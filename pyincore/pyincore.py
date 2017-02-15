@@ -223,13 +223,12 @@ class ComputeDamage:
     @staticmethod
     def calculate_mean_damage_std_deviation(weights, weights_std_dev, dmg_intervals, mean_damage):
         output = collections.OrderedDict()
-        # Start here - not sure why we can't compute mean damage deviation like with this code, must be doing something stupid
-        #result = 0.0
+        result = 0.0
 
-        #idx = 0
-        #for dmg_interval in dmg_intervals:
-        #    idx += 1
-        #    result += dmg_interval[dmg_intervals] * (math.pow(weights[idx], 2) + math.pow(weights_std_dev[idx], 2)
+        idx = 0
+        for dmg_interval in dmg_intervals:
+            result += dmg_intervals[dmg_interval] * (math.pow(weights[idx], 2) + math.pow(weights_std_dev[idx], 2))
+            idx += 1
 
-        output['mdamagedev'] = 0.0
+        output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
