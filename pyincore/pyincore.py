@@ -103,14 +103,14 @@ class DamageRatioDataset:
 
 class MappingSubject(object):
     def __init__(self):
-        self.schema: str = str()
+        self.schema = str()
         self.inventory = None  # Feature Collection
 
 
 class MappingRequest(object):
     def __init__(self):
-        self.params: Dict[str, any] = dict()
-        self.subject: MappingSubject = MappingSubject()
+        self.params = dict()
+        self.subject = MappingSubject()
 
 
 class MappingResponse(object):
@@ -119,8 +119,8 @@ class MappingResponse(object):
         self.mapping = mapping
 
     def __init__(self):
-        self.sets: Dict[str, any] = dict()  # fragility id to fragility
-        self.mapping: Dict[str, str] = dict()  # inventory id to fragility id
+        self.sets = dict()  # fragility id to fragility
+        self.mapping = dict() # inventory id to fragility id
 
 
 class FragilityResource:
@@ -135,14 +135,12 @@ class FragilityResource:
         if not service.endswith('/'):
             endpoint = endpoint + '/'
 
-        url = endpoint + "fragility/api/fragility/map"
+        url = endpoint + "api/fragilities/map"
 
         json = jsonpickle.encode(mapping_request, unpicklable = False).encode("utf-8")
         request = urllib.request.Request(url, json, {'Content-Type': 'application/json'})
         response = urllib.request.urlopen(request)  # post
         content = response.read().decode('utf-8')
-
-        # TODO need to indicate the type of the decoded object
 
         mapping_response = jsonpickle.decode(content)
 
@@ -151,20 +149,20 @@ class FragilityResource:
         return fragility_set
 
 
-@staticmethod
-def get_fragility_set(service, fragility_id: str, legacy: str):
-    endpoint = service
-    if not service.endswith('/'):
-        endpoint = endpoint + '/'
+    @staticmethod
+    def get_fragility_set(service, fragility_id: str, legacy: str):
+        endpoint = service
+        if not service.endswith('/'):
+            endpoint = endpoint + '/'
 
-    url = endpoint + "incore/api/fragility/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
+        url = endpoint + "api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
 
-    request = urllib.request.Request(url)
-    response = urllib.request.urlopen(request)
-    content = response.read().decode('utf-8')
-    fragility_set = json.loads(content)
+        request = urllib.request.Request(url)
+        response = urllib.request.urlopen(request)
+        content = response.read().decode('utf-8')
+        fragility_set = json.loads(content)
 
-    return fragility_set[0]
+        return fragility_set[0]
 
 
 class ComputeDamage:
