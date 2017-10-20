@@ -1,26 +1,24 @@
 import logging
 import sys
 import csv
-
-import xml.etree.ElementTree as ET
-
 import rasterio
 import fiona
-from shapely.geometry import shape
-
-import numpy as np
 import math
+import collections
+import json
+import urllib.request
+import jsonpickle
+import numpy as np
+
+from shapely.geometry import shape
 from scipy.stats import norm
 
-import collections
+from typing import Dict
 
-import urllib.request
-import json
+logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
-logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 class GeoUtil:
-
     @staticmethod
     def get_location(feature):
         geom = shape(feature['geometry'])
@@ -40,10 +38,10 @@ class GeoUtil:
             empty_data[col] = None
 
         with fiona.open(
-            filename, 'w',
-            crs=source.crs,
-            driver=source.driver,
-            schema=new_schema,
+                filename, 'w',
+                crs = source.crs,
+                driver = source.driver,
+                schema = new_schema,
         ) as sink:
             for f in source:
                 try:
@@ -59,7 +57,6 @@ class GeoUtil:
 
 
 class InventoryDataset:
-
     inventory_set = None
 
     def __init__(self, filename):
@@ -103,39 +100,62 @@ class DamageRatioDataset:
         for row in reader:
             self.damage_ratio.append(row)
 
+
+class MappingSubject(object):
+    def __init__(self):
+        self.schema = str()
+        self.inventory = None  # Feature Collection
+
+
+class MappingRequest(object):
+    def __init__(self):
+        self.params = dict()
+        self.subject = MappingSubject()
+
+
+class MappingResponse(object):
+    def __init__(self, sets: Dict[str, any], mapping: Dict[str, str]):
+        self.sets = sets
+        self.mapping = mapping
+
+    def __init__(self):
+        self.sets = dict()  # fragility id to fragility
+        self.mapping = dict() # inventory id to fragility id
+
+
 class FragilityResource:
-
     @staticmethod
-    def get_mapped_fragility(service, inventory, fragility_key):
-        jsondata = {}
-        for attribute in inventory['properties']:
-            jsondata[attribute] = inventory['properties'][attribute]
-
-        jsondata['retrofit'] = fragility_key
+    def map_fragility(service: str, inventory, key: str):
+        mapping_request = MappingRequest()
+        mapping_request.subject.schema = "building"
+        mapping_request.subject.inventory = inventory
+        mapping_request.params["key"] = key
 
         endpoint = service
         if not service.endswith('/'):
             endpoint = endpoint + '/'
 
-        url = endpoint + "api/mapping/byJson?json=" +urllib.parse.quote(json.dumps(jsondata)) 
+        url = endpoint + "api/fragilities/map"
 
-        #request = urllib2.Request(url)
-        #response = urllib2.urlopen(request)
-        request = urllib.request.Request(url)
-        response = urllib.request.urlopen(request)
+        json = jsonpickle.encode(mapping_request, unpicklable = False).encode("utf-8")
+        request = urllib.request.Request(url, json, {'Content-Type': 'application/json'})
+        response = urllib.request.urlopen(request)  # post
         content = response.read().decode('utf-8')
 
-        fragilities = json.loads(content)
+        mapping_response = jsonpickle.decode(content)
 
-        # TODO handle case where multiple are returned
-        return fragilities['fragilityId']
+        fragility_set = next(iter(mapping_response["sets"].values()))
+
+        return fragility_set
+
+
     @staticmethod
-    def get_fragility_set(service, fragility_id, legacy):
+    def get_fragility_set(service, fragility_id: str, legacy: str):
         endpoint = service
         if not service.endswith('/'):
             endpoint = endpoint + '/'
 
-        url = endpoint + "incore/api/fragility/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
+        url = endpoint + "api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
 
         request = urllib.request.Request(url)
         response = urllib.request.urlopen(request)
@@ -144,17 +164,17 @@ class FragilityResource:
 
         return fragility_set[0]
 
-class ComputeDamage:
 
+class ComputeDamage:
     @staticmethod
     def calculate_damage(bridge_fragility, hazard_value):
         output = collections.OrderedDict()
         limit_states = map(str.strip, bridge_fragility.getProperties()[
-                           'LimitStates'].split(":"))
+            'LimitStates'].split(":"))
         for i in range(len(limit_states)):
             limit_state = limit_states[i]
             fragility_curve = bridge_fragility.getFragilities()[i]
-            if(fragility_curve.getType() == 'Normal'):
+            if (fragility_curve.getType() == 'Normal'):
                 median = float(fragility_curve.getProperties()
                                ['fragility-curve-median'])
                 beta = float(fragility_curve.getProperties()
@@ -175,14 +195,14 @@ class ComputeDamage:
         for fragility_curve in fragility_curves:
             median = float(fragility_curve['median'])
             beta = float(fragility_curve['beta'])
-            #limit_state = fragility_curve['description']
+            # limit_state = fragility_curve['description']
             probability = float(0.0)
 
             if hazard > 0.0:
-                if(fragility_curve['curveType'] == 'Normal'):
+                if (fragility_curve['curveType'] == 'Normal'):
                     sp = (math.log(hazard_value) - math.log(median)) / beta
                     probability = norm.cdf(sp)
-                elif(fragility_curve['curveType'] == "LogNormal"):
+                elif (fragility_curve['curveType'] == "LogNormal"):
                     x = (math.log(hazard) - median) / beta
                     probability = norm.cdf(x)
 
@@ -212,12 +232,14 @@ class ComputeDamage:
         output = collections.OrderedDict()
         if len(weights) == 5:
             output['MeanDamage'] = weights[0] * float(dmg_intervals['I_None']) \
-                + weights[1] * float(dmg_intervals['I_Slight']) \
-                + weights[2] * float(dmg_intervals['I_Moderate']) \
-                + weights[3] * float(dmg_intervals['I_Extensive']) \
-                + weights[4] * float(dmg_intervals['I_Complete'])
+                                   + weights[1] * float(dmg_intervals['I_Slight']) \
+                                   + weights[2] * float(dmg_intervals['I_Moderate']) \
+                                   + weights[3] * float(dmg_intervals['I_Extensive']) \
+                                   + weights[4] * float(dmg_intervals['I_Complete'])
         elif len(weights) == 4:
-            output['meandamage'] = float(weights[0]) * float(dmg_intervals['insignific']) + float(weights[1]) * float(dmg_intervals['moderate']) + float(weights[2]) * float(dmg_intervals['heavy']) + float(weights[3]) * float(dmg_intervals['complete'])        
+            output['meandamage'] = float(weights[0]) * float(dmg_intervals['insignific']) + float(weights[1]) * float(
+                dmg_intervals['moderate']) + float(weights[2]) * float(dmg_intervals['heavy']) + float(weights[3]) * float(
+                dmg_intervals['complete'])
         return output
 
     @staticmethod
