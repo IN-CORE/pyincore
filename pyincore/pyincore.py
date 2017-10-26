@@ -12,11 +12,47 @@ import numpy as np
 
 from shapely.geometry import shape
 from scipy.stats import norm
+from scipy.stats import lognorm
+import scipy.stats as stats
+import matplotlib.pyplot as plt
 
 from typing import Dict
 
 logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
+class PlotUtil:
+    @staticmethod
+    def sample_lognormal_cdf(location: float, scale: float, sample_size: int):
+        # the lognormal distribution in python is a little unusual, that is why it's define this way
+        dist = lognorm(scale, 0, location)
+        start = dist.ppf(0.001) #cdf inverse
+        end = dist.ppf(0.99) #cdf inverse
+        x = np.linspace(start, end, sample_size)
+        y = dist.cdf(x)
+        return x, y
+
+    @staticmethod
+    def sample_normal_cdf(mean: float, std: float, sample_size: int):
+        dist = norm(mean, std)
+        start = dist.ppf(0.001) #cdf inverse
+        end = dist.ppf(0.999) #cdf inverse
+        x = np.linspace(start, end, sample_size)
+        y = dist.cdf(x)
+        return x, y
+
+    @staticmethod
+    def plot_lognormal_cdf(location: float, scale: float):
+        x, y = self.sample_lognormal_cdf(location, scale, 200)
+        plt.plot(x, y)
+
+    @staticmethod
+    def plot_normal_cdf(mean: float, std: float):
+        x, y = self.sample_normal_cdf(mean, std, 200)
+        plt.plot(x, y)
+
+    @staticmethod
+    def plot_custom(expression: str):
+        pass
 
 class GeoUtil:
     @staticmethod
@@ -150,13 +186,17 @@ class FragilityResource:
 
 
     @staticmethod
-    def get_fragility_set(service, fragility_id: str, legacy: str):
+    def get_fragility_set(service, fragility_id: str, legacy: bool):
         endpoint = service
         if not service.endswith('/'):
             endpoint = endpoint + '/'
 
-        url = endpoint + "api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
-
+        url = ""
+        if legacy:
+            url = endpoint + "api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
+        else:
+            url = endpoint + "api/fragilities/"+ fragility_id
+        print(url)
         request = urllib.request.Request(url)
         response = urllib.request.urlopen(request)
         content = response.read().decode('utf-8')
