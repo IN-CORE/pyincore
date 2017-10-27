@@ -53,6 +53,15 @@ class PlotUtil:
         y = dist.cdf(x)
         return x, y
 
+    @staticmethod
+    def get_x_y(disttype: str, alpha: float, beta: float):
+        if disttype == 'LogNormal':
+            return PlotUtil.sample_lognormal_cdf_alt(alpha, beta, 200)
+        if disttype == 'Normal':
+            return PlotUtil.sample_lognormal_cdf(alpha, beta, 200)
+        if disttype == 'standardNormal':
+            return PlotUtil.sample_normal_cdf(alpha, beta, 200)
+
 
 class GeoUtil:
     @staticmethod
