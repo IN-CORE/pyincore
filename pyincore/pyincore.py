@@ -22,6 +22,19 @@ logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
 class PlotUtil:
     @staticmethod
+    def sample_lognormal_cdf_alt(mean: float, std: float, sample_size: int):
+        # convert the normal mean and normal std to location and scale
+        location = np.exp(mean + np.square(std) / 2)
+        scale = np.exp((2 * mean) + np.square(std)) * (np.exp(np.square(std)) - 1)
+        scale = np.sqrt(scale)
+        dist = lognorm(scale, 0, location)
+        start = dist.ppf(0.001) #cdf inverse
+        end = dist.ppf(0.99) #cdf inverse
+        x = np.linspace(start, end, sample_size)
+        y = dist.cdf(x)
+        return x, y
+
+    @staticmethod
     def sample_lognormal_cdf(location: float, scale: float, sample_size: int):
         # the lognormal distribution in python is a little unusual, that is why it's define this way
         dist = lognorm(scale, 0, location)
@@ -40,19 +53,6 @@ class PlotUtil:
         y = dist.cdf(x)
         return x, y
 
-    @staticmethod
-    def plot_lognormal_cdf(location: float, scale: float):
-        x, y = self.sample_lognormal_cdf(location, scale, 200)
-        plt.plot(x, y)
-
-    @staticmethod
-    def plot_normal_cdf(mean: float, std: float):
-        x, y = self.sample_normal_cdf(mean, std, 200)
-        plt.plot(x, y)
-
-    @staticmethod
-    def plot_custom(expression: str):
-        pass
 
 class GeoUtil:
     @staticmethod
