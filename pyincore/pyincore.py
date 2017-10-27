@@ -259,7 +259,31 @@ class ComputeDamage:
             index += 1
 
         return output
+    
+    @staticmethod
+    def calculate_damage_json2(fragility_set, hazard):
+        # using the "description" for limit_state
+        fragility_curves = fragility_set['fragilityCurves']
+        output = collections.OrderedDict()
 
+        for fragility_curve in fragility_curves:
+            median = float(fragility_curve['median'])
+            beta = float(fragility_curve['beta'])
+            # limit_state = fragility_curve['description']
+            probability = float(0.0)
+
+            if hazard > 0.0:
+                if (fragility_curve['curveType'] == 'Normal'):
+                    sp = (math.log(hazard_value) - math.log(median)) / beta
+                    probability = norm.cdf(sp)
+                elif (fragility_curve['curveType'] == "LogNormal"):
+                    x = (math.log(hazard) - median) / beta
+                    probability = norm.cdf(x)
+
+            output[fragility_curve['description']] = probability
+
+        return output
+    
     @staticmethod
     def calculate_damage_interval(damage):
         output = collections.OrderedDict()
@@ -303,3 +327,11 @@ class ComputeDamage:
 
         output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
+
+
+if __name__ == "__main__":
+    x,y = PlotUtil.sample_lognormal_cdf_alt(0.583, 0.725, 200)
+    import pprint
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(x)
+    
