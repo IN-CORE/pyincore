@@ -7,8 +7,11 @@ import math
 import collections
 import json
 import urllib.request
+import requests   # http client module
+import urllib.parse # joining path of url
 import jsonpickle
 import numpy as np
+import re
 
 from shapely.geometry import shape
 from scipy.stats import norm
@@ -23,23 +26,21 @@ logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 class PlotUtil:
     @staticmethod
     def sample_lognormal_cdf_alt(mean: float, std: float, sample_size: int):
-        # convert the normal mean and normal std to location and scale
-        location = np.exp(mean + np.square(std) / 2)
-        scale = np.exp((2 * mean) + np.square(std)) * (np.exp(np.square(std)) - 1)
-        scale = np.sqrt(scale)
-        dist = lognorm(scale, 0, location)
+        dist = lognorm(s=std, loc=0, scale=np.exp(mean))
         start = dist.ppf(0.001) #cdf inverse
-        end = dist.ppf(0.99) #cdf inverse
+        end = dist.ppf(0.999) #cdf inverse
         x = np.linspace(start, end, sample_size)
         y = dist.cdf(x)
         return x, y
 
     @staticmethod
     def sample_lognormal_cdf(location: float, scale: float, sample_size: int):
-        # the lognormal distribution in python is a little unusual, that is why it's define this way
-        dist = lognorm(scale, 0, location)
+        # convert location and scale parameters to the normal mean and std
+        mean = np.log(np.square(location) / np.sqrt(scale + np.square(location)))
+        std = np.sqrt(np.log((scale / np.square(location)) + 1))
+        dist = lognorm(s=std, loc=0, scale=np.exp(mean))
         start = dist.ppf(0.001) #cdf inverse
-        end = dist.ppf(0.99) #cdf inverse
+        end = dist.ppf(0.999) #cdf inverse
         x = np.linspace(start, end, sample_size)
         y = dist.cdf(x)
         return x, y
@@ -167,7 +168,28 @@ class MappingResponse(object):
         self.sets = dict()  # fragility id to fragility
         self.mapping = dict() # inventory id to fragility id
 
-
+        
+class DataService:
+    @staticmethod
+    def get_dataset(service: str, dataset_id: str, download = False):
+        # construct url with service, dataset api, and id
+        if not download:
+            url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id)
+            r = requests.get(url)
+            return r.json()
+        else:
+            # construct url for file download
+            url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id+'/files')
+            r = requests.get(url, stream=True)
+            d = r.headers['content-disposition']
+            fname = re.findall("filename=(.+)", d)
+            local_filename = 'data/'+fname[0].strip('\"')
+            with open(local_filename, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=1024): 
+                    if chunk: # filter out keep-alive new chunks
+                        f.write(chunk)
+            return local_filename
+        
 class FragilityResource:
     @staticmethod
     def map_fragility(service: str, inventory, key: str):
@@ -180,7 +202,7 @@ class FragilityResource:
         if not service.endswith('/'):
             endpoint = endpoint + '/'
 
-        url = endpoint + "api/fragilities/map"
+        url = endpoint + "fragility/api/fragilities/map"
 
         json = jsonpickle.encode(mapping_request, unpicklable = False).encode("utf-8")
         request = urllib.request.Request(url, json, {'Content-Type': 'application/json'})
@@ -202,16 +224,16 @@ class FragilityResource:
 
         url = ""
         if legacy:
-            url = endpoint + "api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
+            url = endpoint + "fragility/api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
         else:
-            url = endpoint + "api/fragilities/"+ fragility_id
+            url = endpoint + "fragility/api/fragilities/"+ fragility_id
         print(url)
         request = urllib.request.Request(url)
         response = urllib.request.urlopen(request)
         content = response.read().decode('utf-8')
         fragility_set = json.loads(content)
 
-        return fragility_set[0]
+        return fragility_set
 
 
 class ComputeDamage:
