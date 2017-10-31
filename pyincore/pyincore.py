@@ -240,15 +240,12 @@ class HazardResource:
             endpoint = endpoint + '/'
 
         hazard_service = endpoint + "hazard/api/earthquakes/" + hazard_id + "/"
-        print("demand type = "+demand_type)
         hazard_demand_type = urllib.parse.quote_plus(demand_type)
-        print("demand type = "+demand_type)
 
         request_url = hazard_service + "value?" + "siteLat="+str(site_lat) +  "&siteLong="+str(site_long)
 
         # Add Demand Type and Units
         request_url = request_url + "&demandType="+hazard_demand_type + "&demandUnits="+demand_units
-        print("request = "+request_url)
 
         request = urllib.request.Request(request_url)
         response = urllib.request.urlopen(request)
