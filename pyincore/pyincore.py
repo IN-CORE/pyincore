@@ -198,30 +198,33 @@ class DataService:
         
         
     @staticmethod
-    def get_dataset(service: str, dataset_id: str, download = False):
+    def get_dataset_metadata(service: str, dataset_id: str):
         # construct url with service, dataset api, and id
-        if not download:
-            url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id)
-            r = requests.get(url)
-            return r.json()
+        url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id)
+        r = requests.get(url)
+        return r.json()
+
+    @staticmethod
+    def get_dataset(service: str, dataset_id: str):
+        # construct url for file download
+        url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id+'/files')
+        r = requests.get(url, stream=True)
+        d = r.headers['content-disposition']
+        fname = re.findall("filename=(.+)", d)
+        local_filename = 'data/'+fname[0].strip('\"')
+        with open(local_filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024): 
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+
+        folder = DataService.unzip_dataset(local_filename)
+        if folder != None: 
+            return folder
         else:
-            # construct url for file download
-            url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id+'/files')
-            r = requests.get(url, stream=True)
-            d = r.headers['content-disposition']
-            fname = re.findall("filename=(.+)", d)
-            local_filename = 'data/'+fname[0].strip('\"')
-            with open(local_filename, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=1024): 
-                    if chunk: # filter out keep-alive new chunks
-                        f.write(chunk)
-            folder = DataService.unzip_dataset(local_filename)
-            if folder != None: 
-                return folder
-            else:
-                return local_filename
+            return local_filename
+
         
-class FragilityResource:
+class FragilityService:
     @staticmethod
     def map_fragility(service: str, inventory, key: str):
         mapping_request = MappingRequest()
@@ -284,7 +287,7 @@ class BuildingUtil:
 
         return period
 
-class HazardResource:
+class HazardService:
 
     @staticmethod
     def get_hazard_value(service: str, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
@@ -424,8 +427,7 @@ class ComputeDamage:
 
 
 if __name__ == "__main__":
-    x,y = PlotUtil.sample_lognormal_cdf_alt(0.583, 0.725, 200)
     import pprint
     pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(x)
+    # test code here
     
