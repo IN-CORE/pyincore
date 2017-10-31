@@ -235,6 +235,47 @@ class FragilityResource:
 
         return fragility_set
 
+class BuildingUtil:
+
+    @staticmethod
+    def get_building_period(num_stories, fragility_set):
+        period = 0.0
+
+        fragility_curve = fragility_set['fragilityCurves'][0]
+        if fragility_curve['className'] == 'edu.illinois.ncsa.incore.services.fragility.model.PeriodStandardFragilityCurve':
+            period_equation_type = fragility_curve['periodEqnType']
+            if period_equation_type == 1:
+                period = fragility_curve['periodParam0']
+            elif period_equation_type == 2:
+                period = fragility_curve['periodParam0'] * num_stories
+            elif period_equation_type == 3:
+                period = fragility_curve['periodParam1'] * math.pow(fragility_curve['periodParam0'] * num_stories, fragility_curve['periodParam2'] )
+
+        return period
+
+class HazardResource:
+
+    @staticmethod
+    def get_hazard_value(service: str, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
+        endpoint = service
+        if not service.endswith('/'):
+            endpoint = endpoint + '/'
+
+        hazard_service = endpoint + "hazard/api/earthquakes/" + hazard_id + "/"
+        hazard_demand_type = urllib.parse.quote_plus(demand_type)
+
+        request_url = hazard_service + "value?" + "siteLat="+str(site_lat) +  "&siteLong="+str(site_long)
+
+        # Add Demand Type and Units
+        request_url = request_url + "&demandType="+hazard_demand_type + "&demandUnits="+demand_units
+
+        request = urllib.request.Request(request_url)
+        response = urllib.request.urlopen(request)
+        content = response.read().decode('utf-8')
+
+        response = json.loads(content)
+
+        return float(response['hazardValue'])
 
 class ComputeDamage:
     @staticmethod
