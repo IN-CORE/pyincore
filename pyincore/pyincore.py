@@ -12,6 +12,8 @@ import urllib.parse # joining path of url
 import jsonpickle
 import numpy as np
 import re
+import zipfile
+import os, os.path
 
 from shapely.geometry import shape
 from scipy.stats import norm
@@ -106,7 +108,13 @@ class InventoryDataset:
     inventory_set = None
 
     def __init__(self, filename):
-        self.inventory_set = fiona.open(filename)
+        if os.path.isdir(filename):
+            layers = fiona.listlayers(filename)
+            if len(layers) > 0:
+                # for now, open a first shapefile
+                self.inventory_set = fiona.open(filename, layer = layers[0])
+        else:
+            self.inventory_set = fiona.open(filename)
 
     def close(self):
         self.inventory_set.close()
@@ -171,6 +179,25 @@ class MappingResponse(object):
         
 class DataService:
     @staticmethod
+    def unzip_dataset(local_filename: str):
+        foldername, file_extension = os.path.splitext(local_filename)
+        # if it is not a zip file, no unzip 
+        if not file_extension.lower() == '.zip': 
+            print('It is not a zip file; no unzip')
+            return None
+        # check the folder existance, no unzip
+        if os.path.isdir(foldername): 
+            print('It already exsists; no unzip')
+            return foldername
+        os.makedirs(foldername)
+        
+        zip_ref = zipfile.ZipFile(local_filename, 'r')
+        zip_ref.extractall(foldername)
+        zip_ref.close()
+        return foldername
+        
+        
+    @staticmethod
     def get_dataset(service: str, dataset_id: str, download = False):
         # construct url with service, dataset api, and id
         if not download:
@@ -188,7 +215,11 @@ class DataService:
                 for chunk in r.iter_content(chunk_size=1024): 
                     if chunk: # filter out keep-alive new chunks
                         f.write(chunk)
-            return local_filename
+            folder = DataService.unzip_dataset(local_filename)
+            if folder != None: 
+                return folder
+            else:
+                return local_filename
         
 class FragilityResource:
     @staticmethod
