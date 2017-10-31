@@ -251,26 +251,17 @@ class FragilityService:
 
 
     @staticmethod
-    def get_fragility_set(service, fragility_id: str, legacy: bool):
-        endpoint = service
-        if not service.endswith('/'):
-            endpoint = endpoint + '/'
-
-        url = ""
-        if legacy:
-            url = endpoint + "fragility/api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
+    def get_fragility_set(service: str, fragility_id: str, legacy: bool):
+        url = None
+        if legacy: 
+            url = urllib.parse.urljoin(service, "fragility/api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building")
         else:
-            url = endpoint + "fragility/api/fragilities/"+ fragility_id
-        print(url)
-        request = urllib.request.Request(url)
-        response = urllib.request.urlopen(request)
-        content = response.read().decode('utf-8')
-        fragility_set = json.loads(content)
+            url = urllib.parse.urljoin(service, "fragility/api/fragilities/"+ fragility_id)
+        r = requests.get(url)
 
-        return fragility_set
+        return r.json()
 
 class BuildingUtil:
-
     @staticmethod
     def get_building_period(num_stories, fragility_set):
         period = 0.0
@@ -288,27 +279,14 @@ class BuildingUtil:
         return period
 
 class HazardService:
-
     @staticmethod
     def get_hazard_value(service: str, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
-        endpoint = service
-        if not service.endswith('/'):
-            endpoint = endpoint + '/'
-
-        hazard_service = endpoint + "hazard/api/earthquakes/" + hazard_id + "/"
-        hazard_demand_type = urllib.parse.quote_plus(demand_type)
-
-        request_url = hazard_service + "value?" + "siteLat="+str(site_lat) +  "&siteLong="+str(site_long)
-
-        # Add Demand Type and Units
-        request_url = request_url + "&demandType="+hazard_demand_type + "&demandUnits="+demand_units
-
-        request = urllib.request.Request(request_url)
-        response = urllib.request.urlopen(request)
-        content = response.read().decode('utf-8')
-
-        response = json.loads(content)
-
+        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/"+ hazard_id+"/value")
+        payload = {'demandType':demand_type, 'demandUnits':demand_units, 'siteLat':site_lat, 'siteLong':site_long}
+        #hazard_demand_type = urllib.parse.quote_plus(demand_type)
+        r = requests.get(url, params=payload)
+        response = r.json()
+        
         return float(response['hazardValue'])
 
 class ComputeDamage:
