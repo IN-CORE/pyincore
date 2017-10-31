@@ -232,23 +232,17 @@ class FragilityService:
         mapping_request.subject.inventory = inventory
         mapping_request.params["key"] = key
 
-        endpoint = service
-        if not service.endswith('/'):
-            endpoint = endpoint + '/'
-
-        url = endpoint + "fragility/api/fragilities/map"
-
+        url = urllib.parse.urljoin(service, "fragility/api/fragilities/map")
+        
         json = jsonpickle.encode(mapping_request, unpicklable = False).encode("utf-8")
-        request = urllib.request.Request(url, json, {'Content-Type': 'application/json'})
-        response = urllib.request.urlopen(request)  # post
-        content = response.read().decode('utf-8')
 
-        mapping_response = jsonpickle.decode(content)
-
-        fragility_set = next(iter(mapping_response["sets"].values()))
+        r = requests.post(url, data=json, headers={'Content-type':'application/json'})
+        
+        response = r.json()
+        
+        fragility_set = next(iter(response["sets"].values()))
 
         return fragility_set
-
 
     @staticmethod
     def get_fragility_set(service: str, fragility_id: str, legacy: bool):
