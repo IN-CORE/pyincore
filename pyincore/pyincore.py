@@ -301,11 +301,11 @@ class HazardService:
 
 class GlossaryService:
     @staticmethod
-    def get_term(term_id):
-        client = wikidata_client("https://resilience-glossary.ncsa.illinois.edu")
+    def get_term(service: str, term: str):
+        client = wikidata_client(service)
         # definition_prop = client.get('P13')  # definition
         # image_prop = client.get('P4')  # image
-        entity = client.get(term_id, load = True)
+        entity = client.get(term, load = True)
         return entity
     
 class ComputeDamage:
