@@ -198,30 +198,47 @@ class DataService:
         
         
     @staticmethod
-    def get_dataset(service: str, dataset_id: str, download = False):
+    def get_dataset_metadata(service: str, dataset_id: str):
         # construct url with service, dataset api, and id
-        if not download:
-            url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id)
+        url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id)
+        r = requests.get(url)
+        return r.json()
+
+    @staticmethod
+    def get_dataset(service: str, dataset_id: str):
+        # construct url for file download
+        url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id+'/files')
+        r = requests.get(url, stream=True)
+        d = r.headers['content-disposition']
+        fname = re.findall("filename=(.+)", d)
+        local_filename = 'data/'+fname[0].strip('\"')
+        with open(local_filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024): 
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+
+        folder = DataService.unzip_dataset(local_filename)
+        if folder != None: 
+            return folder
+        else:
+            return local_filename
+    @staticmethod
+    def get_datasets(service: str, datatype=None, title=None):
+        url = urllib.parse.urljoin(service, 'data/api/datasets')
+        if datatype == None and title == None:
             r = requests.get(url)
             return r.json()
         else:
-            # construct url for file download
-            url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id+'/files')
-            r = requests.get(url, stream=True)
-            d = r.headers['content-disposition']
-            fname = re.findall("filename=(.+)", d)
-            local_filename = 'data/'+fname[0].strip('\"')
-            with open(local_filename, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=1024): 
-                    if chunk: # filter out keep-alive new chunks
-                        f.write(chunk)
-            folder = DataService.unzip_dataset(local_filename)
-            if folder != None: 
-                return folder
-            else:
-                return local_filename
+            payload = {}
+            if datatype != None:
+                payload['type'] = datatype
+            if title != None:
+                payload['title'] = title
+            r = requests.get(url, params=payload)
+            # need to handle there is no datasets
+            return r.json()
         
-class FragilityResource:
+class FragilityService:
     @staticmethod
     def map_fragility(service: str, inventory, key: str):
         mapping_request = MappingRequest()
@@ -229,45 +246,30 @@ class FragilityResource:
         mapping_request.subject.inventory = inventory
         mapping_request.params["key"] = key
 
-        endpoint = service
-        if not service.endswith('/'):
-            endpoint = endpoint + '/'
-
-        url = endpoint + "fragility/api/fragilities/map"
-
+        url = urllib.parse.urljoin(service, "fragility/api/fragilities/map")
+        
         json = jsonpickle.encode(mapping_request, unpicklable = False).encode("utf-8")
-        request = urllib.request.Request(url, json, {'Content-Type': 'application/json'})
-        response = urllib.request.urlopen(request)  # post
-        content = response.read().decode('utf-8')
 
-        mapping_response = jsonpickle.decode(content)
-
-        fragility_set = next(iter(mapping_response["sets"].values()))
+        r = requests.post(url, data=json, headers={'Content-type':'application/json'})
+        
+        response = r.json()
+        
+        fragility_set = next(iter(response["sets"].values()))
 
         return fragility_set
-
 
     @staticmethod
-    def get_fragility_set(service, fragility_id: str, legacy: bool):
-        endpoint = service
-        if not service.endswith('/'):
-            endpoint = endpoint + '/'
-
-        url = ""
-        if legacy:
-            url = endpoint + "fragility/api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building"
+    def get_fragility_set(service: str, fragility_id: str, legacy: bool):
+        url = None
+        if legacy: 
+            url = urllib.parse.urljoin(service, "fragility/api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building")
         else:
-            url = endpoint + "fragility/api/fragilities/"+ fragility_id
-        print(url)
-        request = urllib.request.Request(url)
-        response = urllib.request.urlopen(request)
-        content = response.read().decode('utf-8')
-        fragility_set = json.loads(content)
+            url = urllib.parse.urljoin(service, "fragility/api/fragilities/"+ fragility_id)
+        r = requests.get(url)
 
-        return fragility_set
+        return r.json()
 
 class BuildingUtil:
-
     @staticmethod
     def get_building_period(num_stories, fragility_set):
         period = 0.0
@@ -284,28 +286,15 @@ class BuildingUtil:
 
         return period
 
-class HazardResource:
-
+class HazardService:
     @staticmethod
     def get_hazard_value(service: str, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
-        endpoint = service
-        if not service.endswith('/'):
-            endpoint = endpoint + '/'
-
-        hazard_service = endpoint + "hazard/api/earthquakes/" + hazard_id + "/"
-        hazard_demand_type = urllib.parse.quote_plus(demand_type)
-
-        request_url = hazard_service + "value?" + "siteLat="+str(site_lat) +  "&siteLong="+str(site_long)
-
-        # Add Demand Type and Units
-        request_url = request_url + "&demandType="+hazard_demand_type + "&demandUnits="+demand_units
-
-        request = urllib.request.Request(request_url)
-        response = urllib.request.urlopen(request)
-        content = response.read().decode('utf-8')
-
-        response = json.loads(content)
-
+        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/"+ hazard_id+"/value")
+        payload = {'demandType':demand_type, 'demandUnits':demand_units, 'siteLat':site_lat, 'siteLong':site_long}
+        #hazard_demand_type = urllib.parse.quote_plus(demand_type)
+        r = requests.get(url, params=payload)
+        response = r.json()
+        
         return float(response['hazardValue'])
 
 class ComputeDamage:
@@ -424,8 +413,7 @@ class ComputeDamage:
 
 
 if __name__ == "__main__":
-    x,y = PlotUtil.sample_lognormal_cdf_alt(0.583, 0.725, 200)
     import pprint
     pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(x)
+    # test code here
     
