@@ -222,7 +222,21 @@ class DataService:
             return folder
         else:
             return local_filename
-
+    @staticmethod
+    def get_datasets(service: str, datatype=None, title=None):
+        url = urllib.parse.urljoin(service, 'data/api/datasets')
+        if datatype == None and title == None:
+            r = requests.get(url)
+            return r.json()
+        else:
+            payload = {}
+            if datatype != None:
+                payload['type'] = datatype
+            if title != None:
+                payload['title'] = title
+            r = requests.get(url, params=payload)
+            # need to handle there is no datasets
+            return r.json()
         
 class FragilityService:
     @staticmethod
