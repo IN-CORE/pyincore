@@ -20,6 +20,8 @@ from scipy.stats import norm
 from scipy.stats import lognorm
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+from wikidata.client import Client as wikidata_client
+
 
 from typing import Dict
 
@@ -297,6 +299,15 @@ class HazardService:
         
         return float(response['hazardValue'])
 
+class GlossaryService:
+    @staticmethod
+    def get_term(term_id):
+        client = wikidata_client("https://resilience-glossary.ncsa.illinois.edu")
+        # definition_prop = client.get('P13')  # definition
+        # image_prop = client.get('P4')  # image
+        entity = client.get(term_id, load = True)
+        return entity
+    
 class ComputeDamage:
     @staticmethod
     def calculate_damage(bridge_fragility, hazard_value):
@@ -411,6 +422,7 @@ class ComputeDamage:
         output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
 
+    
 
 if __name__ == "__main__":
     import pprint
