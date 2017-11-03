@@ -20,6 +20,8 @@ from scipy.stats import norm
 from scipy.stats import lognorm
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+from wikidata.client import Client as wikidata_client
+
 
 from typing import Dict
 
@@ -291,12 +293,42 @@ class HazardService:
     def get_hazard_value(service: str, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
         url = urllib.parse.urljoin(service, "hazard/api/earthquakes/"+ hazard_id+"/value")
         payload = {'demandType':demand_type, 'demandUnits':demand_units, 'siteLat':site_lat, 'siteLong':site_long}
-        #hazard_demand_type = urllib.parse.quote_plus(demand_type)
         r = requests.get(url, params=payload)
         response = r.json()
         
         return float(response['hazardValue'])
+    def get_hazard_value_set(service: str, hazard_id: str, demand_type: str, demand_units: str, bbox, grid_spacing: float):
+        # bbox: [[minx, miny],[maxx, maxy]]
+        # raster?demandType=0.2+SA&demandUnits=g&minX=-90.3099&minY=34.9942&maxX=-89.6231&maxY=35.4129&gridSpacing=0.01696
+        bbox
+        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/"+ hazard_id+"/raster")
+        payload = {'demandType':demand_type, 'demandUnits':demand_units, 'minX':bbox[0][0], 'minY':bbox[0][1], 'maxX': bbox[1][0], 'maxY': bbox[1][1], 'gridSpacing': grid_spacing}
+        r = requests.get(url, params=payload)
+        response = r.json()
+        
+        # TODO: need to handle error with the request
+        xlist = []
+        ylist = []
+        zlist = []
+        for entry in response['hazardResults']:
+            xlist.append(float(entry['longitude']))
+            ylist.append(float(entry['latitude']))
+            zlist.append(float(entry['hazardValue']))
+        x = np.array(xlist)
+        y = np.array(ylist)
+        hazard_val = np.array(zlist)
+        return x, y, hazard_val
 
+
+class GlossaryService:
+    @staticmethod
+    def get_term(service: str, term: str):
+        client = wikidata_client(service)
+        # definition_prop = client.get('P13')  # definition
+        # image_prop = client.get('P4')  # image
+        entity = client.get(term, load = True)
+        return entity
+    
 class ComputeDamage:
     @staticmethod
     def calculate_damage(bridge_fragility, hazard_value):
@@ -411,6 +443,7 @@ class ComputeDamage:
         output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
 
+    
 
 if __name__ == "__main__":
     import pprint
