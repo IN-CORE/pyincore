@@ -19,11 +19,11 @@ extension_shp = ".shp"
 extension_zip = ".zip"
 extension_asc = ".asc"
 extension_tif = ".tif"
-host_url = ''   # url for the data repository rest service e.g. http://localhost:8080
-geoserver_url = ''  # url for the geoserver e.g http://localhost:8080/geoserver
+host_url = ''   # url for data rest service. e.g http://localhost'
+geoserver_url = ''  # url for geoserver rest service http://localhost/geoserver/rest/'
 geoserver_user = '' # geoserver user name
-geoserver_pwd = ''  # geoserver user password
-data_store_dir = '' # local direcotory for processing the data download or unzip
+geoserver_pwd = ''  # geoserver password
+data_store_dir = '' # local directory for temporarily storing downloaded data, unzip and so on.
 
 
 class Geoserver:
