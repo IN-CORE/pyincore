@@ -19,11 +19,11 @@ extension_shp = ".shp"
 extension_zip = ".zip"
 extension_asc = ".asc"
 extension_tif = ".tif"
-host_url = 'http://incore2-services.ncsa.illinois.edu:8888'
-geoserver_url = 'http://incore2-geoserver.ncsa.illinois.edu:9999/geoserver/rest/'
-geoserver_user = 'admin'
-geoserver_pwd = 'NCSAincore!'
-data_store_dir = 'C:\Workspace-incore2\pyincore\pyincore\\'
+host_url = ''   # url for the data repository rest service e.g. http://
+geoserver_url = ''  # url for the geoserver
+geoserver_user = '' # geoserver user name
+geoserver_pwd = ''  # geoserver user password
+data_store_dir = '' # local direcotory for processing the data download or unzip
 
 
 class Geoserver:
