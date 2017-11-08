@@ -39,12 +39,7 @@ class Geoserver:
             Geoserver.upload_shpfile_to_geoserver(dataset_id, localfile, workspace_name)
         else:
             del_list = os.listdir(localfile)
-            # remove zip file
-            os.remove(localfile + extension_zip)
-            # remover directory
-            for file in del_list:
-                os.remove(os.path.join(localfile, file))
-            os.rmdir(localfile)
+            Geoserver.remove_directory(localfile, del_list)
 
     def upload_raster_to_geoserver(dataset_id: str, localfile: str, workspace_name: str):
         localfile = ntpath.basename(localfile)
@@ -78,12 +73,7 @@ class Geoserver:
                         "There was an error uploading a raster " + dataset_id + ". Possibly the data already exist in the geoserver")
                     pass
 
-        # remove zip file
-        os.remove(localfile + extension_zip)
-        # remover directory
-        for file in del_list:
-            os.remove(os.path.join(localfile, file))
-        os.rmdir(localfile)
+        Geoserver.remove_directory(localfile, del_list)
 
     @staticmethod
     def upload_shpfile_to_geoserver(dataset_id: str, localfile: str, workspace_name: str):
@@ -106,12 +96,7 @@ class Geoserver:
             "There was an error uploading a shapefile " + dataset_id + ". Possibly the data already exist in the geoserver")
         # pass
 
-        # remove zip file
-        os.remove(localfile + extension_zip)
-        # remover directory
-        for file in dirlist:
-            os.remove(os.path.join(localfile, file))
-        os.rmdir(localfile)
+        Geoserver.remove_directory(localfile, dirlist)
 
     @staticmethod
     def convert_asc_tiff(in_asc, out_tif):
@@ -150,13 +135,15 @@ class Geoserver:
                 print("There was an error uploading a dataset. Possibly the data already exist in the geoserver")
                 pass
 
-            # remove zip file
-            os.remove(localfile + extension_zip)
-            # remover directory
-            for file in dirlist:
-                os.remove(os.path.join(localfile, file))
-            os.rmdir(localfile)
+            Geoserver.remove_directory(localfile, dirlist)
 
+    def remove_directory(localfile:str, dirlist):
+        # remove zip file
+        os.remove(localfile + extension_zip)
+        # remover directory
+        for file in dirlist:
+            os.remove(os.path.join(localfile, file))
+        os.rmdir(localfile)
 
 if __name__ == "__main__":
     import pprint
