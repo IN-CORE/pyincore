@@ -1,29 +1,26 @@
-import logging
-import sys
-import csv
-import rasterio
-import fiona
-import math
+import base64
 import collections
-import json
+import csv
+import logging
+import math
+import os
+import os.path
+import re
+import sys
+import urllib.parse  # joining path of url
 import urllib.request
-import requests   # http client module
-import urllib.parse # joining path of url
+import zipfile
+from typing import Dict
+
+import fiona
 import jsonpickle
 import numpy as np
-import re
-import zipfile
-import os, os.path
-
-from shapely.geometry import shape
-from scipy.stats import norm
+import rasterio
+import requests  # http client module
 from scipy.stats import lognorm
-import scipy.stats as stats
-import matplotlib.pyplot as plt
+from scipy.stats import norm
+from shapely.geometry import shape
 from wikidata.client import Client as wikidata_client
-
-
-from typing import Dict
 
 logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
@@ -328,7 +325,23 @@ class GlossaryService:
         # image_prop = client.get('P4')  # image
         entity = client.get(term, load = True)
         return entity
-    
+
+
+class AuthService:
+    """
+    Authentication service
+    """
+    def __init__(self, service_url):
+        self.service_url = service_url
+
+    def get_token(self, username: str, password: str):
+        url = urllib.parse.urljoin(self.service_url, "auth/api/login")
+        b64_value = base64.b64encode(bytes('%s:%s' % (username, password), "utf-8"))
+        r = requests.get(url, headers={"Authorization": "LDAP %s" % b64_value.decode('ascii')})
+        print(r.request.headers['Authorization'])
+        return r.json()
+
+
 class ComputeDamage:
     @staticmethod
     def calculate_damage(bridge_fragility, hazard_value):
@@ -443,10 +456,8 @@ class ComputeDamage:
         output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
 
-    
 
 if __name__ == "__main__":
     import pprint
     pp = pprint.PrettyPrinter(indent=4)
     # test code here
-    
