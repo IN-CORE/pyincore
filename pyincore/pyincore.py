@@ -267,9 +267,7 @@ class FragilityService:
 
         response = r.json()
 
-        fragility_sets = response["sets"]
-
-        return fragility_sets
+        return response
 
 
     @staticmethod
