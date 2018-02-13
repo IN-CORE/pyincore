@@ -243,7 +243,7 @@ class DataService:
 
 class FragilityService:
     @staticmethod
-    def map_fragilities(service: str, inventories, key: str) -> MappingResponse:
+    def map_fragilities(service: str, inventories, key: str):
         features = []
 
         for inventory in inventories:
@@ -267,7 +267,15 @@ class FragilityService:
 
         response = r.json()
 
-        return response
+        # construct list of fragility sets
+        mapping = response["mapping"]
+        sets = response["sets"]
+
+        fragility_sets = {}
+        for key, value in mapping.items():
+            fragility_sets[key] = sets[value]
+
+        return fragility_sets
 
 
     @staticmethod
