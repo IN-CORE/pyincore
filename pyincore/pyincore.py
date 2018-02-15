@@ -5,34 +5,32 @@ import rasterio
 import fiona
 import math
 import collections
-import json
 import urllib.request
-import requests   # http client module
-import urllib.parse # joining path of url
+import requests  # http client module
+import urllib.parse  # joining path of url
 import jsonpickle
 import numpy as np
 import re
 import zipfile
-import os, os.path
+import os
+import os.path
 
 from shapely.geometry import shape
 from scipy.stats import norm
 from scipy.stats import lognorm
-import scipy.stats as stats
-import matplotlib.pyplot as plt
 from wikidata.client import Client as wikidata_client
-
 
 from typing import Dict
 
 logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
+
 class PlotUtil:
     @staticmethod
     def sample_lognormal_cdf_alt(mean: float, std: float, sample_size: int):
-        dist = lognorm(s=std, loc=0, scale=np.exp(mean))
-        start = dist.ppf(0.001) #cdf inverse
-        end = dist.ppf(0.999) #cdf inverse
+        dist = lognorm(s = std, loc = 0, scale = np.exp(mean))
+        start = dist.ppf(0.001)  # cdf inverse
+        end = dist.ppf(0.999)  # cdf inverse
         x = np.linspace(start, end, sample_size)
         y = dist.cdf(x)
         return x, y
@@ -42,9 +40,9 @@ class PlotUtil:
         # convert location and scale parameters to the normal mean and std
         mean = np.log(np.square(location) / np.sqrt(scale + np.square(location)))
         std = np.sqrt(np.log((scale / np.square(location)) + 1))
-        dist = lognorm(s=std, loc=0, scale=np.exp(mean))
-        start = dist.ppf(0.001) #cdf inverse
-        end = dist.ppf(0.999) #cdf inverse
+        dist = lognorm(s = std, loc = 0, scale = np.exp(mean))
+        start = dist.ppf(0.001)  # cdf inverse
+        end = dist.ppf(0.999)  # cdf inverse
         x = np.linspace(start, end, sample_size)
         y = dist.cdf(x)
         return x, y
@@ -52,8 +50,8 @@ class PlotUtil:
     @staticmethod
     def sample_normal_cdf(mean: float, std: float, sample_size: int):
         dist = norm(mean, std)
-        start = dist.ppf(0.001) #cdf inverse
-        end = dist.ppf(0.999) #cdf inverse
+        start = dist.ppf(0.001)  # cdf inverse
+        end = dist.ppf(0.999)  # cdf inverse
         x = np.linspace(start, end, sample_size)
         y = dist.cdf(x)
         return x, y
@@ -160,7 +158,7 @@ class DamageRatioDataset:
 class MappingSubject(object):
     def __init__(self):
         self.schema = str()
-        self.inventory = None  # Feature Collection
+        self.inventory = None  # Feature or Feature Collection
 
 
 class MappingRequest(object):
@@ -176,71 +174,107 @@ class MappingResponse(object):
 
     def __init__(self):
         self.sets = dict()  # fragility id to fragility
-        self.mapping = dict() # inventory id to fragility id
+        self.mapping = dict()  # inventory id to fragility id
 
-        
+
 class DataService:
     @staticmethod
     def unzip_dataset(local_filename: str):
         foldername, file_extension = os.path.splitext(local_filename)
         # if it is not a zip file, no unzip 
-        if not file_extension.lower() == '.zip': 
+        if not file_extension.lower() == '.zip':
             print('It is not a zip file; no unzip')
             return None
         # check the folder existance, no unzip
-        if os.path.isdir(foldername): 
+        if os.path.isdir(foldername):
             print('It already exsists; no unzip')
             return foldername
         os.makedirs(foldername)
-        
+
         zip_ref = zipfile.ZipFile(local_filename, 'r')
         zip_ref.extractall(foldername)
         zip_ref.close()
         return foldername
-        
-        
+
     @staticmethod
     def get_dataset_metadata(service: str, dataset_id: str):
         # construct url with service, dataset api, and id
-        url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id)
+        url = urllib.parse.urljoin(service, 'data/api/datasets/' + dataset_id)
         r = requests.get(url)
         return r.json()
 
     @staticmethod
     def get_dataset(service: str, dataset_id: str):
         # construct url for file download
-        url = urllib.parse.urljoin(service, 'data/api/datasets/'+dataset_id+'/files')
-        r = requests.get(url, stream=True)
+        url = urllib.parse.urljoin(service, 'data/api/datasets/' + dataset_id + '/files')
+        r = requests.get(url, stream = True)
         d = r.headers['content-disposition']
         fname = re.findall("filename=(.+)", d)
-        local_filename = 'data/'+fname[0].strip('\"')
+        local_filename = 'data/' + fname[0].strip('\"')
         with open(local_filename, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024): 
-                if chunk: # filter out keep-alive new chunks
+            for chunk in r.iter_content(chunk_size = 1024):
+                if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
 
         folder = DataService.unzip_dataset(local_filename)
-        if folder != None: 
+        if folder is not None:
             return folder
         else:
             return local_filename
+
     @staticmethod
-    def get_datasets(service: str, datatype=None, title=None):
+    def get_datasets(service: str, datatype = None, title = None):
         url = urllib.parse.urljoin(service, 'data/api/datasets')
-        if datatype == None and title == None:
+        if datatype is None and title is None:
             r = requests.get(url)
             return r.json()
         else:
             payload = {}
-            if datatype != None:
+            if datatype is not None:
                 payload['type'] = datatype
-            if title != None:
+            if title is not None:
                 payload['title'] = title
-            r = requests.get(url, params=payload)
+            r = requests.get(url, params = payload)
             # need to handle there is no datasets
             return r.json()
-        
+
+
 class FragilityService:
+    @staticmethod
+    def map_fragilities(service: str, inventories, key: str):
+        features = []
+
+        for inventory in inventories:
+            features.append(inventory)
+
+        feature_collection = {
+            "type": "FeatureCollection",
+            "features": features,
+        }
+
+        mapping_request = MappingRequest()
+        mapping_request.subject.schema = "building"
+        mapping_request.subject.inventory = feature_collection
+        mapping_request.params["key"] = key
+
+        url = urllib.parse.urljoin(service, "fragility/api/fragilities/map")
+
+        json = jsonpickle.encode(mapping_request, unpicklable = False).encode("utf-8")
+
+        r = requests.post(url, data = json, headers = {'Content-type': 'application/json'})
+
+        response = r.json()
+
+        # construct list of fragility sets
+        mapping = response["mapping"]
+        sets = response["sets"]
+
+        fragility_sets = {}
+        for key, value in mapping.items():
+            fragility_sets[key] = sets[value]
+
+        return fragility_sets
+
     @staticmethod
     def map_fragility(service: str, inventory, key: str):
         mapping_request = MappingRequest()
@@ -249,13 +283,13 @@ class FragilityService:
         mapping_request.params["key"] = key
 
         url = urllib.parse.urljoin(service, "fragility/api/fragilities/map")
-        
+
         json = jsonpickle.encode(mapping_request, unpicklable = False).encode("utf-8")
 
-        r = requests.post(url, data=json, headers={'Content-type':'application/json'})
-        
+        r = requests.post(url, data = json, headers = {'Content-type': 'application/json'})
+
         response = r.json()
-        
+
         fragility_set = next(iter(response["sets"].values()))
 
         return fragility_set
@@ -263,13 +297,15 @@ class FragilityService:
     @staticmethod
     def get_fragility_set(service: str, fragility_id: str, legacy: bool):
         url = None
-        if legacy: 
-            url = urllib.parse.urljoin(service, "fragility/api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building")
+        if legacy:
+            url = urllib.parse.urljoin(service, "fragility/api/fragilities/query?legacyid=" + fragility_id +
+                                       "&hazardType=Seismic&inventoryType=Building")
         else:
-            url = urllib.parse.urljoin(service, "fragility/api/fragilities/"+ fragility_id)
+            url = urllib.parse.urljoin(service, "fragility/api/fragilities/" + fragility_id)
         r = requests.get(url)
 
         return r.json()
+
 
 class BuildingUtil:
     @staticmethod
@@ -284,28 +320,33 @@ class BuildingUtil:
             elif period_equation_type == 2:
                 period = fragility_curve['periodParam0'] * num_stories
             elif period_equation_type == 3:
-                period = fragility_curve['periodParam1'] * math.pow(fragility_curve['periodParam0'] * num_stories, fragility_curve['periodParam2'] )
+                period = fragility_curve['periodParam1'] * math.pow(fragility_curve['periodParam0'] * num_stories,
+                                                                    fragility_curve['periodParam2'])
 
         return period
+
 
 class HazardService:
     @staticmethod
     def get_hazard_value(service: str, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
-        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/"+ hazard_id+"/value")
-        payload = {'demandType':demand_type, 'demandUnits':demand_units, 'siteLat':site_lat, 'siteLong':site_long}
-        r = requests.get(url, params=payload)
+        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/" + hazard_id + "/value")
+        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'siteLat': site_lat, 'siteLong': site_long}
+        r = requests.get(url, params = payload)
         response = r.json()
-        
+
         return float(response['hazardValue'])
+
+    @staticmethod
     def get_hazard_value_set(service: str, hazard_id: str, demand_type: str, demand_units: str, bbox, grid_spacing: float):
         # bbox: [[minx, miny],[maxx, maxy]]
         # raster?demandType=0.2+SA&demandUnits=g&minX=-90.3099&minY=34.9942&maxX=-89.6231&maxY=35.4129&gridSpacing=0.01696
-        bbox
-        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/"+ hazard_id+"/raster")
-        payload = {'demandType':demand_type, 'demandUnits':demand_units, 'minX':bbox[0][0], 'minY':bbox[0][1], 'maxX': bbox[1][0], 'maxY': bbox[1][1], 'gridSpacing': grid_spacing}
-        r = requests.get(url, params=payload)
+        # bbox
+        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/" + hazard_id + "/raster")
+        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'minX': bbox[0][0], 'minY': bbox[0][1],
+                   'maxX': bbox[1][0], 'maxY': bbox[1][1], 'gridSpacing': grid_spacing}
+        r = requests.get(url, params = payload)
         response = r.json()
-        
+
         # TODO: need to handle error with the request
         xlist = []
         ylist = []
@@ -328,7 +369,8 @@ class GlossaryService:
         # image_prop = client.get('P4')  # image
         entity = client.get(term, load = True)
         return entity
-    
+
+
 class ComputeDamage:
     @staticmethod
     def calculate_damage(bridge_fragility, hazard_value):
@@ -374,7 +416,7 @@ class ComputeDamage:
             index += 1
 
         return output
-    
+
     @staticmethod
     def calculate_damage_json2(fragility_set, hazard):
         # using the "description" for limit_state
@@ -398,7 +440,7 @@ class ComputeDamage:
             output[fragility_curve['description']] = probability
 
         return output
-    
+
     @staticmethod
     def calculate_damage_interval(damage):
         output = collections.OrderedDict()
@@ -443,10 +485,9 @@ class ComputeDamage:
         output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
 
-    
 
 if __name__ == "__main__":
     import pprint
-    pp = pprint.PrettyPrinter(indent=4)
+
+    pp = pprint.PrettyPrinter(indent = 4)
     # test code here
-    
