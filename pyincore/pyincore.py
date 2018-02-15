@@ -5,7 +5,6 @@ import rasterio
 import fiona
 import math
 import collections
-import json
 import urllib.request
 import requests  # http client module
 import urllib.parse  # joining path of url
@@ -13,13 +12,12 @@ import jsonpickle
 import numpy as np
 import re
 import zipfile
-import os, os.path
+import os
+import os.path
 
 from shapely.geometry import shape
 from scipy.stats import norm
 from scipy.stats import lognorm
-import scipy.stats as stats
-import matplotlib.pyplot as plt
 from wikidata.client import Client as wikidata_client
 
 from typing import Dict
@@ -219,7 +217,7 @@ class DataService:
                     f.write(chunk)
 
         folder = DataService.unzip_dataset(local_filename)
-        if folder != None:
+        if folder is not None:
             return folder
         else:
             return local_filename
@@ -227,14 +225,14 @@ class DataService:
     @staticmethod
     def get_datasets(service: str, datatype = None, title = None):
         url = urllib.parse.urljoin(service, 'data/api/datasets')
-        if datatype == None and title == None:
+        if datatype is None and title is None:
             r = requests.get(url)
             return r.json()
         else:
             payload = {}
-            if datatype != None:
+            if datatype is not None:
                 payload['type'] = datatype
-            if title != None:
+            if title is not None:
                 payload['title'] = title
             r = requests.get(url, params = payload)
             # need to handle there is no datasets
@@ -277,7 +275,6 @@ class FragilityService:
 
         return fragility_sets
 
-
     @staticmethod
     def map_fragility(service: str, inventory, key: str):
         mapping_request = MappingRequest()
@@ -301,8 +298,8 @@ class FragilityService:
     def get_fragility_set(service: str, fragility_id: str, legacy: bool):
         url = None
         if legacy:
-            url = urllib.parse.urljoin(service,
-                                       "fragility/api/fragilities/query?legacyid=" + fragility_id + "&hazardType=Seismic&inventoryType=Building")
+            url = urllib.parse.urljoin(service, "fragility/api/fragilities/query?legacyid=" + fragility_id +
+                                       "&hazardType=Seismic&inventoryType=Building")
         else:
             url = urllib.parse.urljoin(service, "fragility/api/fragilities/" + fragility_id)
         r = requests.get(url)
@@ -339,13 +336,14 @@ class HazardService:
 
         return float(response['hazardValue'])
 
+    @staticmethod
     def get_hazard_value_set(service: str, hazard_id: str, demand_type: str, demand_units: str, bbox, grid_spacing: float):
         # bbox: [[minx, miny],[maxx, maxy]]
         # raster?demandType=0.2+SA&demandUnits=g&minX=-90.3099&minY=34.9942&maxX=-89.6231&maxY=35.4129&gridSpacing=0.01696
-        bbox
+        # bbox
         url = urllib.parse.urljoin(service, "hazard/api/earthquakes/" + hazard_id + "/raster")
-        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'minX': bbox[0][0], 'minY': bbox[0][1], 'maxX': bbox[1][
-            0], 'maxY': bbox[1][1], 'gridSpacing': grid_spacing}
+        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'minX': bbox[0][0], 'minY': bbox[0][1],
+                   'maxX': bbox[1][0], 'maxY': bbox[1][1], 'gridSpacing': grid_spacing}
         r = requests.get(url, params = payload)
         response = r.json()
 
