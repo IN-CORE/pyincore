@@ -21,6 +21,7 @@ from scipy.stats import lognorm
 from wikidata.client import Client as wikidata_client
 
 from typing import Dict
+from typing import List
 
 logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
@@ -335,6 +336,17 @@ class HazardService:
         response = r.json()
 
         return float(response['hazardValue'])
+
+    @staticmethod
+    def get_hazard_values(service: str, hazard_id: str, demand_type: str, demand_units: str, points: List):
+
+        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/" + hazard_id + "/values")
+        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': points}
+
+        r = requests.get(url, params=payload)
+        response = r.json()
+
+        return response['hazardResults']
 
     @staticmethod
     def get_hazard_value_set(service: str, hazard_id: str, demand_type: str, demand_units: str, bbox, grid_spacing: float):
