@@ -12,21 +12,21 @@ class HazardService:
     """
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_earthquake_url = str(urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes'))
+        self.base_earthquake_url = urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes/')
 
     def get_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/value")
+        print(url)
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'siteLat': site_lat, 'siteLong': site_long}
-        r = requests.get(url, params = payload)
+        r = requests.get(url, headers={'auth-user': self.client.user, 'auth-token': self.client.auth_token, 'Authorization': ''}, params = payload)
         response = r.json()
-
         return float(response['hazardValue'])
 
     def get_hazard_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': points}
 
-        r = requests.get(url, params=payload)
+        r = requests.get(url, headers={'auth-user': self.client.user, 'auth-token': self.client.auth_token, 'Authorization': ' '}, params = payload)
         response = r.json()
 
         return response['hazardResults']
@@ -38,7 +38,7 @@ class HazardService:
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/raster")
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'minX': bbox[0][0], 'minY': bbox[0][1],
                    'maxX': bbox[1][0], 'maxY': bbox[1][1], 'gridSpacing': grid_spacing}
-        r = requests.get(url, params = payload)
+        r = requests.get(url, headers={'auth-user': self.client.user, 'auth-token': self.client.auth_token, 'Authorization': ' '}, params = payload)
         response = r.json()
 
         # TODO: need to handle error with the request
