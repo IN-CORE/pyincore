@@ -14,18 +14,36 @@ import re
 import zipfile
 import os
 import os.path
+import base64
 
 from shapely.geometry import shape
 from scipy.stats import norm
 from scipy.stats import lognorm
-import scipy.stats as stats
-import matplotlib.pyplot as plt
 from wikidata.client import Client as wikidata_client
 
 from typing import Dict
 from typing import List
 
 logging.basicConfig(stream = sys.stderr, level = logging.INFO)
+
+
+class IncoreClient:
+    """
+    Incore service client class. It contains token and service root url
+    """
+    def __init__(self, service_url: str, username: str, password: str):
+        self.service_url = service_url
+        self.token = None
+        self.token = self.get_token(username, password)
+
+    def get_token(self, username: str, password: str):
+        if self.token is not None:
+            return self.token
+        url = urllib.parse.urljoin(self.service_url, "auth/api/login")
+        b64_value = base64.b64encode(bytes('%s:%s' % (username, password), "utf-8"))
+        r = requests.get(url, headers={"Authorization": "LDAP %s" % b64_value.decode('ascii')})
+        print(r.request.headers['Authorization'])
+        return r.json()
 
 class PlotUtil:
     @staticmethod
@@ -106,6 +124,26 @@ class GeoUtil:
                     logging.exception("Error processing feature %s:", f['id'])
 
 
+class DatasetUtil:
+    @staticmethod
+    def unzip_dataset(local_filename: str):
+        foldername, file_extension = os.path.splitext(local_filename)
+        # if it is not a zip file, no unzip
+        if not file_extension.lower() == '.zip':
+            print('It is not a zip file; no unzip')
+            return None
+        # check the folder existance, no unzip
+        if os.path.isdir(foldername):
+            print('It already exsists; no unzip')
+            return foldername
+        os.makedirs(foldername)
+
+        zip_ref = zipfile.ZipFile(local_filename, 'r')
+        zip_ref.extractall(foldername)
+        zip_ref.close()
+        return foldername
+
+
 class InventoryDataset:
     inventory_set = None
 
@@ -180,35 +218,22 @@ class MappingResponse(object):
 
 
 class DataService:
-    @staticmethod
-    def unzip_dataset(local_filename: str):
-        foldername, file_extension = os.path.splitext(local_filename)
-        # if it is not a zip file, no unzip 
-        if not file_extension.lower() == '.zip':
-            print('It is not a zip file; no unzip')
-            return None
-        # check the folder existance, no unzip
-        if os.path.isdir(foldername):
-            print('It already exsists; no unzip')
-            return foldername
-        os.makedirs(foldername)
+    """
+    Data service client
+    """
+    def __init__(self, client: IncoreClient):
+        self.client = client
+        self.base_url = str(urllib.parse.urljoin(client.service_url, 'data/api/datasets'))
 
-        zip_ref = zipfile.ZipFile(local_filename, 'r')
-        zip_ref.extractall(foldername)
-        zip_ref.close()
-        return foldername
-
-    @staticmethod
-    def get_dataset_metadata(service: str, dataset_id: str):
+    def get_dataset_metadata(self, dataset_id: str):
         # construct url with service, dataset api, and id
-        url = urllib.parse.urljoin(service, 'data/api/datasets/' + dataset_id)
+        url = urllib.parse.urljoin(self.base_url, dataset_id)
         r = requests.get(url)
         return r.json()
 
-    @staticmethod
-    def get_dataset(service: str, dataset_id: str):
+    def get_dataset(self, dataset_id: str):
         # construct url for file download
-        url = urllib.parse.urljoin(service, 'data/api/datasets/' + dataset_id + '/files')
+        url = urllib.parse.urljoin(self.base_url, dataset_id + '/files')
         r = requests.get(url, stream = True)
         d = r.headers['content-disposition']
         fname = re.findall("filename=(.+)", d)
@@ -218,15 +243,14 @@ class DataService:
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
 
-        folder = DataService.unzip_dataset(local_filename)
+        folder = DatasetUtil.unzip_dataset(local_filename)
         if folder is not None:
             return folder
         else:
             return local_filename
 
-    @staticmethod
-    def get_datasets(service: str, datatype = None, title = None):
-        url = urllib.parse.urljoin(service, 'data/api/datasets')
+    def get_datasets(self, datatype = None, title = None):
+        url = self.base_url
         if datatype is None and title is None:
             r = requests.get(url)
             return r.json()
@@ -242,8 +266,17 @@ class DataService:
 
 
 class FragilityService:
-    @staticmethod
-    def map_fragilities(service: str, inventories, key: str):
+    """
+    Fragility service client
+    """
+    def __init__(self, client: IncoreClient):
+        self.client = client
+        self.base_frag_url = str(urllib.parse.urljoin(client.service_url, 'fragility/api/fragilities'))
+        # new api
+        # self.base_mapping_url = str(urllib.parse.urljoin(client.service_url, 'fragility/api/mappings'))
+        self.base_mapping_url = str(urllib.parse.urljoin(client.service_url, 'fragility/api/fragilities/map'))
+
+    def map_fragilities(self, inventories, key: str):
         features = []
 
         for inventory in inventories:
@@ -259,7 +292,7 @@ class FragilityService:
         mapping_request.subject.inventory = feature_collection
         mapping_request.params["key"] = key
 
-        url = urllib.parse.urljoin(service, "fragility/api/fragilities/map")
+        url = self.base_mapping_url
 
         json = jsonpickle.encode(mapping_request, unpicklable = False).encode("utf-8")
 
@@ -277,14 +310,13 @@ class FragilityService:
 
         return fragility_sets
 
-    @staticmethod
-    def map_fragility(service: str, inventory, key: str):
+    def map_fragility(self, inventory, key: str):
         mapping_request = MappingRequest()
         mapping_request.subject.schema = "building"
         mapping_request.subject.inventory = inventory
         mapping_request.params["key"] = key
 
-        url = urllib.parse.urljoin(service, "fragility/api/fragilities/map")
+        url = self.base_mapping_url
 
         json = jsonpickle.encode(mapping_request, unpicklable = False).encode("utf-8")
 
@@ -296,14 +328,8 @@ class FragilityService:
 
         return fragility_set
 
-    @staticmethod
-    def get_fragility_set(service: str, fragility_id: str, legacy: bool):
-        url = None
-        if legacy:
-            url = urllib.parse.urljoin(service, "fragility/api/fragilities/query?legacyid=" + fragility_id +
-                                       "&hazardType=Seismic&inventoryType=Building")
-        else:
-            url = urllib.parse.urljoin(service, "fragility/api/fragilities/" + fragility_id)
+    def get_fragility_set(self, fragility_id: str):
+        url = urllib.parse.urljoin(self.base_frag_url, fragility_id)
         r = requests.get(url)
 
         return r.json()
@@ -329,19 +355,23 @@ class BuildingUtil:
 
 
 class HazardService:
-    @staticmethod
-    def get_hazard_value(service: str, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
-        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/" + hazard_id + "/value")
+    """
+    Hazard service client
+    """
+    def __init__(self, client: IncoreClient):
+        self.client = client
+        self.base_earthquake_url = str(urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes'))
+
+    def get_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
+        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/value")
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'siteLat': site_lat, 'siteLong': site_long}
         r = requests.get(url, params = payload)
         response = r.json()
 
         return float(response['hazardValue'])
 
-    @staticmethod
-    def get_hazard_values(service: str, hazard_id: str, demand_type: str, demand_units: str, points: List):
-
-        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/" + hazard_id + "/values")
+    def get_hazard_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
+        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': points}
 
         r = requests.get(url, params=payload)
@@ -349,12 +379,11 @@ class HazardService:
 
         return response['hazardResults']
 
-    @staticmethod
-    def get_hazard_value_set(service: str, hazard_id: str, demand_type: str, demand_units: str, bbox, grid_spacing: float):
+    def get_hazard_value_set(self, hazard_id: str, demand_type: str, demand_units: str, bbox, grid_spacing: float):
         # bbox: [[minx, miny],[maxx, maxy]]
         # raster?demandType=0.2+SA&demandUnits=g&minX=-90.3099&minY=34.9942&maxX=-89.6231&maxY=35.4129&gridSpacing=0.01696
         # bbox
-        url = urllib.parse.urljoin(service, "hazard/api/earthquakes/" + hazard_id + "/raster")
+        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/raster")
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'minX': bbox[0][0], 'minY': bbox[0][1],
                    'maxX': bbox[1][0], 'maxY': bbox[1][1], 'gridSpacing': grid_spacing}
         r = requests.get(url, params = payload)
@@ -393,7 +422,7 @@ class ComputeDamage:
         for i in range(len(limit_states)):
             limit_state = limit_states[i]
             fragility_curve = bridge_fragility.getFragilities()[i]
-            if (fragility_curve.getType() == 'Normal'):
+            if fragility_curve.getType() == 'Normal':
                 median = float(fragility_curve.getProperties()
                                ['fragility-curve-median'])
                 beta = float(fragility_curve.getProperties()
