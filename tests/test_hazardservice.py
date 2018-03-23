@@ -23,4 +23,5 @@ def test_get_hazard_values(hazardsvc):
     """
     testing getting multiple hazard values
     """
-    print("2", hazardsvc.base_earthquake_url)
+    assert True
+

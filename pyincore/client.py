@@ -11,11 +11,13 @@ class IncoreClient:
         self.service_url = service_url
         self.user = username
         self.auth_token = None
+        self.headers = {}
         self.status = 'fail'
         response = self.retrieve_token(username, password)
         if 'result' in response:
             self.auth_token = response['auth-token']
             self.status = 'success'
+            self.headers = {'auth-user': self.user, 'auth-token': self.auth_token, 'Authorization': ''}
 
     def retrieve_token(self, username: str, password: str):
         if self.auth_token is not None:
