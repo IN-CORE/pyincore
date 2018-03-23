@@ -1,75 +1,13 @@
-import logging
-import sys
-import csv
-import rasterio
-import fiona
-import math
 import collections
-import numpy as np
-import os
-import os.path
+import math
 
 from scipy.stats import norm
-from wikidata.client import Client as wikidata_client
 
 
-logging.basicConfig(stream = sys.stderr, level = logging.INFO)
-
-
-
-
-class InventoryDataset:
-    inventory_set = None
-
-    def __init__(self, filename):
-        if os.path.isdir(filename):
-            layers = fiona.listlayers(filename)
-            if len(layers) > 0:
-                # for now, open a first shapefile
-                self.inventory_set = fiona.open(filename, layer = layers[0])
-        else:
-            self.inventory_set = fiona.open(filename)
-
-    def close(self):
-        self.inventory_set.close()
-
-    def __del__(self):
-        self.close()
-
-
-class HazardDataset:
-    hazard = None
-
-    def __init__(self, filename):
-        self.hazard = rasterio.open(filename)
-
-    def get_hazard_value(self, location):
-        row, col = self.hazard.index(location.x, location.y)
-        # assume that there is only 1 band
-        data = self.hazard.read(1)
-        if row < 0 or col < 0 or row >= self.hazard.height or col >= self.hazard.width:
-            return 0.0
-        return np.asscalar(data[row, col])
-
-    def close(self):
-        self.hazard.close()
-
-    def __del__(self):
-        self.close()
-
-
-class DamageRatioDataset:
-    damage_ratio = None
-
-    def __init__(self, filename):
-        csvfile = open(filename, 'r')
-        reader = csv.DictReader(csvfile)
-        self.damage_ratio = []
-        for row in reader:
-            self.damage_ratio.append(row)
-
-
-class BuildingUtil:
+class AnalysisUtil:
+    """
+    Utility methods for analysis
+    """
     @staticmethod
     def get_building_period(num_stories, fragility_set):
         period = 0.0
@@ -87,19 +25,6 @@ class BuildingUtil:
 
         return period
 
-
-
-class GlossaryService:
-    @staticmethod
-    def get_term(service: str, term: str):
-        client = wikidata_client(service)
-        # definition_prop = client.get('P13')  # definition
-        # image_prop = client.get('P4')  # image
-        entity = client.get(term, load = True)
-        return entity
-
-
-class ComputeDamage:
     @staticmethod
     def calculate_damage(bridge_fragility, hazard_value):
         output = collections.OrderedDict()
@@ -134,7 +59,7 @@ class ComputeDamage:
 
             if hazard > 0.0:
                 if (fragility_curve['curveType'] == 'Normal'):
-                    sp = (math.log(hazard_value) - math.log(median)) / beta
+                    sp = (math.log(hazard) - math.log(median)) / beta
                     probability = norm.cdf(sp)
                 elif (fragility_curve['curveType'] == "LogNormal"):
                     x = (math.log(hazard) - median) / beta
@@ -159,7 +84,7 @@ class ComputeDamage:
 
             if hazard > 0.0:
                 if (fragility_curve['curveType'] == 'Normal'):
-                    sp = (math.log(hazard_value) - math.log(median)) / beta
+                    sp = (math.log(hazard) - math.log(median)) / beta
                     probability = norm.cdf(sp)
                 elif (fragility_curve['curveType'] == "LogNormal"):
                     x = (math.log(hazard) - median) / beta
@@ -195,8 +120,10 @@ class ComputeDamage:
                                    + weights[3] * float(dmg_intervals['I_Extensive']) \
                                    + weights[4] * float(dmg_intervals['I_Complete'])
         elif len(weights) == 4:
-            output['meandamage'] = float(weights[0]) * float(dmg_intervals['insignific']) + float(weights[1]) * float(
-                dmg_intervals['moderate']) + float(weights[2]) * float(dmg_intervals['heavy']) + float(weights[3]) * float(
+            output['meandamage'] = float(weights[0]) * float(dmg_intervals['insignific']) + float(
+                weights[1]) * float(
+                dmg_intervals['moderate']) + float(weights[2]) * float(dmg_intervals['heavy']) + float(
+                weights[3]) * float(
                 dmg_intervals['complete'])
         return output
 
@@ -212,10 +139,3 @@ class ComputeDamage:
 
         output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
-
-
-if __name__ == "__main__":
-    import pprint
-
-    pp = pprint.PrettyPrinter(indent = 4)
-    # test code here
