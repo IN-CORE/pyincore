@@ -7,7 +7,7 @@ class IncoreClient:
     """
     Incore service client class. It contains token and service root url
     """
-    def __init__(self, service_url: object, username: object, password: object) -> object:
+    def __init__(self, service_url: str, username: str, password: str) -> object:
         self.service_url = service_url
         self.user = username
         self.auth_token = None
@@ -19,6 +19,13 @@ class IncoreClient:
             self.status = 'success'
             self.headers = {'auth-user': self.user, 'auth-token': self.auth_token, 'Authorization': ''}
 
+    # def __init__(self, service_url: object, username: str, token: str):
+    #     self.service_url = service_url
+    #     self.user = username
+    #     self.auth_token = token
+    #     self.headers = {'auth-user': self.user, 'auth-token': self.auth_token, 'Authorization': ''}
+    #     self.status = 'success'
+
     def retrieve_token(self, username: str, password: str):
         if self.auth_token is not None:
             return self.auth_token
@@ -27,3 +34,13 @@ class IncoreClient:
         r = requests.get(url, headers={"Authorization": "LDAP %s" % b64_value.decode('ascii')})
         return r.json()
 
+
+class InsecureIncoreClient:
+    """
+    Incore service client class. It contains token and service root url
+    """
+    def __init__(self, service_url: str, username: str) -> object:
+        self.service_url = service_url
+        self.user = username
+        self.status = 'success'
+        self.headers = {'auth-user': self.user}

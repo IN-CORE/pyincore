@@ -21,3 +21,6 @@ hs_err_pid*
 
 # Apple metadata
 **/.DS_Store
+
+# incore pw file
+tests/.incorepw

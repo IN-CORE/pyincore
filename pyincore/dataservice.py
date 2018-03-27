@@ -17,8 +17,6 @@ class DataService:
     def get_dataset_metadata(self, dataset_id: str):
         # construct url with service, dataset api, and id
         url = urllib.parse.urljoin(self.base_url, dataset_id)
-        print(url)
-        print(self.client.headers)
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
