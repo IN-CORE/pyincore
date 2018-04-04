@@ -14,7 +14,7 @@ def cred():
         return None
 
 
-def test_client_sucess(cred):
+def test_client_success(cred):
     """
     testing successful login
     """
