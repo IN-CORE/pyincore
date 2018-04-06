@@ -38,7 +38,7 @@ class DataService:
         else:
             return local_filename
 
-    def get_datasets(self, datatype = None, title = None):
+    def get_datasets(self, datatype=None, title=None):
         url = self.base_url
         if datatype is None and title is None:
             r = requests.get(url, headers=self.client.headers)
