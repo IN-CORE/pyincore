@@ -54,7 +54,7 @@ class FragilityService:
         mapping_request.subject.inventory = feature_collection
         mapping_request.params["key"] = key
 
-        url = urllib.parse.urljoin(self.base_mapping_url, "match/"+mapping_id)
+        url = urllib.parse.urljoin(self.base_mapping_url, mapping_id+"/matched")
 
         json = jsonpickle.encode(mapping_request, unpicklable=False).encode("utf-8")
         headers = {'Content-type': 'application/json'}
@@ -75,25 +75,6 @@ class FragilityService:
 
         return fragility_sets
 
-    # maybe we don't need this function; we can always use the function above
-    def map_fragility(self, mapping_id: str, inventory, key: str):
-        mapping_request = MappingRequest()
-        mapping_request.subject.schema = "building"
-        mapping_request.subject.inventory = inventory
-        mapping_request.params["key"] = key
-
-        url = urllib.parse.urljoin(self.base_mapping_url, "match/"+mapping_id)
-
-        json = jsonpickle.encode(mapping_request, unpicklable=False).encode("utf-8")
-        headers = {'Content-type': 'application/json'}
-        new_headers = {**self.client.headers, **headers}
-        r = requests.post(url, data=json, headers=new_headers)
-
-        response = r.json()
-
-        fragility_set = next(iter(response["sets"].values()))
-
-        return fragility_set
 
     def get_fragility_set(self, fragility_id: str):
         url = urllib.parse.urljoin(self.base_frag_url, fragility_id)
