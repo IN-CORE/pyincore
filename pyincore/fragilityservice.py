@@ -36,9 +36,8 @@ class FragilityService:
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_frag_url = urllib.parse.urljoin(client.service_url, 'fragility/api/fragilities/')
-        # new api
-        # self.base_mapping_url = urllib.parse.urljoin(client.service_url, 'fragility/api/mappings/')
-        self.base_mapping_url = urllib.parse.urljoin(client.service_url, 'fragility/api/fragilities/map/')
+        self.base_mapping_url = urllib.parse.urljoin(client.service_url, 'fragility/api/mappings/match/')
+
 
     def map_fragilities(self, inventories, key: str):
         features = []
@@ -87,7 +86,7 @@ class FragilityService:
         r = requests.post(url, data = json, headers = {'Content-type': 'application/json'})
 
         response = r.json()
-
+        print(response["sets"].values())
         fragility_set = next(iter(response["sets"].values()))
 
         return fragility_set

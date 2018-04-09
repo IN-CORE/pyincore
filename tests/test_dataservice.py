@@ -28,13 +28,9 @@ def test_get_datasets(datasvc):
 
     assert 'id' in metadata[0].keys()
 
+'''def test_get_dataset(datasvc):
+    # TODO need to find a way to compare metadata stub
+    id = "5a284f08c7d30d13bc08199c"
+    metadata = datasvc.get_dataset(id)
 
-#
-# def test_get_dataset(datasvc):
-#     metadata = datasvc.get_dataset("5a284f08c7d30d13bc08199c")
-#     # print(metadata)
-#     # # TODO need to find a way to compare metadata stub
-#     assert False
-
-
-
+    assert type(metadata) is str'''

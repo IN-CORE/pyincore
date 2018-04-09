@@ -1,0 +1,5 @@
+{
+  "tests/test_dataservice.py::test_get_dataset": true,
+  "tests/test_fragilityservice.py::test_map_fragilities": true,
+  "tests/test_fragilityservice.py::test_map_fragility": true
+}

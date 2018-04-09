@@ -1,4 +1,5 @@
 import pytest
+import json
 
 from pyincore import IncoreClient, FragilityService, InsecureIncoreClient
 
@@ -21,3 +22,21 @@ def test_get_fragility_set(fragilitysvc):
     metadata = fragilitysvc.get_fragility_set(id)
 
     assert metadata['id'] == id
+
+def test_map_fragilities(fragilitysvc):
+    with open("test_data/inventories.json",'r') as f:
+        inventories = json.load(f)
+    key = ''
+    metadata = fragilitysvc.map_fragilities(inventories, key)
+
+    assert False
+
+def test_map_fragility(fragilitysvc):
+
+    with open("test_data/inventory.json", 'r') as f:
+        inventory = json.load(f)
+
+    key = ''
+    metadata = fragilitysvc.map_fragility(inventory, key)
+
+    assert False
