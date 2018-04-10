@@ -43,4 +43,4 @@ class InsecureIncoreClient:
         self.service_url = service_url
         self.user = username
         self.status = 'success'
-        self.headers = {'auth-user': self.user}
+        self.headers = {'X-Credential-Username': username}

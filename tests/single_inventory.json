@@ -1,0 +1,44 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      -89.9501,
+      35.1598
+    ]
+  },
+  "properties": {
+    "parid": "038028  00022",
+    "parid_card": "038028  00022_1",
+    "bldg_id": "038028  00022_1_1",
+    "struct_typ": "W1",
+    "str_prob": 0.97366,
+    "year_built": 1960,
+    "no_stories": 1,
+    "a_stories": 1,
+    "b_stories": 0,
+    "bsmt_type": "SLAB",
+    "sq_foot": 1626,
+    "gsq_foot": 1626,
+    "occ_type": "RES3",
+    "occ_detail": "DUPLEX",
+    "major_occ": "DUPLEX",
+    "broad_occ": "Multi-family Residential",
+    "appr_bldg": 57200,
+    "repl_cst": 109995,
+    "str_cst": 25739,
+    "nstra_cst": 29259,
+    "nstrd_cst": 54997,
+    "dgn_lvl": "Low - Code",
+    "cont_val": 54997,
+    "efacility": "FALSE",
+    "dwell_unit": 2,
+    "str_typ2": "W1",
+    "occ_typ2": "RES3A",
+    "tract_id": "47157001300",
+    "guid": "dee8131b-ad85-4bad-9d3e-2c7806755ece",
+    "IMPUTED": "F",
+    "Soil": "Upland"
+  },
+  "id": "all_bldgs_ver5_WGS1984.1"
+}
