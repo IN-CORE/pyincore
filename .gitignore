@@ -27,3 +27,6 @@ tests/.incorepw
 
 # incore download data
 tests/data/
+
+# pytest cache
+.pytest_cache
