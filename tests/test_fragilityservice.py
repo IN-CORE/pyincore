@@ -45,4 +45,3 @@ def test_map_fragilities_multiple_inventory(fragilitysvc):
     frag_set = fragilitysvc.map_fragilities(mapping_id, inventories, key)
 
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
-    

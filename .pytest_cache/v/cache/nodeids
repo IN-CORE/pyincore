@@ -1,9 +1,10 @@
 [
-  "tests/test_client.py::test_client_success",
-  "tests/test_client.py::test_client_fail",
   "tests/test_dataservice.py::test_get_dataset_metadata",
+  "tests/test_dataservice.py::test_get_dataset_fileDescriptors",
+  "tests/test_dataservice.py::test_get_dataset_blob",
   "tests/test_dataservice.py::test_get_datasets",
-  "tests/test_fragilityservice.py::test_get_fragility_set",
-  "tests/test_fragilityservice.py::test_map_fragility",
-  "tests/test_hazardservice.py::test_get_hazard_value"
+  "tests/test_dataservice.py::test_get_files",
+  "tests/test_dataservice.py::test_get_file_metadata",
+  "tests/test_dataservice.py::test_get_file_blob",
+  "tests/test_dataservice.py::test_get_spaces"
 ]
