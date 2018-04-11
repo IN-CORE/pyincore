@@ -75,7 +75,6 @@ class FragilityService:
 
         return fragility_sets
 
-
     def get_fragility_set(self, fragility_id: str):
         url = urllib.parse.urljoin(self.base_frag_url, fragility_id)
         r = requests.get(url, headers=self.client.headers)
