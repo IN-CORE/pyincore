@@ -40,7 +40,7 @@ class DataService:
             r = requests.get(url, headers=self.client.headers, stream=True, params=payload)
 
         # extract filename
-        d = r.headers['content-disposition']
+        disposition = r.headers['content-disposition']
         fname = re.findall("filename=(.+)", d)
 
         # construct local directory and filename
@@ -91,7 +91,7 @@ class DataService:
         r = requests.get(url, headers=self.client.headers, stream=True)
 
         # extract filename
-        d = r.headers['content-disposition']
+        disposition = r.headers['content-disposition']
         fname = re.findall("filename=(.+)", d)
 
         # construct local directory and filename
