@@ -28,6 +28,15 @@ def test_get_eq_hazard_value(hazardsvc):
     hval = hazardsvc.get_eq_hazard_value("59f3315ec7d30d4d6741b0bb", "0.2 SA", "g", 35.07899, -90.0178)
     assert hval == 0.5322993805448739
 
+def test_get_hazard_values(hazardsvc):
+
+    assert False
+
+def test_get_hazard_value_set(hazardsvc):
+
+    assert False
+
+
 
 def test_create_earthquake(hazardsvc):
     if hazardsvc is None:
