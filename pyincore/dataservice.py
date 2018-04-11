@@ -41,7 +41,7 @@ class DataService:
 
         # extract filename
         disposition = r.headers['content-disposition']
-        fname = re.findall("filename=(.+)", d)
+        fname = re.findall("filename=(.+)", disposition)
 
         # construct local directory and filename
         if not os.path.exists('data'):
