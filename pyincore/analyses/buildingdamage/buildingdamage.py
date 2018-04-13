@@ -24,7 +24,6 @@ from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 from docopt import docopt
 import os
 import csv
-import multiprocessing
 import concurrent.futures
 
 
@@ -142,7 +141,7 @@ class BuildingDamage:
         '''
 
         # gets the local cpu number
-        number_of_cpu = multiprocessing.cpu_count()
+        number_of_cpu = os.cpu_count()
         if number_of_loops > 0:
             if user_defined_parallelism > 0:
                 return min(number_of_cpu, number_of_loops, user_defined_parallelism)
