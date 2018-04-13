@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 import re
@@ -15,6 +16,7 @@ class DataService:
         self.base_url = urllib.parse.urljoin(client.service_url, 'data/api/datasets/')
         self.files_url = urllib.parse.urljoin(client.service_url, 'data/api/files/')
         self.spaces_url = urllib.parse.urljoin(client.service_url, 'data/api/spaces')
+
     def get_dataset_metadata(self, dataset_id: str):
         # construct url with service, dataset api, and id
         url = urllib.parse.urljoin(self.base_url, dataset_id)
@@ -74,6 +76,32 @@ class DataService:
             r = requests.get(url, headers=self.client.headers, params = payload)
             # need to handle there is no datasets
             return r.json()
+
+    def create_dataset(self, properties: dict):
+        payload = {'dataset': json.dumps(properties)}
+        url = self.base_url
+        r = requests.post(url, files=payload, headers=self.client.headers)
+        return r.json()
+
+    def add_files_to_dataset(self, dataset_id: str, filepaths: list):
+        url = urllib.parse.urljoin(self.base_url, dataset_id+"/files")
+        listfiles = []
+        for filepath in filepaths:
+            file = open(filepath, 'rb')
+            tuple = ('file', file)
+            listfiles.append(tuple)
+
+        r = requests.post(url, files=listfiles, headers=self.client.headers)
+
+        #close files
+        for tuple in listfiles:
+            tuple[1].close()
+        return r.json()
+
+    def delete_dataset(self, dataset_id: str):
+        url = urllib.parse.urljoin(self.base_url, dataset_id)
+        r = requests.delete(url, headers=self.client.headers)
+        return r.json()
 
     def get_files(self):
         url = self.files_url
