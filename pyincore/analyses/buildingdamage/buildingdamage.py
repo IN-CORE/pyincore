@@ -29,19 +29,8 @@ import concurrent.futures
 
 class BuildingDamage:
 
-    def __init__(self, client, building_path: str, hazard_service: str, mapping_id: str, dmg_ratios: str, exec_type: int
-                 , base_datast_id: str=None, num_threads: int=0):
-        # TODO determine the file name
-        shp_file = None
-
-        for file in os.listdir(building_path):
-            if file.endswith(".shp"):
-                shp_file = os.path.join(building_path, file)
-
-        building_shp = os.path.abspath(shp_file)
-
-        building_set = InventoryDataset(building_shp)
-
+    def __init__(self, client, hazard_service: str, mapping_id: str, dmg_ratios: str):
+        # TODO Should we move this outside of the building damage class?
         # Handle the case where Ergo data has an .mvz
         # In the case of multiple files, DataWolf creates a folder and passes that to the tool
         dmg_ratio = None
@@ -58,37 +47,42 @@ class BuildingDamage:
 
         # Find hazard type and id
         hazard_service_split = hazard_service.split("/")
-        hazard_type = hazard_service_split[0]
-        hazard_dataset_id = hazard_service_split[1]
+        self.hazard_type = hazard_service_split[0]
+        self.hazard_dataset_id = hazard_service_split[1]
 
         # Create Hazard and Fragility service
-        hazardsvc = HazardService(client)
-        fragilitysvc = FragilityService(client)
+        self.hazardsvc = HazardService(client)
+        self.fragilitysvc = FragilityService(client)
 
         # damage weights for buildings
-        dmg_weights = [
+        self.dmg_weights = [
             float(damage_ratios[1]['Mean Damage Factor']),
             float(damage_ratios[2]['Mean Damage Factor']),
             float(damage_ratios[3]['Mean Damage Factor']),
             float(damage_ratios[4]['Mean Damage Factor'])]
-        dmg_weights_std_dev = [float(damage_ratios[1]['Deviation Damage Factor']), float(damage_ratios[2]['Deviation Damage Factor']), float(damage_ratios[3]['Deviation Damage Factor']), float(damage_ratios[4]['Deviation Damage Factor'])]
+        self.dmg_weights_std_dev = [float(damage_ratios[1]['Deviation Damage Factor']), float(damage_ratios[2]['Deviation Damage Factor']), float(damage_ratios[3]['Deviation Damage Factor']), float(damage_ratios[4]['Deviation Damage Factor'])]
 
-        fragility_sets = fragilitysvc.map_fragilities(mapping_id, building_set.inventory_set, "Non-Retrofit Fragility ID Code")
-
-        buildings = range(0, len(building_set.inventory_set))
-        parallelism = AnalysisUtil.determine_parallelism_locally(len(building_set.inventory_set), num_threads)
+    def get_damage(self, building_set: InventoryDataset, exec_type: int, base_datast_id: str=None, num_threads: int=0):
         output = []
 
+        # Get the fragility sets
+        fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, building_set.inventory_set, "Non-Retrofit Fragility ID Code")
         # Determine which type of building damage analysis to run
         if exec_type == 0:
-            output = self.building_damage_process_pool(parallelism, buildings, building_set, dmg_weights, dmg_weights_std_dev, fragility_sets, hazardsvc, hazard_dataset_id, hazard_type)
+            buildings = range(0, len(building_set.inventory_set))
+            parallelism = AnalysisUtil.determine_parallelism_locally(len(building_set.inventory_set), num_threads)
+            output = self.building_damage_process_pool(parallelism, buildings, building_set, self.dmg_weights, self.dmg_weights_std_dev, fragility_sets, self.hazardsvc, self.hazard_dataset_id, self.hazard_type)
         elif exec_type == 1:
-            output = self.building_damage_thread_pool(parallelism, buildings, building_set, dmg_weights, dmg_weights_std_dev, fragility_sets, hazardsvc, hazard_dataset_id, hazard_type)
+            buildings = range(0, len(building_set.inventory_set))
+            parallelism = AnalysisUtil.determine_parallelism_locally(len(building_set.inventory_set), num_threads)
+            output = self.building_damage_thread_pool(parallelism, buildings, building_set, self.dmg_weights, self.dmg_weights_std_dev, fragility_sets, self.hazardsvc, self.hazard_dataset_id, self.hazard_type)
         else:
-            output = self.building_damage_sequential(building_set, dmg_weights, dmg_weights_std_dev, fragility_sets, hazardsvc, hazard_dataset_id, hazard_type)
+            output = self.building_damage_sequential(building_set, self.dmg_weights, self.dmg_weights_std_dev, fragility_sets, self.hazardsvc, self.hazard_dataset_id, self.hazard_type)
+
+        output_file_name="dmg-results.csv"
 
         # Write Output to csv
-        with open('dmg-results.csv', 'w') as csv_file:
+        with open(output_file_name, 'w') as csv_file:
             # Write the parent ID at the top of the result data, if it is given
             if base_dataset_id is not None:
                 csv_file.write(base_dataset_id + '\n')
@@ -96,6 +90,8 @@ class BuildingDamage:
             writer = csv.DictWriter(csv_file, dialect="unix", fieldnames=['guid', 'immocc', 'lifesfty', 'collprev', 'insignific', 'moderate', 'heavy', 'complete', 'meandamage', 'mdamagedev', 'hazardtype', 'hazardval'])
             writer.writeheader()
             writer.writerows(output)
+
+        return output_file_name
 
     def building_damage_sequential(self, building_set, dmg_weights, dmg_weights_std_dev, fragility_sets, hazardsvc, hazard_dataset_id, hazard_type):
         output = []
@@ -123,6 +119,12 @@ class BuildingDamage:
         output = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
             for id in buildings:
+                # print(building_set.inventory_set[id])
+                # print("")
+                # print("")
+                # print(self.inventory_set[id])
+                # print("")
+                # print("")
                 future = executor.submit(self.building_damage_analysis, building_set.inventory_set[id], dmg_weights,
                                          dmg_weights_std_dev,
                                          fragility_sets[building_set.inventory_set[id]["id"]],
@@ -183,6 +185,16 @@ if __name__ == '__main__':
     base_dataset_id = arguments['BASEDATASETID']
     exec_type = int(arguments['EXECUTION'])
 
+    # TODO determine the file name
+    shp_file = None
+
+    for file in os.listdir(building_path):
+        if file.endswith(".shp"):
+            shp_file = os.path.join(building_path, file)
+
+    building_shp = os.path.abspath(shp_file)
+    building_set = InventoryDataset(building_shp)
+
     num_threads = 0
     # Get number of cpus or threads, if specified
     if arguments['PARALLELISM'] is not None:
@@ -194,8 +206,8 @@ if __name__ == '__main__':
             cred = f.read().splitlines()
 
         client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
-        BuildingDamage(client, building_path, hazard_service, mapping_id, dmg_ratios, exec_type, base_dataset_id,
-                       num_threads)
+        bldg_dmg = BuildingDamage(client, hazard_service, mapping_id, dmg_ratios)
+        print(bldg_dmg.get_damage(building_set, exec_type, base_dataset_id, num_threads))
 
     except EnvironmentError:
         print("Could not get client credentials")
