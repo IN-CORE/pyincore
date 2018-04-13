@@ -4,7 +4,7 @@
 
 Usage:
     building_damage.py INVENTORY HAZARD MAPPING DMGRATIO BASEDATASETID EXECUTION
-    building_damage.py INVENTORY HAZARD MAPPING DMGRATIO BASEDATASETID EXECUTION THREADS
+    building_damage.py INVENTORY HAZARD MAPPING DMGRATIO BASEDATASETID EXECUTION PARALLELISM
 
 Options:
     INVENTORY     inventory file in ESRI shapefile
@@ -13,7 +13,7 @@ Options:
     DMGRATIO      damage ratio file in CSV
     BASEDATASETID parent of the output file, needed for result ingestion
     EXECUTION     0 - process pool, 1 - thread pool, 2 - sequential
-    THREADS       Number of threads/cpus to use
+    PARALLELISM   Number of threads/cpus to use
 
 
 """
@@ -76,7 +76,7 @@ class BuildingDamage:
         fragility_sets = fragilitysvc.map_fragilities(mapping_id, building_set.inventory_set, "Non-Retrofit Fragility ID Code")
 
         buildings = range(0, len(building_set.inventory_set))
-        parallelism = self.determine_parallelism_locally(len(building_set.inventory_set), num_threads)
+        parallelism = AnalysisUtil.determine_parallelism_locally(len(building_set.inventory_set), num_threads)
         output = []
 
         # Determine which type of building damage analysis to run
@@ -129,26 +129,6 @@ class BuildingDamage:
                                          hazardsvc, hazard_dataset_id, hazard_type)
                 output.append(future.result())
         return output
-
-    def determine_parallelism_locally(self, number_of_loops, user_defined_parallelism=0):
-        '''
-        Determine the parallelism on the current compute node
-        Args:
-            number_of_loops: total number of loops will be executed on current compute node
-            user_defined_parallelism: a customized parallelism specified by users
-        Returns:
-            number_of_cpu: parallelism on current compute node
-        '''
-
-        # gets the local cpu number
-        number_of_cpu = os.cpu_count()
-        if number_of_loops > 0:
-            if user_defined_parallelism > 0:
-                return min(number_of_cpu, number_of_loops, user_defined_parallelism)
-            else:
-                return min(number_of_cpu, number_of_loops)
-        else:
-            return number_of_cpu;
 
     def building_damage_analysis(self, building, dmg_weights, dmg_weights_std_dev, fragility_set, hazardsvc, hazard_dataset_id, hazard_type):
         # print(building)
@@ -205,8 +185,8 @@ if __name__ == '__main__':
 
     num_threads = 0
     # Get number of cpus or threads, if specified
-    if arguments['THREADS'] is not None:
-        num_threads = int(arguments['THREADS'])
+    if arguments['PARALLELISM'] is not None:
+        num_threads = int(arguments['PARALLELISM'])
 
     cred = None
     try:
