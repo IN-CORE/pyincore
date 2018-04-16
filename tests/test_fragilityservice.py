@@ -25,6 +25,7 @@ def test_get_fragility_set(fragilitysvc):
 
     assert metadata['id'] == id
 
+
 def test_map_fragilities_single_inventory(fragilitysvc):
     inventory = {}
     with open("single_inventory.json", 'r') as file:

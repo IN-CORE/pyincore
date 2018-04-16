@@ -1,3 +1,5 @@
+import ast
+
 import pytest
 import os
 import re
@@ -69,6 +71,53 @@ def test_get_datasets(datasvc):
         errors.append("datatype doesn't match!")
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
+
+
+def test_create_dataset_geotif(datasvc):
+    """
+    Testing create dataset with geotif file
+    """
+    dataset_prop = {}
+    with open('geotif_sample.json', 'r') as file:
+        dataset_prop = ast.literal_eval(file.read())
+    response = datasvc.create_dataset(dataset_prop)
+
+    if 'id' not in response:
+        assert False
+
+    dataset_id = response['id']
+    print('dataset is created with id ' + dataset_id)
+    files = ['geotif_sample.tif']
+    response = datasvc.add_files_to_dataset(dataset_id, files)
+
+    # TODO: need to delete the test dataset
+
+    assert response['id'] == dataset_id
+
+
+def test_create_dataset_shpfile(datasvc):
+    """
+    Testing create dataset with shapefile
+    """
+    dataset_prop = {}
+    with open('shp_sample.json', 'r') as file:
+        dataset_prop = ast.literal_eval(file.read())
+    response = datasvc.create_dataset(dataset_prop)
+
+    if 'id' not in response:
+        assert False
+
+    dataset_id = response['id']
+    print('dataset is created with id ' + dataset_id)
+    files = ['shp_sample/shp_sample.shp',
+             'shp_sample/shp_sample.dbf',
+             'shp_sample/shp_sample.shx',
+             'shp_sample/shp_sample.prj']
+    response = datasvc.add_files_to_dataset(dataset_id, files)
+
+    # TODO: need to delete the test dataset
+
+    assert response['id'] == dataset_id
 
 
 def test_get_files(datasvc):
