@@ -109,7 +109,10 @@ def test_create_dataset_shpfile(datasvc):
 
     dataset_id = response['id']
     print('dataset is created with id ' + dataset_id)
-    files = ['shp_sample/shp_sample.shp', 'shp_sample/shp_sample.dbf', 'shp_sample/shp_sample.shx', 'shp_sample/shp_sample.prj']
+    files = ['shp_sample/shp_sample.shp',
+             'shp_sample/shp_sample.dbf',
+             'shp_sample/shp_sample.shx',
+             'shp_sample/shp_sample.prj']
     response = datasvc.add_files_to_dataset(dataset_id, files)
 
     # TODO: need to delete the test dataset
