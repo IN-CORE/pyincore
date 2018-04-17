@@ -12,8 +12,8 @@ Options:
     MAPPING       fragility mapping id
     DMGRATIO      damage ratio file in CSV
     BASEDATASETID parent of the output file, needed for result ingestion
-    EXECUTION     0 - process pool, 1 - thread pool, 2 - sequential
-    PARALLELISM   Number of threads/cpus to use
+    EXECUTION     0 - process pool, 1 - thread pool, 2 - multiprocessing, other - sequential
+    PARALLELISM   Number of concurrent threads/processes to use
 
 
 """
@@ -28,13 +28,12 @@ import concurrent.futures
 
 
 class BuildingDamage:
-
     def __init__(self, client, hazard_service: str, mapping_id: str, dmg_ratios: str):
         # TODO Should we move this outside of the building damage class?
         # Handle the case where Ergo data has an .mvz
         # In the case of multiple files, DataWolf creates a folder and passes that to the tool
         dmg_ratio = None
-        if(os.path.isfile(dmg_ratios)):
+        if (os.path.isfile(dmg_ratios)):
             dmg_ratio = DamageRatioDataset(dmg_ratios)
         else:
             dmg_ratio_file = None
@@ -60,9 +59,12 @@ class BuildingDamage:
             float(damage_ratios[2]['Mean Damage Factor']),
             float(damage_ratios[3]['Mean Damage Factor']),
             float(damage_ratios[4]['Mean Damage Factor'])]
-        self.dmg_weights_std_dev = [float(damage_ratios[1]['Deviation Damage Factor']), float(damage_ratios[2]['Deviation Damage Factor']), float(damage_ratios[3]['Deviation Damage Factor']), float(damage_ratios[4]['Deviation Damage Factor'])]
+        self.dmg_weights_std_dev = [float(damage_ratios[1]['Deviation Damage Factor']),
+                                    float(damage_ratios[2]['Deviation Damage Factor']),
+                                    float(damage_ratios[3]['Deviation Damage Factor']),
+                                    float(damage_ratios[4]['Deviation Damage Factor'])]
 
-    def get_damage(self, inventory_set: dict, exec_type: int, base_datast_id: str=None, num_threads: int=0):
+    def get_damage(self, inventory_set: dict, exec_type: int, base_datast_id: str = None, user_defined_parallelism: int = 0):
         output = []
 
         # Get the fragility sets
@@ -70,16 +72,31 @@ class BuildingDamage:
         # Determine which type of building damage analysis to run
         if exec_type == 0:
             buildings = range(0, len(inventory_set))
-            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), num_threads)
-            output = self.building_damage_process_pool(parallelism, buildings, inventory_set, self.dmg_weights, self.dmg_weights_std_dev, fragility_sets, self.hazardsvc, self.hazard_dataset_id, self.hazard_type)
+            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), user_defined_parallelism)
+            output = self.building_damage_process_pool(parallelism, buildings, inventory_set, self.dmg_weights,
+                                                       self.dmg_weights_std_dev, fragility_sets, self.hazardsvc,
+                                                       self.hazard_dataset_id, self.hazard_type)
         elif exec_type == 1:
             buildings = range(0, len(inventory_set))
-            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), num_threads)
-            output = self.building_damage_thread_pool(parallelism, buildings, inventory_set, self.dmg_weights, self.dmg_weights_std_dev, fragility_sets, self.hazardsvc, self.hazard_dataset_id, self.hazard_type)
+            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), user_defined_parallelism)
+            output = self.building_damage_thread_pool(parallelism, buildings, inventory_set, self.dmg_weights,
+                                                      self.dmg_weights_std_dev, fragility_sets, self.hazardsvc,
+                                                      self.hazard_dataset_id, self.hazard_type)
+        elif exec_type == 2:
+            buildings = range(0, len(inventory_set))
+            zipped_arg = []
+            for id in buildings:
+                zipped_arg.append((inventory_set[id], self.dmg_weights, self.dmg_weights_std_dev,
+                                   fragility_sets[inventory_set[id]["id"]],
+                                   self.hazardsvc, self.hazard_dataset_id))
+            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), user_defined_parallelism)
+            output = self.building_damage_multiprocessing(self.building_damage_analysis, zipped_arg, parallelism)
         else:
-            output = self.building_damage_sequential(inventory_set, self.dmg_weights, self.dmg_weights_std_dev, fragility_sets, self.hazardsvc, self.hazard_dataset_id, self.hazard_type)
+            output = self.building_damage_sequential(inventory_set, self.dmg_weights, self.dmg_weights_std_dev,
+                                                     fragility_sets, self.hazardsvc, self.hazard_dataset_id,
+                                                     self.hazard_type)
 
-        output_file_name="dmg-results.csv"
+        output_file_name = "dmg-results.csv"
 
         # Write Output to csv
         with open(output_file_name, 'w') as csv_file:
@@ -87,13 +104,17 @@ class BuildingDamage:
             if base_dataset_id is not None:
                 csv_file.write(base_dataset_id + '\n')
 
-            writer = csv.DictWriter(csv_file, dialect="unix", fieldnames=['guid', 'immocc', 'lifesfty', 'collprev', 'insignific', 'moderate', 'heavy', 'complete', 'meandamage', 'mdamagedev', 'hazardtype', 'hazardval'])
+            writer = csv.DictWriter(csv_file, dialect="unix",
+                                    fieldnames=['guid', 'immocc', 'lifesfty', 'collprev', 'insignific', 'moderate',
+                                                'heavy', 'complete', 'meandamage', 'mdamagedev', 'hazardtype',
+                                                'hazardval'])
             writer.writeheader()
             writer.writerows(output)
 
         return output_file_name
 
-    def building_damage_sequential(self, inventory_set, dmg_weights, dmg_weights_std_dev, fragility_sets, hazardsvc, hazard_dataset_id, hazard_type):
+    def building_damage_sequential(self, inventory_set, dmg_weights, dmg_weights_std_dev, fragility_sets, hazardsvc,
+                                   hazard_dataset_id, hazard_type):
         output = []
         for building in inventory_set:
             bldg_output = self.building_damage_analysis(building, dmg_weights, dmg_weights_std_dev,
@@ -103,7 +124,8 @@ class BuildingDamage:
 
         return output
 
-    def building_damage_thread_pool(self, parallelism, buildings, inventory_set, dmg_weights, dmg_weights_std_dev, fragility_sets, hazardsvc, hazard_dataset_id, hazard_type):
+    def building_damage_thread_pool(self, parallelism, buildings, inventory_set, dmg_weights, dmg_weights_std_dev,
+                                    fragility_sets, hazardsvc, hazard_dataset_id, hazard_type):
         output = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=parallelism) as executor:
             for id in buildings:
@@ -115,7 +137,8 @@ class BuildingDamage:
                     output.append(future.result())
         return output
 
-    def building_damage_process_pool(self, parallelism, buildings, inventory_set, dmg_weights, dmg_weights_std_dev, fragility_sets, hazardsvc, hazard_dataset_id, hazard_type):
+    def building_damage_process_pool(self, parallelism, buildings, inventory_set, dmg_weights, dmg_weights_std_dev,
+                                     fragility_sets, hazardsvc, hazard_dataset_id, hazard_type):
         output = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
             for id in buildings:
@@ -126,7 +149,24 @@ class BuildingDamage:
                 output.append(future.result())
         return output
 
-    def building_damage_analysis(self, building, dmg_weights, dmg_weights_std_dev, fragility_set, hazardsvc, hazard_dataset_id, hazard_type):
+    def building_damage_multiprocessing(self, function_name, zipped_arg_list, parallelism):
+        import socket
+        import multiprocessing
+        import sys
+        host = socket.gethostname()
+        try:
+            p = multiprocessing.Pool(processes=parallelism)
+            output = p.starmap(function_name, zipped_arg_list)
+
+            p.close()
+            p.join()
+
+            return output
+        except:
+            raise OSError("Failed running parallel processing on host {}:{}".format(host, sys.exc_info()))
+
+    def building_damage_analysis(self, building, dmg_weights, dmg_weights_std_dev, fragility_set, hazardsvc,
+                                 hazard_dataset_id, hazard_type):
         # print(building)
         bldg_results = collections.OrderedDict()
 
@@ -194,10 +234,10 @@ if __name__ == '__main__':
     building_shp = os.path.abspath(shp_file)
     building_set = InventoryDataset(building_shp)
 
-    num_threads = 0
+    user_defined_parallelism = 0
     # Get number of cpus or threads, if specified
     if arguments['PARALLELISM'] is not None:
-        num_threads = int(arguments['PARALLELISM'])
+        user_defined_parallelism = int(arguments['PARALLELISM'])
 
     cred = None
     try:
@@ -206,8 +246,7 @@ if __name__ == '__main__':
 
         client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
         bldg_dmg = BuildingDamage(client, hazard_service, mapping_id, dmg_ratios)
-        bldg_dmg.get_damage(building_set.inventory_set, exec_type, base_dataset_id, num_threads)
+        bldg_dmg.get_damage(building_set.inventory_set, exec_type, base_dataset_id, user_defined_parallelism)
 
     except EnvironmentError:
         print("Could not get client credentials")
-
