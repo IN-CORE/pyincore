@@ -16,7 +16,7 @@ class HazardService:
         self.base_earthquake_url = urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes/')
         self.base_tornado_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tornadoes/')
 
-    def get_eq_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
+    def get_earthquake_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/value")
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'siteLat': site_lat, 'siteLong': site_long}
         r = requests.get(url, headers=self.client.headers, params = payload)
@@ -24,7 +24,7 @@ class HazardService:
 
         return float(response['hazardValue'])
 
-    def get_eq_hazard_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
+    def get_earthquake_hazard_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': points}
         r = requests.get(url, headers=self.client.headers, params = payload)
@@ -32,7 +32,7 @@ class HazardService:
 
         return response['hazardResults']
 
-    def get_eq_hazard_value_set(self, hazard_id: str, demand_type: str, demand_units: str, bbox, grid_spacing: float):
+    def get_earthquake_hazard_value_set(self, hazard_id: str, demand_type: str, demand_units: str, bbox, grid_spacing: float):
         # bbox: [[minx, miny],[maxx, maxy]]
         # raster?demandType=0.2+SA&demandUnits=g&minX=-90.3099&minY=34.9942&maxX=-89.6231&maxY=35.4129&gridSpacing=0.01696
         # bbox
