@@ -149,8 +149,13 @@ class BuildingDamage:
             location = GeoUtil.get_location(building)
 
             # Update this once hazard service supports tornado
-            hazard_val = hazardsvc.get_hazard_value(hazard_dataset_id, hazard_demand_type, demand_units, location.y,
-                                                    location.x)
+            if hazard_type == 'earthquake':
+                hazard_val = hazardsvc.get_hazard_value(hazard_dataset_id, hazard_demand_type, demand_units, location.y,
+                                                        location.x)
+            elif hazard_type == 'tornado':
+                hazard_val = hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y, location.x,
+                                                                0)
+
             dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, hazard_val)
             demand_type = fragility_set['demandType']
         else:
@@ -207,7 +212,7 @@ if __name__ == '__main__':
 
         client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
         bldg_dmg = BuildingDamage(client, hazard_service, mapping_id, dmg_ratios)
-        print(bldg_dmg.get_damage(building_set, exec_type, base_dataset_id, num_threads))
+        bldg_dmg.get_damage(building_set, exec_type, base_dataset_id, num_threads)
 
     except EnvironmentError:
         print("Could not get client credentials")
