@@ -1,0 +1,5 @@
+{
+  "type": "http://localhost:8080/semantics/edu.illinois.ncsa.ergo.eq.schemas.deterministicHazardRaster.v1.0",
+  "title": "geotif_test",
+  "format": "geotif"
+}

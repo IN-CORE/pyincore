@@ -1,0 +1,5 @@
+{
+  "type": "edu.illinois.ncsa.ergo.eq.schemas.censustract.v1.0",
+  "title": "shp_test",
+  "format": "shapefile"
+}

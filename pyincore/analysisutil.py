@@ -1,6 +1,6 @@
 import collections
 import math
-
+import os
 from scipy.stats import norm
 
 
@@ -139,3 +139,24 @@ class AnalysisUtil:
 
         output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
+
+    @staticmethod
+    def determine_parallelism_locally(self, number_of_loops, user_defined_parallelism=0):
+        '''
+        Determine the parallelism on the current compute node
+        Args:
+            number_of_loops: total number of loops will be executed on current compute node
+            user_defined_parallelism: a customized parallelism specified by users
+        Returns:
+            number_of_cpu: parallelism on current compute node
+        '''
+
+        # gets the local cpu number
+        number_of_cpu = os.cpu_count()
+        if number_of_loops > 0:
+            if user_defined_parallelism > 0:
+                return min(number_of_cpu, number_of_loops, user_defined_parallelism)
+            else:
+                return min(number_of_cpu, number_of_loops)
+        else:
+            return number_of_cpu;

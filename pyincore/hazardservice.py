@@ -1,6 +1,5 @@
 import urllib
 
-import numpy
 import requests
 from typing import List
 
@@ -14,6 +13,7 @@ class HazardService:
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_earthquake_url = urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes/')
+        self.base_tornado_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tornadoes/')
 
     def get_eq_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/value")
@@ -54,6 +54,26 @@ class HazardService:
         hazard_val = numpy.array(zlist)
 
         return x, y, hazard_val
+
+
+    def get_tornado_hazard_value(self, hazard_id:str, demand_units: str, site_lat, site_long, simulation=0):
+        url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/value")
+        payload = {'demandUnits': demand_units, 'siteLat': site_lat,
+                   'siteLong': site_long, 'simulation':simulation}
+        r = requests.get(url, headers=self.client.headers, params=payload)
+        response = r.json()
+
+        return response['hazardValue']
+
+    def create_tornado_scenario(self, scenario):
+        url = self.base_tornado_url
+
+        headers = {'Content-type': 'application/json'}
+        # merge two headers
+        new_headers = {**self.client.headers, **headers}
+        r = requests.post(url, data=scenario, headers=new_headers)
+        response = r.json()
+        return response
 
     def create_earthquake(self, config):
         url = self.base_earthquake_url
