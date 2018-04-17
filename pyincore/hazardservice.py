@@ -1,5 +1,6 @@
 import urllib
 
+import numpy
 import requests
 from typing import List
 
@@ -55,6 +56,15 @@ class HazardService:
 
         return x, y, hazard_val
 
+    def create_earthquake(self, config):
+        url = self.base_earthquake_url
+
+        headers = {'Content-type': 'application/json'}
+        # merge two headers
+        new_headers = {**self.client.headers, **headers}
+        r = requests.post(url, data=config, headers=new_headers)
+        response = r.json()
+        return response
 
     def get_tornado_hazard_value(self, hazard_id:str, demand_units: str, site_lat, site_long, simulation=0):
         url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/value")
@@ -75,6 +85,4 @@ class HazardService:
         response = r.json()
         return response
 
-    def create_earthquake(self, config):
-        url = self.base_earthquake_url
-        r = requests.post(url, data=config, headers=self.client.headers)
+
