@@ -7,3 +7,5 @@ from pyincore.plotutil import PlotUtil
 from pyincore.geoutil import GeoUtil
 from pyincore.dataservice import DataService
 from pyincore.fragilityservice import FragilityService
+from pyincore.analysisutil import AnalysisUtil
+from pyincore.dataset import InventoryDataset, DamageRatioDataset
