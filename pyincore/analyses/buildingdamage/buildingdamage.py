@@ -65,7 +65,7 @@ class BuildingDamage:
     @staticmethod
     def get_output_metadata():
         output = {}
-        output["dataType"] = "edu.illinois.ncsa.ergo.eq.schemas.buildingDamageVer4.v1.0"
+        output["dataType"] = "ergo:buildingDamageVer4"
         output["format"] = "table"
 
         return output
