@@ -25,7 +25,9 @@ from docopt import docopt
 import os
 import csv
 import concurrent.futures
-
+import socket
+import multiprocessing
+import sys
 
 class BuildingDamage:
     def __init__(self, client, hazard_service: str, mapping_id: str, dmg_ratios: str):
@@ -88,7 +90,7 @@ class BuildingDamage:
             for id in buildings:
                 zipped_arg.append((inventory_set[id], self.dmg_weights, self.dmg_weights_std_dev,
                                    fragility_sets[inventory_set[id]["id"]],
-                                   self.hazardsvc, self.hazard_dataset_id))
+                                   self.hazardsvc, self.hazard_dataset_id, self.hazard_type))
             parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), user_defined_parallelism)
             output = self.building_damage_multiprocessing(self.building_damage_analysis, zipped_arg, parallelism)
         else:
@@ -150,9 +152,7 @@ class BuildingDamage:
         return output
 
     def building_damage_multiprocessing(self, function_name, zipped_arg_list, parallelism):
-        import socket
-        import multiprocessing
-        import sys
+
         host = socket.gethostname()
         try:
             p = multiprocessing.Pool(processes=parallelism)
@@ -234,10 +234,10 @@ if __name__ == '__main__':
     building_shp = os.path.abspath(shp_file)
     building_set = InventoryDataset(building_shp)
 
-    user_defined_parallelism = 0
+    num_threads = 0
     # Get number of cpus or threads, if specified
     if arguments['PARALLELISM'] is not None:
-        user_defined_parallelism = int(arguments['PARALLELISM'])
+        num_threads = int(arguments['PARALLELISM'])
 
     cred = None
     try:
@@ -246,7 +246,7 @@ if __name__ == '__main__':
 
         client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
         bldg_dmg = BuildingDamage(client, hazard_service, mapping_id, dmg_ratios)
-        bldg_dmg.get_damage(building_set.inventory_set, exec_type, base_dataset_id, user_defined_parallelism)
+        bldg_dmg.get_damage(building_set.inventory_set, exec_type, base_dataset_id, num_threads)
 
-    except EnvironmentError:
-        print("Could not get client credentials")
+    except:
+        print(sys.exc_info())
