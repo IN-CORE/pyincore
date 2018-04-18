@@ -65,9 +65,8 @@ class BuildingDamage:
     @staticmethod
     def get_output_metadata():
         output = {}
-        output["type"] = "http://localhost:8080/semantics/edu.illinois.ncsa.ergo.eq.schemas.buildingDamageVer4.v1.0"
+        output["dataType"] = "edu.illinois.ncsa.ergo.eq.schemas.buildingDamageVer4.v1.0"
         output["format"] = "table"
-        output["schema"] = "buildingDamagev4"
 
         return output
 
