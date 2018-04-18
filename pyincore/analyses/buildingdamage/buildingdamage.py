@@ -66,7 +66,7 @@ class BuildingDamage:
                                     float(damage_ratios[3]['Deviation Damage Factor']),
                                     float(damage_ratios[4]['Deviation Damage Factor'])]
 
-    def get_damage(self, inventory_set: dict, exec_type: int, base_datast_id: str = None, user_defined_parallelism: int = 0):
+    def get_damage(self, inventory_set: dict, exec_type: int, base_datast_id: str = None, num_threads: int = 0):
         output = []
 
         # Get the fragility sets
@@ -74,13 +74,13 @@ class BuildingDamage:
         # Determine which type of building damage analysis to run
         if exec_type == 0:
             buildings = range(0, len(inventory_set))
-            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), user_defined_parallelism)
+            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), num_threads)
             output = self.building_damage_process_pool(parallelism, buildings, inventory_set, self.dmg_weights,
                                                        self.dmg_weights_std_dev, fragility_sets, self.hazardsvc,
                                                        self.hazard_dataset_id, self.hazard_type)
         elif exec_type == 1:
             buildings = range(0, len(inventory_set))
-            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), user_defined_parallelism)
+            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), num_threads)
             output = self.building_damage_thread_pool(parallelism, buildings, inventory_set, self.dmg_weights,
                                                       self.dmg_weights_std_dev, fragility_sets, self.hazardsvc,
                                                       self.hazard_dataset_id, self.hazard_type)
@@ -91,7 +91,7 @@ class BuildingDamage:
                 zipped_arg.append((inventory_set[id], self.dmg_weights, self.dmg_weights_std_dev,
                                    fragility_sets[inventory_set[id]["id"]],
                                    self.hazardsvc, self.hazard_dataset_id, self.hazard_type))
-            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), user_defined_parallelism)
+            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), num_threads)
             output = self.building_damage_multiprocessing(self.building_damage_analysis, zipped_arg, parallelism)
         else:
             output = self.building_damage_sequential(inventory_set, self.dmg_weights, self.dmg_weights_std_dev,
