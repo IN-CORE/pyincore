@@ -1,7 +1,9 @@
 import collections
+from typing import List, Dict
 import math
 import os
 from scipy.stats import norm
+from pyincore import DataService
 
 
 class AnalysisUtil:
@@ -160,3 +162,19 @@ class AnalysisUtil:
                 return min(number_of_cpu, number_of_loops)
         else:
             return number_of_cpu;
+
+    @staticmethod
+    def create_result_dataset(datasvc: DataService, parentid: str, result_files: List[str], title: str, output_metadata: Dict[str, str]):
+        # Result metadata
+        properties = output_metadata
+        properties["title"] = title
+        properties["sourceDataset"] = parentid
+
+        # Create child dataset with parent dataset as sourceDataset
+        result_dataset = datasvc.create_dataset(properties)
+        result_dataset_id = result_dataset["id"]
+
+        # Attach files to result dataset
+        datasvc.add_files_to_dataset(result_dataset_id, result_files)
+
+        return result_dataset_id
