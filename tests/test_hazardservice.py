@@ -29,16 +29,6 @@ def test_get_earthquake_hazard_value(hazardsvc):
     assert hval == 0.5322993805448739
 
 
-def test_get_earthquake_hazard_values(hazardsvc):
-
-    assert False
-
-
-def test_get_earthquake_hazard_value_set(hazardsvc):
-
-    assert False
-
-
 def test_create_earthquake(hazardsvc):
     """
     Test creating earthquake
@@ -70,3 +60,8 @@ def test_get_tornado_hazard_value(hazardsvc):
 
     hval = hazardsvc.get_tornado_hazard_value("5ad0f35eec230965e6d98d0c", "mph", 35.228, -97.478, 0)
     assert ((hval > 85) and (hval <  165))
+
+
+# TODO implement the following test
+# def test_get_earthquake_hazard_values(hazardsvc):
+# def test_get_earthquake_hazard_value_set(hazardsvc):
