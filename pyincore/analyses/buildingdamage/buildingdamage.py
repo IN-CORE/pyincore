@@ -68,7 +68,15 @@ class BuildingDamage:
                                     float(damage_ratios[3]['Deviation Damage Factor']),
                                     float(damage_ratios[4]['Deviation Damage Factor'])]
 
-    def get_damage(self, inventory_set: dict, exec_type: int, base_datast_id: str = None, num_threads: int = 0):
+    @staticmethod
+    def get_output_metadata():
+        output = {}
+        output["dataType"] = "ergo:buildingDamageVer4"
+        output["format"] = "table"
+
+        return output
+
+    def get_damage(self, inventory_set: dict, exec_type: int, base_datast_id: str=None, num_threads: int=0):
         output = []
 
         # Get the fragility sets
@@ -168,7 +176,7 @@ class BuildingDamage:
 
             hazard_val = 0.0
             demand_type = "Unknown"
-    
+
             dmg_probability = collections.OrderedDict()
 
             # TODO what would be returned if no match found?
