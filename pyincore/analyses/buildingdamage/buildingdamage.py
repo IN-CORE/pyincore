@@ -62,6 +62,14 @@ class BuildingDamage:
             float(damage_ratios[4]['Mean Damage Factor'])]
         self.dmg_weights_std_dev = [float(damage_ratios[1]['Deviation Damage Factor']), float(damage_ratios[2]['Deviation Damage Factor']), float(damage_ratios[3]['Deviation Damage Factor']), float(damage_ratios[4]['Deviation Damage Factor'])]
 
+    @staticmethod
+    def get_output_metadata():
+        output = {}
+        output["dataType"] = "ergo:buildingDamageVer4"
+        output["format"] = "table"
+
+        return output
+
     def get_damage(self, inventory_set: dict, exec_type: int, base_datast_id: str=None, num_threads: int=0):
         output = []
 
