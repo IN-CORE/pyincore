@@ -28,6 +28,8 @@ import concurrent.futures
 import socket
 import multiprocessing
 import sys
+import traceback
+
 
 class BuildingDamage:
     def __init__(self, client, hazard_service: str, mapping_id: str, dmg_ratios: str):
@@ -152,67 +154,66 @@ class BuildingDamage:
         return output
 
     def building_damage_multiprocessing(self, function_name, zipped_arg_list, parallelism):
-
-        host = socket.gethostname()
-        try:
-            p = multiprocessing.Pool(processes=parallelism)
-            output = p.starmap(function_name, zipped_arg_list)
-
-            p.close()
-            p.join()
-
-            return output
-        except:
-            raise OSError("Failed running parallel processing on host {}:{}".format(host, sys.exc_info()))
+        p = multiprocessing.Pool(processes=parallelism)
+        output = p.starmap(function_name, zipped_arg_list)
+        p.close()
+        p.join()
+        return output
 
     def building_damage_analysis(self, building, dmg_weights, dmg_weights_std_dev, fragility_set, hazardsvc,
                                  hazard_dataset_id, hazard_type):
-        # print(building)
-        bldg_results = collections.OrderedDict()
+        try:
+            # print(building)
+            bldg_results = collections.OrderedDict()
 
-        hazard_val = 0.0
-        demand_type = "Unknown"
+            hazard_val = 0.0
+            demand_type = "Unknown"
+    
+            dmg_probability = collections.OrderedDict()
 
-        dmg_probability = collections.OrderedDict()
+            # TODO what would be returned if no match found?
+            if fragility_set is not None:
 
-        # TODO what would be returned if no match found?
-        if fragility_set is not None:
+                hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, fragility_set, hazard_type)
+                demand_units = fragility_set['demandUnits']
+                location = GeoUtil.get_location(building)
 
-            hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, fragility_set, hazard_type)
-            demand_units = fragility_set['demandUnits']
-            location = GeoUtil.get_location(building)
+                # Update this once hazard service supports tornado
+                if hazard_type == 'earthquake':
+                    hazard_val = hazardsvc.get_hazard_value(hazard_dataset_id, hazard_demand_type, demand_units, location.y,
+                                                            location.x)
+                elif hazard_type == 'tornado':
+                    hazard_val = hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y, location.x,
+                                                                    0)
 
-            # Update this once hazard service supports tornado
-            if hazard_type == 'earthquake':
-                hazard_val = hazardsvc.get_hazard_value(hazard_dataset_id, hazard_demand_type, demand_units, location.y,
-                                                        location.x)
-            elif hazard_type == 'tornado':
-                hazard_val = hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y, location.x,
-                                                                0)
+                dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, hazard_val)
+                demand_type = fragility_set['demandType']
+            else:
+                dmg_probability['immocc'] = 0.0
+                dmg_probability['lifesfty'] = 0.0
+                dmg_probability['collprev'] = 0.0
 
-            dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, hazard_val)
-            demand_type = fragility_set['demandType']
-        else:
-            dmg_probability['immocc'] = 0.0
-            dmg_probability['lifesfty'] = 0.0
-            dmg_probability['collprev'] = 0.0
+            dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
+            mean_damage = AnalysisUtil.calculate_mean_damage(dmg_weights, dmg_interval)
+            mean_damage_dev = AnalysisUtil.calculate_mean_damage_std_deviation(dmg_weights, dmg_weights_std_dev,
+                                                                               dmg_interval, mean_damage['meandamage'])
 
-        dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
-        mean_damage = AnalysisUtil.calculate_mean_damage(dmg_weights, dmg_interval)
-        mean_damage_dev = AnalysisUtil.calculate_mean_damage_std_deviation(dmg_weights, dmg_weights_std_dev,
-                                                                           dmg_interval, mean_damage['meandamage'])
+            bldg_results['guid'] = building['properties']['guid']
+            bldg_results.update(dmg_probability)
+            bldg_results.update(dmg_interval)
+            bldg_results.update(mean_damage)
+            bldg_results.update(mean_damage_dev)
 
-        bldg_results['guid'] = building['properties']['guid']
-        bldg_results.update(dmg_probability)
-        bldg_results.update(dmg_interval)
-        bldg_results.update(mean_damage)
-        bldg_results.update(mean_damage_dev)
+            bldg_results['hazardtype'] = demand_type
+            bldg_results['hazardval'] = hazard_val
 
-        bldg_results['hazardtype'] = demand_type
-        bldg_results['hazardval'] = hazard_val
+            return bldg_results
 
-        return bldg_results
-
+        except Exception as e:
+            # This prints the type, value and stacktrace of error being handled.
+            traceback.print_exc()
+            print()
+            raise e
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
@@ -248,5 +249,5 @@ if __name__ == '__main__':
         bldg_dmg = BuildingDamage(client, hazard_service, mapping_id, dmg_ratios)
         bldg_dmg.get_damage(building_set.inventory_set, exec_type, base_dataset_id, num_threads)
 
-    except:
-        print(sys.exc_info())
+    except Exception as e:
+        print(str(e))
