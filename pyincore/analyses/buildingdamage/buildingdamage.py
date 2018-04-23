@@ -188,7 +188,7 @@ class BuildingDamage:
 
                 # Update this once hazard service supports tornado
                 if hazard_type == 'earthquake':
-                    hazard_val = hazardsvc.get_hazard_value(hazard_dataset_id, hazard_demand_type, demand_units, location.y,
+                    hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type, demand_units, location.y,
                                                             location.x)
                 elif hazard_type == 'tornado':
                     hazard_val = hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y, location.x,
