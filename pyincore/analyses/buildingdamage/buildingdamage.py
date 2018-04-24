@@ -25,14 +25,12 @@ from docopt import docopt
 import os
 import csv
 import concurrent.futures
-import socket
 import multiprocessing
-import sys
 import traceback
 
 
 class BuildingDamage:
-    def __init__(self, client, hazard_service: str, mapping_id: str, dmg_ratios: str):
+    def __init__(self, client, hazard_service: str, dmg_ratios: str):
         # TODO Should we move this outside of the building damage class?
         # Handle the case where Ergo data has an .mvz
         # In the case of multiple files, DataWolf creates a folder and passes that to the tool
@@ -76,7 +74,7 @@ class BuildingDamage:
 
         return output
 
-    def get_damage(self, inventory_set: dict, exec_type: int, base_datast_id: str=None, num_threads: int=0):
+    def get_damage(self, inventory_set: dict, mapping_id: str, exec_type: int, base_dataset_id: str=None, num_threads: int=0):
         output = []
 
         # Get the fragility sets
@@ -254,8 +252,8 @@ if __name__ == '__main__':
             cred = f.read().splitlines()
 
         client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
-        bldg_dmg = BuildingDamage(client, hazard_service, mapping_id, dmg_ratios)
-        bldg_dmg.get_damage(building_set.inventory_set, exec_type, base_dataset_id, num_threads)
+        bldg_dmg = BuildingDamage(client, hazard_service, dmg_ratios)
+        bldg_dmg.get_damage(building_set.inventory_set, mapping_id, exec_type, base_dataset_id, num_threads)
 
     except Exception as e:
         print(str(e))
