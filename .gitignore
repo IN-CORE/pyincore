@@ -30,3 +30,6 @@ tests/data/
 
 # pytest cache
 .pytest_cache
+
+# jupyter notebook checkpoints folder
+.ipynb_checkpoints

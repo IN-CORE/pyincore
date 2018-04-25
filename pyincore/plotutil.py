@@ -1,5 +1,7 @@
 import numpy
 from scipy.stats import lognorm, norm
+import folium
+from owslib.wms import WebMapService
 
 
 class PlotUtil:
@@ -41,4 +43,48 @@ class PlotUtil:
             return PlotUtil.sample_lognormal_cdf(alpha, beta, 200)
         if disttype == 'standardNormal':
             return PlotUtil.sample_normal_cdf(alpha, beta, 200)
+        
+    @staticmethod
+    def get_wms_map(layers_config: list):
+        """
+        return map with wms layers
+        
+        layers_config: list of layer config
+        [{
+            'id': '12345fe',
+            'name': 'hello',
+            'style': 'hello-style'
+        },{}]
+        """
+        m = folium.Map(width=600, height=400)
+        url = 'http://incore2-geoserver.ncsa.illinois.edu:9999/geoserver/incore/wms' 
+        bbox_all = [9999, 9999, -9999, -9999]
+        for layer in layers_config:
+            wms_layer = folium.features.WmsTileLayer(url, name=layer['name'], fmt='image/png',transparent=True,
+                                                    layers='incore:'+layer['id'], styles=layer['style'])
+            wms_layer.add_to(m)
+            wms = WebMapService(url) 
+            bbox = wms[layer['id']].boundingBox 
+            # merge bbox 
+            if bbox[0] < bbox_all[0]: bbox_all[0] = bbox[0]
+            if bbox[1] < bbox_all[1]: bbox_all[1] = bbox[1]
+            if bbox[2] > bbox_all[2]: bbox_all[2] = bbox[2]
+            if bbox[3] > bbox_all[3]: bbox_all[3] = bbox[3]
+
+        folium.LayerControl().add_to(m)
+        bounds = ((bbox_all[1], bbox_all[0]), (bbox_all[3],bbox_all[2]))
+        m.fit_bounds(bounds)
+        return m
+    
+    @staticmethod
+    def get_geopandas_map(geodataframe):
+        """
+        return map with geo dataframe
+        """
+        m = folium.Map(width=600, height=400)
+        folium.GeoJson(geodataframe.to_json(), name='hospital').add_to(m)
+        ext = geodataframe.total_bounds
+        m.fit_bounds([[ext[1], ext[0]], [ext[3], ext[2]]])
+        return m
+        
 

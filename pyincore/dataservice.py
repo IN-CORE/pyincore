@@ -46,9 +46,9 @@ class DataService:
         fname = re.findall("filename=(.+)", disposition)
 
         # construct local directory and filename
-        if not os.path.exists('data'):
-            os.makedirs('data')
-        local_filename = os.path.join('data', fname[0].strip('\"'))
+        if not os.path.exists('cache_data'):
+            os.makedirs('cache_data')
+        local_filename = os.path.join('cache_data', fname[0].strip('\"'))
 
         # download
         with open(local_filename, 'wb') as f:
