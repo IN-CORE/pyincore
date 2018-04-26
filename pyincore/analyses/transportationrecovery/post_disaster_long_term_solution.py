@@ -1,7 +1,7 @@
 import copy
 import networkx as nx
 import random
-from pyincore.analyses.transportationrecovery.freeflow_traveltime import traveltime_freeflow as ft
+from pyincore.analyses.transportationrecovery import freeflow_traveltime as ft
 from pyincore.analyses.transportationrecovery.nsga2 import Solution
 from pyincore.analyses.transportationrecovery import WIPW as WIPW
 import pandas as pd

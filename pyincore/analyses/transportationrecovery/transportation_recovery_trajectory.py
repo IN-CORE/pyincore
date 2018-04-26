@@ -1,9 +1,8 @@
 from __future__ import division
 import pandas as pd
 import copy
-import timeit
 import random
-from pyincore.analyses.transportationrecovery.freeflow_traveltime import traveltime_freeflow as ft
+from pyincore.analyses.transportationrecovery import freeflow_traveltime as ft
 from pyincore.analyses.transportationrecovery.nsga2 import NSGAII
 from pyincore.analyses.transportationrecovery import WIPW as WIPW
 from pyincore.analyses.transportationrecovery.write_output import write_output
@@ -11,6 +10,7 @@ from pyincore.analyses.transportationrecovery.network_reconstruction import nw_r
 from pyincore.analyses.transportationrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
 import os
 import pathos.multiprocessing as mp
+from functools import partial
 from pyincore import InsecureIncoreClient
 
 class TransportationRecovery:
@@ -61,8 +61,8 @@ class TransportationRecovery:
                 self.adt_data[self.arc_df["linknwid"][i]] = max(self.bridge_df["ADT"])
 
 
-    def _calc_scenario(self, SS, pm, ini_num_population, population_size,
-                 num_generation, mutation_rate, crossover_rate):
+    def _calc_scenario(self, pm, ini_num_population, population_size,
+                 num_generation, mutation_rate, crossover_rate, SS):
 
         """
         calculate the recovery trajectory in each scenario
@@ -225,14 +225,18 @@ class TransportationRecovery:
     def calc_recovery(self, pm, ini_num_population=5, population_size=3,
                  num_generation=2, mutation_rate=0.1, crossover_rate=1.0):
         for SS in range(0, self.num_scenarios):
-            self._calc_scenario(SS, pm, ini_num_population, population_size,
-                 num_generation, mutation_rate, crossover_rate)
+            self._calc_scenario(pm, ini_num_population, population_size,
+                 num_generation, mutation_rate, crossover_rate, SS)
 
     def calc_recovery_multiprocessing(self, pm, ini_num_population=5,
                                       population_size=3,num_generation=2,
                                       mutation_rate=0.1, crossover_rate=1.0):
+
         p = mp.Pool(self.num_workders)
-        p.map(self._calc_scenario, range(0, self.num_scenarios))
+
+        func = partial(self._calc_scenario, pm, ini_num_population,
+              population_size,num_generation,mutation_rate,crossover_rate)
+        p.map(func, range(0, self.num_scenarios))
 
 
 if __name__ == "__main__":
@@ -240,8 +244,13 @@ if __name__ == "__main__":
     cred = None
     client = InsecureIncoreClient(
         "http://incore2-services.ncsa.illinois.edu:8888", 'cwang138')
-    transportation_recovery = TransportationRecovery(client, num_workers=64)
-    transportation_recovery.calc_recovery(pm=1, ini_num_population=5,
+    transportation_recovery = TransportationRecovery(client, num_workers=8)
+    # transportation_recovery.calc_recovery(pm=1, ini_num_population=5,
+    #                                       population_size=3,
+    #                                       num_generation=2,
+    #                                       mutation_rate=0.1,
+    #                                       crossover_rate=1.0)
+    transportation_recovery.calc_recovery_multiprocessing(pm=1, ini_num_population=5,
                                           population_size=3,
                                           num_generation=2,
                                           mutation_rate=0.1,
