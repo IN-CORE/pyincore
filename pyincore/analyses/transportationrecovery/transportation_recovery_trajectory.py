@@ -244,12 +244,16 @@ if __name__ == "__main__":
     cred = None
     client = InsecureIncoreClient(
         "http://incore2-services.ncsa.illinois.edu:8888", 'cwang138')
+
+    # TODO: how to pass client in? do I save the dataset on dataserver?
     transportation_recovery = TransportationRecovery(client, num_workers=8)
+
     # transportation_recovery.calc_recovery(pm=1, ini_num_population=5,
     #                                       population_size=3,
     #                                       num_generation=2,
     #                                       mutation_rate=0.1,
     #                                       crossover_rate=1.0)
+
     transportation_recovery.calc_recovery_multiprocessing(pm=1, ini_num_population=5,
                                           population_size=3,
                                           num_generation=2,
