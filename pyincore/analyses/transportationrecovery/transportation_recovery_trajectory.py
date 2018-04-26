@@ -15,7 +15,7 @@ from pyincore import InsecureIncoreClient
 
 class TransportationRecovery:
 
-    def __init__(self, client, num_workers):
+    def __init__(self, client, local_data_path, num_workers):
         '''
 
         :param client:
@@ -23,23 +23,24 @@ class TransportationRecovery:
         '''
 
         self.num_workders = num_workers
+        self.local_data_path = local_data_path
 
         # read the nodes in transportation
         self.node_df = pd.DataFrame(
-            pd.read_csv(os.path.join('Data', '_Nodes_.csv'), header='infer'))
+            pd.read_csv(os.path.join(local_data_path, '_Nodes_.csv'), header='infer'))
 
         # read the link in transportation
         self.arc_df = pd.DataFrame(
-            pd.read_csv(os.path.join('Data', '_Edges_.csv'), header='infer'))
+            pd.read_csv(os.path.join(local_data_path, '_Edges_.csv'), header='infer'))
 
         # read bridge information
         self.bridge_df = pd.DataFrame(
-            pd.read_csv(os.path.join('Data', 'Bridge_Characteristics.csv'),
+            pd.read_csv(os.path.join(local_data_path, 'Bridge_Characteristics.csv'),
                         header='infer'))
 
         # read damage status of bridge in 1000 scenarios
         self.damage_state = pd.DataFrame(
-            pd.read_csv(os.path.join('Data', 'Component_Damage_Statuses.csv'),
+            pd.read_csv(os.path.join(local_data_path, 'Component_Damage_Statuses.csv'),
                         header=None))
 
         seed = 333
@@ -129,7 +130,7 @@ class TransportationRecovery:
 
         p = []
         for i in range(ini_num_population):
-            p.append(PostDisasterLongTermSolution(unrepaired_bridge,
+            p.append(PostDisasterLongTermSolution(self.local_data_path, unrepaired_bridge,
                                                   bridge_damage_value, network,
                                                   pm, all_ipw, path_adt))
 
@@ -244,16 +245,18 @@ if __name__ == "__main__":
     cred = None
     client = InsecureIncoreClient(
         "http://incore2-services.ncsa.illinois.edu:8888", 'cwang138')
+    local_data_path = '/Users/cwang138/Documents/INCORE-2.0/Data'
 
     # TODO: how to pass client in? do I save the dataset on dataserver?
-    transportation_recovery = TransportationRecovery(client, num_workers=8)
+    transportation_recovery = TransportationRecovery(client, local_data_path, num_workers=8)
 
-    # transportation_recovery.calc_recovery(pm=1, ini_num_population=5,
-    #                                       population_size=3,
-    #                                       num_generation=2,
-    #                                       mutation_rate=0.1,
-    #                                       crossover_rate=1.0)
-
+    # non parallel
+    '''transportation_recovery.calc_recovery(pm=1, ini_num_population=5,
+                                          population_size=3,
+                                          num_generation=2,
+                                          mutation_rate=0.1,
+                                          crossover_rate=1.0)'''
+    # parallel
     transportation_recovery.calc_recovery_multiprocessing(pm=1, ini_num_population=5,
                                           population_size=3,
                                           num_generation=2,

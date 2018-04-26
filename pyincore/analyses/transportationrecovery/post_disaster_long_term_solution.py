@@ -12,18 +12,6 @@ class PostDisasterLongTermSolution(Solution):
     """
     Solution for the post disaster long term recovery function.
     """
-    # read the nodes in transportation
-    node_df = pd.DataFrame(
-        pd.read_csv(os.path.join('Data', '_Nodes_.csv'), header='infer'))
-
-    # read the link in transportation
-    arc_df = pd.DataFrame(
-        pd.read_csv(os.path.join('Data', '_Edges_.csv'), header='infer'))
-
-    # read bridge information
-    bridge_df = pd.DataFrame(
-        pd.read_csv(os.path.join('Data', 'Bridge_Characteristics.csv'),
-                    header='infer'))
 
     # for repair time of bridge assignment
     # slight damage state
@@ -35,11 +23,21 @@ class PostDisasterLongTermSolution(Solution):
     # complete damage state
     compRepair = 230
 
-    def __init__(self, candidates, bridge_damage_value, network, pm, all_ipw,
+    def __init__(self, local_data_path, candidates, bridge_damage_value, network, pm, all_ipw,
                  path_adt):
         """
         initialize the chromosomes
         """
+        # read the link in transportation
+        self.arc_df = pd.DataFrame(
+            pd.read_csv(os.path.join(local_data_path, '_Edges_.csv'),
+                        header='infer'))
+
+        # read bridge information
+        self.bridge_df = pd.DataFrame(
+            pd.read_csv(
+                os.path.join(local_data_path, 'Bridge_Characteristics.csv'),
+                header='infer'))
 
         Solution.__init__(self, 2)
         self.candidates = candidates
@@ -186,16 +184,16 @@ class PostDisasterLongTermSolution(Solution):
                             schedule[bridge] = [start[bridge], end[bridge]]
                             fg[bridge] = 1
 
-                for i in range(len(PostDisasterLongTermSolution.arc_df)):
-                    nod1 = PostDisasterLongTermSolution.arc_df['fromnode'][i]
-                    nod2 = PostDisasterLongTermSolution.arc_df['tonode'][i]
+                for i in range(len(self.arc_df)):
+                    nod1 = self.arc_df['fromnode'][i]
+                    nod2 = self.arc_df['tonode'][i]
                     self.network.edges[nod1, nod2]['Damage_Status'] = 0
 
                 for i, j in temp_bridge_damage_value.items():
-                    nod1 = PostDisasterLongTermSolution.arc_df['fromnode'][
-                        PostDisasterLongTermSolution.bridge_df['linkid'][i]]
-                    nod2 = PostDisasterLongTermSolution.arc_df['tonode'][
-                        PostDisasterLongTermSolution.bridge_df['linkid'][i]]
+                    nod1 = self.arc_df['fromnode'][
+                        self.bridge_df['linkid'][i]]
+                    nod2 = self.arc_df['tonode'][
+                        self.bridge_df['linkid'][i]]
                     self.network.edges[nod1, nod2]['Damage_Status'] = j
 
                 nx.get_edge_attributes(self.network, 'Damage_Status')
