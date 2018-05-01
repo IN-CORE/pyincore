@@ -27,7 +27,7 @@ import csv
 import concurrent.futures
 import multiprocessing
 import traceback
-
+from itertools import repeat
 
 class BuildingDamage:
     def __init__(self, client, hazard_service: str, dmg_ratios: str):
@@ -80,18 +80,23 @@ class BuildingDamage:
         # Get the fragility sets
         fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, inventory_set, "Non-Retrofit Fragility ID Code")
         # Determine which type of building damage analysis to run
-        if exec_type == 0:
+        if exec_type == 0 or 1:
             buildings = range(0, len(inventory_set))
-            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), num_threads)
-            output = self.building_damage_process_pool(parallelism, buildings, inventory_set, self.dmg_weights,
-                                                       self.dmg_weights_std_dev, fragility_sets, self.hazardsvc,
-                                                       self.hazard_dataset_id, self.hazard_type)
-        elif exec_type == 1:
-            buildings = range(0, len(inventory_set))
-            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), num_threads)
-            output = self.building_damage_thread_pool(parallelism, buildings, inventory_set, self.dmg_weights,
-                                                      self.dmg_weights_std_dev, fragility_sets, self.hazardsvc,
-                                                      self.hazard_dataset_id, self.hazard_type)
+            inventory_args = []
+            fragility_args = []
+            for id in buildings:
+                if inventory_set[id]["id"] in fragility_sets:
+                    inventory_args.append(inventory_set[id])
+                    fragility_args.append(fragility_sets[inventory_set[id]["id"]])
+
+            parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), num_threads)
+            parallel_method = concurrent.futures.ProcessPoolExecutor if exec_type == 0 else concurrent.futures.ThreadPoolExecutor
+            output = self.building_damage_concurrent_future(parallel_method, self.building_damage_analysis, parallelism,
+                                                                 inventory_args, repeat(self.dmg_weights),
+                                                                 repeat(self.dmg_weights_std_dev),
+                                                                 fragility_args, repeat(self.hazardsvc),
+                                                                 repeat(self.hazard_dataset_id),
+                                                                 repeat(self.hazard_type))
         elif exec_type == 2:
             buildings = range(0, len(inventory_set))
             zipped_arg = []
@@ -99,7 +104,7 @@ class BuildingDamage:
                 zipped_arg.append((inventory_set[id], self.dmg_weights, self.dmg_weights_std_dev,
                                    fragility_sets[inventory_set[id]["id"]],
                                    self.hazardsvc, self.hazard_dataset_id, self.hazard_type))
-            parallelism = AnalysisUtil.determine_parallelism_locally(len(inventory_set), num_threads)
+            parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), num_threads)
             output = self.building_damage_multiprocessing(self.building_damage_analysis, zipped_arg, parallelism)
         else:
             output = self.building_damage_sequential(inventory_set, self.dmg_weights, self.dmg_weights_std_dev,
@@ -134,29 +139,12 @@ class BuildingDamage:
 
         return output
 
-    def building_damage_thread_pool(self, parallelism, buildings, inventory_set, dmg_weights, dmg_weights_std_dev,
-                                    fragility_sets, hazardsvc, hazard_dataset_id, hazard_type):
+    def building_damage_concurrent_future(self, parallel_method, function_name, parallelism, *args):
         output = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=parallelism) as executor:
-            for id in buildings:
-                if building_set.inventory_set[id]["id"] in fragility_sets:
-                    future = executor.submit(self.building_damage_analysis, inventory_set[id], dmg_weights,
-                                             dmg_weights_std_dev,
-                                             fragility_sets[inventory_set[id]["id"]],
-                                             hazardsvc, hazard_dataset_id, hazard_type)
-                    output.append(future.result())
-        return output
+        with parallel_method(max_workers=parallelism) as executor:
+            for ret in executor.map(function_name, *args):
+                output.append(ret)
 
-    def building_damage_process_pool(self, parallelism, buildings, inventory_set, dmg_weights, dmg_weights_std_dev,
-                                     fragility_sets, hazardsvc, hazard_dataset_id, hazard_type):
-        output = []
-        with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
-            for id in buildings:
-                future = executor.submit(self.building_damage_analysis, inventory_set[id], dmg_weights,
-                                         dmg_weights_std_dev,
-                                         fragility_sets[inventory_set[id]["id"]],
-                                         hazardsvc, hazard_dataset_id, hazard_type)
-                output.append(future.result())
         return output
 
     def building_damage_multiprocessing(self, function_name, zipped_arg_list, parallelism):
