@@ -27,9 +27,18 @@ tests/.incorepw
 
 # incore download data
 tests/data/
+cache_data/
 
 # pytest cache
 .pytest_cache
 
 # jupyter notebook checkpoints folder
 .ipynb_checkpoints
+
+# jupyter notebook
+.user
+
+# possible output file
+*.csv
+
+
