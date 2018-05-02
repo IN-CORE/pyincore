@@ -21,7 +21,7 @@ import collections
 from pyincore import InsecureIncoreClient, InventoryDataset, DamageRatioDataset, HazardService, FragilityService
 from pyincore import GeoUtil, AnalysisUtil
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
-from docopt import docopt
+#from docopt import docopt
 import os
 import csv
 import concurrent.futures
@@ -220,40 +220,3 @@ class BuildingDamage:
             traceback.print_exc()
             print()
             raise e
-
-if __name__ == '__main__':
-    arguments = docopt(__doc__)
-
-    building_path = arguments['INVENTORY']
-    hazard_service = arguments['HAZARD']
-    mapping_id = arguments['MAPPING']
-    dmg_ratios = arguments['DMGRATIO']
-    base_dataset_id = arguments['BASEDATASETID']
-    exec_type = int(arguments['EXECUTION'])
-
-    # TODO determine the file name
-    shp_file = None
-
-    for file in os.listdir(building_path):
-        if file.endswith(".shp"):
-            shp_file = os.path.join(building_path, file)
-
-    building_shp = os.path.abspath(shp_file)
-    building_set = InventoryDataset(building_shp)
-
-    num_threads = 0
-    # Get number of cpus or threads, if specified
-    if arguments['PARALLELISM'] is not None:
-        num_threads = int(arguments['PARALLELISM'])
-
-    cred = None
-    try:
-        with open(".incorepw", 'r') as f:
-            cred = f.read().splitlines()
-
-        client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
-        bldg_dmg = BuildingDamage(client, hazard_service, dmg_ratios)
-        bldg_dmg.get_damage(building_set.inventory_set, mapping_id, exec_type, base_dataset_id, num_threads)
-
-    except Exception as e:
-        print(str(e))
