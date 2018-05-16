@@ -1,20 +1,8 @@
 #!/usr/bin/env python3
 
 """Building Damage Analysis
-
-Usage:
-    building_damage.py INVENTORY HAZARD MAPPING DMGRATIO BASEDATASETID EXECUTION
-    building_damage.py INVENTORY HAZARD MAPPING DMGRATIO BASEDATASETID EXECUTION PARALLELISM
-
-Options:
-    INVENTORY     inventory file in ESRI shapefile
-    HAZARD        type/id (e.g. earthquake/59f3315ec7d30d4d6741b0bb)
-    MAPPING       fragility mapping id
-    DMGRATIO      damage ratio file in CSV
-    BASEDATASETID parent of the output file, needed for result ingestion
-    EXECUTION     0 - process pool, 1 - thread pool, 2 - multiprocessing, other - sequential
-    PARALLELISM   Number of concurrent threads/processes to use
-
+Calculate the probability of building damage based on different hazard type
+by calling fragility service and hazard/tornado service
 
 """
 import collections
@@ -74,6 +62,13 @@ class BuildingDamage:
         return output
 
     def get_damage(self, inventory_set: dict, mapping_id: str, base_dataset_id: str = None, num_threads: int = 0):
+        '''
+        :param inventory_set: buildings from inventory file
+        :param mapping_id: fragility mapping id
+        :param base_dataset_id:
+        :param num_threads: number of concurrent threads/processes to use
+        :return: output_file_name: string of file name
+        '''
         output = []
 
         parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), num_threads)
@@ -85,7 +80,7 @@ class BuildingDamage:
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        output = self.building_damage_concurrent_future(self.building_damage_analysis_bulky_input,
+        output = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
                                                         parallelism,
                                                         inventory_args,
                                                         repeat(mapping_id),
@@ -113,6 +108,14 @@ class BuildingDamage:
         return output_file_name
 
     def building_damage_concurrent_future(self, function_name, parallelism, *args):
+        """
+        Utilizes concurrent.future module
+
+        :param function_name: the function to be parallelized
+        :param parallelism: number of max workers in parallelization
+        :param args: all the arguments in order to pass into parameter function_name
+        :return: output: list of OrderedDict
+        """
         output = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
             for ret in executor.map(function_name, *args):
@@ -120,8 +123,9 @@ class BuildingDamage:
 
         return output
 
-    def building_damage_analysis_bulky_input(self, buildings, mapping_id, dmg_weights, dmg_weights_std_dev,
+    def building_damage_analysis_bulk_input(self, buildings, mapping_id, dmg_weights, dmg_weights_std_dev,
                                              hazardsvc, hazard_dataset_id, hazard_type):
+
         result = []
         fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, buildings, "Non-Retrofit Fragility ID Code")
 
@@ -135,6 +139,17 @@ class BuildingDamage:
 
     def building_damage_analysis(self, building, dmg_weights, dmg_weights_std_dev, fragility_set, hazardsvc,
                                  hazard_dataset_id, hazard_type):
+        """
+
+        :param building: a single building from input inventory set
+        :param dmg_weights: weights to compute mean damage
+        :param dmg_weights_std_dev: standard deviation of dmg_weights
+        :param fragility_set: fragility set
+        :param hazardsvc: hazard service client
+        :param hazard_dataset_id: hazard dataset id
+        :param hazard_type: hazard type
+        :return: bldg_results: a single OrderedDict
+        """
         try:
             bldg_results = collections.OrderedDict()
 
