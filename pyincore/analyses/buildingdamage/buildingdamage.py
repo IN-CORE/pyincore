@@ -116,7 +116,7 @@ class BuildingDamage:
         output = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
             for ret in executor.map(function_name, *args):
-                output.append(ret)
+                output.extend(ret)
 
         return output
 
