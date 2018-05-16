@@ -125,6 +125,18 @@ class BuildingDamage:
 
     def building_damage_analysis_bulk_input(self, buildings, mapping_id, dmg_weights, dmg_weights_std_dev,
                                              hazardsvc, hazard_dataset_id, hazard_type):
+        """
+        Run analysis for multiple buildings
+
+        :param building: a single building from input inventory set
+        :param dmg_weights: weights to compute mean damage
+        :param dmg_weights_std_dev: standard deviation of dmg_weights
+        :param fragility_set: fragility set
+        :param hazardsvc: hazard service client
+        :param hazard_dataset_id: hazard dataset id
+        :param hazard_type: hazard type
+        :return: results: a list of OrderedDict
+        """
 
         result = []
         fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, buildings, "Non-Retrofit Fragility ID Code")
@@ -140,6 +152,7 @@ class BuildingDamage:
     def building_damage_analysis(self, building, dmg_weights, dmg_weights_std_dev, fragility_set, hazardsvc,
                                  hazard_dataset_id, hazard_type):
         """
+        Run analysis for single building
 
         :param building: a single building from input inventory set
         :param dmg_weights: weights to compute mean damage
