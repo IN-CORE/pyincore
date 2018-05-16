@@ -9,7 +9,7 @@ from pyincore.analyses.transportationrecovery.write_output import write_output
 from pyincore.analyses.transportationrecovery.network_reconstruction import nw_reconstruct
 from pyincore.analyses.transportationrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
 import os
-import pathos.multiprocessing as mp
+import concurrent.futures
 from functools import partial
 from pyincore import InsecureIncoreClient
 
@@ -232,12 +232,11 @@ class TransportationRecovery:
     def calc_recovery_multiprocessing(self, pm, ini_num_population=5,
                                       population_size=3,num_generation=2,
                                       mutation_rate=0.1, crossover_rate=1.0):
-
-        p = mp.Pool(self.num_workders)
-
         func = partial(self._calc_scenario, pm, ini_num_population,
-              population_size,num_generation,mutation_rate,crossover_rate)
-        p.map(func, range(0, self.num_scenarios))
+                       population_size, num_generation, mutation_rate,
+                       crossover_rate)
+        with concurrent.futures.ProcessPoolExecutor(max_workers=self.num_workders) as executor:
+            executor.map(func, range(0, self.num_scenarios))
 
 
 if __name__ == "__main__":
@@ -247,7 +246,6 @@ if __name__ == "__main__":
         "http://incore2-services.ncsa.illinois.edu:8888", 'cwang138')
     local_data_path = '/Users/cwang138/Documents/INCORE-2.0/Data'
 
-    # TODO: how to pass client in? do I save the dataset on dataserver?
     transportation_recovery = TransportationRecovery(client, local_data_path, num_workers=8)
 
     # non parallel
