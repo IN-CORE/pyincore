@@ -61,17 +61,17 @@ class BuildingDamage:
 
         return output
 
-    def get_damage(self, inventory_set: dict, mapping_id: str, base_dataset_id: str = None, num_threads: int = 0):
+    def get_damage(self, inventory_set: dict, mapping_id: str, base_dataset_id: str = None, user_defined_parallelism: int = 0):
         """
         :param inventory_set: buildings from inventory file
         :param mapping_id: fragility mapping id
         :param base_dataset_id:
-        :param num_threads: number of concurrent threads/processes to use
+        :param user_defined_parallelism: number of concurrent threads/processes to use
         :return: output_file_name: string of file name
         """
         output = []
 
-        parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), num_threads)
+        parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), user_defined_parallelism)
         avg_bulk_input_size = int(len(inventory_set) / parallelism)
         inventory_args = []
         count = 0
