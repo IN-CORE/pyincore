@@ -66,7 +66,7 @@ class BuildingDamage:
         :param inventory_set: buildings from inventory file
         :param mapping_id: fragility mapping id
         :param base_dataset_id:
-        :param user_defined_parallelism: number of concurrent threads/processes to use
+        :param user_defined_parallelism: number of concurrent processes to use
         :return: output_file_name: string of file name
         """
         output = []
