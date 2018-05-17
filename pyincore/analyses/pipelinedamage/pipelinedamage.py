@@ -2,11 +2,14 @@
 
 """
 
-from pyincore import HazardService, FragilityService, AnalysisUtil
+from pyincore import HazardService, FragilityService, AnalysisUtil, GeoUtil
+from pyincore.analyses.pipelinedamage.pipelineutil import PipelineUtil
 import csv
 import concurrent.futures
 from itertools import repeat
 import collections
+import random
+import math
 
 
 class PipelineDamage:
@@ -26,12 +29,13 @@ class PipelineDamage:
 
         return output
 
-    def get_damage(self, inventory_set: dict, mapping_id: str, hazard_input: str, base_dataset_id: str=None, num_threads: int=0):
+    def get_damage(self, inventory_set: dict, mapping_id: str, hazard_input: str, use_liquefaction: bool, base_dataset_id: str=None, num_threads: int=0):
         """Get pipeline damage
 
         :param inventory_set:
         :param mapping_id:
         :param hazard_input:
+        :param use_liquefaction:
         :param base_dataset_id:
         :param num_threads:
         :return:
@@ -44,14 +48,8 @@ class PipelineDamage:
         hazard_type = hazard_input_split[0]
         hazard_dataset_id = hazard_input_split[1]
 
-        pipes = range(0, len(inventory_set))
-
-        # for id in pipes:
-        #     print(inventory_set[id])
-
         parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), num_threads)
 
-        print(parallelism)
         pipes_per_process = int(len(inventory_set) / parallelism)
         inventory_args = []
         count = 0
@@ -63,7 +61,8 @@ class PipelineDamage:
 
         output = self.pipeline_damage_concurrent_future(self.pipeline_damage_analysis_bulk_input, parallelism,
                                                         inventory_args, repeat(mapping_id), repeat(self.hazardsvc),
-                                                        repeat(hazard_dataset_id), repeat(hazard_type))
+                                                        repeat(hazard_dataset_id), repeat(hazard_type),
+                                                        repeat(use_liquefaction))
 
         output_file_name = "dmg-results.csv"
 
@@ -90,25 +89,35 @@ class PipelineDamage:
 
         return output
 
-    def pipeline_damage_analysis_bulk_input(self, pipelines, mapping_id, hazardsvc, hazard_dataset_id, hazard_type):
+    def pipeline_damage_analysis_bulk_input(self, pipelines, mapping_id, hazardsvc, hazard_dataset_id, hazard_type,
+                                            use_liquefaction):
         result = []
         fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, pipelines, "Non-Retrofit Fragility ID Code")
 
+        # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
+        if use_liquefaction:
+            fragility_sets_liq = self.fragilitysvc.map_fragilities(mapping_id, pipelines, "Liquefaction-Fragility-Key")
         for pipeline in pipelines:
 
             if pipeline["id"] in fragility_sets.keys():
-                result.append(self.pipeline_damage_analysis(pipeline, fragility_sets[pipeline["id"]], hazardsvc,
-                                                            hazard_dataset_id, hazard_type))
+                liq_fragility_set = None
+                # Check if mapping contains liquefaction fragility
+                if use_liquefaction and pipeline["id"] in fragility_sets_liq:
+                    liq_fragility_set = fragility_sets_liq[pipeline["id"]]
 
+                result.append(self.pipeline_damage_analysis(pipeline, fragility_sets[pipeline["id"]], liq_fragility_set,
+                                                            hazardsvc, hazard_dataset_id, hazard_type,
+                                                            use_liquefaction))
         return result
 
-    def pipeline_damage_analysis(self, pipeline, fragility_set, hazardsvc, hazard_dataset_id, hazard_type):
+    def pipeline_damage_analysis(self, pipeline, fragility_set, fragility_set_liq, hazardsvc, hazard_dataset_id,
+                                 hazard_type, use_liquefaction):
 
+        # TODO original pipeline damage does not store the pgd value, this should be added
         pipeline_results = collections.OrderedDict()
-        pipeclass = None
         pgv_repairs = 0.0
         pgd_repairs = 0.0
-        total_repairs = 0.0
+        total_repair_rate = 0.0
         break_rate = 0.0
         leak_rate = 0.0
         failure_probability = 0.0
@@ -118,12 +127,62 @@ class PipelineDamage:
         demand_type = None
         hazard_val = 0.0
 
+        if fragility_set is not None:
+            demand_type = fragility_set['demandType'].lower()
+            demand_units = fragility_set['demandUnits']
+            location = GeoUtil.get_location(pipeline)
+
+            # Get PGV hazard from hazardsvc
+            # TODO - need to modify the earthquake service to convert hazard types if direct match not found
+            # hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, demand_type, demand_units, location.y,
+            #                                                    location.x)
+            hazard_val = random.uniform(0.0, 12)
+            diameter = PipelineUtil.get_pipe_diameter(pipeline)
+            fragility_vars = {'x': hazard_val, 'y': diameter}
+            pgv_repairs = AnalysisUtil.compute_custom_limit_state_probability(fragility_set, fragility_vars)
+            fragility_curve = fragility_set['fragilityCurves'][0]
+
+            # Convert PGV repairs to SI units
+            pgv_repairs = PipelineUtil.convert_result_unit(fragility_curve['description'], pgv_repairs)
+
+            pgd_hazard = 0.0
+            liquefaction_prob = 0.0
+            if fragility_set_liq is not None:
+                liq_fragility_curve = fragility_set_liq['fragilityCurves'][0]
+                # Get PGD hazard value from hazardsvc
+                # TODO add liquefaction endpoint to hazard service to return permanent ground deformation and
+                # probability of liquefaction and remove the random() call
+                pgd_hazard = random.uniform(0.0, 12)
+                liquefaction_prob = random.uniform(0.0, 1.0)
+
+                liq_fragility_vars = {'x': pgd_hazard, 'y' : liquefaction_prob}
+                pgd_repairs = AnalysisUtil.compute_custom_limit_state_probability(fragility_set_liq,
+                                                                                  liq_fragility_vars)
+                pgd_repairs = PipelineUtil.convert_result_unit(liq_fragility_curve['description'], pgd_repairs)
+
+            total_repair_rate = pgd_repairs + pgv_repairs
+            break_rate = 0.2 * pgv_repairs + 0.8 * pgd_repairs
+            leak_rate = 0.8 * pgv_repairs + 0.2 * pgd_repairs
+
+            length = PipelineUtil.get_pipe_length(pipeline)
+
+            failure_probability = 1 - math.exp(-1.0 * break_rate * length)
+            num_pgd_repairs = pgd_repairs * length
+            num_pgv_repairs = pgv_repairs * length
+            num_repairs = num_pgd_repairs + num_pgv_repairs
+
         # pipeline_results['guid'] = "test"
         pipeline_results['guid'] = pipeline['properties']['guid']
-        pipeline_results['pipeclass'] = pipeclass
+        if 'pipetype' in pipeline['properties']:
+            pipeline_results['pipeclass'] = pipeline['properties']['pipetype']
+        elif 'pipelinesc' in pipeline['properties']:
+            pipeline_results['pipeclass'] = pipeline['properties']['pipelinesc']
+        else:
+            pipeline_results['pipeclass'] = ""
+
         pipeline_results['pgvrepairs'] = pgv_repairs
         pipeline_results['pgdrepairs'] = pgd_repairs
-        pipeline_results['repairspkm'] = total_repairs
+        pipeline_results['repairspkm'] = total_repair_rate
         pipeline_results['breakrate'] = break_rate
         pipeline_results['leakrate'] = leak_rate
         pipeline_results['failprob'] = failure_probability
