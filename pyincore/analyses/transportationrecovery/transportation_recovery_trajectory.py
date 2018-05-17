@@ -3,11 +3,11 @@ import pandas as pd
 import copy
 import random
 from pyincore.analyses.transportationrecovery import freeflow_traveltime as ft
-from pyincore.analyses.transportationrecovery import NSGAII
+from pyincore.analyses.transportationrecovery.nsga2 import NSGAII
 from pyincore.analyses.transportationrecovery import WIPW as WIPW
-from pyincore.analyses.transportationrecovery import write_output
-from pyincore.analyses.transportationrecovery import nw_reconstruct
-from pyincore.analyses.transportationrecovery import PostDisasterLongTermSolution
+from pyincore.analyses.transportationrecovery.write_output import write_output
+from pyincore.analyses.transportationrecovery.network_reconstruction import nw_reconstruct
+from pyincore.analyses.transportationrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
 import os
 import concurrent.futures
 from functools import partial
