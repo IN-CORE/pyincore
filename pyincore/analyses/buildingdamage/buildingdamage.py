@@ -181,12 +181,10 @@ class BuildingDamage:
                 # Update this once hazard service supports tornado
                 if hazard_type == 'earthquake':
                     hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
-                                                                       demand_units, location.y,
-                                                                       location.x)
+                                                                       demand_units, location.y, location.x)
                 elif hazard_type == 'tornado':
                     hazard_val = hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
-                                                                    location.x,
-                                                                    0)
+                                                                    location.x, 0)
 
                 dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, hazard_val)
                 demand_type = fragility_set['demandType']
