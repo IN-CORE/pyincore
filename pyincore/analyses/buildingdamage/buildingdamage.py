@@ -62,13 +62,13 @@ class BuildingDamage:
         return output
 
     def get_damage(self, inventory_set: dict, mapping_id: str, base_dataset_id: str = None, num_threads: int = 0):
-        '''
+        """
         :param inventory_set: buildings from inventory file
         :param mapping_id: fragility mapping id
         :param base_dataset_id:
         :param num_threads: number of concurrent threads/processes to use
         :return: output_file_name: string of file name
-        '''
+        """
         output = []
 
         parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), num_threads)
@@ -128,10 +128,10 @@ class BuildingDamage:
         """
         Run analysis for multiple buildings
 
-        :param building: a single building from input inventory set
+        :param building: multiple buildings from input inventory set
+        :param mapping_id: fragility mapping id
         :param dmg_weights: weights to compute mean damage
         :param dmg_weights_std_dev: standard deviation of dmg_weights
-        :param fragility_set: fragility set
         :param hazardsvc: hazard service client
         :param hazard_dataset_id: hazard dataset id
         :param hazard_type: hazard type
