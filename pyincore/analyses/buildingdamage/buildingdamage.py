@@ -1,33 +1,20 @@
 #!/usr/bin/env python3
 
 """Building Damage Analysis
-
-Usage:
-    building_damage.py INVENTORY HAZARD MAPPING DMGRATIO BASEDATASETID EXECUTION
-    building_damage.py INVENTORY HAZARD MAPPING DMGRATIO BASEDATASETID EXECUTION PARALLELISM
-
-Options:
-    INVENTORY     inventory file in ESRI shapefile
-    HAZARD        type/id (e.g. earthquake/59f3315ec7d30d4d6741b0bb)
-    MAPPING       fragility mapping id
-    DMGRATIO      damage ratio file in CSV
-    BASEDATASETID parent of the output file, needed for result ingestion
-    EXECUTION     0 - process pool, 1 - thread pool, 2 - multiprocessing, other - sequential
-    PARALLELISM   Number of concurrent threads/processes to use
-
+Calculate the probability of building damage based on different hazard type
+by calling fragility service and hazard/tornado service
 
 """
 import collections
-from pyincore import InsecureIncoreClient, InventoryDataset, DamageRatioDataset, HazardService, FragilityService
+from pyincore import DamageRatioDataset, HazardService, FragilityService
 from pyincore import GeoUtil, AnalysisUtil
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
-#from docopt import docopt
 import os
 import csv
 import concurrent.futures
-import multiprocessing
 import traceback
 from itertools import repeat
+
 
 class BuildingDamage:
     def __init__(self, client, hazard_service: str, dmg_ratios: str):
@@ -74,42 +61,34 @@ class BuildingDamage:
 
         return output
 
-    def get_damage(self, inventory_set: dict, mapping_id: str, exec_type: int, base_dataset_id: str=None, num_threads: int=0):
+    def get_damage(self, inventory_set: dict, mapping_id: str, base_dataset_id: str = None, user_defined_parallelism: int = 0):
+        """
+        :param inventory_set: buildings from inventory file
+        :param mapping_id: fragility mapping id
+        :param base_dataset_id:
+        :param user_defined_parallelism: number of concurrent processes to use
+        :return: output_file_name: string of file name
+        """
         output = []
 
-        # Get the fragility sets
-        fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, inventory_set, "Non-Retrofit Fragility ID Code")
-        # Determine which type of building damage analysis to run
-        if exec_type == 0 or 1:
-            buildings = range(0, len(inventory_set))
-            inventory_args = []
-            fragility_args = []
-            for id in buildings:
-                if inventory_set[id]["id"] in fragility_sets:
-                    inventory_args.append(inventory_set[id])
-                    fragility_args.append(fragility_sets[inventory_set[id]["id"]])
+        parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), user_defined_parallelism)
+        avg_bulk_input_size = int(len(inventory_set) / parallelism)
+        inventory_args = []
+        count = 0
+        inventory_list = list(inventory_set)
+        while count < len(inventory_list):
+            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
+            count += avg_bulk_input_size
 
-            parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), num_threads)
-            parallel_method = concurrent.futures.ProcessPoolExecutor if exec_type == 0 else concurrent.futures.ThreadPoolExecutor
-            output = self.building_damage_concurrent_future(parallel_method, self.building_damage_analysis, parallelism,
-                                                                 inventory_args, repeat(self.dmg_weights),
-                                                                 repeat(self.dmg_weights_std_dev),
-                                                                 fragility_args, repeat(self.hazardsvc),
-                                                                 repeat(self.hazard_dataset_id),
-                                                                 repeat(self.hazard_type))
-        elif exec_type == 2:
-            buildings = range(0, len(inventory_set))
-            zipped_arg = []
-            for id in buildings:
-                zipped_arg.append((inventory_set[id], self.dmg_weights, self.dmg_weights_std_dev,
-                                   fragility_sets[inventory_set[id]["id"]],
-                                   self.hazardsvc, self.hazard_dataset_id, self.hazard_type))
-            parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), num_threads)
-            output = self.building_damage_multiprocessing(self.building_damage_analysis, zipped_arg, parallelism)
-        else:
-            output = self.building_damage_sequential(inventory_set, self.dmg_weights, self.dmg_weights_std_dev,
-                                                     fragility_sets, self.hazardsvc, self.hazard_dataset_id,
-                                                     self.hazard_type)
+        output = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
+                                                        parallelism,
+                                                        inventory_args,
+                                                        repeat(mapping_id),
+                                                        repeat(self.dmg_weights),
+                                                        repeat(self.dmg_weights_std_dev),
+                                                        repeat(self.hazardsvc),
+                                                        repeat(self.hazard_dataset_id),
+                                                        repeat(self.hazard_type))
 
         output_file_name = "dmg-results.csv"
 
@@ -128,36 +107,63 @@ class BuildingDamage:
 
         return output_file_name
 
-    def building_damage_sequential(self, inventory_set, dmg_weights, dmg_weights_std_dev, fragility_sets, hazardsvc,
-                                   hazard_dataset_id, hazard_type):
-        output = []
-        for building in inventory_set:
-            bldg_output = self.building_damage_analysis(building, dmg_weights, dmg_weights_std_dev,
-                                                        fragility_sets[building["id"]], hazardsvc, hazard_dataset_id,
-                                                        hazard_type)
-            output.append(bldg_output)
+    def building_damage_concurrent_future(self, function_name, parallelism, *args):
+        """
+        Utilizes concurrent.future module
 
-        return output
-
-    def building_damage_concurrent_future(self, parallel_method, function_name, parallelism, *args):
+        :param function_name: the function to be parallelized
+        :param parallelism: number of max workers in parallelization
+        :param args: all the arguments in order to pass into parameter function_name
+        :return: output: list of OrderedDict
+        """
         output = []
-        with parallel_method(max_workers=parallelism) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
             for ret in executor.map(function_name, *args):
-                output.append(ret)
+                output.extend(ret)
 
         return output
 
-    def building_damage_multiprocessing(self, function_name, zipped_arg_list, parallelism):
-        p = multiprocessing.Pool(processes=parallelism)
-        output = p.starmap(function_name, zipped_arg_list)
-        p.close()
-        p.join()
-        return output
+    def building_damage_analysis_bulk_input(self, buildings, mapping_id, dmg_weights, dmg_weights_std_dev,
+                                             hazardsvc, hazard_dataset_id, hazard_type):
+        """
+        Run analysis for multiple buildings
+
+        :param building: multiple buildings from input inventory set
+        :param mapping_id: fragility mapping id
+        :param dmg_weights: weights to compute mean damage
+        :param dmg_weights_std_dev: standard deviation of dmg_weights
+        :param hazardsvc: hazard service client
+        :param hazard_dataset_id: hazard dataset id
+        :param hazard_type: hazard type
+        :return: results: a list of OrderedDict
+        """
+
+        result = []
+        fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, buildings, "Non-Retrofit Fragility ID Code")
+
+        for building in buildings:
+            if building["id"] in fragility_sets.keys():
+                result.append(self.building_damage_analysis(building, dmg_weights, dmg_weights_std_dev,
+                                                            fragility_sets[building["id"]], hazardsvc,
+                                                            hazard_dataset_id, hazard_type))
+
+        return result
 
     def building_damage_analysis(self, building, dmg_weights, dmg_weights_std_dev, fragility_set, hazardsvc,
                                  hazard_dataset_id, hazard_type):
+        """
+        Run analysis for single building
+
+        :param building: a single building from input inventory set
+        :param dmg_weights: weights to compute mean damage
+        :param dmg_weights_std_dev: standard deviation of dmg_weights
+        :param fragility_set: fragility set
+        :param hazardsvc: hazard service client
+        :param hazard_dataset_id: hazard dataset id
+        :param hazard_type: hazard type
+        :return: bldg_results: a single OrderedDict
+        """
         try:
-            # print(building)
             bldg_results = collections.OrderedDict()
 
             hazard_val = 0.0
@@ -174,11 +180,11 @@ class BuildingDamage:
 
                 # Update this once hazard service supports tornado
                 if hazard_type == 'earthquake':
-                    hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type, demand_units, location.y,
-                                                            location.x)
+                    hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
+                                                                       demand_units, location.y, location.x)
                 elif hazard_type == 'tornado':
-                    hazard_val = hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y, location.x,
-                                                                    0)
+                    hazard_val = hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
+                                                                    location.x, 0)
 
                 dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, hazard_val)
                 demand_type = fragility_set['demandType']
