@@ -2,7 +2,7 @@ import collections
 from typing import List, Dict
 import math
 import os
-from scipy.stats import norm
+from scipy.stats import norm, lognorm
 from pyincore import DataService
 
 
@@ -178,3 +178,26 @@ class AnalysisUtil:
         datasvc.add_files_to_dataset(result_dataset_id, result_files)
 
         return result_dataset_id
+
+    @staticmethod
+    def compute_cdf(curve, val, std_dev):
+        if val == 0:
+            return 0
+
+        median = curve['median']
+        beta = curve['beta']
+
+        if std_dev != 0:
+            beta = math.sqrt(math.pow(beta, 2) + math.pow(std_dev, 2))
+
+        if curve['curveType'] == 'Normal':
+            mean = 0.0
+            variance = 1.0
+            x = math.log(val / median) / beta
+            return norm.cdf(x, mean, variance)
+            # return 0.5 * (1 + sp.erf((x - mean) / (variance * math.sqrt(2))))
+        elif curve['curveType'] == 'LogNormal':
+            x = (math.log(val) - median) / (math.sqrt(2) * beta)
+            return lognorm.cdf(x)
+            # return 0.5*(1+sp.erf(x))
+

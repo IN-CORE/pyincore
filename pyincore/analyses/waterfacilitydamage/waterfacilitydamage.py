@@ -4,12 +4,11 @@
 Water Facility Damage
 
 Usage:
-    waterfacilitydamage.py INVENTORY HAZARD FRAGILITY MAPPING
+    waterfacilitydamage.py INVENTORY HAZARD MAPPING UNCERTAINITY LIQUEFACTION
 
 Options:
     INVENTORY   Inventory file
     HAZARD      type/id (e.g. earthquake/59f3315ec7d30d4d6741b0bb)
-    FRAGILITY   fragility
     MAPPING     fragility mapping
     UNCERTAINITY Include hazard uncertainity
     LIQUEFACTION Include Liquefaction in damage calculations
@@ -39,12 +38,11 @@ class WaterFacilityDamage:
         self.hazardsvc = HazardService(client)
         self.fragilitysvc = FragilityService(client)
 
-    def get_damage(self, inventory_set: dict, fragility: str,
-                   fragility_mapping_id: str, uncertainity:bool=False,
+    def get_damage(self, inventory_set: dict, fragility_mapping_id: str, uncertainity:bool=False,
                    liquefaction:bool=False):
         # Get the fragility sets
         if liquefaction:
-            # None available in database now for W-Facility PGD
+            #TODO: No mappings available in database now to test W-Facility PGD.
             fragility_sets = self.fragilitysvc.map_fragilities(
                 fragility_mapping_id, inventory_set, "pgd")
         else:
@@ -64,11 +62,7 @@ class WaterFacilityDamage:
                                   hazard_dataset_id, hazardsvc, fragility_set,
                                   uncertainity, liquefaction):
         try:
-            fclty_results = collections.OrderedDict()
-            pdg = 0
             std_dev = 0
-
-            dmg_probability = collections.OrderedDict()
 
             hazard_demand_type = "pga"  # get by hazard type and 4 fragility set
             demand_units = "g"  # Same as above
@@ -80,19 +74,32 @@ class WaterFacilityDamage:
                 hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type, demand_units,
                                                                    location.y, location.x)
 
-            #limit_states = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
-            #dmg_intervals = ['none', 'slight-mod', 'mod-extens', 'ext-comple', 'complete']
-            if liquefaction:
-                pdg = random.randint(120, 140) #implement API to get pgd
-
+            #TODO: This will enventually be fetched from API.
+            # Pyincore wrapper needs to be developed too
             if uncertainity:
                 std_dev = random.random()
 
-            fragility_yvalue = 1.0
+            fragility_yvalue = 1.0 # is this relevant? copied from v1
+
+            #If liq.calculate pgd limit states and adjust limit states
 
             limit_states = LifelineUtil.compute_limit_state_probability(
                 fragility_set['fragilityCurves'], hazard_val, fragility_yvalue,
                 std_dev)
+
+            if liquefaction:
+                # TODO: Develop Pyincore wrapper for pgd calculation and use it
+                # INCORE-415 has the API call.
+                pgd = random.randint(120, 140)
+
+                pgd_limit_states = LifelineUtil.compute_limit_state_probability(
+                    fragility_set['fragilityCurves'], pgd, fragility_yvalue,
+                    std_dev)
+
+                limit_states = LifelineUtil.adjustLimitStatesForPGD(
+                                            limit_states, pgd_limit_states)
+
+
             dmg_intervals = LifelineUtil.compute_damage_intervals(limit_states)
 
             result = collections.OrderedDict()
@@ -102,8 +109,6 @@ class WaterFacilityDamage:
             for k,v in result.items():
                 result[k] = round(v,2)
 
-            #result = limit_states.copy()
-            #result.update(dmg_intervals)
 
             metadata = collections.OrderedDict()
             metadata['guid'] = facility['properties']['guid']
@@ -123,10 +128,8 @@ class WaterFacilityDamage:
         with open(out_file, 'w') as csv_file:
             writer = csv.DictWriter(csv_file, dialect="unix",
                 fieldnames=['guid', 'hazardtype','hazardval',
-                            'ls_slight', 'ls_moderate', 'ls_extensive',
-                            'ls_complete',
-                            'none', 'slight-mod', 'mod-extens', 'ext-comple',
-                            'complete'
+                            'ls_slight', 'ls_moderate', 'ls_extensive', 'ls_complete',
+                            'none', 'slight-mod', 'mod-extens', 'ext-comple', 'complete'
                             ])
 
             writer.writeheader()
@@ -141,10 +144,10 @@ if __name__ == '__main__':
 
         facility_path = arguments['INVENTORY']
         hazard = arguments['HAZARD']
-        fragility = arguments['FRAGILITY']
         mapping_id = arguments['MAPPING']
-        uncertainity = arguments['UNCERTAINITY']
-        liquefaction = arguments['LIQUEFACTION']
+        uncertainity = int(arguments['UNCERTAINITY'])
+        liquefaction = int(arguments['LIQUEFACTION'])
+
 
         # TODO determine the file name
         shp_file = None
@@ -160,10 +163,10 @@ if __name__ == '__main__':
             with open(".incorepw", 'r') as f:
                 cred = f.read().splitlines()
 
-            client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
+            client = InsecureIncoreClient("http://localhost:8080", cred[0])
             fcty_dmg = WaterFacilityDamage(client, hazard)
             dmg_output = fcty_dmg.get_damage(facility_set.inventory_set,
-                fragility, mapping_id, bool(uncertainity), bool(liquefaction))
+                            mapping_id, bool(uncertainity), bool(liquefaction))
             fcty_dmg.write_output('facility-dmg.csv', dmg_output)
 
         except Exception as e:
