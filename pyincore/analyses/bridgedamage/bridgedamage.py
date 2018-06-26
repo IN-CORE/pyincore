@@ -1,19 +1,5 @@
 #!/usr/bin/env python3
 
-"""Building Damage Analysis
-
-Usage:
-    building_damage.py INVENTORY HAZARD FRAGSRV DMGRATIO BASEDATASETID
-
-Options:
-    INVENTORY     inventory file in ESRI shapefile
-    HAZARD        hazard service
-    FRAGSRV       Fragility service
-    DMGRATIO      damage ratio file in CSV
-    BASEDATASETID parent of the output file, needed for result ingestion
-
-
-"""
 from pyincore import InsecureIncoreClient, InventoryDataset, DamageRatioDataset, HazardService, FragilityService
 from pyincore import GeoUtil, AnalysisUtil
 import os
