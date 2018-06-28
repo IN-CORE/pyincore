@@ -14,8 +14,6 @@ import math
 
 class PipelineDamage:
     def __init__(self, client):
-        print("initialize pipeline damage")
-
         # Create Hazard and Fragility service
         self.hazardsvc = HazardService(client)
         self.fragilitysvc = FragilityService(client)
@@ -134,9 +132,8 @@ class PipelineDamage:
 
             # Get PGV hazard from hazardsvc
             # TODO - need to modify the earthquake service to convert hazard types if direct match not found
-            # hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, demand_type, demand_units, location.y,
-            #                                                    location.x)
-            hazard_val = random.uniform(0.0, 12)
+            hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, demand_type, demand_units,
+                                                                 location.y, location.x)
             diameter = PipelineUtil.get_pipe_diameter(pipeline)
             fragility_vars = {'x': hazard_val, 'y': diameter}
             pgv_repairs = AnalysisUtil.compute_custom_limit_state_probability(fragility_set, fragility_vars)
@@ -147,7 +144,7 @@ class PipelineDamage:
 
             pgd_hazard = 0.0
             liquefaction_prob = 0.0
-            if fragility_set_liq is not None:
+            if fragility_set_liq is not None and use_liquefaction:
                 liq_fragility_curve = fragility_set_liq['fragilityCurves'][0]
                 # Get PGD hazard value from hazardsvc
                 # TODO add liquefaction endpoint to hazard service to return permanent ground deformation and
