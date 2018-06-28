@@ -13,7 +13,7 @@ def hazardsvc():
     except EnvironmentError:
         return None
     # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
+    client = InsecureIncoreClient("http://localhost:8080", cred[0])
 
     return HazardService(client)
 
@@ -39,6 +39,13 @@ def test_get_earthquake_hazard_values(hazardsvc):
                                                    [35.07899, -90.0178, 35.17899, -90.0178])
     assert hvals[0]['hazardValue'] == 0.5322993805448739 and hvals[1]['hazardValue'] == 0.5926201634382787
 
+#TODO: This geologydataset is only available on gowtham's local. Test with a real dataset once nebula is back
+def test_get_eq_liquefaction_values(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    liq_vals = hazardsvc.get_eq_liquefaction_values("59f3315ec7d30d4d6741b0bb","5ad8c1ebfc5b22c8cb5c173c", "in",
+                                [35.14244, -89.99990, 35.26215, -89.76884])
+    assert liq_vals[0]['pgd'] == 28.837687031317795 and liq_vals[1]['pgd'] == 50.25163937581824
 
 def test_create_earthquake(hazardsvc):
     """

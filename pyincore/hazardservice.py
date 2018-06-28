@@ -56,6 +56,14 @@ class HazardService:
 
         return x, y, hazard_val
 
+    def get_eq_liquefaction_values(self, hazard_id: str, geologyDataetId: str, demand_units: str, points: List):
+        url = urllib.parse.urljoin(self.base_earthquake_url,  hazard_id+"/liquefaction/values")
+        payload = {'demandUnits': demand_units, 'geologyDataset': geologyDataetId, 'point': points}
+        r = requests.get(url, headers=self.client.headers, params=payload)
+        response = r.json()
+        return response
+
+
     def create_earthquake(self, config):
         url = self.base_earthquake_url
 
@@ -92,5 +100,7 @@ class HazardService:
         r = requests.post(url, data=scenario, headers=new_headers)
         response = r.json()
         return response
+
+
 
 
