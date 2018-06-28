@@ -18,7 +18,6 @@ import collections
 from pyincore import InsecureIncoreClient, InventoryDataset, HazardService,\
     FragilityService
 from pyincore import GeoUtil, AnalysisUtil
-from pyincore.analyses.waterfacilitydamage.LifelineUtil import LifelineUtil
 from docopt import docopt
 import os
 import csv
@@ -83,7 +82,7 @@ class WaterFacilityDamage:
 
             #If liq.calculate pgd limit states and adjust limit states
 
-            limit_states = LifelineUtil.compute_limit_state_probability(
+            limit_states = AnalysisUtil.compute_limit_state_probability(
                 fragility_set['fragilityCurves'], hazard_val, fragility_yvalue,
                 std_dev)
 
@@ -92,15 +91,15 @@ class WaterFacilityDamage:
                 # INCORE-415 has the API call.
                 pgd = random.randint(120, 140)
 
-                pgd_limit_states = LifelineUtil.compute_limit_state_probability(
+                pgd_limit_states = AnalysisUtil.compute_limit_state_probability(
                     fragility_set['fragilityCurves'], pgd, fragility_yvalue,
                     std_dev)
 
-                limit_states = LifelineUtil.adjustLimitStatesForPGD(
+                limit_states = AnalysisUtil.adjustLimitStatesForPGD(
                                             limit_states, pgd_limit_states)
 
 
-            dmg_intervals = LifelineUtil.compute_damage_intervals(limit_states)
+            dmg_intervals = AnalysisUtil.compute_damage_intervals(limit_states)
 
             result = collections.OrderedDict()
             result = {**limit_states, **dmg_intervals} # py 3.5+
@@ -163,7 +162,7 @@ if __name__ == '__main__':
             with open(".incorepw", 'r') as f:
                 cred = f.read().splitlines()
 
-            client = InsecureIncoreClient("http://localhost:8080", cred[0])
+            client = InsecureIncoreClient("http://incore2-services:8888", cred[0])
             fcty_dmg = WaterFacilityDamage(client, hazard)
             dmg_output = fcty_dmg.get_damage(facility_set.inventory_set,
                             mapping_id, bool(uncertainity), bool(liquefaction))
