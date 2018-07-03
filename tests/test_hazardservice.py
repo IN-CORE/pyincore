@@ -12,8 +12,9 @@ def hazardsvc():
             cred = f.read().splitlines()
     except EnvironmentError:
         return None
-    # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-    client = InsecureIncoreClient("http://localhost:8080", cred[0])
+    #client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
+    client =   InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888",
+            cred[0])
 
     return HazardService(client)
 
