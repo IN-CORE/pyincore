@@ -20,7 +20,8 @@ BRIDGE_FRAGILITY_KEYS = {
 
 
 class BridgeDamage:
-    def __init__(self, client, bridge_file_path: str, dmg_ratio_dir: str, hazard_service:str, use_liquefaction):
+    def __init__(self, client, bridge_file_path: str, dmg_ratio_dir: str, hazard_service:str, use_liquefaction: bool, use_hazard_uncertainty: bool):
+
         shp_file = None
         for file in os.listdir(bridge_file_path):
             if file.endswith(".shp"):
@@ -62,7 +63,7 @@ class BridgeDamage:
             float(self.dmg_ratios[3]['MeanDR']),
             float(self.dmg_ratios[4]['MeanDR']),
             float(self.dmg_ratios[5]['MeanDR'])]
-        self.use_hazard_uncertainty = 0
+        self.use_hazard_uncertainty = use_hazard_uncertainty
 
     def get_damage(self):
         output = []
@@ -257,7 +258,7 @@ if __name__ == '__main__':
     bridge_file_path = './input.bridge/'
     dmg_ratio_dir = './dmgratio/'
     hazard_service = "earthquake/5aac087a3342c424fc3fb3e4"
+    use_hazard_uncertainty = False
     use_liquefaction = False
-    obj = BridgeDamage(client, bridge_file_path, dmg_ratio_dir, hazard_service, use_liquefaction)
+    obj = BridgeDamage(client, bridge_file_path, dmg_ratio_dir, hazard_service, use_liquefaction, use_hazard_uncertainty)
     obj.get_damage()
-
