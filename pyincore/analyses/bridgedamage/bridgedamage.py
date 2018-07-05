@@ -262,4 +262,3 @@ if __name__ == '__main__':
     obj = BridgeDamage(client, bridge_file_path, dmg_ratio_dir, hazard_service, use_liquefaction)
     obj.get_damage()
 
-
