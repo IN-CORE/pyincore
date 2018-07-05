@@ -89,11 +89,8 @@ class BridgeDamage:
                                                                 cur_fragility['demandUnits'],
                                                                 center_point.y, center_point.x)
         hazard_type = cur_fragility['hazardType']
-
         hazard_std_dev = self.get_hazard_std_dev() if self.use_hazard_uncertainty else 0.0
         exceedence_probability = self.get_probability_of_exceedence(cur_fragility, hazard_val, hazard_std_dev)
-        print(exceedence_probability)
-
         dmg_intervals = self.get_damage_state_intervals(exceedence_probability)
         mean_damage = self.get_mean_damage(dmg_intervals, 1, cur_bridge)
         expected_damage = self.get_expected_damage(mean_damage)
