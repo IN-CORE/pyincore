@@ -21,7 +21,6 @@ BRIDGE_FRAGILITY_KEYS = {
 
 class BridgeDamage:
     def __init__(self, client, bridge_file_path: str, dmg_ratio_dir: str, hazard_service:str, use_liquefaction):
-
         shp_file = None
         for file in os.listdir(bridge_file_path):
             if file.endswith(".shp"):
