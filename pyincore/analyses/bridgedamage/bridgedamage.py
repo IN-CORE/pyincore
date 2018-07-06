@@ -6,7 +6,6 @@ import csv
 import collections
 import math
 
-
 DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code";
 
 BRIDGE_FRAGILITY_KEYS = {
@@ -20,25 +19,24 @@ BRIDGE_FRAGILITY_KEYS = {
 
 
 class BridgeDamage:
-    def __init__(self, client, bridge_file_path: str, dmg_ratio_dir: str, hazard_service:str, use_liquefaction: bool, use_hazard_uncertainty: bool):
+    def __init__(self, client, bridge_file_path: str, dmg_ratio_dir: str, hazard_service: str, use_liquefaction: bool,
+                 use_hazard_uncertainty: bool, output_file_name: str):
 
         shp_file = None
         for file in os.listdir(bridge_file_path):
             if file.endswith(".shp"):
                 shp_file = os.path.join(bridge_file_path, file)
 
-        bridge_shp = os.path.abspath(shp_file)
-
-        self.bridges = InventoryDataset(bridge_shp)
+        self.bridges = InventoryDataset(os.path.abspath(shp_file))
 
         self.client = client
 
-        # Create Hazard and Fragility service
+        # Create hazard and fragility service
         self.hazardsvc = HazardService(self.client)
 
         # Find hazard type and id
         hazard_service_split = hazard_service.split("/")
-        self.hazard_type = hazard_service_split[0]
+        self.hazard_type = hazard_service_split[0] if hazard_service_split is not None else "Unknown"
         self.hazard_dataset_id = hazard_service_split[1]
         self.mapping_id = "5aa98588949f232724db17fd"
 
@@ -46,6 +44,7 @@ class BridgeDamage:
         self.fragility_key = DEFAULT_FRAGILITY_KEY
         # Needs modification
         self.use_liquefaction = use_liquefaction
+        self.use_hazard_uncertainty = use_hazard_uncertainty
 
         dmg_ratio = None
         if (os.path.isfile(dmg_ratio_dir)):
@@ -63,26 +62,37 @@ class BridgeDamage:
             float(self.dmg_ratios[3]['MeanDR']),
             float(self.dmg_ratios[4]['MeanDR']),
             float(self.dmg_ratios[5]['MeanDR'])]
-        self.use_hazard_uncertainty = use_hazard_uncertainty
+        self.output_file_name = output_file_name
+
 
     def get_damage(self):
+        '''
+        Main function to perform bridge damage analysis.
+
+        :return: a list of ordered dictionary.
+        '''
         output = []
 
         fragility_set = self.fragilitysvc.map_fragilities(self.mapping_id, self.bridges.inventory_set,
-                                                          "Non-Retrofit Fragility ID Code")
+                                                          DEFAULT_FRAGILITY_KEY)
         if len(fragility_set) > 0:
             for item in self.bridges.inventory_set:
                 output.append(self.bridge_damage_analysis(item, fragility_set[item['id']]))
 
-        self.write_to_file(output)
+        self.write_to_file(output, self.output_file_name)
 
         return output
 
     def bridge_damage_analysis(self, cur_bridge, cur_fragility):
+        '''
+        Calculates bridge damage results for single fragility.
 
+        :param cur_bridge: current bridge
+        :param cur_fragility: current fragility
+        :return: an ordered dictionary with 15 fields listed below
+        '''
         bridge_results = collections.OrderedDict()
 
-        exceedence_probability = [0.0, 0.0, 0.0, 0.0]
         center_point = GeoUtil.get_location(cur_bridge)
         hazard_val = self.hazardsvc.get_earthquake_hazard_value(self.hazard_dataset_id,
                                                                 cur_fragility['demandType'].lower(),
@@ -118,11 +128,18 @@ class BridgeDamage:
     def get_hazard_std_dev(self):
         '''
         To be developed
+
         :return:
         '''
         return 0.0
 
     def get_damage_state_intervals(self, exceedence_probability):
+        '''
+        Calcualates damage state intervals for current fragility.
+
+        :param exceedence_probability: input list of exceedence probability
+        :return: damage intervals
+        '''
         dmg_intervals = []
         for idx, val in enumerate(exceedence_probability):
             if idx == 0:
@@ -134,11 +151,24 @@ class BridgeDamage:
         return dmg_intervals
 
     def get_mean_damage(self, dmg_intervals, start_idx, cur_bridge):
-        n = 1
+        """
+        Calculate mean damage.
+
+        :param dmg_intervals: list of damage intervals
+        :param start_idx:
+        :param cur_bridge:
+        :return:
+        """
         if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"].isdigit():
             n = int(cur_bridge["properties"]["spans"])
         elif "SPANS" in cur_bridge["properties"] and cur_bridge["properties"]["SPANS"].isdigit():
             n = int(cur_bridge["properties"]["SPANS"])
+        else:
+            n = 1
+
+        if n > 10:
+            n = 10
+            print("A bridge was found with greater than 10 spans: " + str(cur_bridge))
 
         weight_slight = self.dmg_weights[0]
         weight_moderate = self.dmg_weights[1]
@@ -158,6 +188,12 @@ class BridgeDamage:
         return mean_damage
 
     def get_expected_damage(self, mean_damage):
+        '''
+        Calcualte expected damage value.
+
+        :param mean_damage:
+        :return:
+        '''
         no_dmg_bound = [float(self.dmg_ratios[1]["LowerBound"]), float(self.dmg_ratios[1]["UpperBound"])]
         slight_bound = [float(self.dmg_ratios[2]["LowerBound"]), float(self.dmg_ratios[2]["UpperBound"])]
         moderate_bound = [float(self.dmg_ratios[3]["LowerBound"]), float(self.dmg_ratios[3]["UpperBound"])]
@@ -178,9 +214,16 @@ class BridgeDamage:
         return self.dmg_ratios[idx]["MeanDR"]
 
     def get_probability_of_exceedence(self, cur_fragility, hazard_val, std_dev):
+        '''
+        Calculates probability of exceedence.
+
+        :param cur_fragility:
+        :param hazard_val:
+        :param std_dev:
+        :return:
+        '''
         exceedence_probability = []
         for curve in cur_fragility["fragilityCurves"]:
-
             if self.use_liquefaction:
                 curve = self.adjust_fragility_for_liquefaction(curve, "U")
             if curve["className"].endswith("StandardFragilityCurve"):
@@ -194,17 +237,30 @@ class BridgeDamage:
 
     def get_normal_distribution_cumulative_probability(self, x, mean, std_dev):
         '''
+        Calculate normal distribution cumulative probability.
             public double cumulativeProbability(double x) throws MathException {
                 return 0.5D * (1.0D + Erf.erf((x - this.mean) / (this.standardDeviation * Math.sqrt(2.0D))));
             }
+
+        :param x:
+        :param mean:
+        :param std_dev:
+        :return:
         '''
         return 0.5 * (1.0 + math.erf((x - mean)) / (std_dev * math.sqrt(2.0)))
 
-    def adjust_fragility_for_liquefaction(self, fragility_curve, liqufaction):
-        liqufaction_std = str(liqufaction).upper()
-        if liqufaction_std == "U":
+    def adjust_fragility_for_liquefaction(self, fragility_curve, liquefaction):
+        '''
+        Adjusts fragility curve object by input parameter liquefaction
+
+        :param fragility_curve: original fragility curve
+        :param liquefaction: a string parameter indicating liquefaction type
+        :return: an adjust fragility curve object
+        '''
+        liquefaction_unified = str(liquefaction).upper()
+        if liquefaction_unified == "U":
             multiplier = 0.85
-        elif liqufaction_std == "Y":
+        elif liquefaction_unified == "Y":
             multiplier = 0.65
         else:
             multiplier = 1.0
@@ -220,6 +276,7 @@ class BridgeDamage:
     def get_retrofit_cost(self):
         '''
         To be continue
+
         :return:
         '''
         retrofit_cost = 0.0
@@ -230,16 +287,30 @@ class BridgeDamage:
         return retrofit_cost
 
     def get_retrofit_type(self):
+        """
+        Gets retrofit type by looking up BRIDGE_FRAGILITY_KEYS dictionary
+
+        :return: a string retrofit type
+        """
         return BRIDGE_FRAGILITY_KEYS[self.fragility_key.lower()][0] \
             if self.fragility_key.lower() not in BRIDGE_FRAGILITY_KEYS else "none"
 
     def get_retrofit_code(self):
+        '''
+        Gets retrofit code by looking up BRIDGE_FRAGILITY_KEYS dictionary
+
+        :return: a string retrofit code
+        '''
         return BRIDGE_FRAGILITY_KEYS[self.fragility_key.lower()][1] \
             if self.fragility_key.lower() not in BRIDGE_FRAGILITY_KEYS else "none"
 
-    def write_to_file(self, output):
-        output_file_name = "bridge-damage-analysis-results.csv"
+    def write_to_file(self, output, output_file_name):
+        '''
+        Generates output csv file with header
 
+        :param output: content to be written to output
+        :return:
+        '''
         # Write Output to csv
         with open(output_file_name, 'w') as csv_file:
             writer = csv.DictWriter(csv_file, dialect="unix",
@@ -257,5 +328,7 @@ if __name__ == '__main__':
     hazard_service = "earthquake/5aac087a3342c424fc3fb3e4"
     use_hazard_uncertainty = False
     use_liquefaction = False
-    obj = BridgeDamage(client, bridge_file_path, dmg_ratio_dir, hazard_service, use_liquefaction, use_hazard_uncertainty)
+    output_file_name = "bridge-damage-analysis-results.csv"
+    obj = BridgeDamage(client, bridge_file_path, dmg_ratio_dir, hazard_service, use_liquefaction,
+                       use_hazard_uncertainty, output_file_name)
     obj.get_damage()
