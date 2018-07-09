@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
 from pyincore import InsecureIncoreClient, InventoryDataset, DamageRatioDataset, HazardService, FragilityService
 from pyincore import GeoUtil
 import os
 import csv
 import collections
 import math
+
 
 DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code";
 
@@ -331,4 +331,3 @@ if __name__ == '__main__':
     output_file_name = "bridge-damage-analysis-results.csv"
     obj = BridgeDamage(client, bridge_file_path, dmg_ratio_dir, hazard_service, use_liquefaction,
                        use_hazard_uncertainty, output_file_name)
-    obj.get_damage()
