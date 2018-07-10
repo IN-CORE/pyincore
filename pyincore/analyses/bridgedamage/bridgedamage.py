@@ -135,7 +135,7 @@ class BridgeDamage:
 
     def get_damage_state_intervals(self, exceedence_probability):
         '''
-        Calcualates damage state intervals for current fragility.
+        Calculates damage state intervals for current fragility.
 
         :param exceedence_probability: input list of exceedence probability
         :return: damage intervals
@@ -152,7 +152,7 @@ class BridgeDamage:
 
     def get_mean_damage(self, dmg_intervals, start_idx, cur_bridge):
         """
-        Calculate mean damage.
+        Calculates mean damage.
 
         :param dmg_intervals: list of damage intervals
         :param start_idx:
@@ -189,7 +189,7 @@ class BridgeDamage:
 
     def get_expected_damage(self, mean_damage):
         '''
-        Calcualte expected damage value.
+        Calculates expected damage value.
 
         :param mean_damage:
         :return:
@@ -225,7 +225,7 @@ class BridgeDamage:
         exceedence_probability = []
         for curve in cur_fragility["fragilityCurves"]:
             if self.use_liquefaction:
-                curve = self.adjust_fragility_for_liquefaction(curve, "U")
+                curve = self.adjust_fragility_for_liquefaction(curve, cur_fragility["LIQ"])
             if curve["className"].endswith("StandardFragilityCurve"):
                 beta = math.sqrt(math.pow(curve["beta"], 2) + math.pow(std_dev, 2))
             else:
@@ -238,16 +238,13 @@ class BridgeDamage:
     def get_normal_distribution_cumulative_probability(self, x, mean, std_dev):
         '''
         Calculate normal distribution cumulative probability.
-            public double cumulativeProbability(double x) throws MathException {
-                return 0.5D * (1.0D + Erf.erf((x - this.mean) / (this.standardDeviation * Math.sqrt(2.0D))));
-            }
 
         :param x:
-        :param mean:
-        :param std_dev:
+        :param mean: mean to initialize normal distribution
+        :param std_dev: standard deviation to initialize normal distribution
         :return:
         '''
-        return 0.5 * (1.0 + math.erf((x - mean)) / (std_dev * math.sqrt(2.0)))
+        return 0.5 * (1.0 + math.erf((x - mean) / (std_dev * math.sqrt(2.0))))
 
     def adjust_fragility_for_liquefaction(self, fragility_curve, liquefaction):
         '''
