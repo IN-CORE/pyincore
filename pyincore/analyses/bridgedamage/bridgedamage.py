@@ -272,7 +272,8 @@ class BridgeDamage:
 
     def get_retrofit_cost(self):
         '''
-        To be continue
+        To be continue. This function is not completed yet. Need real data example on
+            private FeatureDataset bridgeRetrofitCostEstimate
 
         :return:
         '''
