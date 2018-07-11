@@ -77,9 +77,9 @@ class BridgeDamage:
                                                           DEFAULT_FRAGILITY_KEY)
         if len(fragility_set) > 0:
             for item in self.bridges.inventory_set:
-                output.append(self.bridge_damage_analysis(item, fragility_set[item['id']]))
-
-        self.write_to_file(output, self.output_file_name)
+                if item["id"] in fragility_set:
+                    output.append(self.bridge_damage_analysis(item, fragility_set[item['id']]))
+                    self.write_to_file(output)
 
         return output
 
