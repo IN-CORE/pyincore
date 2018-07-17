@@ -56,7 +56,7 @@ class HazardService:
 
         return x, y, hazard_val
 
-    def get_eq_liquefaction_values(self, hazard_id: str, geologyDatasetId: str, demand_units: str, points: List):
+    def get_liquefaction_values(self, hazard_id: str, geologyDatasetId: str, demand_units: str, points: List):
         url = urllib.parse.urljoin(self.base_earthquake_url,  hazard_id+"/liquefaction/values")
         payload = {'demandUnits': demand_units, 'geologyDataset': geologyDatasetId, 'point': points}
         r = requests.get(url, headers=self.client.headers, params=payload)
