@@ -1,33 +1,14 @@
+#!/usr/bin/env python3
 from pyincore import InsecureIncoreClient, InventoryDataset, DamageRatioDataset, HazardService, FragilityService
 from pyincore import GeoUtil
+from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
 import os
-import csv
 import collections
-import math
-
-
-DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code";
-
-BRIDGE_FRAGILITY_KEYS = {
-    "elastomeric bearing retrofit fragility id code": ["Elastomeric Bearing", "eb"],
-    "steel jacket retrofit fragility id code": ["Steel Jacket", "sj"],
-    "restrainer cables retrofit fragility id code": ["Restrainer Cables", "rc"],
-    "seat extender retrofit fragility id code": ["Seat Extender", "se"],
-    "shear key retrofit fragility id code": ["Shear Key", "sk"],
-    "non-retrofit fragility id code": ["as built", "none"]
-}
 
 
 class BridgeDamage:
-    def __init__(self, client, bridge_file_path: str, dmg_ratio_dir: str, hazard_service: str, use_liquefaction: bool,
+    def __init__(self, client, dmg_ratio_dir: str, hazard_service: str, use_liquefaction: bool,
                  use_hazard_uncertainty: bool, output_file_name: str):
-
-        shp_file = None
-        for file in os.listdir(bridge_file_path):
-            if file.endswith(".shp"):
-                shp_file = os.path.join(bridge_file_path, file)
-
-        self.bridges = InventoryDataset(os.path.abspath(shp_file))
 
         self.client = client
 
@@ -38,14 +19,12 @@ class BridgeDamage:
         hazard_service_split = hazard_service.split("/")
         self.hazard_type = hazard_service_split[0] if hazard_service_split is not None else "Unknown"
         self.hazard_dataset_id = hazard_service_split[1]
-        self.mapping_id = "5aa98588949f232724db17fd"
 
         self.fragilitysvc = FragilityService(self.client)
-        self.fragility_key = DEFAULT_FRAGILITY_KEY
         # Needs modification
         self.use_liquefaction = use_liquefaction
         self.use_hazard_uncertainty = use_hazard_uncertainty
-
+        self.fragility_key = BridgeUtil.DEFAULT_FRAGILITY_KEY
         dmg_ratio = None
         if (os.path.isfile(dmg_ratio_dir)):
             dmg_ratio = DamageRatioDataset(dmg_ratio_dir)
@@ -65,7 +44,7 @@ class BridgeDamage:
         self.output_file_name = output_file_name
 
 
-    def get_damage(self):
+    def get_damage(self, inventory_set: dict, mapping_id: str):
         '''
         Main function to perform bridge damage analysis.
 
@@ -73,13 +52,14 @@ class BridgeDamage:
         '''
         output = []
 
-        fragility_set = self.fragilitysvc.map_fragilities(self.mapping_id, self.bridges.inventory_set,
-                                                          DEFAULT_FRAGILITY_KEY)
+        fragility_set = self.fragilitysvc.map_fragilities(mapping_id, inventory_set, self.fragility_key)
         if len(fragility_set) > 0:
-            for item in self.bridges.inventory_set:
+            for item in inventory_set:
                 if item["id"] in fragility_set:
                     output.append(self.bridge_damage_analysis(item, fragility_set[item['id']]))
-                    self.write_to_file(output)
+                    BridgeUtil.write_to_file(output, ["ls-slight", "ls-moderat", "ls-extensi", "ls-complet", "none",
+                                                "slight-mod", "mod-extens", "ext-comple", "complete", "meandamage",
+                                                "expectval", "retrofit", "retro_cost", "hazardtype", "hazardval"], self.output_file_name)
 
         return output
 
@@ -99,13 +79,13 @@ class BridgeDamage:
                                                                 cur_fragility['demandUnits'],
                                                                 center_point.y, center_point.x)
         hazard_type = cur_fragility['hazardType']
-        hazard_std_dev = self.get_hazard_std_dev() if self.use_hazard_uncertainty else 0.0
-        exceedence_probability = self.get_probability_of_exceedence(cur_fragility, hazard_val, hazard_std_dev)
-        dmg_intervals = self.get_damage_state_intervals(exceedence_probability)
-        mean_damage = self.get_mean_damage(dmg_intervals, 1, cur_bridge)
-        expected_damage = self.get_expected_damage(mean_damage)
-        retrofit_cost = self.get_retrofit_cost()
-        retrofit_type = self.get_retrofit_type()
+        hazard_std_dev = BridgeUtil.get_hazard_std_dev() if self.use_hazard_uncertainty else 0.0
+        exceedence_probability = BridgeUtil.get_probability_of_exceedence(cur_fragility, hazard_val, hazard_std_dev, self.use_liquefaction)
+        dmg_intervals = BridgeUtil.get_damage_state_intervals(exceedence_probability)
+        mean_damage = BridgeUtil.get_mean_damage(dmg_intervals, 1, cur_bridge, self.dmg_weights)
+        expected_damage = BridgeUtil.get_expected_damage(mean_damage, self.dmg_ratios)
+        retrofit_cost = BridgeUtil.get_retrofit_cost(self.fragility_key)
+        retrofit_type = BridgeUtil.get_retrofit_type(self.fragility_key)
 
         bridge_results["ls-slight"] = exceedence_probability[0]
         bridge_results["ls-moderat"] = exceedence_probability[1]
@@ -125,207 +105,23 @@ class BridgeDamage:
 
         return bridge_results
 
-    def get_hazard_std_dev(self):
-        '''
-        To be developed
-
-        :return:
-        '''
-        return 0.0
-
-    def get_damage_state_intervals(self, exceedence_probability):
-        '''
-        Calculates damage state intervals for current fragility.
-
-        :param exceedence_probability: input list of exceedence probability
-        :return: damage intervals
-        '''
-        dmg_intervals = []
-        for idx, val in enumerate(exceedence_probability):
-            if idx == 0:
-                dmg_intervals.append(1.0 - val)
-            else:
-                dmg_intervals.append(exceedence_probability[idx - 1] - exceedence_probability[idx])
-
-        dmg_intervals.append(exceedence_probability[-1])
-        return dmg_intervals
-
-    def get_mean_damage(self, dmg_intervals, start_idx, cur_bridge):
-        """
-        Calculates mean damage.
-
-        :param dmg_intervals: list of damage intervals
-        :param start_idx:
-        :param cur_bridge:
-        :return:
-        """
-        if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"].isdigit():
-            n = int(cur_bridge["properties"]["spans"])
-        elif "SPANS" in cur_bridge["properties"] and cur_bridge["properties"]["SPANS"].isdigit():
-            n = int(cur_bridge["properties"]["SPANS"])
-        else:
-            n = 1
-
-        if n > 10:
-            n = 10
-            print("A bridge was found with greater than 10 spans: " + str(cur_bridge))
-
-        weight_slight = self.dmg_weights[0]
-        weight_moderate = self.dmg_weights[1]
-        weight_extensive = self.dmg_weights[2]
-        weight_collapse0 = self.dmg_weights[3]
-        weight_collapse1 = self.dmg_weights[4]
-
-        mean_damage = weight_slight * dmg_intervals[start_idx] \
-                      + weight_moderate * dmg_intervals[start_idx + 1] \
-                      + weight_extensive * dmg_intervals[start_idx + 2]
-
-        if n >= 3:
-            mean_damage += weight_collapse1 / n * dmg_intervals[start_idx + 3]
-        else:
-            mean_damage += weight_collapse0 * dmg_intervals[start_idx + 3]
-
-        return mean_damage
-
-    def get_expected_damage(self, mean_damage):
-        '''
-        Calculates expected damage value.
-
-        :param mean_damage:
-        :return:
-        '''
-        no_dmg_bound = [float(self.dmg_ratios[1]["LowerBound"]), float(self.dmg_ratios[1]["UpperBound"])]
-        slight_bound = [float(self.dmg_ratios[2]["LowerBound"]), float(self.dmg_ratios[2]["UpperBound"])]
-        moderate_bound = [float(self.dmg_ratios[3]["LowerBound"]), float(self.dmg_ratios[3]["UpperBound"])]
-        extensive_bound = [float(self.dmg_ratios[4]["LowerBound"]), float(self.dmg_ratios[4]["UpperBound"])]
-        collapse_bound = [float(self.dmg_ratios[5]["LowerBound"]), float(self.dmg_ratios[5]["UpperBound"])]
-        if no_dmg_bound[0] <= mean_damage <= no_dmg_bound[1]:
-            idx = 0
-        elif slight_bound[0] <= mean_damage <= slight_bound[1]:
-            idx = 1
-        elif moderate_bound[0] <= mean_damage <= moderate_bound[1]:
-            idx = 2
-        elif extensive_bound[0] <= mean_damage <= extensive_bound[1]:
-            idx = 3
-        elif collapse_bound[0] <= mean_damage <= collapse_bound[1]:
-            idx = 4
-        else:
-            idx = 0
-        return self.dmg_ratios[idx]["MeanDR"]
-
-    def get_probability_of_exceedence(self, cur_fragility, hazard_val, std_dev):
-        '''
-        Calculates probability of exceedence.
-
-        :param cur_fragility:
-        :param hazard_val:
-        :param std_dev:
-        :return:
-        '''
-        exceedence_probability = []
-        for curve in cur_fragility["fragilityCurves"]:
-            if self.use_liquefaction:
-                curve = self.adjust_fragility_for_liquefaction(curve, cur_fragility["LIQ"])
-            if curve["className"].endswith("StandardFragilityCurve"):
-                beta = math.sqrt(math.pow(curve["beta"], 2) + math.pow(std_dev, 2))
-            else:
-                beta = curve["beta"]
-            exceedence_probability.append(self.get_normal_distribution_cumulative_probability(
-                (hazard_val - curve["median"]) / beta, 0.0, 1.0))
-
-        return exceedence_probability
-
-    def get_normal_distribution_cumulative_probability(self, x, mean, std_dev):
-        '''
-        Calculate normal distribution cumulative probability.
-
-        :param x:
-        :param mean: mean to initialize normal distribution
-        :param std_dev: standard deviation to initialize normal distribution
-        :return:
-        '''
-        return 0.5 * (1.0 + math.erf((x - mean) / (std_dev * math.sqrt(2.0))))
-
-    def adjust_fragility_for_liquefaction(self, fragility_curve, liquefaction):
-        '''
-        Adjusts fragility curve object by input parameter liquefaction
-
-        :param fragility_curve: original fragility curve
-        :param liquefaction: a string parameter indicating liquefaction type
-        :return: an adjust fragility curve object
-        '''
-        liquefaction_unified = str(liquefaction).upper()
-        if liquefaction_unified == "U":
-            multiplier = 0.85
-        elif liquefaction_unified == "Y":
-            multiplier = 0.65
-        else:
-            multiplier = 1.0
-
-        fragility_curve_adj = {"className": fragility_curve["className"],
-                               "description": fragility_curve['description'],
-                               "median": fragility_curve['median'] * multiplier,
-                               "beta": fragility_curve['beta'],
-                               'curveType': fragility_curve['curveType']}
-
-        return fragility_curve_adj
-
-    def get_retrofit_cost(self):
-        '''
-        To be continue. This function is not completed yet. Need real data example on
-            private FeatureDataset bridgeRetrofitCostEstimate
-
-        :return:
-        '''
-        retrofit_cost = 0.0
-        if self.fragility_key.lower() == DEFAULT_FRAGILITY_KEY.lower():
-            return retrofit_cost
-        else:
-            retrofit_code = self.get_retrofit_code()
-        return retrofit_cost
-
-    def get_retrofit_type(self):
-        """
-        Gets retrofit type by looking up BRIDGE_FRAGILITY_KEYS dictionary
-
-        :return: a string retrofit type
-        """
-        return BRIDGE_FRAGILITY_KEYS[self.fragility_key.lower()][0] \
-            if self.fragility_key.lower() not in BRIDGE_FRAGILITY_KEYS else "none"
-
-    def get_retrofit_code(self):
-        '''
-        Gets retrofit code by looking up BRIDGE_FRAGILITY_KEYS dictionary
-
-        :return: a string retrofit code
-        '''
-        return BRIDGE_FRAGILITY_KEYS[self.fragility_key.lower()][1] \
-            if self.fragility_key.lower() not in BRIDGE_FRAGILITY_KEYS else "none"
-
-    def write_to_file(self, output, output_file_name):
-        '''
-        Generates output csv file with header
-
-        :param output: content to be written to output
-        :return:
-        '''
-        # Write Output to csv
-        with open(output_file_name, 'w') as csv_file:
-            writer = csv.DictWriter(csv_file, dialect="unix",
-                                    fieldnames=["ls-slight", "ls-moderat", "ls-extensi", "ls-complet", "none",
-                                                "slight-mod", "mod-extens", "ext-comple", "complete", "meandamage",
-                                                "expectval", "retrofit", "retro_cost", "hazardtype", "hazardval"])
-            writer.writeheader()
-            writer.writerows(output)
 
 
 if __name__ == '__main__':
     client = InsecureIncoreClient("http://localhost:8080", "jingge2")
-    bridge_file_path = './input.bridge/'
+    bridge_file_path = './input.bridge/shelby_county_bridge'
     dmg_ratio_dir = './dmgratio/'
     hazard_service = "earthquake/5aac087a3342c424fc3fb3e4"
     use_hazard_uncertainty = False
     use_liquefaction = False
-    output_file_name = "bridge-damage-analysis-results.csv"
-    obj = BridgeDamage(client, bridge_file_path, dmg_ratio_dir, hazard_service, use_liquefaction,
-                       use_hazard_uncertainty, output_file_name)
+
+    shp_file = None
+    for file in os.listdir(bridge_file_path):
+        if file.endswith(".shp"):
+            shp_file = os.path.join(bridge_file_path, file)
+
+    bridges = InventoryDataset(os.path.abspath(shp_file))
+
+    obj = BridgeDamage(client, dmg_ratio_dir, hazard_service, use_liquefaction,
+                       use_hazard_uncertainty, "output-test.csv")
+    obj.get_damage(bridges.inventory_set, "5aa98588949f232724db17fd")
