@@ -7,8 +7,7 @@ import collections
 
 
 class BridgeDamage:
-    def __init__(self, client, dmg_ratio_dir: str, hazard_service: str, use_liquefaction: bool,
-                 use_hazard_uncertainty: bool, output_file_name: str):
+    def __init__(self, client, dmg_ratio_dir: str, hazard_service: str, output_file_name: str):
 
         self.client = client
 
@@ -21,9 +20,6 @@ class BridgeDamage:
         self.hazard_dataset_id = hazard_service_split[1]
 
         self.fragilitysvc = FragilityService(self.client)
-        # Needs modification
-        self.use_liquefaction = use_liquefaction
-        self.use_hazard_uncertainty = use_hazard_uncertainty
         self.fragility_key = BridgeUtil.DEFAULT_FRAGILITY_KEY
         dmg_ratio = None
         if (os.path.isfile(dmg_ratio_dir)):
@@ -36,15 +32,14 @@ class BridgeDamage:
         self.dmg_ratios = dmg_ratio.damage_ratio
         # damage weights for buildings
         self.dmg_weights = [
-            float(self.dmg_ratios[1]['MeanDR']),
-            float(self.dmg_ratios[2]['MeanDR']),
-            float(self.dmg_ratios[3]['MeanDR']),
-            float(self.dmg_ratios[4]['MeanDR']),
-            float(self.dmg_ratios[5]['MeanDR'])]
+            float(self.dmg_ratios[1]['verification_tests']),
+            float(self.dmg_ratios[2]['verification_tests']),
+            float(self.dmg_ratios[3]['verification_tests']),
+            float(self.dmg_ratios[4]['verification_tests']),
+            float(self.dmg_ratios[5]['verification_tests'])]
         self.output_file_name = output_file_name
 
-
-    def get_damage(self, inventory_set: dict, mapping_id: str):
+    def get_damage(self, inventory_set: dict, mapping_id: str, use_liquefaction: bool, use_hazard_uncertainty: bool):
         '''
         Main function to perform bridge damage analysis.
 
@@ -56,14 +51,17 @@ class BridgeDamage:
         if len(fragility_set) > 0:
             for item in inventory_set:
                 if item["id"] in fragility_set:
-                    output.append(self.bridge_damage_analysis(item, fragility_set[item['id']]))
+                    output.append(self.bridge_damage_analysis(item, fragility_set[item['id']]), use_liquefaction,
+                                  use_hazard_uncertainty)
                     BridgeUtil.write_to_file(output, ["ls-slight", "ls-moderat", "ls-extensi", "ls-complet", "none",
-                                                "slight-mod", "mod-extens", "ext-comple", "complete", "meandamage",
-                                                "expectval", "retrofit", "retro_cost", "hazardtype", "hazardval"], self.output_file_name)
+                                                      "slight-mod", "mod-extens", "ext-comple", "complete",
+                                                      "meandamage",
+                                                      "expectval", "retrofit", "retro_cost", "hazardtype", "hazardval"],
+                                             self.output_file_name)
 
         return output
 
-    def bridge_damage_analysis(self, cur_bridge, cur_fragility):
+    def bridge_damage_analysis(self, cur_bridge, cur_fragility, use_liquefaction, use_hazard_uncertainty):
         '''
         Calculates bridge damage results for single fragility.
 
@@ -79,14 +77,16 @@ class BridgeDamage:
                                                                 cur_fragility['demandUnits'],
                                                                 center_point.y, center_point.x)
         hazard_type = cur_fragility['hazardType']
-        hazard_std_dev = BridgeUtil.get_hazard_std_dev() if self.use_hazard_uncertainty else 0.0
-        exceedence_probability = BridgeUtil.get_probability_of_exceedence(cur_fragility, hazard_val, hazard_std_dev, self.use_liquefaction)
+        hazard_std_dev = BridgeUtil.get_hazard_std_dev() if use_hazard_uncertainty else 0.0
+        exceedence_probability = BridgeUtil.get_probability_of_exceedence(cur_fragility, hazard_val, hazard_std_dev,
+                                                                          use_liquefaction)
         dmg_intervals = BridgeUtil.get_damage_state_intervals(exceedence_probability)
         mean_damage = BridgeUtil.get_mean_damage(dmg_intervals, 1, cur_bridge, self.dmg_weights)
         expected_damage = BridgeUtil.get_expected_damage(mean_damage, self.dmg_ratios)
         retrofit_cost = BridgeUtil.get_retrofit_cost(self.fragility_key)
         retrofit_type = BridgeUtil.get_retrofit_type(self.fragility_key)
 
+        bridge_results["guid"] = cur_bridge['properties']['guid']
         bridge_results["ls-slight"] = exceedence_probability[0]
         bridge_results["ls-moderat"] = exceedence_probability[1]
         bridge_results["ls-extensi"] = exceedence_probability[2]
@@ -106,22 +106,3 @@ class BridgeDamage:
         return bridge_results
 
 
-
-if __name__ == '__main__':
-    client = InsecureIncoreClient("http://localhost:8080", "jingge2")
-    bridge_file_path = './input.bridge/shelby_county_bridge'
-    dmg_ratio_dir = './dmgratio/'
-    hazard_service = "earthquake/5aac087a3342c424fc3fb3e4"
-    use_hazard_uncertainty = False
-    use_liquefaction = False
-
-    shp_file = None
-    for file in os.listdir(bridge_file_path):
-        if file.endswith(".shp"):
-            shp_file = os.path.join(bridge_file_path, file)
-
-    bridges = InventoryDataset(os.path.abspath(shp_file))
-
-    obj = BridgeDamage(client, dmg_ratio_dir, hazard_service, use_liquefaction,
-                       use_hazard_uncertainty, "output-test.csv")
-    obj.get_damage(bridges.inventory_set, "5aa98588949f232724db17fd")
