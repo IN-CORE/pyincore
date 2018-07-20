@@ -32,11 +32,13 @@ class BridgeDamage:
         self.dmg_ratios = dmg_ratio.damage_ratio
         # damage weights for buildings
         self.dmg_weights = [
-            float(self.dmg_ratios[1]['verification_tests']),
-            float(self.dmg_ratios[2]['verification_tests']),
-            float(self.dmg_ratios[3]['verification_tests']),
-            float(self.dmg_ratios[4]['verification_tests']),
-            float(self.dmg_ratios[5]['verification_tests'])]
+            float(self.dmg_ratios[1]['Best Mean Damage Ratio']),
+            float(self.dmg_ratios[2]['Best Mean Damage Ratio']),
+            float(self.dmg_ratios[3]['Best Mean Damage Ratio']),
+            float(self.dmg_ratios[4]['Best Mean Damage Ratio']),
+            float(self.dmg_ratios[5]['Best Mean Damage Ratio']),
+            float(self.dmg_ratios[6]['Best Mean Damage Ratio'])]
+
         self.output_file_name = output_file_name
 
     def get_damage(self, inventory_set: dict, mapping_id: str, use_liquefaction: bool, use_hazard_uncertainty: bool):

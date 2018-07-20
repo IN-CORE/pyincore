@@ -1,7 +1,7 @@
-import os
 import csv
-import collections
 import math
+from scipy.stats import norm
+
 
 class BridgeUtil:
     BRIDGE_FRAGILITY_KEYS = {
@@ -63,11 +63,11 @@ class BridgeUtil:
             n = 10
             print("A bridge was found with greater than 10 spans: " + str(cur_bridge))
 
-        weight_slight = dmg_weights[0]
-        weight_moderate = dmg_weights[1]
-        weight_extensive = dmg_weights[2]
-        weight_collapse0 = dmg_weights[3]
-        weight_collapse1 = dmg_weights[4]
+        weight_slight = dmg_weights[1]
+        weight_moderate = dmg_weights[2]
+        weight_extensive = dmg_weights[3]
+        weight_collapse0 = dmg_weights[4]
+        weight_collapse1 = dmg_weights[5]
 
         mean_damage = weight_slight * dmg_intervals[start_idx] \
                       + weight_moderate * dmg_intervals[start_idx + 1] \
@@ -107,7 +107,6 @@ class BridgeUtil:
             idx = 0
         return dmg_ratios[idx]["MeanDR"]
 
-
     @staticmethod
     def get_probability_of_exceedence(cur_fragility, hazard_val, std_dev, use_liquefaction):
         '''
@@ -120,14 +119,24 @@ class BridgeUtil:
         '''
         exceedence_probability = []
         for curve in cur_fragility["fragilityCurves"]:
+            median = float(curve['median'])
+            beta = float(curve['beta'])
+
             if use_liquefaction:
                 curve = BridgeUtil.adjust_fragility_for_liquefaction(curve, cur_fragility["LIQ"])
+                median = float(curve['median'])
             if curve["className"].endswith("StandardFragilityCurve"):
                 beta = math.sqrt(math.pow(curve["beta"], 2) + math.pow(std_dev, 2))
-            else:
-                beta = curve["beta"]
-            exceedence_probability.append(BridgeUtil.get_normal_distribution_cumulative_probability(
-                (hazard_val - curve["median"]) / beta, 0.0, 1.0))
+
+            # Compute probability
+            probability = 0.0
+            if (curve['curveType'] == 'Normal'):
+                sp = (math.log(hazard_val) - math.log(median)) / beta
+                probability = norm.cdf(sp)
+            elif (curve['curveType'] == "LogNormal"):
+                x = (math.log(hazard_val) - median) / beta
+                probability = norm.cdf(x)
+            exceedence_probability.append(probability)
 
         return exceedence_probability
 
@@ -183,7 +192,6 @@ class BridgeUtil:
             retrofit_code = BridgeUtil.get_retrofit_code()
         return retrofit_cost
 
-
     @staticmethod
     def get_retrofit_type(target_fragility_key):
         """
@@ -194,7 +202,6 @@ class BridgeUtil:
         return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][0] \
             if target_fragility_key.lower() not in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
 
-
     @staticmethod
     def get_retrofit_code(target_fragility_key):
         '''
@@ -204,7 +211,6 @@ class BridgeUtil:
         '''
         return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][1] \
             if target_fragility_key.lower() not in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
-
 
     @staticmethod
     def write_to_file(output, fieldname_list, output_file_name):
