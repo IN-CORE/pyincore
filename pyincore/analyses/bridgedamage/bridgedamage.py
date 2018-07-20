@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from pyincore import InsecureIncoreClient, InventoryDataset, DamageRatioDataset, HazardService, FragilityService
+from pyincore import DamageRatioDataset, HazardService, FragilityService
 from pyincore import GeoUtil
-from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
+from bridgeutil import BridgeUtil
 import os
 import collections
 
@@ -38,7 +38,6 @@ class BridgeDamage:
             float(self.dmg_ratios[4]['Best Mean Damage Ratio']),
             float(self.dmg_ratios[5]['Best Mean Damage Ratio']),
             float(self.dmg_ratios[6]['Best Mean Damage Ratio'])]
-
         self.output_file_name = output_file_name
 
     def get_damage(self, inventory_set: dict, mapping_id: str, use_liquefaction: bool, use_hazard_uncertainty: bool):
@@ -53,12 +52,12 @@ class BridgeDamage:
         if len(fragility_set) > 0:
             for item in inventory_set:
                 if item["id"] in fragility_set:
-                    output.append(self.bridge_damage_analysis(item, fragility_set[item['id']]), use_liquefaction,
-                                  use_hazard_uncertainty)
-                    BridgeUtil.write_to_file(output, ["ls-slight", "ls-moderat", "ls-extensi", "ls-complet", "none",
-                                                      "slight-mod", "mod-extens", "ext-comple", "complete",
-                                                      "meandamage",
-                                                      "expectval", "retrofit", "retro_cost", "hazardtype", "hazardval"],
+                    output.append(self.bridge_damage_analysis(item, fragility_set[item['id']], use_liquefaction,
+                                                              use_hazard_uncertainty))
+                    BridgeUtil.write_to_file(output,
+                                             ["guid", "ls-slight", "ls-moderat", "ls-extensi", "ls-complet", "none",
+                                              "slight-mod", "mod-extens", "ext-comple", "complete", "meandamage",
+                                              "expectval", "retrofit", "retro_cost", "hazardtype", "hazardval"],
                                              self.output_file_name)
 
         return output
@@ -106,5 +105,3 @@ class BridgeDamage:
         bridge_results["hazardval"] = hazard_val
 
         return bridge_results
-
-

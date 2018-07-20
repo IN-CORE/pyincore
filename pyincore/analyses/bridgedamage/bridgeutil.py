@@ -63,6 +63,7 @@ class BridgeUtil:
             n = 10
             print("A bridge was found with greater than 10 spans: " + str(cur_bridge))
 
+
         weight_slight = dmg_weights[1]
         weight_moderate = dmg_weights[2]
         weight_extensive = dmg_weights[3]
@@ -88,24 +89,24 @@ class BridgeUtil:
         :param mean_damage:
         :return:
         '''
-        no_dmg_bound = [float(dmg_ratios[1]["LowerBound"]), float(dmg_ratios[1]["UpperBound"])]
-        slight_bound = [float(dmg_ratios[2]["LowerBound"]), float(dmg_ratios[2]["UpperBound"])]
-        moderate_bound = [float(dmg_ratios[3]["LowerBound"]), float(dmg_ratios[3]["UpperBound"])]
-        extensive_bound = [float(dmg_ratios[4]["LowerBound"]), float(dmg_ratios[4]["UpperBound"])]
-        collapse_bound = [float(dmg_ratios[5]["LowerBound"]), float(dmg_ratios[5]["UpperBound"])]
+        no_dmg_bound = [float(dmg_ratios[1]["Lower Bound"]), float(dmg_ratios[1]["Upper Bound"])]
+        slight_bound = [float(dmg_ratios[2]["Lower Bound"]), float(dmg_ratios[2]["Upper Bound"])]
+        moderate_bound = [float(dmg_ratios[3]["Lower Bound"]), float(dmg_ratios[3]["Upper Bound"])]
+        extensive_bound = [float(dmg_ratios[4]["Lower Bound"]), float(dmg_ratios[4]["Upper Bound"])]
+        collapse_bound = [float(dmg_ratios[5]["Lower Bound"]), float(dmg_ratios[5]["Upper Bound"])]
         if no_dmg_bound[0] <= mean_damage <= no_dmg_bound[1]:
-            idx = 0
+            idx = 1 
         elif slight_bound[0] <= mean_damage <= slight_bound[1]:
-            idx = 1
-        elif moderate_bound[0] <= mean_damage <= moderate_bound[1]:
             idx = 2
-        elif extensive_bound[0] <= mean_damage <= extensive_bound[1]:
+        elif moderate_bound[0] <= mean_damage <= moderate_bound[1]:
             idx = 3
-        elif collapse_bound[0] <= mean_damage <= collapse_bound[1]:
+        elif extensive_bound[0] <= mean_damage <= extensive_bound[1]:
             idx = 4
+        elif collapse_bound[0] <= mean_damage <= collapse_bound[1]:
+            idx = 5
         else:
-            idx = 0
-        return dmg_ratios[idx]["MeanDR"]
+            idx = 1
+        return dmg_ratios[idx]["Damage State"]
 
     @staticmethod
     def get_probability_of_exceedence(cur_fragility, hazard_val, std_dev, use_liquefaction):
@@ -139,18 +140,6 @@ class BridgeUtil:
             exceedence_probability.append(probability)
 
         return exceedence_probability
-
-    @staticmethod
-    def get_normal_distribution_cumulative_probability(x, mean, std_dev):
-        '''
-        Calculate normal distribution cumulative probability.
-
-        :param x:
-        :param mean: mean to initialize normal distribution
-        :param std_dev: standard deviation to initialize normal distribution
-        :return:
-        '''
-        return 0.5 * (1.0 + math.erf((x - mean) / (std_dev * math.sqrt(2.0))))
 
     @staticmethod
     def adjust_fragility_for_liquefaction(fragility_curve, liquefaction):
