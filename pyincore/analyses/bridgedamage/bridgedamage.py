@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pyincore import DamageRatioDataset, HazardService, FragilityService
 from pyincore import GeoUtil
-from bridgeutil import BridgeUtil
+from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
 import os
 import collections
 
