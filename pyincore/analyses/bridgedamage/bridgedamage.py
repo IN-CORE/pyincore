@@ -77,7 +77,7 @@ class BridgeDamage:
                                                                 cur_fragility['demandType'].lower(),
                                                                 cur_fragility['demandUnits'],
                                                                 center_point.y, center_point.x)
-        hazard_type = cur_fragility['hazardType']
+        hazard_type = cur_fragility['DemandType']
         hazard_std_dev = BridgeUtil.get_hazard_std_dev() if use_hazard_uncertainty else 0.0
         exceedence_probability = BridgeUtil.get_probability_of_exceedence(cur_fragility, hazard_val, hazard_std_dev,
                                                                           use_liquefaction)
