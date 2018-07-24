@@ -30,7 +30,7 @@ class HazardService:
         r = requests.get(url, headers=self.client.headers, params = payload)
         response = r.json()
 
-        return response['hazardResults']
+        return response
 
     def get_earthquake_hazard_value_set(self, hazard_id: str, demand_type: str, demand_units: str, bbox, grid_spacing: float):
         # bbox: [[minx, miny],[maxx, maxy]]
@@ -56,6 +56,14 @@ class HazardService:
 
         return x, y, hazard_val
 
+    def get_liquefaction_values(self, hazard_id: str, geology_dataset_id: str, demand_units: str, points: List):
+        url = urllib.parse.urljoin(self.base_earthquake_url,  hazard_id+"/liquefaction/values")
+        payload = {'demandUnits': demand_units, 'geologyDataset': geology_dataset_id, 'point': points}
+        r = requests.get(url, headers=self.client.headers, params=payload)
+        response = r.json()
+        return response
+
+
     def create_earthquake(self, config):
         url = self.base_earthquake_url
 
@@ -66,14 +74,22 @@ class HazardService:
         response = r.json()
         return response
 
-    def get_tornado_hazard_value(self, hazard_id:str, demand_units: str, site_lat, site_long, simulation=0):
+    def get_tornado_hazard_value(self, hazard_id: str, demand_units: str, site_lat, site_long, simulation=0):
         url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/value")
         payload = {'demandUnits': demand_units, 'siteLat': site_lat,
-                   'siteLong': site_long, 'simulation':simulation}
+                   'siteLong': site_long, 'simulation': simulation}
         r = requests.get(url, headers=self.client.headers, params=payload)
         response = r.json()
 
         return response['hazardValue']
+
+    def get_tornado_hazard_values(self, hazard_id: str, demand_units: str, points: List):
+        url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/values")
+        payload = {'demandUnits': demand_units, 'point': points}
+        r = requests.get(url, headers=self.client.headers, params = payload)
+        response = r.json()
+
+        return response
 
     def create_tornado_scenario(self, scenario):
         url = self.base_tornado_url
@@ -84,5 +100,7 @@ class HazardService:
         r = requests.post(url, data=scenario, headers=new_headers)
         response = r.json()
         return response
+
+
 
 
