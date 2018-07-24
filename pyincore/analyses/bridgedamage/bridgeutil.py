@@ -189,7 +189,7 @@ class BridgeUtil:
         :return: a string retrofit type
         """
         return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][0] \
-            if target_fragility_key.lower() not in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
+            if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
 
     @staticmethod
     def get_retrofit_code(target_fragility_key):
@@ -199,7 +199,7 @@ class BridgeUtil:
         :return: a string retrofit code
         '''
         return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][1] \
-            if target_fragility_key.lower() not in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
+            if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
 
     @staticmethod
     def write_to_file(output, fieldname_list, output_file_name):
