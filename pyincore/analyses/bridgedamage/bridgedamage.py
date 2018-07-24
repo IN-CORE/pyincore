@@ -41,11 +41,11 @@ class BridgeDamage:
         self.output_file_name = output_file_name
 
     def get_damage(self, inventory_set: dict, mapping_id: str, use_liquefaction: bool, use_hazard_uncertainty: bool):
-        '''
+        """
         Main function to perform bridge damage analysis.
 
         :return: a list of ordered dictionary.
-        '''
+        """
         output = []
 
         fragility_set = self.fragilitysvc.map_fragilities(mapping_id, inventory_set, self.fragility_key)
@@ -63,13 +63,13 @@ class BridgeDamage:
         return output
 
     def bridge_damage_analysis(self, cur_bridge, cur_fragility, use_liquefaction, use_hazard_uncertainty):
-        '''
+        """
         Calculates bridge damage results for single fragility.
 
         :param cur_bridge: current bridge
         :param cur_fragility: current fragility
         :return: an ordered dictionary with 15 fields listed below
-        '''
+        """
         bridge_results = collections.OrderedDict()
 
         center_point = GeoUtil.get_location(cur_bridge)

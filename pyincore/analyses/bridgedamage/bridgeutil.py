@@ -17,21 +17,21 @@ class BridgeUtil:
 
     @staticmethod
     def get_hazard_std_dev():
-        '''
+        """
         To be developed
 
         :return:
-        '''
+        """
         return 0.0
 
     @staticmethod
     def get_damage_state_intervals(exceedence_probability):
-        '''
+        """
         Calculates damage state intervals for current fragility.
 
         :param exceedence_probability: input list of exceedence probability
         :return: damage intervals
-        '''
+        """
         dmg_intervals = []
         for idx, val in enumerate(exceedence_probability):
             if idx == 0:
@@ -83,12 +83,12 @@ class BridgeUtil:
 
     @staticmethod
     def get_expected_damage(mean_damage, dmg_ratios):
-        '''
+        """
         Calculates expected damage value.
 
         :param mean_damage:
         :return:
-        '''
+        """
         no_dmg_bound = [float(dmg_ratios[1]["Lower Bound"]), float(dmg_ratios[1]["Upper Bound"])]
         slight_bound = [float(dmg_ratios[2]["Lower Bound"]), float(dmg_ratios[2]["Upper Bound"])]
         moderate_bound = [float(dmg_ratios[3]["Lower Bound"]), float(dmg_ratios[3]["Upper Bound"])]
@@ -110,14 +110,14 @@ class BridgeUtil:
 
     @staticmethod
     def get_probability_of_exceedence(cur_fragility, hazard_val, std_dev, use_liquefaction):
-        '''
+        """
         Calculates probability of exceedence.
 
         :param cur_fragility:
         :param hazard_val:
         :param std_dev:
         :return:
-        '''
+        """
         exceedence_probability = []
         for curve in cur_fragility["fragilityCurves"]:
             median = float(curve['median'])
@@ -143,13 +143,13 @@ class BridgeUtil:
 
     @staticmethod
     def adjust_fragility_for_liquefaction(fragility_curve, liquefaction):
-        '''
+        """
         Adjusts fragility curve object by input parameter liquefaction
 
         :param fragility_curve: original fragility curve
         :param liquefaction: a string parameter indicating liquefaction type
         :return: an adjust fragility curve object
-        '''
+        """
         liquefaction_unified = str(liquefaction).upper()
         if liquefaction_unified == "U":
             multiplier = 0.85
@@ -168,12 +168,12 @@ class BridgeUtil:
 
     @staticmethod
     def get_retrofit_cost(target_fragility_key):
-        '''
+        """
         To be continue. This function is not completed yet. Need real data example on the following variable
             private FeatureDataset bridgeRetrofitCostEstimate
 
         :return:
-        '''
+        """
         retrofit_cost = 0.0
         if target_fragility_key.lower() == BridgeUtil.DEFAULT_FRAGILITY_KEY.lower():
             return retrofit_cost
@@ -193,22 +193,22 @@ class BridgeUtil:
 
     @staticmethod
     def get_retrofit_code(target_fragility_key):
-        '''
+        """
         Gets retrofit code by looking up BRIDGE_FRAGILITY_KEYS dictionary
 
         :return: a string retrofit code
-        '''
+        """
         return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][1] \
             if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
 
     @staticmethod
     def write_to_file(output, fieldname_list, output_file_name):
-        '''
+        """
         Generates output csv file with header
 
         :param output: content to be written to output
         :return:
-        '''
+        """
         # Write Output to csv
         with open(output_file_name, 'w') as csv_file:
             writer = csv.DictWriter(csv_file, dialect="unix", fieldnames=fieldname_list)
