@@ -3,6 +3,7 @@ from typing import List, Dict
 import math
 import os
 from scipy.stats import norm
+from py_expression_eval import Parser
 from pyincore import DataService
 
 
@@ -178,3 +179,22 @@ class AnalysisUtil:
         datasvc.add_files_to_dataset(result_dataset_id, result_files)
 
         return result_dataset_id
+
+    @staticmethod
+    def compute_custom_limit_state_probability(fragility_set, variables: dict):
+        """Computes custom expression fragility values
+        :param fragility_set: fragility set with custom expression
+        :param variables: variables to set
+        :return:
+        """
+
+        fragility_curves = fragility_set['fragilityCurves']
+        limit_state_prob = 0.0
+        for fragility_curve in fragility_curves:
+            if fragility_curve['className'] == \
+                    'edu.illinois.ncsa.incore.service.fragility.models.CustomExpressionFragilityCurve':
+                expression = fragility_curve['expression']
+                parser = Parser()
+                limit_state_prob = parser.parse(expression).evaluate(variables)
+
+        return limit_state_prob
