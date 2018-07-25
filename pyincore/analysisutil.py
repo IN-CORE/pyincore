@@ -232,6 +232,7 @@ class AnalysisUtil:
 
     @staticmethod
     def compute_damage_intervals(ls_probs):
+        #Assumes that 4 limit states are present: slight, moderate, extensive and complete
         try:
             dmg_intervals = collections.OrderedDict()
             # ['none', 'slight-mod', 'mod-extens', 'ext-comple', 'complete']
@@ -256,7 +257,7 @@ class AnalysisUtil:
 
 
     @staticmethod
-    def adjustLimitStatesForPGD(limit_states, pgd_limit_states):
+    def adjust_limit_states_for_pgd(limit_states, pgd_limit_states):
         try:
             adj_limit_states = collections.OrderedDict()
 
