@@ -215,11 +215,10 @@ class AnalysisUtil:
             variance = 1.0
             x = math.log(val / median) / beta
             return norm.cdf(x, mean, variance)
-            # return 0.5 * (1 + sp.erf((x - mean) / (variance * math.sqrt(2))))
         elif curve['curveType'] == 'LogNormal':
             x = (math.log(val) - median) / (math.sqrt(2) * beta)
             return lognorm.cdf(x)
-            # return 0.5*(1+sp.erf(x))
+
 
     @staticmethod
     def compute_limit_state_probability(fragility_curves, hazard_val, yvalue,
@@ -235,9 +234,6 @@ class AnalysisUtil:
         #Assumes that 4 limit states are present: slight, moderate, extensive and complete
         try:
             dmg_intervals = collections.OrderedDict()
-            # ['none', 'slight-mod', 'mod-extens', 'ext-comple', 'complete']
-
-
             dmg_intervals['none'] = 1 - ls_probs['ls_slight']
             # what happens when this value is negative ie, moderate > slight
             dmg_intervals['slight-mod'] = ls_probs['ls_slight'] - \
