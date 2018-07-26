@@ -40,6 +40,11 @@ class BridgeDamage:
             float(self.dmg_ratios[6]['Best Mean Damage Ratio'])]
         self.output_file_name = output_file_name
 
+    @staticmethod
+    def get_output_metadata():
+        output = {"dataType": "ergo:bridgeDamage", "format": "table"}
+        return output
+
     def get_damage(self, inventory_set: dict, mapping_id: str, use_liquefaction: bool, use_hazard_uncertainty: bool):
         """
         Main function to perform bridge damage analysis.

@@ -13,7 +13,7 @@ class BridgeUtil:
         "non-retrofit fragility id code": ["as built", "none"]
     }
 
-    DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code";
+    DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
 
     @staticmethod
     def get_hazard_std_dev():
