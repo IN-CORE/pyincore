@@ -144,17 +144,17 @@ class WaterFacilityDamage:
         result = collections.OrderedDict()
         result = {**limit_states, **dmg_intervals}  # Needs py 3.5+
 
-        for k, v in result.items():
-            result[k] = round(v, 2)
+        # for k, v in result.items():
+        #     result[k] = round(v, 2)
 
         metadata = collections.OrderedDict()
         metadata['guid'] = facility['properties']['guid']
         metadata['hazardtype'] = "earthquake"
         metadata['demandtype'] = hazard_demand_type
-        metadata['hazardval'] = round(hazard_val, 4)
+        metadata['hazardval'] = hazard_val
         metadata['liqhaztype'] = liq_hazard_type
-        metadata['liqhazval'] = round(liq_hazard_val, 4)
-        metadata['liqprobability'] = round(liquefaction_prob, 2)
+        metadata['liqhazval'] = liq_hazard_val
+        metadata['liqprobability'] = liquefaction_prob
 
         result = {**metadata, **result}
         return result
