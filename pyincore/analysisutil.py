@@ -200,7 +200,7 @@ class AnalysisUtil:
         return limit_state_prob
 
     @staticmethod
-    def compute_cdf(curve, val, std_dev):
+    def compute_cdf(curve, val, std_dev=0):
         if val == 0:
             return 0
 
@@ -210,14 +210,15 @@ class AnalysisUtil:
         if std_dev != 0:
             beta = math.sqrt(math.pow(beta, 2) + math.pow(std_dev, 2))
 
-        if curve['curveType'] == 'Normal':
-            mean = 0.0
-            variance = 1.0
+        mean = 0.0
+        variance = 1.0
+
+        if curve['curveType'].lower() == 'normal':
             x = math.log(val / median) / beta
             return norm.cdf(x, mean, variance)
-        elif curve['curveType'] == 'LogNormal':
-            x = (math.log(val) - median) / (math.sqrt(2) * beta)
-            return lognorm.cdf(x)
+        elif curve['curveType'].lower() == 'lognormal':
+            x = (math.log(val) - median) / beta
+            return norm.cdf(x, mean, variance)
 
 
     @staticmethod
