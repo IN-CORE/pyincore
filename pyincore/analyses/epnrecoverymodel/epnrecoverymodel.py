@@ -334,7 +334,7 @@ class EpnRecoveryModel:
 
 if __name__ == "__main__":
     # data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_data'))
-    # data_path = "C:\Workspace-incore2\\pyincore\\pyincore\\analyses\\epn_recovery_model\\original\\test_data\\gdal_test\\"
+    # data_path = "C:\Workspace-incore2\\pyincore\\pyincore\\analyses\\epnrecoverymodel\\original\\test_data\\gdal_test\\"
     # boudary = os.path.join(data_path, "isaac_parish.shp")
     # wind = os.path.join(data_path, "isaac_hwind.tif")
     # surge = os.path.join(data_path, "isaac_surge.tif")

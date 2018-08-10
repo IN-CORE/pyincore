@@ -15,7 +15,7 @@ from osgeo import ogr
 from rasterstats import zonal_stats
 import pandas as pd
 
-os.chdir("C:\Workspace-incore2\\analyses\\epn_recovery_model\\original\\test_data\\gdal_test\\")
+os.chdir("C:\Workspace-incore2\\analyses\\epnrecoverymodel\\original\\test_data\\gdal_test\\")
 
 # Define parcel and zip code bounday shapefiles
 # boundary = input("Please enter the name of the boundary "
