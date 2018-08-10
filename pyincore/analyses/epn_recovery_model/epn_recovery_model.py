@@ -11,18 +11,17 @@
 import sys
 import os
 import numpy
-from osgeo import ogr
+import fiona
 from rasterstats import zonal_stats
 import pandas as pd
+import shutil
 
-from pyincore import InsecureIncoreClient
+from pyincore import InsecureIncoreClient, HazardService, FragilityService, DataService
+from pyincore import GeoUtil, AnalysisUtil
 
 
 class EpnRecoveryModel:
-    def __init__(self, boundary='', wind='', surge='', rain='', header='', hzd_wind=False, hzd_surge=False, hzd_rain=False):
-
-        # os.chdir("C:\Workspace-incore2\\analyses\\epn_recovery_model\\original\\test_data\\gdal_test\\")
-
+    def __init__(self, client, boundary_id='', wind_id='', surge_id='', rain_id='', hzd_wind=False, hzd_surge=False, hzd_rain=False):
         # boundary: parcel and zip code bounday shapefiles
         # wind: hurricane hazard raster
         #   Maximum sustained wind speed (in meters per second).
@@ -32,9 +31,19 @@ class EpnRecoveryModel:
         # rain: maximum daily total rainfall (in millimeters) raster
         # header: column name which stores identifiers for the boundary data
 
+        # Create Hazard and Fragility service
+        self.hazardsvc = HazardService(client)
+        self.fragilitysvc = FragilityService(client)
+        self.datasetsvc = DataService(client)
+        self.boundary_id = boundary_id
+        self.wind_id = wind_id
+        self.surge_id = surge_id
+        self.rain_id = rain_id
+        unique_fld = "guid"
+
         wind_on = False
         surge_on = False
-        fain_on = False
+        rain_on = False
         hzd_number = 0
 
         if hzd_wind:
@@ -45,38 +54,61 @@ class EpnRecoveryModel:
             hzd_number += 1
 
         # check if the dataset provided
-        if len(wind) > 0:
+        if len(wind_id) > 0:
             wind_on = True
-        if len(surge) > 0:
+        if len(surge_id) > 0:
             surge_on = True
-        if len(rain) > 0:
+        if len(rain_id) > 0:
             rain_on = True
+
+        # store shpefiles in the tmp directory
+        # store boundary shapefile
+        boundary_shp_name = self.datasetsvc.get_dataset_blob(boundary_id)
+        tmpdir, tail = os.path.split(boundary_shp_name)
+        boundary_path = os.path.join(boundary_shp_name, tail) + ".shp"
+
+        # store wind geotif
+        wind_name = self.datasetsvc.get_dataset_blob(wind_id)
+        tmpdir, tail = os.path.split(wind_name)
+        wind_path = os.path.join(wind_name, tail) + ".tif"
+
+        # store surge geotif
+        surge_name = self.datasetsvc.get_dataset_blob(surge_id)
+        tmpdir, tail = os.path.split(surge_name)
+        surge_path = os.path.join(surge_name, tail) + ".tif"
+
+        # store wind geotif
+        rain_name = self.datasetsvc.get_dataset_blob(rain_id)
+        tmpdir, tail = os.path.split(rain_name)
+        rain_path = os.path.join(rain_name, tail) + ".tif"
 
         # check if the hazard dataset and fragility relationship
         if hzd_wind:
-            if hzd_wind == False:
+            if wind_on == False:
                 sys.exit("Wind hazard can't be applied since there is no rain dataset")
         if hzd_surge:
-            if hzd_surge == False:
+            if surge_on == False:
                 sys.exit("Surge hazard can't be applied since there is no rain dataset")
         if hzd_rain:
             if rain_on == False:
                 sys.exit("Rain hazard can't be applied since there is no rain dataset")
 
-        ds = ogr.Open(boundary, 0)
-        lyr = ds.GetLayer(0)
+        # ds = ogr.Open(boundary_path, 0)
+        # lyr = ds.GetLayer(0)
         name = []
         id = []
         i = 0
-        for feat in lyr:
-            name.append(feat.GetFieldAsString(header))
-            id.append(feat.GetFID())
+
+        boundary = fiona.open(boundary_path)
+        for poly in boundary:
+            name.append(poly['properties'][unique_fld])
+            id.append(i)
+            i += 1
         bound_table = {'Name': name, 'ID': id}
         df_bound = pd.DataFrame(bound_table)
 
-
         if rain_on:
-            stats = zonal_stats(boundary, wind, stats='mean')
+            stats = zonal_stats(boundary_path, wind_path, stats='mean')
             h_w = pd.DataFrame(stats)
             h_w['ID'] = h_w.index.values
             h_w.columns = ['Wind_ms', 'ID']
@@ -86,7 +118,7 @@ class EpnRecoveryModel:
         # Calculate maximum storm surge level within each zip code boundary
         # if surge != "NA":
         if surge_on:
-            stats = zonal_stats(boundary, surge, stats='mean')
+            stats = zonal_stats(boundary_path, surge_path, stats='mean')
             h_s = pd.DataFrame(stats)
             h_s['ID'] = h_s.index.values
             h_s.columns = ['Surge_m', 'ID']
@@ -102,7 +134,7 @@ class EpnRecoveryModel:
         # of the hurricane.
         # if rain != "NA":
         if rain_on:
-            stats = zonal_stats(boundary, rain, stats='mean')
+            stats = zonal_stats(boundary_path, rain_path, stats='mean')
             h_r = pd.DataFrame(stats)
             h_r['ID'] = h_r.index.values
             h_r.columns = ['Rain_mm', 'ID']
@@ -147,8 +179,6 @@ class EpnRecoveryModel:
         #                    "Choose from Wind, Surge, or Rain. "
         #                    "Combination of two or three hazards is also allowed"
         #                    " (separate hazards with single space)\n")
-        hazard = 'wind, rain'
-        model = hazard.split()
 
         # Select the proper fragility function to use based on user input
         if hzd_number == 0:
@@ -223,47 +253,6 @@ class EpnRecoveryModel:
         # Calculate 'tr' using 'Omega'
         output['tr'] = numpy.exp(3.062 - 1.092 * output['Omega'])
 
-        # ----------------------------------------------------------------------
-        # Daily Power Outage 'Xt' Calculation
-        # ----------------------------------------------------------------------
-        # Calculate outage for each day 'i' where 'i < maxtf' using
-        # defined 'getxt' function
-
-
-        def getxt(x0, w, t):
-            """
-                Summary
-                -------
-                Calculate power outage fraction for each zone on day t after
-                hurricane landfall (t = 0 at landfall).
-
-                Parameters
-                ----------
-                x0 : float
-                    The peak power outage fraction at hurricane landfall.
-                w : float
-                    Parameters for the recovery function.
-                t : int
-                    The number of days after landfall.
-
-                Returns
-                -------
-                float
-                    Power outage fraction for each zone on day t.
-
-            """
-            z = 1.001
-            x0dot = 0
-            alpha = w * z
-            beta = w * numpy.sqrt(z ** 2 - 1)
-            term1 = (((alpha + beta) * x0 + x0dot) / (2 * beta)) * \
-                numpy.exp(-(alpha - beta) * t)
-            term2 = (((beta - alpha) * x0 - x0dot) / (2 * beta)) * \
-                numpy.exp(-(alpha + beta) * t)
-
-            return term1 + term2
-
-
         # Find maximum tr value for each affected zip code
         n = numpy.ceil(numpy.max(output['tr']))
 
@@ -275,21 +264,92 @@ class EpnRecoveryModel:
             fieldName = "Day" + str(i)
             x0 = output['X0']
             w = output['Omega']
-            output[fieldName] = getxt(x0, w, i)
+            output[fieldName] = self.getxt(x0, w, i)
             i += 1
 
         # Write csv table to file
         result = pd.merge(output, df_bound, on='ID')
-        result.to_csv('result.csv')
+        out_csv = os.path.join(tmpdir, 'result.csv')
+        result.to_csv(out_csv)
+
+        csv_dataset_id = self.update_csv_dataset(out_csv, client)
+
+        print(csv_dataset_id)
+        boundary.close()
+        shutil.rmtree(tmpdir)
+
+    def update_csv_dataset(self, out_csv, client):
+        # create data set and post to dataservice
+        outdict = {}
+        outdict["sourceDataset"] = self.boundary_id
+        outdict["title"] = 'EPN Recovery'
+        outdict["creator"] = client.headers.get("X-Credential-Username")
+        outdict["format"] = 'table'
+        outdict['dataType'] = 'incore:EPNRecoveryVer1'
+
+        dataset_json = self.datasetsvc.create_dataset(outdict)
+        dataset_id = dataset_json["id"]
+
+        self.datasetsvc.add_files_to_dataset(dataset_id, [out_csv])
+
+        return dataset_id
+
+    # ----------------------------------------------------------------------
+    # Daily Power Outage 'Xt' Calculation
+    # ----------------------------------------------------------------------
+    # Calculate outage for each day 'i' where 'i < maxtf' using
+    # defined 'getxt' function
+    def getxt(self, x0, w, t):
+        """
+            Summary
+            -------
+            Calculate power outage fraction for each zone on day t after
+            hurricane landfall (t = 0 at landfall).
+
+            Parameters
+            ----------
+            x0 : float
+                The peak power outage fraction at hurricane landfall.
+            w : float
+                Parameters for the recovery function.
+            t : int
+                The number of days after landfall.
+
+            Returns
+            -------
+            float
+                Power outage fraction for each zone on day t.
+
+        """
+        z = 1.001
+        x0dot = 0
+        alpha = w * z
+        beta = w * numpy.sqrt(z ** 2 - 1)
+        term1 = (((alpha + beta) * x0 + x0dot) / (2 * beta)) * \
+                numpy.exp(-(alpha - beta) * t)
+        term2 = (((beta - alpha) * x0 - x0dot) / (2 * beta)) * \
+                numpy.exp(-(alpha + beta) * t)
+
+        return term1 + term2
 
 if __name__ == "__main__":
     # data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_data'))
-    data_path = "C:\Workspace-incore2\\pyincore\\pyincore\\analyses\\epn_recovery_model\\original\\test_data\\gdal_test\\"
-    boudary = os.path.join(data_path, "isaac_parish.shp")
-    wind = os.path.join(data_path, "isaac_hwind.tif")
-    surge = os.path.join(data_path, "isaac_surge.tif")
-    rain = os.path.join(data_path, "isaac_rainfall.tif")
-    header = 'NAME'
+    # data_path = "C:\Workspace-incore2\\pyincore\\pyincore\\analyses\\epn_recovery_model\\original\\test_data\\gdal_test\\"
+    # boudary = os.path.join(data_path, "isaac_parish.shp")
+    # wind = os.path.join(data_path, "isaac_hwind.tif")
+    # surge = os.path.join(data_path, "isaac_surge.tif")
+    # rain = os.path.join(data_path, "isaac_rainfall.tif")
+    # header = 'NAME'
+
+    boundary_id = '5b6b4027ec2309042a34be01'
+    rain_id = '5b6b4481ec2309042a34be17'
+    surge_id = '5b6b44ceec2309042a34be1b'
+    wind_id = '5b6b4515ec2309042a34be1f'
 
     client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "ywkim")
-    EpnRecoveryModel(boudary, wind, surge, rain, header, True, True, True)
+    EpnRecoveryModel(client, boundary_id, wind_id, surge_id, rain_id, True, True, True)
+
+    # parish dataset id: 5b6b4027ec2309042a34be01
+    # rainfall id: 5b6b4481ec2309042a34be17
+    # surge id: 5b6b44ceec2309042a34be1b
+    # wind id: 5b6b4515ec2309042a34be1f
