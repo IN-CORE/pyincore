@@ -25,9 +25,10 @@ hs_err_pid*
 # incore pw file
 tests/.incorepw
 
-# incore download data
+# incore download data or test data
 tests/data/
 cache_data/
+original/
 
 # pytest cache
 .pytest_cache

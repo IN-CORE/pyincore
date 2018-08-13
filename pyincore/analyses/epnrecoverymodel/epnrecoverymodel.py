@@ -104,7 +104,7 @@ class EpnRecoveryModel:
             name.append(poly['properties'][unique_fld])
             id.append(i)
             i += 1
-        bound_table = {'Name': name, 'ID': id}
+        bound_table = {'guid': name, 'ID': id}
         df_bound = pd.DataFrame(bound_table)
 
         if rain_on:
@@ -268,7 +268,7 @@ class EpnRecoveryModel:
             i += 1
 
         # Write csv table to file
-        result = pd.merge(output, df_bound, on='ID')
+        result = pd.merge(df_bound, output, on='ID')
         out_csv = os.path.join(tmpdir, 'result.csv')
         result.to_csv(out_csv)
 
@@ -331,25 +331,3 @@ class EpnRecoveryModel:
                 numpy.exp(-(alpha + beta) * t)
 
         return term1 + term2
-
-if __name__ == "__main__":
-    # data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_data'))
-    # data_path = "C:\Workspace-incore2\\pyincore\\pyincore\\analyses\\epnrecoverymodel\\original\\test_data\\gdal_test\\"
-    # boudary = os.path.join(data_path, "isaac_parish.shp")
-    # wind = os.path.join(data_path, "isaac_hwind.tif")
-    # surge = os.path.join(data_path, "isaac_surge.tif")
-    # rain = os.path.join(data_path, "isaac_rainfall.tif")
-    # header = 'NAME'
-
-    boundary_id = '5b6b4027ec2309042a34be01'
-    rain_id = '5b6b4481ec2309042a34be17'
-    surge_id = '5b6b44ceec2309042a34be1b'
-    wind_id = '5b6b4515ec2309042a34be1f'
-
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "ywkim")
-    EpnRecoveryModel(client, boundary_id, wind_id, surge_id, rain_id, True, True, True)
-
-    # parish dataset id: 5b6b4027ec2309042a34be01
-    # rainfall id: 5b6b4481ec2309042a34be17
-    # surge id: 5b6b44ceec2309042a34be1b
-    # wind id: 5b6b4515ec2309042a34be1f
