@@ -274,7 +274,7 @@ class EpnRecoveryModel:
 
         csv_dataset_id = self.update_csv_dataset(out_csv, client)
 
-        print(csv_dataset_id)
+        print("The output dataset's id: ", csv_dataset_id)
         boundary.close()
         shutil.rmtree(tmpdir)
 
