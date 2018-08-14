@@ -210,15 +210,12 @@ class AnalysisUtil:
         if std_dev != 0:
             beta = math.sqrt(math.pow(beta, 2) + math.pow(std_dev, 2))
 
-        mean = 0.0
-        variance = 1.0
-
         if curve['curveType'].lower() == 'normal':
             x = math.log(val / median) / beta
-            return norm.cdf(x, mean, variance)
+            return norm.cdf(x)
         elif curve['curveType'].lower() == 'lognormal':
             x = (math.log(val) - median) / beta
-            return norm.cdf(x, mean, variance)
+            return norm.cdf(x)
 
 
     @staticmethod
