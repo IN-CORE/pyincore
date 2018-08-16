@@ -45,27 +45,25 @@ class WaterFacilityDamage:
         hazard_type = hazard_input_split[0]
         hazard_dataset_id = hazard_input_split[1]
 
-        if num_threads != -1:
-            parallel_threads = AnalysisUtil.determine_parallelism_locally(self,
-                                        len(inventory_set), num_threads)
 
-            features_per_thread = int(len(inventory_set) / parallel_threads)
-            inventory_args = []
-            count = 0
-            inventory_list = list(inventory_set)
+        parallel_threads = AnalysisUtil.determine_parallelism_locally(self,
+                                    len(inventory_set), num_threads)
 
-            while count < len(inventory_list):
-                inventory_args.append(
-                    inventory_list[count:count + features_per_thread])
-                count += features_per_thread
+        features_per_thread = int(len(inventory_set) / parallel_threads)
+        inventory_args = []
+        count = 0
+        inventory_list = list(inventory_set)
 
-            output = self.waterfacility_damage_concurrent_execution(
-                self.waterfacilityset_damage_analysis, parallel_threads,
-                inventory_args, repeat(mapping_id), repeat(self.hazardsvc),
-                repeat(hazard_dataset_id), repeat(liq_geology_dataset_id), repeat(uncertainity))
-        else:
-            output = self.waterfacilityset_damage_analysis(inventory_set, mapping_id, self.hazardsvc,
-                                            hazard_dataset_id,liq_geology_dataset_id,uncertainity)
+        while count < len(inventory_list):
+            inventory_args.append(
+                inventory_list[count:count + features_per_thread])
+            count += features_per_thread
+
+        output = self.waterfacility_damage_concurrent_execution(
+            self.waterfacilityset_damage_analysis, parallel_threads,
+            inventory_args, repeat(mapping_id), repeat(self.hazardsvc),
+            repeat(hazard_dataset_id), repeat(liq_geology_dataset_id), repeat(uncertainity))
+
 
         out_file_name = "dmg-results.csv"
 
@@ -110,9 +108,9 @@ class WaterFacilityDamage:
 
         fragility_yvalue = 1.0  # is this relevant? copied from v1
 
-        hazard_demand_type = "pga" #Move to init?
-        demand_units = "g"
-        liq_hazard_type = "pgd"
+        hazard_demand_type = fragility['demandType']
+        demand_units = fragility['demandUnits']
+        liq_hazard_type = ""
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
         location = GeoUtil.get_location(facility)
@@ -125,7 +123,6 @@ class WaterFacilityDamage:
 
 
         if liq_fragility is not None and liq_geology_dataset_id:
-            liq_fragility_curve = liq_fragility['fragilityCurves'][0]
             liq_hazard_type = liq_fragility['demandType']
             pgd_demand_units = liq_fragility['demandUnits']
             location_str = str(location.y) + "," + str(location.x)
