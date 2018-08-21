@@ -85,10 +85,10 @@ class EpnRecoveryModel:
         # check if the hazard dataset and fragility relationship
         if hzd_wind:
             if wind_on == False:
-                sys.exit("Wind hazard can't be applied since there is no rain dataset")
+                sys.exit("Wind hazard can't be applied since there is no wind dataset")
         if hzd_surge:
             if surge_on == False:
-                sys.exit("Surge hazard can't be applied since there is no rain dataset")
+                sys.exit("Surge hazard can't be applied since there is no surge dataset")
         if hzd_rain:
             if rain_on == False:
                 sys.exit("Rain hazard can't be applied since there is no rain dataset")
