@@ -21,7 +21,23 @@ from pyincore import GeoUtil, AnalysisUtil
 
 
 class EpnRecoveryModel:
-    def __init__(self, client, boundary_id='', wind_id='', surge_id='', rain_id='', hzd_wind=False, hzd_surge=False, hzd_rain=False):
+    def __init__(self, client):
+        # Create Hazard and Fragility service
+        self.hazardsvc = HazardService(client)
+        self.fragilitysvc = FragilityService(client)
+        self.datasetsvc = DataService(client)
+
+    def get_recovery(self, boundary_id='', wind_id='', surge_id='', rain_id='', hzd_wind=False, hzd_surge=False, hzd_rain=False):
+        """
+        :param boundary_id: boundary shapefile dataset id
+        :param wind_id: wind geotif dataset id
+        :param surge_id: surge geotif dataset id
+        :param rain_id: rain geotif dataset id
+        :param hzd_wind: Boolean for including wind hazard in analysis
+        :param hzd_surge: Boolean for including surge hazard in analysis
+        :param hzd_rain: Boolean for including rain hazard in analysis
+        :return: output_file_name: string of file name
+        """
         # boundary: parcel and zip code bounday shapefiles
         # wind: hurricane hazard raster
         #   Maximum sustained wind speed (in meters per second).
@@ -30,15 +46,10 @@ class EpnRecoveryModel:
         # surge: inland inundation level above ground (in meters) raster
         # rain: maximum daily total rainfall (in millimeters) raster
         # header: column name which stores identifiers for the boundary data
-
-        # Create Hazard and Fragility service
-        self.hazardsvc = HazardService(client)
-        self.fragilitysvc = FragilityService(client)
-        self.datasetsvc = DataService(client)
-        self.boundary_id = boundary_id
-        self.wind_id = wind_id
-        self.surge_id = surge_id
-        self.rain_id = rain_id
+        boundary_id = boundary_id
+        wind_id = wind_id
+        surge_id = surge_id
+        rain_id = rain_id
         unique_fld = "guid"
 
         wind_on = False
@@ -85,13 +96,13 @@ class EpnRecoveryModel:
         # check if the hazard dataset and fragility relationship
         if hzd_wind:
             if wind_on == False:
-                sys.exit("Wind hazard can't be applied since there is no wind dataset")
+                raise ValueError("Wind hazard can't be applied since there is no wind dataset")
         if hzd_surge:
             if surge_on == False:
-                sys.exit("Surge hazard can't be applied since there is no surge dataset")
+                raise ValueError("Surge hazard can't be applied since there is no surge dataset")
         if hzd_rain:
             if rain_on == False:
-                sys.exit("Rain hazard can't be applied since there is no rain dataset")
+                raise ValueError("Rain hazard can't be applied since there is no rain dataset")
 
         # ds = ogr.Open(boundary_path, 0)
         # lyr = ds.GetLayer(0)
@@ -182,7 +193,7 @@ class EpnRecoveryModel:
 
         # Select the proper fragility function to use based on user input
         if hzd_number == 0:
-            sys.exit("No hazard was selected")
+            raise ValueError("Hazard input error. Select at least one hazard or more.")
 
         if hzd_number == 1:
             if hzd_wind:
@@ -198,7 +209,7 @@ class EpnRecoveryModel:
                 output['X0'] = numpy.exp(-4 + 0.011 * h) / (
                         1 + numpy.exp(-4 + 0.011 * h))
             else:
-                sys.exit("Hazard input error")
+                raise ValueError("Hazard input error. Selected hazard doesn't have dataset id.")
 
         if hzd_number == 2:
             if hzd_wind and hzd_rain:
@@ -217,7 +228,7 @@ class EpnRecoveryModel:
                 output['X0'] = numpy.exp(-2.796 + 0.520 * h1 + 0.006 * h2) / (
                         1 + numpy.exp(-2.796 + 0.520 * h1 + 0.006 * h2))
             else:
-                sys.exit("Hazard input error")
+                raise ValueError("Hazard input error. Selected hazard doesn't have dataset id.")
 
         if hzd_number == 3:
             if hzd_wind and hzd_surge and hzd_rain:
@@ -229,7 +240,7 @@ class EpnRecoveryModel:
                         1 + numpy.exp(-4.956 + 0.156 * h1 + 0.043 * h2 +
                                      0.004 * h3))
             else:
-                sys.exit("Hazard input error")
+                raise ValueError("Hazard input error. Selected hazard doesn't have dataset id.")
 
         # ----------------------------------------------------------------------
         # Omega Calculation
@@ -269,8 +280,9 @@ class EpnRecoveryModel:
 
         # Write csv table to file
         result = pd.merge(df_bound, output, on='ID')
-        out_csv = os.path.join(tmpdir, 'result.csv')
-        result.to_csv(out_csv)
+        output_file_name = os.path.join(tmpdir, 'result.csv')
+        result.to_csv(output_file_name)
+        output_file_name = os.path.abspath(output_file_name)
 
         boundary.close()
 
@@ -296,6 +308,15 @@ class EpnRecoveryModel:
         except OSError:
             pass
 
+        return output_file_name
+
+    @staticmethod
+    def get_output_metadata():
+        output = {}
+        output["dataType"] = "incore:EPNRecoveryVer1"
+        output["format"] = "table"
+
+        return output
 
     # ----------------------------------------------------------------------
     # Daily Power Outage 'Xt' Calculation
