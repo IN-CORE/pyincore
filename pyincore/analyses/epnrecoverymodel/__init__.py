@@ -1,1 +1,1 @@
-from pyincore.analyses.epnrecoverymodel import epnrecoverymodel
+from pyincore.analyses.epnrecoverymodel.epnrecoverymodel import EpnRecoveryModel

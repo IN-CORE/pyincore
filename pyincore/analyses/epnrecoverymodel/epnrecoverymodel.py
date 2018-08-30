@@ -272,27 +272,30 @@ class EpnRecoveryModel:
         out_csv = os.path.join(tmpdir, 'result.csv')
         result.to_csv(out_csv)
 
-        csv_dataset_id = self.update_csv_dataset(out_csv, client)
-
-        print("The output dataset's id: ", csv_dataset_id)
         boundary.close()
-        shutil.rmtree(tmpdir)
 
-    def update_csv_dataset(self, out_csv, client):
-        # create data set and post to dataservice
-        outdict = {}
-        outdict["sourceDataset"] = self.boundary_id
-        outdict["title"] = 'EPN Recovery'
-        outdict["creator"] = client.headers.get("X-Credential-Username")
-        outdict["format"] = 'table'
-        outdict['dataType'] = 'incore:EPNRecoveryVer1'
+        # remove downloaded files and only leave the output csv file
+        shutil.rmtree(boundary_shp_name)
+        shutil.rmtree(wind_name)
+        shutil.rmtree(surge_name)
+        shutil.rmtree(rain_name)
+        try:
+            os.remove(boundary_shp_name + ".zip")
+        except OSError:
+            pass
+        try:
+            os.remove(wind_name + ".zip")
+        except OSError:
+            pass
+        try:
+            os.remove(surge_name + ".zip")
+        except OSError:
+            pass
+        try:
+            os.remove(rain_name + ".zip")
+        except OSError:
+            pass
 
-        dataset_json = self.datasetsvc.create_dataset(outdict)
-        dataset_id = dataset_json["id"]
-
-        self.datasetsvc.add_files_to_dataset(dataset_id, [out_csv])
-
-        return dataset_id
 
     # ----------------------------------------------------------------------
     # Daily Power Outage 'Xt' Calculation
