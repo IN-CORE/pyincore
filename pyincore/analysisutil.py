@@ -2,7 +2,7 @@ import collections
 from typing import List, Dict
 import math
 import os
-from scipy.stats import norm
+from scipy.stats import norm, lognorm
 from py_expression_eval import Parser
 from pyincore import DataService
 
@@ -198,3 +198,70 @@ class AnalysisUtil:
                 limit_state_prob = parser.parse(expression).evaluate(variables)
 
         return limit_state_prob
+
+    @staticmethod
+    def compute_cdf(curve, val, std_dev=0):
+        if val == 0:
+            return 0
+
+        median = curve['median']
+        beta = curve['beta']
+
+        if std_dev != 0:
+            beta = math.sqrt(math.pow(beta, 2) + math.pow(std_dev, 2))
+
+        if curve['curveType'].lower() == 'normal':
+            x = math.log(val / median) / beta
+            return norm.cdf(x)
+        elif curve['curveType'].lower() == 'lognormal':
+            x = (math.log(val) - median) / beta
+            return norm.cdf(x)
+
+
+    @staticmethod
+    def compute_limit_state_probability(fragility_curves, hazard_val, yvalue,
+                                        std_dev):
+        ls_probs = collections.OrderedDict()
+        for fragility in fragility_curves:
+            ls_probs['ls_' + fragility['description'].lower()] = \
+                AnalysisUtil.compute_cdf(fragility, hazard_val, std_dev)
+        return ls_probs
+
+    @staticmethod
+    def compute_damage_intervals(ls_probs):
+        #Assumes that 4 limit states are present: slight, moderate, extensive and complete
+        try:
+            dmg_intervals = collections.OrderedDict()
+            dmg_intervals['none'] = 1 - ls_probs['ls_slight']
+            # what happens when this value is negative ie, moderate > slight
+            dmg_intervals['slight-mod'] = ls_probs['ls_slight'] - \
+                                          ls_probs['ls_moderate']
+            dmg_intervals['mod-extens'] = ls_probs['ls_moderate'] - \
+                                          ls_probs['ls_extensive']
+            dmg_intervals['ext-comple'] = ls_probs['ls_extensive'] - \
+                                          ls_probs['ls_complete']
+            dmg_intervals['complete'] = ls_probs['ls_complete']
+            return dmg_intervals
+
+        except KeyError as e:
+            print('This function only works with the 4 hazus limit states - '
+                  'slight, moderate, extensive, complete')
+            print(str(e))
+
+
+
+    @staticmethod
+    def adjust_limit_states_for_pgd(limit_states, pgd_limit_states):
+        try:
+            adj_limit_states = collections.OrderedDict()
+
+            for key, value in limit_states.items():
+                adj_limit_states[key] = limit_states[key] + pgd_limit_states[key] - \
+                                        (limit_states[key] * pgd_limit_states[key])
+
+            return adj_limit_states
+
+        except KeyError as e:
+            print('Mismatched keys encountered in the limit states')
+            print(str(e))
+
