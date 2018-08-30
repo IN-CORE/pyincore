@@ -8,11 +8,10 @@ import collections
 
 from itertools import repeat
 from pyincore import HazardService, FragilityService, GeoUtil, AnalysisUtil
-import os
 import csv
 import concurrent.futures
-import traceback
 import random
+
 
 class WaterFacilityDamage:
     def __init__(self, client):
@@ -29,14 +28,14 @@ class WaterFacilityDamage:
         return output
 
     def get_damage(self, inventory_set:dict, mapping_id: str, hazard_input: str, liq_geology_dataset_id: str=None,
-                    uncertainity:bool=False, num_threads: int=0):
+                   uncertainty:bool=False, num_threads: int=0):
         """
 
         :param inventory_set:
         :param mapping_id:
         :param hazard_input:
         :param liq_geology_dataset_id:
-        :param uncertainity:
+        :param uncertainty:
         :param num_threads:
         :return:
         """
@@ -62,7 +61,7 @@ class WaterFacilityDamage:
         output = self.waterfacility_damage_concurrent_execution(
             self.waterfacilityset_damage_analysis, parallel_threads,
             inventory_args, repeat(mapping_id), repeat(self.hazardsvc),
-            repeat(hazard_dataset_id), repeat(liq_geology_dataset_id), repeat(uncertainity))
+            repeat(hazard_dataset_id), repeat(liq_geology_dataset_id), repeat(uncertainty))
 
 
         out_file_name = "dmg-results.csv"
@@ -80,8 +79,8 @@ class WaterFacilityDamage:
         return output
 
     def waterfacilityset_damage_analysis(self, facilities, mapping_id,
-                                            hazardsvc, hazard_dataset_id,
-                                            liq_geology_dataset_id, uncertainity):
+                                         hazardsvc, hazard_dataset_id,
+                                         liq_geology_dataset_id, uncertainty):
         result = []
         liq_fragility = None
 
@@ -96,14 +95,14 @@ class WaterFacilityDamage:
                 liq_fragility = liq_fragility_set[facility["id"]]
 
             result.append(self.waterfacility_damage_analysis(facility, fragility, liq_fragility,hazardsvc,
-                                hazard_dataset_id, liq_geology_dataset_id, uncertainity))
+                                hazard_dataset_id, liq_geology_dataset_id, uncertainty))
         return result
 
-    def waterfacility_damage_analysis(self, facility, fragility, liq_fragility,hazardsvc, hazard_dataset_id,
-                                      liq_geology_dataset_id, uncertainity):
+    def waterfacility_damage_analysis(self, facility, fragility, liq_fragility, hazardsvc, hazard_dataset_id,
+                                      liq_geology_dataset_id, uncertainty):
         std_dev = 0
         #TODO Get this from API once implemented
-        if uncertainity:
+        if uncertainty:
             std_dev = random.random()
 
         fragility_yvalue = 1.0  # is this relevant? copied from v1
@@ -114,8 +113,8 @@ class WaterFacilityDamage:
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
         location = GeoUtil.get_location(facility)
-        hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
-                                                        demand_units, location.y, location.x)
+        hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id,hazard_demand_type,
+                                                            demand_units, location.y, location.x)
 
         limit_states = AnalysisUtil.compute_limit_state_probability(fragility['fragilityCurves'],
                                                             hazard_val, fragility_yvalue, std_dev)
