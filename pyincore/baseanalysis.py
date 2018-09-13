@@ -128,7 +128,9 @@ class BaseAnalysis:
             err_msg = 'dataset type does not match'
         return (is_valid, err_msg)
 
-    def validate_analysis_run(self):
+
+    """ validates and runs the analysis """
+    def run_analysis(self):
         # TODO check required parameters and input datasets
         is_valid = True
         err_msg = ''
