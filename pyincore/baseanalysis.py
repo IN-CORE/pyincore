@@ -1,12 +1,16 @@
 import pprint
 
-
-
 # TODO: exception handling for validation and set methods
+from pyincore import DataService
+from pyincore.dataset import Dataset
+
+
 class BaseAnalysis:
-    def __init__(self):
+    def __init__(self, incoreClient):
         self.spec = self.get_spec()
         self.temp_folder = ''
+        self.client = incoreClient
+        self.data_service = DataService(self.client)
 
         # initialize parameters, input_datasets, output_datasets, etc
         self.parameters = {}
@@ -38,6 +42,10 @@ class BaseAnalysis:
             'output_datasets': [
             ]
         }
+
+    def load_remote_input_dataset(self, analysis_param_id, remote_id):
+        dataset = Dataset.from_data_service(remote_id, self.data_service)
+        self.set_input_dataset(analysis_param_id, dataset)
 
     def get_name(self):
         return self.spec['name']
@@ -115,7 +123,7 @@ class BaseAnalysis:
     def validate_input_dataset(self, dataset_spec, dataset):
         is_valid = True
         err_msg = ''
-        if not (dataset.type in dataset_spec['type']):
+        if not (dataset.data_type in dataset_spec['type']):
             is_valid = False
             err_msg = 'dataset type does not match'
         return (is_valid, err_msg)
@@ -123,18 +131,27 @@ class BaseAnalysis:
     def validate_output_dataset(self, dataset_spec, dataset):
         is_valid = True
         err_msg = ''
-        if not (dataset.type is dataset_spec['type']):
+        if not (dataset.data_type is dataset_spec['type']):
             is_valid = False
             err_msg = 'dataset type does not match'
         return (is_valid, err_msg)
 
-
     """ validates and runs the analysis """
+
     def run_analysis(self):
-        # TODO check required parameters and input datasets
-        is_valid = True
-        err_msg = ''
-        return (is_valid, err_msg)
+        for dataset_spec in self.spec['input_datasets']:
+            id = dataset_spec["id"]
+            result = self.validate_input_dataset(dataset_spec, self.input_datasets[id]["value"])
+            if not result[0]:
+                return result
+
+        for parameter_spec in self.spec['input_parameters']:
+            id = parameter_spec["id"]
+            result = self.validate_parameter(parameter_spec, self.get_parameter(id))
+            if not result[0]:
+                return result
+
+        return self.run()
 
     def run(self):
         if not self.validate_analysis_run()[0]:

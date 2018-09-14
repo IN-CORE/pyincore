@@ -1,6 +1,6 @@
 from pyincore import InsecureIncoreClient
 from pyincore.baseanalysis import BaseAnalysis
-
+import pprint
 
 class BuildingUglyAnalysis(BaseAnalysis):
     def run(self):
@@ -24,7 +24,7 @@ class BuildingUglyAnalysis(BaseAnalysis):
                     'id': 'buildings',
                     'required': True,
                     'description': 'Building Inventory',
-                    'type': ['building-v4', 'building-v5'],
+                    'type': ['ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer4'],
                 }
             ],
             'output_datasets': [
@@ -40,6 +40,13 @@ class BuildingUglyAnalysis(BaseAnalysis):
 if __name__ == "__main__":
 
     client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "ywkim")
-    analysis = BuildingUglyAnalysis()
+    analysis = BuildingUglyAnalysis(client)
 
-    analysis.set_input_dataset("buildings", )
+    analysis.load_remote_input_dataset("buildings", "5a284f1fc7d30d13bc081a7e")
+    #analysis.load_local_input_dataset("buildings", "/tmp/file.shp")
+
+    analysis.set_parameter("result_name", "is_ugly_result")
+    analysis.run_analysis()
+
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(analysis.get_output_dataset("result"))
