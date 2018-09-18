@@ -67,7 +67,12 @@ if __name__ == "__main__":
     analysis = BuildingUglyAnalysis(client)
 
     analysis.load_remote_input_dataset("buildings", "5a284f1fc7d30d13bc081a7e")
-    #analysis.load_local_input_dataset("buildings", "/tmp/file.shp")
+    #or you could do analysis.load_local_input_dataset("buildings", "/tmp/file.shp")
+
+    #if you tried to load a dataset of the wrong type, like bridges:
+    #analysis.load_remote_input_dataset("buildings", "xyzPretendBridgeId")
+    # then the validation step would barf and complain that the dataset has the
+    # wrong data type
 
     analysis.set_parameter("result_name", "is_ugly_result")
     analysis.run_analysis()
