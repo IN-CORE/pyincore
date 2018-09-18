@@ -17,12 +17,9 @@ class HazardService:
         self.base_tornado_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tornadoes/')
 
     def get_earthquake_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
-        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/value")
-        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'siteLat': site_lat, 'siteLong': site_long}
-        r = requests.get(url, headers=self.client.headers, params = payload)
-        response = r.json()
+        hazard_value_set = self.get_earthquake_hazard_values(hazard_id, demand_type, demand_units, points=[site_lat, site_long])
 
-        return float(response['hazardValue'])
+        return hazard_value_set[0]['hazardValue']
 
     def get_earthquake_hazard_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/values")
