@@ -1,11 +1,35 @@
-from pyincore import InsecureIncoreClient
+import random
+
+import collections
+
+from pyincore import InsecureIncoreClient, AnalysisUtil
 from pyincore.baseanalysis import BaseAnalysis
 import pprint
 
 class BuildingUglyAnalysis(BaseAnalysis):
     def run(self):
 
+        #omitting concurrency here, we could just to the same determine_parallelism_locally
+        #as is done in other existing anlayses
+
+        building_set = self.get_input_dataset("buildings").get_inventory_reader()
+        results = []
+
+        for building in building_set:
+            results.append(self.building_ugly_analysis(building))
+
+        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
+
         return True
+
+    def building_ugly_analysis(self, building):
+        ugly_results = collections.OrderedDict()
+        ugly_results['guid'] = building['properties']['guid']
+        ugly_results["ugly_rating"] = str(random.randint(1,101))
+        ugly_results["backward_guid"] = str(building['properties']['guid'])[::-1]
+
+        return ugly_results
+
 
     def get_spec(self):
         return {

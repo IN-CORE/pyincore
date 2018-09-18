@@ -43,6 +43,8 @@ class BaseAnalysis:
             ]
         }
 
+
+    """ Convenience function for loading a remote dataset by id """
     def load_remote_input_dataset(self, analysis_param_id, remote_id):
         dataset = Dataset.from_data_service(remote_id, self.data_service)
         self.set_input_dataset(analysis_param_id, dataset)
@@ -135,6 +137,20 @@ class BaseAnalysis:
             is_valid = False
             err_msg = 'dataset type does not match'
         return (is_valid, err_msg)
+
+    """ convenience function(s) for setting result data as a csv """
+    def set_result_csv_data(self, result_id, result_data, name):
+        if name is None:
+            name = self.spec["name"] + "-result"
+
+        if not name.endswith(".csv"):
+            name = name + ".csv"
+
+        dataset = Dataset.from_csv_data(result_data, name)
+        dataset.data_type = self.output_datasets[result_id]["spec"]["type"]
+        self.set_output_dataset(result_id, dataset)
+
+
 
     """ validates and runs the analysis """
 

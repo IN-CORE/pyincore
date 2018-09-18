@@ -1,7 +1,10 @@
+import csv
 import json
+import numpy
 import os
 
 import fiona
+import rasterio
 
 from pyincore import DataService
 
@@ -17,7 +20,7 @@ class Dataset:
         self.file_descriptors = metadata["fileDescriptors"]
         self.local_file_path = None
 
-        self.inventory_set = None
+        self.readers = {}
 
     @classmethod
     def from_data_service(cls, id: str, data_service: DataService):
@@ -40,36 +43,71 @@ class Dataset:
         instance.local_file_path = file_path
         return instance
 
+    @classmethod
+    def from_csv_data(cls, result_data, name):
+        if len(result_data) > 0:
+            with open(name, 'w') as csv_file:
+                # Write the parent ID at the top of the result data, if it is given
+                writer = csv.DictWriter(csv_file, dialect="unix", fieldnames= result_data[0].keys())
+                writer.writeheader()
+                writer.writerows(result_data)
+        return Dataset.from_file(name, "csv")
+
     def cache_files(self, data_service: DataService):
         if self.local_file_path is not None:
             return
         self.local_file_path = data_service.get_dataset_blob(self.id)
         return self.local_file_path
 
-    def get_inventory_set(self, data_service=None):
-        if self.inventory_set is not None:
-            return self.inventory_set
+    """Utility methods for reading different standard file formats"""
+    def get_inventory_reader(self):
+        if "inventory" in self.readers:
+            return self.readers["inventory"]
 
         filename = self.local_file_path
         if os.path.isdir(filename):
             layers = fiona.listlayers(filename)
             if len(layers) > 0:
                 # for now, open a first shapefile
-                self.inventory_set = fiona.open(filename, layer=layers[0])
+                self.readers["inventory"] = fiona.open(filename, layer=layers[0])
         else:
-            self.inventory_set = fiona.open(filename)
-        return self.inventory_set
+            self.readers["inventory"] = fiona.open(filename)
+        return self.readers["inventory"]
+
+    def get_raster_value(self, location):
+        if not "raster" in self.readers:
+            filename = self.local_file_path
+            self.readers["raster"] = rasterio.open(filename)
+
+        hazard = self.readers["raster"]
+        row, col = hazard.index(location.x, location.y)
+        # assume that there is only 1 band
+        data = hazard.read(1)
+        if row < 0 or col < 0 or row >= hazard.height or col >= hazard.width:
+            return 0.0
+        return numpy.asscalar(data[row, col])
+
+    def get_csv_reader(self):
+        if not "csv" in self.readers:
+            filename = self.local_file_path
+            csvfile = open(filename, 'r')
+            self.readers["csv"] = csv.DictReader(csvfile)
+
+        return self.readers["csv"]
 
     def close(self):
-        if self.inventory_set is not None:
-            self.inventory_set.close()
+        for key in self.readers:
+            self.readers[key].close()
 
     def __del__(self):
         self.close()
 
+
+
 class InventoryDataset:
     def __init__(self):
         print("inv")
+
 
 class DamageRatioDataset:
     def __init__(self):
