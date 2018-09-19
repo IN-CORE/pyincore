@@ -280,7 +280,7 @@ class EpnRecoveryModel:
 
         # Write csv table to file
         result = pd.merge(df_bound, output, on='ID')
-        output_file_name = os.path.join(tmpdir, 'result.csv')
+        output_file_name = os.path.join(tmpdir, 'epn_recovery.csv')
         result.to_csv(output_file_name)
         output_file_name = os.path.abspath(output_file_name)
 
