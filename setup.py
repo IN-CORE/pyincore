@@ -5,4 +5,4 @@ setup(name = 'pyincore',
       packages = ['pyincore', 'pyincore.analyses', 'pyincore.analyses.buildingdamage',
                   'pyincore.analyses.transportationrecovery', 'pyincore.analyses.pipelinedamage' ,'pyincore.analyses.epnrecoverymodel'],
       requires = ['fiona', 'rasterio', 'jsonpickle', 'numpy', 'shapely', 'scipy', 'matplotlib', 'wikidata', 'requests',
-                  'networkx', 'pandas', 'folium', 'owslib', 'py_expression_eval'])
+                  'networkx', 'pandas', 'folium', 'owslib', 'py_expression_eval', 'rasterstats'])
