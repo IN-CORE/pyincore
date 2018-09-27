@@ -8,7 +8,6 @@ from pyincore.dataset import Dataset
 class BaseAnalysis:
     def __init__(self, incoreClient):
         self.spec = self.get_spec()
-        self.temp_folder = ''
         self.client = incoreClient
         self.data_service = DataService(self.client)
 
@@ -55,10 +54,6 @@ class BaseAnalysis:
     def get_description(self):
         return self.spec['description']
 
-    # do we want 'version' for analysis?
-    # @property
-    # def get_version();
-    #     retur spec['version']
 
     def get_parameters(self):
         param = {}
@@ -111,8 +106,6 @@ class BaseAnalysis:
             # TOTO handle error message
             return False
 
-    def get_temp_folder(self):
-        return self.temp_folder
 
     def validate_parameter(self, parameter_spec, parameter):
         is_valid = True
@@ -170,8 +163,6 @@ class BaseAnalysis:
         return self.run()
 
     def run(self):
-        if not self.validate_analysis_run()[0]:
-            return False
         return True
 
 
