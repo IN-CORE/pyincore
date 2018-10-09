@@ -61,18 +61,15 @@ class Dataset:
 
     """Utility methods for reading different standard file formats"""
     def get_inventory_reader(self):
-        if "inventory" in self.readers:
-            return self.readers["inventory"]
 
         filename = self.local_file_path
         if os.path.isdir(filename):
             layers = fiona.listlayers(filename)
             if len(layers) > 0:
                 # for now, open a first shapefile
-                self.readers["inventory"] = fiona.open(filename, layer=layers[0])
+                return fiona.open(filename, layer=layers[0])
         else:
-            self.readers["inventory"] = fiona.open(filename)
-        return self.readers["inventory"]
+            return fiona.open(filename)
 
     def get_raster_value(self, location):
         if not "raster" in self.readers:
