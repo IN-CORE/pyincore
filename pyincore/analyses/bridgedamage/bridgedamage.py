@@ -78,10 +78,12 @@ class BridgeDamage:
         bridge_results = collections.OrderedDict()
 
         center_point = GeoUtil.get_location(cur_bridge)
-        hazard_val = self.hazardsvc.get_earthquake_hazard_value(self.hazard_dataset_id,
+        hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(self.hazard_dataset_id,
                                                                 cur_fragility['demandType'].lower(),
                                                                 cur_fragility['demandUnits'],
-                                                                center_point.y, center_point.x)
+                                                                points=[center_point.y, center_point.x])
+        hazard_val = hazard_val_set[0]['hazardValue']
+
         hazard_type = cur_fragility['demandType']
         hazard_std_dev = BridgeUtil.get_hazard_std_dev() if use_hazard_uncertainty else 0.0
         exceedence_probability = BridgeUtil.get_probability_of_exceedence(cur_fragility, hazard_val, hazard_std_dev,
@@ -110,3 +112,4 @@ class BridgeDamage:
         bridge_results["hazardval"] = hazard_val
 
         return bridge_results
+

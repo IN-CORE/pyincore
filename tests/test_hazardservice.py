@@ -26,7 +26,7 @@ def test_get_earthquake_hazard_value(hazardsvc):
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    hval = hazardsvc.get_earthquake_hazard_value("59f3315ec7d30d4d6741b0bb", "0.2 SA", "g", 35.07899, -90.0178)
+    hval = hazardsvc.get_earthquake_hazard_value("5b902cb273c3371e1236b36b", "0.2 SA", "g", 35.07899, -90.0178)
     assert hval == 0.5322993805448739
 
 
@@ -36,7 +36,7 @@ def test_get_earthquake_hazard_values(hazardsvc):
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    hvals = hazardsvc.get_earthquake_hazard_values("59f3315ec7d30d4d6741b0bb", "0.2 SA", "g",
+    hvals = hazardsvc.get_earthquake_hazard_values("5b902cb273c3371e1236b36b", "0.2 SA", "g",
                                                    [35.07899, -90.0178, 35.17899, -90.0178])
     assert hvals[0]['hazardValue'] == 0.5322993805448739 and hvals[1]['hazardValue'] == 0.5926201634382787
 
