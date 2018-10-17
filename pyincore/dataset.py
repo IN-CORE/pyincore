@@ -2,6 +2,7 @@ import csv
 import json
 import numpy
 import os
+import glob
 
 import fiona
 import rasterio
@@ -87,8 +88,13 @@ class Dataset:
     def get_csv_reader(self):
         if not "csv" in self.readers:
             filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.csv")
+                if len(files) > 0:
+                    filename = files[0]
+
             csvfile = open(filename, 'r')
-            self.readers["csv"] = csv.DictReader(csvfile)
+            return csv.DictReader(csvfile)
 
         return self.readers["csv"]
 
