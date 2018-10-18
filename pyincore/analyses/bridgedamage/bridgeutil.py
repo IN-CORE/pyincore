@@ -65,19 +65,21 @@ class BridgeUtil:
         return dmg_intervals
 
     @staticmethod
-    def get_mean_damage(dmg_intervals, start_idx, cur_bridge, dmg_weights):
+    def get_mean_damage(dmg_intervals, start_idx, cur_bridge, dmg_ratio_tbl):
         """
         Calculates mean damage.
 
         :param dmg_intervals: list of damage intervals
-        :param start_idx:
-        :param cur_bridge:
+        :param start_idx: dmg interval index to start, starting at 1 ignores the no damage interval
+        :param cur_bridge: bridge information
         :return:
         """
 
-        if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"] is not None and cur_bridge["properties"]["spans"].isdigit():
+        if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"] is not None and \
+                cur_bridge["properties"]["spans"].isdigit():
             n = int(cur_bridge["properties"]["spans"])
-        elif "SPANS" in cur_bridge["properties"] and cur_bridge["properties"]["SPANS"] is not None and cur_bridge["properties"]["SPANS"].isdigit():
+        elif "SPANS" in cur_bridge["properties"] and cur_bridge["properties"]["SPANS"] is not None and \
+                cur_bridge["properties"]["SPANS"].isdigit():
             n = int(cur_bridge["properties"]["SPANS"])
         else:
             n = 1
@@ -86,11 +88,11 @@ class BridgeUtil:
             n = 10
             print("A bridge was found with greater than 10 spans: " + str(cur_bridge))
 
-        weight_slight = float(dmg_weights[1])
-        weight_moderate = float(dmg_weights[2])
-        weight_extensive = float(dmg_weights[3])
-        weight_collapse0 = float(dmg_weights[4])
-        weight_collapse1 = float(dmg_weights[5])
+        weight_slight = float(dmg_ratio_tbl[1]['Best Mean Damage Ratio'])
+        weight_moderate = float(dmg_ratio_tbl[2]['Best Mean Damage Ratio'])
+        weight_extensive = float(dmg_ratio_tbl[3]['Best Mean Damage Ratio'])
+        weight_collapse0 = float(dmg_ratio_tbl[4]['Best Mean Damage Ratio'])
+        weight_collapse1 = float(dmg_ratio_tbl[5]['Best Mean Damage Ratio'])
 
         mean_damage = weight_slight * dmg_intervals[start_idx] \
                       + weight_moderate * dmg_intervals[start_idx + 1] \

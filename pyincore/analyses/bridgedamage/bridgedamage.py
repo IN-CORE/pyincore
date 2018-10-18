@@ -23,8 +23,7 @@ class BridgeDamage(BaseAnalysis):
         bridge_set = self.get_input_dataset("bridges").get_inventory_reader()
 
         dmg_ratio_csv = self.get_input_dataset("dmg_ratios").get_csv_reader()
-        dmg_ratio_rows = BridgeUtil.get_damage_ratio_rows(dmg_ratio_csv)
-        mean_dmg_weights = BridgeUtil.get_damage_ratio_values(dmg_ratio_rows, 'Best Mean Damage Ratio')
+        dmg_ratio_tbl = BridgeUtil.get_damage_ratio_rows(dmg_ratio_csv)
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -33,6 +32,9 @@ class BridgeDamage(BaseAnalysis):
 
         # Get hazard input
         hazard_dataset_id = self.get_parameter("hazard_id")
+
+        # Hazard type, note this is here for future use if additional hazards are supported by this analysis
+        hazard_type = self.get_parameter("hazard_type")
 
         # Hazard Uncertainty
         use_hazard_uncertainty = False
@@ -61,10 +63,9 @@ class BridgeDamage(BaseAnalysis):
             count += avg_bulk_input_size
 
         results = self.bridge_damage_concurrent_future(self.bridge_damage_analysis_bulk_input, num_workers,
-                                                       inventory_args, repeat(hazard_dataset_id),
-                                                       repeat(use_hazard_uncertainty), repeat(use_liquefaction),
-                                                       repeat(dmg_ratio_rows), repeat(mean_dmg_weights),
-                                                       repeat(fragility_key))
+                                                       inventory_args, repeat(hazard_dataset_id), repeat(dmg_ratio_tbl),
+                                                       repeat(fragility_key), repeat(use_hazard_uncertainty),
+                                                       repeat(use_liquefaction))
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -86,18 +87,17 @@ class BridgeDamage(BaseAnalysis):
 
         return output
 
-    def bridge_damage_analysis_bulk_input(self, bridges, hazard_dataset_id, use_hazard_uncertainty, use_liquefaction,
-                                          dmg_ratio_data, mean_dmg_weights, fragility_key):
+    def bridge_damage_analysis_bulk_input(self, bridges, hazard_dataset_id, dmg_ratio_tbl, fragility_key,
+                                          use_hazard_uncertainty, use_liquefaction):
         """
         Run analysis for multiple bridges
 
         :param bridges: multiple buildings from input inventory set
         :param hazard_dataset_id: id of the hazard exposure
+        :param dmg_ratio_tbl: damage ratios table
+        :param fragility_key: fragility key to use for mapping bridges to fragilities
         :param use_hazard_uncertainty: use hazard uncertainty when computing damage
         :param use_liquefaction: if bridge contains liquefaction information use it to modify the damage
-        :param mean_dmg_weights: weights to compute mean damage
-        :param dmg_ratio_data: row data for damage ratios table
-        :param fragility_key: fragility key to use for mapping bridges to fragilities
         :return: results: a list of OrderedDict
         """
         result = []
@@ -107,18 +107,24 @@ class BridgeDamage(BaseAnalysis):
             if bridge["id"] in fragility_sets:
                 fragility_set = fragility_sets[bridge["id"]]
 
-            result.append(self.bridge_damage_analysis(bridge, fragility_set, hazard_dataset_id, use_hazard_uncertainty,
-                                                      use_liquefaction, dmg_ratio_data, mean_dmg_weights, fragility_key))
+            result.append(self.bridge_damage_analysis(bridge, fragility_set, hazard_dataset_id, dmg_ratio_tbl,
+                                                      fragility_key, use_hazard_uncertainty, use_liquefaction))
 
         return result
 
-    def bridge_damage_analysis(self, bridge, fragility_set, hazard_dataset_id, use_hazard_uncertainty, use_liquefaction,
-                               dmg_ratio_data, mean_dmg_weights, fragility_key):
+    def bridge_damage_analysis(self, bridge, fragility_set, hazard_dataset_id, dmg_ratio_tbl, fragility_key,
+                               use_hazard_uncertainty, use_liquefaction):
         """
         Calculates bridge damage results for a single bridge.
 
         :param bridge: current bridge
         :param fragility_set: fragility assigned to the bridge
+        :param hazard_dataset_id: hazard dataset to use
+        :param dmg_ratio_tbl: table of damage ratios for mean damage
+        :param fragility_key: fragility key to use for mapping bridges to fragilities
+        :param use_hazard_uncertainty: include hazard uncertainty in damage analysis
+        :param use_liquefaction: use liquefaction data, if available to modify damage
+
         :return: an ordered dictionary with bridge damage and other data/metadata
         """
         bridge_results = collections.OrderedDict()
@@ -150,8 +156,8 @@ class BridgeDamage(BaseAnalysis):
                                                                               hazard_std_dev, use_liquefaction)
 
             dmg_intervals = BridgeUtil.get_damage_state_intervals(exceedence_probability)
-            mean_damage = BridgeUtil.get_mean_damage(dmg_intervals, 1, bridge, mean_dmg_weights)
-            expected_damage = BridgeUtil.get_expected_damage(mean_damage, dmg_ratio_data)
+            mean_damage = BridgeUtil.get_mean_damage(dmg_intervals, 1, bridge, dmg_ratio_tbl)
+            expected_damage = BridgeUtil.get_expected_damage(mean_damage, dmg_ratio_tbl)
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 
