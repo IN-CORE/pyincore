@@ -1,3 +1,11 @@
+"""pyincore.analyses.bridgedamage.bridgedamage
+
+Copyright (c) 2017 University of Illinois and others.  All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the BSD-3-Clause which accompanies this distribution,
+and is available at https://opensource.org/licenses/BSD-3-Clause
+
+"""
 import collections
 import concurrent.futures
 from pyincore import BaseAnalysis, HazardService, FragilityService
@@ -7,6 +15,9 @@ from itertools import repeat
 
 
 class BridgeDamage(BaseAnalysis):
+    """Computes bridge structural damage for an earthquake hazard
+
+    """
 
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
