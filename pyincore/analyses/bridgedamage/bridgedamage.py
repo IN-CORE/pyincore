@@ -68,7 +68,6 @@ class BridgeDamage(BaseAnalysis):
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
-        print("Finished running bridge damage")
         return True
 
     def bridge_damage_concurrent_future(self, function_name, num_workers, *args):
@@ -190,6 +189,12 @@ class BridgeDamage(BaseAnalysis):
                     'id': 'mapping_id',
                     'required': True,
                     'description': 'Fragility mapping dataset',
+                    'type': str
+                },
+                {
+                    'id': 'hazard_type',
+                    'required': True,
+                    'description': 'Hazard Type (e.g. earthquake)',
                     'type': str
                 },
                 {

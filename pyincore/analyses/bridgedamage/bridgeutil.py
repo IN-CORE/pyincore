@@ -74,9 +74,10 @@ class BridgeUtil:
         :param cur_bridge:
         :return:
         """
-        if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"].isdigit():
+
+        if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"] is not None and cur_bridge["properties"]["spans"].isdigit():
             n = int(cur_bridge["properties"]["spans"])
-        elif "SPANS" in cur_bridge["properties"] and cur_bridge["properties"]["SPANS"].isdigit():
+        elif "SPANS" in cur_bridge["properties"] and cur_bridge["properties"]["SPANS"] is not None and cur_bridge["properties"]["SPANS"].isdigit():
             n = int(cur_bridge["properties"]["SPANS"])
         else:
             n = 1
@@ -85,12 +86,11 @@ class BridgeUtil:
             n = 10
             print("A bridge was found with greater than 10 spans: " + str(cur_bridge))
 
-
-        weight_slight = dmg_weights[1]
-        weight_moderate = dmg_weights[2]
-        weight_extensive = dmg_weights[3]
-        weight_collapse0 = dmg_weights[4]
-        weight_collapse1 = dmg_weights[5]
+        weight_slight = float(dmg_weights[1])
+        weight_moderate = float(dmg_weights[2])
+        weight_extensive = float(dmg_weights[3])
+        weight_collapse0 = float(dmg_weights[4])
+        weight_collapse1 = float(dmg_weights[5])
 
         mean_damage = weight_slight * dmg_intervals[start_idx] \
                       + weight_moderate * dmg_intervals[start_idx + 1] \
