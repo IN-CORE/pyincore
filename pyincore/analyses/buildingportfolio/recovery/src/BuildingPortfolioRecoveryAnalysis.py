@@ -197,15 +197,17 @@ def main():
                         default="utility2.csv")
     parser.add_argument("--mean_repair", help="Percentage of mean repair by occupancy / building type",
                         default="Mean_Repair.csv")
+    parser.add_argument("--coefFL", help="CoefFL",
+                        default="coefFL.csv")
     parser.add_argument("--occupancy_mapping", help="",
                         default="Occupancy_Code_Mapping.csv")
     parser.add_argument("--output_file_name", help="Name for the output file",
                         default="building_portfolio_recovery")
-    parser.add_argument("--number_of_simulations", help="Number of simulations", default = 100)
+    parser.add_argument("--number_of_simulations", help="Number of simulations", default=500)
                         # default=5000)
     parser.add_argument("--uncertainty", help="True to include uncertainty analysis",
-                        default=False)
-    parser.add_argument("--sample_size", help="Number of buildings to use as a sample", default = 1000)
+                        default=True)
+    parser.add_argument("--sample_size", help="Number of buildings to use as a sample", default=1000)
                         # default = 1000)
 
     args = parser.parse_args()
@@ -215,6 +217,7 @@ def main():
     building_data = load_csv_file(args.directory, args.building_data)
     mean_repair = load_csv_file(args.directory, args.mean_repair)
     occupancy_mapping = load_csv_file(args.directory, args.occupancy_mapping)
+    coeFL = load_csv_file(args.directory, args.coefFL)
 
     print('INFO: Data for Building Portfolio Recovery Analysis loaded successfully.')
 
@@ -280,98 +283,21 @@ def main():
 
     # Mean recovery trajectory at portfolio level
     mean_recovery = np.zeros((time_steps, 5))
-    total_mean = np.zeros((4, 4))
-    total_var = np.zeros((4, 4))
-    transition_probability = np.zeros((4,4))
-    state_probabilities = np.zeros((time_steps, 5))
-    output = np.zeros(time_steps)
 
     # Functionality Recovery (Best Line Functionality + Full functionality) for each building on the sample
     recovery_fp = np.zeros((sample_size, time_steps))
 
-    for k in range(sample_size):
-
-        # The index for finance starts in 1 they are one off from the matrix
-        finance_id = sample_buildings[k].finance - 1
-        utility_id = sample_buildings[k].ep_pw_id
-        for j in range(4):
-            mean = impeding_mean[finance_id, j]
-            std = impeding_std[finance_id, j] ** 2
-
-            for i in range(j, 4):
-
-                mean += repair_mean[occupancy_map[sample_buildings[k].occupation_code]][i]
-                total_mean[j][i] = mean
-                std += 0.4 * repair_mean[occupancy_map[sample_buildings[k].occupation_code]][i] ** 2
-                total_var[j][i] = math.sqrt(std)
-
-        for t in range(time_steps):
-            for i in range(4):
-                for j in range(i, 4):
-                    zeta = math.sqrt(math.log(1+(total_var[i][j]/total_mean[i][j])**2))
-                    lambda_log = math.log(total_mean[i][j]) - 1/2 * zeta **2
-                    transition_probability[i][j] = log_n_cdf(t+1, lambda_log, zeta)
-            # tpm = transition probability matrix
-            tpm = np.matrix([[1 - transition_probability[0, 0],
-                    transition_probability[0, 0] - transition_probability[0, 1],
-                    transition_probability[0, 1] - transition_probability[0, 2],
-                    transition_probability[0, 2] - transition_probability[0, 3], transition_probability[0, 3]],
-                   [0.0, 1 - transition_probability[1, 1], transition_probability[1, 1] - transition_probability[1, 2],
-                    transition_probability[1, 2] - transition_probability[1, 3], transition_probability[1, 3]],
-                   [0.0, 0.0, 1 - transition_probability[2, 2],
-                    transition_probability[2, 2] - transition_probability[2, 3], transition_probability[2, 3]],
-                   [0.0, 0.0, 0.0, 1 - transition_probability[3, 3], transition_probability[3, 3]],
-                   [0.0, 0.0, 0.0, 0.0, 1.0]], dtype=float)
-            # State Probability vector, pie(t) = initial vector * Transition Probability Matrix
-            state_probabilities[t] = np.matmul(building_damage[k], tpm)
-            if not uncertainty:
-                output[t] = state_probabilities[t, 3] + state_probabilities[t, 4]
-
-            if uncertainty:
-                # Considering the effect of utility availability
-                # Utility Dependence Matrix
-                utility_matrix = np.matrix([[1, 0, 0, 0, 0],
-                                  [0, 1, 0, 0, 0],
-                                  [0, 0, 1, utility[utility_id][t], utility[utility_id][t]],
-                                  [0, 0, 0, 1 - utility[utility_id][t], utility2[utility_id][t]],
-                                  [0, 0, 0, 0, 1 - utility[utility_id][t] - utility2[utility_id][t]]
-                                  ], dtype=float)
-                updated_tpm = np.matmul(tpm, utility_matrix.transpose())
-                state_probabilities[t] = np.matmul(state_probabilities[t], utility_matrix.transpose())
-
-                # Calculation functionality statee indicator wheen j=4+5 Conditional mean
-                temporary_correlation1[t][k][0] = updated_tpm[0, 3]
-                temporary_correlation1[t][k][1] = updated_tpm[1, 3]
-                temporary_correlation1[t][k][2] = updated_tpm[2, 3]
-                temporary_correlation1[t][k][3] = updated_tpm[3, 3]
-                temporary_correlation1[t][k][4] = updated_tpm[4, 3]
-                temporary_correlation2[t][k][0] = updated_tpm[0, 4]
-                temporary_correlation2[t][k][1] = updated_tpm[1, 4]
-                temporary_correlation2[t][k][2] = updated_tpm[2, 4]
-                temporary_correlation2[t][k][3] = updated_tpm[3, 4]
-                temporary_correlation2[t][k][4] = updated_tpm[4, 4]
-                mean_over_time[t][k] = state_probabilities[t][3] + state_probabilities[t][4]
-                variance_over_time[t][k] = (state_probabilities[t][3]+state_probabilities[t][4]) * \
-                                           (1 - (state_probabilities[t][3] + state_probabilities[t][4]))
-
-        # Considering the effect of utility availability
-        # Service Area ID of individual buildings
-        # START: Code from only recovery analysis
-        if not uncertainty:
-
-            for i in range(len(state_probabilities)):
-                state_probabilities[i, 2] = state_probabilities[i, 2] + state_probabilities[i, 3] + \
-                                            state_probabilities[i, 4] * (1 - utility[utility_id, i])
-                state_probabilities[i, 3] = state_probabilities[i, 3] * utility[utility_id, i]
-                state_probabilities[i, 4] = state_probabilities[i, 4] * utility[utility_id, i]
-
-        # END: Code from only recovery analysis
-
-        # Save functional probability (Best Line Functionality + Full functionality) for each building
-        recovery_fp[k, :] = state_probabilities[:, 4] + state_probabilities[:, 3]
-
-        # Aggregate state probability vector to portfolio level
-        mean_recovery = mean_recovery + state_probabilities
+    with concurrent.futures.ProcessPoolExecutor(max_workers=sample_size) as executor:
+        for response in executor.map(calculate_transition_probability_matrix(sample_size, time_steps, sample_buildings,
+                                                                             repair_mean, occupancy_map, uncertainty,
+                                                                             impeding_mean, impeding_std,
+                                                                             building_damage, utility, utility2)):
+            temporary_correlation1 = response["temporary_correlation1"]
+            temporary_correlation2 = response["temporary_correlation2"]
+            mean_over_time = response["mean_over_time"]
+            variance_over_time = response["variance_over_time"]
+            recovery_fp = response["recovery_fp"]
+            mean_recovery = response["mean_recovery"]
 
     # Trajectory for the Restricted entry, Restricted Use, Reoccupancy, Best Line Functionality, Full Functionality
     mean_recovery = mean_recovery/sample_size
@@ -401,26 +327,15 @@ def main():
         # START: Additional Code for uncertainty analysis
         mean_u = np.zeros(sample_size)
         # sample_size2 = args.sample_size
-        covar = np.zeros([sample_size, sample_size]) #TODO: Should read a coefFL file
+        covar = np.matrix(coeFL) # np.zeros([sample_size, sample_size]) # TODO: Should read a coefFL file
         random_distribution = np.random.multivariate_normal(mean_u, covar, number_of_simulations)
         random_samples = sp.stats.norm.cdf(random_distribution)
         sample_total = np.zeros((sample_size, number_of_simulations))
 
-        for j in range(number_of_simulations):
-            sample = np.zeros(sample_size)
-            for i in range(sample_size):
-                threshold = building_damage[i]
-                if random_samples[j][i] <= threshold[0]:
-                    sample[i] = 1
-                elif random_samples[j][i] <= threshold[0] + threshold[1] and random_samples[j][i] <= threshold[0]:
-                    sample[i] = 2
-                elif threshold[0] + threshold[1] <= random_samples[j][i] <= threshold[0] + threshold[1] + threshold[2] :
-                    sample[i] = 3
-                elif threshold[0] + threshold[1] + threshold[2] <= random_samples[j][i] <= threshold[0] + threshold[1] + threshold[2] + threshold[3] :
-                    sample[i] = 4
-                else:
-                    sample[i] = 5
-                sample_total[i][j] = sample[i]
+        with concurrent.futures.ProcessPoolExecutor(max_workers=number_of_simulations) as executor:
+            for response in executor.map(calculate_sample_total(number_of_simulations, sample_size, building_damage,
+                                                                random_samples)):
+                sample_total = response
 
         for k in range(sample_size):
             for t in range(time_steps):
@@ -429,31 +344,13 @@ def main():
 
         # Start calculating standard deviation of the mean recovery trajectory
         total_standard_deviation = np.zeros(time_steps)
-        for t in range(time_steps):
-            total_standard_deviation[t] = np.sum(variance_over_time[t])
+        with concurrent.futures.ProcessPoolExecutor(max_workers=time_steps) as executor:
+            for response in executor.map(calculate_std_of_mean(time_steps, sample_size, number_of_simulations,
+                                                               variance_over_time, mean_over_time, temporary_correlation1,
+                                                               temporary_correlation2, sample_total)):
+                total_standard_deviation = response
 
-            # Building i
-            for i in range(sample_size - 1):
-                # Building j
-                for j in range(i + 1, sample_size):
-                    expect1 = 0
-                    # Joint probability of initial functionality state P(S0i=k, S0j=l)
-                    joint_probability = joint_probability_calculation(sample_total[i], sample_total[j], number_of_simulations)
 
-                    # Functionality State k
-                    for k in range(5):
-                        # Functionality State l
-                        for l in range(5):
-                            expect1 += joint_probability[k][l] * temporary_correlation1[t][i][k] * temporary_correlation1[t][j][l]\
-                                       + temporary_correlation1[t][i][k] * temporary_correlation1[t][j][l]\
-                                       + temporary_correlation2[t][i][k] * temporary_correlation1[t][j][l]\
-                                       + temporary_correlation2[t][i][k] * temporary_correlation2[t][j][l]
-                    expect2 = mean_over_time[t][i] * mean_over_time[t][j]
-
-                    covariance = 0
-                    if variance_over_time[t][i] > 0 and variance_over_time[t][j] > 0 and expect1 - expect2 > 0:
-                        covariance = expect1 - expect2
-                    total_standard_deviation[t] += 2 * covariance
         # total_standard_deviation = math.sqrt(total_standard_deviation) / sample_size
         # for t in range(time_steps):
         #     total_standard_deviation[t] = math.sqrt(total_standard_deviation[t]) / sample_size
@@ -564,11 +461,163 @@ def main():
     print("INFO: Finished executing Building Portfolio Recovery Analysis")
 
 
-# def calculate_transition_probability_matrix():
+def calculate_transition_probability_matrix(sample_size, time_steps, sample_buildings, repair_mean, occupancy_map,
+                                            uncertainty, impeding_mean, impeding_std, building_damage, utility, utility2):
+    total_mean = np.zeros((4, 4))
+    total_var = np.zeros((4, 4))
+    transition_probability = np.zeros((4,4))
+    state_probabilities = np.zeros((time_steps, 5))
+    output = np.zeros(time_steps)
+    temporary_correlation1 = np.zeros((time_steps, sample_size, 5))
+    temporary_correlation2 = np.zeros((time_steps, sample_size, 5))
+    mean_over_time = np.zeros((time_steps, sample_size))
+    variance_over_time = np.zeros((time_steps, sample_size))
+    recovery_fp = np.zeros((sample_size, time_steps))
+    mean_recovery = np.zeros((time_steps, 5))
+    for k in range(sample_size):
+        print("Calculating transition probability matrix for " + str(k))
+        # The index for finance starts in 1 they are one off from the matrix
+        finance_id = sample_buildings[k].finance - 1
+        utility_id = sample_buildings[k].ep_pw_id
+        for j in range(4):
+            mean = impeding_mean[finance_id, j]
+            std = impeding_std[finance_id, j] ** 2
+
+            for i in range(j, 4):
+
+                mean += repair_mean[occupancy_map[sample_buildings[k].occupation_code]][i]
+                total_mean[j][i] = mean
+                std += 0.4 * repair_mean[occupancy_map[sample_buildings[k].occupation_code]][i] ** 2
+                total_var[j][i] = math.sqrt(std)
+
+        for t in range(time_steps):
+            for i in range(4):
+                for j in range(i, 4):
+                    zeta = math.sqrt(math.log(1+(total_var[i][j]/total_mean[i][j])**2))
+                    lambda_log = math.log(total_mean[i][j]) - 1/2 * zeta **2
+                    transition_probability[i][j] = log_n_cdf(t+1, lambda_log, zeta)
+            # tpm = transition probability matrix
+            tpm = np.matrix([[1 - transition_probability[0, 0],
+                    transition_probability[0, 0] - transition_probability[0, 1],
+                    transition_probability[0, 1] - transition_probability[0, 2],
+                    transition_probability[0, 2] - transition_probability[0, 3], transition_probability[0, 3]],
+                   [0.0, 1 - transition_probability[1, 1], transition_probability[1, 1] - transition_probability[1, 2],
+                    transition_probability[1, 2] - transition_probability[1, 3], transition_probability[1, 3]],
+                   [0.0, 0.0, 1 - transition_probability[2, 2],
+                    transition_probability[2, 2] - transition_probability[2, 3], transition_probability[2, 3]],
+                   [0.0, 0.0, 0.0, 1 - transition_probability[3, 3], transition_probability[3, 3]],
+                   [0.0, 0.0, 0.0, 0.0, 1.0]], dtype=float)
+            # State Probability vector, pie(t) = initial vector * Transition Probability Matrix
+            state_probabilities[t] = np.matmul(building_damage[k], tpm)
+            if not uncertainty:
+                output[t] = state_probabilities[t, 3] + state_probabilities[t, 4]
+
+            if uncertainty:
+                # Considering the effect of utility availability
+                # Utility Dependence Matrix
+                utility_matrix = np.matrix([[1, 0, 0, 0, 0],
+                                  [0, 1, 0, 0, 0],
+                                  [0, 0, 1, utility[utility_id][t], utility[utility_id][t]],
+                                  [0, 0, 0, 1 - utility[utility_id][t], utility2[utility_id][t]],
+                                  [0, 0, 0, 0, 1 - utility[utility_id][t] - utility2[utility_id][t]]
+                                  ], dtype=float)
+                updated_tpm = np.matmul(tpm, utility_matrix.transpose())
+                state_probabilities[t] = np.matmul(state_probabilities[t], utility_matrix.transpose())
+
+                # Calculation functionality statee indicator wheen j=4+5 Conditional mean
+                temporary_correlation1[t][k][0] = updated_tpm[0, 3]
+                temporary_correlation1[t][k][1] = updated_tpm[1, 3]
+                temporary_correlation1[t][k][2] = updated_tpm[2, 3]
+                temporary_correlation1[t][k][3] = updated_tpm[3, 3]
+                temporary_correlation1[t][k][4] = updated_tpm[4, 3]
+                temporary_correlation2[t][k][0] = updated_tpm[0, 4]
+                temporary_correlation2[t][k][1] = updated_tpm[1, 4]
+                temporary_correlation2[t][k][2] = updated_tpm[2, 4]
+                temporary_correlation2[t][k][3] = updated_tpm[3, 4]
+                temporary_correlation2[t][k][4] = updated_tpm[4, 4]
+                mean_over_time[t][k] = state_probabilities[t][3] + state_probabilities[t][4]
+                variance_over_time[t][k] = (state_probabilities[t][3]+state_probabilities[t][4]) * \
+                                           (1 - (state_probabilities[t][3] + state_probabilities[t][4]))
+
+        # Considering the effect of utility availability
+        # Service Area ID of individual buildings
+        # START: Code from only recovery analysis
+        if not uncertainty:
+
+            for i in range(len(state_probabilities)):
+                state_probabilities[i, 2] = state_probabilities[i, 2] + state_probabilities[i, 3] + \
+                                            state_probabilities[i, 4] * (1 - utility[utility_id, i])
+                state_probabilities[i, 3] = state_probabilities[i, 3] * utility[utility_id, i]
+                state_probabilities[i, 4] = state_probabilities[i, 4] * utility[utility_id, i]
+
+        # END: Code from only recovery analysis
+
+        # Save functional probability (Best Line Functionality + Full functionality) for each building
+        recovery_fp[k, :] = state_probabilities[:, 4] + state_probabilities[:, 3]
+
+        # Aggregate state probability vector to portfolio level
+        mean_recovery = mean_recovery + state_probabilities
+
+    return {"temporary_correlation1": temporary_correlation1, "temporary_correlation2": temporary_correlation2,
+            "mean_over_time": mean_over_time, "variance_over_time": variance_over_time, "recovery_fp": recovery_fp,
+            "mean_recovery": mean_recovery}
+
+
+def calculate_sample_total(number_of_simulations, sample_size, building_damage, random_samples):
+    sample_total = np.zeros((sample_size, number_of_simulations))
+    for j in range(number_of_simulations):
+        print("Calculating sample total for " +  str(j))
+        sample = np.zeros(sample_size)
+        for i in range(sample_size):
+            threshold = building_damage[i]
+            if random_samples[j][i] <= threshold[0]:
+                sample[i] = 1
+            elif random_samples[j][i] <= threshold[0] + threshold[1] and random_samples[j][i] <= threshold[0]:
+                sample[i] = 2
+            elif threshold[0] + threshold[1] <= random_samples[j][i] <= threshold[0] + threshold[1] + threshold[2]:
+                sample[i] = 3
+            elif threshold[0] + threshold[1] + threshold[2] <= random_samples[j][i] <= threshold[0] + threshold[1] + \
+                    threshold[2] + threshold[3]:
+                sample[i] = 4
+            else:
+                sample[i] = 5
+            sample_total[i][j] = sample[i]
+    return sample_total
+
 
 # calculating standard deviation of the mean recovery trajectory
-# def calculate_std_of_mean():
+def calculate_std_of_mean(time_steps, sample_size, number_of_simulations, variance_over_time, mean_over_time,
+                          temporary_correlation1, temporary_correlation2, sample_total):
+    total_standard_deviation = np.zeros(time_steps)
+    for t in range(time_steps):
+        print("Calculating std mean for " + str(t))
+        total_standard_deviation[t] = np.sum(variance_over_time[t])
 
+        # Building i
+        for i in range(sample_size - 1):
+            # Building j
+            for j in range(i + 1, sample_size):
+                expect1 = 0
+                # Joint probability of initial functionality state P(S0i=k, S0j=l)
+                joint_probability = joint_probability_calculation(sample_total[i], sample_total[j],
+                                                                  number_of_simulations)
+
+                # Functionality State k
+                for k in range(5):
+                    # Functionality State l
+                    for l in range(5):
+                        expect1 += joint_probability[k][l] * temporary_correlation1[t][i][k] * \
+                                   temporary_correlation1[t][j][l] \
+                                   + temporary_correlation1[t][i][k] * temporary_correlation1[t][j][l] \
+                                   + temporary_correlation2[t][i][k] * temporary_correlation1[t][j][l] \
+                                   + temporary_correlation2[t][i][k] * temporary_correlation2[t][j][l]
+                expect2 = mean_over_time[t][i] * mean_over_time[t][j]
+
+                covariance = 0
+                if variance_over_time[t][i] > 0 and variance_over_time[t][j] > 0 and expect1 - expect2 > 0:
+                    covariance = expect1 - expect2
+                total_standard_deviation[t] += 2 * covariance
+    return total_standard_deviation
 
 if __name__ == '__main__':
     main()
