@@ -1,0 +1,2 @@
+from pyincore.analyses.waternetworkdamage.waternetworkdamage import WaterNetworkDamage
+from pyincore.analyses.waternetworkdamage.waternetworkutil import WaterNetworkUtil
