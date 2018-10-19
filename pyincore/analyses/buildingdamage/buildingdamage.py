@@ -4,6 +4,14 @@
 Calculate the probability of building damage based on different hazard type
 by calling fragility service and hazard/tornado service
 
+Usage:
+    building_damage.py BUILDING HAZARD MAPPING DMGRATIO
+
+Options:
+    BUILDING    Building inventory file in ESRI shapefile.
+    HAZARD      Hazard id.
+    MAPPING     Fragility mapping id.
+    DMGRATIO    Damage ratio file in CSV.
 """
 import collections
 from pyincore import DamageRatioDataset, HazardService, FragilityService
@@ -17,7 +25,7 @@ from itertools import repeat
 
 
 class BuildingDamage:
-    def __init__(self, client, hazard_service: str, dmg_ratios: str):
+    def __init__(self, client, hazard_service: str, dmg_ratios: str, intermediate_files: bool = True):
         # TODO Should we move this outside of the building damage class?
         # Handle the case where Ergo data has an .mvz
         # In the case of multiple files, DataWolf creates a folder and passes that to the tool
@@ -32,7 +40,6 @@ class BuildingDamage:
                     dmg_ratio = DamageRatioDataset(os.path.abspath(dmg_ratio_file))
 
         damage_ratios = dmg_ratio.damage_ratio
-
         # Find hazard type and id
         hazard_service_split = hazard_service.split("/")
         self.hazard_type = hazard_service_split[0]
@@ -53,6 +60,8 @@ class BuildingDamage:
                                     float(damage_ratios[3]['Deviation Damage Factor']),
                                     float(damage_ratios[4]['Deviation Damage Factor'])]
 
+        self.intermediate_files = intermediate_files
+
     @staticmethod
     def get_output_metadata():
         output = {}
@@ -67,7 +76,7 @@ class BuildingDamage:
         :param mapping_id: fragility mapping id
         :param base_dataset_id:
         :param user_defined_parallelism: number of concurrent processes to use
-        :return: output_file_name: string of file name
+        :return: output_file: string of file name or OrderedDict
         """
         output = []
 
@@ -92,20 +101,22 @@ class BuildingDamage:
 
         output_file_name = "dmg-results.csv"
 
+        fieldnames = ['guid', 'immocc', 'lifesfty', 'collprev', 'insignific', 'moderate',
+                      'heavy', 'complete', 'meandamage', 'mdamagedev', 'hazardtype',
+                      'hazardval']
+
         # Write Output to csv
-        with open(output_file_name, 'w') as csv_file:
-            # Write the parent ID at the top of the result data, if it is given
-            if base_dataset_id is not None:
-                csv_file.write(base_dataset_id + '\n')
+        if self.intermediate_files:
+            with open(output_file_name, 'w') as csv_file:
+                # Write the parent ID at the top of the result data, if it is given
+                if base_dataset_id is not None:
+                    csv_file.write(base_dataset_id + '\n')
 
-            writer = csv.DictWriter(csv_file, dialect="unix",
-                                    fieldnames=['guid', 'immocc', 'lifesfty', 'collprev', 'insignific', 'moderate',
-                                                'heavy', 'complete', 'meandamage', 'mdamagedev', 'hazardtype',
-                                                'hazardval'])
-            writer.writeheader()
-            writer.writerows(output)
+                writer = csv.DictWriter(csv_file, dialect="unix", fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(output)
 
-        return output_file_name
+        return output
 
     def building_damage_concurrent_future(self, function_name, parallelism, *args):
         """
@@ -137,7 +148,6 @@ class BuildingDamage:
         :param hazard_type: hazard type
         :return: results: a list of OrderedDict
         """
-
         result = []
         fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, buildings, "Non-Retrofit Fragility ID Code")
 
@@ -214,3 +224,40 @@ class BuildingDamage:
             traceback.print_exc()
             print()
             raise e
+
+if __name__ == '__main__':
+    from pyincore import InsecureIncoreClient
+    from pyincore import InventoryDataset
+    from docopt import docopt
+
+    arguments = docopt(__doc__)
+
+    building_inv_path = arguments["BUILDING"]
+    hazard_id_service = arguments["HAZARD"]
+    mapping_id_service = arguments["MAPPING"]
+    damage_ratio_path = arguments["DMGRATIO"]
+
+    server = "http://incore2-services.ncsa.illinois.edu:8888"
+
+    shp_file = None
+    for file in os.listdir(building_inv_path):
+        if file.endswith(".shp"):
+            shp_file = os.path.join(building_inv_path, file)
+
+    building_shp = os.path.abspath(shp_file)
+    building_set = InventoryDataset(building_shp)
+
+    cred = None
+    client = None
+    try:
+        #with open(".incorepw", 'r') as f:
+        #    cred = f.read().splitlines()
+
+        # client = InsecureIncoreClient(server, cred[0])
+        client = InsecureIncoreClient(server, "mondrejc")
+
+        building_dmg = BuildingDamage(client, hazard_id_service, damage_ratio_path, False)
+        output = building_dmg.get_damage(building_set.inventory_set, mapping_id_service)
+
+    except Exception as ex:
+        print(str(ex))
