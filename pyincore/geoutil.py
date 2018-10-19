@@ -2,7 +2,12 @@ import logging
 
 import fiona
 import sys
-from shapely.geometry import shape
+import pyproj
+import networkx as nx
+import matplotlib.pyplot as plt
+
+from rtree import index
+from shapely.geometry import shape, Point
 
 logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
@@ -44,3 +49,168 @@ class GeoUtil:
                 except Exception as e:
                     logging.exception("Error processing feature %s:", f['id'])
 
+    @staticmethod
+    def create_network_graph_from_field(filename, fromnode_fldname, tonode_fldname, is_directed = False):
+        # iterate link
+        link = fiona.open(filename)
+        fromnode_list = []
+        tonode_list = []
+        node_list = []
+        size = 0
+
+        for line_feature in link:
+            from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            to_node_val = line_feature['properties'][tonode_fldname.lower()]
+            fromnode_list.append(from_node_val - 1 )
+            tonode_list.append(to_node_val - 1)
+            node_list.append(from_node_val - 1)
+            node_list.append(to_node_val - 1)
+
+        # create node list
+        node_list.sort()
+        node_list = list(set(node_list))
+
+        # create graph
+        graph = None
+        if is_directed:
+            graph = nx.DiGraph()
+        else:
+            graph = nx.Graph()
+
+        for i in range(len(fromnode_list)):
+            graph.add_edge(fromnode_list[i], tonode_list[i])
+
+        # initialize coords dictionary
+        coords = dict((i, None) for i in range(len(node_list) - 1))
+
+        # create coordinates
+        node_coords_list = [None] * (len(node_list))
+        for line_feature in link:
+            from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            to_node_val = line_feature['properties'][tonode_fldname.lower()]
+            line_geom = (line_feature['geometry'])
+            coords_list = line_geom.get('coordinates')
+            from_coord = coords_list[0]
+            to_coord = coords_list[1]
+            coords[int(from_node_val) - 1] = from_coord
+            coords[int(to_node_val) - 1] = to_coord
+
+        return graph, coords
+
+    @staticmethod
+    def plot_graph_network(graph, coords):
+        # nx.draw(graph, coords, with_lables=True, font_weithg='bold')
+
+        # other ways to draw
+        nx.draw_networkx_nodes(graph, coords, cmap=plt.get_cmap('jet'), node_size=100, node_color='g', with_lables=True, font_weithg='bold')
+        nx.draw_networkx_labels(graph, coords)
+        nx.draw_networkx_edges(graph, coords, edge_color='r', arrows=True)
+        plt.show()
+
+    @staticmethod
+    def get_network_graph(filename, is_directed=False):
+        geom = nx.read_shp(filename)
+        node_coords = {k: v for k, v in enumerate(geom.nodes())}
+        # create graph
+        graph = None
+        if is_directed:
+            graph = nx.DiGraph()
+        else:
+            graph = nx.Graph()
+
+        graph.add_nodes_from(node_coords.keys())
+        l = [set(x) for x in geom.edges()]
+        edg = [tuple(k for k, v in node_coords.items() if v in sl) for sl in l]
+
+        graph.add_edges_from(edg)
+
+        return graph, node_coords
+
+    """
+    check if the node id in from or to node exist in the real node id
+    """
+    @staticmethod
+    def validate_network_node_ids(nodefilename, linkfilename, fromnode_fldname, tonode_fldname, nodeid_fldname):
+        validate = True
+        # iterate link
+        link = fiona.open(linkfilename)
+        link_node_list = []
+        for line_feature in link:
+            from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            to_node_val = line_feature['properties'][tonode_fldname.lower()]
+            link_node_list.append(from_node_val)
+            link_node_list.append(to_node_val)
+
+        # iterate node
+        node = fiona.open(nodefilename)
+        node_list = []
+        for node_feature in node:
+            node_val = node_feature['properties'][nodeid_fldname.lower()]
+            node_list.append(node_val)
+
+        link_node_list.sort()
+        node_list.sort()
+        link_node_list = list(set(link_node_list))
+        node_list = list(set(node_list))
+
+        for node in link_node_list:
+            if node in node_list == False:
+                validate = False
+
+        return validate
+
+    '''
+    calculate geometric matric from line string segment
+    unit= 1: meter, 2: km, 3: mile
+    '''
+    @staticmethod
+    def calc_geog_distance_from_linestring(line_segment, unit=1):
+        dist = 0
+        if (line_segment.__class__.__name__) == "MultiLineString":
+            for line in line_segment:
+                dist = dist + float(GeoUtil.calc_geog_distance_between_points(Point(line.coords[0]), Point(line.coords[1]), unit))
+        elif (line_segment.__class__.__name__) == "LineString":
+            dist = float(GeoUtil.calc_geog_distance_between_points(Point(line_segment.coords[0]), Point(line_segment.coords[1]), unit))
+
+        return dist
+
+    '''
+    calculate geometric matric between two points
+    this only works for WGS84 projection
+    unit= 1: meter, 2: km, 3: mile
+    '''
+    @staticmethod
+    def calc_geog_distance_between_points(point1, point2, unit=1):
+        dist = 0
+        geod = pyproj.Geod(ellps='WGS84')
+        angle1, angle2, distance = geod.inv(point1.x, point1.y, point2.x, point2.y)
+        # print(point1.x, point1.y, point2.x, point2.y)
+        km = "{0:8.4f}".format(distance / 1000)
+        meter = "{0:8.4f}".format(distance)
+        mile = float(meter) * 0.000621371
+
+        if unit == 1:
+            return meter
+        elif unit == 2:
+            return km
+        elif unit == 3:
+            return mile
+
+        return meter
+
+
+    '''
+    create rtree index
+    '''
+    @staticmethod
+    def create_rtree_index(inshp):
+        print("creating node index.....")
+        feature_list = []
+        for feature in inshp:
+            line = shape(feature['geometry'])
+            feature_list.append(line)
+        idx = index.Index()
+        for i in range(len(feature_list)):
+            idx.insert(i, feature_list[i].bounds)
+
+        return idx

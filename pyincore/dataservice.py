@@ -3,8 +3,10 @@ import os
 import requests
 import re
 import urllib
+import zipfile
+import io
 
-from pyincore import IncoreClient, DatasetUtil
+from pyincore import IncoreClient
 
 
 class DataService:
@@ -16,6 +18,8 @@ class DataService:
         self.base_url = urllib.parse.urljoin(client.service_url, 'data/api/datasets/')
         self.files_url = urllib.parse.urljoin(client.service_url, 'data/api/files/')
         self.spaces_url = urllib.parse.urljoin(client.service_url, 'data/api/spaces')
+        self.base_earthquake_url = urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes/')
+        self.base_tornado_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tornadoes/')
 
     def get_dataset_metadata(self, dataset_id: str):
         # construct url with service, dataset api, and id
@@ -56,7 +60,7 @@ class DataService:
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
 
-        folder = DatasetUtil.unzip_dataset(local_filename)
+        folder = self.unzip_dataset(local_filename)
         if folder is not None:
             return folder
         else:
@@ -139,3 +143,43 @@ class DataService:
         url = self.spaces_url
         r = requests.get(url, headers=self.client.headers)
         return r.json()
+
+    def unzip_dataset(self, local_filename: str):
+        foldername, file_extension = os.path.splitext(local_filename)
+        # if it is not a zip file, no unzip
+        if not file_extension.lower() == '.zip':
+            print('It is not a zip file; no unzip')
+            return None
+        # check the folder existance, no unzip
+        if os.path.isdir(foldername):
+            print('It already exsists; no unzip')
+            return foldername
+        os.makedirs(foldername)
+
+        zip_ref = zipfile.ZipFile(local_filename, 'r')
+        zip_ref.extractall(foldername)
+        zip_ref.close()
+        return foldername
+
+    def get_shpfile_from_service(self, fileid, dirname):
+        request_str = self.base_url + fileid
+        request_str_zip = request_str + '/blob'
+
+        # obtain file name
+        r = requests.get(request_str, headers=self.client.headers)
+        first_filename = r.json()['fileDescriptors'][0]['filename']
+        filename = os.path.splitext(first_filename)[0]
+
+        r = requests.get(request_str_zip, headers=self.client.headers, stream=True)
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        z.extractall(dirname)
+        # print(r.status_code)
+
+        return filename
+
+    def get_tornado_dataset_id_from_service(self, fileid, client):
+        # dataset
+        request_str = self.base_tornado_url + fileid
+        r = requests.get(request_str, headers=client.headers)
+
+        return r.json()['tornadoDatasetId']
