@@ -16,6 +16,28 @@ class BridgeUtil:
     DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
 
     @staticmethod
+    def get_damage_ratio_rows(csv_reader: csv.DictReader):
+        csv_rows = []
+
+        # Ignore the header
+        row_index = 0
+        for row in csv_reader:
+            if row_index > 0:
+                csv_rows.append(row)
+
+            row_index += 1
+
+        return csv_rows
+
+    @staticmethod
+    def get_damage_ratio_values(rows, column: str):
+        dmg_ratio_values = []
+        for row in rows:
+            dmg_ratio_values.append(row[column])
+
+        return dmg_ratio_values
+
+    @staticmethod
     def get_hazard_std_dev():
         """
         To be developed
@@ -43,18 +65,21 @@ class BridgeUtil:
         return dmg_intervals
 
     @staticmethod
-    def get_mean_damage(dmg_intervals, start_idx, cur_bridge, dmg_weights):
+    def get_mean_damage(dmg_intervals, start_idx, cur_bridge, dmg_ratio_tbl):
         """
         Calculates mean damage.
 
         :param dmg_intervals: list of damage intervals
-        :param start_idx:
-        :param cur_bridge:
+        :param start_idx: dmg interval index to start, starting at 1 ignores the no damage interval
+        :param cur_bridge: bridge information
         :return:
         """
-        if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"].isdigit():
+
+        if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"] is not None and \
+                cur_bridge["properties"]["spans"].isdigit():
             n = int(cur_bridge["properties"]["spans"])
-        elif "SPANS" in cur_bridge["properties"] and cur_bridge["properties"]["SPANS"].isdigit():
+        elif "SPANS" in cur_bridge["properties"] and cur_bridge["properties"]["SPANS"] is not None and \
+                cur_bridge["properties"]["SPANS"].isdigit():
             n = int(cur_bridge["properties"]["SPANS"])
         else:
             n = 1
@@ -63,12 +88,11 @@ class BridgeUtil:
             n = 10
             print("A bridge was found with greater than 10 spans: " + str(cur_bridge))
 
-
-        weight_slight = dmg_weights[1]
-        weight_moderate = dmg_weights[2]
-        weight_extensive = dmg_weights[3]
-        weight_collapse0 = dmg_weights[4]
-        weight_collapse1 = dmg_weights[5]
+        weight_slight = float(dmg_ratio_tbl[1]['Best Mean Damage Ratio'])
+        weight_moderate = float(dmg_ratio_tbl[2]['Best Mean Damage Ratio'])
+        weight_extensive = float(dmg_ratio_tbl[3]['Best Mean Damage Ratio'])
+        weight_collapse0 = float(dmg_ratio_tbl[4]['Best Mean Damage Ratio'])
+        weight_collapse1 = float(dmg_ratio_tbl[5]['Best Mean Damage Ratio'])
 
         mean_damage = weight_slight * dmg_intervals[start_idx] \
                       + weight_moderate * dmg_intervals[start_idx + 1] \
@@ -109,32 +133,34 @@ class BridgeUtil:
         return dmg_ratios[idx]["Damage State"]
 
     @staticmethod
-    def get_probability_of_exceedence(cur_fragility, hazard_val, std_dev, use_liquefaction):
+    def get_probability_of_exceedence(bridge, fragility_set, hazard_val, std_dev, use_liquefaction):
         """
         Calculates probability of exceedence.
 
-        :param cur_fragility:
+        :param bridge:
+        :param fragility_set:
         :param hazard_val:
         :param std_dev:
+        :param use_liquefaction:
         :return:
         """
         exceedence_probability = []
-        for curve in cur_fragility["fragilityCurves"]:
-            median = float(curve['median'])
-            beta = float(curve['beta'])
+        for fragility in fragility_set["fragilityCurves"]:
+            median = float(fragility['median'])
+            beta = float(fragility['beta'])
 
-            if use_liquefaction:
-                curve = BridgeUtil.adjust_fragility_for_liquefaction(curve, cur_fragility["LIQ"])
-                median = float(curve['median'])
-            if curve["className"].endswith("StandardFragilityCurve"):
-                beta = math.sqrt(math.pow(curve["beta"], 2) + math.pow(std_dev, 2))
+            if use_liquefaction and 'liq' in bridge['properties']:
+                fragility = BridgeUtil.adjust_fragility_for_liquefaction(fragility, bridge['properties']['liq'])
+                median = float(fragility['median'])
+            if fragility["className"].endswith("StandardFragilityCurve"):
+                beta = math.sqrt(math.pow(fragility["beta"], 2) + math.pow(std_dev, 2))
 
             # Compute probability
             probability = 0.0
-            if (curve['curveType'] == 'Normal'):
+            if fragility['curveType'] == 'Normal':
                 sp = (math.log(hazard_val) - math.log(median)) / beta
                 probability = norm.cdf(sp)
-            elif (curve['curveType'] == "LogNormal"):
+            elif fragility['curveType'] == "LogNormal":
                 x = (math.log(hazard_val) - median) / beta
                 probability = norm.cdf(x)
             exceedence_probability.append(probability)
