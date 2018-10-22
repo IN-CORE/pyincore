@@ -2,6 +2,7 @@ import csv
 import json
 import numpy
 import os
+import glob
 
 import fiona
 import rasterio
@@ -61,18 +62,15 @@ class Dataset:
 
     """Utility methods for reading different standard file formats"""
     def get_inventory_reader(self):
-        if "inventory" in self.readers:
-            return self.readers["inventory"]
 
         filename = self.local_file_path
         if os.path.isdir(filename):
             layers = fiona.listlayers(filename)
             if len(layers) > 0:
                 # for now, open a first shapefile
-                self.readers["inventory"] = fiona.open(filename, layer=layers[0])
+                return fiona.open(filename, layer=layers[0])
         else:
-            self.readers["inventory"] = fiona.open(filename)
-        return self.readers["inventory"]
+            return fiona.open(filename)
 
     def get_raster_value(self, location):
         if not "raster" in self.readers:
@@ -90,8 +88,13 @@ class Dataset:
     def get_csv_reader(self):
         if not "csv" in self.readers:
             filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.csv")
+                if len(files) > 0:
+                    filename = files[0]
+
             csvfile = open(filename, 'r')
-            self.readers["csv"] = csv.DictReader(csvfile)
+            return csv.DictReader(csvfile)
 
         return self.readers["csv"]
 
@@ -103,3 +106,30 @@ class Dataset:
         self.close()
 
 
+# Added DamageRatioDataset and InventoryDataset for backwards compatibility until analyses are updated
+class DamageRatioDataset:
+    def __init__(self, filename):
+        self.damage_ratio = None
+        csvfile = open(filename, 'r')
+        reader = csv.DictReader(csvfile)
+        self.damage_ratio = []
+        for row in reader:
+            self.damage_ratio.append(row)
+
+
+class InventoryDataset:
+    def __init__(self, filename):
+        self.inventory_set = None
+        if os.path.isdir(filename):
+            layers = fiona.listlayers(filename)
+            if len(layers) > 0:
+                # for now, open a first shapefile
+                self.inventory_set = fiona.open(filename, layer=layers[0])
+        else:
+            self.inventory_set = fiona.open(filename)
+
+    def close(self):
+        self.inventory_set.close()
+
+    def __del__(self):
+        self.close()

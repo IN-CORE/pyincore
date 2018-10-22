@@ -110,9 +110,13 @@ class BaseAnalysis:
     def validate_parameter(self, parameter_spec, parameter):
         is_valid = True
         err_msg = ''
-        if type(parameter) is parameter_spec['type']:
+        if parameter_spec['required'] and not (type(parameter) is parameter_spec['type']):
             is_valid = False
-            err_msg = 'dataset type does not match'
+            err_msg = 'parameter type does not match'
+        elif not isinstance(parameter, type(None)) and not (type(parameter) is parameter_spec['type']):
+            is_valid = False
+            err_msg = 'parameter type does not match'
+
         return (is_valid, err_msg)
 
     def validate_input_dataset(self, dataset_spec, dataset):
