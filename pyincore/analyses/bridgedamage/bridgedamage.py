@@ -140,26 +140,6 @@ class BridgeDamage(BaseAnalysis):
         """
         bridge_results = collections.OrderedDict()
 
-<<<<<<< HEAD
-        center_point = GeoUtil.get_location(cur_bridge)
-        hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(self.hazard_dataset_id,
-                                                                cur_fragility['demandType'].lower(),
-                                                                cur_fragility['demandUnits'],
-                                                                points=[center_point.y, center_point.x])
-        hazard_val = hazard_val_set[0]['hazardValue']
-
-        hazard_type = cur_fragility['demandType']
-        hazard_std_dev = BridgeUtil.get_hazard_std_dev() if use_hazard_uncertainty else 0.0
-        exceedence_probability = BridgeUtil.get_probability_of_exceedence(cur_fragility, hazard_val, hazard_std_dev,
-                                                                          use_liquefaction)
-        dmg_intervals = BridgeUtil.get_damage_state_intervals(exceedence_probability)
-        mean_damage = BridgeUtil.get_mean_damage(dmg_intervals, 1, cur_bridge, self.dmg_weights)
-        expected_damage = BridgeUtil.get_expected_damage(mean_damage, self.dmg_ratios)
-        retrofit_cost = BridgeUtil.get_retrofit_cost(self.fragility_key)
-        retrofit_type = BridgeUtil.get_retrofit_type(self.fragility_key)
-
-        bridge_results["guid"] = cur_bridge['properties']['guid']
-=======
         hazard_val = 0.0
         demand_type = "Unknown"
         exceedence_probability = [0.0, 0.0, 0.0, 0.0]
@@ -193,7 +173,6 @@ class BridgeDamage(BaseAnalysis):
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 
         bridge_results['guid'] = bridge['properties']['guid']
->>>>>>> a759cc33a2f5d39a572bcd43dd29d88018b72ac7
         bridge_results["ls-slight"] = exceedence_probability[0]
         bridge_results["ls-moderat"] = exceedence_probability[1]
         bridge_results["ls-extensi"] = exceedence_probability[2]
@@ -212,8 +191,6 @@ class BridgeDamage(BaseAnalysis):
 
         return bridge_results
 
-<<<<<<< HEAD
-=======
     def get_spec(self):
         return {
             'name': 'bridge-damage',
@@ -291,4 +268,3 @@ class BridgeDamage(BaseAnalysis):
                 }
             ]
         }
->>>>>>> a759cc33a2f5d39a572bcd43dd29d88018b72ac7
