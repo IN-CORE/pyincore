@@ -114,6 +114,15 @@ class AnalysisUtil:
         return output
 
     @staticmethod
+    def calculate_limit_states(damage):
+        output = collections.OrderedDict()
+        if len(damage) == 4:
+            output['immocc'] = 1.0 - damage['insignific']
+            output['lifesfty'] = damage['heavy'] - damage['complete']
+            output['collprev'] = damage['complete']
+        return output
+
+    @staticmethod
     def calculate_mean_damage(weights, dmg_intervals):
         output = collections.OrderedDict()
         if len(weights) == 5:
