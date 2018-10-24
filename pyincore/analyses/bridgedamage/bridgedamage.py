@@ -18,7 +18,6 @@ class BridgeDamage(BaseAnalysis):
     """Computes bridge structural damage for an earthquake hazard
 
     """
-
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)

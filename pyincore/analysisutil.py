@@ -2,6 +2,7 @@ import collections
 from typing import List, Dict
 import math
 import os
+import csv
 from scipy.stats import norm, lognorm
 from py_expression_eval import Parser
 from pyincore import DataService
@@ -123,30 +124,29 @@ class AnalysisUtil:
         return output
 
     @staticmethod
-    def calculate_mean_damage(weights, dmg_intervals):
+    def calculate_mean_damage(dmg_ratio_tbl, dmg_intervals):
         output = collections.OrderedDict()
-        if len(weights) == 5:
-            output['MeanDamage'] = weights[0] * float(dmg_intervals['I_None']) \
-                                   + weights[1] * float(dmg_intervals['I_Slight']) \
-                                   + weights[2] * float(dmg_intervals['I_Moderate']) \
-                                   + weights[3] * float(dmg_intervals['I_Extensive']) \
-                                   + weights[4] * float(dmg_intervals['I_Complete'])
-        elif len(weights) == 4:
-            output['meandamage'] = float(weights[0]) * float(dmg_intervals['insignific']) + float(
-                weights[1]) * float(
-                dmg_intervals['moderate']) + float(weights[2]) * float(dmg_intervals['heavy']) + float(
-                weights[3]) * float(
-                dmg_intervals['complete'])
+        if len(dmg_ratio_tbl) == 5:
+            output['meandamage'] = float(dmg_ratio_tbl[1]["Best Mean Damage Ratio"]) * float(dmg_intervals['I_Slight']) \
+                                   + float(dmg_ratio_tbl[2]["Best Mean Damage Ratio"]) * float(dmg_intervals['I_Moderate']) \
+                                   + float(dmg_ratio_tbl[3]["Best Mean Damage Ratio"]) * float(dmg_intervals['I_Extensive']) \
+                                   + float(dmg_ratio_tbl[4]["Best Mean Damage Ratio"]) * float(dmg_intervals['I_Complete'])
+        elif len(dmg_ratio_tbl) == 4:
+            output['meandamage'] = float(dmg_ratio_tbl[0]["Mean Damage Factor"]) * float(dmg_intervals["insignific"]) + \
+                                   float(dmg_ratio_tbl[1]["Mean Damage Factor"]) * float(dmg_intervals['moderate']) + \
+                                   float(dmg_ratio_tbl[2]["Mean Damage Factor"]) * float(dmg_intervals['heavy']) + \
+                                   float(dmg_ratio_tbl[3]["Mean Damage Factor"]) * float(dmg_intervals['complete'])
         return output
 
     @staticmethod
-    def calculate_mean_damage_std_deviation(weights, weights_std_dev, dmg_intervals, mean_damage):
+    def calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg_intervals, mean_damage):
         output = collections.OrderedDict()
         result = 0.0
 
         idx = 0
         for dmg_interval in dmg_intervals:
-            result += dmg_intervals[dmg_interval] * (math.pow(weights[idx], 2) + math.pow(weights_std_dev[idx], 2))
+            result += dmg_intervals[dmg_interval] * (math.pow(float(dmg_ratio_tbl[idx]["Mean Damage Factor"]), 2) +
+                                                     math.pow(float(dmg_ratio_tbl[idx]["Deviation Damage Factor"]), 2))
             idx += 1
 
         output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
@@ -274,3 +274,16 @@ class AnalysisUtil:
             print('Mismatched keys encountered in the limit states')
             print(str(e))
 
+    @staticmethod
+    def get_csv_table_rows(csv_reader: csv.DictReader):
+        csv_rows = []
+
+        # Ignore the header
+        row_index = 0
+        for row in csv_reader:
+            if row_index > 0:
+                csv_rows.append(row)
+
+            row_index += 1
+
+        return csv_rows

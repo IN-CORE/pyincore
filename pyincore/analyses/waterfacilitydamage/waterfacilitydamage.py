@@ -58,10 +58,15 @@ class WaterFacilityDamage:
                 inventory_list[count:count + features_per_thread])
             count += features_per_thread
 
-        output = self.waterfacility_damage_concurrent_execution(
-            self.waterfacilityset_damage_analysis, parallel_threads,
-            inventory_args, repeat(mapping_id), repeat(self.hazardsvc),
-            repeat(hazard_dataset_id), repeat(liq_geology_dataset_id), repeat(uncertainty))
+        if(num_threads > 1):
+            output = self.waterfacility_damage_concurrent_execution(
+                self.waterfacilityset_damage_analysis, parallel_threads,
+                inventory_args, repeat(mapping_id), repeat(self.hazardsvc),
+                repeat(hazard_dataset_id), repeat(liq_geology_dataset_id), repeat(uncertainty))
+        else:
+            output = self.waterfacilityset_damage_analysis( inventory_args[0], mapping_id,
+                self.hazardsvc, hazard_dataset_id,
+                liq_geology_dataset_id, uncertainty);
 
 
         out_file_name = "dmg-results.csv"
@@ -113,8 +118,9 @@ class WaterFacilityDamage:
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
         location = GeoUtil.get_location(facility)
-        hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id,hazard_demand_type,
-                                                            demand_units, location.y, location.x)
+        hazard_val_set = hazardsvc.get_earthquake_hazard_values(hazard_dataset_id,hazard_demand_type,
+                                                            demand_units, points=[location.y, location.x])
+        hazard_val = hazard_val_set[0]['hazardValue']
 
         limit_states = AnalysisUtil.compute_limit_state_probability(fragility['fragilityCurves'],
                                                             hazard_val, fragility_yvalue, std_dev)

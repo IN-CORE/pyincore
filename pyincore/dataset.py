@@ -106,3 +106,30 @@ class Dataset:
         self.close()
 
 
+# Added DamageRatioDataset and InventoryDataset for backwards compatibility until analyses are updated
+class DamageRatioDataset:
+    def __init__(self, filename):
+        self.damage_ratio = None
+        csvfile = open(filename, 'r')
+        reader = csv.DictReader(csvfile)
+        self.damage_ratio = []
+        for row in reader:
+            self.damage_ratio.append(row)
+
+
+class InventoryDataset:
+    def __init__(self, filename):
+        self.inventory_set = None
+        if os.path.isdir(filename):
+            layers = fiona.listlayers(filename)
+            if len(layers) > 0:
+                # for now, open a first shapefile
+                self.inventory_set = fiona.open(filename, layer=layers[0])
+        else:
+            self.inventory_set = fiona.open(filename)
+
+    def close(self):
+        self.inventory_set.close()
+
+    def __del__(self):
+        self.close()
