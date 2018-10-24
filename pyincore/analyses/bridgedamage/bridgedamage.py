@@ -18,7 +18,6 @@ class BridgeDamage(BaseAnalysis):
     """Computes bridge structural damage for an earthquake hazard
 
     """
-
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
@@ -139,7 +138,6 @@ class BridgeDamage(BaseAnalysis):
         :return: an ordered dictionary with bridge damage and other data/metadata
         """
         bridge_results = collections.OrderedDict()
-
 
         hazard_val = 0.0
         demand_type = "Unknown"
