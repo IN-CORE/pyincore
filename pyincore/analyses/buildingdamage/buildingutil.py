@@ -5,18 +5,23 @@ class BuildingUtil:
     """
         Utility methods for analysis
     """
+    DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
+    DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY = "Non-Retrofit Inundation Fragility ID Code"
+    DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY = "Non-Retrofit MomentumFlux Fragility ID Code"
 
     @staticmethod
     def get_building_period(num_stories, fragility_set):
         period = 0.0
 
         fragility_curve = fragility_set['fragilityCurves'][0]
-        if fragility_curve[
-            'className'] == 'edu.illinois.ncsa.incore.services.fragility.model.PeriodStandardFragilityCurve':
+
+        fragility_class_name = fragility_curve['className']
+        if fragility_class_name == 'edu.illinois.ncsa.incore.services.fragility.model.PeriodStandardFragilityCurve' or \
+                fragility_class_name == 'edu.illinois.ncsa.incore.service.fragility.models.PeriodStandardFragilityCurve':
             period_equation_type = fragility_curve['periodEqnType']
             if period_equation_type == 1:
                 period = fragility_curve['periodParam0']
-            elif period_equation_type == 3:
+            elif period_equation_type == 2:
                 period = fragility_curve['periodParam0'] * num_stories
             elif period_equation_type == 3:
                 period = fragility_curve['periodParam1'] * math.pow(fragility_curve['periodParam0'] * num_stories,
@@ -44,5 +49,10 @@ class BuildingUtil:
             # This handles the case where some fragilities only specify Sa, others a specific period of Sa
             if not hazard_demand_type.endswith('pga'):
                 hazard_demand_type = str(building_period) + " " + fragility_hazard_type
+        elif hazard_type.lower() == "tsunami":
+            if hazard_demand_type == "momentumflux":
+                hazard_demand_type = "mmax"
+            elif hazard_demand_type == "inundationdepth":
+                hazard_demand_type = "hmax"
 
         return hazard_demand_type
