@@ -4,119 +4,74 @@
 Calculate the probability of building damage based on different hazard type
 by calling fragility service and hazard/tornado service
 
-Usage:
-    building_damage.py BUILDING HAZARD MAPPING DMGRATIO
-
-Options:
-    BUILDING    Building inventory file in ESRI shapefile.
-    HAZARD      Hazard id.
-    MAPPING     Fragility mapping id.
-    DMGRATIO    Damage ratio file in CSV.
 """
 import collections
-from pyincore import DamageRatioDataset, HazardService, FragilityService
-from pyincore import GeoUtil, AnalysisUtil
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
-import os
-import csv
 import concurrent.futures
 import traceback
 from itertools import repeat
 
+from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
 
-class BuildingDamage:
-    def __init__(self, client, hazard_service: str, dmg_ratios: str, intermediate_files: bool = True):
-        # TODO Should we move this outside of the building damage class?
-        # Handle the case where Ergo data has an .mvz
-        # In the case of multiple files, DataWolf creates a folder and passes that to the tool
-        dmg_ratio = None
-        if (os.path.isfile(dmg_ratios)):
-            dmg_ratio = DamageRatioDataset(dmg_ratios)
+
+class BuildingDamage(BaseAnalysis):
+    """Computes building structural damage for an hazard exposure
+
+    """
+    def __init__(self, incore_client):
+        self.hazardsvc = HazardService(incore_client)
+        self.fragilitysvc = FragilityService(incore_client)
+
+        super(BuildingDamage, self).__init__(incore_client)
+
+    def run(self):
+        """
+        Executes building damage analysis
+        """
+
+        # Building dataset
+        bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
+
+        dmg_ratio_csv = self.get_input_dataset("dmg_ratios").get_csv_reader()
+        dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(dmg_ratio_csv)
+
+        # Get hazard input
+        hazard_dataset_id = self.get_parameter("hazard_id")
+
+        # Hazard type of the exposure
+        hazard_type = self.get_parameter("hazard_type")
+
+        # Get Fragility key
+        fragility_key = self.get_parameter("fragility_key")
+        if fragility_key is None and not hazard_type == 'tsunami':
+            fragility_key = BuildingUtil.DEFAULT_FRAGILITY_KEY
+            self.set_parameter("fragility_key", fragility_key)
         else:
-            dmg_ratio_file = None
-            for file in os.listdir(dmg_ratios):
-                if file.endswith(".csv"):
-                    dmg_ratio_file = os.path.join(dmg_ratios, file)
-                    dmg_ratio = DamageRatioDataset(os.path.abspath(dmg_ratio_file))
+            fragility_key = BuildingUtil.DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY
+            self.set_parameter("fragility_key", fragility_key)
 
-        damage_ratios = dmg_ratio.damage_ratio
-        # Find hazard type and id
-        hazard_service_split = hazard_service.split("/")
-        self.hazard_type = hazard_service_split[0]
-        self.hazard_dataset_id = hazard_service_split[1]
+        user_defined_cpu = 1
 
-        # Create Hazard and Fragility service
-        self.hazardsvc = HazardService(client)
-        self.fragilitysvc = FragilityService(client)
+        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
+            user_defined_cpu = self.get_parameter("num_cpu")
 
-        # damage weights for buildings
-        self.dmg_weights = [
-            float(damage_ratios[1]['Mean Damage Factor']),
-            float(damage_ratios[2]['Mean Damage Factor']),
-            float(damage_ratios[3]['Mean Damage Factor']),
-            float(damage_ratios[4]['Mean Damage Factor'])]
-        self.dmg_weights_std_dev = [float(damage_ratios[1]['Deviation Damage Factor']),
-                                    float(damage_ratios[2]['Deviation Damage Factor']),
-                                    float(damage_ratios[3]['Deviation Damage Factor']),
-                                    float(damage_ratios[4]['Deviation Damage Factor'])]
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(bldg_set), user_defined_cpu)
 
-        self.intermediate_files = intermediate_files
-
-    @staticmethod
-    def get_output_metadata():
-        output = {}
-        output["dataType"] = "ergo:buildingDamageVer4"
-        output["format"] = "table"
-
-        return output
-
-    def get_damage(self, inventory_set: dict, mapping_id: str, base_dataset_id: str = None, user_defined_parallelism: int = 0):
-        """
-        :param inventory_set: buildings from inventory file
-        :param mapping_id: fragility mapping id
-        :param base_dataset_id:
-        :param user_defined_parallelism: number of concurrent processes to use
-        :return: output_file: string of file name or OrderedDict
-        """
-        output = []
-
-        parallelism = AnalysisUtil.determine_parallelism_locally(self, len(inventory_set), user_defined_parallelism)
-        avg_bulk_input_size = int(len(inventory_set) / parallelism)
+        avg_bulk_input_size = int(len(bldg_set) / num_workers)
         inventory_args = []
         count = 0
-        inventory_list = list(inventory_set)
+        inventory_list = list(bldg_set)
         while count < len(inventory_list):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        output = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
-                                                        parallelism,
-                                                        inventory_args,
-                                                        repeat(mapping_id),
-                                                        repeat(self.dmg_weights),
-                                                        repeat(self.dmg_weights_std_dev),
-                                                        repeat(self.hazardsvc),
-                                                        repeat(self.hazard_dataset_id),
-                                                        repeat(self.hazard_type))
+        results = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input, num_workers,
+                                                         inventory_args, repeat(hazard_type), repeat(hazard_dataset_id),
+                                                         repeat(dmg_ratio_tbl))
 
-        output_file_name = "dmg-results.csv"
+        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
-        fieldnames = ['guid', 'immocc', 'lifesfty', 'collprev', 'insignific', 'moderate',
-                      'heavy', 'complete', 'meandamage', 'mdamagedev', 'hazardtype',
-                      'hazardval']
-
-        # Write Output to csv
-        if self.intermediate_files:
-            with open(output_file_name, 'w') as csv_file:
-                # Write the parent ID at the top of the result data, if it is given
-                if base_dataset_id is not None:
-                    csv_file.write(base_dataset_id + '\n')
-
-                writer = csv.DictWriter(csv_file, dialect="unix", fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(output)
-
-        return output
+        return True
 
     def building_damage_concurrent_future(self, function_name, parallelism, *args):
         """
@@ -134,79 +89,123 @@ class BuildingDamage:
 
         return output
 
-    def building_damage_analysis_bulk_input(self, buildings, mapping_id, dmg_weights, dmg_weights_std_dev,
-                                             hazardsvc, hazard_dataset_id, hazard_type):
+    def building_damage_analysis_bulk_input(self, buildings, hazard_type, hazard_dataset_id, dmg_ratio_tbl):
         """
         Run analysis for multiple buildings
 
-        :param building: multiple buildings from input inventory set
-        :param mapping_id: fragility mapping id
-        :param dmg_weights: weights to compute mean damage
-        :param dmg_weights_std_dev: standard deviation of dmg_weights
-        :param hazardsvc: hazard service client
-        :param hazard_dataset_id: hazard dataset id
-        :param hazard_type: hazard type
+        :param buildings: multiple buildings from input inventory set
+        :param dmg_ratio_tbl: damage ratio table, including weights to compute mean damage
+        :param hazard_dataset_id: id of the hazard exposure
+        :param hazard_type: hazard type of the hazard exposure
         :return: results: a list of OrderedDict
         """
+
         result = []
-        fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, buildings, "Non-Retrofit Fragility ID Code")
+        fragility_key = self.get_parameter("fragility_key")
+
+        fragility_sets = dict()
+        fragility_sets[fragility_key] = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), buildings,
+                                                                          fragility_key)
+
+        if hazard_type == 'tsunami':
+            other_fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), buildings,
+                                                                     BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY)
+            fragility_sets[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY] = other_fragility_sets
 
         for building in buildings:
-            if building["id"] in fragility_sets.keys():
-                result.append(self.building_damage_analysis(building, dmg_weights, dmg_weights_std_dev,
-                                                            fragility_sets[building["id"]], hazardsvc,
-                                                            hazard_dataset_id, hazard_type))
+            fragility_set = dict()
+            if building["id"] in fragility_sets[fragility_key]:
+                fragility_set[fragility_key] = fragility_sets[fragility_key][building["id"]]
+
+            if hazard_type == 'tsunami' and building["id"] in \
+                    fragility_sets[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY]:
+                other_fragility_set = fragility_sets[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY][building["id"]]
+                fragility_set[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY] = other_fragility_set
+
+            result.append(self.building_damage_analysis(building, dmg_ratio_tbl, fragility_set, hazard_dataset_id,
+                                                        hazard_type))
 
         return result
 
-    def building_damage_analysis(self, building, dmg_weights, dmg_weights_std_dev, fragility_set, hazardsvc,
-                                 hazard_dataset_id, hazard_type):
+    def building_damage_analysis(self, building, dmg_ratio_tbl, fragility_set, hazard_dataset_id, hazard_type):
         """
         Run analysis for single building
 
         :param building: a single building from input inventory set
-        :param dmg_weights: weights to compute mean damage
-        :param dmg_weights_std_dev: standard deviation of dmg_weights
-        :param fragility_set: fragility set
-        :param hazardsvc: hazard service client
-        :param hazard_dataset_id: hazard dataset id
-        :param hazard_type: hazard type
+        :param dmg_ratio_tbl: damage ratio table, including weights to compute mean damage
+        :param fragility_set: fragility set applicable to building
+        :param hazard_dataset_id: dataset id of the hazard exposure
+        :param hazard_type: hazard type of the hazard exposure
         :return: bldg_results: a single OrderedDict
         """
         try:
             bldg_results = collections.OrderedDict()
 
             hazard_val = 0.0
-            demand_type = "Unknown"
+            demand_type = "None"
 
             dmg_probability = collections.OrderedDict()
+            dmg_interval = collections.OrderedDict()
+            mean_damage = collections.OrderedDict()
+            mean_damage['meandamage'] = 0.0
+            mean_damage_dev = collections.OrderedDict()
+            mean_damage_dev['mdamagedev'] = 0.0
 
-            # TODO what would be returned if no match found?
-            if fragility_set is not None:
-
-                hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, fragility_set, hazard_type)
-                demand_units = fragility_set['demandUnits']
+            if bool(fragility_set):
                 location = GeoUtil.get_location(building)
-
-                # Update this once hazard service supports tornado
+                fragility_key = self.get_parameter("fragility_key")
+                local_fragility_set = fragility_set[fragility_key]
                 if hazard_type == 'earthquake':
-                    hazard_val = hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
-                                                                       demand_units, location.y, location.x)
+                    # TODO include liquefaction and hazard uncertainty
+                    hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
+                    demand_units = local_fragility_set['demandUnits']
+                    hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
+                                                                            demand_units, location.y, location.x)
+                    demand_type = local_fragility_set['demandType']
                 elif hazard_type == 'tornado':
-                    hazard_val = hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
-                                                                    location.x, 0)
+                    demand_type = local_fragility_set['demandType']
+                    demand_units = local_fragility_set['demandUnits']
+                    hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
+                                                                         location.x, 0)
+                elif hazard_type == 'hurricane':
+                    # TODO implement hurricane
+                    demand_type = local_fragility_set['demandType']
+                    print("hurricane not yet implemented")
+                elif hazard_type == 'tsunami':
+                    hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
 
-                dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, hazard_val)
-                demand_type = fragility_set['demandType']
+                    demand_units = local_fragility_set["demandUnits"]
+                    location_str = str(location.y) + "," + str(location.x)
+                    hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, hazard_demand_type,
+                                                                          demand_units, [location_str])[0]["hazardValue"]
+
+                    # Sometimes the geotiffs give large negative values for out of bounds instead of 0
+                    if hazard_val <= 0.0:
+                        if BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY in fragility_set:
+                            local_fragility_set = fragility_set[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY]
+                            hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set,
+                                                                                     hazard_type)
+                            demand_units = local_fragility_set["demandUnits"]
+                            hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, hazard_demand_type,
+                                                                                  demand_units, [location_str])[0]["hazardValue"]
+                            if hazard_val <= 0.0:
+                                hazard_val = 0.0
+                            else:
+                                demand_type = hazard_demand_type
+
+                    else:
+                        demand_type = hazard_demand_type
+
+                dmg_probability = AnalysisUtil.calculate_damage_json(local_fragility_set, hazard_val)
             else:
                 dmg_probability['immocc'] = 0.0
                 dmg_probability['lifesfty'] = 0.0
                 dmg_probability['collprev'] = 0.0
 
             dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
-            mean_damage = AnalysisUtil.calculate_mean_damage(dmg_weights, dmg_interval)
-            mean_damage_dev = AnalysisUtil.calculate_mean_damage_std_deviation(dmg_weights, dmg_weights_std_dev,
-                                                                               dmg_interval, mean_damage['meandamage'])
+            mean_damage = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl, dmg_interval)
+            mean_damage_dev = AnalysisUtil.calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg_interval,
+                                                                               mean_damage['meandamage'])
 
             bldg_results['guid'] = building['properties']['guid']
             bldg_results.update(dmg_probability)
@@ -225,39 +224,81 @@ class BuildingDamage:
             print()
             raise e
 
-if __name__ == '__main__':
-    from pyincore import InsecureIncoreClient
-    from pyincore import InventoryDataset
-    from docopt import docopt
+    def get_spec(self):
+        return {
+            'name': 'building-damage',
+            'description': 'building damage analysis',
+            'input_parameters': [
+                {
+                    'id': 'result_name',
+                    'required': True,
+                    'description': 'result dataset name',
+                    'type': str
+                },
+                {
+                    'id': 'mapping_id',
+                    'required': True,
+                    'description': 'Fragility mapping dataset',
+                    'type': str
+                },
+                {
+                    'id': 'hazard_type',
+                    'required': True,
+                    'description': 'Hazard Type (e.g. earthquake)',
+                    'type': str
+                },
+                {
+                    'id': 'hazard_id',
+                    'required': True,
+                    'description': 'Hazard ID',
+                    'type': str
+                },
+                {
+                    'id': 'fragility_key',
+                    'required': False,
+                    'description': 'Fragility key to use in mapping dataset',
+                    'type': str
+                },
+                {
+                    'id': 'use_liquefaction',
+                    'required': False,
+                    'description': 'Use liquefaction',
+                    'type': bool
+                },
+                {
+                    'id': 'use_hazard_uncertainty',
+                    'required': False,
+                    'description': 'Use hazard uncertainty',
+                    'type': bool
+                },
+                {
+                    'id': 'num_cpu',
+                    'required': False,
+                    'description': 'If using parallel execution, the number of cpus to request',
+                    'type': int
+                },
+            ],
+            'input_datasets': [
+                {
+                    'id': 'buildings',
+                    'required': True,
+                    'description': 'Building Inventory',
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5'],
+                },
+                {
+                    'id': 'dmg_ratios',
+                    'required': True,
+                    'description': 'Bridge Damage Ratios',
+                    'type': ['ergo:buildingDamageRatios'],
+                },
 
-    arguments = docopt(__doc__)
+            ],
+            'output_datasets': [
+                {
+                    'id': 'result',
+                    'parent_type': 'bridges',
+                    'type': 'ergo:buildingDamageVer4'
+                }
+            ]
+        }
 
-    building_inv_path = arguments["BUILDING"]
-    hazard_id_service = arguments["HAZARD"]
-    mapping_id_service = arguments["MAPPING"]
-    damage_ratio_path = arguments["DMGRATIO"]
-
-    server = "http://incore2-services.ncsa.illinois.edu:8888"
-
-    shp_file = None
-    for file in os.listdir(building_inv_path):
-        if file.endswith(".shp"):
-            shp_file = os.path.join(building_inv_path, file)
-
-    building_shp = os.path.abspath(shp_file)
-    building_set = InventoryDataset(building_shp)
-
-    cred = None
-    client = None
-    try:
-        #with open(".incorepw", 'r') as f:
-        #    cred = f.read().splitlines()
-
-        # client = InsecureIncoreClient(server, cred[0])
-        client = InsecureIncoreClient(server, "mondrejc")
-
-        building_dmg = BuildingDamage(client, hazard_id_service, damage_ratio_path, False)
-        output = building_dmg.get_damage(building_set.inventory_set, mapping_id_service)
-
-    except Exception as ex:
-        print(str(ex))
