@@ -407,11 +407,48 @@ class WaterNetworkRecovery:
         return WN_rec_atr['Rectime']
 
 
-    def output_water_network(self,resultsNday, wnNday, timestamp):
+    def output_water_network(self,resultsNday, wnNday, timestamp, plotly_options:dict):
         pressure = resultsNday.node['pressure'].loc[timestamp, :]
         pressure0 = WaterNetworkRecoveryUtil.pressure_plot(np.array(pressure))
         pressure0 = pd.Series(pressure0, index=pressure.index)
-        mycmap = colors.ListedColormap(['red', 'yellow', 'green'])
 
-        wntr.graphics.plot_network(wnNday, node_attribute=pressure0,
-                                   node_cmap=mycmap)
+        if 'title' in plotly_options.keys():
+            title = plotly_options['title']
+        else:
+            title = None
+
+        if 'node_size' in plotly_options.keys():
+            node_size = plotly_options['node_size']
+        else:
+            node_size = None
+
+        if 'node_cmap' in plotly_options.keys():
+            node_cmap = plotly_options['node_cmap']
+        else:
+            node_cmap = None
+
+        if 'link_width' in plotly_options.keys():
+            link_width = plotly_options['link_width']
+        else:
+            link_width = None
+
+        if 'filename' in plotly_options.keys():
+            filename = plotly_options['filename']
+        else:
+            filename = None
+
+        if 'figsize' in plotly_options.keys():
+            figsize = plotly_options['figsize']
+        else:
+            figsize = None
+
+        WaterNetworkRecoveryUtil.plot_interactive_network(
+            wnNday,
+            node_attribute=pressure0,
+            title=title,
+            node_size=node_size,
+            node_cmap=node_cmap,
+            link_width=link_width,
+            figsize=figsize,
+            filename=filename)
+
