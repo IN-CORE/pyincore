@@ -28,21 +28,7 @@ class CumulativeBuildingDamage(BaseAnalysis):
         tsunami_damage_df = pd.DataFrame(list(tsunami_damage_set))
 
         dmg_ratio_csv = self.get_input_dataset("dmg_ratios").get_csv_reader()
-
-        damage_ratios = []
-
-        for row in dmg_ratio_csv:
-            damage_ratios.append(row)
-
-        dmg_weights = [
-            float(damage_ratios[1]['Mean Damage Factor']),
-            float(damage_ratios[2]['Mean Damage Factor']),
-            float(damage_ratios[3]['Mean Damage Factor']),
-            float(damage_ratios[4]['Mean Damage Factor'])]
-        dmg_weights_std_dev = [float(damage_ratios[1]['Deviation Damage Factor']),
-                                    float(damage_ratios[2]['Deviation Damage Factor']),
-                                    float(damage_ratios[3]['Deviation Damage Factor']),
-                                    float(damage_ratios[4]['Deviation Damage Factor'])]
+        dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(dmg_ratio_csv)
 
         user_defined_cpu = 1
 
@@ -62,7 +48,7 @@ class CumulativeBuildingDamage(BaseAnalysis):
         results = self.cumulative_building_damage_concurrent_future(self.cumulative_building_damage_bulk_input,
                                                                     num_workers, eq_damage_args,
                                                                     repeat(tsunami_damage_df),
-                                                                    repeat(dmg_weights), repeat(dmg_weights_std_dev))
+                                                                    repeat(dmg_ratio_tbl))
 
         self.set_result_csv_data("combined-result", results, name=self.get_parameter("result_name"))
 
@@ -73,7 +59,7 @@ class CumulativeBuildingDamage(BaseAnalysis):
         Utilizes concurrent.future module
         :param function_name: the function to be parallelized
         :param num_workers: number of max workers in the parallelization
-        :param args: all the argumeents in order to pass into parameter function_namee
+        :param args: all the arguments in order to pass into parameter function_namee
         :return: output: list of OrderedDict
         """
 
@@ -84,8 +70,7 @@ class CumulativeBuildingDamage(BaseAnalysis):
 
         return output
 
-    def cumulative_building_damage_bulk_input(self, eq_building_damage_set, tsunami_building_damage_set, dmg_weights,
-                                              dmg_weights_std_dev):
+    def cumulative_building_damage_bulk_input(self, eq_building_damage_set, tsunami_building_damage_set, dmg_ratio_tbl):
         """
         Runs analysis for multiple earthquake building damage results
         :param eq_building_damage: Multiple building damage results
@@ -97,11 +82,11 @@ class CumulativeBuildingDamage(BaseAnalysis):
         result = []
         for idx, eq_building_damage in eq_building_damage_set.iterrows():
             result.append(self.cumulative_building_damage(eq_building_damage, tsunami_building_damage_set,
-                                                          dmg_weights, dmg_weights_std_dev))
+                                                          dmg_ratio_tbl))
 
         return result
 
-    def cumulative_building_damage(self, eq_building_damage, tsunami_building_damage, dmg_weights, dmg_weights_std_dev):
+    def cumulative_building_damage(self, eq_building_damage, tsunami_building_damage, dmg_ratio_tbl):
         guid = eq_building_damage['guid']
 
         tsunami_building = tsunami_building_damage.loc[tsunami_building_damage['guid'] == guid]
@@ -139,10 +124,9 @@ class CumulativeBuildingDamage(BaseAnalysis):
 
             damage_state = AnalysisUtil.calculate_damage_interval(limit_states)
 
-            mean_damage = AnalysisUtil.calculate_mean_damage(dmg_weights, damage_state)
+            mean_damage = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl, damage_state)
 
-            mean_damage_std_dev = AnalysisUtil.calculate_mean_damage_std_deviation(dmg_weights,
-                                                                                   dmg_weights_std_dev,
+            mean_damage_std_dev = AnalysisUtil.calculate_mean_damage_std_deviation(dmg_ratio_tbl,
                                                                                    damage_state,
                                                                                    mean_damage['meandamage'])
             bldg_results = collections.OrderedDict()
@@ -161,13 +145,10 @@ class CumulativeBuildingDamage(BaseAnalysis):
 
             return bldg_results
 
-
-
     @staticmethod
     def load_csv_file(file_name):
         read_file = pd.read_csv(file_name, header="infer")
         return read_file
-
 
     def get_spec(self):
         return {
