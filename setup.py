@@ -9,4 +9,4 @@ setup(name = 'pyincore',
                   'pyincore.analyses.stochastic_population', 'pyincore.analyses.populationdislocation',
                   'pyincore.analyses.tornadoepndamage', 'pyincore.analyses.nonstructbuildingdamage'],
       requires = ['fiona', 'rasterio', 'jsonpickle', 'numpy', 'shapely', 'scipy', 'matplotlib', 'wikidata', 'requests',
-                  'networkx', 'pandas', 'pyproj', 'folium', 'owslib', 'py_expression_eval', 'rtree', 'wntr'])
+                  'networkx', 'pandas', 'pyproj', 'folium', 'owslib', 'py_expression_eval', 'rtree', 'wntr', 'plotly'])

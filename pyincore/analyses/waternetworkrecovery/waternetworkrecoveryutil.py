@@ -10,6 +10,7 @@ from fiona.crs import from_epsg
 import json
 import csv
 import ast
+import plotly
 from rtree import index
 
 class WaterNetworkRecoveryUtil:
@@ -398,3 +399,168 @@ class WaterNetworkRecoveryUtil:
 				waternode_population[unserved_node] = 0.0
 
 		return waternode_population
+
+	@staticmethod
+	def plot_interactive_network(wn, node_attribute=None, title=None,
+								 node_size=8, node_range=[None, None],
+								 node_cmap='Jet', node_labels=True,
+								 link_width=1, add_colorbar=True,
+								 reverse_colormap=True,
+								 figsize=[700, 450], round_ndigits=2,
+								 filename=None, auto_open=True):
+		"""
+		This came from WNTR library network.py. WE fix the tuple error they have
+        Create an interactive scalable network graphic using networkx and plotly.
+
+        Parameters
+        ----------
+        wn : wntr WaterNetworkModel
+            A WaterNetworkModel object
+
+        node_attribute : str, list, pd.Series, or dict, optional
+            (default = None)
+
+            - If node_attribute is a string, then a node attribute dictionary is
+              created using node_attribute = wn.query_node_attribute(str)
+            - If node_attribute is a list, then each node in the list is given a
+              value of 1.
+            - If node_attribute is a pd.Series, then it should be in the format
+              {(nodeid,time): x} or {nodeid: x} where nodeid is a string and x is
+              a float.
+              The time index is not used in the plot.
+            - If node_attribute is a dict, then it should be in the format
+              {nodeid: x} where nodeid is a string and x is a float
+
+        title : str, optional
+            Plot title (default = None)
+
+        node_size : int, optional
+            Node size (default = 8)
+
+        node_range : list, optional
+            Node range (default = [None,None], autoscale)
+
+        node_cmap : palette name string, optional
+            Node colormap, options include Greys, YlGnBu, Greens, YlOrRd, Bluered,
+            RdBu, Reds, Blues, Picnic, Rainbow, Portland, Jet, Hot, Blackbody,
+            Earth, Electric, Viridis (default = Jet)
+
+        node_labels: bool, optional
+            If True, the graph will include each node labelled with its name and
+            attribute value. (default = True)
+
+        link_width : int, optional
+            Link width (default = 1)
+
+        add_colorbar : bool, optional
+            Add colorbar (default = True)
+
+        reverse_colormap : bool, optional
+            Reverse colormap (default = True)
+
+        figsize: list, optional
+            Figure size in pixels, default= [700, 450]
+
+        round_ndigits : int, optional
+            Number of digits to round node values used in the label (default = 2)
+
+        filename : string, optional
+            HTML file name (default=None, temp-plot.html)
+        """
+		if plotly is None:
+			raise ImportError('plotly is required')
+
+		# Graph
+		G = wn.get_graph()
+
+		# Node attribute
+		if isinstance(node_attribute, str):
+			node_attribute = wn.query_node_attribute(node_attribute)
+		if isinstance(node_attribute, list):
+			node_attribute = dict(
+				zip(node_attribute, [1] * len(node_attribute)))
+		if isinstance(node_attribute, pd.Series):
+			if node_attribute.index.nlevels == 2:  # (nodeid, time) index
+				# drop time
+				node_attribute.reset_index(level=1, drop=True, inplace=True)
+			node_attribute = dict(node_attribute)
+
+		# Create edge trace
+		edge_trace = plotly.graph_objs.Scatter(
+			x=[],
+			y=[],
+			text=[],
+			hoverinfo='text',
+			mode='lines',
+			line=plotly.graph_objs.Line(
+				# colorscale=link_cmap,
+				# reversescale=reverse_colormap,
+				color='#888',  # [],
+				width=link_width))
+		for edge in G.edges():
+			x0, y0 = G.node[edge[0]]['pos']
+			x1, y1 = G.node[edge[1]]['pos']
+			edge_trace['x'] += tuple([x0, x1, None])
+			edge_trace['y'] += tuple([y0, y1, None])
+
+		# Create node trace
+		node_trace = plotly.graph_objs.Scatter(
+			x=[],
+			y=[],
+			text=[],
+			hoverinfo='text',
+			mode='markers',
+			marker=plotly.graph_objs.Marker(
+				showscale=add_colorbar,
+				colorscale=node_cmap,
+				cmin=node_range[0],
+				cmax=node_range[1],
+				reversescale=reverse_colormap,
+				color=[],
+				size=node_size,
+				colorbar=dict(
+					thickness=15,
+					xanchor='left',
+					titleside='right'),
+				line=dict(width=1)))
+		for node in G.nodes():
+			x, y = G.node[node]['pos']
+			node_trace['x'] += tuple([x])
+			node_trace['y'] += tuple([y])
+			try:
+				# Add node attributes
+				node_trace['marker']['color'] += tuple([node_attribute[node]])
+				# Add node labels
+				if node_labels:
+					node_info = 'Node ' + str(node) + ', ' + \
+								str(round(node_attribute[node], round_ndigits))
+					node_trace['text'] += tuple([node_info])
+			except:
+				node_trace['marker']['color'] += tuple(['#888'])
+				if node_labels:
+					node_info = 'Node ' + str(node)
+					node_trace['text'] += tuple([node_info])
+
+		# Create figure
+		data = plotly.graph_objs.Data([edge_trace, node_trace])
+		layout = plotly.graph_objs.Layout(
+			title=title,
+			titlefont=dict(size=16),
+			showlegend=False,
+			width=figsize[0],
+			height=figsize[1],
+			hovermode='closest',
+			margin=dict(b=20, l=5, r=5, t=40),
+			xaxis=plotly.graph_objs.XAxis(showgrid=False,
+										  zeroline=False,
+										  showticklabels=False),
+			yaxis=plotly.graph_objs.YAxis(showgrid=False,
+										  zeroline=False,
+										  showticklabels=False))
+
+		fig = plotly.graph_objs.Figure(data=data, layout=layout)
+		if filename:
+			plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
+		else:
+			plotly.offline.iplot(fig)
+
