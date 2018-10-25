@@ -18,11 +18,6 @@ from pyincore import BaseAnalysis, AnalysisUtil
 
 class CumulativeBuildingDamage(BaseAnalysis):
 
-    def __init__(self, incore_client):
-
-
-        super(CumulativeBuildingDamage, self).__init__(incore_client)
-
     def run(self):
         """
         Executes Cumulative Building Damage Analysis
