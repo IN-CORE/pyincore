@@ -86,7 +86,7 @@ class BaseAnalysis:
             self.input_datasets[id]['value'] = dataset
             return True
         else:
-            # TOTO handle error message
+            # TODO handle error message
             return False
 
     def get_output_datasets(self):
