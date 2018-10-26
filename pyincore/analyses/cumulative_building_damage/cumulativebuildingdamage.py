@@ -7,7 +7,6 @@ and is available at https://opensource.org/licenses/BSD-3-Clause
 
 """
 
-import os
 import pandas as pd
 import collections
 import concurrent.futures
@@ -73,9 +72,9 @@ class CumulativeBuildingDamage(BaseAnalysis):
     def cumulative_building_damage_bulk_input(self, eq_building_damage_set, tsunami_building_damage_set, dmg_ratio_tbl):
         """
         Runs analysis for multiple earthquake building damage results
-        :param eq_building_damage: Multiple building damage results
-        :param tsunami_building_damage: Set of all the tsunami building damage results
-        :param dmg_ratios: damage ratios table
+        :param eq_building_damage_set: Multiple building damage results
+        :param tsunami_building_damage_set: Set of all the tsunami building damage results
+        :param dmg_ratio_tbl: damage ratios table
         :return: results: a list of Ordered Dict
         """
 
