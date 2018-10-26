@@ -92,20 +92,15 @@ class CumulativeBuildingDamage(BaseAnalysis):
         tsunami_building = tsunami_building_damage.loc[tsunami_building_damage['guid'] == guid]
 
         for idy, tsunami_building in tsunami_building.iterrows():
-            damage_interval_eq = collections.OrderedDict()
-            damage_interval_eq["insignific"] = float(eq_building_damage["insignific"])
-            damage_interval_eq["moderate"] = float(eq_building_damage["moderate"])
-            damage_interval_eq["heavy"] = float(eq_building_damage["heavy"])
-            damage_interval_eq["complete"] = float(eq_building_damage["complete"])
-            eq_limit_states = AnalysisUtil.calculate_limit_states(damage_interval_eq)
+            eq_limit_states = collections.OrderedDict()
+            eq_limit_states['immocc'] = float(eq_building_damage["immocc"])
+            eq_limit_states['lifesfty'] = float(eq_building_damage["lifesfty"])
+            eq_limit_states['collprev'] = float(eq_building_damage["collprev"])
 
-            damage_interval_tsunami = collections.OrderedDict()
-            damage_interval_tsunami["insignific"] = float(tsunami_building["insignific"])
-            damage_interval_tsunami["moderate"] = float(tsunami_building["moderate"])
-            damage_interval_tsunami["heavy"] = float(tsunami_building["heavy"])
-            damage_interval_tsunami["complete"] = float(tsunami_building["complete"])
-
-            tsunami_limit_states = AnalysisUtil.calculate_limit_states(damage_interval_tsunami)
+            tsunami_limit_states = collections.OrderedDict()
+            tsunami_limit_states['immocc'] = float(tsunami_building["immocc"])
+            tsunami_limit_states['lifesfty'] = float(tsunami_building["lifesfty"])
+            tsunami_limit_states['collprev'] = float(tsunami_building["collprev"])
 
             limit_states = collections.OrderedDict()
 
