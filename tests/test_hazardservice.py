@@ -92,5 +92,24 @@ def test_get_tornado_hazard_values(hazardsvc):
 
     assert ((hvals[0]['hazardValue'] > 85) and (hvals[0]['hazardValue'] < 165)) and hvals[1]['hazardValue'] == 0
 
+def test_create_hurricane_windfield(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+
+    scenario = ""
+    with open("hurricanewf.json", 'r') as file:
+        hurr_wf_inputs = file.read()
+
+    response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
+    assert response["id"] is not None
+
+def test_get_hurricanewf_values(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    hvals = hazardsvc.get_hurricanewf_values("5bd3d6a1f242fe0cf903cb0e", "velocity",
+        "kmph", ["28,-81"])
+
+    assert (hvals[0]['hazardValue'] == 60.21153835934114)
+
 # TODO implement the following test
 # def test_get_earthquake_hazard_value_set(hazardsvc):

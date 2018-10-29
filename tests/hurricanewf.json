@@ -1,0 +1,11 @@
+{
+	"name": "Florida coast cat-1 hurricane",
+	"description": "Simulated pytest hurricane",
+	"coast": "florida",
+	"category": 1,
+	"gridResolution": 6,
+	"rasterResolution": 6,
+	"transD": -83,
+	"landfallLocation": "28.08, -80.61",
+	"gridPoints": 10
+}
