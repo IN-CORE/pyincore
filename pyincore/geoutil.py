@@ -1,6 +1,8 @@
 import logging
 
 import fiona
+import numpy as np
+from scipy.spatial import KDTree
 import sys
 import pyproj
 import networkx as nx
@@ -17,6 +19,26 @@ class GeoUtil:
     def get_location(feature):
         geom = shape(feature['geometry'])
         return geom.centroid
+
+    @staticmethod
+    def find_nearest_feature(features, query_point):
+        """
+        given a set of features from shapefile and one set Point,
+        find the first nearest feature/point in the that feature set
+        :param features:
+        :param query_point:
+        :return:
+        """
+        points = np.asarray([feature['geometry']['coordinates'] for feature in features])
+        tree = KDTree(points)
+        query_point = np.asarray([[query_point.x, query_point.y]])
+
+        result = tree.query(query_point, 1)
+
+        nearest_feature = features[result[1][0]]
+        distances = result[0]
+
+        return nearest_feature, distances
 
     @staticmethod
     def create_output(filename, source, results, types):
@@ -50,6 +72,43 @@ class GeoUtil:
                     logging.exception("Error processing feature %s:", f['id'])
 
     @staticmethod
+    def decimal_to_degree(decimal: float):
+        """
+        convert decimal latitude and longitude to degree to look up in National
+        Bridge Inventory.
+
+        :param decimal:
+        :return: 8 digits int, first 2 digits are degree, another 2 digits are minutes,
+        last 4 digits are xx.xx seconds
+        """
+        decimal = abs(decimal)
+        degree = int(decimal)
+        minutes = int((decimal - degree) * 60)
+        seconds = (decimal - degree - minutes / 60) * 3600
+        overall_degree = format(degree, '02d') + format(minutes, '02d') \
+                         + format(int(seconds), '02d') + format(
+            int(seconds % 1 * 100), '02d')
+
+        return int(overall_degree)
+
+    @staticmethod
+    def degree_to_decimal(degree: int):
+        """
+        convert degree latitude and longitude to degree to look up in National
+        Bridge Inventory.
+
+        :param degree: 8 digits int, first 2 digits are degree, another 2 digits are minutes,
+        last 4 digits are xx.xx seconds
+        :return:
+        """
+        if degree == 0.0 or degree == None or degree == '':
+            decimal = 'NA'
+        else:
+            degree = str(int(degree))
+            decimal = int(degree[:-6]) + int(degree[-6:-4])/60 + (int(degree[-4:-2]) + int(degree[-2:])/100)/3600
+
+        return decimal
+
     def create_network_graph_from_field(filename, fromnode_fldname, tonode_fldname, is_directed = False):
         # iterate link
         link = fiona.open(filename)
