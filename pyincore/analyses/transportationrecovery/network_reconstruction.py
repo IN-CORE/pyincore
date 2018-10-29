@@ -12,13 +12,13 @@ def nw_reconstruct(node_df, arc_df, adt_data):
     network = nx.Graph()
 
     # add nodes to the network
-    network.add_nodes_from(node_df['Node_ID'])
+    network.add_nodes_from(node_df['guid'])
 
     # add arcs to the network
     for i in range(len(arc_df)):
-        fromnode = arc_df['fromnode'][i]
-        tonode = arc_df['tonode'][i]
-        dis = arc_df['len_mile'][i]/arc_df['freeflowsd'][i]
-        network.add_edge(fromnode, tonode, distance=dis, adt=adt_data[i])
+        fromnode = node_df.loc[node_df['ID']==arc_df['fromnode'][i], 'guid'].values[0]
+        tonode = node_df.loc[node_df['ID']==arc_df['tonode'][i], 'guid'].values[0]
+        dis = arc_df['len_mile'][i]/arc_df['freeflowsp'][i]
+        network.add_edge(fromnode, tonode, distance=dis, adt=adt_data[arc_df['guid'][i]])
 
     return network

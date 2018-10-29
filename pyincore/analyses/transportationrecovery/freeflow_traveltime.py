@@ -28,10 +28,13 @@ def traveltime_freeflow(temp_network):
 
     tdistance = dict(nx.all_pairs_dijkstra_path_length(network,
                                                        weight='distance'))
-
+    i = 0
     for key1, value1 in tdistance.items():
-        for key2 in list(tdistance[key1].keys()):
-            distance[key1][key2] = tdistance[key1][key2]
+        j = 0
+        for key2 in list(value1.keys()):
+            distance[i][j] = tdistance[key1][key2]
+            j += 1
+        i += 1
 
     travel_efficiency = 0
     for i in range(num_node):

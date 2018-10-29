@@ -23,24 +23,16 @@ class PostDisasterLongTermSolution(Solution):
     # complete damage state
     compRepair = 230
 
-    def __init__(self, local_data_path, candidates, bridge_damage_value, network, pm, all_ipw,
-                 path_adt):
+    def __init__(self, candidates, node_df, arc_df, bridge_df, bridge_damage_value,
+                 network, pm, all_ipw, path_adt):
         """
         initialize the chromosomes
         """
-        # read the link in transportation
-        self.arc_df = pd.DataFrame(
-            pd.read_csv(os.path.join(local_data_path, '_Edges_.csv'),
-                        header='infer'))
-
-        # read bridge information
-        self.bridge_df = pd.DataFrame(
-            pd.read_csv(
-                os.path.join(local_data_path, 'Bridge_Characteristics.csv'),
-                header='infer'))
-
         Solution.__init__(self, 2)
         self.candidates = candidates
+        self.node_df = node_df
+        self.arc_df = arc_df
+        self.bridge_df = bridge_df
         self.attributes = [i for i in range(len(self.candidates))]
         self.bridge_damage_value = bridge_damage_value
         self.network = network
@@ -185,16 +177,20 @@ class PostDisasterLongTermSolution(Solution):
                             fg[bridge] = 1
 
                 for i in range(len(self.arc_df)):
-                    nod1 = self.arc_df['fromnode'][i]
-                    nod2 = self.arc_df['tonode'][i]
+                    nod1 = self.node_df.loc[self.node_df['ID']==self.arc_df['fromnode'][i], 'guid'].values[0]
+                    nod2 = self.node_df.loc[self.node_df['ID']==self.arc_df['tonode'][i], 'guid'].values[0]
                     self.network.edges[nod1, nod2]['Damage_Status'] = 0
 
-                for i, j in temp_bridge_damage_value.items():
-                    nod1 = self.arc_df['fromnode'][
-                        self.bridge_df['linkid'][i]]
-                    nod2 = self.arc_df['tonode'][
-                        self.bridge_df['linkid'][i]]
-                    self.network.edges[nod1, nod2]['Damage_Status'] = j
+                for key, val in temp_bridge_damage_value.items():
+                    linknwid = self.bridge_df.loc[self.bridge_df['guid']==key,'linkID'].values[0]
+
+                    nod_id1 = self.arc_df[self.arc_df['id']==linknwid]['fromnode'].values[0]
+                    nod1 = self.node_df.loc[self.node_df['ID']==nod_id1, 'guid'].values[0]
+
+                    nod_id2 = self.arc_df[self.arc_df['id'] == linknwid]['tonode'].values[0]
+                    nod2 = self.node_df.loc[self.node_df['ID']==nod_id2, 'guid'].values[0]
+
+                    self.network.edges[nod1, nod2]['Damage_Status'] = val
 
                 nx.get_edge_attributes(self.network, 'Damage_Status')
 

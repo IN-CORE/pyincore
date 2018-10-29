@@ -74,7 +74,6 @@ class BridgeUtil:
         :param cur_bridge: bridge information
         :return:
         """
-
         if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"] is not None and \
                 cur_bridge["properties"]["spans"].isdigit():
             n = int(cur_bridge["properties"]["spans"])
