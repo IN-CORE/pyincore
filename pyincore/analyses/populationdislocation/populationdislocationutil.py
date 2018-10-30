@@ -33,7 +33,8 @@ class PopulationDislocationUtil:
                               "mdamagedev"])
 
         # further add block data information to the dataframe
-        df["bgid"] = df["blockidstr"].str[1:13].astype(int)
+        df["bgid"] = df["blockidstr"].str[1:13].astype(str)
+        block_data["bgid"] = block_data["bgid"].astype(str)
 
         # outer merge on bgid
         final_df = pd.merge(df, block_data, how="outer", on="bgid",
