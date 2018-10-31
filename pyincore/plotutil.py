@@ -71,7 +71,7 @@ class PlotUtil:
         url = 'http://incore2-geoserver.ncsa.illinois.edu:9999/geoserver/incore/wms' 
         bbox_all = [9999, 9999, -9999, -9999]
         for layer in layers_config:
-            wms_layer = folium.features.WmsTileLayer(url, name=layer['name'], fmt='image/png',transparent=True,
+            wms_layer = folium.raster_layers.WmsTileLayer(url, name=layer['name'], fmt='image/png',transparent=True,
                                                     layers='incore:'+layer['id'], styles=layer['style'])
             wms_layer.add_to(m)
             wms = WebMapService(url) 
@@ -104,7 +104,7 @@ class PlotUtil:
         bbox_all = gdf.total_bounds
         url = 'http://incore2-geoserver.ncsa.illinois.edu:9999/geoserver/incore/wms' 
         for layer in layers_config:
-            wms_layer = folium.features.WmsTileLayer(url, name=layer['name'], fmt='image/png',transparent=True,
+            wms_layer = folium.raster_layers.WmsTileLayer(url, name=layer['name'], fmt='image/png',transparent=True,
                                                     layers='incore:'+layer['id'], styles=layer['style'])
             wms_layer.add_to(m)
             wms = WebMapService(url) 
