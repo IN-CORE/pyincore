@@ -16,6 +16,7 @@ class HazardService:
         self.base_earthquake_url = urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes/')
         self.base_tornado_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tornadoes/')
         self.base_tsunami_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tsunamis/')
+        self.base_hurricanewf_url = urllib.parse.urljoin(client.service_url, 'hazard/api/hurricaneWindfields/')
 
     def get_earthquake_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
         hazard_value_set = self.get_earthquake_hazard_values(hazard_id, demand_type, demand_units, points=[site_lat, site_long])
@@ -107,6 +108,21 @@ class HazardService:
 
         return response
 
+    def create_hurricane_windfield(self, hurr_wf_inputs):
+        url = self.base_hurricanewf_url
 
+        headers = {'Content-type': 'application/json'}
+        new_headers = {**self.client.headers, **headers}
+        r = requests.post(url, data=hurr_wf_inputs, headers=new_headers)
+        response = r.json()
+        return response
+
+    def get_hurricanewf_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
+        url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id + "/values")
+        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': points}
+        r = requests.get(url, headers=self.client.headers, params = payload)
+        response = r.json()
+
+        return response
 
 
