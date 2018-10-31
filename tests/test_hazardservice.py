@@ -18,6 +18,14 @@ def hazardsvc():
 
     return HazardService(client)
 
+def test_get_earthquake_hazard_metadata(hazardsvc):
+    """
+    Testing get earthquake/{id}
+    """
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    response = hazardsvc.get_earthquake_hazard_metadata("5b902cb273c3371e1236b36b")
+    assert response['id'] == "5b902cb273c3371e1236b36b"
 
 def test_get_earthquake_hazard_value(hazardsvc):
     """
@@ -60,6 +68,14 @@ def test_create_earthquake(hazardsvc):
     response = hazardsvc.create_earthquake(config)
     assert response["id"] is not None
 
+def test_get_tornado_hazard_metadata(hazardsvc):
+    """
+    Testing get tornado/{id}
+    """
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    response = hazardsvc.get_tornado_hazard_metadata("5ad0f35eec230965e6d98d0c")
+    assert response['id'] == "5ad0f35eec230965e6d98d0c"
 
 def test_create_tornado_scenario(hazardsvc):
     if hazardsvc is None:
@@ -92,6 +108,15 @@ def test_get_tornado_hazard_values(hazardsvc):
 
     assert ((hvals[0]['hazardValue'] > 85) and (hvals[0]['hazardValue'] < 165)) and hvals[1]['hazardValue'] == 0
 
+def test_get_tsunami_hazard_metadata(hazardsvc):
+    """
+    Testing get tsunami/{id}
+    """
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    response = hazardsvc.get_tsunami_hazard_metadata("5bc9e25ef7b08533c7e610dc")
+    assert response['id'] == "5bc9e25ef7b08533c7e610dc"
+
 def test_create_hurricane_windfield(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
@@ -102,6 +127,12 @@ def test_create_hurricane_windfield(hazardsvc):
 
     response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
     assert response["id"] is not None
+
+def test_get_hurricanewf_metadata(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    response = hazardsvc.get_hurricanewf_metadata("5bd3d6a1f242fe0cf903cb0e")
+    assert response['id'] == "5bd3d6a1f242fe0cf903cb0e"
 
 def test_get_hurricanewf_values(hazardsvc):
     if hazardsvc is None:
