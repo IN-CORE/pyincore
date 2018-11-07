@@ -2,72 +2,57 @@ from __future__ import division
 import pandas as pd
 import copy
 import random
+import os
+
 from pyincore.analyses.transportationrecovery import freeflow_traveltime as ft
 from pyincore.analyses.transportationrecovery.nsga2 import NSGAII
 from pyincore.analyses.transportationrecovery import WIPW as WIPW
-from pyincore.analyses.transportationrecovery.write_output import write_output
+from pyincore.analyses.transportationrecovery.transportation_recovery_util import TransportationRecoveryUtil
 from pyincore.analyses.transportationrecovery.network_reconstruction import nw_reconstruct
 from pyincore.analyses.transportationrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
-import os
-import concurrent.futures
-from functools import partial
-from pyincore import InsecureIncoreClient
+
 
 class TransportationRecovery:
 
-    def __init__(self, client, local_data_path, num_workers):
-        '''
-
-        :param client:
-        :param num_workers:
-        '''
-
-        self.num_workders = num_workers
-        self.local_data_path = local_data_path
-
+    def __init__(self, nodes, links, bridges, bridge_damage_value, unrepaired_bridge, ADT):
+        
         # read the nodes in transportation
-        self.node_df = pd.DataFrame(
-            pd.read_csv(os.path.join(local_data_path, '_Nodes_.csv'), header='infer'))
+        self.node_df = pd.DataFrame(columns=nodes[0]['properties'].keys())
+        for node in nodes:
+            self.node_df = self.node_df.append(node['properties'], ignore_index=True)
 
         # read the link in transportation
-        self.arc_df = pd.DataFrame(
-            pd.read_csv(os.path.join(local_data_path, '_Edges_.csv'), header='infer'))
+        self.arc_df = pd.DataFrame(columns=links[0]['properties'].keys())
+        for link in links:
+            self.arc_df = self.arc_df.append(link['properties'], ignore_index=True)
 
         # read bridge information
-        self.bridge_df = pd.DataFrame(
-            pd.read_csv(os.path.join(local_data_path, 'Bridge_Characteristics.csv'),
-                        header='infer'))
+        self.bridge_df = pd.DataFrame(columns=bridges[0]['properties'].keys())
+        for bridge in bridges:
+            self.bridge_df = self.bridge_df.append(bridge['properties'], ignore_index=True)
 
-        # read damage status of bridge in 1000 scenarios
-        self.damage_state = pd.DataFrame(
-            pd.read_csv(os.path.join(local_data_path, 'Component_Damage_Statuses.csv'),
-                        header=None))
+        # read bridge damage information
+        self.bridge_damage_value = bridge_damage_value
+        self.unrepaired_bridge = unrepaired_bridge
 
         seed = 333
         random.seed(seed)
 
-        # calculate recovery trajectory for each damage state scenario
-        self.num_scenarios = len(self.damage_state)
-
         # record the average daily traffic (ADT) data of bridge, a road has the
         # same ADT value as its crossing bridge
-        self.adt_data = {}
-        for i in range(len(self.bridge_df)):
-            self.adt_data[self.bridge_df['linkid'][i]] = self.bridge_df["ADT"][i]
+        self.adt_data = ADT
 
         # if there is no bridge across a road, the ADT of the road equals to
         # the maxinum value of ADTs
         for i in range(len(self.arc_df)):
-            if self.arc_df["linknwid"][i] not in list(self.adt_data.keys()):
-                self.adt_data[self.arc_df["linknwid"][i]] = max(self.bridge_df["ADT"])
+            if self.arc_df["guid"][i] not in list(self.adt_data.keys()):
+                self.adt_data[self.arc_df["guid"][i]] = max(ADT.values())
 
-
-    def _calc_scenario(self, pm, ini_num_population, population_size,
-                 num_generation, mutation_rate, crossover_rate, SS):
+    def calc_recovery_scenario(self, pm, ini_num_population, population_size,
+                 num_generation, mutation_rate, crossover_rate):
 
         """
         calculate the recovery trajectory in each scenario
-        :param SS: the scenario number
         :param pm: transportation performance metrics 0: WIPW,  1:Free flow travel time
         :param ini_num_population: 5 or 50
         :param population_size: 3 or 30
@@ -100,29 +85,6 @@ class TransportationRecovery:
             all_ipw_length = None
             path_adt = None
 
-        # input bridge damage status
-        bridge_damage_status = {}
-
-        # determine the bridge need to be repaired
-        bridge_damage_value = {}
-        unrepaired_bridge = []
-
-        for i in range(len(self.bridge_df)):
-            if self.damage_state[i][SS] == 'none':
-                bridge_damage_status[i] = 0
-            elif self.damage_state[i][SS] == 'slight':
-                bridge_damage_status[i] = 1
-            elif self.damage_state[i][SS] == 'moderate':
-                bridge_damage_status[i] = 2
-            elif self.damage_state[i][SS] == 'extensive':
-                bridge_damage_status[i] = 3
-            else:
-                bridge_damage_status[i] = 4
-
-            if bridge_damage_status[i] > 0:
-                bridge_damage_value[i] = bridge_damage_status[i]
-                unrepaired_bridge.append(i)
-
         num_objectives = 2
 
         # implement NSGA for transportation network post-disaster recovery
@@ -130,8 +92,9 @@ class TransportationRecovery:
 
         p = []
         for i in range(ini_num_population):
-            p.append(PostDisasterLongTermSolution(self.local_data_path, unrepaired_bridge,
-                                                  bridge_damage_value, network,
+            p.append(PostDisasterLongTermSolution(self.unrepaired_bridge, self.node_df,
+                                                  self.arc_df, self.bridge_df,
+                                                  self.bridge_damage_value, network,
                                                   pm, all_ipw, path_adt))
 
         first_front = nsga2.run(p, population_size, num_generation)
@@ -152,13 +115,12 @@ class TransportationRecovery:
         # output the optimal solution of bridge repair schedule based on NSGA
         bridge_recovery = pd.DataFrame(
             {"Bridge ID": bridge_set, "Ending Time": ending_time})
-        path = 'The_' + str(SS) + \
-               "_optimal_solution_of_bridge_repair_schedule.csv"
-        write_output(bridge_recovery, path)
+        fname = 'optimal_solution_of_bridge_repair_schedule.csv'
+        TransportationRecoveryUtil.write_output(bridge_recovery, fname)
 
         network = nw_reconstruct(self.node_df, self.arc_df, self.adt_data)
 
-        temp_bridge_damage_value = copy.deepcopy(bridge_damage_value)
+        temp_bridge_damage_value = copy.deepcopy(self.bridge_damage_value)
 
         # record the  non-recurrence ending time of bridges
         schedule_time = []
@@ -187,14 +149,20 @@ class TransportationRecovery:
                         fg[bridge] = 1
 
             for i in range(len(self.arc_df)):
-                nod1 = self.arc_df['fromnode'][i]
-                nod2 = self.arc_df['tonode'][i]
+                nod1 = self.node_df.loc[self.node_df['ID'] == self.arc_df['fromnode'][i], 'guid'].values[0]
+                nod2 = self.node_df.loc[self.node_df['ID'] == self.arc_df['tonode'][i], 'guid'].values[0]
                 network.edges[nod1, nod2]['Damage_Status'] = 0
 
-            for i, j in temp_bridge_damage_value.items():
-                nod1 = self.arc_df['fromnode'][self.bridge_df['linkid'][i]]
-                nod2 = self.arc_df['tonode'][self.bridge_df['linkid'][i]]
-                network.edges[nod1, nod2]['Damage_Status'] = j
+            for key, val in temp_bridge_damage_value.items():
+                linknwid = self.bridge_df.loc[self.bridge_df['guid'] == key, 'linkID'].values[0]
+
+                nod_id1 = self.arc_df[self.arc_df['id'] == linknwid]['fromnode'].values[0]
+                nod1 = self.node_df.loc[self.node_df['ID'] == nod_id1, 'guid'].values[0]
+
+                nod_id2 = self.arc_df[self.arc_df['id'] == linknwid]['tonode'].values[0]
+                nod2 = self.node_df.loc[self.node_df['ID'] == nod_id2, 'guid'].values[0]
+
+                network.edges[nod1, nod2]['Damage_Status'] = val
 
             # calculate different travel efficiency based on different
             # performance metrics
@@ -212,51 +180,13 @@ class TransportationRecovery:
             for i in range(len(efficiency)):
                 efficiency[i] = efficiency[i] / maxe
         except ValueError as e:
-            print("Scenario " + str(SS), e)
+            print(e)
 
         # output the recovery trajectory
         recovery_trajectory = pd.DataFrame(
             {"Ending Time": schedule_time, "Travel Efficiency": efficiency})
-        path = 'The_' + str(
-            SS) + '_Scenario_Overall_Transportation_Recovery_Trajectory.csv'
-        write_output(recovery_trajectory, path)
+        fname = 'overall_transportation_recovery_trajectory.csv'
+        TransportationRecoveryUtil.write_output(recovery_trajectory, fname)
 
-        print("Scenario " + str(SS))
+        return None
 
-    def calc_recovery(self, pm, ini_num_population=5, population_size=3,
-                 num_generation=2, mutation_rate=0.1, crossover_rate=1.0):
-        for SS in range(0, self.num_scenarios):
-            self._calc_scenario(pm, ini_num_population, population_size,
-                 num_generation, mutation_rate, crossover_rate, SS)
-
-    def calc_recovery_multiprocessing(self, pm, ini_num_population=5,
-                                      population_size=3,num_generation=2,
-                                      mutation_rate=0.1, crossover_rate=1.0):
-        func = partial(self._calc_scenario, pm, ini_num_population,
-                       population_size, num_generation, mutation_rate,
-                       crossover_rate)
-        with concurrent.futures.ProcessPoolExecutor(max_workers=self.num_workders) as executor:
-            executor.map(func, range(0, self.num_scenarios))
-
-
-if __name__ == "__main__":
-
-    cred = None
-    client = InsecureIncoreClient(
-        "http://incore2-services.ncsa.illinois.edu:8888", 'cwang138')
-    local_data_path = '/Users/cwang138/Documents/INCORE-2.0/Data'
-
-    transportation_recovery = TransportationRecovery(client, local_data_path, num_workers=8)
-
-    # non parallel
-    '''transportation_recovery.calc_recovery(pm=1, ini_num_population=5,
-                                          population_size=3,
-                                          num_generation=2,
-                                          mutation_rate=0.1,
-                                          crossover_rate=1.0)'''
-    # parallel
-    transportation_recovery.calc_recovery_multiprocessing(pm=1, ini_num_population=5,
-                                          population_size=3,
-                                          num_generation=2,
-                                          mutation_rate=0.1,
-                                          crossover_rate=1.0)

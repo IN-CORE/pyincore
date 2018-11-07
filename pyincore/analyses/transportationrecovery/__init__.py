@@ -5,4 +5,4 @@ from pyincore.analyses.transportationrecovery.nsga2 import NSGAII
 from pyincore.analyses.transportationrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
 from pyincore.analyses.transportationrecovery import WIPW
 from pyincore.analyses.transportationrecovery.transportation_recovery_trajectory import TransportationRecovery
-from pyincore.analyses.transportationrecovery.write_output import write_output
+from pyincore.analyses.transportationrecovery.transportation_recovery_util import TransportationRecoveryUtil

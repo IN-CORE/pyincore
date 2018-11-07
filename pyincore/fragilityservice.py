@@ -42,6 +42,14 @@ class FragilityService:
         features = []
 
         for inventory in inventories:
+            # hack, change null to an empty string
+            # Some metadata field values are null even though the field is defined
+            # in the “Default Building Fragility Mapping” as a string
+            if "occ_type" in inventory["properties"] and inventory["properties"]["occ_type"] is None:
+                inventory["properties"]["occ_type"] = ""
+            if "efacility" in inventory["properties"] and inventory["properties"]["efacility"] is None:
+                inventory["properties"]["efacility"] = ""
+
             features.append(inventory)
 
         feature_collection = {
