@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import fiona
 import os
 import math
 import numpy
@@ -8,111 +7,99 @@ import sys
 import random
 import networkx as nx
 import csv
-import shutil
+import collections
 
 from shapely.geometry import shape
-from pyincore import InsecureIncoreClient, HazardService, FragilityService, DataService
+from pyincore import InsecureIncoreClient, BaseAnalysis, HazardService, FragilityService, DataService
 from pyincore import GeoUtil, AnalysisUtil
 
 
-class TornadoEpnDamage:
-    use_indpnode = False    # this is for deciding to use indpnode field. Not using this could be safer for general dataset
-    nnode = 0
-    highest_node_num = 0
-    EF = 0
-    nint = []
-    indpnode = []
-    mcost = 1435  # mean repair cost for single distribution pole
-    vcost = (0.1 * mcost) ** 2
-    sigmad = math.sqrt(math.log(vcost / (mcost ** 2) + 1))  # convert to gaussian Std Deviation to be used in logncdf
-    mud = math.log((mcost ** 2) / math.sqrt(vcost + mcost ** 2))
-
-    mcost = 400000  # mean repair cost for single transmission pole
-    vcost = (0.1 * mcost) ** 2
-    sigmat = math.sqrt(math.log(vcost / (mcost ** 2) + 1))  # convert to gaussian Std Deviation to be used in logncdf
-    mut = math.log((mcost ** 2) / math.sqrt(vcost + mcost ** 2))
-
-    tmut = 72  # mean repairtime for transmission tower in hrs
-    tsigmat = 36  # std dev
-
-    tmud = 5  # mean repairtime for poles in hrs
-    tsigmad = 2.5
-
-    totalcost2repairpath = []
-    totalpoles2repair = []
-
-    tornado_sim_field_name = 'SIMULATION'
-    tornado_ef_field_name = 'EF_RATING'
-
-    # tornado number of simulation and ef_rate
-    nmcs = 0
-    tornado_ef_rate = 0
-
-    pole_distance = 38.1
-
-    # node variables
-    nodenwid_fld_name = "NODENWID"
-    indpnode_fld_name = "INDPNODE"
-    guid_fldname = 'GUID'
-
-    # link variables
-    tonode_fld_name = "TONODE"
-    fromnode_fld_name = "FROMNODE"
-    linetype_fld_name = "LINETYPE"
-
-    # line type variable
-    line_transmission = "transmission"
-    line_distribution = "distribution"
-
-    def __init__(self, client):
-        # Create Hazard and Fragility service
-        self.hazardsvc = HazardService(client)
-        self.fragilitysvc = FragilityService(client)
-        self.datasetsvc = DataService(client)
+class TornadoEpnDamage(BaseAnalysis):
+    def __init__(self, incore_client):
+        self.hazardsvc = HazardService(incore_client)
+        self.fragilitysvc = FragilityService(incore_client)
+        self.hazardsvc = HazardService(incore_client)
+        self.fragilitysvc = FragilityService(incore_client)
+        self.datasetsvc = DataService(incore_client)
         self.fragility_tower_id = '5b201b41b1cf3e336de8fa67'
         self.fragility_pole_id = '5b201d91b1cf3e336de8fa68'
         self.fragility_mapping_id = '5b2bddcbd56d215b9b7471d8'
-        self.client = client
+        self.client = incore_client
 
-    def get_damage(self, node_dataset_id='', link_dataset_id='', tornado_dataset_id=''):
+        self.use_indpnode = False  # this is for deciding to use indpnode field. Not using this could be safer for general dataset
+        self.nnode = 0
+        self.highest_node_num = 0
+        self.EF = 0
+        self.nint = []
+        self.indpnode = []
+        self.mcost = 1435  # mean repair cost for single distribution pole
+        self.vcost = (0.1 * self.mcost) ** 2
+        self.sigmad = math.sqrt(
+            math.log(self.vcost / (self.mcost ** 2) + 1))  # convert to gaussian Std Deviation to be used in logncdf
+        self.mud = math.log((self.mcost ** 2) / math.sqrt(self.vcost + self.mcost ** 2))
+
+        self.mcost = 400000  # mean repair cost for single transmission pole
+        self.vcost = (0.1 * self.mcost) ** 2
+        self.sigmat = math.sqrt(
+            math.log(self.vcost / (self.mcost ** 2) + 1))  # convert to gaussian Std Deviation to be used in logncdf
+        self.mut = math.log((self.mcost ** 2) / math.sqrt(self.vcost + self.mcost ** 2))
+
+        self.tmut = 72  # mean repairtime for transmission tower in hrs
+        self.tsigmat = 36  # std dev
+
+        self.tmud = 5  # mean repairtime for poles in hrs
+        self.tsigmad = 2.5
+
+        self.totalcost2repairpath = []
+        self.totalpoles2repair = []
+
+        self.tornado_sim_field_name = 'SIMULATION'
+        self.tornado_ef_field_name = 'EF_RATING'
+
+        # tornado number of simulation and ef_rate
+        self.nmcs = 0
+        self.tornado_ef_rate = 0
+
+        self.pole_distance = 38.1
+
+        # node variables
+        self.nodenwid_fld_name = "NODENWID"
+        self.indpnode_fld_name = "INDPNODE"
+        self.guid_fldname = 'GUID'
+
+        # link variables
+        self.tonode_fld_name = "TONODE"
+        self.fromnode_fld_name = "FROMNODE"
+        self.linetype_fld_name = "LINETYPE"
+
+        # line type variable
+        self.line_transmission = "transmission"
+        self.line_distribution = "distribution"
+
+        super(TornadoEpnDamage, self).__init__(incore_client)
+
+    def run(self):
+        node_dataset = self.get_input_dataset("epn_node").get_inventory_reader()
+        link_dataset = self.get_input_dataset("epn_link").get_inventory_reader()
+        tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
+
+        # tornado_id = self.get_parameter('tornado_id')
+
+        results = self.get_damage(node_dataset, link_dataset, tornado_dataset)
+
+        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
+
+        return True
+
+    def get_damage(self, node_dataset, link_dataset, tornado_dataset):
         """
-        :param boundary_id: boundary shapefile dataset id
-        :param wind_id: wind geotif dataset id
-        :param surge_id: surge geotif dataset id
-        :param rain_id: rain geotif dataset id
-        :param hzd_wind: Boolean for including wind hazard in analysis
-        :param hzd_surge: Boolean for including surge hazard in analysis
-        :param hzd_rain: Boolean for including rain hazard in analysis
-        :return: output_file_name: string of file name
-                """
-
-        # store shpefiles in the tmp directory
-        # store tornado shapefile
-        tornado_file_id = self.datasetsvc.get_tornado_dataset_id_from_service(tornado_dataset_id, self.client)
-        tornado_shp_path = self.datasetsvc.get_dataset_blob(tornado_file_id)
-        tmpdir, tail = os.path.split(tornado_shp_path)
-
-        tornado_shp_name = os.path.join(tornado_shp_path, tail) + ".shp"
-
-        # store link shapefile
-        link_shp_path = self.datasetsvc.get_dataset_blob(link_dataset_id)
-        tmpdir, tail = os.path.split(link_shp_path)
-        link_shp_name = os.path.join(link_shp_path, tail) + ".shp"
-
-        # store node shapefile
-        node_shp_path = self.datasetsvc.get_dataset_blob(node_dataset_id)
-        tmpdir, tail = os.path.split(node_shp_path)
-        node_shp_name = os.path.join(node_shp_path, tail) + ".shp"
-
-        shp_node = fiona.open(node_shp_name)
-        shp_link = fiona.open(link_shp_name)
-        shp_tornado = fiona.open(tornado_shp_name)
-
-        self.set_tornado_variables(shp_tornado)
-        self.set_nod_variables(shp_node)
-
-        # set output csv file name
-        outcsv = os.path.join(tmpdir, 'tornado_epn_damage.csv')
+        :param node_dataset:
+        :param link_dataset:
+        :param tornado_dataset:
+        :return:
+        """
+        self.set_tornado_variables(tornado_dataset)
+        self.set_node_variables(node_dataset)
 
         # get fragility curves set - tower for transmission, pole for distribution
         fragility_set_tower = self.fragilitysvc.get_fragility_set(self.fragility_tower_id)
@@ -121,7 +108,7 @@ class TornadoEpnDamage:
         assert fragility_set_pole['id'] == self.fragility_pole_id
 
         # network test
-        node_id_validation = GeoUtil.validate_network_node_ids(node_shp_name, link_shp_name, self.fromnode_fld_name,
+        node_id_validation = GeoUtil.validate_network_node_ids(node_dataset, link_dataset, self.fromnode_fld_name,
                                                                self.tonode_fld_name, self.nodenwid_fld_name)
         if node_id_validation == False:
             print("ID in from or to node field doesn't exist in the node dataset")
@@ -131,7 +118,7 @@ class TornadoEpnDamage:
         is_driected_graph = True
         # # another method of getting graph, this could be useful when there is no from and to node information
         # graph, node_coords = GeoUtil.get_network_graph(link_shp_name, is_driected_graph)
-        graph, node_coords = GeoUtil.create_network_graph_from_field(link_shp_name, self.fromnode_fld_name,
+        graph, node_coords = GeoUtil.create_network_graph_from_field(link_dataset, self.fromnode_fld_name,
                                                                      self.tonode_fld_name, is_driected_graph)
         # reverse the graph to acculate the damage to next to node
         graph = nx.DiGraph.reverse(graph, copy=True)
@@ -164,7 +151,7 @@ class TornadoEpnDamage:
         # construct guid field
         guid_list = []
         nodenwid_list = []
-        for node_feature in shp_node:
+        for node_feature in node_dataset:
             # get guid colum
             guid_fld_val = ''
             try:
@@ -198,7 +185,7 @@ class TornadoEpnDamage:
             nodetimerep = [0] * self.nnode
 
             # iterate link
-            for line_feature in shp_link:
+            for line_feature in link_dataset:
                 ndamage = 0  # number of damaged poles in each link
                 repaircost = 0  # repair cost value
                 repairtime = 0  # repair time value
@@ -249,7 +236,7 @@ class TornadoEpnDamage:
                 #     new_line_feature_list.append(line_feature)
 
                 # iterate tornado
-                for tornado_feature in shp_tornado:
+                for tornado_feature in tornado_dataset:
                     resistivity_probability = 0  # resistivity value at the point of windSpeed
                     random_resistivity = 0  # random resistivity value between 0 and one
 
@@ -321,7 +308,7 @@ class TornadoEpnDamage:
                                             # this is very hardly happen but should be needed just in case
                                             any_point = poly.centroid
 
-                                    windspeed = self.hazardsvc.get_tornado_hazard_value(tornado_dataset_id, "mph", any_point.coords[0][1], any_point.coords[0][0], z)
+                                    windspeed = self.hazardsvc.get_tornado_hazard_value(tornado_id, "mph", any_point.coords[0][1], any_point.coords[0][0], z)
 
                                     # check if the line is tower or transmission
                                     if linetype_val.lower() == self.line_transmission:
@@ -404,46 +391,20 @@ class TornadoEpnDamage:
         meantime = numpy.mean(numpy.asarray(totaltime2repair), axis=0)
         stdtime = numpy.std(numpy.asarray(totaltime2repair), axis=0)
 
-        self.create_output_csv(outcsv, guid_list, meanpoles, stdpoles, meancost, stdcost, meantime, stdtime)
+        # create result
+        results = []
+        for i in range(len(meanpoles)):
+            output_dict = collections.OrderedDict()
+            output_dict["meanpoles"] = meanpoles[i]
+            output_dict["stdpoles"] = stdpoles[i]
+            output_dict["meancost"] = meancost[i]
+            output_dict["stdcost"] = stdcost[i]
+            output_dict["meantime"] = meantime[i]
+            output_dict["stdtime"] = stdtime[i]
 
-        shp_node.close()
-        shp_link.close()
-        shp_tornado.close()
+            results.append(output_dict)
 
-        # remove downloaded files and only leave the output csv file
-        shutil.rmtree(tornado_shp_path)
-        shutil.rmtree(link_shp_path)
-        shutil.rmtree(node_shp_path)
-        try:
-            os.remove(tornado_shp_path + ".zip")
-        except OSError:
-            pass
-        try:
-            os.remove(link_shp_path + ".zip")
-        except OSError:
-            pass
-        try:
-            os.remove(node_shp_path + ".zip")
-        except OSError:
-            pass
-
-        return outcsv
-
-    @staticmethod
-    def get_output_metadata():
-        output = {}
-        output["dataType"] = "incore:TornadoEPNDamageVer1"
-        output["format"] = "table"
-
-        return output
-
-    def create_output_csv(self, outcsvfile, guidlist, meanpoles, stdpoles, meancost, stdcost, meantime, stdtime):
-        with open(outcsvfile, 'w', newline='') as outcsv:
-            writer = csv.writer(outcsv, delimiter=',')
-            writer.writerow(['guid', 'mean_poles', 'std_poles', 'mean_cost', 'std_cost', 'mean_time', 'std_time'])
-            for i in range(len(meanpoles)):
-                writer.writerow([guidlist[i], str("%.4f" % meanpoles[i]), str("%.4f" % stdpoles[i]), str("%.4f" % meancost[i]), str("%.4f" % stdpoles[i]),
-                      str("%.4f" % meantime[i]), str("%.4f" % stdtime[i])])
+        return results
 
     """
     align coordinate values in a list as a single pair in order
@@ -458,11 +419,11 @@ class TornadoEpnDamage:
             # if it is polygon the following line is needed to close the polygon geometry
             # yield coord, first
 
-    def set_tornado_variables(self, shp_tornado):
+    def set_tornado_variables(self, tornado_dataset):
         sim_num_list = []
         ef_rate_list = []
 
-        for ef_poly in shp_tornado:
+        for ef_poly in tornado_dataset:
             try:
                 sim_num_list.append(int(ef_poly['properties'][self.tornado_sim_field_name.lower()]))
             except:
@@ -490,10 +451,10 @@ class TornadoEpnDamage:
         self.tornado_ef_rate = max(ef_rate_list) + 1
 
 
-    def set_nod_variables(self, shp_node):
+    def set_node_variables(self, node_dataset):
         i = 0
 
-        for node_point in shp_node:
+        for node_point in node_dataset:
             node_id = None
             indpnode_val = None
             try:
@@ -533,5 +494,70 @@ class TornadoEpnDamage:
 
         self.nnode = i
 
+    def get_spec(self):
+        return {
+            'name': 'tornado-epn-damage',
+            'description': 'tornado epn damage analysis',
+            'input_parameters': [
+                {
+                    'id': 'result_name',
+                    'required': True,
+                    'description': 'result dataset name',
+                    'type': str
+                },
+                {
+                    'id': 'tornado_id',
+                    'required': True,
+                    'description': 'Tornado hazard id',
+                    'type': str
+                }
+            ],
+            'input_datasets': [
+                {
+                    'id': 'epn_node',
+                    'required': True,
+                    'description': 'EPN Node',
+                    'type': ['incore:epnNodeVer1'],
+                },
+                {
+                    'id': 'epn_link',
+                    'required': True,
+                    'description': 'EPN Link',
+                    'type': ['incore:epnLinkeVer1'],
+                },
+                {
+                    'id': 'tornado',
+                    'required': True,
+                    'description': 'Bridge Damage Ratios',
+                    'type': ['tornadowindfield'],
+                }
 
+            ],
+            'output_datasets': [
+                {
+                    'id': 'result',
+                    'parent_type': 'epn_node',
+                    'type': 'incore:tornadoEPNDamageVer1'
+                }
+            ]
+        }
+
+if __name__ == "__main__":
+    tornado_id = '5b2173a9b1cf3e336db2f1d8'
+    tornado_dataset_id = '5b2173a0b1cf3e336d7d11b0'
+    epn_node_id = '5b1fdb50b1cf3e336d7cecb1'
+    epn_link_id = '5b1fdc2db1cf3e336d7cecc9'
+    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "ywkim")
+
+    ted = TornadoEpnDamage(client)
+    # tornado_file_id = self.datasetsvc.get_tornado_dataset_id_from_service(tornado_dataset_id, self.client)
+    ted.load_remote_input_dataset("epn_node", epn_node_id)
+    ted.load_remote_input_dataset("epn_link", epn_link_id)
+    ted.load_remote_input_dataset("tornado", tornado_dataset_id)
+
+    result_name = "eq_bldg_dmg_result"
+    ted.set_parameter("result_name", result_name)
+    ted.set_parameter('tornado_id', tornado_id)
+
+    ted.run_analysis()
 

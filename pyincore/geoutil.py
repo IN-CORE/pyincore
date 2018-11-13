@@ -109,9 +109,8 @@ class GeoUtil:
 
         return decimal
 
-    def create_network_graph_from_field(filename, fromnode_fldname, tonode_fldname, is_directed = False):
+    def create_network_graph_from_field(link, fromnode_fldname, tonode_fldname, is_directed = False):
         # iterate link
-        link = fiona.open(filename)
         fromnode_list = []
         tonode_list = []
         node_list = []
@@ -189,10 +188,9 @@ class GeoUtil:
     check if the node id in from or to node exist in the real node id
     """
     @staticmethod
-    def validate_network_node_ids(nodefilename, linkfilename, fromnode_fldname, tonode_fldname, nodeid_fldname):
+    def validate_network_node_ids(node, link, fromnode_fldname, tonode_fldname, nodeid_fldname):
         validate = True
         # iterate link
-        link = fiona.open(linkfilename)
         link_node_list = []
         for line_feature in link:
             from_node_val = line_feature['properties'][fromnode_fldname.lower()]
@@ -201,7 +199,6 @@ class GeoUtil:
             link_node_list.append(to_node_val)
 
         # iterate node
-        node = fiona.open(nodefilename)
         node_list = []
         for node_feature in node:
             node_val = node_feature['properties'][nodeid_fldname.lower()]
