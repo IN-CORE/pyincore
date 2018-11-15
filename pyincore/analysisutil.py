@@ -3,6 +3,7 @@ from typing import List, Dict
 import math
 import os
 import csv
+import re
 from scipy.stats import norm, lognorm
 from py_expression_eval import Parser
 from pyincore import DataService
@@ -12,20 +13,29 @@ class AnalysisUtil:
     """
     Utility methods for analysis
     """
+    DOCSTR_FORMAT = "$DESC$ \n" \
+                    "Args: \n\t" \
+                    "$ARGS$ \n" \
+                    "\n" \
+                    "Returns: \n\t" \
+                    "$RETS$ "
+
     @staticmethod
     def get_building_period(num_stories, fragility_set):
         period = 0.0
 
         fragility_curve = fragility_set['fragilityCurves'][0]
-        if fragility_curve['className'] == 'edu.illinois.ncsa.incore.services.fragility.model.PeriodStandardFragilityCurve':
+        if fragility_curve[
+            'className'] == 'edu.illinois.ncsa.incore.services.fragility.model.PeriodStandardFragilityCurve':
             period_equation_type = fragility_curve['periodEqnType']
             if period_equation_type == 1:
                 period = fragility_curve['periodParam0']
             elif period_equation_type == 2:
                 period = fragility_curve['periodParam0'] * num_stories
             elif period_equation_type == 3:
-                period = fragility_curve['periodParam1'] * math.pow(fragility_curve['periodParam0'] * num_stories,
-                                                                    fragility_curve['periodParam2'])
+                period = fragility_curve['periodParam1'] * math.pow(
+                    fragility_curve['periodParam0'] * num_stories,
+                    fragility_curve['periodParam2'])
 
         return period
 
@@ -39,9 +49,9 @@ class AnalysisUtil:
             fragility_curve = bridge_fragility.getFragilities()[i]
             if fragility_curve.getType() == 'Normal':
                 median = float(fragility_curve.getProperties()
-                               ['fragility-curve-median'])
+                ['fragility-curve-median'])
                 beta = float(fragility_curve.getProperties()
-                             ['fragility-curve-beta'])
+                ['fragility-curve-beta'])
                 sp = (math.log(hazard_value) - math.log(median)) / beta
                 p = norm.cdf(sp)
                 output['DS_' + limit_state] = p
@@ -104,8 +114,10 @@ class AnalysisUtil:
         if len(damage) == 4:
             output['I_None'] = 1.0 - damage['DS_Slight']
             output['I_Slight'] = damage['DS_Slight'] - damage['DS_Moderate']
-            output['I_Moderate'] = damage['DS_Moderate'] - damage['DS_Extensive']
-            output['I_Extensive'] = damage['DS_Extensive'] - damage['DS_Complete']
+            output['I_Moderate'] = damage['DS_Moderate'] - damage[
+                'DS_Extensive']
+            output['I_Extensive'] = damage['DS_Extensive'] - damage[
+                'DS_Complete']
             output['I_Complete'] = damage['DS_Complete']
         elif len(damage) == 3:
             output['insignific'] = 1.0 - damage['immocc']
@@ -118,33 +130,55 @@ class AnalysisUtil:
     def calculate_mean_damage(dmg_ratio_tbl, dmg_intervals):
         output = collections.OrderedDict()
         if len(dmg_ratio_tbl) == 5:
-            output['meandamage'] = float(dmg_ratio_tbl[1]["Best Mean Damage Ratio"]) * float(dmg_intervals['I_Slight']) \
-                                   + float(dmg_ratio_tbl[2]["Best Mean Damage Ratio"]) * float(dmg_intervals['I_Moderate']) \
-                                   + float(dmg_ratio_tbl[3]["Best Mean Damage Ratio"]) * float(dmg_intervals['I_Extensive']) \
-                                   + float(dmg_ratio_tbl[4]["Best Mean Damage Ratio"]) * float(dmg_intervals['I_Complete'])
+            output['meandamage'] = float(
+                dmg_ratio_tbl[1]["Best Mean Damage Ratio"]) * float(
+                dmg_intervals['I_Slight']) \
+                                   + float(
+                dmg_ratio_tbl[2]["Best Mean Damage Ratio"]) * float(
+                dmg_intervals['I_Moderate']) \
+                                   + float(
+                dmg_ratio_tbl[3]["Best Mean Damage Ratio"]) * float(
+                dmg_intervals['I_Extensive']) \
+                                   + float(
+                dmg_ratio_tbl[4]["Best Mean Damage Ratio"]) * float(
+                dmg_intervals['I_Complete'])
         elif len(dmg_ratio_tbl) == 4:
-            output['meandamage'] = float(dmg_ratio_tbl[0]["Mean Damage Factor"]) * float(dmg_intervals["insignific"]) + \
-                                   float(dmg_ratio_tbl[1]["Mean Damage Factor"]) * float(dmg_intervals['moderate']) + \
-                                   float(dmg_ratio_tbl[2]["Mean Damage Factor"]) * float(dmg_intervals['heavy']) + \
-                                   float(dmg_ratio_tbl[3]["Mean Damage Factor"]) * float(dmg_intervals['complete'])
+            output['meandamage'] = float(
+                dmg_ratio_tbl[0]["Mean Damage Factor"]) * float(
+                dmg_intervals["insignific"]) + \
+                                   float(dmg_ratio_tbl[1][
+                                       "Mean Damage Factor"]) * float(
+                dmg_intervals['moderate']) + \
+                                   float(dmg_ratio_tbl[2][
+                                       "Mean Damage Factor"]) * float(
+                dmg_intervals['heavy']) + \
+                                   float(dmg_ratio_tbl[3][
+                                       "Mean Damage Factor"]) * float(
+                dmg_intervals['complete'])
         return output
 
     @staticmethod
-    def calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg_intervals, mean_damage):
+    def calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg_intervals,
+                                            mean_damage):
         output = collections.OrderedDict()
         result = 0.0
 
         idx = 0
         for dmg_interval in dmg_intervals:
-            result += dmg_intervals[dmg_interval] * (math.pow(float(dmg_ratio_tbl[idx]["Mean Damage Factor"]), 2) +
-                                                     math.pow(float(dmg_ratio_tbl[idx]["Deviation Damage Factor"]), 2))
+            result += dmg_intervals[dmg_interval] * (math.pow(
+                float(dmg_ratio_tbl[idx]["Mean Damage Factor"]), 2) +
+                                                     math.pow(float(
+                                                         dmg_ratio_tbl[idx][
+                                                             "Deviation Damage Factor"]),
+                                                         2))
             idx += 1
 
         output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
 
     @staticmethod
-    def determine_parallelism_locally(self, number_of_loops, user_defined_parallelism=0):
+    def determine_parallelism_locally(self, number_of_loops,
+                                      user_defined_parallelism=0):
         '''
         Determine the parallelism on the current compute node
         Args:
@@ -158,14 +192,17 @@ class AnalysisUtil:
         number_of_cpu = os.cpu_count()
         if number_of_loops > 0:
             if user_defined_parallelism > 0:
-                return min(number_of_cpu, number_of_loops, user_defined_parallelism)
+                return min(number_of_cpu, number_of_loops,
+                    user_defined_parallelism)
             else:
                 return min(number_of_cpu, number_of_loops)
         else:
             return number_of_cpu;
 
     @staticmethod
-    def create_result_dataset(datasvc: DataService, parentid: str, result_files: List[str], title: str, output_metadata: Dict[str, str]):
+    def create_result_dataset(datasvc: DataService, parentid: str,
+                              result_files: List[str], title: str,
+                              output_metadata: Dict[str, str]):
         # Result metadata
         properties = output_metadata
         properties["title"] = title
@@ -217,7 +254,6 @@ class AnalysisUtil:
             x = (math.log(val) - median) / beta
             return norm.cdf(x)
 
-
     @staticmethod
     def compute_limit_state_probability(fragility_curves, hazard_val, yvalue,
                                         std_dev):
@@ -229,7 +265,7 @@ class AnalysisUtil:
 
     @staticmethod
     def compute_damage_intervals(ls_probs):
-        #Assumes that 4 limit states are present: slight, moderate, extensive and complete
+        # Assumes that 4 limit states are present: slight, moderate, extensive and complete
         try:
             dmg_intervals = collections.OrderedDict()
             dmg_intervals['none'] = 1 - ls_probs['ls_slight']
@@ -248,16 +284,16 @@ class AnalysisUtil:
                   'slight, moderate, extensive, complete')
             print(str(e))
 
-
-
     @staticmethod
     def adjust_limit_states_for_pgd(limit_states, pgd_limit_states):
         try:
             adj_limit_states = collections.OrderedDict()
 
             for key, value in limit_states.items():
-                adj_limit_states[key] = limit_states[key] + pgd_limit_states[key] - \
-                                        (limit_states[key] * pgd_limit_states[key])
+                adj_limit_states[key] = limit_states[key] + pgd_limit_states[
+                    key] - \
+                                        (limit_states[key] * pgd_limit_states[
+                                            key])
 
             return adj_limit_states
 
@@ -278,3 +314,93 @@ class AnalysisUtil:
             row_index += 1
 
         return csv_rows
+
+    @staticmethod
+    def create_gdocstr_from_spec(specs):
+        """
+
+        Args:
+            specs: Json of the specs for each analysis
+
+        Returns:
+            Google format docstrings to copy for the run() method of any analysis
+
+        """
+        desc = specs['description']
+        args = ""
+        rets = ""
+
+        for dataset in specs['input_datasets']:
+            isOpt = ""
+            if not dataset['required']:
+                isOpt = ", " + "optional"
+
+            args = args + dataset['id'] + "(str" + isOpt + ") : " \
+                   + dataset['description'] + \
+                   ". " + AnalysisUtil.get_custom_types_str(
+                dataset['type']) + "\n\t"
+
+        for param in specs['input_parameters']:
+            isOpt = ""
+            if not param['required']:
+                isOpt = ", " + "optional"
+
+            args = args + param['id'] + "(" + AnalysisUtil.get_type_str(
+                param['type']) + isOpt + ") : " \
+                   + param['description'] + "\n\t"
+
+        for dataset in specs['output_datasets']:
+            rets = rets + dataset['id'] + ": " \
+                   + dataset[
+                       'description'] + ". " + AnalysisUtil.get_custom_types_str(
+                dataset['type']) + "\n\t"
+
+        docstr = AnalysisUtil.DOCSTR_FORMAT.replace("$DESC$", desc).replace(
+            "$ARGS$",
+            args).replace("$RETS$", rets)
+
+        print(docstr)
+
+    @staticmethod
+    def get_type_str(class_type):
+        """
+
+        Args:
+            class_type(str): Example: <class 'int'>
+
+        Returns:
+            Text inside first single quotes of a string
+
+        """
+
+        t = str(class_type)
+        match = re.search('\'([^"]*)\'', t)
+        if match != None:
+            return match.group(1)
+        return None
+
+    @staticmethod
+    def get_custom_types_str(types):
+        """
+        Args:
+            types: Can be string or List of strings
+
+        Returns:
+            Formatted string with applicable datatypes used to generate docstrigns from specs
+
+        """
+        custom_types_str = 'Applicable dataset type(s): '
+        if (isinstance(types, str)):
+            return custom_types_str + types
+        if (isinstance(types, list)):
+            if (len(types) > 1):
+                idx = 0
+                for type in types:
+                    if idx < len(types) - 1:
+                        custom_types_str += type + ", "
+                    else:
+                        custom_types_str += type
+                    idx = idx + 1
+                return custom_types_str
+            else:
+                return types[0]

@@ -101,6 +101,8 @@ class WaterFacilityDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'water_facilities',
+                    'description': 'A csv file with limit state probabilities and damage states '
+                                   'for each water facility',
                     'type': 'ergo:waterFacilityDamageVer4'
                 }
             ]
@@ -108,8 +110,22 @@ class WaterFacilityDamage(BaseAnalysis):
 
     def run(self):
         """
-        Executes Water Facility Damage Analysis
+        water facility damage analysis
+        Args:
+            water_facilities(str) : Water Facility Inventory. ergo:waterFacilityTopo
+            result_name(str, optional) : result dataset name
+            mapping_id(str) : Fragility mapping dataset
+            hazard_type(str) : Hazard Type (e.g. earthquake)
+            hazard_id(str) : Hazard ID
+            fragility_key(str, optional) : Fragility key to use in mapping dataset
+            liquefaction_geology_dataset_id(str, optional) : Liquefaction geology/susceptibility dataset id. If not provided, liquefaction will be ignored
+            liquefaction_fragility_key(str, optional) : Fragility key to use in liquefaction mapping dataset
+            use_hazard_uncertainty(bool, optional) : Use hazard uncertainty
+            num_cpu(int, optional) : If using parallel execution, the number of cpus to request
+
+
         Returns:
+            result: A csv file with limit state probabilities and damage states for each water facility. Applicable dataset type(s): ergo:waterFacilityDamageVer4
 
         """
         # Facility dataset
@@ -163,6 +179,16 @@ class WaterFacilityDamage(BaseAnalysis):
 
 
     def waterfacilityset_damage_analysis(self, facilities, hazard_type, hazard_dataset_id):
+        """
+        Gets applicable fragilities and calculates damage
+        Args:
+            facilities:
+            hazard_type:
+            hazard_dataset_id:
+
+        Returns:
+
+        """
         result = []
         liq_fragility = None
         mapping_id = self.get_parameter("mapping_id")
@@ -193,6 +219,19 @@ class WaterFacilityDamage(BaseAnalysis):
 
     def waterfacility_damage_analysis(self, facility, fragility, liq_fragility, hazard_dataset_id,
                                       liq_geology_dataset_id, uncertainty):
+        """
+        Computes damage analysis for a single facility
+        Args:
+            facility:
+            fragility:
+            liq_fragility:
+            hazard_dataset_id:
+            liq_geology_dataset_id:
+            uncertainty:
+
+        Returns:
+
+        """
         std_dev = 0
         #TODO Get this from API once implemented
         if uncertainty:
@@ -248,10 +287,4 @@ class WaterFacilityDamage(BaseAnalysis):
 
         result = {**metadata, **result}
         return result
-
-
-
-
-
-
 

@@ -18,8 +18,11 @@ def run_with_base_class():
     wf_dmg = WaterFacilityDamage(client)
     wf_dmg.load_remote_input_dataset("water_facilities", facility_datasetid)
 
+    wf_dmg.show_gdocstr_docs()
+
     result_name = "wf-dmg-results.csv"
     wf_dmg.set_parameter("result_name", result_name)
+    print(wf_dmg.spec)
 
     wf_dmg.set_parameter("hazard_type", hazard_type)
     wf_dmg.set_parameter("hazard_id", hazard_id)
@@ -32,10 +35,5 @@ def run_with_base_class():
     wf_dmg.run_analysis()
 
 if __name__ == '__main__':
-    # client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
-    # wf_dmg = WaterFacilityDamage(client)
-    # specs = wf_dmg.get_spec()
-    # print(specs)
-
     run_with_base_class()
 
