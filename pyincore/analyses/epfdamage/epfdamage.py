@@ -18,7 +18,7 @@ class EpfDamage(BaseAnalysis):
     """Computes electric power facility structural damage for an earthquake hazard.
 
     Args:
-        incore_client (incoreClient): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
     def __init__(self, incore_client):
