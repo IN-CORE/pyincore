@@ -118,6 +118,21 @@ class EpfDamage(BaseAnalysis):
         """
         result = []
         fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), epfs, fragility_key)
+
+        #fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, epfs, "Non-Retrofit Fragility ID Code")
+
+        # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
+        # fragility_sets_liq = self.fragilitysvc.map_fragilities(mapping_id, epfs, "Liquefaction-Fragility-Key")
+        #for epf in epfs:
+        #    if epf["id"] in fragility_sets.keys():
+        #        liq_fragility_set = None
+                # Check if mapping contains liquefaction fragility
+        #        if epf_dataset_id is not None and epf["id"] in fragility_sets_liq:
+        #            liq_fragility_set = fragility_sets_liq[epf["id"]]
+        #
+        #        result.append(self.epf_damage_analysis(epf, fragility_sets[epf["id"]], liq_fragility_set,
+        #                                               hazardsvc, hazard_dataset_id, epf_dataset_id))
+
         for epf in epfs:
             fragility_set = None
             if epf["id"] in fragility_sets:
