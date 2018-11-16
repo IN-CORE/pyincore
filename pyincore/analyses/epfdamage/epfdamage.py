@@ -12,6 +12,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore.analyses.epfdamage.epfutil import EpfUtil
 from itertools import repeat
+import traceback
 
 
 class EpfDamage(BaseAnalysis):
@@ -30,9 +31,6 @@ class EpfDamage(BaseAnalysis):
     def run(self):
         """Executes electric power facility damage analysis."""
         epf_set = self.get_input_dataset("epfs").get_inventory_reader()
-
-        dmg_ratio_csv = self.get_input_dataset("dmg_ratios").get_csv_reader()
-        dmg_ratio_tbl = EpfUtil.get_damage_ratio_rows(dmg_ratio_csv)
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -72,7 +70,7 @@ class EpfDamage(BaseAnalysis):
             count += avg_bulk_input_size
 
         results = self.epf_damage_concurrent_future(self.epf_damage_analysis_bulk_input, num_workers,
-                                                       inventory_args, repeat(hazard_dataset_id), repeat(dmg_ratio_tbl),
+                                                       inventory_args, repeat(hazard_type), repeat(hazard_dataset_id),
                                                        repeat(fragility_key), repeat(use_hazard_uncertainty),
                                                        repeat(use_liquefaction))
 
@@ -100,14 +98,14 @@ class EpfDamage(BaseAnalysis):
 
         return output
 
-    def epf_damage_analysis_bulk_input(self, epfs, hazard_dataset_id, dmg_ratio_tbl, fragility_key,
+    def epf_damage_analysis_bulk_input(self, epfs, hazard_type, hazard_dataset_id, fragility_key,
                                           use_hazard_uncertainty, use_liquefaction):
         """Run analysis for multiple epfs.
 
         Args:
             epfs (list): Multiple epfs from input inventory set.
+            hazard_type (str): A tyoe of hazard exposure (earthquake etc.).
             hazard_dataset_id (str): An id of the hazard exposure.
-            dmg_ratio_tbl (obj): A damage ratio table, including weights to compute mean damage.
             fragility_key (str): Fragility key describing the type of fragility.
             use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty when computing damage,
                 False otherwise.
@@ -125,17 +123,20 @@ class EpfDamage(BaseAnalysis):
             if epf["id"] in fragility_sets:
                 fragility_set = fragility_sets[epf["id"]]
 
-            result.append(self.epf_damage_analysis(epf, fragility_set, hazard_dataset_id, dmg_ratio_tbl,
-                                                      fragility_key, use_hazard_uncertainty, use_liquefaction))
+            result.append(self.epf_damage_analysis(epf, fragility_set, hazard_type, hazard_dataset_id,
+                                                   fragility_key, use_hazard_uncertainty, use_liquefaction))
 
         return result
 
-    def epf_damage_analysis(self, facility, fragility_set, fragility_key, use_hazard_uncertainty, use_liquefaction):
+    def epf_damage_analysis(self, facility, fragility_set, hazard_type, hazard_dataset_id, fragility_key,
+                            use_hazard_uncertainty, use_liquefaction):
         """Calculates epf damage results for a single epf.
 
         Args:
             facility (obj): A JSON mapping of a geometric object from the inventory: current Electric Power facility.
             fragility_set (obj): A JSON description of fragility assigned to the epf.
+            hazard_type (str): A tyoe of hazard exposure (earthquake etc.).
+            hazard_dataset_id (str): An id of the hazard exposure.
             fragility_key (str): A fragility key to use for mapping epfs to fragilities.
             use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty in damage analysis,
                 False otherwise.
@@ -153,64 +154,73 @@ class EpfDamage(BaseAnalysis):
         dmg_probability = [0.0, 0.0, 0.0, 0.0]
         dmg_intervals = [0.0, 0.0, 0.0, 0.0, 0.0]
 
-        if fragility_set is not None:
-            location = GeoUtil.get_location(facility)
-            demand_type = EpfUtil.get_hazard_demand_type(fragility_set, self.hazard_type)
-            # demand_type = fragility_set['demandType']
-            demand_units = fragility_set['demandUnits']
+        try:
+            if fragility_set is not None:
+                location = GeoUtil.get_location(facility)
+                demand_type = EpfUtil.get_hazard_demand_type(fragility_set, hazard_type)
+                # demand_type = fragility_set['demandType']
+                demand_units = fragility_set['demandUnits']
 
-            fragility_key = self.get_parameter("fragility_key")
-            local_fragility_set = fragility_set[fragility_key]
-            if hazard_type == 'earthquake':
-                # TODO include liquefaction and hazard uncertainty
-                hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
-                demand_units = local_fragility_set['demandUnits']
-                hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
-                                                                        demand_units, location.y, location.x)
-                demand_type = local_fragility_set['demandType']
+                fragility_key = self.get_parameter("fragility_key")
+                local_fragility_set = fragility_set[fragility_key]
+                if hazard_type == 'earthquake':
+                    # TODO include liquefaction and hazard uncertainty
+                    hazard_demand_type = EpfUtil.get_hazard_demand_type(local_fragility_set, hazard_type)
+                    demand_units = local_fragility_set['demandUnits']
 
+                    demand_type = local_fragility_set['demandType']
 
-            # Start here, need to add the hazard dataset id to the analysis parameter list
-            hazard_resp = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, demand_type, demand_units,
-                                                                     [location.y, location.x])
-            hazard_val = hazard_resp[0]['hazardValue']
-            hazard_std_dev = 0.0
+                    if hazard_demand_type != demand_type:
+                        print("Mismatch in hazard type.")
+                        # exit(1)
 
-            # if use_hazard_uncertainty:
-            # TODO this value needs to come from the hazard service
-            # hazard_std_dev = ...
+                    # Start here, need to add the hazard dataset id to the analysis parameter list
+                    hazard_resp = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, demand_type,
+                                                                              demand_units,
+                                                                              [location.y, location.x])
+                    hazard_val = hazard_resp[0]['hazardValue']
 
-            dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
+                    dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
+                    dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
-            dmg_intervals = EpfUtil.get_damage_state_intervals(exceedence_probability)
-            mean_damage = EpfUtil.get_mean_damage(dmg_intervals, 1, epf, dmg_ratio_tbl)
-            expected_damage = EpfUtil.get_expected_damage(mean_damage, dmg_ratio_tbl)
-            retrofit_cost = EpfUtil.get_retrofit_cost(fragility_key)
-            retrofit_type = EpfUtil.get_retrofit_type(fragility_key)
+                    # use ground liquifacition to modify damage interval, not implemented
+                    if use_liquefaction:
+                        pass
+                    # use hazard uncertainty, not implemented
+                    if use_hazard_uncertainty:
+                        pass
 
-        epf_results['guid'] = epf['properties']['guid']
-        epf_results["ls-slight"] = dmg_probability[0]
-        epf_results["ls-moderat"] = dmg_probability[1]
-        epf_results["ls-extensi"] = dmg_probability[2]
-        epf_results["ls-complet"] = dmg_probability[3]
-        epf_results["none"] = dmg_intervals[0]
-        epf_results["slight-mod"] = dmg_intervals[1]
-        epf_results["mod-extens"] = dmg_intervals[2]
-        epf_results["ext-comple"] = dmg_intervals[3]
-        epf_results["complete"] = dmg_intervals[4]
-        epf_results["meandamage"] = mean_damage
-        epf_results["expectval"] = expected_damage
-        epf_results["retrofit"] = retrofit_type
-        epf_results["retro_cost"] = retrofit_cost
+                    epf_results['guid'] = facility['properties']['guid']
+                    epf_results["hazardtype"] = demand_type
+                    epf_results["hazardval"] = hazard_val
+                    epf_results["nodenwid"] = facility["properties"]["nodenwid"]
+                    epf_results["fltytype"] = facility["properties"]["fltytype"]
+                    epf_results["strctype"] = facility["properties"]["strctype"]
+                    epf_results["utilfcltyc"] = facility["properties"]["utilfcltyc"]
+                    epf_results["flow"] = facility["properties"]["flow"]
+                    epf_results["indpnode"] = facility["properties"]["indpnode"]
 
-        epf_results["hazardtype"] = demand_type
-        epf_results["hazardval"] = hazard_val
-        epf_results["nodenwid"] = hazard_val
-        epf_results["fltytype"] = hazard_val
-        epf_results["strctype"] = hazard_val
-        epf_results["utilfcltyc"] = hazard_val
-        epf_results["flow"] = hazard_val
-        epf_results["indpnode"] = hazard_val
+                    # epf_results.update(dmg_probability)
+                    epf_results["ls-slight"] = dmg_probability[0]
+                    epf_results["ls-moderat"] = dmg_probability[1]
+                    epf_results["ls-extensi"] = dmg_probability[2]
+                    epf_results["ls-complet"] = dmg_probability[3]
+                    # epf_results.update(dmg_interval)
+                    epf_results["none"] = dmg_interval[0]
+                    epf_results["slight-mod"] = dmg_interval[1]
+                    epf_results["mod-extens"] = dmg_interval[2]
+                    epf_results["ext-comple"] = dmg_interval[3]
+                    epf_results["complete"] = dmg_interval[4]
+                else:
+                    print("Missing hazard type.")
+            else:
+                print("Missing fragility set.")
+
+        except Exception as ex:
+            # This prints the type, value and stacktrace of error being handled.
+            traceback.print_exc()
+            print()
+            # raise e
 
         return epf_results
 
@@ -223,42 +233,43 @@ class EpfDamage(BaseAnalysis):
         """
         return {
             'name': 'epf-damage',
-            'description': 'electric power facility damage analysis',
+            'description': 'Electric Power Facility damage analysis.',
             'input_parameters': [
                 {
                     'id': 'result_name',
                     'required': True,
-                    'description': 'result dataset name',
+                    'description': 'A name of the resulting dataset',
                     'type': str
                 },
                 {
                     'id': 'mapping_id',
                     'required': True,
-                    'description': 'Fragility mapping dataset',
+                    'description': 'Fragility mapping dataset applicable to the EPF.',
                     'type': str
                 },
                 {
                     'id': 'hazard_type',
                     'required': True,
-                    'description': 'Hazard Type (e.g. earthquake)',
+                    'description': 'Hazard type (e.g. earthquake).',
                     'type': str
                 },
                 {
                     'id': 'hazard_id',
                     'required': True,
-                    'description': 'Hazard ID',
+                    'description': 'Hazard ID which defines the particular hazard (e.g. New madrid earthquake '
+                                   'using Atkinson Boore 1995).',
                     'type': str
                 },
                 {
                     'id': 'fragility_key',
                     'required': False,
-                    'description': 'Fragility key to use in mapping dataset',
+                    'description': 'Fragility key to use in mapping dataset ()',
                     'type': str
                 },
                 {
                     'id': 'use_liquefaction',
                     'required': False,
-                    'description': 'Use liquefaction',
+                    'description': 'Use a ground liquifacition to modify damage interval.',
                     'type': bool
                 },
                 {
@@ -270,7 +281,7 @@ class EpfDamage(BaseAnalysis):
                 {
                     'id': 'num_cpu',
                     'required': False,
-                    'description': 'If using parallel execution, the number of cpus to request',
+                    'description': 'If using parallel execution, the number of cpus to request.',
                     'type': int
                 },
             ],
@@ -280,12 +291,6 @@ class EpfDamage(BaseAnalysis):
                     'required': True,
                     'description': 'Electric Power Facility Inventory',
                     'type': ['ergo:epfs'],
-                },
-                {
-                    'id': 'dmg_ratios',
-                    'required': True,
-                    'description': 'Electric Power Facility Damage Ratios',
-                    'type': ['ergo:epfDamageRatios'],
                 },
 
             ],
