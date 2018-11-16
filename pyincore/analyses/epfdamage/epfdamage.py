@@ -70,9 +70,9 @@ class EpfDamage(BaseAnalysis):
             count += avg_bulk_input_size
 
         results = self.epf_damage_concurrent_future(self.epf_damage_analysis_bulk_input, num_workers,
-                                                       inventory_args, repeat(hazard_type), repeat(hazard_dataset_id),
-                                                       repeat(fragility_key), repeat(use_hazard_uncertainty),
-                                                       repeat(use_liquefaction))
+                                                    inventory_args, repeat(hazard_type), repeat(hazard_dataset_id),
+                                                    repeat(fragility_key), repeat(use_hazard_uncertainty),
+                                                    repeat(use_liquefaction))
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -99,7 +99,7 @@ class EpfDamage(BaseAnalysis):
         return output
 
     def epf_damage_analysis_bulk_input(self, epfs, hazard_type, hazard_dataset_id, fragility_key,
-                                          use_hazard_uncertainty, use_liquefaction):
+                                       use_hazard_uncertainty, use_liquefaction):
         """Run analysis for multiple epfs.
 
         Args:
@@ -152,7 +152,7 @@ class EpfDamage(BaseAnalysis):
         hazard_val = 0.0
         demand_type = "Unknown"
         dmg_probability = [0.0, 0.0, 0.0, 0.0]
-        dmg_intervals = [0.0, 0.0, 0.0, 0.0, 0.0]
+        dmg_interval = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         try:
             if fragility_set is not None:
@@ -161,7 +161,7 @@ class EpfDamage(BaseAnalysis):
                 # demand_type = fragility_set['demandType']
                 demand_units = fragility_set['demandUnits']
 
-                fragility_key = self.get_parameter("fragility_key")
+                #fragility_key = self.get_parameter("fragility_key")
                 local_fragility_set = fragility_set[fragility_key]
                 if hazard_type == 'earthquake':
                     # TODO include liquefaction and hazard uncertainty
@@ -190,31 +190,32 @@ class EpfDamage(BaseAnalysis):
                     if use_hazard_uncertainty:
                         pass
 
-                    epf_results['guid'] = facility['properties']['guid']
-                    epf_results["hazardtype"] = demand_type
-                    epf_results["hazardval"] = hazard_val
-                    epf_results["nodenwid"] = facility["properties"]["nodenwid"]
-                    epf_results["fltytype"] = facility["properties"]["fltytype"]
-                    epf_results["strctype"] = facility["properties"]["strctype"]
-                    epf_results["utilfcltyc"] = facility["properties"]["utilfcltyc"]
-                    epf_results["flow"] = facility["properties"]["flow"]
-                    epf_results["indpnode"] = facility["properties"]["indpnode"]
-
-                    # epf_results.update(dmg_probability)
-                    epf_results["ls-slight"] = dmg_probability[0]
-                    epf_results["ls-moderat"] = dmg_probability[1]
-                    epf_results["ls-extensi"] = dmg_probability[2]
-                    epf_results["ls-complet"] = dmg_probability[3]
-                    # epf_results.update(dmg_interval)
-                    epf_results["none"] = dmg_interval[0]
-                    epf_results["slight-mod"] = dmg_interval[1]
-                    epf_results["mod-extens"] = dmg_interval[2]
-                    epf_results["ext-comple"] = dmg_interval[3]
-                    epf_results["complete"] = dmg_interval[4]
                 else:
                     print("Missing hazard type.")
             else:
                 print("Missing fragility set.")
+
+            epf_results['guid'] = facility['properties']['guid']
+            epf_results["hazardtype"] = demand_type
+            epf_results["hazardval"] = hazard_val
+            epf_results["nodenwid"] = facility["properties"]["nodenwid"]
+            epf_results["fltytype"] = facility["properties"]["fltytype"]
+            epf_results["strctype"] = facility["properties"]["strctype"]
+            epf_results["utilfcltyc"] = facility["properties"]["utilfcltyc"]
+            epf_results["flow"] = facility["properties"]["flow"]
+            epf_results["indpnode"] = facility["properties"]["indpnode"]
+
+            # epf_results.update(dmg_probability)
+            epf_results["ls-slight"] = dmg_probability[0]
+            epf_results["ls-moderat"] = dmg_probability[1]
+            epf_results["ls-extensi"] = dmg_probability[2]
+            epf_results["ls-complet"] = dmg_probability[3]
+            # epf_results.update(dmg_interval)
+            epf_results["none"] = dmg_interval[0]
+            epf_results["slight-mod"] = dmg_interval[1]
+            epf_results["mod-extens"] = dmg_interval[2]
+            epf_results["ext-comple"] = dmg_interval[3]
+            epf_results["complete"] = dmg_interval[4]
 
         except Exception as ex:
             # This prints the type, value and stacktrace of error being handled.
