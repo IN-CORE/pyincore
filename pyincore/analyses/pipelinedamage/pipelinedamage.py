@@ -1,4 +1,9 @@
-"""Buried Pipeline Damage Analysis
+"""pyincore.analyses.pipelinedamage.pipelinedamage
+
+Copyright (c) 2017 University of Illinois and others.  All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the BSD-3-Clause which accompanies this distribution,
+and is available at https://opensource.org/licenses/BSD-3-Clause
 
 """
 
@@ -12,6 +17,12 @@ import math
 
 
 class PipelineDamage(BaseAnalysis):
+    """Computes pipeline damage for a hazard.
+    
+    Args:
+        incore_client: Service client with authentication info
+
+    """
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)

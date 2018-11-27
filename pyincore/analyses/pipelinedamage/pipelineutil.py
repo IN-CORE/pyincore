@@ -1,14 +1,23 @@
 
 class PipelineUtil:
-    """
-            Utility methods for pipeline analysis
-    """
+    """Utility methods for pipeline analysis"""
 
     DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
     LIQ_FRAGILITY_KEY= "Liquefaction-Fragility-Key"
 
     @staticmethod
     def convert_result_unit(result_unit: str, result: float):
+        """Convert values between different units.
+        
+        Args:
+            result_unit (str): Resulting unit.
+            result (float): Input value.
+        
+        Returns:
+            float: Converted value.
+
+        """
+
         if result_unit.lower() == "repairs/km":
             return result
         elif result_unit.lower() == "repairs/1000ft":
@@ -20,6 +29,15 @@ class PipelineUtil:
 
     @staticmethod
     def get_pipe_length(pipeline):
+        """Get pipe length.
+
+        Args:
+            pipeline (obj): A JSON-like description of pipeline properties.
+
+        Returns:
+            float: Pipe length.
+
+        """
         pipe_length = 0.0
 
         if 'pipelength' in pipeline['properties']:
@@ -35,6 +53,15 @@ class PipelineUtil:
 
     @staticmethod
     def get_pipe_diameter(pipeline):
+        """Get pipe diameter.
+
+        Args:
+            pipeline (obj): A JSON-like description of pipeline properties.
+
+        Returns:
+            float: Pipe diameter.
+
+        """
         diameter = 0.0
         if 'diameter' in pipeline['properties']:
             diameter = float(pipeline['properties']['diameter'])
