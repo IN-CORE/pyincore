@@ -200,7 +200,30 @@ class EpfDamage(BaseAnalysis):
 
                     # use ground liquifacition to modify damage interval, not implemented
                     if use_liquefaction:
-                        pass
+                        liq_hazard_type = ""
+                        liq_hazard_val = 0.0
+                        liquefaction_prob = 0.0
+
+                        geology_dataset_id = ""
+                        pgd_demand_units = ""
+                        fragility_set_liq = None
+                        if fragility_set_liq is not None and geology_dataset_id is not None:
+                            liq_fragility_curve = fragility_set_liq['fragilityCurves'][0]
+                            liq_hazard_type = fragility_set_liq['demandType']
+                            pgd_demand_units = fragility_set_liq['demandUnits']
+
+                            # Get PGD hazard value from hazard service
+                            location_str = str(location.y) + "," + str(location.x)
+
+                            liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, geology_dataset_id,
+                                                                              pgd_demand_units, [location_str])
+                            liq_hazard_val = liquefaction[0]['pgd']
+                            liquefaction_prob = liquefaction[0]['liqProbability']
+
+                            liq_fragility_vars = {'x': liq_hazard_val, 'y': liquefaction_prob}
+                            pgd_repairs = AnalysisUtil.compute_custom_limit_state_probability(fragility_set_liq,
+                                                                                              liq_fragility_vars)
+
                     # use hazard uncertainty, not implemented
                     if use_hazard_uncertainty:
                         pass
