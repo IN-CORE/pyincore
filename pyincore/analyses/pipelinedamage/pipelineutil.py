@@ -4,6 +4,9 @@ class PipelineUtil:
             Utility methods for pipeline analysis
     """
 
+    DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
+    LIQ_FRAGILITY_KEY= "Liquefaction-Fragility-Key"
+
     @staticmethod
     def convert_result_unit(result_unit: str, result: float):
         if result_unit.lower() == "repairs/km":

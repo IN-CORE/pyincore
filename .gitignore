@@ -15,6 +15,9 @@ hs_err_pid*
 **.iml
 **.iml
 
+# VSCODE
+.vscode
+
 # IDEA - generated artifacts
 **/build/
 **/out/
