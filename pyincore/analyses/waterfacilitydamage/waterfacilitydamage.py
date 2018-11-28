@@ -8,7 +8,6 @@ import collections
 
 from itertools import repeat
 from pyincore import BaseAnalysis, HazardService, FragilityService, GeoUtil, AnalysisUtil
-import csv
 import concurrent.futures
 import random
 
@@ -161,9 +160,6 @@ class WaterFacilityDamage(BaseAnalysis):
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
-        #return self.write_output(self.get_parameter("result_name"), results)
-        spec = self.get_spec()
-
         return True
 
 
@@ -195,26 +191,27 @@ class WaterFacilityDamage(BaseAnalysis):
         liq_geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
         uncertainty = self.get_parameter("use_hazard_uncertainty")
 
-        # TODO: Use fragility_key
         fragility_key = self.get_parameter("fragility_key")
-        if fragility_key is None:
-            fragility_key = self.DEFAULT_FRAGILITY_KEY
 
-        pga_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, fragility_key)
+        if hazard_type == 'earthquake':
+            if fragility_key is None:
+                fragility_key = self.DEFAULT_FRAGILITY_KEY
 
-        if liq_geology_dataset_id is not None:
-            liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
-            if liq_fragility_key is None:
-                liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-            liq_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, liq_fragility_key)
+            pga_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, fragility_key)
 
-        for facility in facilities:
-            fragility = pga_fragility_set[facility["id"]]
-            if liq_geology_dataset_id is not None and facility["id"] in liq_fragility_set:
-                liq_fragility = liq_fragility_set[facility["id"]]
+            if liq_geology_dataset_id is not None:
+                liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
+                if liq_fragility_key is None:
+                    liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
+                liq_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, liq_fragility_key)
 
-            result.append(self.waterfacility_damage_analysis(facility, fragility, liq_fragility,
-                                hazard_dataset_id, liq_geology_dataset_id, uncertainty))
+            for facility in facilities:
+                fragility = pga_fragility_set[facility["id"]]
+                if liq_geology_dataset_id is not None and facility["id"] in liq_fragility_set:
+                    liq_fragility = liq_fragility_set[facility["id"]]
+
+                result.append(self.waterfacility_damage_analysis(facility, fragility, liq_fragility,
+                                    hazard_dataset_id, liq_geology_dataset_id, uncertainty))
         return result
 
     def waterfacility_damage_analysis(self, facility, fragility, liq_fragility, hazard_dataset_id,
