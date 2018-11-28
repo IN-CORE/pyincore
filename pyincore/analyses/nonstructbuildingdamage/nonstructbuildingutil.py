@@ -1,9 +1,18 @@
+"""pyincore.analyses.nonstructbuildingdamage.nonstructbuildingutil
+
+Copyright (c) 2017 University of Illinois and others.  All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the BSD-3-Clause which accompanies this distribution,
+and is available at https://opensource.org/licenses/BSD-3-Clause
+
+"""
 import math
 import csv
 import collections
 
 
 class NonStructBuildingUtil:
+    """Utility methods for the non-structural building damage analysis."""
     BUILDING_FRAGILITY_KEYSBUILDING_FRAGILITY_KEYS = {
         "drift-sensitive fragility id code": ["Drift Sensitive", "DS"],
         "parametric non-retrofit fragility id code": ["Parametric Non-Retrofit", "PNR"],
@@ -16,6 +25,15 @@ class NonStructBuildingUtil:
 
     @staticmethod
     def get_damage_ratio_rows(csv_reader: csv.DictReader):
+        """Parse a csv file with damage ratios.
+
+        Args:
+            csv_reader (csv.DictReader): CSV file reader.
+
+        Returns:
+            list: Data rows.
+
+        """
         csv_rows = []
 
         # Ignore the header
@@ -30,6 +48,16 @@ class NonStructBuildingUtil:
 
     @staticmethod
     def get_damage_ratio_values(rows, column: str):
+        """Get damage ratio values.
+
+        Args:
+            rows (list): Damage ratio values.
+            column (str): Column name.
+
+        Returns:
+            list: Damage ratio values.
+
+        """
         dmg_ratio_values = []
         for row in rows:
             dmg_ratio_values.append(row[column])
@@ -38,6 +66,15 @@ class NonStructBuildingUtil:
 
     @staticmethod
     def get_dmg_weights(dmg_ratio_tbl):
+        """Get damage weights.
+
+        Args:
+            dmg_ratio_tbl (obj): A table of damage ratios for mean damage.
+
+        Returns:
+            obj: Damage weights.
+
+        """
         dmg_weights = [float(row['Mean Damage Factor']) for row in
                        dmg_ratio_tbl]
 
@@ -45,6 +82,15 @@ class NonStructBuildingUtil:
 
     @staticmethod
     def get_dmg_weights_std_dev(dmg_ratio_tbl):
+        """Get damage weights standard deviations.
+
+        Args:
+            dmg_ratio_tbl (obj): A table of damage ratios for mean damage.
+
+        Returns:
+            obj: Damage weights standard deviations.
+
+        """
         dmg_weights_std_dev = [float(row['Deviation Damage Factor']) for
                                row in dmg_ratio_tbl]
 
@@ -52,6 +98,16 @@ class NonStructBuildingUtil:
 
     @staticmethod
     def get_building_period(num_stories, fragility_set):
+        """Get building period from the fragility curve.
+
+        Args:
+            num_stories (int): Number of building stories.
+            fragility_set (obj): A JSON-like description of fragility applicable to the bridge.
+
+        Returns:
+            float: Building period.
+
+        """
         period = 0.0
 
         fragility_curve = fragility_set['fragilityCurves'][0]
@@ -71,6 +127,17 @@ class NonStructBuildingUtil:
 
     @staticmethod
     def get_hazard_demand_type(building, fragility_set, hazard_type):
+        """Get hazard demand type.
+
+        Args:
+            building (obj): A JSON mapping of a geometric object from the inventory: current building.
+            fragility_set (obj): A JSON description of fragility applicable to the bridge.
+            hazard_type (str): A hazard type such as earthquake, tsunami etc.
+
+        Returns:
+            str: A hazard demand type.
+
+        """
         fragility_hazard_type = fragility_set['demandType'].lower()
         hazard_demand_type = fragility_hazard_type
 
@@ -97,16 +164,17 @@ class NonStructBuildingUtil:
 
     @staticmethod
     def adjust_damage_for_liquefaction(limit_state_probabilities, ground_failure_probabilities):
-        """
-        Adjusts building damage probability based on liquefaction ground failure probability
-        with the liq_dmg, we know that it is 3 values, the first two are the
-		same. The 3rd might be different.
-		we always want to apply the first two to all damage states except the highest.
-        Args:
-            limit_state_probabilities:
-            ground_failure_probabilities:
+        """Adjusts building damage probability based on liquefaction ground failure probability
+        with the liq_dmg, we know that it is 3 values, the first two are the same.
+        The 3rd might be different.
+        We always want to apply the first two to all damage states except the highest.
 
-        Returns: adjusted limit state probability
+        Args:
+            limit_state_probabilities (obj): Limit state probabilities.
+            ground_failure_probabilities (list): Ground failure probabilities.
+
+        Returns:
+            OrderedDict: Adjusted limit state probability.
 
         """
         keys = list(limit_state_probabilities.keys())
@@ -126,14 +194,10 @@ class NonStructBuildingUtil:
             adjusted_limit_state_probabilities[keys[i]] = limit_state_probabilities[keys[i]] + prob_ground_failure \
                                                 - limit_state_probabilities[keys[i]] * prob_ground_failure
 
-        # the final one is the last of limitStates should match with the last
-		# of ground failures
+        # the final one is the last of limitStates should match with the last of ground failures
         j = len(limit_state_probabilities) - 1
         prob_ground_failure = ground_failure_probabilities[-1]
         adjusted_limit_state_probabilities[keys[j]] = limit_state_probabilities[keys[j]] + prob_ground_failure \
                                             - limit_state_probabilities[keys[j]] * prob_ground_failure
 
         return adjusted_limit_state_probabilities
-
-
-
