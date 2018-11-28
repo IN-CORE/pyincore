@@ -1,3 +1,11 @@
+"""pyincore.geoutil
+
+Copyright (c) 2017 University of Illinois and others.  All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the BSD-3-Clause which accompanies this distribution,
+and is available at https://opensource.org/licenses/BSD-3-Clause
+
+"""
 import logging
 
 import fiona
@@ -15,20 +23,38 @@ logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
 
 class GeoUtil:
+    """Utility methods for georeferenced data."""
     @staticmethod
     def get_location(feature):
+        """Location of the object.
+
+         Args:
+             feature (obj):  A JSON mapping of a geometric object from the inventory.
+
+         Note:
+             From the Shapely documentation: The centroid of an object might be one of its points,
+             but this is not guaranteed.
+
+         Returns:
+             point: A representation of the object’s geometric centroid.
+
+         """
         geom = shape(feature['geometry'])
         return geom.centroid
 
     @staticmethod
     def find_nearest_feature(features, query_point):
-        """
-        given a set of features from shapefile and one set Point,
-        find the first nearest feature/point in the that feature set
-        :param features:
-        :param query_point:
-        :return:
-        """
+        """Finds the first nearest feature/point in the feature set given a set of features
+        from shapefile and one set point.
+
+         Args:
+             features (obj):  A JSON mapping of a geometric objects from the inventory.
+             query_point (obj): A query point
+
+         Returns:
+             obj, obj: A nearest feature and distances
+
+         """
         points = np.asarray([feature['geometry']['coordinates'] for feature in features])
         tree = KDTree(points)
         query_point = np.asarray([[query_point.x, query_point.y]])
@@ -42,8 +68,18 @@ class GeoUtil:
 
     @staticmethod
     def create_output(filename, source, results, types):
-        # the reults is the dictionary
+        """Create Fiona output.
 
+        Args:
+            filename (str):  A name of a geo dataset resource recognized by Fiona package.
+            source (obj): Resource with format driver and coordinate reference system.
+            results (obj): Output with key/column names and values.
+            types (dict): Schema key names.
+
+        Returns:
+            obj: Output with metadata names and values.
+
+        """
         # create new schema
         new_schema = source.schema.copy()
         col_names = results[list(results.keys())[0]].keys()
@@ -73,13 +109,16 @@ class GeoUtil:
 
     @staticmethod
     def decimal_to_degree(decimal: float):
-        """
-        convert decimal latitude and longitude to degree to look up in National
+        """Convert decimal latitude and longitude to degree to look up in National
         Bridge Inventory.
 
-        :param decimal:
-        :return: 8 digits int, first 2 digits are degree, another 2 digits are minutes,
-        last 4 digits are xx.xx seconds
+        Args:
+            decimal (float):  Decimal value.
+
+        Returns:
+            int: 8 digits int, first 2 digits are degree, another 2 digits are minutes,
+                last 4 digits are xx.xx seconds.
+
         """
         decimal = abs(decimal)
         degree = int(decimal)
@@ -93,13 +132,15 @@ class GeoUtil:
 
     @staticmethod
     def degree_to_decimal(degree: int):
-        """
-        convert degree latitude and longitude to degree to look up in National
-        Bridge Inventory.
+        """Convert degree latitude and longitude to degree to look up in National Bridge Inventory.
 
-        :param degree: 8 digits int, first 2 digits are degree, another 2 digits are minutes,
-        last 4 digits are xx.xx seconds
-        :return:
+        Args:
+            degree (int):  8 digits int, first 2 digits are degree, another 2 digits are minutes,
+            last 4 digits are xx.xx seconds.
+
+        Returns:
+            str, int: Decimal value.
+
         """
         if degree == 0.0 or degree == None or degree == '':
             decimal = 'NA'
@@ -110,6 +151,19 @@ class GeoUtil:
         return decimal
 
     def create_network_graph_from_field(filename, fromnode_fldname, tonode_fldname, is_directed = False):
+        """Create network graph from field.
+
+        Args:
+            filename (str):  A name of a geo dataset resource recognized by Fiona package.
+            fromnode_fldname (str): Line feature, from node field name.
+            tonode_fldname (str): Line feature, to node field name.
+            is_directed (bool, optional (Defaults to False)): Graph type. True for directed Graph,
+                False for Graph.
+
+        Returns:
+            obj, dict: Graph and coordinates.
+
+        """
         # iterate link
         link = fiona.open(filename)
         fromnode_list = []
@@ -158,6 +212,13 @@ class GeoUtil:
 
     @staticmethod
     def plot_graph_network(graph, coords):
+        """Plot graph.
+
+        Args:
+            graph (obj):  A nx graph to be drawn.
+            coords (dict): Position coordinates.
+
+        """
         # nx.draw(graph, coords, with_lables=True, font_weithg='bold')
 
         # other ways to draw
@@ -168,6 +229,17 @@ class GeoUtil:
 
     @staticmethod
     def get_network_graph(filename, is_directed=False):
+        """Get network graph from filename.
+
+        Args:
+            filename (str):  A name of a geo dataset resource recognized by Fiona package.
+            is_directed (bool, optional (Defaults to False)): Graph type. True for directed Graph,
+                False for Graph.
+
+        Returns:
+            obj, dict: Graph and node coordinates.
+
+        """
         geom = nx.read_shp(filename)
         node_coords = {k: v for k, v in enumerate(geom.nodes())}
         # create graph
@@ -185,11 +257,21 @@ class GeoUtil:
 
         return graph, node_coords
 
-    """
-    check if the node id in from or to node exist in the real node id
-    """
     @staticmethod
     def validate_network_node_ids(nodefilename, linkfilename, fromnode_fldname, tonode_fldname, nodeid_fldname):
+        """Check if the node id in from or to node exist in the real node id.
+
+        Args:
+            nodefilename (str):  A name of a geo dataset resource recognized by Fiona package.
+            linkfilename (str): A name of the line.
+            fromnode_fldname (str): Line feature, from node field name.
+            tonode_fldname (str): Line feature, to node field name.
+            nodeid_fldname (str): Node field id name.
+
+        Returns:
+            bool: Validation of node existence.
+
+        """
         validate = True
         # iterate link
         link = fiona.open(linkfilename)
@@ -218,12 +300,18 @@ class GeoUtil:
 
         return validate
 
-    '''
-    calculate geometric matric from line string segment
-    unit= 1: meter, 2: km, 3: mile
-    '''
     @staticmethod
     def calc_geog_distance_from_linestring(line_segment, unit=1):
+        """Calculate geometric matric from line string segment.
+
+        Args:
+            line_segment (obj):  A multi line string with coordinates of segments.
+            unit (int, optional (Defaults to 1)): Unit selector, 1: meter, 2: km, 3: mile.
+
+        Returns:
+            float: Distance of a line.
+
+        """
         dist = 0
         if (line_segment.__class__.__name__) == "MultiLineString":
             for line in line_segment:
@@ -233,13 +321,19 @@ class GeoUtil:
 
         return dist
 
-    '''
-    calculate geometric matric between two points
-    this only works for WGS84 projection
-    unit= 1: meter, 2: km, 3: mile
-    '''
     @staticmethod
     def calc_geog_distance_between_points(point1, point2, unit=1):
+        """Calculate geometric matric between two points, this only works for WGS84 projection.
+
+        Args:
+            point1 (Point):  Point 1 coordinates.
+            point2 (Point):  Point 2 coordinates.
+            unit (int, optional (Defaults to 1)): Unit selector, 1: meter, 2: km, 3: mile.
+
+        Returns:
+            str: Distance between points.
+
+        """
         dist = 0
         geod = pyproj.Geod(ellps='WGS84')
         angle1, angle2, distance = geod.inv(point1.x, point1.y, point2.x, point2.y)
@@ -258,11 +352,17 @@ class GeoUtil:
         return meter
 
 
-    '''
-    create rtree index
-    '''
     @staticmethod
     def create_rtree_index(inshp):
+        """Create rtree bounding index for an input shape.
+
+        Args:
+            inshp (obj):  Shapefile with features.
+
+        Returns:
+            obj: rtree bounding box index.
+
+        """
         print("creating node index.....")
         feature_list = []
         for feature in inshp:
