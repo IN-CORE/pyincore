@@ -70,6 +70,7 @@ class BaseAnalysis:
 
         """
         dataset = Dataset.from_data_service(remote_id, self.data_service)
+        #TODO: Need to handle failing to set input dataset
         self.set_input_dataset(analysis_param_id, dataset)
 
     def get_name(self):
@@ -113,11 +114,13 @@ class BaseAnalysis:
         return self.input_datasets[id]['value']
 
     def set_input_dataset(self, id, dataset):
-        if self.validate_input_dataset(self.input_datasets[id]['spec'], dataset)[0]:
+        result = self.validate_input_dataset(self.input_datasets[id]['spec'], dataset)
+        if result[0]:
             self.input_datasets[id]['value'] = dataset
             return True
         else:
             # TODO handle error message
+            print(result[1])
             return False
 
     def get_output_datasets(self):
@@ -180,13 +183,13 @@ class BaseAnalysis:
             if not (dataset.data_type in dataset_spec['type']):
                 # if dataset type is not equal to spec, then return false
                 is_valid = False
-                err_msg = 'dataset type does not match'
+                err_msg = 'dataset type does not match - ' + 'given type: '+dataset.data_type+' spec types: '+ str(dataset_spec['type'])
         else:
             #if dataset is none, check 'requirement'
             if dataset_spec['required']:
                 # if dataset is 'required', return false
                 is_valid = False
-                err_msg = 'required dataset is missing'
+                err_msg = 'required dataset is missing - spec: ' + str(dataset_spec)
         return (is_valid, err_msg)
 
     def validate_output_dataset(self, dataset_spec, dataset):

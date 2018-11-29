@@ -30,12 +30,8 @@ class PipelineDamage(BaseAnalysis):
         super(PipelineDamage, self).__init__(incore_client)
 
     def run(self):
-
         # Bridge dataset
         pipeline_dataset = self.get_input_dataset("pipeline").get_inventory_reader()
-
-        # Geology dataset
-
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -59,7 +55,7 @@ class PipelineDamage(BaseAnalysis):
             user_defined_cpu = self.get_parameter("num_cpu")
 
         dataset_size = len(pipeline_dataset)
-        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(dataset_size), user_defined_cpu)
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, dataset_size, user_defined_cpu)
 
         avg_bulk_input_size = int(dataset_size / num_workers)
         inventory_args = []
@@ -235,21 +231,20 @@ class PipelineDamage(BaseAnalysis):
                     'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
                 },
+                {
+                    'id': 'geology',
+                    'required': False,
+                    'description': 'Geology dataset id',
+                    'type': str,
+                }                
             ],
             'input_datasets': [
                 {
                     'id': 'pipeline',
                     'required': True,
                     'description': 'Pipeline Inventory',
-                    'type': ['ergo:pipeline'],
-                },
-                {
-                    'id': 'geology',
-                    'required': True,
-                    'description': 'Geology dataset',
-                    'type': ['ergo:geology'],
-                },
-
+                    'type': ['ergo:buriedPipelineTopology','ergo:pipeline'],
+                }
             ],
             'output_datasets': [
                 {
