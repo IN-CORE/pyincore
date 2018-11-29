@@ -1,6 +1,4 @@
 import pprint
-
-# TODO: exception handling for validation and set methods
 from pyincore import DataService
 from pyincore.dataset import Dataset
 
@@ -122,12 +120,18 @@ class BaseAnalysis:
     def validate_input_dataset(self, dataset_spec, dataset):
         is_valid = True
         err_msg = ''
-        if dataset_spec['required'] and not (dataset.data_type in dataset_spec['type']):
-            is_valid = False
-            err_msg = 'dataset type does not match'
-        elif not isinstance(dataset, type(None)) and not (dataset.data_type in dataset_spec['type']):
-            is_valid = False
-            err_msg = 'dataset type does not match'
+        if not isinstance(dataset, type(None)):
+            #if dataset is not none, check data type
+            if not (dataset.data_type in dataset_spec['type']):
+                # if dataset type is not equal to spec, then return false
+                is_valid = False
+                err_msg = 'dataset type does not match'
+        else:
+            #if dataset is none, check 'requirement'
+            if dataset_spec['required']:
+                # if dataset is 'required', return false
+                is_valid = False
+                err_msg = 'required dataset is missing'
         return (is_valid, err_msg)
 
     def validate_output_dataset(self, dataset_spec, dataset):
@@ -173,42 +177,3 @@ class BaseAnalysis:
         return True
 
 
-class BuildingDamageAnalysis(BaseAnalysis):
-    def run(self):
-        print('hello this is building damage analysis')
-        return True
-
-    def get_spec(self):
-        return {
-            'name': 'building-damage',
-            'description': 'building damage analysis',
-            'input_parameters': [
-                {
-                    'id': 'result_name',
-                    'required': True,
-                    'description': 'result dataset name',
-                    'type': str
-                }
-            ],
-            'input_datasets': [
-                {
-                    'id': 'buildings',
-                    'required': True,
-                    'description': 'Building Inventory',
-                    'type': ['building-v4', 'building-v5'],
-                }
-            ],
-            'output_datasets': [
-                {
-                    'id': 'result',
-                    'parent_type': 'buidings',
-                    'type': 'building-damage'
-                }
-            ]
-        }
-
-
-if __name__ == "__main__":
-    analysis = BuildingDamageAnalysis()
-    pprint.pprint(analysis.get_input_datasets())
-    analysis.run()
