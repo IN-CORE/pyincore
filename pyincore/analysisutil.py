@@ -13,9 +13,9 @@ class AnalysisUtil:
     """
     Utility methods for analysis
     """
-    DOCSTR_FORMAT = "$DESC$ \n" \
+    DOCSTR_FORMAT = "$DESC$ \n\n" \
                     "Args: \n\t" \
-                    "$ARGS$ \n" \
+                    "$ARGS$ " \
                     "\n" \
                     "Returns: \n\t" \
                     "$RETS$ "

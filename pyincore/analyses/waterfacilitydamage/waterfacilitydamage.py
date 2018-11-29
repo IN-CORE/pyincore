@@ -24,6 +24,7 @@ class WaterFacilityDamage(BaseAnalysis):
         #Create Hazard and Fragility service
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
+
         super(WaterFacilityDamage, self).__init__(incore_client)
 
     def get_spec(self):
@@ -108,27 +109,16 @@ class WaterFacilityDamage(BaseAnalysis):
         }
 
     def run(self):
-        """
-        water facility damage analysis
-        Args:
-            water_facilities(str) : Water Facility Inventory. ergo:waterFacilityTopo
-            result_name(str, optional) : result dataset name
-            mapping_id(str) : Fragility mapping dataset
-            hazard_type(str) : Hazard Type (e.g. earthquake)
-            hazard_id(str) : Hazard ID
-            fragility_key(str, optional) : Fragility key to use in mapping dataset
-            liquefaction_geology_dataset_id(str, optional) : Liquefaction geology/susceptibility dataset id. If not provided, liquefaction will be ignored
-            liquefaction_fragility_key(str, optional) : Fragility key to use in liquefaction mapping dataset
-            use_hazard_uncertainty(bool, optional) : Use hazard uncertainty
-            num_cpu(int, optional) : If using parallel execution, the number of cpus to request
-
+        """Performs Water facility damage analysis by using the parameters from the spec
+        and creates an output dataset in csv format
 
         Returns:
-            result: A csv file with limit state probabilities and damage states for each water facility. Applicable dataset type(s): ergo:waterFacilityDamageVer4
-
+            bool: True if successful, False otherwise
         """
         # Facility dataset
         inventory_set = self.get_input_dataset("water_facilities").get_inventory_reader()
+
+
 
         # Get hazard input
         hazard_dataset_id = self.get_parameter("hazard_id")
@@ -165,6 +155,17 @@ class WaterFacilityDamage(BaseAnalysis):
 
     def waterfacility_damage_concurrent_execution(self, function_name, parallel_processes,
                                           *args):
+        """Utilizes concurrent.future module.
+
+            Args:
+                function_name (function): The function to be parallelized.
+                parallelism (int): Number of workers in parallelization.
+                *args: All the arguments in order to pass into parameter function_name.
+
+            Returns:
+                list: A list of ordered dictionaries with damage results and other data/metadata.
+
+        """
         output = []
         with concurrent.futures.ProcessPoolExecutor(
                 max_workers=parallel_processes) as executor:
@@ -175,15 +176,15 @@ class WaterFacilityDamage(BaseAnalysis):
 
 
     def waterfacilityset_damage_analysis(self, facilities, hazard_type, hazard_dataset_id):
-        """
-        Gets applicable fragilities and calculates damage
+        """Gets applicable fragilities and calculates damage
+
         Args:
-            facilities:
-            hazard_type:
-            hazard_dataset_id:
+            facilities(list): Multiple water facilities from input inventory set.
+            hazard_type(str): A hazard type of the hazard exposure.
+            hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
-
+             list: A list of ordered dictionaries with water facility damage values and metadata.
         """
         result = []
         liq_fragility = None
@@ -216,18 +217,18 @@ class WaterFacilityDamage(BaseAnalysis):
 
     def waterfacility_damage_analysis(self, facility, fragility, liq_fragility, hazard_dataset_id,
                                       liq_geology_dataset_id, uncertainty):
-        """
-        Computes damage analysis for a single facility
+        """Computes damage analysis for a single facility
+
         Args:
-            facility:
-            fragility:
-            liq_fragility:
-            hazard_dataset_id:
-            liq_geology_dataset_id:
-            uncertainty:
+            facility(obj): A JSON mapping of a facility based on mapping attributes
+            fragility(obj): A JSON description of fragility mapped to the building.
+            liq_fragility(obj): A JSON description of liquefaction fragility mapped to the building.
+            hazard_dataset_id(str): Hazard id from the hazard service
+            liq_geology_dataset_id(str): Geology dataset id from data service to use for liquefaction calculation, if applicable
+            uncertainty(bool): Whether to use hazard standard deviation values for uncertainity
 
         Returns:
-
+            OrderedDict: A dictionary with water facility damage values and other data/metadata.
         """
         std_dev = 0
         #TODO Get this from API once implemented
