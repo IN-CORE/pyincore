@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
+"""pyincore.analyses.buildingdamage.buldingdamage
 
-"""Building Damage Analysis
-Calculate the probability of building damage based on different hazard type
-by calling fragility service and hazard/tornado service
+Copyright (c) 2017 University of Illinois and others.  All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the BSD-3-Clause which accompanies this distribution,
+and is available at https://opensource.org/licenses/BSD-3-Clause
 
 """
 import collections
@@ -15,7 +16,12 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil
 
 
 class BuildingDamage(BaseAnalysis):
-    """Computes building structural damage for an hazard exposure
+    """Building Damage Analysis calculates the probability of building damage based on
+    different hazard type such as earthquake, tsunami and tornado by calling fragility
+    and hazard services.
+
+    Args:
+        incore_client (IncoreClient): Service authentication.
 
     """
     def __init__(self, incore_client):
@@ -25,10 +31,7 @@ class BuildingDamage(BaseAnalysis):
         super(BuildingDamage, self).__init__(incore_client)
 
     def run(self):
-        """
-        Executes building damage analysis
-        """
-
+        """Executes building damage analysis."""
         # Building dataset
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
 
@@ -74,13 +77,16 @@ class BuildingDamage(BaseAnalysis):
         return True
 
     def building_damage_concurrent_future(self, function_name, parallelism, *args):
-        """
-        Utilizes concurrent.future module
+        """Utilizes concurrent.future module.
 
-        :param function_name: the function to be parallelized
-        :param parallelism: number of max workers in parallelization
-        :param args: all the arguments in order to pass into parameter function_name
-        :return: output: list of OrderedDict
+        Args:
+            function_name (function): The function to be parallelized.
+            parallelism (int): Number of workers in parallelization.
+            *args: All the arguments in order to pass into parameter function_name.
+
+        Returns:
+            list: A list of ordered dictionaries with building damage values and other data/metadata.
+
         """
         output = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
@@ -90,16 +96,18 @@ class BuildingDamage(BaseAnalysis):
         return output
 
     def building_damage_analysis_bulk_input(self, buildings, hazard_type, hazard_dataset_id, dmg_ratio_tbl):
-        """
-        Run analysis for multiple buildings
+        """Run analysis for multiple buildings.
 
-        :param buildings: multiple buildings from input inventory set
-        :param dmg_ratio_tbl: damage ratio table, including weights to compute mean damage
-        :param hazard_dataset_id: id of the hazard exposure
-        :param hazard_type: hazard type of the hazard exposure
-        :return: results: a list of OrderedDict
-        """
+        Args:
+            buildings (list): Multiple buildings from input inventory set.
+            hazard_type (str): A hazard type of the hazard exposure.
+            hazard_dataset_id (str): An id of the hazard exposure.
+            dmg_ratio_tbl (obj): A damage ratio table, including weights to compute mean damage.
 
+        Returns:
+            list: A list of ordered dictionaries with building damage values and other data/metadata.
+
+        """
         result = []
         fragility_key = self.get_parameter("fragility_key")
 
@@ -128,15 +136,18 @@ class BuildingDamage(BaseAnalysis):
         return result
 
     def building_damage_analysis(self, building, dmg_ratio_tbl, fragility_set, hazard_dataset_id, hazard_type):
-        """
-        Run analysis for single building
+        """Calculates building damage results for a single building.
 
-        :param building: a single building from input inventory set
-        :param dmg_ratio_tbl: damage ratio table, including weights to compute mean damage
-        :param fragility_set: fragility set applicable to building
-        :param hazard_dataset_id: dataset id of the hazard exposure
-        :param hazard_type: hazard type of the hazard exposure
-        :return: bldg_results: a single OrderedDict
+        Args:
+            building (obj): A JSON mapping of a geometric object from the inventory: current building.
+            dmg_ratio_tbl (obj): A table of damage ratios for mean damage.
+            fragility_set (obj): A JSON description of fragility assigned to the building.
+            hazard_dataset_id (str): A hazard dataset to use.
+            hazard_type (str): A hazard type of the hazard exposure.
+
+        Returns:
+            OrderedDict: A dictionary with building damage values and other data/metadata.
+
         """
         try:
             bldg_results = collections.OrderedDict()
@@ -176,8 +187,10 @@ class BuildingDamage(BaseAnalysis):
 
                     demand_units = local_fragility_set["demandUnits"]
                     location_str = str(location.y) + "," + str(location.x)
-                    hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, hazard_demand_type,
-                                                                          demand_units, [location_str])[0]["hazardValue"]
+                    hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
+                                                                          hazard_demand_type,
+                                                                          demand_units,
+                                                                          [location_str])[0]["hazardValue"]
 
                     # Sometimes the geotiffs give large negative values for out of bounds instead of 0
                     if hazard_val <= 0.0:
@@ -186,8 +199,10 @@ class BuildingDamage(BaseAnalysis):
                             hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set,
                                                                                      hazard_type)
                             demand_units = local_fragility_set["demandUnits"]
-                            hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, hazard_demand_type,
-                                                                                  demand_units, [location_str])[0]["hazardValue"]
+                            hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
+                                                                                  hazard_demand_type,
+                                                                                  demand_units,
+                                                                                  [location_str])[0]["hazardValue"]
                             if hazard_val <= 0.0:
                                 hazard_val = 0.0
                             else:
@@ -225,6 +240,12 @@ class BuildingDamage(BaseAnalysis):
             raise e
 
     def get_spec(self):
+        """Get specifications of the building damage analysis.
+
+        Returns:
+            obj: A JSON object of specifications of the building damage analysis.
+
+        """
         return {
             'name': 'building-damage',
             'description': 'building damage analysis',
@@ -297,8 +318,8 @@ class BuildingDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'bridges',
+                    'description': 'CSV file of building structural damage',
                     'type': 'ergo:buildingDamageVer4'
                 }
             ]
         }
-

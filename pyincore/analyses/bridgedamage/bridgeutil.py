@@ -1,9 +1,18 @@
+"""pyincore.analyses.bridgedamage.bridgeutil
+
+Copyright (c) 2017 University of Illinois and others.  All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the BSD-3-Clause which accompanies this distribution,
+and is available at https://opensource.org/licenses/BSD-3-Clause
+
+"""
 import csv
 import math
 from scipy.stats import norm
 
 
 class BridgeUtil:
+    """Utility methods for the bridge damage analysis."""
     BRIDGE_FRAGILITY_KEYS = {
         "elastomeric bearing retrofit fragility id code": ["Elastomeric Bearing", "eb"],
         "steel jacket retrofit fragility id code": ["Steel Jacket", "sj"],
@@ -17,6 +26,15 @@ class BridgeUtil:
 
     @staticmethod
     def get_damage_ratio_rows(csv_reader: csv.DictReader):
+        """Parse a csv file with damage ratios.
+
+        Args:
+            csv_reader (csv.DictReader): CSV file reader.
+
+        Returns:
+            list: Data rows.
+
+        """
         csv_rows = []
 
         # Ignore the header
@@ -31,6 +49,16 @@ class BridgeUtil:
 
     @staticmethod
     def get_damage_ratio_values(rows, column: str):
+        """Get damage ratio values.
+
+        Args:
+            rows (list): Damage ratio values.
+            column (str): Column name.
+
+        Returns:
+            list: Damage ratio values.
+
+        """
         dmg_ratio_values = []
         for row in rows:
             dmg_ratio_values.append(row[column])
@@ -39,20 +67,27 @@ class BridgeUtil:
 
     @staticmethod
     def get_hazard_std_dev():
-        """
-        To be developed
+        """Get hazard standard deviation.
 
-        :return:
+        Note:
+            TO DO: To be developed.
+
+        Returns
+            float: Standard deviation.
+
         """
         return 0.0
 
     @staticmethod
     def get_damage_state_intervals(exceedence_probability):
-        """
-        Calculates damage state intervals for current fragility.
+        """Calculates damage state intervals for current fragility.
 
-        :param exceedence_probability: input list of exceedence probability
-        :return: damage intervals
+        Args:
+            exceedence_probability (list): An input list of exceedance probability.
+
+        Returns:
+            list of floats: Damage intervals.
+
         """
         dmg_intervals = []
         for idx, val in enumerate(exceedence_probability):
@@ -66,13 +101,18 @@ class BridgeUtil:
 
     @staticmethod
     def get_mean_damage(dmg_intervals, start_idx, cur_bridge, dmg_ratio_tbl):
-        """
-        Calculates mean damage.
+        """Calculates mean damage.
 
-        :param dmg_intervals: list of damage intervals
-        :param start_idx: dmg interval index to start, starting at 1 ignores the no damage interval
-        :param cur_bridge: bridge information
-        :return:
+        Args:
+            dmg_intervals (list): A list of damage intervals.
+            start_idx (int): An initial index of damage intervals, starting at 1 ignores the
+                no damage interval.
+            cur_bridge (obj): A JSON mapping of a geometric object from the inventory: current bridge.
+            dmg_ratio_tbl (obj): Damage ratios, descriptions and states.
+
+        Returns:
+            float: A value of mean damage.
+
         """
         if "spans" in cur_bridge["properties"] and cur_bridge["properties"]["spans"] is not None and \
                 cur_bridge["properties"]["spans"].isdigit():
@@ -93,9 +133,10 @@ class BridgeUtil:
         weight_collapse0 = float(dmg_ratio_tbl[4]['Best Mean Damage Ratio'])
         weight_collapse1 = float(dmg_ratio_tbl[5]['Best Mean Damage Ratio'])
 
-        mean_damage = weight_slight * dmg_intervals[start_idx] \
-                      + weight_moderate * dmg_intervals[start_idx + 1] \
-                      + weight_extensive * dmg_intervals[start_idx + 2]
+        mean_damage = \
+            weight_slight * dmg_intervals[start_idx] + \
+            weight_moderate * dmg_intervals[start_idx + 1] + \
+            weight_extensive * dmg_intervals[start_idx + 2]
 
         if n >= 3:
             mean_damage += weight_collapse1 / n * dmg_intervals[start_idx + 3]
@@ -106,11 +147,15 @@ class BridgeUtil:
 
     @staticmethod
     def get_expected_damage(mean_damage, dmg_ratios):
-        """
-        Calculates expected damage value.
+        """Calculates mean damage.
 
-        :param mean_damage:
-        :return:
+        Args:
+            mean_damage (float): Mean damage value.
+            dmg_ratios (obj): Damage ratios, descriptions and states.
+
+        Returns:
+            float: A value of the damage state.
+
         """
         no_dmg_bound = [float(dmg_ratios[1]["Lower Bound"]), float(dmg_ratios[1]["Upper Bound"])]
         slight_bound = [float(dmg_ratios[2]["Lower Bound"]), float(dmg_ratios[2]["Upper Bound"])]
@@ -133,15 +178,18 @@ class BridgeUtil:
 
     @staticmethod
     def get_probability_of_exceedence(bridge, fragility_set, hazard_val, std_dev, use_liquefaction):
-        """
-        Calculates probability of exceedence.
+        """Calculates probabilities of exceedance.
 
-        :param bridge:
-        :param fragility_set:
-        :param hazard_val:
-        :param std_dev:
-        :param use_liquefaction:
-        :return:
+        Args:
+            bridge (obj): A JSON mapping of a geometric object from the inventory: current bridge.
+            fragility_set (obj): A JSON description of fragility applicable to the bridge.
+            hazard_val (float): Hazard value.
+            std_dev (float): Standard deviation.
+            use_liquefaction (bool): Liquefaction. True for using liquefaction, False otherwise.
+
+        Returns:
+            list: A list of float probabilities.
+
         """
         exceedence_probability = []
         for fragility in fragility_set["fragilityCurves"]:
@@ -168,12 +216,15 @@ class BridgeUtil:
 
     @staticmethod
     def adjust_fragility_for_liquefaction(fragility_curve, liquefaction):
-        """
-        Adjusts fragility curve object by input parameter liquefaction
+        """Adjusts fragility curve object by input parameter liquefaction.
 
-        :param fragility_curve: original fragility curve
-        :param liquefaction: a string parameter indicating liquefaction type
-        :return: an adjust fragility curve object
+        Args:
+            fragility_curve (obj): A JSON description of current fragility curve.
+            liquefaction (str): Liquefaction type.
+
+        Returns:
+            obj: An adjusted fragility curve.
+
         """
         liquefaction_unified = str(liquefaction).upper()
         if liquefaction_unified == "U":
@@ -193,11 +244,18 @@ class BridgeUtil:
 
     @staticmethod
     def get_retrofit_cost(target_fragility_key):
-        """
-        To be continue. This function is not completed yet. Need real data example on the following variable
+        """Calculates retrofit cost estimate of a bridge.
+
+        Args:
+            target_fragility_key (str): Fragility key describing the type of fragility.
+
+        Note:
+            This function is not completed yet. Need real data example on the following variable
             private FeatureDataset bridgeRetrofitCostEstimate
 
-        :return:
+        Returns:
+            float: Retrofit cost estimate.
+
         """
         retrofit_cost = 0.0
         if target_fragility_key.lower() == BridgeUtil.DEFAULT_FRAGILITY_KEY.lower():
@@ -208,31 +266,41 @@ class BridgeUtil:
 
     @staticmethod
     def get_retrofit_type(target_fragility_key):
-        """
-        Gets retrofit type by looking up BRIDGE_FRAGILITY_KEYS dictionary
+        """Get retrofit type by looking up BRIDGE_FRAGILITY_KEYS dictionary.
 
-        :return: a string retrofit type
+        Args:
+            target_fragility_key (str): Fragility key describing the type of fragility.
+
+        Returns:
+            str: A retrofit type.
+
         """
         return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][0] \
             if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
 
     @staticmethod
     def get_retrofit_code(target_fragility_key):
-        """
-        Gets retrofit code by looking up BRIDGE_FRAGILITY_KEYS dictionary
+        """Get retrofit code by looking up BRIDGE_FRAGILITY_KEYS dictionary.
 
-        :return: a string retrofit code
+        Args:
+            target_fragility_key (str): Fragility key describing the type of fragility.
+
+        Returns:
+            str: A retrofit code.
+
         """
         return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][1] \
             if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
 
     @staticmethod
     def write_to_file(output, fieldname_list, output_file_name):
-        """
-        Generates output csv file with header
+        """Generates output csv file with header.
 
-        :param output: content to be written to output
-        :return:
+        Args:
+            output (str): A content to be written to output.
+            fieldname_list (list): A list of header names.
+            output_file_name (str): Output file name.
+
         """
         # Write Output to csv
         with open(output_file_name, 'w') as csv_file:

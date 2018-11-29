@@ -1,11 +1,24 @@
+"""pyincore.client
+
+Copyright (c) 2017 University of Illinois and others.  All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the BSD-3-Clause which accompanies this distribution,
+and is available at https://opensource.org/licenses/BSD-3-Clause
+
+"""
 import base64
 import urllib.parse
 import requests
 
 
 class IncoreClient:
-    """
-    Incore service client class. It contains token and service root url
+    """Incore service client class. It contains token and service root url.
+
+    Args:
+        service_url (str): Service url.
+        username (str): Username.
+        password (str): Password.
+
     """
     def __init__(self, service_url: str, username: str, password: str) -> object:
         self.service_url = service_url
@@ -36,8 +49,12 @@ class IncoreClient:
 
 
 class InsecureIncoreClient:
-    """
-    Incore service client class. It contains token and service root url
+    """Incore service client class. It contains token and service root url.
+
+    Args:
+        service_url (str): Service url.
+        username (str): Username.
+
     """
     def __init__(self, service_url: str, username: str) -> object:
         self.service_url = service_url

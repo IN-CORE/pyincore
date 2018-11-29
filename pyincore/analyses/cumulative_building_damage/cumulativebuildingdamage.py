@@ -1,4 +1,4 @@
-"""pyincore.analyses.bridgedamage.bridgedamage
+"""pyincore.analyses.cumulative_building_damage.cumulativebuildingdamage
 
 Copyright (c) 2017 University of Illinois and others.  All rights reserved.
 This program and the accompanying materials are made available under the
@@ -6,7 +6,6 @@ terms of the BSD-3-Clause which accompanies this distribution,
 and is available at https://opensource.org/licenses/BSD-3-Clause
 
 """
-
 import pandas as pd
 import collections
 import concurrent.futures
@@ -16,11 +15,9 @@ from pyincore import BaseAnalysis, AnalysisUtil
 
 
 class CumulativeBuildingDamage(BaseAnalysis):
-
+    """Cumulative building damage analysis."""
     def run(self):
-        """
-        Executes Cumulative Building Damage Analysis
-        """
+        """Executes Cumulative Building Damage Analysis"""
         eq_damage_set = self.get_input_dataset("eq_bldg_dmg").get_csv_reader()
         eq_damage_df = pd.DataFrame(list(eq_damage_set))
         tsunami_damage_set = self.get_input_dataset("tsunami_bldg_dmg").get_csv_reader()
@@ -54,14 +51,17 @@ class CumulativeBuildingDamage(BaseAnalysis):
         return True
 
     def cumulative_building_damage_concurrent_future(self, function_name, num_workers, *args):
-        """
-        Utilizes concurrent.future module
-        :param function_name: the function to be parallelized
-        :param num_workers: number of max workers in the parallelization
-        :param args: all the arguments in order to pass into parameter function_namee
-        :return: output: list of OrderedDict
-        """
+        """Utilizes concurrent.future module.
 
+        Args:
+            function_name (function): The function to be parallelized.
+            num_workers (int): Maximum number workers in parallelization.
+            *args: All the arguments in order to pass into parameter function_name.
+
+        Returns:
+            list: A list of ordered dictionaries with cumulative damage values and other data/metadata.
+
+        """
         output = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
             for ret in executor.map(function_name, *args):
@@ -70,14 +70,16 @@ class CumulativeBuildingDamage(BaseAnalysis):
         return output
 
     def cumulative_building_damage_bulk_input(self, eq_building_damage_set, tsunami_building_damage_set, dmg_ratio_tbl):
-        """
-        Runs analysis for multiple earthquake building damage results
-        :param eq_building_damage_set: Multiple building damage results
-        :param tsunami_building_damage_set: Set of all the tsunami building damage results
-        :param dmg_ratio_tbl: damage ratios table
-        :return: results: a list of Ordered Dict
-        """
+        """Run analysis for building damage results.
 
+         Args:
+             eq_building_damage_set (obj): A set of earthquake building damage results.
+             tsunami_building_damage_set (obj): A set of all tsunami building damage results.
+             dmg_ratio_tbl (obj): A damage ratio table, including weights to compute mean damage.
+
+         Returns:
+             list: A list of ordered dictionaries with multiple damage values and other data/metadata.
+        """
         result = []
         for idx, eq_building_damage in eq_building_damage_set.iterrows():
             result.append(self.cumulative_building_damage(eq_building_damage, tsunami_building_damage_set,
@@ -86,6 +88,17 @@ class CumulativeBuildingDamage(BaseAnalysis):
         return result
 
     def cumulative_building_damage(self, eq_building_damage, tsunami_building_damage, dmg_ratio_tbl):
+        """Run analysis for building damage results.
+
+         Args:
+             eq_building_damage (obj): A JSON description of an earthquake building damage.
+             tsunami_building_damage (obj): Set of all tsunami building damage results.
+             dmg_ratio_tbl (obj): A damage ratio table, including weights to compute mean damage.
+
+         Returns:
+             OrderedDict: A dictionary with building damage values and other data/metadata.
+
+        """
         guid = eq_building_damage['guid']
 
         tsunami_building = tsunami_building_damage.loc[tsunami_building_damage['guid'] == guid]
@@ -103,26 +116,30 @@ class CumulativeBuildingDamage(BaseAnalysis):
 
             limit_states = collections.OrderedDict()
 
-            limit_states["collprev"] = eq_limit_states["collprev"] + tsunami_limit_states["collprev"] - \
-                                       eq_limit_states["collprev"] * tsunami_limit_states["collprev"] + \
-                                       ((eq_limit_states["lifesfty"] - eq_limit_states["collprev"]) *
-                                        (tsunami_limit_states["lifesfty"] - tsunami_limit_states["collprev"]))
+            limit_states["collprev"] = \
+                eq_limit_states["collprev"] + tsunami_limit_states["collprev"] - \
+                eq_limit_states["collprev"] * tsunami_limit_states["collprev"] + \
+                ((eq_limit_states["lifesfty"] - eq_limit_states["collprev"]) *
+                 (tsunami_limit_states["lifesfty"] - tsunami_limit_states["collprev"]))
 
-            limit_states["lifesfty"] = eq_limit_states["lifesfty"] + tsunami_limit_states["lifesfty"] - \
-                                       eq_limit_states["lifesfty"] * tsunami_limit_states["lifesfty"] + \
-                                       ((eq_limit_states["immocc"] - eq_limit_states["lifesfty"]) *
-                                        (tsunami_limit_states["immocc"] - tsunami_limit_states["lifesfty"]))
+            limit_states["lifesfty"] = \
+                eq_limit_states["lifesfty"] + tsunami_limit_states["lifesfty"] - \
+                eq_limit_states["lifesfty"] * tsunami_limit_states["lifesfty"] + \
+                ((eq_limit_states["immocc"] - eq_limit_states["lifesfty"]) *
+                 (tsunami_limit_states["immocc"] - tsunami_limit_states["lifesfty"]))
 
-            limit_states["immocc"] = eq_limit_states["immocc"] + tsunami_limit_states["immocc"] - \
-                                     eq_limit_states["immocc"] * tsunami_limit_states["immocc"]
+            limit_states["immocc"] = \
+                eq_limit_states["immocc"] + tsunami_limit_states["immocc"] - \
+                eq_limit_states["immocc"] * tsunami_limit_states["immocc"]
 
             damage_state = AnalysisUtil.calculate_damage_interval(limit_states)
 
             mean_damage = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl, damage_state)
 
-            mean_damage_std_dev = AnalysisUtil.calculate_mean_damage_std_deviation(dmg_ratio_tbl,
-                                                                                   damage_state,
-                                                                                   mean_damage['meandamage'])
+            mean_damage_std_dev = \
+                AnalysisUtil.calculate_mean_damage_std_deviation(dmg_ratio_tbl,
+                                                                 damage_state,
+                                                                 mean_damage['meandamage'])
             bldg_results = collections.OrderedDict()
 
             bldg_results["guid"] = guid
@@ -141,10 +158,24 @@ class CumulativeBuildingDamage(BaseAnalysis):
 
     @staticmethod
     def load_csv_file(file_name):
+        """Load csv file into Pandas DataFrame.
+
+        Args (str): Input csv file name.
+
+        Returns:
+            pd.DataFrame: A table from the csv with headers and values.
+
+        """
         read_file = pd.read_csv(file_name, header="infer")
         return read_file
 
     def get_spec(self):
+        """Get specifications of the damage analysis.
+
+        Returns:
+            obj: A JSON object of specifications of the cumulative damage analysis.
+
+        """
         return {
             'name': 'cumulative-building-damage',
             'description': 'cumulative building damage (earthquake + tsunami)',
@@ -186,6 +217,7 @@ class CumulativeBuildingDamage(BaseAnalysis):
                 {
                     'id': 'combined-result',
                     'parent_type': 'buildings',
+                    'description': 'CSV file of building cumulative damage',
                     'type': 'ergo:buildingDamageVer4'
                 }
 
