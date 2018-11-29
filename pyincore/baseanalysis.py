@@ -122,7 +122,10 @@ class BaseAnalysis:
     def validate_input_dataset(self, dataset_spec, dataset):
         is_valid = True
         err_msg = ''
-        if not (dataset.data_type in dataset_spec['type']):
+        if dataset_spec['required'] and not (dataset.data_type in dataset_spec['type']):
+            is_valid = False
+            err_msg = 'dataset type does not match'
+        elif not isinstance(dataset, type(None)) and not (dataset.data_type in dataset_spec['type']):
             is_valid = False
             err_msg = 'dataset type does not match'
         return (is_valid, err_msg)
