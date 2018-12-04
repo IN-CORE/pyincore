@@ -87,17 +87,14 @@ class HazardService:
         return response
 
     def get_tornado_hazard_value(self, hazard_id: str, demand_units: str, site_lat, site_long, simulation=0):
-        url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/value")
-        payload = {'demandUnits': demand_units, 'siteLat': site_lat,
-                   'siteLong': site_long, 'simulation': simulation}
-        r = requests.get(url, headers=self.client.headers, params=payload)
-        response = r.json()
+        points=[site_lat, site_long]
 
-        return response['hazardValue']
+        hazard_value_set = self.get_tornado_hazard_values(hazard_id, demand_units, points, simulation)
+        return hazard_value_set[0]['hazardValue']
 
-    def get_tornado_hazard_values(self, hazard_id: str, demand_units: str, points: List):
+    def get_tornado_hazard_values(self, hazard_id: str, demand_units: str, points: List, simulation=0):
         url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/values")
-        payload = {'demandUnits': demand_units, 'point': points}
+        payload = {'demandUnits': demand_units, 'point': points, 'simulation': simulation}
         r = requests.get(url, headers=self.client.headers, params = payload)
         response = r.json()
 
