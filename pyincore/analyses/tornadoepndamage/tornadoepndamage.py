@@ -393,16 +393,33 @@ class TornadoEpnDamage(BaseAnalysis):
 
         # create result
         results = []
-        for i in range(len(meanpoles)):
-            output_dict = collections.OrderedDict()
-            output_dict["meanpoles"] = meanpoles[i]
-            output_dict["stdpoles"] = stdpoles[i]
-            output_dict["meancost"] = meancost[i]
-            output_dict["stdcost"] = stdcost[i]
-            output_dict["meantime"] = meantime[i]
-            output_dict["stdtime"] = stdtime[i]
 
-            results.append(output_dict)
+        for i in range(len(meanpoles)):
+            epn_results = collections.OrderedDict()
+            guid_dict = collections.OrderedDict()
+            meanpole_dict = collections.OrderedDict()
+            stdpole_dict = collections.OrderedDict()
+            meancost_dict = collections.OrderedDict()
+            stdcost_dict = collections.OrderedDict()
+            meantime_dict = collections.OrderedDict()
+            stdtime_dict = collections.OrderedDict()
+
+            guid_dict["guid"] = guid_list[i]
+            meanpole_dict["meanpoles"] = meanpoles[i]
+            stdpole_dict["stdpoles"] = stdpoles[i]
+            meancost_dict["meancost"] = meancost[i]
+            stdcost_dict["stdcost"] = stdcost[i]
+            meantime_dict["meantime"] = meantime[i]
+            stdtime_dict["stdtime"] = stdtime[i]
+
+            epn_results.update(guid_dict)
+            epn_results.update(meanpole_dict)
+            epn_results.update(stdpole_dict)
+            epn_results.update(meancost_dict)
+            epn_results.update(stdcost_dict)
+            epn_results.update(meantime_dict)
+            epn_results.update(stdtime_dict)
+            results.append(epn_results)
 
         return results
 
