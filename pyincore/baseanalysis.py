@@ -6,8 +6,8 @@ terms of the BSD-3-Clause which accompanies this distribution,
 and is available at https://opensource.org/licenses/BSD-3-Clause
 
 """
-import pprint
-from pyincore import DataService
+# TODO: exception handling for validation and set methods
+from pyincore import DataService, AnalysisUtil
 from pyincore.dataset import Dataset
 
 
@@ -247,5 +247,8 @@ class BaseAnalysis:
 
     def run(self):
         return True
+
+    def show_gdocstr_docs(self):
+        return AnalysisUtil.create_gdocstr_from_spec(self.get_spec())
 
 
