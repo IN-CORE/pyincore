@@ -30,6 +30,7 @@ class PipelineDamage(BaseAnalysis):
         super(PipelineDamage, self).__init__(incore_client)
 
     def run(self):
+        """Execute pipeline damage analysis """
         # Bridge dataset
         pipeline_dataset = self.get_input_dataset("pipeline").get_inventory_reader()
 
@@ -74,6 +75,17 @@ class PipelineDamage(BaseAnalysis):
         return True
 
     def pipeline_damage_concurrent_future(self, function_name, num_workers, *args):
+        """Utilizes concurrent.future module.
+        
+        Args:
+            function_name (function): The function to be parallelized.
+            num_workers (int): Maximum number workers in parallelization.
+            *args: All the arguments in order to pass into parameter function_name.
+        
+        Returns:
+            list: A list of ordered dictionaries with building damage values and other data/metadata.
+
+        """
         output = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
             for ret in executor.map(function_name, *args):
@@ -82,6 +94,18 @@ class PipelineDamage(BaseAnalysis):
         return output
 
     def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_dataset_id, fragility_key, geology_dataset_id):
+        """Run pipeline damage analysis for multiple pipelines.
+        
+        Args:
+            pipelines (list): multiple pipelines from pieline dataset. 
+            hazard_dataset_id (str): An id of the hazard exposure.
+            fragility_key (str): Fragility Key.
+            geology_dataset_id (str): An id of Geology dataset.
+        
+        Returns:
+            list: A list of ordered dictionaries with pipeline damage values and other data/metadata.
+
+        """
         result = []
         fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), pipelines, fragility_key)
 
@@ -102,6 +126,18 @@ class PipelineDamage(BaseAnalysis):
 
     def pipeline_damage_analysis(self, pipeline, fragility_set, fragility_set_liq, hazard_dataset_id,
                                  geology_dataset_id):
+        """Run pipeline damage for a single pipeline.
+        
+        Args:
+            pipeline (obj): a single pipeline. 
+            fragility_set (obj): A JSON description of fragility assigned to the building.
+            fragility_set_liq (obj): A JSON description of fragility assigned to the building with liqufaction.
+            hazard_dataset_id (str): A hazard dataset to use.
+            geology_dataset_id (str): A dataset id for geology dataset for liqufaction.
+        
+        Returns:
+            OrderedDict: A dictionary with pipeline damage values and other data/metadata.
+        """
 
         pipeline_results = collections.OrderedDict()
         pgv_repairs = 0.0
@@ -191,6 +227,12 @@ class PipelineDamage(BaseAnalysis):
         return pipeline_results
 
     def get_spec(self):
+        """Get specifications of the pipeline damage analysis.
+
+        Returns:
+            obj: A JSON object of specifications of the pipeline damage analysis.
+
+        """
         return {
             'name': 'pipeline-damage',
             'description': 'buried pipeline damage analysis',
