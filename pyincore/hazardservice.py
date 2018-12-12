@@ -32,7 +32,7 @@ class HazardService:
 
     def get_earthquake_hazard_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/values")
-        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': points}
+        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': ["45.99","-123.91"]}
         r = requests.get(url, headers=self.client.headers, params = payload)
         response = r.json()
 
