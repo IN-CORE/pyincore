@@ -26,12 +26,14 @@ import numpy as np
 import pandas as pd
 import datetime
 import warnings
+from pyincore import BaseAnalysis
+from pyincore.analyses.populationdislocation.populationdislocationutil import PopulationDislocationUtil
 
-class PopulationDislocation:
+class PopulationDislocation(BaseAnalysis):
     """Main Population dislocation class.
     """
 
-    def __init__(self, client, output_file_path: str, intermediate_files: bool):
+    def __init__(self, incore_client, output_file_path: str, intermediate_files: bool):
         """Constructor.
 
             Args:
@@ -50,6 +52,88 @@ class PopulationDislocation:
                             }
         self.output_file_path = output_file_path
         self.intermediate_files = intermediate_files
+
+        super(PopulationDislocation, self).__init__(incore_client)
+
+
+    def get_spec(self):
+        return {
+            'name': 'population-dislocation',
+            'description': 'Population Dislocation Analysis',
+            'input_parameters': [
+                {
+                    'id': 'result_name',
+                    'required': False,
+                    'description': 'result dataset name',
+                    'type': str
+                },
+                {
+                    'id': 'seed',
+                    'required': True,
+                    'description': 'Seed from the Stochastic Population Allocation',
+                    'type': int
+                }
+            ],
+            'input_datasets': [
+                {
+                    'id': 'building_dmg_file',
+                    'required': True,
+                    'description': 'Builing Damage Results file',
+                    'type': 'csv'
+                },
+                {
+                    'id': 'population_allocation_file',
+                    'required': True,
+                    'description': 'Population Allocation ',
+                    'type': 'csv'
+                },
+                {
+                    'id': 'block_data_file',
+                    'required': True,
+                    'description': 'Water Facility Inventory',
+                    'type': 'csv'
+                }
+            ],
+            'output_datasets': [
+                # {
+                #     'id': 'result',
+                #     'parent_type': 'water_facilities',
+                #     'description': 'A csv file with limit state probabilities and damage states '
+                #                    'for each water facility',
+                #     'type': 'csv'
+                # }
+            ]
+        }
+
+    def run(self):
+        """Computes the approximate dislocation for each residential structure based on the direct
+        economic damage. The results of this analysis are aggregated to the block group level
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        # Get seed
+        seed_i = self.get_parameter("seed")
+        # Get result name
+        result_name = self.get_parameter("result_name")
+
+
+        merged_block_inv = PopulationDislocationUtil.merge_damage_population_block(
+            building_dmg_file='seaside_bldg_dmg_result.csv',
+            population_allocation_file='pop_allocation_1111.csv',
+            block_data_file='IN-CORE_01av3_SetupSeaside_FourInventories_2018-08-29_bgdata.csv')
+
+
+        #dataframe
+        merged_final_inv = self.get_dislocation(seed_i, merged_block_inv)
+
+        # save to csv
+        merged_final_inv.to_csv(
+             result_name + str(seed_i) + ".csv",
+            sep=",")
+
+        return True
+
 
     # coefficients setter
     def set_coefficients(self, coefficient: dict):
