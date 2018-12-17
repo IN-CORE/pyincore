@@ -7,10 +7,8 @@ def run_without_base_class():
     client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
 
     seed_i = 1111
-    output_file_path = ""
-
     # Population Dislocation
-    podi = PopulationDislocation(client, output_file_path)
+    podi = PopulationDislocation(client)
     merged_block_inv = PopulationDislocationUtil.merge_damage_population_block(
         building_dmg_file='seaside_bldg_dmg_result.csv',
         population_allocation_file='pop_allocation_2222.csv',
@@ -20,8 +18,7 @@ def run_without_base_class():
     merged_final_inv = podi.get_dislocation(seed_i, merged_block_inv)
 
     # save to csv
-    merged_final_inv.to_csv(
-        output_file_path + "final_inventory_" + str(seed_i) + ".csv", sep=",")
+    merged_final_inv.to_csv("final_inventory" + str(seed_i) + ".csv", sep=",")
 
 
 def run_with_base_class():
@@ -31,7 +28,7 @@ def run_with_base_class():
     sto_pop_alloc = "5c12d96f1f5e0d0667d66b2c"
     bg_data = "5c128a161f5e0d0667d64116"
 
-    pop_dis = PopulationDislocation(client, "") # saves to analysis location
+    pop_dis = PopulationDislocation(client)
 
     pop_dis.load_remote_input_dataset("building_dmg", building_dmg)
     pop_dis.load_remote_input_dataset("population_allocation", sto_pop_alloc)
@@ -49,4 +46,4 @@ def run_with_base_class():
 
 
 if __name__ == '__main__':
-    run_with_base_class()
+    run_without_base_class()

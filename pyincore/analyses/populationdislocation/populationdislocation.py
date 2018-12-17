@@ -33,9 +33,7 @@ class PopulationDislocation(BaseAnalysis):
     """Main Population dislocation class.
     """
 
-    #TODO: Can we get rid of output_file_path and assume user wants to save in
-    # the analysis location. Consistent with other analyses.
-    def __init__(self, incore_client, output_file_path: str):
+    def __init__(self, incore_client):
         """Constructor.
 
             Args:
@@ -51,10 +49,8 @@ class PopulationDislocation(BaseAnalysis):
                             "beta3": -0.01826,  # percent black block group
                             "beta4": -0.01198   # percent hispanic block group
                             }
-        self.output_file_path = output_file_path
 
         super(PopulationDislocation, self).__init__(incore_client)
-
 
     def get_spec(self):
         return {
