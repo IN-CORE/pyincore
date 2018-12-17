@@ -33,13 +33,14 @@ class PopulationDislocation(BaseAnalysis):
     """Main Population dislocation class.
     """
 
-    def __init__(self, incore_client, output_file_path: str, intermediate_files: bool):
+    #TODO: Can we get rid of output_file_path and assume user wants to save in
+    # the analysis location. Consistent with other analyses.
+    def __init__(self, incore_client, output_file_path: str):
         """Constructor.
 
             Args:
                 client:                     Used for Service (such as Hazard) Authentication.
                 output_file_path (str):     Path to the output file.
-                intermediate_files (bool):  Save intermediate files.
 
             Returns:
         """
@@ -51,7 +52,6 @@ class PopulationDislocation(BaseAnalysis):
                             "beta4": -0.01198   # percent hispanic block group
                             }
         self.output_file_path = output_file_path
-        self.intermediate_files = intermediate_files
 
         super(PopulationDislocation, self).__init__(incore_client)
 
@@ -64,7 +64,7 @@ class PopulationDislocation(BaseAnalysis):
                 {
                     'id': 'result_name',
                     'required': False,
-                    'description': 'result dataset name',
+                    'description': 'Result CSV dataset name',
                     'type': str
                 },
                 {
@@ -76,32 +76,32 @@ class PopulationDislocation(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'building_dmg_file',
+                    'id': 'building_dmg',
                     'required': True,
-                    'description': 'Builing Damage Results file',
-                    'type': 'csv'
+                    'description': 'Building damage results CSV file from hazard service',
+                    'type': ['ergo:buildingDamageVer4']
                 },
                 {
-                    'id': 'population_allocation_file',
+                    'id': 'population_allocation',
                     'required': True,
-                    'description': 'Population Allocation ',
-                    'type': 'csv'
+                    'description': 'Stochastic Population Allocation CSV data',
+                    'type': ['ergo:PopAllocation']
                 },
                 {
-                    'id': 'block_data_file',
+                    'id': 'block_group_data',
                     'required': True,
-                    'description': 'Water Facility Inventory',
-                    'type': 'csv'
+                    'description': 'Block group racial distribution census CSV data',
+                    'type': ['ergo:blockGroupData']
                 }
             ],
             'output_datasets': [
-                # {
-                #     'id': 'result',
-                #     'parent_type': 'water_facilities',
-                #     'description': 'A csv file with limit state probabilities and damage states '
-                #                    'for each water facility',
-                #     'type': 'csv'
-                # }
+                {
+                    'id': 'result',
+                    'parent_type': 'population_block',
+                    'description': 'A csv file with population dislocation result '
+                                   'aggregated to the block group level',
+                    'type': 'csv'
+                }
             ]
         }
 
@@ -114,23 +114,28 @@ class PopulationDislocation(BaseAnalysis):
         """
         # Get seed
         seed_i = self.get_parameter("seed")
-        # Get result name
+
+        # Get desired result name
         result_name = self.get_parameter("result_name")
 
+        #Building Damage Dataset
+        building_dmg = self.get_input_dataset("building_dmg").get_file_path('csv')
+
+        #Population Allocation Dataset
+        sto_pop_alloc = self.get_input_dataset("population_allocation").get_file_path('csv')
+
+        #Block Group data
+        bg_data = self.get_input_dataset("block_group_data").get_file_path('csv')
 
         merged_block_inv = PopulationDislocationUtil.merge_damage_population_block(
-            building_dmg_file='seaside_bldg_dmg_result.csv',
-            population_allocation_file='pop_allocation_1111.csv',
-            block_data_file='IN-CORE_01av3_SetupSeaside_FourInventories_2018-08-29_bgdata.csv')
+            building_dmg, sto_pop_alloc, bg_data
+        )
 
-
-        #dataframe
+        #Returns dataframe
         merged_final_inv = self.get_dislocation(seed_i, merged_block_inv)
 
-        # save to csv
-        merged_final_inv.to_csv(
-             result_name + str(seed_i) + ".csv",
-            sep=",")
+        csv_source = "dataframe"
+        self.set_result_csv_data("result", merged_final_inv, result_name, csv_source)
 
         return True
 
@@ -291,16 +296,6 @@ class PopulationDislocation(BaseAnalysis):
         dislocated = np.less_equal(randomdis, total_prob_disl)
 
         inventory["dislocated"] = dislocated
-
-        if self.intermediate_files:
-            cols = ["addrptid", "strctid", "lvtypuntid", "blockid", "numprec", "ownershp", "prdis",
-                    "dislocated", "x", "y"]
-            order_inventory = inventory[cols]
-
-            sort_inventory = order_inventory.sort_values(by=["blockid", "addrptid"], ascending=[True, True])
-            # ValueError: The column label 'blockid' is not unique.
-
-            sort_inventory.to_csv(self.output_file_path + "sort_inventory_" + str(seed_i) + ".csv", sep=",")
 
         return inventory
 
