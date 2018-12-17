@@ -200,22 +200,20 @@ class BaseAnalysis:
             err_msg = 'dataset type does not match'
         return is_valid, err_msg
 
-    def set_result_csv_data(self, result_id, result_data, name):
-        """A convenience function for setting results as a csv.
+    """ convenience function(s) for setting result data as a csv """
 
-        Args:
-            result_id (str): Result data id.
-            result_data (obj): Result data.
-            name (str): Csv file name.
-
-        """
+    def set_result_csv_data(self, result_id, result_data, name, source='file'):
         if name is None:
             name = self.spec["name"] + "-result"
 
         if not name.endswith(".csv"):
             name = name + ".csv"
 
-        dataset = Dataset.from_csv_data(result_data, name)
+        if source == 'file':
+            dataset = Dataset.from_csv_data(result_data, name)
+        elif source == 'dataframe':
+            dataset = Dataset.from_dataframe(result_data, name)
+
         dataset.data_type = self.output_datasets[result_id]["spec"]["type"]
         self.set_output_dataset(result_id, dataset)
 
