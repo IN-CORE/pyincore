@@ -34,7 +34,7 @@ def test_get_earthquake_hazard_value(hazardsvc):
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    hval = hazardsvc.get_earthquake_hazard_value("5b902cb273c3371e1236b36b", "0.2 SA", "g", 35.07899, -90.0178)
+    hval = hazardsvc.get_earthquake_hazard_value("5b902cb273c3371e1236b36b", "0.2 SA", "g", ["35.07899,-90.0178"])
     assert hval == 0.5322993805448739
 
 
@@ -45,7 +45,7 @@ def test_get_earthquake_hazard_values(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
     hvals = hazardsvc.get_earthquake_hazard_values("5b902cb273c3371e1236b36b", "0.2 SA", "g",
-                                                   [35.07899, -90.0178, 35.17899, -90.0178])
+                                                   ["35.07899,-90.0178", "35.17899,-90.0178"])
     assert hvals[0]['hazardValue'] == 0.5322993805448739 and hvals[1]['hazardValue'] == 0.5926201634382787
 
 #TODO: This geologydataset is only available on gowtham's local. Test with a real dataset once nebula is back
@@ -93,7 +93,7 @@ def test_get_tornado_hazard_value(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
 
-    hval = hazardsvc.get_tornado_hazard_value("5ad0f35eec230965e6d98d0c", "mph", 35.228, -97.478, 0)
+    hval = hazardsvc.get_tornado_hazard_value("5ad0f35eec230965e6d98d0c", "mph", ["35.228, -97.478"], 0)
     assert ((hval > 85) and (hval <  165))
 
 
@@ -104,7 +104,7 @@ def test_get_tornado_hazard_values(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
     hvals = hazardsvc.get_tornado_hazard_values("5ad0f35eec230965e6d98d0c", "mph",
-                                                   [35.228, -97.478, 35.229, -97.465])
+                                                   ["35.228, -97.478", "35.229, -97.465"])
 
     assert ((hvals[0]['hazardValue'] > 85) and (hvals[0]['hazardValue'] < 165)) and hvals[1]['hazardValue'] == 0
 
