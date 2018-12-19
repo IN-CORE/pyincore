@@ -33,12 +33,12 @@ class BaseAnalysis:
             self.parameters[param['id']] = {'spec': param, 'value': None}
 
         self.input_datasets = {}
-        for param in self.spec['input_datasets']:
-            self.input_datasets[param['id']] = {'spec': param, 'value': None}
+        for input_dataset in self.spec['input_datasets']:
+            self.input_datasets[input_dataset['id']] = {'spec': input_dataset, 'value': None}
 
         self.output_datasets = {}
-        for param in self.spec['output_datasets']:
-            self.output_datasets[param['id']] = {'spec': param, 'value': None}
+        for output_dataset in self.spec['output_datasets']:
+            self.output_datasets[output_dataset['id']] = {'spec': output_dataset, 'value': None}
 
     def get_spec(self):
         """Get basic specifications.
@@ -177,10 +177,14 @@ class BaseAnalysis:
         """
         is_valid = True
         err_msg = ''
-        if not (dataset.data_type in dataset_spec['type']):
+        if dataset_spec['required'] and not (dataset.data_type in dataset_spec['type']):
             is_valid = False
             err_msg = 'dataset type does not match'
-        return is_valid, err_msg
+        elif not isinstance(dataset.data_type, type(None)) and not (dataset.data_type in dataset_spec['type']):
+            is_valid = False
+            err_msg = 'parameter type does not match'
+
+        return (is_valid, err_msg)
 
     def validate_output_dataset(self, dataset_spec, dataset):
         """Match output dataset by type.

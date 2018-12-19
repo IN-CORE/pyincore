@@ -3,6 +3,7 @@ import json
 import numpy
 import os
 import glob
+import wntr
 
 import fiona
 import rasterio
@@ -71,6 +72,28 @@ class Dataset:
                 return fiona.open(filename, layer=layers[0])
         else:
             return fiona.open(filename)
+
+    def get_EPAnet_inp_reader(self):
+        filename = self.local_file_path
+        if os.path.isdir(filename):
+            files = glob.glob(filename + "/*.inp")
+            if len(files) > 0:
+               filename = files[0]
+        wn = wntr.network.WaterNetworkModel(filename)
+        return wn
+
+    def get_json_reader(self):
+        if not "json" in self.readers:
+            filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.json")
+                if len(files) > 0:
+                    filename = files[0]
+
+            with open(filename, 'r') as f:
+                return json.load(f)
+
+        return self.readers["json"]
 
     def get_raster_value(self, location):
         if not "raster" in self.readers:
