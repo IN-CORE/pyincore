@@ -6,7 +6,7 @@ import glob
 
 import fiona
 import rasterio
-
+import pandas as pd
 from pyincore import DataService
 
 
@@ -96,6 +96,17 @@ class Dataset:
             csvfile = open(filename, 'r')
             return csv.DictReader(csvfile)
 
+        return self.readers["csv"]
+
+    def get_csv_as_dataframe(self):
+        if not "csv" in self.readers:
+            filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.csv")
+                if len(files) > 0:
+                    filename = files[0]
+            read_file = pd.read_csv(filename, header="infer")
+            return read_file
         return self.readers["csv"]
 
     def close(self):

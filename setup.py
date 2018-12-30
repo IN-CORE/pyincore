@@ -8,6 +8,6 @@ setup(name = 'pyincore',
                   'pyincore.analyses.waterfacilitydamage', 'pyincore.analyses.bridgedamage',
                   'pyincore.analyses.stochastic_population', 'pyincore.analyses.populationdislocation',
                   'pyincore.analyses.tornadoepndamage', 'pyincore.analyses.nonstructbuildingdamage',
-                  'pyincore.analyses.cumulative_building_damage'],
+                  'pyincore.analyses.cumulative_building_damage', 'pyincore.analyses.BuildingPortfolioRecoveryAnalysis.recovery'],
       requires = ['fiona', 'rasterio', 'jsonpickle', 'numpy', 'shapely', 'scipy', 'matplotlib', 'wikidata', 'requests',
                   'networkx', 'pandas', 'pyproj', 'folium', 'owslib', 'py_expression_eval', 'rtree', 'wntr', 'plotly'])
