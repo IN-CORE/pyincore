@@ -23,7 +23,7 @@ def run_without_base_class():
 
     address_point_inventory_file = base_path + "/addresspointinventory.csv"
     building_inventory_file = base_path + "/buildinginventory.csv"
-    critical_infrastructure_inventory_file = base_path + "/waterinventory.csv"
+    #critical_infrastructure_inventory_file = base_path + "/waterinventory.csv"
     population_inventory_file = base_path + "/popinventory.csv"
     output_name_file = base_path + "stochastic_population_allocation_123888"
 
@@ -33,7 +33,7 @@ def run_without_base_class():
 
     spi = StochasticPopulationAllocation(address_point_inventory_file,
         building_inventory_file,
-        critical_infrastructure_inventory_file,
+        #critical_infrastructure_inventory_file,
         population_inventory_file, output_name_file, base_path, initial_seed,
         n_iterations,
         generate_temporary_files)
