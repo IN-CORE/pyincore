@@ -36,7 +36,7 @@ def run_with_base_class():
 
     #pop_dis.show_gdocstr_docs()
 
-    result_name = "pop-dislocation-result"
+    result_name = "pop-dislocation-results"
     seed = 1111
 
     pop_dis.set_parameter("result_name", result_name)
