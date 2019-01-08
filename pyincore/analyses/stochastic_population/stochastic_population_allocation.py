@@ -7,24 +7,6 @@ from pyincore import BaseAnalysis
 
 class StochasticPopulationAllocation(BaseAnalysis):
     def __init__(self, incore_client):
-        # self.po
-        # self.output_name = output_name
-        # self.seed = seed
-        # self.iterations = iterations
-        # self.intermediate_files = intermediate_files
-        # self.intermediate_files = True #TODO: what is marked as intermediate are the final outputs
-        # if os.path.isfile(address_point_inventory):
-        #     self.address_point_inventory = self.load_csv_file(address_point_inventory)
-        #
-        # if os.path.isfile(building_inventory):
-        #     self.building_inventory = self.load_csv_file(building_inventory)
-        #
-        # # if os.path.isfile(critical_infrastructure_inventory):
-        # #     self.critical_infrastructure_inventory = self.load_csv_file(critical_infrastructure_inventory)
-        #
-        # if os.path.isfile(population_inventory):
-        #     self.population_inventory = self.load_csv_file(population_inventory)
-
         super(StochasticPopulationAllocation, self).__init__(incore_client)
 
     def get_spec(self):
@@ -87,7 +69,8 @@ class StochasticPopulationAllocation(BaseAnalysis):
 
     def run(self):
         """Merges Population Inventory, Address Point Inventory and Building Inventory.
-         The results of this analysis are aggregated per structure/building
+         The results of this analysis are aggregated per structure/building. Generates
+         one csv result per iteration.
 
         Returns:
                bool: True if successful, False otherwise
@@ -123,11 +106,6 @@ class StochasticPopulationAllocation(BaseAnalysis):
 
         return True
 
-
-    # building setter with updated Pandas DataFrame
-    def set_building_inv(self, building_inv: pd.DataFrame):
-        self.building_inventory = building_inv
-
     def prepare_population_inventory(self,population_inventory, seed):
         size_row, size_col = population_inventory.shape
         np.random.seed(seed)
@@ -150,7 +128,7 @@ class StochasticPopulationAllocation(BaseAnalysis):
         return sorted_population2
 
     def merge_infrastructure_inventory(self, address_point_inventory, building_inventory ):
-        """Merge order to Building, Water and Address inventories.
+        """Merge order to Building and Address inventories.
 
             Args:
                 self: for chaining
@@ -169,19 +147,6 @@ class StochasticPopulationAllocation(BaseAnalysis):
 
         addresspt_building_inv = self.compare_merges(sorted_pnt_0.columns, sorted_bld_0.columns,
                                                      addresspt_building_inv)
-
-        #sorted_inf_0 = self.critical_infrastructure_inventory.sort_values(by=["strctid"])
-
-        # Merge Critical Infrastructure Inventory
-        # critical_building_inv = pd.merge(sorted_inf_0, addresspt_building_inv,
-        #                                  how='outer', on="strctid",
-        #                                  left_index=False, right_index=False,
-        #                                  sort=True, copy=True, indicator="exists",
-        #                                  validate="1:m")
-        #
-        # critical_building_inv = self.compare_merges(addresspt_building_inv.columns, sorted_inf_0.columns,
-        #                                             critical_building_inv)
-        # critical_building_inv = critical_building_inv.drop(columns=["_merge"])
 
         return addresspt_building_inv
 
@@ -247,51 +212,11 @@ class StochasticPopulationAllocation(BaseAnalysis):
     def get_iteration_stochastic_allocation(self, population_inventory, address_point_inventory, building_inventory, seed):
         sorted_population = self.prepare_population_inventory(population_inventory, seed)
 
-        # merge infrastructure-related inventories (building, address point and infrastructure (water)
         critical_building_inv = self.merge_infrastructure_inventory(address_point_inventory, building_inventory)
         sorted_infrastructure = self.prepare_infrastructure_inventory(seed, critical_building_inv)
 
         output = self.merge_inventories(sorted_population, sorted_infrastructure)
         return output
-
-    # def get_stochastic_population_allocation(self):
-    #
-    #     output = pd.DataFrame()
-    #     #unique_skeleton_ids = self.critical_infrastructure_inventory['wtrdnd2'].unique()
-    #
-    #     # Avoids error indicating that a DataFrame was updated in place.
-    #     pd.options.mode.chained_assignment = None
-    #     for i in range(self.iterations):
-    #         seed_i = self.seed + i
-    #
-    #         sorted_population_address_inventory = self.get_iteration_stochastic_allocation(seed_i)
-    #         output_item = {"i": i, "seed_i": seed_i, "other": 0}
-    #
-    #         # for skeleton_id in unique_skeleton_ids:
-    #         #     output_item[skeleton_id] = 0
-    #         #
-    #         # for idx, item in sorted_population_address_inventory.iterrows():
-    #         #
-    #         #     if item['exists3'] == 'both':
-    #         #         skeleton_id = item['wtrdnd2']
-    #         #         if np.isnan(skeleton_id):
-    #         #             skeleton_id = "other"
-    #         #         output_item[skeleton_id] += item["numprec"]
-    #         #
-    #         # output = output.append(pd.Series(output_item, name=str(i)))
-    #         # if self.intermediate_files:
-    #         temp_output_file = self.output_name + "_" + str(seed_i) + ".csv"
-    #         sorted_population_address_inventory.to_csv(temp_output_file, mode="w+", index=False)
-    #
-    #         # output_file = os.path.join(output_directory, self.output_name + ".csv")
-    #         # output.to_csv(output_file, mode="w+", index=False)
-    #     #return output
-    #     return True
-
-    @staticmethod
-    def load_csv_file(file_name):
-        read_file = pd.read_csv(file_name, header="infer")
-        return read_file
 
     # utility functions
     def compare_merges(self, table1_cols, table2_cols, table_merged):
