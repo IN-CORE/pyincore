@@ -26,18 +26,19 @@ import numpy as np
 import pandas as pd
 import datetime
 import warnings
+from pyincore import BaseAnalysis
+from pyincore.analyses.populationdislocation.populationdislocationutil import PopulationDislocationUtil
 
-class PopulationDislocation:
+class PopulationDislocation(BaseAnalysis):
     """Main Population dislocation class.
     """
 
-    def __init__(self, client, output_file_path: str, intermediate_files: bool):
+    def __init__(self, incore_client):
         """Constructor.
 
             Args:
                 client:                     Used for Service (such as Hazard) Authentication.
                 output_file_path (str):     Path to the output file.
-                intermediate_files (bool):  Save intermediate files.
 
             Returns:
         """
@@ -48,8 +49,92 @@ class PopulationDislocation:
                             "beta3": -0.01826,  # percent black block group
                             "beta4": -0.01198   # percent hispanic block group
                             }
-        self.output_file_path = output_file_path
-        self.intermediate_files = intermediate_files
+
+        super(PopulationDislocation, self).__init__(incore_client)
+
+    def get_spec(self):
+        return {
+            'name': 'population-dislocation',
+            'description': 'Population Dislocation Analysis',
+            'input_parameters': [
+                {
+                    'id': 'result_name',
+                    'required': False,
+                    'description': 'Result CSV dataset name',
+                    'type': str
+                },
+                {
+                    'id': 'seed',
+                    'required': True,
+                    'description': 'Seed from the Stochastic Population Allocation',
+                    'type': int
+                }
+            ],
+            'input_datasets': [
+                {
+                    'id': 'building_dmg',
+                    'required': True,
+                    'description': 'Building damage results CSV file from hazard service',
+                    'type': ['ergo:buildingDamageVer4']
+                },
+                {
+                    'id': 'population_allocation',
+                    'required': True,
+                    'description': 'Stochastic Population Allocation CSV data',
+                    'type': ['ergo:PopAllocation']
+                },
+                {
+                    'id': 'block_group_data',
+                    'required': True,
+                    'description': 'Block group racial distribution census CSV data',
+                    'type': ['ergo:blockGroupData']
+                }
+            ],
+            'output_datasets': [
+                {
+                    'id': 'result',
+                    'parent_type': 'population_block',
+                    'description': 'A csv file with population dislocation result '
+                                   'aggregated to the block group level',
+                    'type': 'csv'
+                }
+            ]
+        }
+
+    def run(self):
+        """Computes the approximate dislocation for each residential structure based on the direct
+        economic damage. The results of this analysis are aggregated to the block group level
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        # Get seed
+        seed_i = self.get_parameter("seed")
+
+        # Get desired result name
+        result_name = self.get_parameter("result_name")
+
+        #Building Damage Dataset
+        building_dmg = self.get_input_dataset("building_dmg").get_file_path('csv')
+
+        #Population Allocation Dataset
+        sto_pop_alloc = self.get_input_dataset("population_allocation").get_file_path('csv')
+
+        #Block Group data
+        bg_data = self.get_input_dataset("block_group_data").get_file_path('csv')
+
+        merged_block_inv = PopulationDislocationUtil.merge_damage_population_block(
+            building_dmg, sto_pop_alloc, bg_data
+        )
+
+        #Returns dataframe
+        merged_final_inv = self.get_dislocation(seed_i, merged_block_inv)
+
+        csv_source = "dataframe"
+        self.set_result_csv_data("result", merged_final_inv, result_name, csv_source)
+
+        return True
+
 
     # coefficients setter
     def set_coefficients(self, coefficient: dict):
@@ -207,16 +292,6 @@ class PopulationDislocation:
         dislocated = np.less_equal(randomdis, total_prob_disl)
 
         inventory["dislocated"] = dislocated
-
-        if self.intermediate_files:
-            cols = ["addrptid", "strctid", "lvtypuntid", "blockid", "numprec", "ownershp", "prdis",
-                    "dislocated", "x", "y"]
-            order_inventory = inventory[cols]
-
-            sort_inventory = order_inventory.sort_values(by=["blockid", "addrptid"], ascending=[True, True])
-            # ValueError: The column label 'blockid' is not unique.
-
-            sort_inventory.to_csv(self.output_file_path + "sort_inventory_" + str(seed_i) + ".csv", sep=",")
 
         return inventory
 
