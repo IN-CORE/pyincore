@@ -103,16 +103,13 @@ class StochasticPopulationAllocation(BaseAnalysis):
         result_name = self.get_parameter("result_name")
 
         # Population Inventory Dataset
-        pop_inv_file = self.get_input_dataset("population_inventory").get_file_path('csv')
-        pop_inv = self.load_csv_file(pop_inv_file)
+        pop_inv = self.get_input_dataset("population_inventory").get_dataframe_from_csv()
 
         # Address Point Inventory Dataset
-        addr_point_inv_file = self.get_input_dataset("address_point_inventory").get_file_path('csv')
-        addr_point_inv = self.load_csv_file(addr_point_inv_file)
+        addr_point_inv = self.get_input_dataset("address_point_inventory").get_dataframe_from_csv()
 
         # Building Inventory dataset
-        bg_inv_file = self.get_input_dataset("building_inventory").get_file_path('csv')
-        bg_inv = self.load_csv_file(bg_inv_file)
+        bg_inv = self.get_input_dataset("building_inventory").get_dataframe_from_csv()
 
         csv_source = "dataframe"
 
