@@ -21,10 +21,9 @@ Usage:
 Options:
 
 """
-import os
+
 import numpy as np
 import pandas as pd
-import datetime
 import warnings
 from pyincore import BaseAnalysis
 from pyincore.analyses.populationdislocation.populationdislocationutil import PopulationDislocationUtil
