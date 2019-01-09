@@ -1,52 +1,42 @@
-#!/usr/bin/env python3
+"""pyincore.analyses.populationdislocation.populationdislocation
 
-"""Population Dislocation Analysis
-This analysis computes the approximate dislocation for each residential structure based on the direct
-economic damage. The results of this analysis are aggregated to the block group level.
-
-The dislocation is calculated from four probabilites of dislocation based on a random normal
-distribution of the four damage factors presented by Bai, Hueste, Gardoni 2009.
-
-These four damage factors correspond to value loss. The sum of the four probabilities multiplied
-by the four probabilities of damage states was used as the probability for dislocation.
-
-This is different from Lin 2008
-http://hrrc.arch.tamu.edu/publications/research%20reports/08-05R%20Dislocation%20Algorithm%203.pdf
-which calculates a value loss which is the sum of the four damage factors times the four probabilities
-of damage. The two approaches produce different results.
-
-Usage:
-    populationdislocation.py
-
-Options:
+Copyright (c) 2017 University of Illinois and others.  All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the BSD-3-Clause which accompanies this distribution,
+and is available at https://opensource.org/licenses/BSD-3-Clause
 
 """
-
 import numpy as np
 import pandas as pd
 import warnings
 from pyincore import BaseAnalysis
 from pyincore.analyses.populationdislocation.populationdislocationutil import PopulationDislocationUtil
 
+
 class PopulationDislocation(BaseAnalysis):
-    """Main Population dislocation class.
+    """Population Dislocation Analysis computes dislocation for each residential structure based on the direct
+    economic damage. The dislocation is calculated from four probabilites of dislocation based on a random normal
+    distribution of the four damage factors presented by Bai, Hueste, Gardoni 2009.
+
+    These four damage factors correspond to value loss. The sum of the four probabilities multiplied
+    by the four probabilities of damage states was used as the probability for dislocation.
+
+    This is different from Lin 2008
+    http://hrrc.arch.tamu.edu/publications/research%20reports/08-05R%20Dislocation%20Algorithm%203.pdf
+    which calculates a value loss which is the sum of the four damage factors times the four probabilities
+    of damage. The two approaches produce different results.
+
+    Args:
+        incore_client (IncoreClient): Service authentication.
+
     """
-
     def __init__(self, incore_client):
-        """Constructor.
-
-            Args:
-                client:                     Used for Service (such as Hazard) Authentication.
-                output_file_path (str):     Path to the output file.
-
-            Returns:
-        """
-        # coefficients for the Logistic Regression Method
-        self.coefficient = {"beta0": -0.42523,  # contstant
-                            "beta1": 0.02480,   # percent
-                            "beta2": -0.50166,  # single Family
-                            "beta3": -0.01826,  # percent black block group
-                            "beta4": -0.01198   # percent hispanic block group
+        # coefficients for the Logistic regression model
+        self.coefficient = {"beta0": -0.42523,
+                            "beta1": 0.02480,
+                            "beta2": -0.50166,  # single family coefficient
+                            "beta3": -0.01826,  # black block group coefficient
+                            "beta4": -0.01198   # hispanic block group coefficient
                             }
 
         super(PopulationDislocation, self).__init__(incore_client)
@@ -65,7 +55,8 @@ class PopulationDislocation(BaseAnalysis):
                 {
                     'id': 'seed',
                     'required': True,
-                    'description': 'Seed from the Stochastic Population Allocation',
+                    'description': 'Seed to ensure replication if run as part of a stochastic analysis, '
+                                   'for example in connection with Population Allocation analysis.',
                     'type': int
                 }
             ],
@@ -79,7 +70,7 @@ class PopulationDislocation(BaseAnalysis):
                 {
                     'id': 'population_allocation',
                     'required': True,
-                    'description': 'Stochastic Population Allocation CSV data',
+                    'description': 'Population Allocation CSV data',
                     'type': ['ergo:PopAllocation']
                 },
                 {
@@ -101,11 +92,11 @@ class PopulationDislocation(BaseAnalysis):
         }
 
     def run(self):
-        """Computes the approximate dislocation for each residential structure based on the direct
-        economic damage. The results of this analysis are aggregated to the block group level
+        """Executes the Population dislocation analysis.
 
         Returns:
-            bool: True if successful, False otherwise
+            bool: True if successful, False otherwise.
+
         """
         # Get seed
         seed_i = self.get_parameter("seed")
@@ -113,20 +104,20 @@ class PopulationDislocation(BaseAnalysis):
         # Get desired result name
         result_name = self.get_parameter("result_name")
 
-        #Building Damage Dataset
+        # Building Damage Dataset
         building_dmg = self.get_input_dataset("building_dmg").get_file_path('csv')
 
-        #Population Allocation Dataset
+        # Population Allocation Dataset
         sto_pop_alloc = self.get_input_dataset("population_allocation").get_file_path('csv')
 
-        #Block Group data
+        # Block Group data
         bg_data = self.get_input_dataset("block_group_data").get_file_path('csv')
 
         merged_block_inv = PopulationDislocationUtil.merge_damage_population_block(
             building_dmg, sto_pop_alloc, bg_data
         )
 
-        #Returns dataframe
+        # Returns dataframe
         merged_final_inv = self.get_dislocation(seed_i, merged_block_inv)
 
         csv_source = "dataframe"
@@ -135,7 +126,7 @@ class PopulationDislocation(BaseAnalysis):
         return True
 
     def get_dislocation(self, seed_i: int, inventory: pd.DataFrame):
-        """Calculate dislocation probability.
+        """Calculates dislocation probability.
 
         Probability of dislocation, a binary variable based on the logistic probability of dislocation.
         A random number between 0 and 1 was assigned to each household.
@@ -144,13 +135,14 @@ class PopulationDislocation(BaseAnalysis):
         that households with a greater chance of dislocated were more likely
         to have a random number less than the probability predicted.
 
-            Args:
-                self: for chaining
-                seed_i (int): seed for random normal to ensure replication
-                inventory (pd.DataFrame): final merged inventory
+        Args:
+            seed_i (int): Seed for random normal to ensure replication if run as part of a stochastic analysis,
+                for example in connection with Population Allocation analysis.
+            inventory (pd.DataFrame): Merged building, population allocation and block group inventories
 
-            Returns:
-                inventory (pd.DataFrame)
+        Returns:
+            pd.DataFrame: An inventory with probabilities of dislocation in a separate column
+
         """
         # pd.Series to np.array
         dsf = inventory["d_sf"].values
@@ -191,23 +183,23 @@ class PopulationDislocation(BaseAnalysis):
                              percent_black_bg: np.array, percent_hisp_bg: np.array):
         """
         Calculate dislocation, the probability of dislocation for the household and population.
-        Probability of dislocation Damage Factor,
-        based on current IN-COREv1 algorithm and Bai et al 2009 damage factors
+        Probability of dislocation Damage factor,
+        based on current IN-COREv1 algorithm and Bai et al 2009 damage factors.
 
         The following variables are need to predict dislocation using logistic model
         see detailed explanation https://opensource.ncsa.illinois.edu/confluence/
         display/INCORE1/Household+and+Population+Dislocation?
         preview=%2F66224473%2F68289561%2FAlgorithm+3+Logistic.pdf
 
-            Args:
-                self:                           for chaining
-                value_loss (np.array):          Value loss.
-                d_sf (np.array):                'Dummy' parameter.
-                percent_black_bg (np.array):    Block group data, percentage of black minority.
-                percent_hisp_bg (np.array):     Block group data, percentage of hispanic minority.
+        Args:
+            value_loss (np.array): Value loss.
+            d_sf (np.array): 'Dummy' parameter.
+            percent_black_bg (np.array): Block group data, percentage of black minority.
+            percent_hisp_bg (np.array): Block group data, percentage of hispanic minority.
 
-            Returns:
-                disl_prob (np.array)               Dislocation probability
+        Returns:
+            numpy.array: Dislocation probability for the household and population.
+
         """
         disl_prob = np.zeros_like(d_sf)
         try:
@@ -221,4 +213,3 @@ class PopulationDislocation(BaseAnalysis):
             # raise e
 
         return disl_prob
-

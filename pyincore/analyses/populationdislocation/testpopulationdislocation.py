@@ -12,8 +12,7 @@ def run_without_base_class():
     merged_block_inv = PopulationDislocationUtil.merge_damage_population_block(
         building_dmg_file='seaside_bldg_dmg_result.csv',
         population_allocation_file='pop_allocation_2222.csv',
-        block_data_file='IN-CORE_01av3_SetupSeaside_FourInventories_2018-08-29_bgdata.csv',
-        use_prob_damages = False)
+        block_data_file='IN-CORE_01av3_SetupSeaside_FourInventories_2018-08-29_bgdata.csv')
 
     merged_final_inv = podi.get_dislocation(seed_i, merged_block_inv)
 
@@ -34,7 +33,7 @@ def run_with_base_class():
     pop_dis.load_remote_input_dataset("population_allocation", sto_pop_alloc)
     pop_dis.load_remote_input_dataset("block_group_data", bg_data)
 
-    #pop_dis.show_gdocstr_docs()
+    # pop_dis.show_gdocstr_docs()
 
     result_name = "pop-dislocation-results"
     seed = 1111
