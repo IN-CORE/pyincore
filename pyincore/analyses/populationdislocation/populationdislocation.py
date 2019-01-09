@@ -21,10 +21,9 @@ Usage:
 Options:
 
 """
-import os
+
 import numpy as np
 import pandas as pd
-import datetime
 import warnings
 from pyincore import BaseAnalysis
 from pyincore.analyses.populationdislocation.populationdislocationutil import PopulationDislocationUtil
@@ -135,113 +134,6 @@ class PopulationDislocation(BaseAnalysis):
 
         return True
 
-
-    # coefficients setter
-    def set_coefficients(self, coefficient: dict):
-            self.coefficient = coefficient
-
-    @staticmethod
-    def get_output_metadata():
-        output = {"dataType": "", "format": "table"}
-
-        return output
-
-    @staticmethod
-    def set_provenance(author: str, filename: str, source: str):
-        """ From STATA model
-        What is the output file name? What program is needed to replicate results?
-        """
-        now = datetime.datetime.now()
-        provenance = "Provenance: " + filename + now.isoformat()
-
-        return provenance
-
-    @staticmethod
-    def merge_bld_inventory(merged_inventory: pd.DataFrame, building_inv: pd.DataFrame):
-        """Merge Stochastic inventory and new building inventory.
-
-            Args:
-                merged_inventory (pd.DataFrame):  Stochastich inventory which includes Building inventory
-                    (no or not updated hazard), Address point inventory and Critical (Water) Infrastrucutre,
-                    Population inventory and Block data
-                building_inv (pd.DataFrame):   New building inventory with probability of damage.
-
-            Returns:
-                sorted_fin_inv (pd.DataFrame): Sorted final merge
-        """
-        sorted_mrg = merged_inventory.sort_values(by=["strctid"])
-        sorted_bld = building_inv.sort_values(by=["strctid"])
-
-        final_inv = pd.merge(sorted_mrg, sorted_bld[["strctid", "insignific", "moderate", "heavy", "complete"]],
-                             how="outer", on="strctid", left_index=False, right_index=False,
-                             sort=True, copy=True, indicator=True,
-                             validate="m:1")
-
-        sorted_fin_inv = final_inv.sort_values(by=["lvtypuntid"])
-        return sorted_fin_inv
-
-    @staticmethod
-    def merge_block_data(inventory_data: pd.DataFrame, block_data_path: str):
-        """Merge a master dataset with block group data, a distribution of hispanic
-        and black population based on the building id.
-
-            Args:
-                inventory_data (pd.DataFrame):  Merged inventory file.
-                block_data_path (str):          Path and filename. Block data file, a distribution
-                                                of hispanic and black population.
-
-            Returns: merged_table(pd.DataFrame)
-        """
-        block_group_data = pd.DataFrame()
-        if os.path.isfile(block_data_path) and block_data_path.endswith(".csv"):
-            block_group_data = pd.read_csv(block_data_path, header="infer")
-
-        merged_table = pd.DataFrame()
-        # make a new column bgid which extracts the first 12 digits of column blockid
-        try:
-            inventory_data["bgid"] = inventory_data["blockid"].astype(str)
-            inventory_data["bgid"] = inventory_data["bgid"].str[0:12].astype(int)
-
-            # outer merge on bgid
-            merged_table = pd.merge(inventory_data, block_group_data,
-                                    how="outer",
-                                    on="bgid",
-                                    copy=True,
-                                    validate="m:1")
-        except Exception as e:
-            print()
-            # raise e
-
-        return merged_table
-
-    @staticmethod
-    def get_block_data_value(building_inventory, block_data_path: str):
-        """Get values for minorities from block group data, a distribution of hispanic
-        and black population.
-
-            Args:
-                building_inventory:     Building inventory file.
-                block_data_path (str):  Path and filename. Block data file.
-
-            Returns: values (dict)
-        """
-        block_group_data = pd.DataFrame()
-        if os.path.isfile(block_data_path) and block_data_path.endswith(".csv"):
-            block_group_data = pd.read_csv(block_data_path, header="infer")
-
-        values = []
-        for building in building_inventory:
-            for group in block_group_data:
-                if building["blockid"].str[0:12] in group.values():
-                    block_id = building["blockid"]
-                    building_id = group["bgid"]
-                    percent_hisp_data = group["phispbg"]
-                    percent_black_data = group["pblackbg"]
-
-                    values[block_id] = (building_id, percent_black_data, percent_hisp_data)
-
-        return values
-
     def get_dislocation(self, seed_i: int, inventory: pd.DataFrame):
         """Calculate dislocation probability.
 
@@ -295,74 +187,6 @@ class PopulationDislocation(BaseAnalysis):
 
         return inventory
 
-    def aggregate_disl_value(self, seed_i: int, inventory: pd.DataFrame):
-        """Calculate dislocation probability
-
-            Args:
-                self: for chaining
-                seed_i (int): seed for random normal to ensure replication
-                inventory (pd.DataFrame): final merged inventory
-
-            Returns:
-                values (dict): Total dislocation probabilities
-        """
-        # total dislocation
-        # numprec: Number of persons in Structure from the popinventory
-        noperson = inventory["numprec"].values
-        ownership = inventory["ownershp"].values
-        # non-missing values True, missing False.
-        dislocated = inventory["dislocated"].values
-
-        # generate total number of persons dislocated
-        numprec = noperson
-        disnumprec = numprec * dislocated
-
-        numprec = np.sum(numprec)
-        totdisnumprec = np.sum(disnumprec)
-
-        # generate number of persons dislocated by tenure
-        # water infrastructure exists
-        infrastructure = inventory["wtrdnd1"].notna()
-        # ownershp == 1
-        numprecown = noperson * (ownership == 1) * (infrastructure == True)
-        disnumprecown = numprecown * dislocated
-
-        numprecown = np.sum(numprecown)
-        totdisnumprecown = np.sum(disnumprecown)
-
-        # ownershp == 2:
-        numprecrent = noperson * (ownership == 2) * (infrastructure == True)
-        disnumprecrent = numprecrent * dislocated
-
-        numprecrent = np.sum(numprecrent)
-        totdisnumprecrent = np.sum(disnumprecrent)
-
-        # generate number of persons missing infrastructure data by tenure
-        # water infrastructure does not exist
-        noinfrastructure = inventory["wtrdnd1"].isna()
-        # ownershp == 1
-        numprecowninf = noperson * (ownership == 1) * (noinfrastructure == True)
-        disnumprecowninf = numprecowninf * dislocated
-
-        numprecowninf = np.sum(numprecowninf)
-        disnumprecowninf = np.sum(disnumprecowninf)
-
-        # ownershp == 2:
-        numprecrentinf = noperson * (ownership == 2) * (noinfrastructure == True)
-        disnumprecrentinf = numprecrentinf * dislocated
-
-        numprecrentinf = np.sum(numprecrentinf)
-        disnumprecrentinf = np.sum(disnumprecrentinf)
-
-        mc_out_iter = [seed_i,
-                       numprec, totdisnumprec,
-                       numprecown, totdisnumprecown,
-                       numprecrent, totdisnumprecrent,
-                       numprecowninf, disnumprecowninf,
-                       numprecrentinf, disnumprecrentinf]
-
-        return mc_out_iter
-
     def get_disl_probability(self, value_loss: np.array, d_sf: np.array,
                              percent_black_bg: np.array, percent_hisp_bg: np.array):
         """
@@ -398,29 +222,3 @@ class PopulationDislocation(BaseAnalysis):
 
         return disl_prob
 
-    def get_disl_probability_val(self, value_loss: float, d_sf: int,
-                                 percent_black_bg: float, percent_hisp_bg: float):
-        """Calculate dislocation, for a single value
-
-            Args:
-                self:                       for chaining
-                value_loss (float):         Value loss.
-                d_sf (int):                 'Dummy' parameter.
-                percent_black_bg (float):   Block group data, percentage of black minority.
-                percent_hisp_bg (float):    Block group data, percentage of hispanic minority.
-
-            Returns:
-                disl_prob (float)               Dislocation probability
-        """
-        disl_prob = np.nan
-        try:
-            disl_prob = 1.0 / (1 + np.exp(-1.0 * (self.coefficient["beta0"] * 1 +
-                                                  self.coefficient["beta1"] * (float(value_loss) * 100) +
-                                                  self.coefficient["beta2"] * float(d_sf) +
-                                                  self.coefficient["beta3"] * float(percent_black_bg) +
-                                                  self.coefficient["beta4"] * float(percent_hisp_bg))))
-        except Exception as e:
-            print()
-            # raise e
-
-        return disl_prob
