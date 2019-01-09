@@ -30,7 +30,6 @@ def test_get_earthquake_hazard_metadata(hazardsvc):
 def test_get_earthquake_hazard_value(hazardsvc):
     """
     testing getting hazard value
-    https://incore2-services.ncsa.illinois.edu/hazard/api/earthquakes/59f3315ec7d30d4d6741b0bb/value?demandType=0.2+SA&demandUnits=g&siteLat=35.07899&siteLong=-90.0178
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
@@ -48,13 +47,12 @@ def test_get_earthquake_hazard_values(hazardsvc):
                                                    ["35.07899,-90.0178", "35.17899,-90.0178"])
     assert hvals[0]['hazardValue'] == 0.5322993805448739 and hvals[1]['hazardValue'] == 0.5926201634382787
 
-#TODO: This geologydataset is only available on gowtham's local. Test with a real dataset once nebula is back
 def test_get_liquefaction_values(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    liq_vals = hazardsvc.get_liquefaction_values("59f3315ec7d30d4d6741b0bb","5ad506f5ec23094e887f4760", "in",
-                                ["35.07899,-90.0178", "35.17899,-90.0178"])
-    assert liq_vals[0]['pgd'] == 23.21177309712353 and liq_vals[1]['pgd'] == 97.25585469955409
+    liq_vals = hazardsvc.get_liquefaction_values("5b902cb273c3371e1236b36b","5a284f53c7d30d13bc08249c", "in",
+                                ["35.18,-90.076", "35.19,-90.0178"])
+    assert liq_vals[0]['pgd'] == 94.28155130685825 and liq_vals[1]['pgd'] == 103.2176731165868
 
 def test_create_earthquake(hazardsvc):
     """

@@ -26,8 +26,8 @@ class HazardService:
         return response
 
     def get_earthquake_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
-        hazard_value_set = self.get_earthquake_hazard_values(hazard_id, demand_type, demand_units, points=[site_lat, site_long])
-
+        hazard_value_set = self.get_earthquake_hazard_values(hazard_id, demand_type, demand_units,
+            points=str(site_lat) + ',' + str(site_long))
         return hazard_value_set[0]['hazardValue']
 
     def get_earthquake_hazard_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
@@ -71,11 +71,8 @@ class HazardService:
 
     def create_earthquake(self, config):
         url = self.base_earthquake_url
-
-        headers = {'Content-type': 'application/json'}
-        # merge two headers
-        new_headers = {**self.client.headers, **headers}
-        r = requests.post(url, data=config, headers=new_headers)
+        eq_data = {'earthquake': config}
+        r = requests.post(url, files=eq_data, headers=self.client.headers)
         response = r.json()
         return response
 
@@ -87,7 +84,7 @@ class HazardService:
         return response
 
     def get_tornado_hazard_value(self, hazard_id: str, demand_units: str, site_lat, site_long, simulation=0):
-        points=[site_lat, site_long]
+        points = str(site_lat) + ',' + str(site_long)
 
         hazard_value_set = self.get_tornado_hazard_values(hazard_id, demand_units, points, simulation)
         return hazard_value_set[0]['hazardValue']
