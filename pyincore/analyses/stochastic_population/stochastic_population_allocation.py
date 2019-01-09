@@ -59,7 +59,6 @@ class StochasticPopulationAllocation(BaseAnalysis):
             'output_datasets': [
                 {
                     'id': 'result',
-                    'parent_type': 'population_block', #TODO: Is parent_type needed?
                     'description': 'A csv file with the merged dataset of the inputs, aka Stochastic'
                                    'Population Allocation',
                     'type': 'csv'

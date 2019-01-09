@@ -10,7 +10,7 @@ def run_with_base_class():
     addr_point_inv = "5c34db03c5c0e40670b77637"
     bg_inv = "5c34db0ec5c0e40670b7763b"
 
-    result_name = "stochastic-allocationn"
+    result_name = "stochastic-allocation"
     seed = 1238
     iterations = 5
 
