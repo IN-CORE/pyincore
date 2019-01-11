@@ -60,12 +60,13 @@ def test_get_dataset_blob(datasvc):
 
 def test_get_datasets(datasvc):
     errors = []
-    datatype = "buildingInventoryVer5.v1.0"
-    metadata = datasvc.get_datasets(datatype=datatype, title="Shelby")
+    # datatype = "buildingInventoryVer5.v1.0" title="Shelby")
+    datatype = "buildingCollapseRateTable"
+    metadata = datasvc.get_datasets(datatype=datatype, title="HAZUS")
 
     if 'id' not in metadata[0].keys():
         errors.append("response is not right!")
-    if not re.search(r'Shelby',metadata[0]['title']):
+    if not re.search(r'HAZUS',metadata[0]['title']):
         errors.append("title doesn't match!")
     if not re.search(datatype, metadata[0]['dataType']):
         errors.append("datatype doesn't match!")
