@@ -60,7 +60,6 @@ def test_get_dataset_blob(datasvc):
 
 def test_get_datasets(datasvc):
     errors = []
-    # datatype = "buildingInventoryVer5.v1.0" title="Shelby")
     datatype = "buildingCollapseRateTable"
     metadata = datasvc.get_datasets(datatype=datatype, title="HAZUS")
 
