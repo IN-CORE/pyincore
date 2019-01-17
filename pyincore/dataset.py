@@ -3,6 +3,7 @@ import json
 import numpy
 import os
 import glob
+import wntr
 
 import fiona
 import rasterio
@@ -45,6 +46,11 @@ class Dataset:
         return instance
 
     @classmethod
+    def from_dataframe(cls, dataframe, name):
+        dataframe.to_csv(name, index=False)
+        return Dataset.from_file(name, "csv")
+
+    @classmethod
     def from_csv_data(cls, result_data, name):
         if len(result_data) > 0:
             with open(name, 'w') as csv_file:
@@ -72,6 +78,28 @@ class Dataset:
         else:
             return fiona.open(filename)
 
+    def get_EPAnet_inp_reader(self):
+        filename = self.local_file_path
+        if os.path.isdir(filename):
+            files = glob.glob(filename + "/*.inp")
+            if len(files) > 0:
+               filename = files[0]
+        wn = wntr.network.WaterNetworkModel(filename)
+        return wn
+
+    def get_json_reader(self):
+        if not "json" in self.readers:
+            filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.json")
+                if len(files) > 0:
+                    filename = files[0]
+
+            with open(filename, 'r') as f:
+                return json.load(f)
+
+        return self.readers["json"]
+
     def get_raster_value(self, location):
         if not "raster" in self.readers:
             filename = self.local_file_path
@@ -97,6 +125,15 @@ class Dataset:
             return csv.DictReader(csvfile)
 
         return self.readers["csv"]
+
+    def get_file_path(self, type='csv'):
+        filename = self.local_file_path
+        if os.path.isdir(filename):
+            files = glob.glob(filename + "/*."+type)
+            if len(files) > 0:
+                filename = files[0]
+
+        return filename
 
     def close(self):
         for key in self.readers:
