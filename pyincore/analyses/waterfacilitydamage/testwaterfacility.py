@@ -14,7 +14,8 @@ def run_with_base_class():
     liq_geology_dataset_id =  "5a284f53c7d30d13bc08249c"
 
     uncertainty = False
-    liquefaction = False
+    liquefaction = True
+    liq_fragility_key = "pgd"
 
     wf_dmg = WaterFacilityDamage(client)
     wf_dmg.load_remote_input_dataset("water_facilities", facility_datasetid)
@@ -31,6 +32,7 @@ def run_with_base_class():
     wf_dmg.set_parameter("fragility_key", "pga")
     wf_dmg.set_parameter("use_liquefaction", liquefaction)
     wf_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
+    wf_dmg.set_parameter("liquefaction_fragility_key", liq_fragility_key)
     wf_dmg.set_parameter("use_hazard_uncertainty", uncertainty)
     wf_dmg.set_parameter("num_cpu", 4)
 
