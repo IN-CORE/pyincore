@@ -60,11 +60,14 @@ def test_create_earthquake(hazardsvc):
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    config = ""
+    eq_json = ""
     with open("eq.json", 'r') as file:
-        config = file.read()
-    response = hazardsvc.create_earthquake(config)
-    assert response["id"] is not None
+        eq_json = file.read()
+
+    file_paths = ["eq-dataset1.tif", "eq-dataset2.tif"];
+
+    response = hazardsvc.create_earthquake(eq_json, file_paths)
+    assert response["id"] is not None and response["hazardDatasets"][1]["datasetId"] is not None
 
 def test_get_tornado_hazard_metadata(hazardsvc):
     """

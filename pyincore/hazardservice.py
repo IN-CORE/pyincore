@@ -69,9 +69,13 @@ class HazardService:
         response = r.json()
         return response
 
-    def create_earthquake(self, config):
+    def create_earthquake(self, eq_json, file_paths: List):
         url = self.base_earthquake_url
-        eq_data = {'earthquake': config}
+        eq_data = {('earthquake', eq_json)}
+
+        for file_path in file_paths:
+            eq_data.add(('file', open(file_path, 'rb')))
+
         r = requests.post(url, files=eq_data, headers=self.client.headers)
         response = r.json()
         return response
