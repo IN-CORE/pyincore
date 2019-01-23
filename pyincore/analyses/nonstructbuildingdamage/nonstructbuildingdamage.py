@@ -188,14 +188,12 @@ class NonStructBuildingDamage(BaseAnalysis):
             demand_units_as = fragility_set_as['demandUnits']
             location = GeoUtil.get_location(building)
 
-            # TODO: the point parameter hasn't been updated this way yet
-            # hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
-            #     hazard_dataset_id, hazard_demand_type_as,
-            #     demand_units_as, points=[str(location.y) + ',' + str(location.x)])
+            point = str(location.y) + "," + str(location.x)
+
             hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_dataset_id, hazard_demand_type_as,
                 demand_units_as,
-                points=[location.y, location.x])[0]['hazardValue']
+                points=[point])[0]['hazardValue']
 
             dmg_probability_as = AnalysisUtil.calculate_damage_json(fragility_set_as,
                                                                  hazard_val_as)
@@ -205,7 +203,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     liqufaction_dmg = self.hazardsvc.get_liquefaction_values(
                         hazard_dataset_id, liq_geology_dataset_id,
                         'in',
-                        points=[str(location.y) + ',' + str(location.x)])[0][
+                        points=[point])[0][
                         'groundFailureProb']
                 else:
                     raise ValueError('Hazard does not support liquefaction! \
@@ -239,13 +237,11 @@ class NonStructBuildingDamage(BaseAnalysis):
             demand_units_ds = fragility_set_ds['demandUnits']
             location = GeoUtil.get_location(building)
 
-            # TODO: the point parameter hasn't been updated this way yet
-            # hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
-            #     hazard_dataset_id, hazard_demand_type_as,
-            #     demand_units_as, points=[str(location.y) + ',' + str(location.x)])
+            point = str(location.y) + "," + str(location.x)
+
             hazard_val_ds = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_dataset_id, hazard_demand_type_ds,
-                demand_units_ds, points=[location.y, location.x])[0]['hazardValue']
+                demand_units_ds, points=[point])[0]['hazardValue']
 
             dmg_probability_ds = AnalysisUtil.calculate_damage_json(fragility_set_ds,
                                                                  hazard_val_ds)
@@ -256,7 +252,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     liqufaction_dmg = self.hazardsvc.get_liquefaction_values(
                         hazard_dataset_id, liq_geology_dataset_id,
                         'in',
-                        points=[str(location.y) + ',' + str(location.x)])[0][
+                        points=[point])[0][
                         'groundFailureProb']
                 else:
                     raise ValueError('Hazard does not support liquefaction! \

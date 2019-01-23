@@ -96,12 +96,14 @@ class WaterNetworkDamage(BaseAnalysis):
             # get Pipe location
             location = GeoUtil.get_location(pipe)
 
+            point = str(location.y) + "," + str(location.x)
+
             # get hazard value pgv
             hazard_val = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_id=self.get_parameter('earthquake_id'),
                 demand_type='pgv',
                 demand_units='in/s',
-                points=[location.y,location.x])[0]['hazardValue']
+                points=[point])[0]['hazardValue']
 
             # make sure it converts in/s back to m/s
             pipe_PEDS['id'] = pipe['id']
@@ -136,12 +138,14 @@ class WaterNetworkDamage(BaseAnalysis):
             # calculate pump coordinates and calculate its pga
             location = GeoUtil.get_location(pump)
 
+            point = str(location.y) + "," + str(location.x)
+
             # calculate pga
             hazard_val = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_id=self.get_parameter('earthquake_id'),
                 demand_type='pga',
                 demand_units='g',
-                points=[location.y,location.x])[0]['hazardValue']
+                points=[point])[0]['hazardValue']
 
             pump_PEDS['id'] = pump['id']
             pump_PEDS['hazardtype'] = fragility_sets[pump['id']]['demandType']
@@ -170,11 +174,14 @@ class WaterNetworkDamage(BaseAnalysis):
 
             # get tank coordinates and calculate its pga
             location = GeoUtil.get_location(tank)
+
+            point = str(location.y) + "," + str(location.x)
+
             hazard_val = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_id=self.get_parameter('earthquake_id'),
                 demand_type='pga',
                 demand_units='g',
-                points=[location.y,location.x])[0]['hazardValue']
+                points=[point])[0]['hazardValue']
 
             tank_PEDS['id'] = tank['id']
             tank_PEDS['hazardtype'] = fragility_sets[tank['id']]['demandType']

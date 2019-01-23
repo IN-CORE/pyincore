@@ -243,8 +243,11 @@ class WaterFacilityDamage(BaseAnalysis):
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
         location = GeoUtil.get_location(facility)
+
+        point = str(location.y) + "," + str(location.x)
+
         hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id,hazard_demand_type,
-                                                            demand_units, points=[location.y, location.x])
+                                                            demand_units, [point])
         hazard_val = hazard_val_set[0]['hazardValue']
 
         limit_states = AnalysisUtil.compute_limit_state_probability(fragility['fragilityCurves'],
@@ -255,10 +258,10 @@ class WaterFacilityDamage(BaseAnalysis):
         if liq_fragility is not None and liq_geology_dataset_id:
             liq_hazard_type = liq_fragility['demandType']
             pgd_demand_units = liq_fragility['demandUnits']
-            location_str = str(location.y) + "," + str(location.x)
+            point = str(location.y) + "," + str(location.x)
 
             liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, liq_geology_dataset_id,
-                                                            pgd_demand_units, [location_str])
+                                                            pgd_demand_units, [point])
             liq_hazard_val = liquefaction[0][liq_hazard_type]
             liquefaction_prob = liquefaction[0]['liqProbability']
             pgd_limit_states = AnalysisUtil.compute_limit_state_probability(liq_fragility['fragilityCurves'],
