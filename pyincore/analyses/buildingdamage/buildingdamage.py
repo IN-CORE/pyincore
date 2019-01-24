@@ -186,11 +186,11 @@ class BuildingDamage(BaseAnalysis):
                     hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
 
                     demand_units = local_fragility_set["demandUnits"]
-                    location_str = str(location.y) + "," + str(location.x)
+                    point = str(location.y) + "," + str(location.x)
                     hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
                                                                           hazard_demand_type,
                                                                           demand_units,
-                                                                          [location_str])[0]["hazardValue"]
+                                                                          [point])[0]["hazardValue"]
 
                     # Sometimes the geotiffs give large negative values for out of bounds instead of 0
                     if hazard_val <= 0.0:
@@ -202,7 +202,7 @@ class BuildingDamage(BaseAnalysis):
                             hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
                                                                                   hazard_demand_type,
                                                                                   demand_units,
-                                                                                  [location_str])[0]["hazardValue"]
+                                                                                  [point])[0]["hazardValue"]
                             if hazard_val <= 0.0:
                                 hazard_val = 0.0
                             else:
