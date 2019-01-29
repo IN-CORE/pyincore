@@ -1,0 +1,1 @@
+from pyincore.analyses.stochasticpopulation.stochastic_population_allocation import StochasticPopulationAllocation

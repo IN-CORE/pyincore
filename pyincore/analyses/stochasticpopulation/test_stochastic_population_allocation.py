@@ -1,6 +1,6 @@
 
 from pyincore import InsecureIncoreClient
-from pyincore.analyses.stochastic_population import StochasticPopulationAllocation
+from pyincore.analyses.stochasticpopulation import StochasticPopulationAllocation
 
 
 def run_with_base_class():
