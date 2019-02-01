@@ -69,9 +69,23 @@ class HazardService:
         response = r.json()
         return response
 
-    def create_earthquake(self, config):
+    def create_earthquake(self, eq_json, file_paths: List=[]):
+        """
+        Creates an Earthquake.
+        Args:
+            eq_json: JSON representing the earthquake.
+            file_paths: List of strings pointing to the paths of the datasets. Not needed for
+            model based earthquakes.
+
+        Returns: JSON of the created earthquake.
+
+        """
         url = self.base_earthquake_url
-        eq_data = {'earthquake': config}
+        eq_data = {('earthquake', eq_json)}
+
+        for file_path in file_paths:
+            eq_data.add(('file', open(file_path, 'rb')))
+
         r = requests.post(url, files=eq_data, headers=self.client.headers)
         response = r.json()
         return response
