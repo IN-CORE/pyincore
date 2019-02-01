@@ -56,15 +56,27 @@ def test_get_liquefaction_values(hazardsvc):
 
 def test_create_earthquake(hazardsvc):
     """
-    Test creating earthquake
+    Test creating both model and dataset based earthquakes
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    config = ""
-    with open("eq.json", 'r') as file:
-        config = file.read()
-    response = hazardsvc.create_earthquake(config)
-    assert response["id"] is not None
+
+    # Dataset Based Earthquake
+    with open("eq-dataset.json", 'r') as file:
+        eq_dataset_json = file.read()
+
+    file_paths = ["eq-dataset1.tif", "eq-dataset2.tif"];
+
+    dataset_response = hazardsvc.create_earthquake(eq_dataset_json, file_paths)
+    assert dataset_response["id"] is not None and \
+           dataset_response["hazardDatasets"][1]["datasetId"] is not None
+
+    # Model Based Earthquake without files
+    with open("eq-model.json", 'r') as file:
+        eqmodel_json = file.read()
+
+    model_response = hazardsvc.create_earthquake(eqmodel_json)
+    assert model_response["id"] is not None
 
 def test_get_tornado_hazard_metadata(hazardsvc):
     """
