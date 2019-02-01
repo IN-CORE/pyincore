@@ -70,7 +70,7 @@ class HazardService:
         return response
 
     def create_earthquake(self, eq_json, file_paths: List=[]):
-        '''
+        """
         Creates an Earthquake.
         Args:
             eq_json: JSON representing the earthquake.
@@ -79,7 +79,7 @@ class HazardService:
 
         Returns: JSON of the created earthquake.
 
-        '''
+        """
         url = self.base_earthquake_url
         eq_data = {('earthquake', eq_json)}
 
