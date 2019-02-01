@@ -207,6 +207,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
             pga_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, fragility_key)
 
+            liq_fragility_set = []
             if use_liquefaction and liq_geology_dataset_id is not None:
                 liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
                 if liq_fragility_key is None:
@@ -215,7 +216,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
             for facility in facilities:
                 fragility = pga_fragility_set[facility["id"]]
-                if use_liquefaction and liq_geology_dataset_id is not None and facility["id"] in liq_fragility_set:
+                if facility["id"] in liq_fragility_set:
                     liq_fragility = liq_fragility_set[facility["id"]]
 
                 result.append(self.waterfacility_damage_analysis(facility, fragility, liq_fragility,
