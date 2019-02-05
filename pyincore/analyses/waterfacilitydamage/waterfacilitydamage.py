@@ -62,6 +62,12 @@ class WaterFacilityDamage(BaseAnalysis):
                     'description': 'Fragility key to use in mapping dataset',
                     'type': str
                 },
+                {
+                    'id': 'use_liquefaction',
+                    'required': False,
+                    'description': 'Use liquefaction',
+                    'type': bool
+                },
 
                 {
                     'id': 'liquefaction_geology_dataset_id',
@@ -189,6 +195,7 @@ class WaterFacilityDamage(BaseAnalysis):
         result = []
         liq_fragility = None
         mapping_id = self.get_parameter("mapping_id")
+        use_liquefaction = self.get_parameter("use_liquefaction")
         liq_geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
         uncertainty = self.get_parameter("use_hazard_uncertainty")
 
@@ -200,7 +207,8 @@ class WaterFacilityDamage(BaseAnalysis):
 
             pga_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, fragility_key)
 
-            if liq_geology_dataset_id is not None:
+            liq_fragility_set = []
+            if use_liquefaction and liq_geology_dataset_id is not None:
                 liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
                 if liq_fragility_key is None:
                     liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
@@ -208,7 +216,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
             for facility in facilities:
                 fragility = pga_fragility_set[facility["id"]]
-                if liq_geology_dataset_id is not None and facility["id"] in liq_fragility_set:
+                if facility["id"] in liq_fragility_set:
                     liq_fragility = liq_fragility_set[facility["id"]]
 
                 result.append(self.waterfacility_damage_analysis(facility, fragility, liq_fragility,
@@ -247,7 +255,8 @@ class WaterFacilityDamage(BaseAnalysis):
         point = str(location.y) + "," + str(location.x)
 
         hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id,hazard_demand_type,
-                                                            demand_units, [point])
+                                                                     demand_units, [point])
+
         hazard_val = hazard_val_set[0]['hazardValue']
 
         limit_states = AnalysisUtil.compute_limit_state_probability(fragility['fragilityCurves'],
