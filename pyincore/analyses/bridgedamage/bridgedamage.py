@@ -164,11 +164,12 @@ class BridgeDamage(BaseAnalysis):
             location = GeoUtil.get_location(bridge)
             demand_type = fragility_set['demandType']
             demand_units = fragility_set['demandUnits']
+            point = str(location.y) + "," + str(location.x)
             # Start here, need to add the hazard dataset id to the analysis parameter list
             hazard_resp = \
                 self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id,
                                                             demand_type, demand_units,
-                                                            [location.y, location.x])
+                                                            [point])
             hazard_val = hazard_resp[0]['hazardValue']
             hazard_std_dev = 0.0
 
