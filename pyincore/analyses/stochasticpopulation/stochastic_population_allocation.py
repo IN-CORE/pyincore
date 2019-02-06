@@ -129,11 +129,11 @@ class StochasticPopulationAllocation(BaseAnalysis):
     def merge_infrastructure_inventory(self, address_point_inventory, building_inventory ):
         """Merge order to Building and Address inventories.
 
-            Args:
-                self: for chaining
+        Args:
+            self: for chaining
 
-            Returns:
-                output (pd.DataFrame)
+        Returns:
+            output (pd.DataFrame)
         """
         sorted_pnt_0 = address_point_inventory.sort_values(by=["strctid"])
         sorted_bld_0 = building_inventory.sort_values(by=["strctid"])
@@ -153,13 +153,13 @@ class StochasticPopulationAllocation(BaseAnalysis):
         """Assign Random merge order to Building, Water and Address inventories. Use main
         seed value.
 
-            Args:
-                self: for chaining
-                seed_i (int):              Seed for reproducibility
-                critical_bld_inv (pd.DataFrame): merged inventories
+        Args:
+            self: for chaining
+            seed_i (int):              Seed for reproducibility
+            critical_bld_inv (pd.DataFrame): merged inventories
 
-            Returns:
-                output (pd.DataFrame)
+        Returns:
+            output (pd.DataFrame)
         """
         size_row, size_col = critical_bld_inv.shape
 
@@ -182,14 +182,14 @@ class StochasticPopulationAllocation(BaseAnalysis):
     def merge_inventories(self, sorted_population: pd.DataFrame, sorted_infrastructure: pd.DataFrame):
         """Merge (Sorted) Population Inventory and (Sorted) Infrastrucutre Inventory.
 
-            Args:
-                self: for chaining
-                sorted_population (pd.DataFrame):  Sorted population inventory
-                sorted_infrastructure (pd.DataFrame):  Sorted infrastrucutre inventory. This includes
-                    Building inventory, Address point inventory and Critical (Water) Infrastrucutre
+        Args:
+            self: for chaining
+            sorted_population (pd.DataFrame):  Sorted population inventory
+            sorted_infrastructure (pd.DataFrame):  Sorted infrastrucutre inventory. This includes
+                Building inventory, Address point inventory and Critical (Water) Infrastrucutre
 
-            Returns:
-                final_merge_inv (pd.DataFrame): final merge of all four inventories
+        Returns:
+            final_merge_inv (pd.DataFrame): final merge of all four inventories
         """
         population_address_point_inventory = pd.merge(sorted_infrastructure, sorted_population,
                                                       how='outer', left_on=["blockid", "mergeorder"],
@@ -222,14 +222,14 @@ class StochasticPopulationAllocation(BaseAnalysis):
         """Compare two lists of columns and run compare columns on columns in both lists.
         It assumes that suffixes are _x and _y
 
-            Args:
-                self:                       for chaining
-                table1_cols (list):         columns in table 1
-                table2_cols (list):         columns in table 2
-                table_merged (pd.DataFrame):merged table
+        Args:
+            self:                       for chaining
+            table1_cols (list):         columns in table 1
+            table2_cols (list):         columns in table 2
+            table_merged (pd.DataFrame):merged table
 
-                Returns:
-                    table_merged (pd.DataFrame)
+            Returns:
+                table_merged (pd.DataFrame)
         """
         match_column = set(table1_cols).intersection(table2_cols)
         for col in match_column:
@@ -243,15 +243,15 @@ class StochasticPopulationAllocation(BaseAnalysis):
         """Compare two columns. If not equal create Tru/False column, if equal rename one of them
         with the base name and drop the other.
 
-            Args:
-                self:                      for chaining.
-                table (pd.DataFrame):      Data Frame table
-                col1 (pd.Series):          Column 1
-                col2 (pd.Series):          Column 2
-                drop (bool):               rename and drop column
+        Args:
+            self:                      for chaining.
+            table (pd.DataFrame):      Data Frame table
+            col1 (pd.Series):          Column 1
+            col2 (pd.Series):          Column 2
+            drop (bool):               rename and drop column
 
-            Returns:
-                output (pd.DataFrame)
+        Returns:
+            output (pd.DataFrame)
         """
         # Values in columns match or not, add True/False column
         table.loc[table[col1] == table[col2], col1+"-"+col2] = True
