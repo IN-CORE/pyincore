@@ -126,16 +126,12 @@ class Dataset:
 
         return self.readers["csv"]
 
-    def get_csv_as_dataframe(self):
-        if not "csv" in self.readers:
-            filename = self.local_file_path
-            if os.path.isdir(filename):
-                files = glob.glob(filename + "/*.csv")
-                if len(files) > 0:
-                    filename = files[0]
-            read_file = pd.read_csv(filename, header="infer")
-            return read_file
-        return self.readers["csv"]
+    def get_dataframe_from_csv(self):
+        filename = self.get_file_path('csv')
+        df = pd.DataFrame()
+        if os.path.isfile(filename):
+            df = pd.read_csv(filename, header="infer")
+        return df
 
     def get_file_path(self, type='csv'):
         filename = self.local_file_path

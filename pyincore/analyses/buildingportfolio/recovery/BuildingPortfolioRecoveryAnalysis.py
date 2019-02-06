@@ -187,12 +187,12 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
     def run(self):
 
         uncertainty = self.get_parameter("uncertainty")
-        utility_initial = self.get_input_dataset("utility").get_csv_as_dataframe()
-        building_damage_results = self.get_input_dataset("building_damage").get_csv_as_dataframe()
-        building_data = self.get_input_dataset("building_data").get_csv_as_dataframe()
-        mean_repair = self.get_input_dataset("dmg_ratios").get_csv_as_dataframe()
-        occupancy_mapping = self.get_input_dataset("occupancy_mapping").get_csv_as_dataframe()
-        coeFL =self.get_input_dataset("coefFL").get_csv_as_dataframe()
+        utility_initial = self.get_input_dataset("utility").get_dataframe_from_csv()
+        building_damage_results = self.get_input_dataset("building_damage").get_dataframe_from_csv()
+        building_data = self.get_input_dataset("building_data").get_dataframe_from_csv()
+        mean_repair = self.get_input_dataset("dmg_ratios").get_dataframe_from_csv()
+        occupancy_mapping = self.get_input_dataset("occupancy_mapping").get_dataframe_from_csv()
+        coeFL =self.get_input_dataset("coefFL").get_dataframe_from_csv()
 
         print('INFO: Data for Building Portfolio Recovery Analysis loaded successfully.')
 
