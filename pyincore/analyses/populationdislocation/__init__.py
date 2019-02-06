@@ -2,4 +2,4 @@ from pyincore.analyses.populationdislocation.populationdislocation import Popula
 from pyincore.analyses.populationdislocation.populationdislocationutil import PopulationDislocationUtil
 from pyincore.analyses.buildingdamage.buildingdamage import BuildingDamage
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
-from pyincore.analyses.stochastic_population.stochastic_population_allocation import StochasticPopulationAllocation
+from pyincore.analyses.stochasticpopulation.stochastic_population_allocation import StochasticPopulationAllocation

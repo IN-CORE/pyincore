@@ -18,7 +18,7 @@ from collections import OrderedDict
 from pyincore import InsecureIncoreClient
 from pyincore.analyses.waternetworkdamage import WaterNetworkDamage
 from pyincore.analyses.waternetworkrecovery import WaterNetworkRecovery, WaterNetworkRecoveryUtil
-from pyincore.analyses.stochastic_population import StochasticPopulationAllocation
+from pyincore.analyses.stochasticpopulation import StochasticPopulationAllocation
 from pyincore.analyses.populationdislocation import PopulationDislocation, PopulationDislocationUtil
 from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore import InventoryDataset, Dataset

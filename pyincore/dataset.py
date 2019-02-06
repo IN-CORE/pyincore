@@ -7,6 +7,7 @@ import wntr
 
 import fiona
 import rasterio
+import pandas as pd
 
 from pyincore import DataService
 
@@ -134,6 +135,14 @@ class Dataset:
                 filename = files[0]
 
         return filename
+
+    def get_dataframe_from_csv(self):
+        filename = self.get_file_path('csv')
+        df = pd.DataFrame()
+        if os.path.isfile(filename):
+            df = pd.read_csv(filename, header="infer")
+        return df
+
 
     def close(self):
         for key in self.readers:
