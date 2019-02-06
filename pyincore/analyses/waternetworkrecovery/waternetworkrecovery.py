@@ -2,153 +2,124 @@ import pandas as pd
 import numpy as np
 import pickle
 from collections import OrderedDict
-from matplotlib import colors
 import wntr
+from pyincore import BaseAnalysis, Dataset
 from pyincore.analyses.waternetworkrecovery.waternetworkrecoveryutil import WaterNetworkRecoveryUtil
 
 
-class WaterNetworkRecovery:
+class WaterNetworkRecovery(BaseAnalysis):
 
-    def __init__(self, WN_input_file, demand):
-        '''
-        initailize the water network
-        :param WN_input_file:
-        '''
+    def run(self):
+        """
+        Execute Water Network Recovery Process
 
-        self.WN_input_file = WN_input_file
+        """
 
-        # save original water network
-        wn = wntr.network.WaterNetworkModel(WN_input_file)
+        # intial water network
+        wn = self.get_input_dataset("wn_inp_file").get_EPAnet_inp_reader()
 
-        if demand is not None:
+        # initial demand
+        demand_initial = self.get_input_dataset("demand_initial").get_json_reader()
+
+        # water network damage
+        pipe_PEDS_csv = self.get_input_dataset("pipe_dmg").get_csv_reader()
+        pipe_PEDS = pd.DataFrame(list(pipe_PEDS_csv))
+        pipe_PEDS.set_index("id", inplace=True)
+        pipe_PEDS.index = pipe_PEDS.index.map(str)
+        pipe_PEDS = pipe_PEDS.astype({"pipe_length": float,
+                                      "hazardval": float,
+                                      "mean_repair_rate": float})
+
+        pump_PEDS_csv = self.get_input_dataset("pump_dmg").get_csv_reader()
+        pump_PEDS = pd.DataFrame(list(pump_PEDS_csv))
+        pump_PEDS.set_index("id", inplace=True)
+        pump_PEDS.index = pump_PEDS.index.map(str)
+        pump_PEDS = pump_PEDS.astype({"hazardval": float,
+                                      "Slight": float,
+                                      "Moderate": float,
+                                      "Extensive": float,
+                                      "Complete": float})
+
+        tank_PEDS_csv = self.get_input_dataset("tank_dmg").get_csv_reader()
+        tank_PEDS = pd.DataFrame(list(tank_PEDS_csv))
+        tank_PEDS.set_index("id", inplace=True)
+        tank_PEDS.index = tank_PEDS.index.map(str)
+        tank_PEDS = tank_PEDS.astype({"hazardval": float,
+                                      "Slight": float,
+                                      "Moderate": float,
+                                      "Extensive": float,
+                                      "Complete": float})
+
+        # dislocation demand
+        demand = self.get_input_dataset("demand").get_json_reader()
+        pipe_zone = self.get_input_dataset("pipe_zone").get_csv_reader()
+
+        # additional dislocation demand (optional)
+        demand_additional_dataset = self.get_input_dataset("demand_additional")
+        if demand_additional_dataset is not None:
+            demand_additional = demand_additional_dataset.get_json_reader()
+        else:
+            demand_additional = None
+
+        result_name = self.get_parameter("result_name")
+        n_days = self.get_parameter("n_days")
+        seed = self.get_parameter("seed")
+
+        work_hour_day = self.get_parameter("work_hour_day")
+        if work_hour_day is None:
+            work_hour_day = 16
+
+        tzero = self.get_parameter("tzero")
+        if tzero is None:
+            tzero = 4
+
+        prod_param = self.get_parameter("prod_param")
+        if prod_param is None:
+            prod_param = (20, 4)
+
+        crew = self.get_parameter("crew")
+        if crew is None:
+            crew = [[6, 5, 7, 7, 1, 6],
+                    [4, 3, 4, 4, 1, 4],
+                    [4, 3, 4, 4, 1, 4]]
+
+        mincrew = self.get_parameter("mincrew")
+        if mincrew is None:
+            mincrew =[2, 2, 2, 2, 1, 2]
+
+        intrp_day = self.get_parameter("intrp_day")
+
+        ################################################
+        # set up the water network
+        if demand_initial is not None:
             for i in wn.junction_name_list:
                 junction = wn.get_node(i)
-                if str(i) in demand.keys():
-                    junction.demand = demand[str(i)]
+                if str(i) in demand_initial.keys():
+                    junction.demand = demand_initial[str(i)]
                 else:
                     continue
 
-        with open('wn.pickle', 'wb') as f:
+        # save initial water network
+        with open(result_name + '_wn.pickle', 'wb') as f:
             print('save water network as wn.pickle file')
             pickle.dump(wn, f)
-
-    def wn_impact1day(self, pipe_PEDS, pump_PEDS, tank_PEDS, demand=None, seed=67823):
-        '''
-        :param pipe_PEDS:
-        :param pump_PEDS:
-        :param tank_PEDS:
-        :param ratio:
-        :return:
-        '''
-        # load original water network
-        with open('wn.pickle', 'rb') as f:
-            wn = pickle.load(f)
-
-        for name, node in wn.junctions():
-            # water meter column: 0.704*psi
-            node.nominal_pressure = 0.704 * 15
-            node.minimum_pressure = 0.704 * 10
-
-        wn.options.time.duration = 24 * 3600
-        wn.options.time.hydraulic_timestep = 3600
-        wn.options.time.report_timestep = 3600
-
-        # get failing pumps
-        pump_DS = WaterNetworkRecoveryUtil.sample_damage_state(pump_PEDS, ['Complete','Extensive'])
-        pumps_to_fail = list(pump_DS[(pump_DS == 'Complete') | (pump_DS == 'Extensive')].index)
-
-        # get failing tanks
-        tank_DS = WaterNetworkRecoveryUtil.sample_damage_state(tank_PEDS, ['Complete','Extensive'])
-        tanks_to_fail = list(tank_DS[(tank_DS == 'Complete') | (tank_DS == 'Extensive')].index)
-
-        # get leaking pipes
-        np.random.seed(seed)
-        nleak_pipe = pd.Series(np.random.poisson(0.85 * np.array(pipe_PEDS['mean_repair_rate']).astype('float64')),
-                               index=pipe_PEDS.index)
-        nbreak_pipe = pd.Series(np.random.poisson(0.15 * np.array(pipe_PEDS['mean_repair_rate']).astype('float64')),
-                                 index=pipe_PEDS.index)
-
-        # break the pipes in WNTR
-        pipes_original = list(pipe_PEDS.index)
-        for name in pipes_original:
-            if nbreak_pipe[name] > 0:
-                pipe = wn.get_link(name)
-                break_area = 3.14159 * (pipe.diameter / 2) ** 2
-                wn.split_pipe(name, name + '_B', name + '_break_node')
-                break_node = wn.get_node(name + '_break_node')
-
-                # Select duration of damage
-                duration_of_damage = 48 * 3600
-                break_node.add_leak(wn, area=break_area, start_time=0,
-                                    end_time=duration_of_damage)
-
-            elif nleak_pipe[name] > 0:
-                pipe = wn.get_link(name)
-                leak_area = 0.03 * 3.14159 * (pipe.diameter / 2) ** 2
-                wn.split_pipe(name, name + '_L', name + '_leak_node')
-                leak_node = wn.get_node(name + '_leak_node')
-
-                # Select duration of damage
-                duration_of_damage = 48 * 3600
-                leak_node.add_leak(wn, area=leak_area, start_time=0,
-                                   end_time=duration_of_damage)
-            else:
-                continue
-
-        # Define outage for pumps
-        for name in pumps_to_fail:
-            duration_of_outage = 48 * 3600
-            pump = wn.get_link(name)
-            pump.add_outage(wn, 0, duration_of_outage)
-
-        # Define damage states for tanks
-        for name in tanks_to_fail:
-            if tank_DS[name] == 'Complete':
-                duration_of_outage = 48 * 3600
-                tank = wn.get_node(name)
-                break_area = np.pi * tank.diameter ** 2 / 4
-                tank.add_leak(wn, area=break_area, start_time=0.0,
-                              end_time=duration_of_outage)
-            else:
-                duration_of_outage = 48 * 3600
-                tank = wn.get_node(name)
-                break_area = 0.75 * np.pi * tank.diameter ** 2 / 4
-                tank.add_leak(wn, area=break_area, start_time=0.0,
-                              end_time=duration_of_outage)
-
-        # Change Demand
-        if demand is not None:
-            for i in wn.junction_name_list:
-                junction = wn.get_node(i)
-                if str(i) in demand.keys():
-                    junction.demand = demand[str(i)]
-                else:
-                    continue
-
-
-        sim = wntr.sim.WNTRSimulator(wn, mode='PDD')
-
-        return sim.run_sim(), wn
-
-
-    def wn_recoveryNday(self, pipe_PEDS, pump_PEDS, tank_PEDS, WN_rec_atr, rec_params,
-                        n_days=3, demand=None, save_model=True, seed=67823):
-
-        # load original water network
-        with open('wn.pickle', 'rb') as f:
-            wn = pickle.load(f)
+        initial_wn = Dataset.from_file(result_name + '_wn.pickle', 'pickle')
+        self.set_output_dataset("initial_water_network", initial_wn)
 
         wn.options.time.duration = n_days * 24 * 3600
         wn.options.time.hydraulic_timestep = 3600
         wn.options.time.report_timestep = 3600
 
         # get failing pumps
-        pump_DS = WaterNetworkRecoveryUtil.sample_damage_state(pump_PEDS,['Complete','Extensive'])
-        pumps_to_fail = list(pump_DS[(pump_DS == 'Complete') | (pump_DS == 'Extensive')].index)
+        pump_DS = WaterNetworkRecoveryUtil.sample_damage_state(pump_PEDS,
+                                                               ['Complete',
+                                                                'Extensive'])
+        pumps_to_fail = list(
+            pump_DS[(pump_DS == 'Complete') | (pump_DS == 'Extensive')].index)
         pump_durations = np.zeros_like(pumps_to_fail, dtype='float64')
         pump_durations = pd.DataFrame(pump_durations,
-                                          index=pumps_to_fail,
-                                          columns=['Duration'])
+                                      index=pumps_to_fail,
+                                      columns=['Duration'])
         np.random.seed(seed)
         for name in pumps_to_fail:
             if name[0:2] == '20':
@@ -159,23 +130,35 @@ class WaterNetworkRecovery:
                     0.5 + 3 * np.random.beta(3, 9), 2) * 24
 
         # get failing tanks
-        tank_DS = WaterNetworkRecoveryUtil.sample_damage_state(tank_PEDS, ['Complete', 'Extensive'])
-        tanks_to_fail = list(tank_DS[(tank_DS == 'Complete') | (tank_DS == 'Extensive')].index)
+        tank_DS = WaterNetworkRecoveryUtil.sample_damage_state(tank_PEDS,
+                                                               ['Complete',
+                                                                'Extensive'])
+        tanks_to_fail = list(
+            tank_DS[(tank_DS == 'Complete') | (tank_DS == 'Extensive')].index)
 
         # get failing pipes
-        nleak_pipe = pd.Series(np.random.poisson(0.85 * np.array(pipe_PEDS['mean_repair_rate']).astype('float64')),
-            index=pipe_PEDS.index)
+        nleak_pipe = pd.Series(np.random.poisson(
+            0.85 * np.array(pipe_PEDS['mean_repair_rate']).astype('float64')),
+                               index=pipe_PEDS.index)
         nbreak_pipe = pd.Series(
-            np.random.poisson(0.15 * np.array(pipe_PEDS['mean_repair_rate']).astype('float64')),
+            np.random.poisson(
+                0.15 * np.array(pipe_PEDS['mean_repair_rate']).astype(
+                    'float64')),
             index=pipe_PEDS.index)
+
+        WN_rec_atr, rec_params = self.set_recovery_attributes(pipe_PEDS,
+                                                pipe_zone, work_hour_day, tzero,
+                                                prod_param, crew)
+
         WN_rec_atr['Breaks'] = nbreak_pipe
         WN_rec_atr['Leaks'] = nleak_pipe
 
         # calculate recovery schedule
         crew, prod_param, work_hour_day, tzero = rec_params
-        rectime_pipe = self.calculate_recoverytime(WN_rec_atr, crew, prod_param,
-                                       work_hour_day, tz=tzero,
-                                       mincrew=[2, 2, 2, 2, 1, 2])
+        rectime_pipe = self.calculate_recoverytime(WN_rec_atr, crew,
+                                                   prod_param,
+                                                   work_hour_day, tzero,
+                                                   mincrew)
 
         # Define outage for pipes
         pipes_original = list(pipe_PEDS.index)
@@ -220,7 +203,7 @@ class WaterNetworkRecovery:
                               end_time=duration_of_outage)
             else:
                 duration_of_outage = np.round(0.5 + 3 * np.random.beta(3, 9),
-                                              2) * 24  * 3600
+                                              2) * 24 * 3600
                 tank = wn.get_node(name)
                 break_area = 0.75 * np.pi * tank.diameter ** 2 / 4
                 tank.add_leak(wn, area=break_area, start_time=0.0,
@@ -235,57 +218,65 @@ class WaterNetworkRecovery:
                 else:
                     continue
 
-        # save water network model
-        if save_model == True:
-            with open('wnNday.pickle', 'wb') as f:
-                pickle.dump(wn, f)
+        with open(result_name + '_wnNday.pickle', 'wb') as f:
+            pickle.dump(wn, f)
+        recovery_wn = Dataset.from_file(result_name + '_wnNday.pickle', 'pickle')
+        self.set_output_dataset("recovery_water_network", recovery_wn)
 
-        # run simulation
-        sim = wntr.sim.WNTRSimulator(wn, mode='PDD')
+        # if there's additional allocation happens:
+        if demand_additional is not None and intrp_day is not None:
+            wn.options.time.duration = n_days * 24 * 3600
+            wn.options.time.hydraulic_timestep = 3600
+            wn.options.time.report_timestep = 3600
 
-        return sim.run_sim(), wn
-
-
-    def wn_rec_intrp_Nday(self, n_days=5, intrp_day=3, demand=None):
-
-        with open('wnNday.pickle', 'rb') as f:
-            wn = pickle.load(f)
-        wn.options.time.duration = n_days * 24 * 3600
-        wn.options.time.hydraulic_timestep = 3600
-        wn.options.time.report_timestep = 3600
-
-        ########
-        if demand is not None:
             time = intrp_day * 24 * 3600
-            timeflag = 'SIM_TIME'
-            dailyflag = False
             for i in wn.junction_name_list:
-                if str(i) in demand.keys():
+                if str(i) in demand_additional.keys():
                     junction = wn.get_node(i)
-                    cond = wntr.network.controls.SimTimeCondition(wn, '>', time)
+                    cond = wntr.network.controls.SimTimeCondition(wn, '>',
+                                                                  time)
                     act = wntr.network.controls.ControlAction(junction,
                                                               'demand',
-                                                              demand[str(i)])
-                    ctrl = wntr.network.controls.Control(cond, act, name='intrp_demand_control')
+                                                              demand_additional[
+                                                                  str(i)])
+                    ctrl = wntr.network.controls.Control(cond, act,
+                                                         name='intrp_demand_control')
                     wn.add_control('ctrl_' + str(i), ctrl)
                 else:
                     continue
 
+            with open(result_name + '_wnNday_add.pickle', 'wb') as f:
+                pickle.dump(wn, f)
+            recovery_wn_add = Dataset.from_file(result_name + '_wnNday_add.pickle', 'pickle')
+            self.set_output_dataset("recovery_water_network_add", recovery_wn_add)
+
         sim = wntr.sim.WNTRSimulator(wn, mode='PDD')
+        resultsNday = sim.run_sim()
+        resultsNday.node['pressure'].to_csv(result_name + '_water_node_pressure.csv')
+        pressure_dataset = Dataset.from_file(result_name + '_water_node_pressure.csv','csv')
+        self.set_output_dataset("pressure", pressure_dataset)
 
-        return sim.run_sim(), wn
+        return True
 
+    def set_recovery_attributes(self, pipe_PEDS, pipe_zone, work_hour_day,
+                                tzero, prod_param, crew):
+        """set the attributes and parameters of the WN recovery
 
-    def set_recovery_attributes(self,
-                                pipe_PEDS,
-                                pipe_zone_file,
-                                work_hour_day=16,
-                                tzero=4,
-                                prod_param = (20, 4),
-                                crew= [[6, 5, 7, 7, 1, 6],[4, 3, 4, 4, 1, 4],[4, 3, 4, 4, 1, 4]]):
+        Args:
+            pipe_PEDS: pipeline damage states
+            pipe_zone: zones and the pipes belong to each zone
+            work_hour_day: hours to work in a day
+            tzero: time to start
+            prod_param: productivity parameters
+            crew: crew memebers and team
+
+        Returns: wn attributes and recvoery parameters
+
+        """
+
         WN_rec_atr = pipe_PEDS['pipe_length'].to_frame('Length')
         WN_rec_atr.index = WN_rec_atr.index.map(str)
-        zone = pd.read_csv(pipe_zone_file)
+        zone = pd.DataFrame(list(pipe_zone))
         zdict = {}
 
         for i, pipe in enumerate(zone['OBJECTID']):
@@ -314,9 +305,21 @@ class WaterNetworkRecovery:
 
         return WN_rec_atr, rec_params
 
+    def calculate_recoverytime(self, WN_rec_atr, crew, prod_param,
+                               work_hour_day, tz, mincrew):
+        """calculate the recovery time
 
-    def calculate_recoverytime(self, WN_rec_atr, crew, prod_param, work_hour_day, tz=0,
-                         mincrew=[1, 1, 1, 1, 1, 1]):
+        Args:
+            WN_rec_atr: wn recovery attribues
+            crew: crew members and team
+            prod_param: productivity parameters
+            work_hour_day: work hour each day
+            tz: tzero time to start
+            mincrew: minimum crew requirement
+
+        Returns: recovery time
+
+        """
 
         # Schedule intial common activities
         DATA = []
@@ -406,49 +409,234 @@ class WaterNetworkRecovery:
 
         return WN_rec_atr['Rectime']
 
+    def get_spec(self):
+        return {
+            'name': 'water-network-recovery',
+            'description': 'water network recovery analysis',
+            'input_parameters': [
+                {
+                    'id': 'n_days',
+                    'required': True,
+                    'description': 'n days of recovery simulation',
+                    'type': int
+                },
+                {
+                    'id': 'result_name',
+                    'required': True,
+                    'description': 'base result dataset name',
+                    'type': str
+                },
+                {
+                    'id': 'seed',
+                    'required': True,
+                    'description': 'random seed number',
+                    'type': int
+                },
+                {
+                    'id': 'work_hour_day',
+                    'required': False,
+                    'description': 'how many hours a day that crew works on the WN',
+                    'type': int
+                },
+                {
+                    'id': 'tzero',
+                    'required': False,
+                    'description': 'starting hour',
+                    'type': int
+                },
+                {
+                    'id': 'prod_param',
+                    'required': False,
+                    'description': '',
+                    'type': tuple
+                },
+                {
+                    'id': 'crew',
+                    'required': False,
+                    'description': 'crew setting',
+                    'type': list
+                },
+                {
+                    'id': 'mincrew',
+                    'required': False,
+                    'description': 'minimum crew requirement',
+                    'type': list
+                },
+                {
+                    'id': 'intrp_day',
+                    'required': False,
+                    'description': 'the day to start additional dislocation',
+                    'type': int
+                }
+            ],
+            'input_datasets': [
+                {
+                    'id': 'wn_inp_file',
+                    'required': True,
+                    'description': 'EPAnet input file',
+                    'type': ['waterNetworkEpanetInp'],
+                },
+                {
+                    'id': 'demand_initial',
+                    'required': True,
+                    'description': 'intial demand for water netowrk',
+                    'type': ['json', 'waterNetworkDemand'],
+                },
+                {
+                    'id': 'pipe_dmg',
+                    'required': True,
+                    'description': 'pipeline damage probability',
+                    'type': ['csv', 'pipelineDamage'],
+                },
+                {
+                    'id': 'pump_dmg',
+                    'required': True,
+                    'description': 'pump damage probability',
+                    'type': ['csv', 'pumpDamage'],
+                },
+                {
+                    'id': 'tank_dmg',
+                    'required': True,
+                    'description': 'tank damage probability',
+                    'type': ['csv', 'tankDamage'],
+                },
+                {
+                    'id': 'demand',
+                    'required': True,
+                    'description': 'demand after dislocation',
+                    'type': ['json', 'waterNetworkDemand'],
+                },
+                {
+                    'id': 'pipe_zone',
+                    'required': True,
+                    'description': 'pipezone to decide repair order',
+                    'type': ['csv', 'pipeZoning'],
+                },
+                {
+                    'id': 'demand_additional',
+                    'required': False,
+                    'description': 'water network demand after additional dislocation',
+                    'type': ['json', 'waterNetworkDemand'],
+                },
+            ],
+            'output_datasets': [
+                {
+                    'id': 'pressure',
+                    'type': 'csv'
+                },
+                {
+                    'id': 'initial_water_network',
+                    'type': 'pickle'
+                },
+                {
+                    'id': 'recovery_water_network',
+                    'type': 'pickle'
+                },
+                {
+                    'id': 'recovery_water_network_add',
+                    'type': 'pickle'
+                }
+            ]
+        }
 
-    def output_water_network(self,resultsNday, wnNday, timestamp, plotly_options:dict):
-        pressure = resultsNday.node['pressure'].loc[timestamp, :]
-        pressure0 = WaterNetworkRecoveryUtil.pressure_plot(np.array(pressure))
-        pressure0 = pd.Series(pressure0, index=pressure.index)
+    """
+        def wn_impact1day(self, pipe_PEDS, pump_PEDS, tank_PEDS, demand=None, seed=67823):
+            '''
+            :param pipe_PEDS:
+            :param pump_PEDS:
+            :param tank_PEDS:
+            :param ratio:
+            :return:
+            '''
+            # load original water network
+            with open('wn.pickle', 'rb') as f:
+                wn = pickle.load(f)
 
-        if 'title' in plotly_options.keys():
-            title = plotly_options['title']
-        else:
-            title = None
+            for name, node in wn.junctions():
+                # water meter column: 0.704*psi
+                node.nominal_pressure = 0.704 * 15
+                node.minimum_pressure = 0.704 * 10
 
-        if 'node_size' in plotly_options.keys():
-            node_size = plotly_options['node_size']
-        else:
-            node_size = None
+            wn.options.time.duration = 24 * 3600
+            wn.options.time.hydraulic_timestep = 3600
+            wn.options.time.report_timestep = 3600
 
-        if 'node_cmap' in plotly_options.keys():
-            node_cmap = plotly_options['node_cmap']
-        else:
-            node_cmap = None
+            # get failing pumps
+            pump_DS = WaterNetworkRecoveryUtil.sample_damage_state(pump_PEDS, ['Complete','Extensive'])
+            pumps_to_fail = list(pump_DS[(pump_DS == 'Complete') | (pump_DS == 'Extensive')].index)
 
-        if 'link_width' in plotly_options.keys():
-            link_width = plotly_options['link_width']
-        else:
-            link_width = None
+            # get failing tanks
+            tank_DS = WaterNetworkRecoveryUtil.sample_damage_state(tank_PEDS, ['Complete','Extensive'])
+            tanks_to_fail = list(tank_DS[(tank_DS == 'Complete') | (tank_DS == 'Extensive')].index)
 
-        if 'filename' in plotly_options.keys():
-            filename = plotly_options['filename']
-        else:
-            filename = None
+            # get leaking pipes
+            np.random.seed(seed)
+            nleak_pipe = pd.Series(np.random.poisson(0.85 * np.array(pipe_PEDS['mean_repair_rate']).astype('float64')),
+                                   index=pipe_PEDS.index)
+            nbreak_pipe = pd.Series(np.random.poisson(0.15 * np.array(pipe_PEDS['mean_repair_rate']).astype('float64')),
+                                     index=pipe_PEDS.index)
 
-        if 'figsize' in plotly_options.keys():
-            figsize = plotly_options['figsize']
-        else:
-            figsize = None
+            # break the pipes in WNTR
+            pipes_original = list(pipe_PEDS.index)
+            for name in pipes_original:
+                if nbreak_pipe[name] > 0:
+                    pipe = wn.get_link(name)
+                    break_area = 3.14159 * (pipe.diameter / 2) ** 2
+                    wn.split_pipe(name, name + '_B', name + '_break_node')
+                    break_node = wn.get_node(name + '_break_node')
 
-        WaterNetworkRecoveryUtil.plot_interactive_network(
-            wnNday,
-            node_attribute=pressure0,
-            title=title,
-            node_size=node_size,
-            node_cmap=node_cmap,
-            link_width=link_width,
-            figsize=figsize,
-            filename=filename)
+                    # Select duration of damage
+                    duration_of_damage = 48 * 3600
+                    break_node.add_leak(wn, area=break_area, start_time=0,
+                                        end_time=duration_of_damage)
+
+                elif nleak_pipe[name] > 0:
+                    pipe = wn.get_link(name)
+                    leak_area = 0.03 * 3.14159 * (pipe.diameter / 2) ** 2
+                    wn.split_pipe(name, name + '_L', name + '_leak_node')
+                    leak_node = wn.get_node(name + '_leak_node')
+
+                    # Select duration of damage
+                    duration_of_damage = 48 * 3600
+                    leak_node.add_leak(wn, area=leak_area, start_time=0,
+                                       end_time=duration_of_damage)
+                else:
+                    continue
+
+            # Define outage for pumps
+            for name in pumps_to_fail:
+                duration_of_outage = 48 * 3600
+                pump = wn.get_link(name)
+                pump.add_outage(wn, 0, duration_of_outage)
+
+            # Define damage states for tanks
+            for name in tanks_to_fail:
+                if tank_DS[name] == 'Complete':
+                    duration_of_outage = 48 * 3600
+                    tank = wn.get_node(name)
+                    break_area = np.pi * tank.diameter ** 2 / 4
+                    tank.add_leak(wn, area=break_area, start_time=0.0,
+                                  end_time=duration_of_outage)
+                else:
+                    duration_of_outage = 48 * 3600
+                    tank = wn.get_node(name)
+                    break_area = 0.75 * np.pi * tank.diameter ** 2 / 4
+                    tank.add_leak(wn, area=break_area, start_time=0.0,
+                                  end_time=duration_of_outage)
+
+            # Change Demand
+            if demand is not None:
+                for i in wn.junction_name_list:
+                    junction = wn.get_node(i)
+                    if str(i) in demand.keys():
+                        junction.demand = demand[str(i)]
+                    else:
+                        continue
+
+
+            sim = wntr.sim.WNTRSimulator(wn, mode='PDD')
+
+            return sim.run_sim(), wn
+        """
+
 
