@@ -29,8 +29,12 @@ import scipy.stats
 from scipy.special import ndtri
 import matplotlib.pyplot as plt
 import concurrent.futures
+import datetime
+from timeit import default_timer as timer
 
-from BuildingData import BuildingData
+#from BuildingData import BuildingData
+from pyincore.analyses.buildingportfolio.recovery.BuildingData import BuildingData
+
 from pyincore import BaseAnalysis, AnalysisUtil
 
 
@@ -40,6 +44,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         super(BuildingPortfolioRecoveryAnalysis, self).__init__(incore_client)
 
+    #TODO: Review
     def calculate_delay_time(self, res_buildings, finance):
         """
         This function calculates the delay time given an initial functionality state and a financing resource
@@ -218,15 +223,16 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                            for i in range(len(building_damage_results))]
 
         # START: Calculate waiting time statistics using Monte Carlo Simulations
+        nsd = 5000 #TODO: Input?
         number_of_simulations = self.get_parameter("number_of_iterations")
         output_base_name = self.get_parameter("result_name")
-        sample_delay = np.zeros(number_of_simulations)
+        sample_delay = np.zeros(nsd)
         impeding_mean = np.zeros((5, 4))
         impeding_std = np.zeros((5, 4))
 
         for i in range(4):
             for j in range(5):
-                for k in range(number_of_simulations):
+                for k in range(nsd):
                     sample_delay[k] = self.calculate_delay_time(i, j)
                 impeding_mean[j, i] = np.mean(sample_delay)
                 impeding_std[j, i] = np.std(sample_delay)
@@ -234,7 +240,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # END: Calculate waiting time statistics using Monte Carlo Simulations
 
         # Recovery time step from week 1 to 300
-        time_steps = 300
+        time_steps = 250 #TODO: Move to input
         utility = np.ones((len(utility_initial), time_steps))
 
         # START initializing variables for uncertainty analysis
@@ -258,17 +264,20 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # Functionality Recovery (Best Line Functionality + Full functionality) for each building on the sample
         recovery_fp = np.zeros((sample_size, time_steps))
 
-        with concurrent.futures.ProcessPoolExecutor(max_workers=sample_size) as executor:
-            for response in executor.map(self.calculate_transition_probability_matrix(sample_size, time_steps, sample_buildings,
-                                                                                 repair_mean, occupancy_map, uncertainty,
-                                                                                 impeding_mean, impeding_std,
-                                                                                 building_damage, utility, utility2)):
-                temporary_correlation1 = response["temporary_correlation1"]
-                temporary_correlation2 = response["temporary_correlation2"]
-                mean_over_time = response["mean_over_time"]
-                variance_over_time = response["variance_over_time"]
-                recovery_fp = response["recovery_fp"]
-                mean_recovery = response["mean_recovery"]
+        # with concurrent.futures.ProcessPoolExecutor(max_workers=sample_size) as executor:
+        #     for response in executor.map(self.calculate_transition_probability_matrix(sample_size, time_steps, sample_buildings,
+        #                                                                          repair_mean, occupancy_map, uncertainty,
+        #                                                                          impeding_mean, impeding_std,
+        #                                                                          building_damage, utility, utility2)):
+        response = self.calculate_transition_probability_matrix(sample_size,
+            time_steps, sample_buildings, repair_mean, occupancy_map, uncertainty,
+            impeding_mean, impeding_std, building_damage, utility, utility2)
+        temporary_correlation1 = response["temporary_correlation1"]
+        temporary_correlation2 = response["temporary_correlation2"]
+        mean_over_time = response["mean_over_time"]
+        variance_over_time = response["variance_over_time"]
+        recovery_fp = response["recovery_fp"]
+        mean_recovery = response["mean_recovery"]
 
         # Trajectory for the Restricted entry, Restricted Use, Reoccupancy, Best Line Functionality, Full Functionality
         mean_recovery = mean_recovery/sample_size
@@ -277,7 +286,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         mean_recovery_output = sum(recovery_fp)/sample_size
 
         fig = plt.figure(1)
-        plt.plot(range(300), mean_recovery_output)
+        plt.plot(range(time_steps), mean_recovery_output)
         plt.xlabel('# of Weeks since event')
         plt.ylabel('Probability of Portfolio Recovery')
         plt.title('Building Portfolio Recovery Analysis')
@@ -303,10 +312,13 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             random_samples = sp.stats.norm.cdf(random_distribution)
             sample_total = np.zeros((sample_size, number_of_simulations))
 
-            with concurrent.futures.ProcessPoolExecutor(max_workers=number_of_simulations) as executor:
-                for response in executor.map(self.calculate_sample_total(number_of_simulations, sample_size, building_damage,
-                                                                    random_samples)):
-                    sample_total = response
+            # with concurrent.futures.ProcessPoolExecutor(max_workers=number_of_simulations) as executor:
+            #     for response in executor.map(self.calculate_sample_total(number_of_simulations, sample_size, building_damage,
+            #                                                         random_samples)):
+            #         sample_total = response
+
+            sample_total = self.calculate_sample_total(number_of_simulations, sample_size,
+                building_damage, random_samples)
 
             for k in range(sample_size):
                 for t in range(time_steps):
@@ -319,14 +331,18 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             avg_bulk_input_size = int(time_steps / num_workers)
             time_step_args = []
             count = 0
-            while count < time_steps:
-                time_step_args.append(range(count, count + avg_bulk_input_size))
-                count += avg_bulk_input_size
+            # while count < time_steps:
+            #     time_step_args.append(range(count, count + avg_bulk_input_size))
+            #     count += avg_bulk_input_size
 
-            total_standard_deviation = self.calculate_std_of_mean_concurrent_future(
-                    self.calculate_std_of_mean_bulk_input, num_workers,time_step_args, sample_size,
-                    number_of_simulations, variance_over_time, mean_over_time, temporary_correlation1,
-                    temporary_correlation2, sample_total)
+            # total_standard_deviation = self.calculate_std_of_mean_concurrent_future(
+            #         self.calculate_std_of_mean_bulk_input, num_workers,time_step_args, sample_size,
+            #         number_of_simulations, variance_over_time, mean_over_time, temporary_correlation1,
+            #         temporary_correlation2, sample_total)
+
+            total_standard_deviation = self.calculate_std_of_mean_bulk_input(range(time_steps), sample_size, number_of_simulations, variance_over_time,
+                                         mean_over_time, temporary_correlation1, temporary_correlation2, sample_total)
+
 
 
             # total_standard_deviation = math.sqrt(total_standard_deviation) / sample_size
@@ -363,13 +379,13 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
             # Calculate truncated normal distribution and 75% & 95% percentile band
             # 75% percentile upper bound
-            upper_bound75 = target_mean_recovery + 1.15 *total_standard_deviation
+            upper_bound75 = target_mean_recovery + [1.15 * i for i in total_standard_deviation]
             # 75% percentile lower bound
-            lower_bound75 = target_mean_recovery - 1.15 * total_standard_deviation
+            lower_bound75 = target_mean_recovery - [1.15 * i for i in total_standard_deviation]
             # 95% percentile upper bound
-            upper_bound95 = target_mean_recovery + 1.96 * total_standard_deviation
+            upper_bound95 = target_mean_recovery + [1.96 * i for i in total_standard_deviation]
             # 95% percentile lower bound
-            lower_bound95 = target_mean_recovery - 1.96 * total_standard_deviation
+            lower_bound95 = target_mean_recovery - [1.96 * i for i in total_standard_deviation]
 
             for t in range(time_steps):
                 coet = sp.stats.norm.cdf(0, target_mean_recovery[t], total_standard_deviation[t])
@@ -450,6 +466,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         variance_over_time = np.zeros((time_steps, sample_size))
         recovery_fp = np.zeros((sample_size, time_steps))
         mean_recovery = np.zeros((time_steps, 5))
+        #print("Calculating transition probability matrix for " )
         for k in range(sample_size):
             print("Calculating transition probability matrix for " + str(k))
             # The index for finance starts in 1 they are one off from the matrix
@@ -538,6 +555,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 "mean_over_time": mean_over_time, "variance_over_time": variance_over_time, "recovery_fp": recovery_fp,
                 "mean_recovery": mean_recovery}
 
+    #TODO: nS=10000 should be used line:301
     def calculate_sample_total(self, number_of_simulations, sample_size, building_damage, random_samples):
         sample_total = np.zeros((sample_size, number_of_simulations))
         for j in range(number_of_simulations):
@@ -584,9 +602,12 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         output = np.sum(variance_over_time[t])
 
         # Building i
+        #start = timer()
         for i in range(sample_size - 1):
+            #start = timer()
             # Building j
             for j in range(i + 1, sample_size):
+                #starti = timer()
                 expect1 = 0
                 # Joint probability of initial functionality state P(S0i=k, S0j=l)
                 joint_probability = self.joint_probability_calculation(sample_total[i], sample_total[j],
@@ -606,6 +627,10 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 if variance_over_time[t][i] > 0 and variance_over_time[t][j] > 0 and expect1 - expect2 > 0:
                     covariance = expect1 - expect2
                     output += 2 * covariance
+                #endi = timer()
+                #print("inner loop for ", j, ": ", endi - starti)
+            #end = timer()
+            #print("OUTER LOOP", end - start)
         return output
 
     def get_spec(self):
