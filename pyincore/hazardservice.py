@@ -26,8 +26,8 @@ class HazardService:
         return response
 
     def get_earthquake_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str, site_lat, site_long):
-        hazard_value_set = self.get_earthquake_hazard_values(hazard_id, demand_type, demand_units, points=[site_lat, site_long])
-
+        hazard_value_set = self.get_earthquake_hazard_values(hazard_id, demand_type, demand_units,
+            points=str(site_lat) + ',' + str(site_long))
         return hazard_value_set[0]['hazardValue']
 
     def get_earthquake_hazard_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
@@ -69,13 +69,24 @@ class HazardService:
         response = r.json()
         return response
 
-    def create_earthquake(self, config):
-        url = self.base_earthquake_url
+    def create_earthquake(self, eq_json, file_paths: List=[]):
+        """
+        Creates an Earthquake.
+        Args:
+            eq_json: JSON representing the earthquake.
+            file_paths: List of strings pointing to the paths of the datasets. Not needed for
+            model based earthquakes.
 
-        headers = {'Content-type': 'application/json'}
-        # merge two headers
-        new_headers = {**self.client.headers, **headers}
-        r = requests.post(url, data=config, headers=new_headers)
+        Returns: JSON of the created earthquake.
+
+        """
+        url = self.base_earthquake_url
+        eq_data = {('earthquake', eq_json)}
+
+        for file_path in file_paths:
+            eq_data.add(('file', open(file_path, 'rb')))
+
+        r = requests.post(url, files=eq_data, headers=self.client.headers)
         response = r.json()
         return response
 
@@ -87,17 +98,14 @@ class HazardService:
         return response
 
     def get_tornado_hazard_value(self, hazard_id: str, demand_units: str, site_lat, site_long, simulation=0):
-        url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/value")
-        payload = {'demandUnits': demand_units, 'siteLat': site_lat,
-                   'siteLong': site_long, 'simulation': simulation}
-        r = requests.get(url, headers=self.client.headers, params=payload)
-        response = r.json()
+        points = str(site_lat) + ',' + str(site_long)
 
-        return response['hazardValue']
+        hazard_value_set = self.get_tornado_hazard_values(hazard_id, demand_units, points, simulation)
+        return hazard_value_set[0]['hazardValue']
 
-    def get_tornado_hazard_values(self, hazard_id: str, demand_units: str, points: List):
+    def get_tornado_hazard_values(self, hazard_id: str, demand_units: str, points: List, simulation=0):
         url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/values")
-        payload = {'demandUnits': demand_units, 'point': points}
+        payload = {'demandUnits': demand_units, 'point': points, 'simulation': simulation}
         r = requests.get(url, headers=self.client.headers, params = payload)
         response = r.json()
 

@@ -6,9 +6,21 @@ To install the package, download the source code and then from the terminal run:
 
 `python setup.py install`
 
+# pyincore docs
+Pyincore documentation uses Sphinx as a bulding tool. In order to run Sphinx, you need to install 
+`sphinx` and `sphinx_rtd_theme` modules by using, for example `pip`:
+
+`pip install -U sphinx`
+
+`pip install -U sphinx_rtd_theme`
+
+From the **docs** folder run following commant to build the documentation:
+
+`sphinx-build -b html source build`
+
 # pyincore tests
 In order to run Tests, you need to create a file called, ".incorepw" under tests folder.
-The file needs to lines: user name in 1st line, password in 2nd line
+The file needs two lines: user name in 1st line, password in 2nd line
 
 
 # Notes

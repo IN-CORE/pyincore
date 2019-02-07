@@ -143,9 +143,9 @@ class PipelineDamage:
                 pgd_demand_units = fragility_set_liq['demandUnits']
 
                 # Get PGD hazard value from hazard service
-                location_str = str(location.y) + "," + str(location.x)
+                point = str(location.y) + "," + str(location.x)
                 liquefaction = hazardsvc.get_liquefaction_values(hazard_dataset_id, geology_dataset_id, pgd_demand_units
-                                                                 , [location_str])
+                                                                 , [point])
                 liq_hazard_val = liquefaction[0]['pgd']
                 liquefaction_prob = liquefaction[0]['liqProbability']
 

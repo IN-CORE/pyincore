@@ -15,11 +15,12 @@ from itertools import repeat
 
 
 class NonStructBuildingDamage(BaseAnalysis):
+    """Computes non-structural structural building damage for a hazard.
+
+    Args:
+        incore_client (IncoreClient): Service authentication.
 
     """
-    Computes building non-structural damage for an earthquake hazard
-    """
-
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
@@ -27,11 +28,8 @@ class NonStructBuildingDamage(BaseAnalysis):
         super(NonStructBuildingDamage, self).__init__(incore_client)
 
     def run(self):
-        """
-        Executes building damage analysis
-        """
-
-        # Bridge dataset
+        """Executes building damage analysis."""
+        # Building dataset
         building_set = self.get_input_dataset("buildings").get_inventory_reader()
 
         # Damage Ratio
@@ -92,15 +90,15 @@ class NonStructBuildingDamage(BaseAnalysis):
         return True
 
     def building_damage_concurrent_future(self, function_name, num_workers, *args):
-        """
-        Utilizes concurrent.future module
+        """Utilizes concurrent.future module.
 
         Args:
-            function_name: the function to be parallelized
-            num_workers: number of max workers in parallelization
-            *args: all the arguments in order to pass into parameter function_name
+            function_name (function): The function to be parallelized.
+            num_workers (int): Maximum number workers in parallelization.
+            *args: All the arguments in order to pass into parameter function_name.
 
-        Returns: list of OrderedDict
+        Returns:
+            list: A list of ordered dictionaries with building damage values and other data/metadata.
 
         """
         output = []
@@ -112,15 +110,16 @@ class NonStructBuildingDamage(BaseAnalysis):
 
     def building_damage_analysis_bulk_input(self, buildings, dmg_ratio_tbl_as,
                                             dmg_ratio_tbl_ds, dmg_ratio_tbl_content):
-        """
-        Run analysis for multiple buildings
-        Args:
-            buildings: multiple buildings from input inventory set
-            dmg_ratio_tbl_as: Acceleration-Sensitive damage ratios table
-            dmg_ratio_tbl_ds: Drift-Sensitive damage ratio table
-            dmg_ratio_tbl_content: Content damage ratio table
+        """Run analysis for multiple buildings.
 
-        Returns: a list of OrderedDict
+        Args:
+            buildings (list): Multiple buildings from input inventory set.
+            dmg_ratio_tbl_as (obj): A table of acceleration-sensitive (AS) damage ratios for mean damage.
+            dmg_ratio_tbl_ds (obj): A table of drift-sensitive (DS) damage ratios for mean damage.
+            dmg_ratio_tbl_content (obj): A table of content damage ratios for mean damage.
+
+        Returns:
+            list: A list of ordered dictionaries with building damage values and other data/metadata.
 
         """
         result = []
@@ -151,17 +150,20 @@ class NonStructBuildingDamage(BaseAnalysis):
 
     def building_damage_analysis(self, building, fragility_set_as, fragility_set_ds,
                                  dmg_ratio_tbl_as, dmg_ratio_tbl_ds, dmg_ratio_tbl_content):
-        """
-        Calculates building damage results for a single building.
-        Args:
-            building:
-            fragility_set_as: AS fragility assigned to the building
-            fragility_set_ds: DS fragility assigned to the building
-            dmg_ratio_tbl_as: AS table of damage ratios for mean damage
-            dmg_ratio_tbl_ds: DS table of damage ratios for mean damage
-            dmg_ratio_tbl_content: Content table of damage ratios for mean damage
+        """Calculates bridge damage results for a single building.
 
-        Returns: an ordered dictionary with building damage and other data/metadata
+        Args:
+            building (obj): A JSON-mapping of a geometric object from the inventory: current building.
+            fragility_set_as (obj): A JSON description of acceleration-sensitive (AS) fragility
+                assigned to the building.
+            fragility_set_ds (obj): A JSON description of drift-sensitive (DS) fragility
+                assigned to the building.
+            dmg_ratio_tbl_as (obj): A table of acceleration-sensitive (AS) damage ratios for mean damage.
+            dmg_ratio_tbl_ds (obj): A table of drift-sensitive (DS) damage ratios for mean damage.
+            dmg_ratio_tbl_content (obj): A table of content damage ratios for mean damage.
+
+        Returns:
+            OrderedDict: A dictionary with building damage values and other data/metadata.
 
         """
         building_results = collections.OrderedDict()
@@ -186,14 +188,12 @@ class NonStructBuildingDamage(BaseAnalysis):
             demand_units_as = fragility_set_as['demandUnits']
             location = GeoUtil.get_location(building)
 
-            # TODO: the point parameter hasn't been updated this way yet
-            # hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
-            #     hazard_dataset_id, hazard_demand_type_as,
-            #     demand_units_as, points=[str(location.y) + ',' + str(location.x)])
+            point = str(location.y) + "," + str(location.x)
+
             hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_dataset_id, hazard_demand_type_as,
                 demand_units_as,
-                points=[location.y, location.x])[0]['hazardValue']
+                points=[point])[0]['hazardValue']
 
             dmg_probability_as = AnalysisUtil.calculate_damage_json(fragility_set_as,
                                                                  hazard_val_as)
@@ -203,7 +203,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     liqufaction_dmg = self.hazardsvc.get_liquefaction_values(
                         hazard_dataset_id, liq_geology_dataset_id,
                         'in',
-                        points=[str(location.y) + ',' + str(location.x)])[0][
+                        points=[point])[0][
                         'groundFailureProb']
                 else:
                     raise ValueError('Hazard does not support liquefaction! \
@@ -237,13 +237,11 @@ class NonStructBuildingDamage(BaseAnalysis):
             demand_units_ds = fragility_set_ds['demandUnits']
             location = GeoUtil.get_location(building)
 
-            # TODO: the point parameter hasn't been updated this way yet
-            # hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
-            #     hazard_dataset_id, hazard_demand_type_as,
-            #     demand_units_as, points=[str(location.y) + ',' + str(location.x)])
+            point = str(location.y) + "," + str(location.x)
+
             hazard_val_ds = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_dataset_id, hazard_demand_type_ds,
-                demand_units_ds, points=[location.y, location.x])[0]['hazardValue']
+                demand_units_ds, points=[point])[0]['hazardValue']
 
             dmg_probability_ds = AnalysisUtil.calculate_damage_json(fragility_set_ds,
                                                                  hazard_val_ds)
@@ -254,7 +252,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     liqufaction_dmg = self.hazardsvc.get_liquefaction_values(
                         hazard_dataset_id, liq_geology_dataset_id,
                         'in',
-                        points=[str(location.y) + ',' + str(location.x)])[0][
+                        points=[point])[0][
                         'groundFailureProb']
                 else:
                     raise ValueError('Hazard does not support liquefaction! \
@@ -322,6 +320,12 @@ class NonStructBuildingDamage(BaseAnalysis):
         return building_results
 
     def get_spec(self):
+        """Get specifications of the building damage analysis.
+
+        Returns:
+            obj: A JSON object of specifications of the building damage analysis.
+
+        """
         return {
             'name': 'building-damage',
             'description': 'building damage analysis',
@@ -419,6 +423,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'buildings',
+                    'description': 'CSV file of building non-structural damage',
                     'type': 'building-damage'
                 }
             ]

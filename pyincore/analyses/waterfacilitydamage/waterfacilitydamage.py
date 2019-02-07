@@ -7,74 +7,171 @@ Water Facility Damage
 import collections
 
 from itertools import repeat
-from pyincore import HazardService, FragilityService, GeoUtil, AnalysisUtil
-import csv
+from pyincore import BaseAnalysis, HazardService, FragilityService, GeoUtil, AnalysisUtil
 import concurrent.futures
 import random
 
 
-class WaterFacilityDamage:
-    def __init__(self, client):
+class WaterFacilityDamage(BaseAnalysis):
+    """Computes water facility damage for an earthquake exposure
+
+    """
+
+    DEFAULT_FRAGILITY_KEY = "pga"
+    DEFAULT_LIQ_FRAGILITY_KEY = "pgd"
+
+    def __init__(self, incore_client):
         #Create Hazard and Fragility service
-        self.hazardsvc = HazardService(client)
-        self.fragilitysvc = FragilityService(client)
+        self.hazardsvc = HazardService(incore_client)
+        self.fragilitysvc = FragilityService(incore_client)
 
-    @staticmethod
-    def get_output_metadata():
-        output = dict()
-        output["dataType"] = "ergo:waterFacilityDamage"
-        output["format"] = "table"
+        super(WaterFacilityDamage, self).__init__(incore_client)
 
-        return output
+    def get_spec(self):
+        return {
+            'name': 'water-facility-damage',
+            'description': 'water facility damage analysis',
+            'input_parameters': [
+                {
+                    'id': 'result_name',
+                    'required': False,
+                    'description': 'result dataset name',
+                    'type': str
+                },
+                {
+                    'id': 'mapping_id',
+                    'required': True,
+                    'description': 'Fragility mapping dataset',
+                    'type': str
+                },
+                {
+                    'id': 'hazard_type',
+                    'required': True,
+                    'description': 'Hazard Type (e.g. earthquake)',
+                    'type': str
+                },
+                {
+                    'id': 'hazard_id',
+                    'required': True,
+                    'description': 'Hazard ID',
+                    'type': str
+                },
+                {
+                    'id': 'fragility_key',
+                    'required': False,
+                    'description': 'Fragility key to use in mapping dataset',
+                    'type': str
+                },
+                {
+                    'id': 'use_liquefaction',
+                    'required': False,
+                    'description': 'Use liquefaction',
+                    'type': bool
+                },
 
-    def get_damage(self, inventory_set:dict, mapping_id: str, hazard_input: str, liq_geology_dataset_id: str=None,
-                   uncertainty:bool=False, num_threads: int=0):
+                {
+                    'id': 'liquefaction_geology_dataset_id',
+                    'required': False,
+                    'description': 'Liquefaction geology/susceptibility dataset id. '
+                                   'If not provided, liquefaction will be ignored',
+                    'type': str
+                },
+                {
+                    'id': 'liquefaction_fragility_key',
+                    'required': False,
+                    'description': 'Fragility key to use in liquefaction mapping dataset',
+                    'type': str
+                },
+                {
+                    'id': 'use_hazard_uncertainty',
+                    'required': False,
+                    'description': 'Use hazard uncertainty',
+                    'type': bool
+                },
+                {
+                    'id': 'num_cpu',
+                    'required': False,
+                    'description': 'If using parallel execution, the number of cpus to request',
+                    'type': int
+                },
+            ],
+            'input_datasets': [
+                {
+                    'id': 'water_facilities',
+                    'required': True,
+                    'description': 'Water Facility Inventory',
+                    'type': ['ergo:waterFacilityTopo'],
+                },
+            ],
+            'output_datasets': [
+                {
+                    'id': 'result',
+                    'parent_type': 'water_facilities',
+                    'description': 'A csv file with limit state probabilities and damage states '
+                                   'for each water facility',
+                    'type': 'ergo:waterFacilityDamageVer4'
+                }
+            ]
+        }
+
+    def run(self):
+        """Performs Water facility damage analysis by using the parameters from the spec
+        and creates an output dataset in csv format
+
+        Returns:
+            bool: True if successful, False otherwise
         """
-
-        :param inventory_set:
-        :param mapping_id:
-        :param hazard_input:
-        :param liq_geology_dataset_id:
-        :param uncertainty:
-        :param num_threads:
-        :return:
-        """
-
-        hazard_input_split = hazard_input.split("/")
-        hazard_type = hazard_input_split[0]
-        hazard_dataset_id = hazard_input_split[1]
+        # Facility dataset
+        inventory_set = self.get_input_dataset("water_facilities").get_inventory_reader()
 
 
-        parallel_threads = AnalysisUtil.determine_parallelism_locally(self,
-                                    len(inventory_set), num_threads)
 
-        features_per_thread = int(len(inventory_set) / parallel_threads)
+        # Get hazard input
+        hazard_dataset_id = self.get_parameter("hazard_id")
+
+        # Hazard type of the exposure
+        hazard_type = self.get_parameter("hazard_type")
+
+        user_defined_cpu = 1
+
+        if not self.get_parameter("num_cpu") is None and self.get_parameter(
+                "num_cpu") > 0:
+            user_defined_cpu = self.get_parameter("num_cpu")
+
+        num_workers = AnalysisUtil.determine_parallelism_locally(self,
+            len(inventory_set), user_defined_cpu)
+
+        avg_bulk_input_size = int(len(inventory_set) / num_workers)
         inventory_args = []
         count = 0
         inventory_list = list(inventory_set)
-
         while count < len(inventory_list):
             inventory_args.append(
-                inventory_list[count:count + features_per_thread])
-            count += features_per_thread
+                inventory_list[count:count + avg_bulk_input_size])
+            count += avg_bulk_input_size
 
-        if(num_threads > 1):
-            output = self.waterfacility_damage_concurrent_execution(
-                self.waterfacilityset_damage_analysis, parallel_threads,
-                inventory_args, repeat(mapping_id), repeat(self.hazardsvc),
-                repeat(hazard_dataset_id), repeat(liq_geology_dataset_id), repeat(uncertainty))
-        else:
-            output = self.waterfacilityset_damage_analysis( inventory_args[0], mapping_id,
-                self.hazardsvc, hazard_dataset_id,
-                liq_geology_dataset_id, uncertainty);
+        results = self.waterfacility_damage_concurrent_execution(
+            self.waterfacilityset_damage_analysis, num_workers,
+            inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
 
+        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
-        out_file_name = "dmg-results.csv"
+        return True
 
-        return self.write_output(out_file_name, output)
 
     def waterfacility_damage_concurrent_execution(self, function_name, parallel_processes,
                                           *args):
+        """Utilizes concurrent.future module.
+
+            Args:
+                function_name (function): The function to be parallelized.
+                parallelism (int): Number of workers in parallelization.
+                *args: All the arguments in order to pass into parameter function_name.
+
+            Returns:
+                list: A list of ordered dictionaries with damage results and other data/metadata.
+
+        """
         output = []
         with concurrent.futures.ProcessPoolExecutor(
                 max_workers=parallel_processes) as executor:
@@ -83,28 +180,64 @@ class WaterFacilityDamage:
 
         return output
 
-    def waterfacilityset_damage_analysis(self, facilities, mapping_id,
-                                         hazardsvc, hazard_dataset_id,
-                                         liq_geology_dataset_id, uncertainty):
+
+    def waterfacilityset_damage_analysis(self, facilities, hazard_type, hazard_dataset_id):
+        """Gets applicable fragilities and calculates damage
+
+        Args:
+            facilities(list): Multiple water facilities from input inventory set.
+            hazard_type(str): A hazard type of the hazard exposure.
+            hazard_dataset_id (str): An id of the hazard exposure.
+
+        Returns:
+             list: A list of ordered dictionaries with water facility damage values and metadata.
+        """
         result = []
         liq_fragility = None
+        mapping_id = self.get_parameter("mapping_id")
+        use_liquefaction = self.get_parameter("use_liquefaction")
+        liq_geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
+        uncertainty = self.get_parameter("use_hazard_uncertainty")
 
-        pga_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, "pga")
+        fragility_key = self.get_parameter("fragility_key")
 
-        if liq_geology_dataset_id is not None:
-            liq_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, "pgd")
+        if hazard_type == 'earthquake':
+            if fragility_key is None:
+                fragility_key = self.DEFAULT_FRAGILITY_KEY
 
-        for facility in facilities:
-            fragility = pga_fragility_set[facility["id"]]
-            if liq_geology_dataset_id is not None and facility["id"] in liq_fragility_set:
-                liq_fragility = liq_fragility_set[facility["id"]]
+            pga_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, fragility_key)
 
-            result.append(self.waterfacility_damage_analysis(facility, fragility, liq_fragility,hazardsvc,
-                                hazard_dataset_id, liq_geology_dataset_id, uncertainty))
+            liq_fragility_set = []
+            if use_liquefaction and liq_geology_dataset_id is not None:
+                liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
+                if liq_fragility_key is None:
+                    liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
+                liq_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, liq_fragility_key)
+
+            for facility in facilities:
+                fragility = pga_fragility_set[facility["id"]]
+                if facility["id"] in liq_fragility_set:
+                    liq_fragility = liq_fragility_set[facility["id"]]
+
+                result.append(self.waterfacility_damage_analysis(facility, fragility, liq_fragility,
+                                    hazard_dataset_id, liq_geology_dataset_id, uncertainty))
         return result
 
-    def waterfacility_damage_analysis(self, facility, fragility, liq_fragility, hazardsvc, hazard_dataset_id,
+    def waterfacility_damage_analysis(self, facility, fragility, liq_fragility, hazard_dataset_id,
                                       liq_geology_dataset_id, uncertainty):
+        """Computes damage analysis for a single facility
+
+        Args:
+            facility(obj): A JSON mapping of a facility based on mapping attributes
+            fragility(obj): A JSON description of fragility mapped to the building.
+            liq_fragility(obj): A JSON description of liquefaction fragility mapped to the building.
+            hazard_dataset_id(str): Hazard id from the hazard service
+            liq_geology_dataset_id(str): Geology dataset id from data service to use for liquefaction calculation, if applicable
+            uncertainty(bool): Whether to use hazard standard deviation values for uncertainity
+
+        Returns:
+            OrderedDict: A dictionary with water facility damage values and other data/metadata.
+        """
         std_dev = 0
         #TODO Get this from API once implemented
         if uncertainty:
@@ -118,8 +251,12 @@ class WaterFacilityDamage:
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
         location = GeoUtil.get_location(facility)
-        hazard_val_set = hazardsvc.get_earthquake_hazard_values(hazard_dataset_id,hazard_demand_type,
-                                                            demand_units, points=[location.y, location.x])
+
+        point = str(location.y) + "," + str(location.x)
+
+        hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id,hazard_demand_type,
+                                                                     demand_units, [point])
+
         hazard_val = hazard_val_set[0]['hazardValue']
 
         limit_states = AnalysisUtil.compute_limit_state_probability(fragility['fragilityCurves'],
@@ -130,10 +267,10 @@ class WaterFacilityDamage:
         if liq_fragility is not None and liq_geology_dataset_id:
             liq_hazard_type = liq_fragility['demandType']
             pgd_demand_units = liq_fragility['demandUnits']
-            location_str = str(location.y) + "," + str(location.x)
+            point = str(location.y) + "," + str(location.x)
 
-            liquefaction = hazardsvc.get_liquefaction_values(hazard_dataset_id, liq_geology_dataset_id,
-                                                            pgd_demand_units, [location_str])
+            liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, liq_geology_dataset_id,
+                                                            pgd_demand_units, [point])
             liq_hazard_val = liquefaction[0][liq_hazard_type]
             liquefaction_prob = liquefaction[0]['liqProbability']
             pgd_limit_states = AnalysisUtil.compute_limit_state_probability(liq_fragility['fragilityCurves'],
@@ -160,23 +297,4 @@ class WaterFacilityDamage:
 
         result = {**metadata, **result}
         return result
-
-
-    def write_output(self, out_file, output):
-        with open(out_file, 'w') as csv_file:
-            writer = csv.DictWriter(csv_file, dialect="unix",
-                fieldnames=['guid', 'hazardtype','demandtype', 'hazardval',
-                            'liqhaztype', 'liqhazval', 'liqprobability',
-                            'ls_slight', 'ls_moderate', 'ls_extensive', 'ls_complete',
-                            'none', 'slight-mod', 'mod-extens', 'ext-comple', 'complete'
-                            ])
-
-            writer.writeheader()
-            writer.writerows(output)
-
-        return out_file
-
-
-
-
 
