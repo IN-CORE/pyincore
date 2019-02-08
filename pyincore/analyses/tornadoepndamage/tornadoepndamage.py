@@ -441,6 +441,7 @@ class TornadoEpnDamage(BaseAnalysis):
         ef_rate_list = []
 
         for ef_poly in tornado_dataset:
+            ef_string = ''
             try:
                 sim_num_list.append(int(ef_poly['properties'][self.tornado_sim_field_name.lower()]))
             except:
@@ -558,4 +559,23 @@ class TornadoEpnDamage(BaseAnalysis):
                 }
             ]
         }
+
+if __name__ == "__main__":
+    tornado_id = '5b2173a9b1cf3e336db2f1d8'
+    tornado_dataset_id = '5b2173a0b1cf3e336d7d11b0'
+    epn_node_id = '5b1fdb50b1cf3e336d7cecb1'
+    epn_link_id = '5b1fdc2db1cf3e336d7cecc9'
+    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "ywkim")
+
+    ted = TornadoEpnDamage(client)
+    # tornado_file_id = self.datasetsvc.get_tornado_dataset_id_from_service(tornado_dataset_id, self.client)
+    ted.load_remote_input_dataset("epn_node", epn_node_id)
+    ted.load_remote_input_dataset("epn_link", epn_link_id)
+    ted.load_remote_input_dataset("tornado", tornado_dataset_id)
+
+    result_name = "eq_bldg_dmg_result"
+    ted.set_parameter("result_name", result_name)
+    ted.set_parameter('tornado_id', tornado_id)
+
+    ted.run_analysis()
 
