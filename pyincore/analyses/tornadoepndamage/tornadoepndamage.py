@@ -85,13 +85,13 @@ class TornadoEpnDamage(BaseAnalysis):
 
         tornado_id = self.get_parameter('tornado_id')
 
-        results = self.get_damage(node_dataset, link_dataset, tornado_dataset)
+        results = self.get_damage(node_dataset, link_dataset, tornado_dataset, tornado_id)
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
         return True
 
-    def get_damage(self, node_dataset, link_dataset, tornado_dataset):
+    def get_damage(self, node_dataset, link_dataset, tornado_dataset, tornado_id):
         """
         :param node_dataset:
         :param link_dataset:
