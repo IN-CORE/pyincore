@@ -83,7 +83,7 @@ class TornadoEpnDamage(BaseAnalysis):
         link_dataset = self.get_input_dataset("epn_link").get_inventory_reader()
         tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
 
-        # tornado_id = self.get_parameter('tornado_id')
+        tornado_id = self.get_parameter('tornado_id')
 
         results = self.get_damage(node_dataset, link_dataset, tornado_dataset)
 
@@ -459,7 +459,6 @@ class TornadoEpnDamage(BaseAnalysis):
             except:
                 pass
             # parse the number in EF and the format should be "EF0", "EF1", or something like it
-            print("ef: " + ef_string)
             ef_rate_list.append(int(ef_string.lower().split("ef", 1)[1]))
 
         if (len(sim_num_list) == 0 or len(ef_string) == 0):
