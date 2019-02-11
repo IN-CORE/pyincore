@@ -24,7 +24,7 @@ Mac
 repository.
 2. We recommend using virtual environments, `virtualenv` for python 3.5+. for managing Python environments.  
     
-    `virtualenv --python=python3.6 farmdoc`
+    `virtualenv --python=python3.6 pyincore`
     `source venv/bin/activate`
 
 3. From the terminal at the project folder run:
