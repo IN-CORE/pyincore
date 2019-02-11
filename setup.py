@@ -18,7 +18,7 @@ setup(
                       "Resilience Modeling Environment) initiative. "
                       "Pyincore allows users to apply hazards on infrastructure in selected areas. "
                       "Python framework acceses underlying data through local or remote services "
-                      "and facilitiates moving and synthesizing results."),
+                      "and facilitates moving and synthesizing results."),
     install_requires=[
         "fiona>=1.8.4",
         "folium>=0.7.0",
