@@ -221,13 +221,10 @@ class NonStructBuildingDamage(BaseAnalysis):
             dmg_probability_as['lifesfty'] = 0.0
             dmg_probability_as['collprev'] = 0.0
 
-        dmg_weights_as = NonStructBuildingUtil.get_dmg_weights(dmg_ratio_tbl_as)
-        dmg_weights_std_dev_as = NonStructBuildingUtil.get_dmg_weights_std_dev(dmg_ratio_tbl_as)
-
         dmg_interval_as = AnalysisUtil.calculate_damage_interval(dmg_probability_as)
-        mean_damage_as = AnalysisUtil.calculate_mean_damage(dmg_weights_as, dmg_interval_as)
+        mean_damage_as = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl_as, dmg_interval_as)
         mean_damage_dev_as = AnalysisUtil.calculate_mean_damage_std_deviation(
-            dmg_weights_as, dmg_weights_std_dev_as,dmg_interval_as, mean_damage_as['meandamage'])
+            dmg_ratio_tbl_as,dmg_interval_as, mean_damage_as['meandamage'])
 
         # Drift-Sensitive Fragility ID Code
         if fragility_set_ds is not None:
@@ -271,21 +268,15 @@ class NonStructBuildingDamage(BaseAnalysis):
             dmg_probability_ds['lifesfty'] = 0.0
             dmg_probability_ds['collprev'] = 0.0
 
-        dmg_weights_ds = NonStructBuildingUtil.get_dmg_weights(dmg_ratio_tbl_ds)
-        dmg_weights_std_dev_ds = NonStructBuildingUtil.get_dmg_weights_std_dev(dmg_ratio_tbl_ds)
-
         dmg_interval_ds = AnalysisUtil.calculate_damage_interval(dmg_probability_ds)
-        mean_damage_ds = AnalysisUtil.calculate_mean_damage(dmg_weights_ds, dmg_interval_ds)
+        mean_damage_ds = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl_ds, dmg_interval_ds)
         mean_damage_dev_ds = AnalysisUtil.calculate_mean_damage_std_deviation(
-            dmg_weights_ds, dmg_weights_std_dev_ds,dmg_interval_ds, mean_damage_ds['meandamage'])
+            dmg_ratio_tbl_ds,dmg_interval_ds, mean_damage_ds['meandamage'])
 
         # Content
-        dmg_weights_content = NonStructBuildingUtil.get_dmg_weights(dmg_ratio_tbl_content)
-        dmg_weights_std_dev_content = NonStructBuildingUtil.get_dmg_weights_std_dev(dmg_ratio_tbl_content)
-
-        mean_damage_contents = AnalysisUtil.calculate_mean_damage(dmg_weights_content, dmg_interval_as)
+        mean_damage_contents = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl_content, dmg_interval_as)
         mean_damage_dev_contents = AnalysisUtil.calculate_mean_damage_std_deviation(
-            dmg_weights_content, dmg_weights_std_dev_content, dmg_interval_as, mean_damage_contents['meandamage'])
+            dmg_ratio_tbl_content, dmg_interval_as, mean_damage_contents['meandamage'])
 
         # put results in dictionary
         building_results['guid'] = building['properties']['guid']
@@ -428,4 +419,3 @@ class NonStructBuildingDamage(BaseAnalysis):
                 }
             ]
         }
-
