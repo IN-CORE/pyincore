@@ -24,7 +24,6 @@ class TornadoEpnDamage(BaseAnalysis):
         self.fragility_tower_id = '5b201b41b1cf3e336de8fa67'
         self.fragility_pole_id = '5b201d91b1cf3e336de8fa68'
         self.fragility_mapping_id = '5b2bddcbd56d215b9b7471d8'
-        self.client = incore_client
 
         self.use_indpnode = False  # this is for deciding to use indpnode field. Not using this could be safer for general dataset
         self.nnode = 0
