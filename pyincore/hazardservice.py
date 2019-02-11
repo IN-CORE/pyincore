@@ -18,6 +18,13 @@ class HazardService:
         self.base_tsunami_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tsunamis/')
         self.base_hurricanewf_url = urllib.parse.urljoin(client.service_url, 'hazard/api/hurricaneWindfields/')
 
+    def get_earthquake_hazard_metadata_list(self):
+        url = urllib.parse.urljoin(self.base_earthquake_url)
+        r = requests.get(url, headers=self.client.headers)
+        response = r.json()
+
+        return response
+
     def get_earthquake_hazard_metadata(self, hazard_id:str):
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id)
         r = requests.get(url, headers=self.client.headers)
@@ -67,6 +74,25 @@ class HazardService:
         payload = {'demandUnits': demand_units, 'geologyDataset': geology_dataset_id, 'point': points}
         r = requests.get(url, headers=self.client.headers, params=payload)
         response = r.json()
+        return response
+
+    def get_soil_amplification_value(self, method:str, dataset_id:str, site_lat:float, site_long:float,
+                                      demand_type: str, hazard:float, default_site_class:str):
+        url = urllib.parse.urljoin(self.base_earthquake_url, 'soil/amplification')
+        payload = { "method": method, "datasetId": dataset_id, "siteLat": site_lat, "siteLong": site_long,
+                    "demandType": demand_type, "hazard": hazard, "defaultSiteClass": default_site_class }
+        r = requests.get(url, headers=self.client.headers, params=payload)
+        response = r.json()
+        return response
+
+    # TODO get_slope_amplification_value needed to be implemented on the server side
+    # def get_slope_amplification_value(self)
+
+    def get_supported_earthquake_models(self):
+        url = urllib.parse.urljoin(self.base_earthquake_url, 'models')
+        r = requests.get(url, headers=self.client.headers)
+        response = r.json()
+
         return response
 
     def create_earthquake(self, eq_json, file_paths: List=[]):
@@ -142,6 +168,14 @@ class HazardService:
         new_headers = {**self.client.headers, **headers}
         r = requests.post(url, data=hurr_wf_inputs, headers=new_headers)
         response = r.json()
+
+        return response
+
+    def get_hurricanewf_metadata_list(self):
+        url = urllib.parse.urljoin(self.base_hurricanewf_url)
+        r = requests.get(url, headers=self.client.headers)
+        response = r.json()
+
         return response
 
     def get_hurricanewf_metadata(self, hazard_id):

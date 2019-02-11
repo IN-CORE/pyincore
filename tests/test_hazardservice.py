@@ -18,6 +18,15 @@ def hazardsvc():
 
     return HazardService(client)
 
+def test_get_earthquake_hazard_metadata_list(hazardsvc):
+    '''
+    test get /earthquakes endpoint
+    '''
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    response = hazardsvc.get_earthquake_hazard_metadata_list()
+    assert len(response) > 0
+
 def test_get_earthquake_hazard_metadata(hazardsvc):
     """
     Testing get earthquake/{id}
@@ -36,7 +45,6 @@ def test_get_earthquake_hazard_value(hazardsvc):
     hval = hazardsvc.get_earthquake_hazard_value("5b902cb273c3371e1236b36b", "0.2 SA", "g", 35.07899,-90.0178)
     assert hval == 0.5322993805448739
 
-
 def test_get_earthquake_hazard_values(hazardsvc):
     """
     Testing getting multiple hazard values
@@ -47,12 +55,34 @@ def test_get_earthquake_hazard_values(hazardsvc):
                                                    ["35.07899,-90.0178", "35.17899,-90.0178"])
     assert hvals[0]['hazardValue'] == 0.5322993805448739 and hvals[1]['hazardValue'] == 0.5926201634382787
 
+# TODO
+# def test_get_earthquake_hazard_value_set
+
 def test_get_liquefaction_values(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
     liq_vals = hazardsvc.get_liquefaction_values("5b902cb273c3371e1236b36b","5a284f53c7d30d13bc08249c", "in",
                                 ["35.18,-90.076", "35.19,-90.0178"])
     assert liq_vals[0]['pgd'] == 94.28155130685825 and liq_vals[1]['pgd'] == 103.2176731165868
+
+def test_get_soil_amplification_value(hazardsvc):
+    """
+    test /earthquakes/soil/amplification endpoint
+    """
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    soil_amplification_value = hazardsvc.get_soil_amplification_value("NEHRP", "5a284f20c7d30d13bc081aa6",
+                                                                      32.3547, -89.3985, "pga", 0.2, "A")
+    assert soil_amplification_value == 0.8
+
+def test_get_supported_earthquake_models(hazardsvc):
+    """
+    test /earthquakes/models endpoint
+    """
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    models = hazardsvc.get_supported_earthquake_models()
+    assert models == [ "AtkinsonBoore1995", "ChiouYoungs2014"]
 
 def test_create_earthquake(hazardsvc):
     """
@@ -98,14 +128,12 @@ def test_create_tornado_scenario(hazardsvc):
     response = hazardsvc.create_tornado_scenario(scenario)
     assert response["id"] is not None
 
-
 def test_get_tornado_hazard_value(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
 
     hval = hazardsvc.get_tornado_hazard_value("5ad0f35eec230965e6d98d0c", "mph", 35.228, -97.478, 0)
     assert ((hval > 85) and (hval <  165))
-
 
 def test_get_tornado_hazard_values(hazardsvc):
     """
@@ -144,6 +172,13 @@ def test_get_hurricanewf_metadata(hazardsvc):
     response = hazardsvc.get_hurricanewf_metadata("5bd3d6a1f242fe0cf903cb0e")
     assert response['id'] == "5bd3d6a1f242fe0cf903cb0e"
 
+def test_get_hurricanewf_metadata_list(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    response = hazardsvc.get_hurricanewf_metadata_list()
+    assert len(response) > 0
+
+
 def test_get_hurricanewf_values(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
@@ -151,6 +186,3 @@ def test_get_hurricanewf_values(hazardsvc):
         "kmph", ["28,-81"])
 
     assert (hvals[0]['hazardValue'] == 60.21153835934114)
-
-# TODO implement the following test
-# def test_get_earthquake_hazard_value_set(hazardsvc):
