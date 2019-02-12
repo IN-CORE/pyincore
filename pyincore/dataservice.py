@@ -102,12 +102,6 @@ class DataService:
         r = requests.post(url, files=payload, headers=self.client.headers)
         return r.json()
 
-    # def update_dataset(self, dataset_id, properties: dict):
-    #     url = urllib.parse.urljoin(self.base_url, dataset_id)
-    #     payload = {'dataset': json.dumps(properties)}
-    #     r = requests.post(url, files=payload, headers=self.client.headers)
-    #     return r.json()
-
     def add_files_to_dataset(self, dataset_id: str, filepaths: list):
         url = urllib.parse.urljoin(self.base_url, dataset_id + "/files")
         listfiles = []

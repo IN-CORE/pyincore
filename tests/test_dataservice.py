@@ -104,17 +104,6 @@ def test_create_dataset_geotif(datasvc):
     assert response['id'] == dataset_id
 
 
-# def test_update_dataset(datasvc):
-#     dataset_id = "5ace7322ec230944f695f5cf"
-#     dataset_prop = {}
-#     with open('geotif_sample.json', 'r') as file:
-#         dataset_prop = ast.literal_eval(file.read())
-#     response = datasvc.update_dataset(dataset_id, dataset_prop)
-#
-#     assert response['id'] == dataset_id \
-#            and response['dataType'] == 'edu.illinois.ncsa.ergo.eq.schemas.deterministicHazardRaster.v1.0'
-
-
 def test_create_dataset_shpfile(datasvc):
     """
     Testing create dataset with shapefile
