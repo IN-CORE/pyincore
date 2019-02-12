@@ -33,7 +33,7 @@ class DataService:
         return r.json()
 
     def get_dataset_single_fileDescriptor(self, dataset_id: str, file_id:str):
-        url = urllib.parse.urljoin(self.base_url, dataset_id, 'files', file_id)
+        url = urllib.parse.urljoin(self.base_url, dataset_id+"/files/"+file_id)
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
@@ -92,11 +92,11 @@ class DataService:
         r = requests.post(url, files=payload, headers=self.client.headers)
         return r.json()
 
-    def update_dataset(self, dataset_id, properties: dict):
-        url = urllib.parse.urljoin(self.base_url, dataset_id)
-        payload = {'dataset': json.dumps(properties)}
-        r = requests.post(url, files=payload, headers=self.client.headers)
-        return r.json()
+    # def update_dataset(self, dataset_id, properties: dict):
+    #     url = urllib.parse.urljoin(self.base_url, dataset_id)
+    #     payload = {'dataset': json.dumps(properties)}
+    #     r = requests.post(url, files=payload, headers=self.client.headers)
+    #     return r.json()
 
     def add_files_to_dataset(self, dataset_id: str, filepaths: list):
         url = urllib.parse.urljoin(self.base_url, dataset_id+"/files")

@@ -20,20 +20,12 @@ def datasvc():
 
     return DataService(client)
 
-def test_get_dataset_metadata_list(datasvc):
-    response = datasvc.get_dataset_metadata_list()
-    assert 'id' in response[0]
 
 def test_get_dataset_metadata(datasvc):
     id = "5a284f0ac7d30d13bc0819c4"
     metadata = datasvc.get_dataset_metadata(id)
     assert metadata['id'] == id
 
-def test_get_dataset_single_fileDescriptor(datasvc):
-    dataset_id="5a284f0bc7d30d13bc081a28"
-    file_id="5a284f0bc7d30d13bc081a2b"
-    metadata = datasvc.get_dataset_single_fileDescriptor(dataset_id, file_id)
-    assert 'id' in metadata.keys() and metadata['id']==file_id
 
 def test_get_dataset_fileDescriptors(datasvc):
     errors = []
@@ -50,6 +42,13 @@ def test_get_dataset_fileDescriptors(datasvc):
         errors.append("it doesn't fetch the right fileDescriptors for this id!")
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
+
+
+def test_get_dataset_single_fileDescriptor(datasvc):
+    dataset_id="5a284f0bc7d30d13bc081a28"
+    file_id="5a284f0bc7d30d13bc081a2b"
+    metadata = datasvc.get_dataset_single_fileDescriptor(dataset_id, file_id)
+    assert 'id' in metadata.keys() and metadata['id']==file_id
 
 
 def test_get_dataset_blob(datasvc):
@@ -103,13 +102,21 @@ def test_create_dataset_geotif(datasvc):
     assert response['id'] == dataset_id
 
 
-def test_update_dataset(datasvc):
-    pass
-    # TODO
+# def test_update_dataset(datasvc):
+#     dataset_id = "5ace7322ec230944f695f5cf"
+#     dataset_prop = {}
+#     with open('geotif_sample.json', 'r') as file:
+#         dataset_prop = ast.literal_eval(file.read())
+#     response = datasvc.update_dataset(dataset_id, dataset_prop)
+#
+#     assert response['id'] == dataset_id \
+#            and response['dataType'] == 'edu.illinois.ncsa.ergo.eq.schemas.deterministicHazardRaster.v1.0'
+
 
 def test_get_mvzdatasets(datasvc):
-    pass
-    # TODO
+    mvzdatasets = datasvc.get_mvzdatasets()
+    assert len(mvzdatasets) > 0 and 'id' in mvzdatasets[0].keys()
+
 
 def test_create_dataset_shpfile(datasvc):
     """
@@ -165,6 +172,8 @@ def test_get_spaces(datasvc):
 
     assert 'datasetIds' in metadata[0].keys()
 
+
 def test_get_data_api_definition(datasvc):
-    # TODO
-    pass
+    swagger_json = datasvc.get_data_api_definition()
+
+    assert "swagger" in swagger_json and "paths" in swagger_json
