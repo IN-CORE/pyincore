@@ -19,7 +19,7 @@ class HazardService:
         self.base_hurricanewf_url = urllib.parse.urljoin(client.service_url, 'hazard/api/hurricaneWindfields/')
 
     def get_earthquake_hazard_metadata_list(self):
-        url = urllib.parse.urljoin(self.base_earthquake_url)
+        url = self.base_earthquake_url
         r = requests.get(url, headers=self.client.headers)
         response = r.json()
 
@@ -116,6 +116,13 @@ class HazardService:
         response = r.json()
         return response
 
+    def get_tornado_hazard_metadata_list(self):
+        url = self.base_tornado_url
+        r = requests.get(url, headers=self.client.headers)
+        response = r.json()
+
+        return response
+
     def get_tornado_hazard_metadata(self, hazard_id:str):
         url = urllib.parse.urljoin(self.base_tornado_url, hazard_id)
         r = requests.get(url, headers=self.client.headers)
@@ -137,6 +144,9 @@ class HazardService:
 
         return response
 
+    # TODO get_tornado_dataset needed to be implemented on the server side first
+    # def get_tornado_dataset(self)
+
     def create_tornado_scenario(self, scenario):
         url = self.base_tornado_url
 
@@ -145,6 +155,13 @@ class HazardService:
         new_headers = {**self.client.headers, **headers}
         r = requests.post(url, data=scenario, headers=new_headers)
         response = r.json()
+        return response
+
+    def get_tsunami_hazard_metadata_list(self):
+        url = self.base_tsunami_url
+        r = requests.get(url, headers=self.client.headers)
+        response = r.json()
+
         return response
 
     def get_tsunami_hazard_metadata(self, hazard_id:str):
@@ -160,6 +177,26 @@ class HazardService:
         r = requests.get(url, headers=self.client.headers, params = payload)
         response = r.json()
 
+        return response
+
+    def create_tsunami_hazard(self, tsunami_inputs, file_paths:List):
+        """
+        Creates an tsunami.
+        Args:
+            tsunami_inputs: JSON representing the tsunami.
+            file_paths: List of strings pointing to the paths of the datasets.
+
+        Returns: JSON of the created tsunami.
+        """
+
+        url = self.base_tsunami_url
+        tsunami_data = {('tsunami', tsunami_inputs)}
+
+        for file_path in file_paths:
+            tsunami_data.add(('file', open(file_path, 'rb')))
+
+        r = requests.post(url, files=tsunami_data, headers=self.client.headers)
+        response = r.json()
         return response
 
     def create_hurricane_windfield(self, hurr_wf_inputs):
@@ -192,3 +229,23 @@ class HazardService:
         response = r.json()
 
         return response
+
+    def get_hurricanewf_json(self, coast:str, category:int, trans_d:float, land_fall_loc:int,
+                             resolution:int=6, grid_points:int=80, rf_method:str="circular"):
+        # land_fall_loc: IncorePoint e.g.'28.01, -83.85'
+        url = urllib.parse.urljoin(self.base_hurricanewf_url,"json", coast)
+        payload = {"category": category, "TransD":trans_d, "LandfallLoc":land_fall_loc,
+                   "resolution":resolution, "gridPoints":grid_points,
+                   "reductionType": rf_method}
+        r = requests.get(url, headers=self.client.headers, params=payload)
+        response = r.json()
+
+        return response
+
+    def get_hazard_api_definition(self):
+        url = urllib.parse.urljoin(self.client.service_url, 'hazard/api/swagger.json')
+        r = requests.get(url, headers=self.client.headers)
+        response = r.json()
+
+        return response
+

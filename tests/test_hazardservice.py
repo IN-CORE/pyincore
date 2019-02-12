@@ -25,7 +25,7 @@ def test_get_earthquake_hazard_metadata_list(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
     response = hazardsvc.get_earthquake_hazard_metadata_list()
-    assert len(response) > 0
+    assert 'id' in response[0]
 
 def test_get_earthquake_hazard_metadata(hazardsvc):
     """
@@ -108,6 +108,12 @@ def test_create_earthquake(hazardsvc):
     model_response = hazardsvc.create_earthquake(eqmodel_json)
     assert model_response["id"] is not None
 
+def test_get_tornado_hazard_metadata_list(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    response = hazardsvc.get_tornado_hazard_metadata_list()
+    assert 'id' in response[0]
+
 def test_get_tornado_hazard_metadata(hazardsvc):
     """
     Testing get tornado/{id}
@@ -146,6 +152,12 @@ def test_get_tornado_hazard_values(hazardsvc):
 
     assert ((hvals[0]['hazardValue'] > 85) and (hvals[0]['hazardValue'] < 165)) and hvals[1]['hazardValue'] == 0
 
+def test_get_tsunami_hazard_metadata_list(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    response = hazardsvc.get_tsunami_hazard_metadata_list()
+    assert 'id' in response[0]
+
 def test_get_tsunami_hazard_metadata(hazardsvc):
     """
     Testing get tsunami/{id}
@@ -154,6 +166,17 @@ def test_get_tsunami_hazard_metadata(hazardsvc):
         assert False, ".incorepw does not exist!"
     response = hazardsvc.get_tsunami_hazard_metadata("5bc9e25ef7b08533c7e610dc")
     assert response['id'] == "5bc9e25ef7b08533c7e610dc"
+
+def test_create_tsunami_hazard(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+
+    with open("tsunami.json", 'r') as file:
+        tsunami_inputs = file.read()
+
+    file_paths = ["", ""];
+    response = hazardsvc.create_tsunami_hazard(tsunami_inputs, file_paths)
+    assert response["id"] is not None and response["hazardDatasets"][1]["datasetId"] is not None
 
 def test_create_hurricane_windfield(hazardsvc):
     if hazardsvc is None:
@@ -178,7 +201,6 @@ def test_get_hurricanewf_metadata_list(hazardsvc):
     response = hazardsvc.get_hurricanewf_metadata_list()
     assert len(response) > 0
 
-
 def test_get_hurricanewf_values(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
@@ -186,3 +208,17 @@ def test_get_hurricanewf_values(hazardsvc):
         "kmph", ["28,-81"])
 
     assert (hvals[0]['hazardValue'] == 60.21153835934114)
+
+def test_get_hurricanewf_json(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    hjson = hazardsvc.get_hurricanewf_json("florida", 1, -83, "28,-81", 6, 10, "circular" )
+
+    assert len(hjson["hurricaneSimulations"]) > 0
+
+def test_get_hazard_api_definition(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+    swagger_json = hazardsvc.get_hazard_api_definition()
+
+    assert "swagger" in swagger_json and "paths" in swagger_json
