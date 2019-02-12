@@ -144,7 +144,17 @@ class HazardService:
 
         return response
 
-    def create_tornado(self, tornado_json, file_paths: List=[]):
+    def create_tornado_scenario(self, tornado_json, file_paths: List=[]):
+        """
+        Creates a Tornado.
+        Args:
+            tornado_json: JSON representing the tornado.
+            file_paths: List of strings pointing to the paths of the shapefiles. Not needed for
+            model based tornadoes.
+
+        Returns: JSON of the created tornado.
+
+        """
         url = self.base_tornado_url
         tornado_data = {('tornado', tornado_json)}
 

@@ -131,6 +131,17 @@ def test_get_tornado_hazard_metadata(hazardsvc):
     response = hazardsvc.get_tornado_hazard_metadata("5c62e9ecc11bb380daa9cb75")
     assert response['id'] == "5c62e9ecc11bb380daa9cb75"
 
+def test_create_tornado_scenario(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+
+    scenario = ""
+    with open("tornado.json", 'r') as file:
+        scenario = file.read()
+
+    response = hazardsvc.create_tornado_scenario(scenario)
+    assert response["id"] is not None
+
 def test_get_tornado_hazard_value(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
@@ -148,26 +159,6 @@ def test_get_tornado_hazard_values(hazardsvc):
                                                    ["35.228, -97.478", "35.229, -97.465"])
 
     assert ((hvals[0]['hazardValue'] > 85) and (hvals[0]['hazardValue'] < 165)) and hvals[1]['hazardValue'] == 0
-
-def test_create_tornado_model(hazardsvc):
-    if hazardsvc is None:
-        assert False, ".incorepw does not exist!"
-    with open("tornado_model.json", 'r') as file:
-        tornado_json = file.read()
-
-    response = hazardsvc.create_tornado(tornado_json)
-    assert response["id"] is not None
-
-# TODO: we don't have any dataset tornado yet, we'll test it when we have those shapefiles
-# def test_create_tornado_dataset(hazardsvc):
-#     if hazardsvc is None:
-#         assert False, ".incorepw does not exist!"
-#     with open("torndo_dataset.json", 'r') as file:
-#         tornado_json = file.read()
-#     file_paths = ["","",""]
-#     response = hazardsvc.create_tornado(tornado_json, file_paths)
-#
-#     assert response["id"] is not None
 
 def test_get_tsunami_hazard_metadata_list(hazardsvc):
     if hazardsvc is None:
