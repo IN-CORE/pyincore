@@ -88,21 +88,21 @@ class FragilityService:
         url = self.base_frag_url
         payload={}
 
-        if demand_type != None:
+        if demand_type is not None:
             payload['demand'] = demand_type
-        if hazard_type != None:
+        if hazard_type is not None:
             payload['hazard'] = hazard_type
-        if inventory_type != None:
+        if inventory_type is not None:
             payload['inventory'] = inventory_type
-        if author != None:
+        if author is not None:
             payload['author'] = author
-        if legacy_id != None:
+        if legacy_id is not None:
             payload['legacy_id'] = legacy_id
-        if creator != None:
+        if creator is not None:
             payload['creator'] = creator
-        if skip != None:
+        if skip is not None:
             payload['skip'] = skip
-        if limit != None:
+        if limit is not None:
             payload['limit'] = limit
 
         r = requests.get(url, headers=self.client.headers, params=payload)
@@ -132,15 +132,15 @@ class FragilityService:
         url = self.base_mapping_url
         payload = {}
 
-        if hazard_type != None:
+        if hazard_type is not None:
             payload['hazard'] = hazard_type
-        if inventory_type != None:
+        if inventory_type is not None:
             payload['inventory'] = inventory_type
-        if creator != None:
+        if creator is not None:
             payload['creator'] = creator
-        if skip != None:
+        if skip is not None:
             payload['skip'] = skip
-        if limit != None:
+        if limit is not None:
             payload['limit'] = limit
 
         r = requests.get(url, headers=self.client.headers, params=payload)

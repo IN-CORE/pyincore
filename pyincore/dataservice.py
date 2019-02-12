@@ -71,20 +71,21 @@ class DataService:
         else:
             return local_filename
 
-    def get_datasets(self, datatype=None, title=None):
+    def get_datasets(self, datatype:str=None, title:str=None, creator:str=None, space:str=None):
         url = self.base_url
-        if datatype is None and title is None:
-            r = requests.get(url, headers=self.client.headers)
-            return r.json()
-        else:
-            payload = {}
-            if datatype is not None:
-                payload['type'] = datatype
-            if title is not None:
-                payload['title'] = title
-            r = requests.get(url, headers=self.client.headers, params = payload)
-            # need to handle there is no datasets
-            return r.json()
+        payload = {}
+        if datatype is not None:
+            payload['type'] = datatype
+        if title is not None:
+            payload['title'] = title
+        if creator is not None:
+            payload['creator'] = creator
+        if space is not None:
+            payload['space'] = space
+
+        r = requests.get(url, headers=self.client.headers, params = payload)
+        # need to handle there is no datasets
+        return r.json()
 
     def create_dataset(self, properties: dict):
         payload = {'dataset': json.dumps(properties)}

@@ -217,9 +217,9 @@ class HazardService:
         url = self.base_hurricanewf_url
         payload = {}
 
-        if coast != None:
+        if coast is not None:
             payload['coast'] = coast
-        if category != None:
+        if category is not None:
             payload['category'] = category
 
         r = requests.get(url, headers=self.client.headers, params=payload)
