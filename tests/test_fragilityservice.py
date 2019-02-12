@@ -3,7 +3,7 @@ import ast
 import pytest
 import json
 
-from pyincore import IncoreClient, FragilityService, InsecureIncoreClient
+from pyincore import FragilityService, InsecureIncoreClient
 
 
 @pytest.fixture
@@ -18,9 +18,12 @@ def fragilitysvc():
     client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
     return FragilityService(client)
 
+
 def test_get_fragility_sets(fragilitysvc):
-    pass
-    # TODO
+    metadata = fragilitysvc.get_fragility_sets()
+
+    assert 'id' in metadata[0].keys()
+
 
 def test_get_fragility_set(fragilitysvc):
     id = "5b47b2d7337d4a36187c61c9"
@@ -52,21 +55,35 @@ def test_map_fragilities_multiple_inventory(fragilitysvc):
 
 
 def test_get_fragility_api_definition(fragilitysvc):
-    pass
-    # TODO
+    swagger_json = fragilitysvc.get_fragility_api_definition()
+
+    assert "swagger" in swagger_json and "paths" in swagger_json
+
 
 def test_get_fragility_mappings(fragilitysvc):
-    pass
-    # TODO
+    mappings = fragilitysvc.get_fragility_mappings()
+
+    assert len(mappings)>0 and "id" in mappings[0].keys()
+
 
 def test_get_fragility_mapping(fragilitysvc):
-    pass
-    # TODO
+    id = "5b47b2d9337d4a36187c7563"
+    mapping = fragilitysvc.get_fragility_mapping(id)
+
+    assert mapping["id"] == id
+
 
 def test_create_fragility_set(fragilitysvc):
-    pass
-    # TODO
+    with open("fragilityset.json", 'r') as f:
+        fragility_set = json.load(f)
+    created = fragilitysvc.create_fragility_set(fragility_set)
+
+    assert "id" in created.keys()
+
 
 def test_create_fragility_mapping(fragilitysvc):
-    pass
-    # TODO
+    with open("fragility_mappingset.json", 'r') as f:
+        mapping_set = json.load(f)
+    created = fragilitysvc.create_fragility_mapping(mapping_set)
+
+    assert "id" in created.keys()
