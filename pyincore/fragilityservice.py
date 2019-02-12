@@ -83,9 +83,45 @@ class FragilityService:
 
         return fragility_sets
 
+    def get_fragility_sets(self):
+        url = self.base_frag_url
+        r = requests.get(url, headers=self.client.headers)
+
+        return r.json()
+
     def get_fragility_set(self, fragility_id: str):
         url = urllib.parse.urljoin(self.base_frag_url, fragility_id)
         r = requests.get(url, headers=self.client.headers)
 
         return r.json()
 
+    def create_fragility_set(self, fragility_set:dict):
+        url = self.base_frag_url
+        r = requests.post(url, json=fragility_set, headers=self.client.headers)
+
+        return r.json()
+
+    def create_fragility_mapping(self, mapping_set:dict):
+        url = self.base_mapping_url
+        r = requests.post(url, json=mapping_set, headers=self.client.headers)
+
+        return r.json()
+
+    def get_fragility_mappings(self):
+        url = self.base_mapping_url
+        r = requests.get(url, headers=self.client.headers)
+
+        return r.json()
+
+    def get_fragility_mapping(self, mapping_id):
+        url = urllib.parse.urljoin(self.base_mapping_url, mapping_id)
+        r = requests.get(url, headers=self.client.headers)
+
+        return r.json()
+
+    def get_fragility_api_definition(self):
+        url = urllib.parse.urljoin(self.client.service_url,
+                                   'fragility/api/swagger.json')
+        r = requests.get(url, headers=self.client.headers)
+
+        return r.json()

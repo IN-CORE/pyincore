@@ -18,6 +18,9 @@ def fragilitysvc():
     client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
     return FragilityService(client)
 
+def test_get_fragility_sets(fragilitysvc):
+    pass
+    # TODO
 
 def test_get_fragility_set(fragilitysvc):
     id = "5b47b2d7337d4a36187c61c9"
@@ -46,3 +49,24 @@ def test_map_fragilities_multiple_inventory(fragilitysvc):
     frag_set = fragilitysvc.map_fragilities(mapping_id, inventories, key)
 
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
+
+
+def test_get_fragility_api_definition(fragilitysvc):
+    pass
+    # TODO
+
+def test_get_fragility_mappings(fragilitysvc):
+    pass
+    # TODO
+
+def test_get_fragility_mapping(fragilitysvc):
+    pass
+    # TODO
+
+def test_create_fragility_set(fragilitysvc):
+    pass
+    # TODO
+
+def test_create_fragility_mapping(fragilitysvc):
+    pass
+    # TODO
