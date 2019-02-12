@@ -16,7 +16,8 @@ def datasvc():
     except EnvironmentError:
         return None
     # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
+    client = InsecureIncoreClient(
+        "http://incore2-services.ncsa.illinois.edu:8888", cred[0])
 
     return DataService(client)
 
@@ -39,22 +40,23 @@ def test_get_dataset_fileDescriptors(datasvc):
     # compare the id in fileDescriptors field in metadata with the
     # id returned by /file endpoint
     if metadata['fileDescriptors'][0]['id'] != fileDescriptor[0]['id']:
-        errors.append("it doesn't fetch the right fileDescriptors for this id!")
+        errors.append(
+            "it doesn't fetch the right fileDescriptors for this id!")
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
 
 def test_get_dataset_single_fileDescriptor(datasvc):
-    dataset_id="5a284f0bc7d30d13bc081a28"
-    file_id="5a284f0bc7d30d13bc081a2b"
+    dataset_id = "5a284f0bc7d30d13bc081a28"
+    file_id = "5a284f0bc7d30d13bc081a2b"
     metadata = datasvc.get_dataset_single_fileDescriptor(dataset_id, file_id)
-    assert 'id' in metadata.keys() and metadata['id']==file_id
+    assert 'id' in metadata.keys() and metadata['id'] == file_id
 
 
 def test_get_dataset_blob(datasvc):
     errors = []
     id = "5a284f0ac7d30d13bc0819c4"
-    fname = datasvc.get_dataset_blob(id,join=True)
+    fname = datasvc.get_dataset_blob(id, join=True)
 
     if type(fname) != str:
         errors.append("doesn't return the correct filename!")
@@ -72,7 +74,7 @@ def test_get_datasets(datasvc):
 
     if 'id' not in metadata[0].keys():
         errors.append("response is not right!")
-    if not re.search(r'HAZUS',metadata[0]['title']):
+    if not re.search(r'HAZUS', metadata[0]['title']):
         errors.append("title doesn't match!")
     if not re.search(datatype, metadata[0]['dataType']):
         errors.append("datatype doesn't match!")

@@ -33,10 +33,13 @@ class FragilityService:
     """
     Fragility service client
     """
+
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_frag_url = urllib.parse.urljoin(client.service_url, 'fragility/api/fragilities/')
-        self.base_mapping_url = urllib.parse.urljoin(client.service_url, 'fragility/api/mappings/')
+        self.base_frag_url = urllib.parse.urljoin(client.service_url,
+                                                  'fragility/api/fragilities/')
+        self.base_mapping_url = urllib.parse.urljoin(client.service_url,
+                                                     'fragility/api/mappings/')
 
     def map_fragilities(self, mapping_id: str, inventories: list, key: str):
         features = []
@@ -45,9 +48,11 @@ class FragilityService:
             # hack, change null to an empty string
             # Some metadata field values are null even though the field is defined
             # in the “Default Building Fragility Mapping” as a string
-            if "occ_type" in inventory["properties"] and inventory["properties"]["occ_type"] is None:
+            if "occ_type" in inventory["properties"] and \
+                    inventory["properties"]["occ_type"] is None:
                 inventory["properties"]["occ_type"] = ""
-            if "efacility" in inventory["properties"] and inventory["properties"]["efacility"] is None:
+            if "efacility" in inventory["properties"] and \
+                    inventory["properties"]["efacility"] is None:
                 inventory["properties"]["efacility"] = ""
 
             features.append(inventory)
@@ -62,9 +67,11 @@ class FragilityService:
         mapping_request.subject.inventory = feature_collection
         mapping_request.params["key"] = key
 
-        url = urllib.parse.urljoin(self.base_mapping_url, mapping_id+"/matched")
+        url = urllib.parse.urljoin(self.base_mapping_url,
+                                   mapping_id + "/matched")
 
-        json = jsonpickle.encode(mapping_request, unpicklable=False).encode("utf-8")
+        json = jsonpickle.encode(mapping_request, unpicklable=False).encode(
+            "utf-8")
         headers = {'Content-type': 'application/json'}
         # merge two headers
         new_headers = {**self.client.headers, **headers}
@@ -83,10 +90,13 @@ class FragilityService:
 
         return fragility_sets
 
-    def get_fragility_sets(self, demand_type:str=None, hazard_type:str=None, inventory_type:str=None,
-                           author:str=None, legacy_id:str=None, creator:str=None, skip:int=None, limit:int=None):
+    def get_fragility_sets(self, demand_type: str = None,
+                           hazard_type: str = None, inventory_type: str = None,
+                           author: str = None, legacy_id: str = None,
+                           creator: str = None, skip: int = None,
+                           limit: int = None):
         url = self.base_frag_url
-        payload={}
+        payload = {}
 
         if demand_type is not None:
             payload['demand'] = demand_type
@@ -115,20 +125,21 @@ class FragilityService:
 
         return r.json()
 
-    def create_fragility_set(self, fragility_set:dict):
+    def create_fragility_set(self, fragility_set: dict):
         url = self.base_frag_url
         r = requests.post(url, json=fragility_set, headers=self.client.headers)
 
         return r.json()
 
-    def create_fragility_mapping(self, mapping_set:dict):
+    def create_fragility_mapping(self, mapping_set: dict):
         url = self.base_mapping_url
         r = requests.post(url, json=mapping_set, headers=self.client.headers)
 
         return r.json()
 
-    def get_fragility_mappings(self, hazard_type:str=None, inventory_type:str=None, creator:str=None,
-                               skip:int=None, limit:int=None):
+    def get_fragility_mappings(self, hazard_type: str = None,
+                               inventory_type: str = None, creator: str = None,
+                               skip: int = None, limit: int = None):
         url = self.base_mapping_url
         payload = {}
 
