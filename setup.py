@@ -10,4 +10,4 @@ setup(name = 'pyincore',
                   'pyincore.analyses.tornadoepndamage', 'pyincore.analyses.nonstructbuildingdamage',
                   'pyincore.analyses.cumulative_building_damage'],
       requires = ['fiona', 'rasterio', 'jsonpickle', 'numpy', 'shapely', 'scipy', 'matplotlib', 'wikidata', 'requests',
-                  'networkx', 'pandas', 'pyproj', 'folium', 'owslib', 'py_expression_eval', 'rtree', 'wntr', 'plotly'])
+                  'networkx', 'pandas', 'pyproj', 'folium', 'owslib', 'py_expression_eval', 'rtree', 'wntr', 'plotly', 'pyyaml'])
