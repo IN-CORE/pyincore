@@ -6,7 +6,7 @@ includeOnly:
   - bridgedamage
 
 exclude:
-  - bridgedamage
+  - waternetworkdamage
   - waternetworkrecovery
 
 # includeOnly feature is not implemented yet
