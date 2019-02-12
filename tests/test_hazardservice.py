@@ -228,7 +228,7 @@ def test_get_hurricanewf_metadata(hazardsvc):
 def test_get_hurricanewf_metadata_list(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    response = hazardsvc.get_hurricanewf_metadata_list()
+    response = hazardsvc.get_hurricanewf_metadata_list(coast="florida")
     assert len(response) > 0 and 'id' in response[0].keys()
 
 def test_get_hurricanewf_values(hazardsvc):

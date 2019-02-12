@@ -213,9 +213,16 @@ class HazardService:
 
         return response
 
-    def get_hurricanewf_metadata_list(self):
+    def get_hurricanewf_metadata_list(self, coast:str=None, category:int=None):
         url = self.base_hurricanewf_url
-        r = requests.get(url, headers=self.client.headers)
+        payload = {}
+
+        if coast != None:
+            payload['coast'] = coast
+        if category != None:
+            payload['category'] = category
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
         response = r.json()
 
         return response
