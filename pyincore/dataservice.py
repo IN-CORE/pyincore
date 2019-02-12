@@ -32,6 +32,11 @@ class DataService:
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
+    def get_dataset_single_fileDescriptor(self, dataset_id: str, file_id:str):
+        url = urllib.parse.urljoin(self.base_url, dataset_id, 'files', file_id)
+        r = requests.get(url, headers=self.client.headers)
+        return r.json()
+
     def get_dataset_blob(self, dataset_id: str, join=None):
         # construct url for file download
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/blob')
@@ -87,6 +92,12 @@ class DataService:
         r = requests.post(url, files=payload, headers=self.client.headers)
         return r.json()
 
+    def update_dataset(self, dataset_id, properties: dict):
+        url = urllib.parse.urljoin(self.base_url, dataset_id)
+        payload = {'dataset': json.dumps(properties)}
+        r = requests.post(url, files=payload, headers=self.client.headers)
+        return r.json()
+
     def add_files_to_dataset(self, dataset_id: str, filepaths: list):
         url = urllib.parse.urljoin(self.base_url, dataset_id+"/files")
         listfiles = []
@@ -105,6 +116,11 @@ class DataService:
     def delete_dataset(self, dataset_id: str):
         url = urllib.parse.urljoin(self.base_url, dataset_id)
         r = requests.delete(url, headers=self.client.headers)
+        return r.json()
+
+    def get_mvzdatasets(self):
+        url = urllib.parse.urljoin(self.client.service_url, 'data/api/mvzdatasets/')
+        r = requests.get(url, headers=self.client.headers)
         return r.json()
 
     def get_files(self):
@@ -183,3 +199,9 @@ class DataService:
         r = requests.get(request_str, headers=client.headers)
 
         return r.json()['tornadoDatasetId']
+
+    def get_data_api_definition(self):
+        url = urllib.parse.urljoin(self.client.service_url, 'data/api/swagger.json')
+        r = requests.get(url, headers=self.client.headers)
+
+        return r.json()

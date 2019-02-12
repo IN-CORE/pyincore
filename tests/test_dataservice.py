@@ -20,12 +20,20 @@ def datasvc():
 
     return DataService(client)
 
+def test_get_dataset_metadata_list(datasvc):
+    response = datasvc.get_dataset_metadata_list()
+    assert 'id' in response[0]
 
 def test_get_dataset_metadata(datasvc):
     id = "5a284f0ac7d30d13bc0819c4"
     metadata = datasvc.get_dataset_metadata(id)
     assert metadata['id'] == id
 
+def test_get_dataset_single_fileDescriptor(datasvc):
+    dataset_id="5a284f0bc7d30d13bc081a28"
+    file_id="5a284f0bc7d30d13bc081a2b"
+    metadata = datasvc.get_dataset_single_fileDescriptor(dataset_id, file_id)
+    assert 'id' in metadata.keys() and metadata['id']==file_id
 
 def test_get_dataset_fileDescriptors(datasvc):
     errors = []
@@ -95,6 +103,14 @@ def test_create_dataset_geotif(datasvc):
     assert response['id'] == dataset_id
 
 
+def test_update_dataset(datasvc):
+    pass
+    # TODO
+
+def test_get_mvzdatasets(datasvc):
+    pass
+    # TODO
+
 def test_create_dataset_shpfile(datasvc):
     """
     Testing create dataset with shapefile
@@ -148,3 +164,7 @@ def test_get_spaces(datasvc):
     metadata = datasvc.get_spaces()
 
     assert 'datasetIds' in metadata[0].keys()
+
+def test_get_data_api_definition(datasvc):
+    # TODO
+    pass
