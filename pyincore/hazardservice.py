@@ -111,13 +111,25 @@ class HazardService:
 
         return response
 
-    def create_tornado_scenario(self, scenario):
+    def create_tornado_scenario(self, tornado_json, file_paths: List=[]):
+        """
+        Creates a Tornado.
+        Args:
+            tornado_json: JSON representing the tornado.
+            file_paths: List of strings pointing to the paths of the shapefiles. Not needed for
+            model based tornadoes.
+
+        Returns: JSON of the created tornado.
+
+        """
         url = self.base_tornado_url
 
-        headers = {'Content-type': 'application/json'}
-        # merge two headers
-        new_headers = {**self.client.headers, **headers}
-        r = requests.post(url, data=scenario, headers=new_headers)
+        tornado_data = {('tornado', tornado_json)}
+
+        for file_path in file_paths:
+            tornado_data.add(('file', open(file_path, 'rb')))
+
+        r = requests.post(url, files=tornado_data, headers=self.client.headers)
         response = r.json()
         return response
 
