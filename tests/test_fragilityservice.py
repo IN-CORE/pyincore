@@ -54,12 +54,6 @@ def test_map_fragilities_multiple_inventory(fragilitysvc):
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
 
 
-def test_get_fragility_api_definition(fragilitysvc):
-    swagger_json = fragilitysvc.get_fragility_api_definition()
-
-    assert "swagger" in swagger_json and "paths" in swagger_json
-
-
 def test_get_fragility_mappings(fragilitysvc):
     mappings = fragilitysvc.get_fragility_mappings()
 

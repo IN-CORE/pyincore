@@ -194,9 +194,3 @@ class DataService:
         r = requests.get(request_str, headers=client.headers)
 
         return r.json()['tornadoDatasetId']
-
-    def get_data_api_definition(self):
-        url = urllib.parse.urljoin(self.client.service_url, 'data/api/swagger.json')
-        r = requests.get(url, headers=self.client.headers)
-
-        return r.json()

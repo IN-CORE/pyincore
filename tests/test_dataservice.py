@@ -166,9 +166,3 @@ def test_get_spaces(datasvc):
     metadata = datasvc.get_spaces()
 
     assert 'datasetIds' in metadata[0].keys()
-
-
-def test_get_data_api_definition(datasvc):
-    swagger_json = datasvc.get_data_api_definition()
-
-    assert "swagger" in swagger_json and "paths" in swagger_json

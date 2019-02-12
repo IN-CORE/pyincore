@@ -92,29 +92,29 @@ def test_get_supported_earthquake_models(hazardsvc):
     models = hazardsvc.get_supported_earthquake_models()
     assert models == [ "AtkinsonBoore1995", "ChiouYoungs2014"]
 
-# def test_create_earthquake(hazardsvc):
-#     """
-#     Test creating both model and dataset based earthquakes
-#     """
-#     if hazardsvc is None:
-#         assert False, ".incorepw does not exist!"
-#
-#     # Dataset Based Earthquake
-#     with open("eq-dataset.json", 'r') as file:
-#         eq_dataset_json = file.read()
-#
-#     file_paths = ["eq-dataset1.tif", "eq-dataset2.tif"];
-#
-#     dataset_response = hazardsvc.create_earthquake(eq_dataset_json, file_paths)
-#     assert dataset_response["id"] is not None and \
-#            dataset_response["hazardDatasets"][1]["datasetId"] is not None
-#
-#     # Model Based Earthquake without files
-#     with open("eq-model.json", 'r') as file:
-#         eqmodel_json = file.read()
-#
-#     model_response = hazardsvc.create_earthquake(eqmodel_json)
-#     assert model_response["id"] is not None
+def test_create_earthquake(hazardsvc):
+    """
+    Test creating both model and dataset based earthquakes
+    """
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+
+    # Dataset Based Earthquake
+    with open("eq-dataset.json", 'r') as file:
+        eq_dataset_json = file.read()
+
+    file_paths = ["eq-dataset1.tif", "eq-dataset2.tif"];
+
+    dataset_response = hazardsvc.create_earthquake(eq_dataset_json, file_paths)
+    assert dataset_response["id"] is not None and \
+           dataset_response["hazardDatasets"][1]["datasetId"] is not None
+
+    # Model Based Earthquake without files
+    with open("eq-model.json", 'r') as file:
+        eqmodel_json = file.read()
+
+    model_response = hazardsvc.create_earthquake(eqmodel_json)
+    assert model_response["id"] is not None
 
 def test_get_tornado_hazard_metadata_list(hazardsvc):
     if hazardsvc is None:
@@ -149,16 +149,25 @@ def test_get_tornado_hazard_values(hazardsvc):
 
     assert ((hvals[0]['hazardValue'] > 85) and (hvals[0]['hazardValue'] < 165)) and hvals[1]['hazardValue'] == 0
 
-def test_create_tornado_scenario(hazardsvc):
+def test_create_tornado_model(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
+    with open("tornado_model.json", 'r') as file:
+        tornado_json = file.read()
 
-    scenario = ""
-    with open("tornado.json", 'r') as file:
-        scenario = file.read()
-
-    response = hazardsvc.create_tornado_scenario(scenario)
+    response = hazardsvc.create_tornado(tornado_json)
     assert response["id"] is not None
+
+# TODO: we don't have any dataset tornado yet, we'll test it when we have those shapefiles
+# def test_create_tornado_dataset(hazardsvc):
+#     if hazardsvc is None:
+#         assert False, ".incorepw does not exist!"
+#     with open("torndo_dataset.json", 'r') as file:
+#         tornado_json = file.read()
+#     file_paths = ["","",""]
+#     response = hazardsvc.create_tornado(tornado_json, file_paths)
+#
+#     assert response["id"] is not None
 
 def test_get_tsunami_hazard_metadata_list(hazardsvc):
     if hazardsvc is None:
@@ -188,27 +197,27 @@ def test_get_tsunami_hazard_values(hazardsvc):
     assert response[0]["hazardValue"]==5.900000095367432 \
            and response[1]["hazardValue"]==4.099999904632568
 
-# def test_create_tsunami_hazard(hazardsvc):
-#     if hazardsvc is None:
-#         assert False, ".incorepw does not exist!"
-#
-#     with open("tsunami.json", 'r') as file:
-#         tsunami_inputs = file.read()
-#
-#     file_paths = ["", ""];
-#     response = hazardsvc.create_tsunami_hazard(tsunami_inputs, file_paths)
-#     assert response["id"] is not None and response["hazardDatasets"][1]["datasetId"] is not None
+def test_create_tsunami_hazard(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
 
-# def test_create_hurricane_windfield(hazardsvc):
-#     if hazardsvc is None:
-#         assert False, ".incorepw does not exist!"
-#
-#     scenario = ""
-#     with open("hurricanewf.json", 'r') as file:
-#         hurr_wf_inputs = file.read()
-#
-#     response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
-#     assert response["id"] is not None
+    with open("tsunami.json", 'r') as file:
+        tsunami_json = file.read()
+
+    file_paths = ["Tsu_100yr_Vmax.tif", "Tsu_100yr_Mmax.tif", "Tsu_100yr_Hmax.tif"];
+    response = hazardsvc.create_tsunami_hazard(tsunami_json, file_paths)
+    assert response["id"] is not None and response["hazardDatasets"][1]["datasetId"] is not None
+
+def test_create_hurricane_windfield(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+
+    scenario = ""
+    with open("hurricanewf.json", 'r') as file:
+        hurr_wf_inputs = file.read()
+
+    response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
+    assert response["id"] is not None
 
 def test_get_hurricanewf_metadata(hazardsvc):
     if hazardsvc is None:
@@ -236,10 +245,3 @@ def test_get_hurricanewf_json(hazardsvc):
     hjson = hazardsvc.get_hurricanewf_json("florida", 1, -83, "28,-81", 6, 10, "circular" )
 
     assert len(hjson["hurricaneSimulations"]) > 0
-
-def test_get_hazard_api_definition(hazardsvc):
-    if hazardsvc is None:
-        assert False, ".incorepw does not exist!"
-    swagger_json = hazardsvc.get_hazard_api_definition()
-
-    assert "swagger" in swagger_json and "paths" in swagger_json

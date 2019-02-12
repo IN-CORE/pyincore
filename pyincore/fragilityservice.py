@@ -118,10 +118,3 @@ class FragilityService:
         r = requests.get(url, headers=self.client.headers)
 
         return r.json()
-
-    def get_fragility_api_definition(self):
-        url = urllib.parse.urljoin(self.client.service_url,
-                                   'fragility/api/swagger.json')
-        r = requests.get(url, headers=self.client.headers)
-
-        return r.json()
