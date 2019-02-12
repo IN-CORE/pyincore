@@ -118,11 +118,6 @@ class DataService:
         r = requests.delete(url, headers=self.client.headers)
         return r.json()
 
-    def get_mvzdatasets(self):
-        url = urllib.parse.urljoin(self.client.service_url, 'data/api/mvzdatasets/')
-        r = requests.get(url, headers=self.client.headers)
-        return r.json()
-
     def get_files(self):
         url = self.files_url
         r = requests.get(url, headers=self.client.headers)

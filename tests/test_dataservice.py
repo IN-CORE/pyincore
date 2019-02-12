@@ -113,11 +113,6 @@ def test_create_dataset_geotif(datasvc):
 #            and response['dataType'] == 'edu.illinois.ncsa.ergo.eq.schemas.deterministicHazardRaster.v1.0'
 
 
-def test_get_mvzdatasets(datasvc):
-    mvzdatasets = datasvc.get_mvzdatasets()
-    assert len(mvzdatasets) > 0 and 'id' in mvzdatasets[0].keys()
-
-
 def test_create_dataset_shpfile(datasvc):
     """
     Testing create dataset with shapefile

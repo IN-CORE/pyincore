@@ -171,6 +171,13 @@ class HazardService:
 
         return response
 
+    def get_tsunami_hazard_value(self, hazard_id: str, demand_type: str, demand_units: str,
+                                 site_lat:float, site_long:float):
+        points = [str(site_lat) + ',' + str(site_long)]
+        hazard_value_set = self.get_tsunami_hazard_values(hazard_id, demand_type, demand_units, points)
+
+        return hazard_value_set[0]['hazardValue']
+
     def get_tsunami_hazard_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
         url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': points}
@@ -209,7 +216,7 @@ class HazardService:
         return response
 
     def get_hurricanewf_metadata_list(self):
-        url = urllib.parse.urljoin(self.base_hurricanewf_url)
+        url = self.base_hurricanewf_url
         r = requests.get(url, headers=self.client.headers)
         response = r.json()
 
@@ -221,7 +228,7 @@ class HazardService:
         response = r.json()
 
         return response
-    
+
     def get_hurricanewf_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
         url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': points}
@@ -233,7 +240,7 @@ class HazardService:
     def get_hurricanewf_json(self, coast:str, category:int, trans_d:float, land_fall_loc:int,
                              resolution:int=6, grid_points:int=80, rf_method:str="circular"):
         # land_fall_loc: IncorePoint e.g.'28.01, -83.85'
-        url = urllib.parse.urljoin(self.base_hurricanewf_url,"json", coast)
+        url = urllib.parse.urljoin(self.base_hurricanewf_url,"json/"+coast)
         payload = {"category": category, "TransD":trans_d, "LandfallLoc":land_fall_loc,
                    "resolution":resolution, "gridPoints":grid_points,
                    "reductionType": rf_method}
