@@ -20,7 +20,7 @@ def fragilitysvc():
 
 
 def test_get_fragility_sets(fragilitysvc):
-    metadata = fragilitysvc.get_fragility_sets()
+    metadata = fragilitysvc.get_fragility_sets(demand_type="PGA", creator="cwang138")
 
     assert 'id' in metadata[0].keys()
 
@@ -55,7 +55,7 @@ def test_map_fragilities_multiple_inventory(fragilitysvc):
 
 
 def test_get_fragility_mappings(fragilitysvc):
-    mappings = fragilitysvc.get_fragility_mappings()
+    mappings = fragilitysvc.get_fragility_mappings(hazard_type="earthquake", creator="cwang138")
 
     assert len(mappings)>0 and "id" in mappings[0].keys()
 

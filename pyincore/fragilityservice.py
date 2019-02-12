@@ -83,9 +83,29 @@ class FragilityService:
 
         return fragility_sets
 
-    def get_fragility_sets(self):
+    def get_fragility_sets(self, demand_type:str=None, hazard_type:str=None, inventory_type:str=None,
+                           author:str=None, legacy_id:str=None, creator:str=None, skip:int=None, limit:int=None):
         url = self.base_frag_url
-        r = requests.get(url, headers=self.client.headers)
+        payload={}
+
+        if demand_type != None:
+            payload['demand'] = demand_type
+        if hazard_type != None:
+            payload['hazard'] = hazard_type
+        if inventory_type != None:
+            payload['inventory'] = inventory_type
+        if author != None:
+            payload['author'] = author
+        if legacy_id != None:
+            payload['legacy_id'] = legacy_id
+        if creator != None:
+            payload['creator'] = creator
+        if skip != None:
+            payload['skip'] = skip
+        if limit != None:
+            payload['limit'] = limit
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
 
         return r.json()
 
@@ -107,9 +127,23 @@ class FragilityService:
 
         return r.json()
 
-    def get_fragility_mappings(self):
+    def get_fragility_mappings(self, hazard_type:str=None, inventory_type:str=None, creator:str=None,
+                               skip:int=None, limit:int=None):
         url = self.base_mapping_url
-        r = requests.get(url, headers=self.client.headers)
+        payload = {}
+
+        if hazard_type != None:
+            payload['hazard'] = hazard_type
+        if inventory_type != None:
+            payload['inventory'] = inventory_type
+        if creator != None:
+            payload['creator'] = creator
+        if skip != None:
+            payload['skip'] = skip
+        if limit != None:
+            payload['limit'] = limit
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
 
         return r.json()
 
