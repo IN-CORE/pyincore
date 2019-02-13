@@ -12,7 +12,9 @@ with open(os.path.join(script_path, 'release-packages.yml')) as f:
 internalExcludes = ['__pycache__', 'build', 'cache_data']
 excludeList = config['exclude'] + internalExcludes
 
-zipName = 'pyincore_release.zip'
+version = config['version']
+
+zipName = 'pyincore_' + version + '.zip'
 zf = zipfile.ZipFile(os.path.join(dest_path, zipName), "w")
 
 for dirname, subdirs, files in os.walk(os.path.relpath(os.path.join(script_path, '..'))):
