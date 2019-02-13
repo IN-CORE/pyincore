@@ -566,7 +566,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 threshold = building_damage[i]
                 if random_samples[j][i] <= threshold[0]:
                     sample[i] = 1
-                elif random_samples[j][i] <= threshold[0] + threshold[1] and random_samples[j][i] <= threshold[0]:
+                elif random_samples[j][i] <= threshold[0] + threshold[1] and random_samples[j][i] >= threshold[0]:
                     sample[i] = 2
                 elif threshold[0] + threshold[1] <= random_samples[j][i] <= threshold[0] + threshold[1] + threshold[2]:
                     sample[i] = 3
