@@ -255,8 +255,9 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # Utility matrix. Represents the recovery for each of the utility areas at a given number of weeks after the event
         # The utility matrix uses utility Initial input file for the first 22 weeks and ones for the rest of the time.
 
-        for i in range(len(utility_initial.columns)):
-            utility[:, i] = [j for j in utility_initial[str(i)]]
+        for i in range(time_steps):
+            utility[:, i] = [1-j for j in utility_initial[str(i)]]
+
 
         # Mean recovery trajectory at portfolio level
         mean_recovery = np.zeros((time_steps, 5))

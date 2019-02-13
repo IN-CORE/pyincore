@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
         bldg_portfolio_recovery = BuildingPortfolioRecoveryAnalysis(client)
         bldg_portfolio_recovery.set_parameter("result_name", "building_portfolio_recovery_feb4")
-        bldg_portfolio_recovery.set_parameter("uncertainty", False)
+        bldg_portfolio_recovery.set_parameter("uncertainty", True)
         bldg_portfolio_recovery.set_parameter("sample_size", 50)
         bldg_portfolio_recovery.set_parameter("number_of_iterations", 200)
         bldg_portfolio_recovery.set_parameter("num_cpu", 1)
