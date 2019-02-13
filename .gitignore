@@ -15,8 +15,12 @@ hs_err_pid*
 **.iml
 **.iml
 
-# IDEA - generated artifacts
+# pyincore setup and build
 **/build/
+**/dist/
+**/pyincore.egg-info/
+
+# IDEA - generated artifacts
 **/out/
 
 # Apple metadata
