@@ -9,98 +9,110 @@ and synthesizing results.
                       
 **Pyincore** as a python module can be used to write hazard workflow tools.
 
-# Installation
+## Installation
 
-You will need to have Python 3 installed for this method. To install the package, 
-download the source code from [Git](https://git.ncsa.illinois.edu/incore/pyincore) 
-repository
+### Prerequisites
 
-and then use one of the following methods to install the package.
+[Python 3.5](https://www.python.org) or greater
 
-Mac
----
+[GDAL](https://www.gdal.org)
 
-1. Clone the code from [Git](https://git.ncsa.illinois.edu/incore/pyincore) 
-repository.
-2. We recommend using virtual environments, `virtualenv` for python 3.5+. for managing Python environments.  
+- **Linux** 
+
+    **Pyincore** uses `gdal` library which has to be installed separately for example by using `apt-get` package utility 
+    on Debian, Ubuntu, and related Linux distributions.
+    ```
+    apt-get gdal
+    ```
+- **Windows**
+
+
+**Optional**: `virtualenv` (available by running `pip install virtualenv`) or [Anaconda](https://www.anaconda.com/distribution/), 
+note that a full Anaconda distribution will include Python, so installing Python first isn't needed if you use Anaconda
+
+All Platforms
+-------------
+
+1. Download or clone the source code from [NCSA Git](https://git.ncsa.illinois.edu/incore/pyincore) repository.
+2. Change into the ```pyincore``` directory (or prepend the path to the directory onto files reference from here on out)
+3. **Optional**: Activate your virtual or conda environment
+4. From the terminal, in the project folder (pyincore) run:
+    ```
+    python setup.py install
+    ```
+5. Verify the installation
+    ```
+    python setup.py test
+    ```
+
+    **Windows specific installation notes**
     
-    `virtualenv --python=python3.6 pyincore`
-    `source venv/bin/activate`
+    - Open the `Anaconda` prompt, or `cmd` depending on if you are using Anaconda or not before you activate 
+    virtual environment (step 3 above)
 
-3. From the terminal at the project folder run:
+    **Mac specific installation notes**
 
-    `python setup.py install`
-    
-4. Install required packages individually if necessary. For example, `spatialindex` library 
- could cause problems, use [Homebrew](https://brew.sh/) or `pip` for installing it:
-  
-    `brew install spatialindex`
-    
-    `pip install matplotlib==2.1.0`
+    - `spacialindex` library is needed, but appears to be included on other platforms. The easy way to install 
+    is to use [Homebrew](https://brew.sh/), and run:
+        ```
+        brew install spacialindex
+        ```
+    - We use `matplotlib` library to create graphs. There is a Mac specific installation issue addressed at 
+    StackOverflow [link1](https://stackoverflow.com/questions/4130355/python-matplotlib-framework-under-macosx) and 
+    [link2](https://stackoverflow.com/questions/21784641/installation-issue-with-matplotlib-python). In a nutshell, 
+    insert line:
+        ```
+        backend : Agg
+        ```
+        into `~/.matplotlib/matplotlibrc` file.
 
-# Running
+## Running
 
-Run from pyincore folder: 
-
-    `git branch -a`
-    
-4. Run a script with parameters (use `-h` for help) 
-
-
-### For developers
+Verify the installation by running the test script
 ```
-git clone https://git.ncsa.illinois.edu/incore/pyincore/forge.git
-cd pyincore
-pip install -e .
+python setup.py test
 ```
 
-# Documentation
+## For developers
 
-Pyincore documentation can be found on [Incore server](http://incore2.ncsa.illinois.edu).
-Tutorials and examples can be found in the `docs` directory. The Jupyter notebooks can be run 
-interactively with  [Jupyter](http://jupyter.org/install).
+- Installation directly from `Git`:
+    ```
+    git clone https://git.ncsa.illinois.edu/incore/pyincore
+    cd pyincore
+    pip install -e
+    ```
+- **Pyincore documentation*** can be found on [Incore server](http://incore2.ncsa.illinois.edu/doc).
+- ***Jupyter notebooks*** can be run interactively with [Jupyter](https://git.ncsa.illinois.edu/incore/pyincore).
+- Documentation uses [Sphinx](http://www.sphinx-doc.org/en/master/) as a building tool. In order to run Sphinx, you need 
+    to install `sphinx` and `sphinx_rtd_theme` modules. Using, for example `pip`
+    ```
+    pip install -U sphinx
+    pip install -U sphinx_rtd_theme
+    ```
+    From the `docs` folder then run following command to build the documentation (in this example `source` and `build` 
+are the folder names)
+    ```
+    sphinx-build -b html source build
+    ```
+- **Tests** In order to run Tests, you need to create a file called, `.incorepw` under tests folder. The file needs 
+    two lines: `user name` in the 1st line and `password` in the 2nd line
+- There is a known issue running analyses on multiple threads in some versions of 
+    `python 3.6.x` running on `MacOS High Sierra 10.13.x`. If you see such errors on your environment, 
+    set the following environment variable in your `.bash_profile` as a workaround: 
+    ```
+    export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+    ``` 
+    Issue details can be found [here](http://sealiesoftware.com/blog/archive/2017/6/5/Objective-C_and_fork_in_macOS_1013.html)
 
-### For developers
-Pyincore documentation uses Sphinx as a building tool. In order to run Sphinx, you need to install 
-`sphinx` and `sphinx_rtd_theme` modules by using, for example `pip`:
+## Data
 
-```
-pip install -U sphinx
-pip install -U sphinx_rtd_theme
-```
-
-From the **docs** folder run following command to build the documentation:
-
-```
-sphinx-build -b html source build
-```
-
-
-# Pyincore tests
-In order to run Tests, you need to create a file called, ".incorepw" under tests folder.
-The file needs two lines: user name in 1st line, password in 2nd line
-
-
-# Notes
-
-There is a known issue running analyses on multiple threads in some versions of python 3.6.x running on MacOS High Sierra 10.13.x
-If you see such errors on your environment, set the below environment variable in your .bash_profile as a workaround.
-
-`export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`  
- 
-Issue details can be found [here](http://sealiesoftware.com/blog/archive/2017/6/5/Objective-C_and_fork_in_macOS_1013.html)
-
-
-# Requirements
-* Pyincore requires Python 3.5 or greater.
-* To access data in the Incore, you must have an account recognized by Incore Auth, 
+To access data in the **Incore**, you must have an account recognized by `Incore Auth`, 
 or a [free Incore ID](https://incore.ncsa.illinois.edu).
 
-# Contributions
-If you find a bug or want a feature, feel free to open an issue on NCSA GitLab.
+## Contributions
+If you find a bug or want a feature, feel free to open an issue on [NCSA Jira](https://jira.ncsa.illinois.edu/login.jsp).
 
-
-# Support
+## Support
 This work was performed under financial assistance award 70NANB15H044 from 
 the National Institute of Standards and Technology (NIST) as part of 
 the Interdependent Networked Community Resilience Modeling 

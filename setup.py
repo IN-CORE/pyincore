@@ -41,7 +41,7 @@ setup(
         "wikidata>=0.6.1",
         "wntr>=0.1.6",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.5",
     classifiers=[
         "Development Status :: 2 - Beta",
         "Intended Audience :: Risk-Based Community/Science/Research/Public",
