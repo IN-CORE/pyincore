@@ -9,6 +9,7 @@ pandas>=0.24.1
 plotly>=3.6.0
 py-expression-eval>=0.3.6
 pyproj>=1.9.6
+pyaml>=3.13
 rasterio>=1.0.18
 requests>=2.21.0
 rtree>=0.8.3

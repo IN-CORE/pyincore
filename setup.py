@@ -1,15 +1,15 @@
-from setuptools import setup
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+from setuptools import setup, find_packages
 
 setup(
     name='pyincore',
     version='0.1.0',
-    packages=['pyincore', 'pyincore.analyses', 'pyincore.analyses.buildingdamage',
-              'pyincore.analyses.transportationrecovery', 'pyincore.analyses.pipelinedamage',
-              'pyincore.analyses.waternetworkdamage', 'pyincore.analyses.waternetworkrecovery',
-              'pyincore.analyses.waterfacilitydamage', 'pyincore.analyses.bridgedamage',
-              'pyincore.analyses.stochasticpopulation', 'pyincore.analyses.populationdislocation',
-              'pyincore.analyses.tornadoepndamage', 'pyincore.analyses.nonstructbuildingdamage',
-              'pyincore.analyses.cumulative_building_damage'],
+    packages =  find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     description='Incore analysis tool python package',
     long_description=("Pyincore is a Python package to analyze and visualize various hazard "
                       "(earthquake, tornado, hurricane etc.) scenarios developed "
@@ -31,13 +31,12 @@ setup(
         "plotly>=3.6.0",
         "py-expression-eval>=0.3.6",
         "pyproj>=1.9.6",
+        "pyyaml>=3.13",
         "rasterio>=1.0.18",
         "requests>=2.21.0",
         "rtree>=0.8.3",
         "scipy>=1.2.0",
         "shapely>=1.6.4.post2",
-        "Sphinx>=1.8.4",
-        "sphinx-rtd-theme>=0.4.2",
         "wikidata>=0.6.1",
         "wntr>=0.1.6",
     ],
@@ -64,5 +63,5 @@ setup(
         "dislocation"
     ],
     license="Mozilla Public License v2.0",
-    url="https://git.ncsa.illinois.edu/"
+    url="https://git.ncsa.illinois.edu/incore/pyincore"
 )
