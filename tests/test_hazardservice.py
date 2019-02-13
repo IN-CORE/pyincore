@@ -241,7 +241,7 @@ def test_create_tsunami_hazard(hazardsvc):
         tsunami_json = file.read()
 
     file_paths = ["Tsu_100yr_Vmax.tif", "Tsu_100yr_Mmax.tif",
-                  "Tsu_100yr_Hmax.tif"];
+                  "Tsu_100yr_Hmax.tif"]
     response = hazardsvc.create_tsunami_hazard(tsunami_json, file_paths)
     assert response["id"] is not None and response["hazardDatasets"][1][
         "datasetId"] is not None

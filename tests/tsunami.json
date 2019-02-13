@@ -1,6 +1,6 @@
 {
-  "name": "Seaside Probabilistic Tsunami - 100 yr",
-  "description": "Seaside dataset based probabilistic tsunami hazard",
+  "name": "pytest - Seaside Probabilistic Tsunami - 100 yr",
+  "description": "pythest - Seaside dataset based probabilistic tsunami hazard. This is just a test!",
   "tsunamiType": "dataset",
   "hazardDatasets": [
     {
