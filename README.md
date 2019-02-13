@@ -30,8 +30,7 @@ and synthesizing results.
 **Optional**: `virtualenv` (available by running `pip install virtualenv`) or [Anaconda](https://www.anaconda.com/distribution/), 
 note that a full Anaconda distribution will include Python, so installing Python first isn't needed if you use Anaconda
 
-All Platforms
--------------
+### All Platforms
 
 1. Download or clone the source code from [NCSA Git](https://git.ncsa.illinois.edu/incore/pyincore) repository.
 2. Change into the ```pyincore``` directory (or prepend the path to the directory onto files reference from here on out)
