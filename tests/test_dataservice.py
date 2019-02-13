@@ -129,6 +129,15 @@ def test_create_dataset_shpfile(datasvc):
     assert response['id'] == dataset_id
 
 
+def test_update_dataset(datasvc):
+    id = "5ace7322ec230944f695f5cf"
+    property_name = "title"
+    property_value = "test update dataset"
+    response = datasvc.update_dataset(id, property_name, property_value)
+
+    assert response[property_name] == property_value
+
+
 def test_get_files(datasvc):
     metadata = datasvc.get_files()
     assert 'id' in metadata[0]
