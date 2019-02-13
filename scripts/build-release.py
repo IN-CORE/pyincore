@@ -2,17 +2,20 @@ import yaml
 import zipfile
 import os
 
-with open('release-packages.yml') as f:
+
+script_path = os.path.dirname(os.path.realpath(__file__))
+dest_path = os.path.abspath(os.path.join(script_path, '..', '..'))
+
+with open(os.path.join(script_path, 'release-packages.yml')) as f:
     config = yaml.safe_load(f)
 
 internalExcludes = ['__pycache__', 'build', 'cache_data']
 excludeList = config['exclude'] + internalExcludes
 
-dest_path = os.path.abspath(os.path.join('..', '..'))
 zipName = 'pyincore_release.zip'
 zf = zipfile.ZipFile(os.path.join(dest_path, zipName), "w")
 
-for dirname, subdirs, files in os.walk('..'):
+for dirname, subdirs, files in os.walk(os.path.relpath(os.path.join(script_path, '..'))):
     for exclude in excludeList:
         if exclude in subdirs:
             subdirs.remove(exclude)
