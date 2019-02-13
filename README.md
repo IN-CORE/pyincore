@@ -61,7 +61,7 @@ Tutorials and examples can be found in the `docs` directory. The Jupyter noteboo
 interactively with  [Jupyter](http://jupyter.org/install).
 
 ### For developers
-Pyincore documentation uses Sphinx as a bulding tool. In order to run Sphinx, you need to install 
+Pyincore documentation uses Sphinx as a building tool. In order to run Sphinx, you need to install 
 `sphinx` and `sphinx_rtd_theme` modules by using, for example `pip`:
 
 ```
@@ -69,7 +69,7 @@ pip install -U sphinx
 pip install -U sphinx_rtd_theme
 ```
 
-From the **docs** folder run following commant to build the documentation:
+From the **docs** folder run following command to build the documentation:
 
 ```
 sphinx-build -b html source build
