@@ -11,7 +11,7 @@ def run_with_base_class():
     #mapping_id = "5b47c383337d4a387669d592" #Potable Water Facility Fragility Mapping for INA - Has PGD
 
     liq_geology_dataset_id = None
-    liq_geology_dataset_id =  "5a284f53c7d30d13bc08249c"
+    liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
 
     uncertainty = False
 
@@ -33,6 +33,7 @@ def run_with_base_class():
     wf_dmg.set_parameter("num_cpu", 4)
 
     wf_dmg.run_analysis()
+
 
 if __name__ == '__main__':
     run_with_base_class()

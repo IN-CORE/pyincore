@@ -31,7 +31,7 @@ class PipelineDamage(BaseAnalysis):
 
     def run(self):
         """Execute pipeline damage analysis """
-        # Bridge dataset
+        # Pipeline dataset
         pipeline_dataset = self.get_input_dataset("pipeline").get_inventory_reader()
 
         # Get Fragility key
@@ -48,6 +48,11 @@ class PipelineDamage(BaseAnalysis):
 
         # Get geology dataset id
         geology_dataset_id = self.get_parameter("geology")
+
+        # Liquefaction
+        use_liquefaction = False
+        if self.get_parameter("use_liquefaction") is not None:
+            use_liquefaction = self.get_parameter("use_liquefaction")
 
         results = []
         user_defined_cpu = 1
@@ -68,7 +73,7 @@ class PipelineDamage(BaseAnalysis):
 
         results = self.pipeline_damage_concurrent_future(self.pipeline_damage_analysis_bulk_input, num_workers,
                                                         inventory_args, repeat(hazard_dataset_id), repeat(fragility_key),
-                                                        repeat(geology_dataset_id))
+                                                        repeat(geology_dataset_id), repeat(use_liquefaction))
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -93,7 +98,8 @@ class PipelineDamage(BaseAnalysis):
 
         return output
 
-    def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_dataset_id, fragility_key, geology_dataset_id):
+    def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_dataset_id, fragility_key, geology_dataset_id,
+                                            use_liquefaction):
         """Run pipeline damage analysis for multiple pipelines.
         
         Args:
@@ -101,7 +107,9 @@ class PipelineDamage(BaseAnalysis):
             hazard_dataset_id (str): An id of the hazard exposure.
             fragility_key (str): Fragility Key.
             geology_dataset_id (str): An id of Geology dataset.
-        
+            use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
+                False otherwise.
+
         Returns:
             list: A list of ordered dictionaries with pipeline damage values and other data/metadata.
 
@@ -121,11 +129,11 @@ class PipelineDamage(BaseAnalysis):
                     liq_fragility_set = fragility_sets_liq[pipeline["id"]]
 
                 result.append(self.pipeline_damage_analysis(pipeline, fragility_sets[pipeline["id"]], liq_fragility_set,
-                                                            hazard_dataset_id, geology_dataset_id))
+                                                            hazard_dataset_id, geology_dataset_id, use_liquefaction))
         return result
 
     def pipeline_damage_analysis(self, pipeline, fragility_set, fragility_set_liq, hazard_dataset_id,
-                                 geology_dataset_id):
+                                 geology_dataset_id, use_liquefaction):
         """Run pipeline damage for a single pipeline.
         
         Args:
@@ -134,7 +142,9 @@ class PipelineDamage(BaseAnalysis):
             fragility_set_liq (obj): A JSON description of fragility assigned to the building with liqufaction.
             hazard_dataset_id (str): A hazard dataset to use.
             geology_dataset_id (str): A dataset id for geology dataset for liqufaction.
-        
+            use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
+                False otherwise.
+
         Returns:
             OrderedDict: A dictionary with pipeline damage values and other data/metadata.
         """
@@ -158,8 +168,8 @@ class PipelineDamage(BaseAnalysis):
             location = GeoUtil.get_location(pipeline)
 
             # Get PGV hazard from hazardsvc
-            hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, demand_type, demand_units, location.y,
-                                                               location.x)
+            hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, demand_type, demand_units,
+                                                                    location.y, location.x)
             diameter = PipelineUtil.get_pipe_diameter(pipeline)
             fragility_vars = {'x': hazard_val, 'y': diameter}
             pgv_repairs = AnalysisUtil.compute_custom_limit_state_probability(fragility_set, fragility_vars)
@@ -172,15 +182,15 @@ class PipelineDamage(BaseAnalysis):
             liq_hazard_val = 0.0
             liquefaction_prob = 0.0
 
-            if fragility_set_liq is not None and geology_dataset_id is not None:
+            if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
                 liq_fragility_curve = fragility_set_liq['fragilityCurves'][0]
                 liq_hazard_type = fragility_set_liq['demandType']
                 pgd_demand_units = fragility_set_liq['demandUnits']
 
                 # Get PGD hazard value from hazard service
                 location_str = str(location.y) + "," + str(location.x)
-                liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, geology_dataset_id, pgd_demand_units
-                                                                 , [location_str])
+                liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, geology_dataset_id,
+                                                                      pgd_demand_units, [location_str])
                 liq_hazard_val = liquefaction[0]['pgd']
                 liquefaction_prob = liquefaction[0]['liqProbability']
 
@@ -266,6 +276,12 @@ class PipelineDamage(BaseAnalysis):
                     'required': False,
                     'description': 'Fragility key to use in mapping dataset',
                     'type': str
+                },
+                {
+                    'id': 'use_liquefaction',
+                    'required': False,
+                    'description': 'Use liquefaction',
+                    'type': bool
                 },
                 {
                     'id': 'num_cpu',
