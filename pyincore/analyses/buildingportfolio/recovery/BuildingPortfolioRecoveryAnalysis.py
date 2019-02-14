@@ -117,6 +117,8 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         return impeding[0] + max(impeding[1:4]) + impeding[4]
 
+
+    #TODO: Improve readability
     def joint_probability_calculation(self, sample_i, sample_j, number_of_samples):
         output = np.zeros((5,5))
         for n in range(number_of_samples):
@@ -308,8 +310,9 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             # START: Additional Code for uncertainty analysis
             mean_u = np.zeros(sample_size)
             # sample_size2 = args.sample_size
+            #TODO: check coeFL size as in matlab
             covar = np.matrix(coeFL) # np.zeros([sample_size, sample_size]) # TODO: Should read a coefFL file
-            random_distribution = np.random.multivariate_normal(mean_u, covar, number_of_simulations)
+            random_distribution = np.random.multivariate_normal(mean_u, covar, 10000)
             random_samples = sp.stats.norm.cdf(random_distribution)
             sample_total = np.zeros((sample_size, number_of_simulations))
 
@@ -359,6 +362,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             irt = np.zeros(time_steps)
             for t in range(time_steps):
                 total_standard_deviation[t] = math.sqrt(total_standard_deviation[t]) / sample_size
+                target_mean_recovery[t] = mean_recovery[t][3] + mean_recovery[t][4]
                 pdf_full[t] = sp.stats.norm.pdf(x_range, target_mean_recovery[t], total_standard_deviation[t])
             # for t in range(time_steps):
                 coeR = np.trapz(x_range, pdf_full[t])
@@ -390,7 +394,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
             for t in range(time_steps):
                 coet = sp.stats.norm.cdf(0, target_mean_recovery[t], total_standard_deviation[t])
-                coet2 = 1 - sp.stats.norm.cdf(1, target_mean_recovery[t], total_standard_deviation[t])
+                coet2 = sp.stats.norm.cdf(1, target_mean_recovery[t], total_standard_deviation[t])
 
                 if coet >= 0.000005 and 1 - coet2 < 0.00005:
                     coeAmp = 1 / (1 - coet)
@@ -400,12 +404,12 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                     upper_bound75[t] = sp.stats.norm.ppf(0.75 / coeAmp + coet, target_mean_recovery[t], total_standard_deviation[t])
 
                     pdf_full[t] = pdf_full[t] * coeAmp
-                if coet2 >= 0.000005 and coet < 0.00005:
-                    coeAmp = 1/ (1-coet2)
-                    lower_bound95[t] = sp.stats.norm.ppf((1 - coet2) - 0.95 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
-                    upper_bound95[t] = sp.stats.norm.ppf((1 - coet2) - 0.05 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
-                    lower_bound75[t] = sp.stats.norm.ppf((1 - coet2) - 0.75 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
-                    upper_bound75[t] = sp.stats.norm.ppf((1 - coet2) - 0.25 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
+                if coet < 0.00005 and 1 - coet2 >= 0.000005:
+                    coeAmp = 1/ coet2
+                    lower_bound95[t] = sp.stats.norm.ppf((coet2) - 0.95 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
+                    upper_bound95[t] = sp.stats.norm.ppf((coet2) - 0.05 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
+                    lower_bound75[t] = sp.stats.norm.ppf((coet2) - 0.75 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
+                    upper_bound75[t] = sp.stats.norm.ppf((coet2) - 0.25 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
 
                     pdf_full[t] = pdf_full[t]*coeAmp
                 if coet >= 0.000005 and 1 - coet2 >= 0.00005:
@@ -618,20 +622,17 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 for k in range(5):
                     # Functionality State l
                     for l in range(5):
-                        expect1 += joint_probability[k][l] * temporary_correlation1[t][i][k] * \
+                        expect1 += joint_probability[k][l] * (temporary_correlation1[t][i][k] * \
                                    temporary_correlation1[t][j][l] \
                                    + temporary_correlation1[t][i][k] * temporary_correlation1[t][j][l] \
                                    + temporary_correlation2[t][i][k] * temporary_correlation1[t][j][l] \
-                                   + temporary_correlation2[t][i][k] * temporary_correlation2[t][j][l]
+                                   + temporary_correlation2[t][i][k] * temporary_correlation2[t][j][l])
                 expect2 = mean_over_time[t][i] * mean_over_time[t][j]
 
                 if variance_over_time[t][i] > 0 and variance_over_time[t][j] > 0 and expect1 - expect2 > 0:
                     covariance = expect1 - expect2
                     output += 2 * covariance
-                #endi = timer()
-                #print("inner loop for ", j, ": ", endi - starti)
-            #end = timer()
-            #print("OUTER LOOP", end - start)
+
         return output
 
     def get_spec(self):
