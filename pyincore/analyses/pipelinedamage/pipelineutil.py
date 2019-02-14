@@ -2,8 +2,9 @@
 class PipelineUtil:
     """Utility methods for pipeline analysis"""
 
-    DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
-    LIQ_FRAGILITY_KEY= "Liquefaction-Fragility-Key"
+    DEFAULT_FRAGILITY_KEY = "pgv"
+    LIQ_FRAGILITY_KEY = "pgd"
+
 
     @staticmethod
     def convert_result_unit(result_unit: str, result: float):

@@ -9,7 +9,6 @@ and is available at https://opensource.org/licenses/BSD-3-Clause
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
 from pyincore.analyses.pipelinedamage.pipelineutil import PipelineUtil
-import csv
 import concurrent.futures
 from itertools import repeat
 import collections
@@ -47,7 +46,7 @@ class PipelineDamage(BaseAnalysis):
         hazard_dataset_id = self.get_parameter("hazard_id")
 
         # Get geology dataset id
-        geology_dataset_id = self.get_parameter("geology")
+        geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
         # Liquefaction
         use_liquefaction = False
@@ -290,7 +289,7 @@ class PipelineDamage(BaseAnalysis):
                     'type': int
                 },
                 {
-                    'id': 'geology',
+                    'id': 'liquefaction_geology_dataset_id',
                     'required': False,
                     'description': 'Geology dataset id',
                     'type': str,
