@@ -125,6 +125,13 @@ class FragilityService:
 
         return r.json()
 
+    def search_fragility_sets(self, text: str):
+        url = urllib.parse.urljoin(self.base_frag_url, "search")
+        payload = {"text": text}
+        r = requests.get(url, headers=self.client.headers, params=payload)
+
+        return r.json()
+
     def create_fragility_set(self, fragility_set: dict):
         url = self.base_frag_url
         r = requests.post(url, json=fragility_set, headers=self.client.headers)

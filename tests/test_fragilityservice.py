@@ -31,6 +31,12 @@ def test_get_fragility_set(fragilitysvc):
 
     assert metadata['id'] == id
 
+def test_search_fragility_sets(fragilitysvc):
+    text = "Elnashai and Jeong"
+    fragility_sets = fragilitysvc.search_fragility_sets(text)
+
+    assert len(fragility_sets)>0 and text in fragility_sets[0]['authors']
+
 
 def test_map_fragilities_single_inventory(fragilitysvc):
     inventory = {}
