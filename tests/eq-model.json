@@ -1,5 +1,5 @@
 {
-  "name": "Memphis EQ Model",
+  "name": "pytest - Memphis EQ Model",
   "description": "Memphis model based hazard - Pytest",
   "eqType": "model",
   "attenuations" : {

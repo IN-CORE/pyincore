@@ -1,5 +1,5 @@
 {
-  "name": "Tsunami Building Fragility Mapping",
+  "name": "pytest - Tsunami Building Fragility Mapping",
   "hazardType": "tsunami",
   "inventoryType": "building",
   "mappings": [

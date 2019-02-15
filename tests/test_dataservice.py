@@ -32,7 +32,7 @@ def test_get_dataset_files_metadata(datasvc):
     errors = []
     id = "5a284f0ac7d30d13bc0819c4"
     metadata = datasvc.get_dataset_metadata(id)
-    fileDescriptor = datasvc.get_dataset_fileDescriptors(id)
+    fileDescriptor = datasvc.get_dataset_files_metadata(id)
 
     if 'id' not in fileDescriptor[0].keys():
         errors.append("response does not seem right!")
@@ -49,7 +49,7 @@ def test_get_dataset_files_metadata(datasvc):
 def test_get_dataset_file_metadata(datasvc):
     dataset_id = "5a284f0bc7d30d13bc081a28"
     file_id = "5a284f0bc7d30d13bc081a2b"
-    metadata = datasvc.get_dataset_single_fileDescriptor(dataset_id, file_id)
+    metadata = datasvc.get_dataset_file_metadata(dataset_id, file_id)
     assert 'id' in metadata.keys() and metadata['id'] == file_id
 
 
