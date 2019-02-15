@@ -28,7 +28,7 @@ def test_get_dataset_metadata(datasvc):
     assert metadata['id'] == id
 
 
-def test_get_dataset_fileDescriptors(datasvc):
+def test_get_dataset_files_metadata(datasvc):
     errors = []
     id = "5a284f0ac7d30d13bc0819c4"
     metadata = datasvc.get_dataset_metadata(id)
@@ -46,7 +46,7 @@ def test_get_dataset_fileDescriptors(datasvc):
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
 
-def test_get_dataset_single_fileDescriptor(datasvc):
+def test_get_dataset_file_metadata(datasvc):
     dataset_id = "5a284f0bc7d30d13bc081a28"
     file_id = "5a284f0bc7d30d13bc081a2b"
     metadata = datasvc.get_dataset_single_fileDescriptor(dataset_id, file_id)

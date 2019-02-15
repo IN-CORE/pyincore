@@ -33,12 +33,12 @@ class DataService:
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
-    def get_dataset_fileDescriptors(self, dataset_id: str):
+    def get_dataset_files_metadata(self, dataset_id: str):
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/files')
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
-    def get_dataset_single_fileDescriptor(self, dataset_id: str, file_id: str):
+    def get_dataset_file_metadata(self, dataset_id: str, file_id: str):
         url = urllib.parse.urljoin(self.base_url,
                                    dataset_id + "/files/" + file_id)
         r = requests.get(url, headers=self.client.headers)
