@@ -156,8 +156,8 @@ def test_get_tornado_hazard_metadata(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
     response = hazardsvc.get_tornado_hazard_metadata(
-        "5ad0f35eec230965e6d98d0c")
-    assert response['id'] == "5ad0f35eec230965e6d98d0c"
+        "5c6726705648c40890ba03a7")
+    assert response['id'] == "5c6726705648c40890ba03a7"
 
 
 def test_create_tornado_scenario(hazardsvc):
@@ -176,7 +176,7 @@ def test_get_tornado_hazard_value(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
 
-    hval = hazardsvc.get_tornado_hazard_value("5ad0f35eec230965e6d98d0c",
+    hval = hazardsvc.get_tornado_hazard_value("5c6726705648c40890ba03a7",
                                               "mph", 35.228, -97.478, 0)
     assert ((hval > 85) and (hval < 165))
 
@@ -187,7 +187,7 @@ def test_get_tornado_hazard_values(hazardsvc):
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    hvals = hazardsvc.get_tornado_hazard_values("5ad0f35eec230965e6d98d0c",
+    hvals = hazardsvc.get_tornado_hazard_values("5c6726705648c40890ba03a7",
                                                 "mph",
                                                 ["35.228, -97.478",
                                                  "35.229, -97.465"])
