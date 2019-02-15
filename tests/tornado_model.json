@@ -1,5 +1,5 @@
 {
-  "name": "Centerville Tornado",
+  "name": "pytest - Centerville Tornado",
   "description": "Centerville mean width tornado hazard",
   "tornadoType": "model",
   "tornadoModel" : "MeanWidthTornado",
