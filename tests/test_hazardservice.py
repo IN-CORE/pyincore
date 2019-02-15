@@ -15,7 +15,7 @@ def hazardsvc():
         return None
     # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
     client = InsecureIncoreClient(
-        "http://incore2-services.ncsa.illinois.edu:8888",
+        "http://incore2-services-dev.ncsa.illinois.edu:8888",
         cred[0])
 
     return HazardService(client)
@@ -128,7 +128,7 @@ def test_create_earthquake(hazardsvc):
     with open("eq-dataset.json", 'r') as file:
         eq_dataset_json = file.read()
 
-    file_paths = ["eq-dataset1.tif", "eq-dataset2.tif"];
+    file_paths = ["eq-dataset1.tif", "eq-dataset2.tif"]
 
     dataset_response = hazardsvc.create_earthquake(eq_dataset_json, file_paths)
     assert dataset_response["id"] is not None and \
