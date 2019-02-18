@@ -15,16 +15,28 @@ and synthesizing results.
 
 [Python 3.5](https://www.python.org) or greater
 
-[GDAL](https://www.gdal.org)
+[GDAL](https://www.gdal.org) - Geospatial Data Abstraction Library
 
 - **Linux** 
 
-    **Pyincore** uses `gdal` library which has to be installed separately for example by using `apt-get` package utility 
+    **Pyincore** uses GDAL library which has to be installed separately for example by using `apt-get` package utility 
     on Debian, Ubuntu, and related Linux distributions.
     ```
     apt-get gdal
     ```
+    Additonal information can be found  at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
 - **Windows**
+
+    GDAL for Windows can be difficult to build, requiring a number of prerequisite software, libraries, and header files. 
+    If you are comfortable building Windows software then building GDAL from source as a develop build is preferred.
+    If you are not comfortable building GDAL then you may want to download the `gdal` binaries 
+    from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/). 
+    The problem with this is that GDAL header files 
+    are not included, so you cannot do a `pip install` of packages that want to utilize 
+    the GDAL headers. Fiona and Rasterio will need binaries installed from this page as well, 
+    and if you run into failed dependancies during the setup process you may want to revisit 
+    the page and install the binaries for the Python extensions that are causing problems. 
+    Additional information can be found at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
 
 
 **Optional**: `virtualenv` (available by running `pip install virtualenv`) or [Anaconda](https://www.anaconda.com/distribution/), 
