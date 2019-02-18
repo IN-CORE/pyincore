@@ -95,17 +95,6 @@ python setup.py test
     ```
 - **Pyincore documentation*** can be found on [Incore server](http://incore2.ncsa.illinois.edu/doc).
 - ***Jupyter notebooks*** can be run interactively with [Jupyter](https://git.ncsa.illinois.edu/incore/pyincore).
-- Documentation uses [Sphinx](http://www.sphinx-doc.org/en/master/) as a building tool. In order to run Sphinx, you need 
-    to install `sphinx` and `sphinx_rtd_theme` modules. Using, for example `pip`
-    ```
-    pip install -U sphinx
-    pip install -U sphinx_rtd_theme
-    ```
-    From the `docs` folder then run following command to build the documentation (in this example `source` and `build` 
-are the folder names)
-    ```
-    sphinx-build -b html source build
-    ```
 - **Tests** In order to run Tests, you need to create a file called, `.incorepw` under tests folder. The file needs 
     two lines: `user name` in the 1st line and `password` in the 2nd line
 - There is a known issue running analyses on multiple threads in some versions of 
