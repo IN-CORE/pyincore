@@ -70,6 +70,7 @@ class BaseAnalysis:
 
         """
         dataset = Dataset.from_data_service(remote_id, self.data_service)
+        #TODO: Need to handle failing to set input dataset
         self.set_input_dataset(analysis_param_id, dataset)
 
     def get_name(self):
@@ -113,11 +114,13 @@ class BaseAnalysis:
         return self.input_datasets[id]['value']
 
     def set_input_dataset(self, id, dataset):
-        if self.validate_input_dataset(self.input_datasets[id]['spec'], dataset)[0]:
+        result = self.validate_input_dataset(self.input_datasets[id]['spec'], dataset)
+        if result[0]:
             self.input_datasets[id]['value'] = dataset
             return True
         else:
             # TODO handle error message
+            print(result[1])
             return False
 
     def get_output_datasets(self):
@@ -175,13 +178,18 @@ class BaseAnalysis:
         """
         is_valid = True
         err_msg = ''
-        if dataset_spec['required'] and not (dataset.data_type in dataset_spec['type']):
-            is_valid = False
-            err_msg = 'dataset type does not match'
-        elif not isinstance(dataset.data_type, type(None)) and not (dataset.data_type in dataset_spec['type']):
-            is_valid = False
-            err_msg = 'parameter type does not match'
-
+        if not isinstance(dataset, type(None)):
+            #if dataset is not none, check data type
+            if not (dataset.data_type in dataset_spec['type']):
+                # if dataset type is not equal to spec, then return false
+                is_valid = False
+                err_msg = 'dataset type does not match - ' + 'given type: '+dataset.data_type+' spec types: '+ str(dataset_spec['type'])
+        else:
+            #if dataset is none, check 'requirement'
+            if dataset_spec['required']:
+                # if dataset is 'required', return false
+                is_valid = False
+                err_msg = 'required dataset is missing - spec: ' + str(dataset_spec)
         return (is_valid, err_msg)
 
     def validate_output_dataset(self, dataset_spec, dataset):
@@ -242,50 +250,3 @@ class BaseAnalysis:
         return AnalysisUtil.create_gdocstr_from_spec(self.get_spec())
 
 
-class BuildingDamageAnalysis(BaseAnalysis):
-    """An example subclass with specifications for the building damage analysis."""
-    def run(self):
-        print('hello this is building damage analysis')
-        return True
-
-    def get_spec(self):
-        """An example of the specifications of the building damage analysis.
-
-        Returns:
-            obj: A JSON object of basic specifications of the analysis.
-
-        """
-        return {
-            'name': 'building-damage',
-            'description': 'building damage analysis',
-            'input_parameters': [
-                {
-                    'id': 'result_name',
-                    'required': True,
-                    'description': 'result dataset name',
-                    'type': str
-                }
-            ],
-            'input_datasets': [
-                {
-                    'id': 'buildings',
-                    'required': True,
-                    'description': 'Building Inventory',
-                    'type': ['building-v4', 'building-v5'],
-                }
-            ],
-            'output_datasets': [
-                {
-                    'id': 'result',
-                    'parent_type': 'buidings',
-                    'description': 'output of analysis (mostly CSV file)',
-                    'type': 'building-damage'
-                }
-            ]
-        }
-
-
-if __name__ == "__main__":
-    analysis = BuildingDamageAnalysis()
-    pprint.pprint(analysis.get_input_datasets())
-    analysis.run()
