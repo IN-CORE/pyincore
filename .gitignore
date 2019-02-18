@@ -20,6 +20,9 @@ hs_err_pid*
 **/dist/
 **/pyincore.egg-info/
 
+# VSCODE
+.vscode
+
 # IDEA - generated artifacts
 **/out/
 
