@@ -29,6 +29,7 @@ and synthesizing results.
 
     GDAL for Windows can be difficult to build, requiring a number of prerequisite software, libraries, and header files. 
     If you are comfortable building Windows software then building GDAL from source as a develop build is preferred.
+    
     If you are not comfortable building GDAL then you may want to download the `gdal` binaries 
     from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/). 
     The problem with this is that GDAL header files 
