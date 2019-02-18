@@ -15,11 +15,12 @@ hs_err_pid*
 **.iml
 **.iml
 
-# VSCODE
-.vscode
+# pyincore setup and build
+**/build/
+**/dist/
+**/pyincore.egg-info/
 
 # IDEA - generated artifacts
-**/build/
 **/out/
 
 # Apple metadata

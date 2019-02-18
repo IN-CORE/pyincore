@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
 
 """
 Water Facility Damage
@@ -61,6 +64,12 @@ class WaterFacilityDamage(BaseAnalysis):
                     'required': False,
                     'description': 'Fragility key to use in mapping dataset',
                     'type': str
+                },
+                {
+                    'id': 'use_liquefaction',
+                    'required': False,
+                    'description': 'Use liquefaction',
+                    'type': bool
                 },
 
                 {
@@ -189,6 +198,7 @@ class WaterFacilityDamage(BaseAnalysis):
         result = []
         liq_fragility = None
         mapping_id = self.get_parameter("mapping_id")
+        use_liquefaction = self.get_parameter("use_liquefaction")
         liq_geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
         uncertainty = self.get_parameter("use_hazard_uncertainty")
 
@@ -200,7 +210,8 @@ class WaterFacilityDamage(BaseAnalysis):
 
             pga_fragility_set = self.fragilitysvc.map_fragilities(mapping_id, facilities, fragility_key)
 
-            if liq_geology_dataset_id is not None:
+            liq_fragility_set = []
+            if use_liquefaction and liq_geology_dataset_id is not None:
                 liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
                 if liq_fragility_key is None:
                     liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
@@ -208,7 +219,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
             for facility in facilities:
                 fragility = pga_fragility_set[facility["id"]]
-                if liq_geology_dataset_id is not None and facility["id"] in liq_fragility_set:
+                if facility["id"] in liq_fragility_set:
                     liq_fragility = liq_fragility_set[facility["id"]]
 
                 result.append(self.waterfacility_damage_analysis(facility, fragility, liq_fragility,
@@ -243,8 +254,12 @@ class WaterFacilityDamage(BaseAnalysis):
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
         location = GeoUtil.get_location(facility)
+
+        point = str(location.y) + "," + str(location.x)
+
         hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id,hazard_demand_type,
-                                                            demand_units, points=[location.y, location.x])
+                                                                     demand_units, [point])
+
         hazard_val = hazard_val_set[0]['hazardValue']
 
         limit_states = AnalysisUtil.compute_limit_state_probability(fragility['fragilityCurves'],
@@ -255,10 +270,10 @@ class WaterFacilityDamage(BaseAnalysis):
         if liq_fragility is not None and liq_geology_dataset_id:
             liq_hazard_type = liq_fragility['demandType']
             pgd_demand_units = liq_fragility['demandUnits']
-            location_str = str(location.y) + "," + str(location.x)
+            point = str(location.y) + "," + str(location.x)
 
             liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, liq_geology_dataset_id,
-                                                            pgd_demand_units, [location_str])
+                                                            pgd_demand_units, [point])
             liq_hazard_val = liquefaction[0][liq_hazard_type]
             liquefaction_prob = liquefaction[0]['liqProbability']
             pgd_limit_states = AnalysisUtil.compute_limit_state_probability(liq_fragility['fragilityCurves'],

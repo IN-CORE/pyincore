@@ -1,11 +1,10 @@
-"""pyincore.analyses.bridgedamage.bridgedamage
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-Copyright (c) 2017 University of Illinois and others.  All rights reserved.
-This program and the accompanying materials are made available under the
-terms of the BSD-3-Clause which accompanies this distribution,
-and is available at https://opensource.org/licenses/BSD-3-Clause
 
-"""
 import collections
 import concurrent.futures
 from pyincore import BaseAnalysis, HazardService, FragilityService
@@ -164,11 +163,12 @@ class BridgeDamage(BaseAnalysis):
             location = GeoUtil.get_location(bridge)
             demand_type = fragility_set['demandType']
             demand_units = fragility_set['demandUnits']
+            point = str(location.y) + "," + str(location.x)
             # Start here, need to add the hazard dataset id to the analysis parameter list
             hazard_resp = \
                 self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id,
                                                             demand_type, demand_units,
-                                                            [location.y, location.x])
+                                                            [point])
             hazard_val = hazard_resp[0]['hazardValue']
             hazard_std_dev = 0.0
 

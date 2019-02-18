@@ -4,6 +4,8 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+import pprint
+
 # TODO: exception handling for validation and set methods
 from pyincore import DataService, AnalysisUtil
 from pyincore.dataset import Dataset

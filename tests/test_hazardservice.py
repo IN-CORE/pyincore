@@ -1,3 +1,10 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+
 import pytest
 
 from pyincore import IncoreClient, InsecureIncoreClient
@@ -56,15 +63,27 @@ def test_get_liquefaction_values(hazardsvc):
 
 def test_create_earthquake(hazardsvc):
     """
-    Test creating earthquake
+    Test creating both model and dataset based earthquakes
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    config = ""
-    with open("eq.json", 'r') as file:
-        config = file.read()
-    response = hazardsvc.create_earthquake(config)
-    assert response["id"] is not None
+
+    # Dataset Based Earthquake
+    with open("eq-dataset.json", 'r') as file:
+        eq_dataset_json = file.read()
+
+    file_paths = ["eq-dataset1.tif", "eq-dataset2.tif"];
+
+    dataset_response = hazardsvc.create_earthquake(eq_dataset_json, file_paths)
+    assert dataset_response["id"] is not None and \
+           dataset_response["hazardDatasets"][1]["datasetId"] is not None
+
+    # Model Based Earthquake without files
+    with open("eq-model.json", 'r') as file:
+        eqmodel_json = file.read()
+
+    model_response = hazardsvc.create_earthquake(eqmodel_json)
+    assert model_response["id"] is not None
 
 def test_get_tornado_hazard_metadata(hazardsvc):
     """
@@ -72,8 +91,8 @@ def test_get_tornado_hazard_metadata(hazardsvc):
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    response = hazardsvc.get_tornado_hazard_metadata("5ad0f35eec230965e6d98d0c")
-    assert response['id'] == "5ad0f35eec230965e6d98d0c"
+    response = hazardsvc.get_tornado_hazard_metadata("5c62e9ecc11bb380daa9cb75")
+    assert response['id'] == "5c62e9ecc11bb380daa9cb75"
 
 def test_create_tornado_scenario(hazardsvc):
     if hazardsvc is None:
@@ -91,7 +110,7 @@ def test_get_tornado_hazard_value(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
 
-    hval = hazardsvc.get_tornado_hazard_value("5ad0f35eec230965e6d98d0c", "mph", 35.228, -97.478, 0)
+    hval = hazardsvc.get_tornado_hazard_value("5c62e9ecc11bb380daa9cb75", "mph", 35.228, -97.478, 0)
     assert ((hval > 85) and (hval <  165))
 
 
@@ -101,7 +120,7 @@ def test_get_tornado_hazard_values(hazardsvc):
     """
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    hvals = hazardsvc.get_tornado_hazard_values("5ad0f35eec230965e6d98d0c", "mph",
+    hvals = hazardsvc.get_tornado_hazard_values("5c62e9ecc11bb380daa9cb75", "mph",
                                                    ["35.228, -97.478", "35.229, -97.465"])
 
     assert ((hvals[0]['hazardValue'] > 85) and (hvals[0]['hazardValue'] < 165)) and hvals[1]['hazardValue'] == 0

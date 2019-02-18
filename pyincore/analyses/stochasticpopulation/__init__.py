@@ -3,4 +3,4 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.waterfacilitydamage.waterfacilitydamage import WaterFacilityDamage
+from pyincore.analyses.stochasticpopulation.stochastic_population_allocation import StochasticPopulationAllocation

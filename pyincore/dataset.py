@@ -1,3 +1,10 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+
 import csv
 import json
 import numpy
@@ -7,6 +14,7 @@ import wntr
 
 import fiona
 import rasterio
+import pandas as pd
 
 from pyincore import DataService
 
@@ -134,6 +142,14 @@ class Dataset:
                 filename = files[0]
 
         return filename
+
+    def get_dataframe_from_csv(self):
+        filename = self.get_file_path('csv')
+        df = pd.DataFrame()
+        if os.path.isfile(filename):
+            df = pd.read_csv(filename, header="infer")
+        return df
+
 
     def close(self):
         for key in self.readers:

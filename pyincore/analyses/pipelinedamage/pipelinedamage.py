@@ -1,9 +1,11 @@
-"""pyincore.analyses.pipelinedamage.pipelinedamage
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-Copyright (c) 2017 University of Illinois and others.  All rights reserved.
-This program and the accompanying materials are made available under the
-terms of the BSD-3-Clause which accompanies this distribution,
-and is available at https://opensource.org/licenses/BSD-3-Clause
+
+"""Buried Pipeline Damage Analysis
 
 """
 
@@ -17,7 +19,7 @@ import math
 
 class PipelineDamage(BaseAnalysis):
     """Computes pipeline damage for a hazard.
-    
+
     Args:
         incore_client: Service client with authentication info
 
@@ -86,12 +88,12 @@ class PipelineDamage(BaseAnalysis):
 
     def pipeline_damage_concurrent_future(self, function_name, num_workers, *args):
         """Utilizes concurrent.future module.
-        
+
         Args:
             function_name (function): The function to be parallelized.
             num_workers (int): Maximum number workers in parallelization.
             *args: All the arguments in order to pass into parameter function_name.
-        
+
         Returns:
             list: A list of ordered dictionaries with building damage values and other data/metadata.
 
@@ -106,9 +108,9 @@ class PipelineDamage(BaseAnalysis):
     def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_dataset_id, fragility_key, geology_dataset_id,
                                             use_liquefaction, liquefaction_fragility_key):
         """Run pipeline damage analysis for multiple pipelines.
-        
+
         Args:
-            pipelines (list): multiple pipelines from pieline dataset. 
+            pipelines (list): multiple pipelines from pieline dataset.
             hazard_dataset_id (str): An id of the hazard exposure.
             fragility_key (str): Fragility Key.
             geology_dataset_id (str): An id of Geology dataset.
@@ -141,9 +143,9 @@ class PipelineDamage(BaseAnalysis):
     def pipeline_damage_analysis(self, pipeline, fragility_set, fragility_set_liq, hazard_dataset_id,
                                  geology_dataset_id, use_liquefaction):
         """Run pipeline damage for a single pipeline.
-        
+
         Args:
-            pipeline (obj): a single pipeline. 
+            pipeline (obj): a single pipeline.
             fragility_set (obj): A JSON description of fragility assigned to the building.
             fragility_set_liq (obj): A JSON description of fragility assigned to the building with liqufaction.
             hazard_dataset_id (str): A hazard dataset to use.
@@ -307,7 +309,7 @@ class PipelineDamage(BaseAnalysis):
                     'required': False,
                     'description': 'Geology dataset id',
                     'type': str,
-                }                
+                }
             ],
             'input_datasets': [
                 {
