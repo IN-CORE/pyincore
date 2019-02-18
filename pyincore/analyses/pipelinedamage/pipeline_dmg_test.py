@@ -28,6 +28,7 @@ def test_pipeline_dmg():
     pipeline_dmg.set_parameter("mapping_id", mapping_id)
     pipeline_dmg.set_parameter("hazard_type", hazard_type)
     pipeline_dmg.set_parameter("hazard_id", hazard_id)
+    pipeline_dmg.set_parameter("liquefaction_fragility_key", "pgd")
     pipeline_dmg.set_parameter("use_liquefaction", False)
     pipeline_dmg.set_parameter("num_cpu", 4)
     pipeline_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)

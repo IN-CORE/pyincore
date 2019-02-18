@@ -48,6 +48,11 @@ class PipelineDamage(BaseAnalysis):
         # Get geology dataset id
         geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
+        #Get Liquefaction Fragility Key
+        liquefaction_fragility_key = self.get_parameter("liquefaction_fragility_key")
+        if liquefaction_fragility_key is None:
+            liquefaction_fragility_key = PipelineUtil.LIQ_FRAGILITY_KEY
+
         # Liquefaction
         use_liquefaction = False
         if self.get_parameter("use_liquefaction") is not None:
@@ -71,8 +76,9 @@ class PipelineDamage(BaseAnalysis):
             count += avg_bulk_input_size
 
         results = self.pipeline_damage_concurrent_future(self.pipeline_damage_analysis_bulk_input, num_workers,
-                                                        inventory_args, repeat(hazard_dataset_id), repeat(fragility_key),
-                                                        repeat(geology_dataset_id), repeat(use_liquefaction))
+                                                         inventory_args, repeat(hazard_dataset_id), repeat(fragility_key),
+                                                         repeat(geology_dataset_id), repeat(use_liquefaction),
+                                                         repeat(liquefaction_fragility_key))
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -98,7 +104,7 @@ class PipelineDamage(BaseAnalysis):
         return output
 
     def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_dataset_id, fragility_key, geology_dataset_id,
-                                            use_liquefaction):
+                                            use_liquefaction, liquefaction_fragility_key):
         """Run pipeline damage analysis for multiple pipelines.
         
         Args:
@@ -108,6 +114,7 @@ class PipelineDamage(BaseAnalysis):
             geology_dataset_id (str): An id of Geology dataset.
             use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
                 False otherwise.
+            liquefaction_fragility_key (str): Liquefaction Fragility Key
 
         Returns:
             list: A list of ordered dictionaries with pipeline damage values and other data/metadata.
@@ -118,8 +125,8 @@ class PipelineDamage(BaseAnalysis):
 
         # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
         if geology_dataset_id is not None:
-            fragility_sets_liq = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), pipelines, 
-                                                                PipelineUtil.LIQ_FRAGILITY_KEY)
+            fragility_sets_liq = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), pipelines,
+                                                                   liquefaction_fragility_key)
         for pipeline in pipelines:
             if pipeline["id"] in fragility_sets.keys():
                 liq_fragility_set = None
@@ -229,6 +236,7 @@ class PipelineDamage(BaseAnalysis):
         pipeline_results['hazardval'] = hazard_val
         pipeline_results['liqhaztype'] = liq_hazard_type
         pipeline_results['liqhazval'] = liq_hazard_val
+        pipeline_results['liqprobability'] = liquefaction_prob
         pipeline_results['numpgvrpr'] = num_pgv_repairs
         pipeline_results['numpgdrpr'] = num_pgd_repairs
         pipeline_results['numrepairs'] = num_repairs
@@ -281,6 +289,12 @@ class PipelineDamage(BaseAnalysis):
                     'required': False,
                     'description': 'Use liquefaction',
                     'type': bool
+                },
+                {
+                    'id': 'liquefaction_fragility_key',
+                    'required': False,
+                    'description': 'Fragility key to use in liquefaction mapping dataset',
+                    'type': str
                 },
                 {
                     'id': 'num_cpu',
