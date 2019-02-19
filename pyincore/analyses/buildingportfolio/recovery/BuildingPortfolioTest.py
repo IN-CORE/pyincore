@@ -8,7 +8,7 @@ if __name__ == "__main__":
         client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
 
 
-        bldg_damage_file = "./data/DamageAnalysisResults50.csv"
+        bldg_damage_file = "./data/DamageAnalysisResults.csv"
         bldg_damage_dataset = Dataset.from_file(bldg_damage_file, "ergo:buildingDamageVer4")
 
         bldg_data_file = "./data/Building_data.csv"
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         mean_repair_file = "./data/Mean_Repair.csv"
         mean_repair_dataset = Dataset.from_file(mean_repair_file, "ergo:buildingDamageRatios")
 
-        coefFL_file = "./data/coefFL50.csv"
+        coefFL_file = "./data/coefFL.csv"
         coefFL_dataset = Dataset.from_file(coefFL_file, "ergo:coefFL")
 
         occupancy_mapping = "./data/Occupancy_Code_Mapping.csv"
@@ -31,10 +31,10 @@ if __name__ == "__main__":
 
 
         bldg_portfolio_recovery = BuildingPortfolioRecoveryAnalysis(client)
-        bldg_portfolio_recovery.set_parameter("result_name", "building_portfolio_recovery_feb4")
+        bldg_portfolio_recovery.set_parameter("result_name", "building_portfolio_recovery_feb19")
         bldg_portfolio_recovery.set_parameter("uncertainty", True)
         bldg_portfolio_recovery.set_parameter("sample_size", 50)
-        bldg_portfolio_recovery.set_parameter("number_of_iterations", 200)
+        bldg_portfolio_recovery.set_parameter("random_sample_size", 100)
         bldg_portfolio_recovery.set_parameter("num_cpu", 1)
 
         bldg_portfolio_recovery.set_input_dataset("building_damage", bldg_damage_dataset)

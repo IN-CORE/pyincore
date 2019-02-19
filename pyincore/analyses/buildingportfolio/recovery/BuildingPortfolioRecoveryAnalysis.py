@@ -199,6 +199,12 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         print('INFO: Data for Building Portfolio Recovery Analysis loaded successfully.')
 
         sample_size = self.get_parameter("sample_size") # len(building  _damage_results)
+        if sample_size is None:
+            sample_size = len(building_damage_results)
+        else:
+            building_damage_results = building_damage_results.head(sample_size)
+            coeFL = coeFL.iloc[0:sample_size, 0:sample_size]
+
         user_defined_cpu = self.get_parameter("num_cpu")
         permutation = np.random.permutation(len(building_data))
         permutation_subset = permutation[0:sample_size]
@@ -226,7 +232,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         # START: Calculate waiting time statistics using Monte Carlo Simulations
         nsd = 5000 #TODO: Input?
-        number_of_simulations = self.get_parameter("number_of_iterations")
+        number_of_simulations = self.get_parameter("random_sample_size")
         output_base_name = self.get_parameter("result_name")
         sample_delay = np.zeros(nsd)
         impeding_mean = np.zeros((5, 4))
@@ -659,7 +665,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                     'type': int
                 },
                 {
-                    'id': 'number_of_iterations',
+                    'id': 'random_sample_size',
                     'required': True,
                     'description': 'Number of iterations for Monte Carlo Simulation',
                     'type': int
