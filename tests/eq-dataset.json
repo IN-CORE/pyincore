@@ -1,5 +1,5 @@
 {
-  "name":"Memphis Deterministic EQ",
+  "name":"pytest - Memphis Deterministic EQ",
   "description":"Memphis dataset based deterministic hazard - Pytest",
   "eqType":"dataset",
   "hazardDatasets":[

@@ -1,5 +1,5 @@
 {
-	"name": "Florida coast cat-1 hurricane",
+	"name": "pytest - Florida coast cat-1 hurricane",
 	"description": "Simulated pytest hurricane",
 	"coast": "florida",
 	"category": 1,
