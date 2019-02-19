@@ -42,13 +42,13 @@ setup(
     ],
     python_requires=">=3.5",
     classifiers=[
-        "Development Status :: 2 - Beta",
-        "Intended Audience :: Risk-Based Community/Science/Research/Public",
-        "License :: Mozilla Public License v2.0",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Topic :: Resilience/Hazard/Scientific/Planning"
+        "Topic :: Scientific/Engineering"
     ],
     keywords=[
         "infrastructure",
