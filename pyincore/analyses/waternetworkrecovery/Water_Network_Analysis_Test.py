@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-# coding: utf-8
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 # # Water Network Analysis
 
@@ -18,7 +19,7 @@ from collections import OrderedDict
 from pyincore import InsecureIncoreClient
 from pyincore.analyses.waternetworkdamage import WaterNetworkDamage
 from pyincore.analyses.waternetworkrecovery import WaterNetworkRecovery, WaterNetworkRecoveryUtil
-from pyincore.analyses.stochastic_population import StochasticPopulationAllocation
+from pyincore.analyses.stochasticpopulation import StochasticPopulationAllocation
 from pyincore.analyses.populationdislocation import PopulationDislocation, PopulationDislocationUtil
 from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore import InventoryDataset, Dataset

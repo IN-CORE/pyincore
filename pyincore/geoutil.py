@@ -1,11 +1,9 @@
-"""pyincore.geoutil
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-Copyright (c) 2017 University of Illinois and others.  All rights reserved.
-This program and the accompanying materials are made available under the
-terms of the BSD-3-Clause which accompanies this distribution,
-and is available at https://opensource.org/licenses/BSD-3-Clause
-
-"""
 import logging
 
 import fiona
@@ -165,13 +163,12 @@ class GeoUtil:
 
         """
         # iterate link
-        link = fiona.open(filename)
         fromnode_list = []
         tonode_list = []
         node_list = []
         size = 0
 
-        for line_feature in link:
+        for line_feature in filename:
             from_node_val = line_feature['properties'][fromnode_fldname.lower()]
             to_node_val = line_feature['properties'][tonode_fldname.lower()]
             fromnode_list.append(from_node_val - 1 )
@@ -198,7 +195,7 @@ class GeoUtil:
 
         # create coordinates
         node_coords_list = [None] * (len(node_list))
-        for line_feature in link:
+        for line_feature in filename:
             from_node_val = line_feature['properties'][fromnode_fldname.lower()]
             to_node_val = line_feature['properties'][tonode_fldname.lower()]
             line_geom = (line_feature['geometry'])
@@ -274,18 +271,16 @@ class GeoUtil:
         """
         validate = True
         # iterate link
-        link = fiona.open(linkfilename)
         link_node_list = []
-        for line_feature in link:
+        for line_feature in linkfilename:
             from_node_val = line_feature['properties'][fromnode_fldname.lower()]
             to_node_val = line_feature['properties'][tonode_fldname.lower()]
             link_node_list.append(from_node_val)
             link_node_list.append(to_node_val)
 
         # iterate node
-        node = fiona.open(nodefilename)
         node_list = []
-        for node_feature in node:
+        for node_feature in nodefilename:
             node_val = node_feature['properties'][nodeid_fldname.lower()]
             node_list.append(node_val)
 

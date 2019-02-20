@@ -1,11 +1,9 @@
-"""pyincore.analyses.nonstructbuildingdamage.nonstructbuildingdamage
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-Copyright (c) 2017 University of Illinois and others.  All rights reserved.
-This program and the accompanying materials are made available under the
-terms of the BSD-3-Clause which accompanies this distribution,
-and is available at https://opensource.org/licenses/BSD-3-Clause
-
-"""
 import collections
 import concurrent.futures
 from pyincore import BaseAnalysis, HazardService, FragilityService
@@ -188,14 +186,12 @@ class NonStructBuildingDamage(BaseAnalysis):
             demand_units_as = fragility_set_as['demandUnits']
             location = GeoUtil.get_location(building)
 
-            # TODO: the point parameter hasn't been updated this way yet
-            # hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
-            #     hazard_dataset_id, hazard_demand_type_as,
-            #     demand_units_as, points=[str(location.y) + ',' + str(location.x)])
+            point = str(location.y) + "," + str(location.x)
+
             hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_dataset_id, hazard_demand_type_as,
                 demand_units_as,
-                points=[location.y, location.x])[0]['hazardValue']
+                points=[point])[0]['hazardValue']
 
             dmg_probability_as = AnalysisUtil.calculate_damage_json(fragility_set_as,
                                                                  hazard_val_as)
@@ -205,7 +201,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     liqufaction_dmg = self.hazardsvc.get_liquefaction_values(
                         hazard_dataset_id, liq_geology_dataset_id,
                         'in',
-                        points=[str(location.y) + ',' + str(location.x)])[0][
+                        points=[point])[0][
                         'groundFailureProb']
                 else:
                     raise ValueError('Hazard does not support liquefaction! \
@@ -223,13 +219,10 @@ class NonStructBuildingDamage(BaseAnalysis):
             dmg_probability_as['lifesfty'] = 0.0
             dmg_probability_as['collprev'] = 0.0
 
-        dmg_weights_as = NonStructBuildingUtil.get_dmg_weights(dmg_ratio_tbl_as)
-        dmg_weights_std_dev_as = NonStructBuildingUtil.get_dmg_weights_std_dev(dmg_ratio_tbl_as)
-
         dmg_interval_as = AnalysisUtil.calculate_damage_interval(dmg_probability_as)
-        mean_damage_as = AnalysisUtil.calculate_mean_damage(dmg_weights_as, dmg_interval_as)
+        mean_damage_as = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl_as, dmg_interval_as)
         mean_damage_dev_as = AnalysisUtil.calculate_mean_damage_std_deviation(
-            dmg_weights_as, dmg_weights_std_dev_as,dmg_interval_as, mean_damage_as['meandamage'])
+            dmg_ratio_tbl_as,dmg_interval_as, mean_damage_as['meandamage'])
 
         # Drift-Sensitive Fragility ID Code
         if fragility_set_ds is not None:
@@ -239,13 +232,11 @@ class NonStructBuildingDamage(BaseAnalysis):
             demand_units_ds = fragility_set_ds['demandUnits']
             location = GeoUtil.get_location(building)
 
-            # TODO: the point parameter hasn't been updated this way yet
-            # hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
-            #     hazard_dataset_id, hazard_demand_type_as,
-            #     demand_units_as, points=[str(location.y) + ',' + str(location.x)])
+            point = str(location.y) + "," + str(location.x)
+
             hazard_val_ds = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_dataset_id, hazard_demand_type_ds,
-                demand_units_ds, points=[location.y, location.x])[0]['hazardValue']
+                demand_units_ds, points=[point])[0]['hazardValue']
 
             dmg_probability_ds = AnalysisUtil.calculate_damage_json(fragility_set_ds,
                                                                  hazard_val_ds)
@@ -256,7 +247,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     liqufaction_dmg = self.hazardsvc.get_liquefaction_values(
                         hazard_dataset_id, liq_geology_dataset_id,
                         'in',
-                        points=[str(location.y) + ',' + str(location.x)])[0][
+                        points=[point])[0][
                         'groundFailureProb']
                 else:
                     raise ValueError('Hazard does not support liquefaction! \
@@ -275,21 +266,15 @@ class NonStructBuildingDamage(BaseAnalysis):
             dmg_probability_ds['lifesfty'] = 0.0
             dmg_probability_ds['collprev'] = 0.0
 
-        dmg_weights_ds = NonStructBuildingUtil.get_dmg_weights(dmg_ratio_tbl_ds)
-        dmg_weights_std_dev_ds = NonStructBuildingUtil.get_dmg_weights_std_dev(dmg_ratio_tbl_ds)
-
         dmg_interval_ds = AnalysisUtil.calculate_damage_interval(dmg_probability_ds)
-        mean_damage_ds = AnalysisUtil.calculate_mean_damage(dmg_weights_ds, dmg_interval_ds)
+        mean_damage_ds = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl_ds, dmg_interval_ds)
         mean_damage_dev_ds = AnalysisUtil.calculate_mean_damage_std_deviation(
-            dmg_weights_ds, dmg_weights_std_dev_ds,dmg_interval_ds, mean_damage_ds['meandamage'])
+            dmg_ratio_tbl_ds,dmg_interval_ds, mean_damage_ds['meandamage'])
 
         # Content
-        dmg_weights_content = NonStructBuildingUtil.get_dmg_weights(dmg_ratio_tbl_content)
-        dmg_weights_std_dev_content = NonStructBuildingUtil.get_dmg_weights_std_dev(dmg_ratio_tbl_content)
-
-        mean_damage_contents = AnalysisUtil.calculate_mean_damage(dmg_weights_content, dmg_interval_as)
+        mean_damage_contents = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl_content, dmg_interval_as)
         mean_damage_dev_contents = AnalysisUtil.calculate_mean_damage_std_deviation(
-            dmg_weights_content, dmg_weights_std_dev_content, dmg_interval_as, mean_damage_contents['meandamage'])
+            dmg_ratio_tbl_content, dmg_interval_as, mean_damage_contents['meandamage'])
 
         # put results in dictionary
         building_results['guid'] = building['properties']['guid']
@@ -432,4 +417,3 @@ class NonStructBuildingDamage(BaseAnalysis):
                 }
             ]
         }
-

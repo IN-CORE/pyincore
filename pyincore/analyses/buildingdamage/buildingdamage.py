@@ -1,11 +1,10 @@
-"""pyincore.analyses.buildingdamage.buldingdamage
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-Copyright (c) 2017 University of Illinois and others.  All rights reserved.
-This program and the accompanying materials are made available under the
-terms of the BSD-3-Clause which accompanies this distribution,
-and is available at https://opensource.org/licenses/BSD-3-Clause
 
-"""
 import collections
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 import concurrent.futures
@@ -186,11 +185,11 @@ class BuildingDamage(BaseAnalysis):
                     hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
 
                     demand_units = local_fragility_set["demandUnits"]
-                    location_str = str(location.y) + "," + str(location.x)
+                    point = str(location.y) + "," + str(location.x)
                     hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
                                                                           hazard_demand_type,
                                                                           demand_units,
-                                                                          [location_str])[0]["hazardValue"]
+                                                                          [point])[0]["hazardValue"]
 
                     # Sometimes the geotiffs give large negative values for out of bounds instead of 0
                     if hazard_val <= 0.0:
@@ -202,7 +201,7 @@ class BuildingDamage(BaseAnalysis):
                             hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
                                                                                   hazard_demand_type,
                                                                                   demand_units,
-                                                                                  [location_str])[0]["hazardValue"]
+                                                                                  [point])[0]["hazardValue"]
                             if hazard_val <= 0.0:
                                 hazard_val = 0.0
                             else:

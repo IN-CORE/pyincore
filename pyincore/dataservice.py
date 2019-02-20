@@ -1,3 +1,10 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+
 import json
 import os
 import requests
@@ -13,13 +20,19 @@ class DataService:
     """
     Data service client
     """
+
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_url = urllib.parse.urljoin(client.service_url, 'data/api/datasets/')
-        self.files_url = urllib.parse.urljoin(client.service_url, 'data/api/files/')
-        self.spaces_url = urllib.parse.urljoin(client.service_url, 'data/api/spaces')
-        self.base_earthquake_url = urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes/')
-        self.base_tornado_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tornadoes/')
+        self.base_url = urllib.parse.urljoin(client.service_url,
+                                             'data/api/datasets/')
+        self.files_url = urllib.parse.urljoin(client.service_url,
+                                              'data/api/files/')
+        self.spaces_url = urllib.parse.urljoin(client.service_url,
+                                               'data/api/spaces')
+        self.base_earthquake_url = urllib.parse.urljoin(client.service_url,
+                                                        'hazard/api/earthquakes/')
+        self.base_tornado_url = urllib.parse.urljoin(client.service_url,
+                                                     'hazard/api/tornadoes/')
 
     def get_dataset_metadata(self, dataset_id: str):
         # construct url with service, dataset api, and id
@@ -27,8 +40,14 @@ class DataService:
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
-    def get_dataset_fileDescriptors(self, dataset_id: str):
+    def get_dataset_files_metadata(self, dataset_id: str):
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/files')
+        r = requests.get(url, headers=self.client.headers)
+        return r.json()
+
+    def get_dataset_file_metadata(self, dataset_id: str, file_id: str):
+        url = urllib.parse.urljoin(self.base_url,
+                                   dataset_id + "/files/" + file_id)
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
@@ -40,10 +59,11 @@ class DataService:
         else:
             payload = {}
             if join is True:
-                payload['join']='true'
+                payload['join'] = 'true'
             elif join is False:
-                payload['join']='false'
-            r = requests.get(url, headers=self.client.headers, stream=True, params=payload)
+                payload['join'] = 'false'
+            r = requests.get(url, headers=self.client.headers, stream=True,
+                             params=payload)
 
         # extract filename
         disposition = r.headers['content-disposition']
@@ -56,7 +76,7 @@ class DataService:
 
         # download
         with open(local_filename, 'wb') as f:
-            for chunk in r.iter_content(chunk_size = 1024):
+            for chunk in r.iter_content(chunk_size=1024):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
 
@@ -66,20 +86,22 @@ class DataService:
         else:
             return local_filename
 
-    def get_datasets(self, datatype=None, title=None):
+    def get_datasets(self, datatype: str = None, title: str = None,
+                     creator: str = None, space: str = None):
         url = self.base_url
-        if datatype is None and title is None:
-            r = requests.get(url, headers=self.client.headers)
-            return r.json()
-        else:
-            payload = {}
-            if datatype is not None:
-                payload['type'] = datatype
-            if title is not None:
-                payload['title'] = title
-            r = requests.get(url, headers=self.client.headers, params = payload)
-            # need to handle there is no datasets
-            return r.json()
+        payload = {}
+        if datatype is not None:
+            payload['type'] = datatype
+        if title is not None:
+            payload['title'] = title
+        if creator is not None:
+            payload['creator'] = creator
+        if space is not None:
+            payload['space'] = space
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
+        # need to handle there is no datasets
+        return r.json()
 
     def create_dataset(self, properties: dict):
         payload = {'dataset': json.dumps(properties)}
@@ -87,8 +109,16 @@ class DataService:
         r = requests.post(url, files=payload, headers=self.client.headers)
         return r.json()
 
+    def update_dataset(self, dataset_id, property_name: str,
+                       property_value: str):
+        url = urllib.parse.urljoin(self.base_url, dataset_id)
+        payload = {'update': json.dumps({"property name": property_name,
+                                         "property value": property_value})}
+        r = requests.put(url, files=payload, headers=self.client.headers)
+        return r.json()
+
     def add_files_to_dataset(self, dataset_id: str, filepaths: list):
-        url = urllib.parse.urljoin(self.base_url, dataset_id+"/files")
+        url = urllib.parse.urljoin(self.base_url, dataset_id + "/files")
         listfiles = []
         for filepath in filepaths:
             file = open(filepath, 'rb')
@@ -97,7 +127,7 @@ class DataService:
 
         r = requests.post(url, files=listfiles, headers=self.client.headers)
 
-        #close files
+        # close files
         for tuple in listfiles:
             tuple[1].close()
         return r.json()
@@ -112,12 +142,12 @@ class DataService:
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
-    def get_file_metadata(self, file_id:str):
+    def get_file_metadata(self, file_id: str):
         url = urllib.parse.urljoin(self.files_url, file_id)
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
-    def get_file_blob(self, file_id:str):
+    def get_file_blob(self, file_id: str):
         # construct url for file download
         url = urllib.parse.urljoin(self.files_url, file_id + '/blob')
         r = requests.get(url, headers=self.client.headers, stream=True)
@@ -170,7 +200,8 @@ class DataService:
         first_filename = r.json()['fileDescriptors'][0]['filename']
         filename = os.path.splitext(first_filename)[0]
 
-        r = requests.get(request_str_zip, headers=self.client.headers, stream=True)
+        r = requests.get(request_str_zip, headers=self.client.headers,
+                         stream=True)
         z = zipfile.ZipFile(io.BytesIO(r.content))
         z.extractall(dirname)
         # print(r.status_code)

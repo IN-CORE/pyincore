@@ -1,0 +1,52 @@
+{
+  "name": "pytest - Tsunami Building Fragility Mapping",
+  "hazardType": "tsunami",
+  "inventoryType": "building",
+  "mappings": [
+      {
+          "legacyEntry": {
+              "Non-Retrofit Inundation Fragility ID Code": "TSU_h_W1_1",
+              "Non-Retrofit MomentumFlux Fragility ID Code": "TSU_M_W1_4"
+          },
+          "entry": {
+              "Non-Retrofit Inundation Fragility ID Code": "5bbbaedfec2309046c2745c8",
+              "Non-Retrofit MomentumFlux Fragility ID Code": "5bbbae19ec2309046c2745c6"
+          },
+          "rules": [
+              [
+                 "java.lang.String struct_typ EQUALS W1"
+              ]
+          ]
+      },
+      {
+          "legacyEntry": {
+              "Non-Retrofit Inundation Fragility ID Code": "TSU_h_W2_2",
+              "Non-Retrofit MomentumFlux Fragility ID Code": "TSU_M_W2_4"
+          },
+          "entry": {
+              "Non-Retrofit Inundation Fragility ID Code": "5bbbaf58ec2309046c2745c9",
+              "Non-Retrofit MomentumFlux Fragility ID Code": "5bbbae5eec2309046c2745c7"
+          },
+          "rules": [
+              [
+                  "java.lang.String struct_typ EQUALS W2"
+              ]
+          ]
+      },
+      {
+          "legacyEntry": {
+              "Non-Retrofit Inundation Fragility ID Code": "TSU_h_RC1_1",
+              "Non-Retrofit MomentumFlux Fragility ID Code": "TSU_M_C1L_4"
+          },
+          "entry": {
+               "Non-Retrofit Inundation Fragility ID Code": "5bbbafcdec2309046c2745ca",
+              "Non-Retrofit MomentumFlux Fragility ID Code": "5bbbba6bec2309046c2745d8"
+          },
+          "rules": [
+              [
+                  "java.lang.String struct_typ EQUALS RC"
+              ]
+          ]
+      }
+  ]
+}
