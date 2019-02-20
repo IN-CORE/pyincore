@@ -1,11 +1,9 @@
-"""pyincore.baseanalysis
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-Copyright (c) 2017 University of Illinois and others.  All rights reserved.
-This program and the accompanying materials are made available under the
-terms of the BSD-3-Clause which accompanies this distribution,
-and is available at https://opensource.org/licenses/BSD-3-Clause
-
-"""
 import pprint
 
 # TODO: exception handling for validation and set methods
@@ -72,6 +70,7 @@ class BaseAnalysis:
 
         """
         dataset = Dataset.from_data_service(remote_id, self.data_service)
+        #TODO: Need to handle failing to set input dataset
         self.set_input_dataset(analysis_param_id, dataset)
 
     def get_name(self):
@@ -95,11 +94,12 @@ class BaseAnalysis:
         return self.parameters[id]['value']
 
     def set_parameter(self, id, parameter):
-        if self.validate_parameter(self.parameters[id]['spec'], parameter)[0]:
+        result = self.validate_parameter(self.parameters[id]['spec'], parameter)
+        if result[0]:
             self.parameters[id]['value'] = parameter
             return True
         else:
-            # TOTO handle error message
+            print("Error setting parameter: " + result[1])
             return False
 
     def get_input_datasets(self):
@@ -115,11 +115,12 @@ class BaseAnalysis:
         return self.input_datasets[id]['value']
 
     def set_input_dataset(self, id, dataset):
-        if self.validate_input_dataset(self.input_datasets[id]['spec'], dataset)[0]:
+        result = self.validate_input_dataset(self.input_datasets[id]['spec'], dataset)
+        if result[0]:
             self.input_datasets[id]['value'] = dataset
             return True
         else:
-            # TODO handle error message
+            print(result[1])
             return False
 
     def get_output_datasets(self):
@@ -155,12 +156,16 @@ class BaseAnalysis:
         """
         is_valid = True
         err_msg = ''
-        if parameter_spec['required'] and not (type(parameter) is parameter_spec['type']):
-            is_valid = False
-            err_msg = 'parameter type does not match'
+        if parameter_spec['required']:
+            if parameter is None:
+                is_valid = False
+                err_msg = 'required paramter is missing - spec: ' + str(parameter_spec)
+            elif not type(parameter) is parameter_spec['type']:
+                is_valid = False
+                err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)
         elif not isinstance(parameter, type(None)) and not (type(parameter) is parameter_spec['type']):
             is_valid = False
-            err_msg = 'parameter type does not match'
+            err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)
 
         return is_valid, err_msg
 
@@ -177,13 +182,18 @@ class BaseAnalysis:
         """
         is_valid = True
         err_msg = ''
-        if dataset_spec['required'] and not (dataset.data_type in dataset_spec['type']):
-            is_valid = False
-            err_msg = 'dataset type does not match'
-        elif not isinstance(dataset.data_type, type(None)) and not (dataset.data_type in dataset_spec['type']):
-            is_valid = False
-            err_msg = 'parameter type does not match'
-
+        if not isinstance(dataset, type(None)):
+            #if dataset is not none, check data type
+            if not (dataset.data_type in dataset_spec['type']):
+                # if dataset type is not equal to spec, then return false
+                is_valid = False
+                err_msg = 'dataset type does not match - ' + 'given type: '+dataset.data_type+' spec types: '+ str(dataset_spec['type'])
+        else:
+            #if dataset is none, check 'requirement'
+            if dataset_spec['required']:
+                # if dataset is 'required', return false
+                is_valid = False
+                err_msg = 'required dataset is missing - spec: ' + str(dataset_spec)
         return (is_valid, err_msg)
 
     def validate_output_dataset(self, dataset_spec, dataset):
@@ -227,12 +237,14 @@ class BaseAnalysis:
             id = dataset_spec["id"]
             result = self.validate_input_dataset(dataset_spec, self.input_datasets[id]["value"])
             if not result[0]:
+                print("Error reading dataset: " + result[1])
                 return result
 
         for parameter_spec in self.spec['input_parameters']:
             id = parameter_spec["id"]
             result = self.validate_parameter(parameter_spec, self.get_parameter(id))
             if not result[0]:
+                print("Error reading parameter: "+ result[1])
                 return result
 
         return self.run()
@@ -244,50 +256,3 @@ class BaseAnalysis:
         return AnalysisUtil.create_gdocstr_from_spec(self.get_spec())
 
 
-class BuildingDamageAnalysis(BaseAnalysis):
-    """An example subclass with specifications for the building damage analysis."""
-    def run(self):
-        print('hello this is building damage analysis')
-        return True
-
-    def get_spec(self):
-        """An example of the specifications of the building damage analysis.
-
-        Returns:
-            obj: A JSON object of basic specifications of the analysis.
-
-        """
-        return {
-            'name': 'building-damage',
-            'description': 'building damage analysis',
-            'input_parameters': [
-                {
-                    'id': 'result_name',
-                    'required': True,
-                    'description': 'result dataset name',
-                    'type': str
-                }
-            ],
-            'input_datasets': [
-                {
-                    'id': 'buildings',
-                    'required': True,
-                    'description': 'Building Inventory',
-                    'type': ['building-v4', 'building-v5'],
-                }
-            ],
-            'output_datasets': [
-                {
-                    'id': 'result',
-                    'parent_type': 'buidings',
-                    'description': 'output of analysis (mostly CSV file)',
-                    'type': 'building-damage'
-                }
-            ]
-        }
-
-
-if __name__ == "__main__":
-    analysis = BuildingDamageAnalysis()
-    pprint.pprint(analysis.get_input_datasets())
-    analysis.run()

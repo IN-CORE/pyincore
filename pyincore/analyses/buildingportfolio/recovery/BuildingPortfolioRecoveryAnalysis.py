@@ -665,7 +665,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 },
                 {
                     'id': 'sample_size',
-                    'required': True,
+                    'required': False,
                     'description': 'Sample Size',
                     'type': int
                 },
