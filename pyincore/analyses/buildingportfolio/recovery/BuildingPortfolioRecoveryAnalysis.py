@@ -233,7 +233,10 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # START: Calculate waiting time statistics using Monte Carlo Simulations
         nsd = 5000 #TODO: Input?
         number_of_simulations = self.get_parameter("random_sample_size")
+
         output_base_name = self.get_parameter("result_name")
+        if output_base_name is None:
+            output_base_name = ""
         sample_delay = np.zeros(nsd)
         impeding_mean = np.zeros((5, 4))
         impeding_std = np.zeros((5, 4))
@@ -248,7 +251,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # END: Calculate waiting time statistics using Monte Carlo Simulations
 
         # Recovery time step from week 1 to 300
-        time_steps = 250 #TODO: Move to input
+        time_steps = self.get_parameter("no_of_weeks")
         utility = np.ones((len(utility_initial), time_steps))
 
         # START initializing variables for uncertainty analysis
@@ -302,22 +305,22 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         output_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output'))
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
-        output_image = os.path.join(output_directory, output_base_name + '.png')
+        output_image = os.path.join(output_directory, 'mean-recovery' + '.png')
         fig.savefig(output_image)
 
-        output_file = os.path.join(output_directory, output_base_name +'.csv')
+        output_file = os.path.join(output_directory, output_base_name + 'building-recovery' + '.csv')
         with open(output_file, 'w+', newline='') as output_file:
-            spam_writer = csv.writer(output_file, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            spam_writer.writerow(['Week', 'Recovery Percentage'])
-            for i in range(len(mean_recovery_output)):
-                spam_writer.writerow([i, mean_recovery_output[i]])
+            spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            spam_writer.writerow(['Building_ID', 'Building_Lon', 'Building_Lat'] + list(range(1, time_steps+1)))
+            for i in range(sample_size):
+                spam_writer.writerow([building_data['Build_ID_X'][i], building_data['X_Lon'][i], building_data['Y_Lat'][i]] + list(recovery_fp[i]))
 
         if uncertainty:
             # START: Additional Code for uncertainty analysis
             mean_u = np.zeros(sample_size)
             # sample_size2 = args.sample_size
             #TODO: check coeFL size as in matlab
-            covar = np.matrix(coeFL) # np.zeros([sample_size, sample_size]) # TODO: Should read a coefFL file
+            covar = np.matrix(coeFL) # np.zeros([sample_size, sample_size])
             random_distribution = np.random.multivariate_normal(mean_u, covar, 10000)
             random_samples = sp.stats.norm.cdf(random_distribution)
             sample_total = np.zeros((sample_size, number_of_simulations))
@@ -363,21 +366,20 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
             # Calculate distribution of Portfolio Recovery Time (PRT) assume normal distribution
 
-            x_range = np.arange(0.0, 1.0, 0.001)
+            x_range = np.arange(0.0, 1.001, 0.001)
             pdf_full = np.zeros((time_steps, len(x_range)))
             irt = np.zeros(time_steps)
             for t in range(time_steps):
                 total_standard_deviation[t] = math.sqrt(total_standard_deviation[t]) / sample_size
                 target_mean_recovery[t] = mean_recovery[t][3] + mean_recovery[t][4]
                 pdf_full[t] = sp.stats.norm.pdf(x_range, target_mean_recovery[t], total_standard_deviation[t])
-            # for t in range(time_steps):
-                coeR = np.trapz(x_range, pdf_full[t])
-                pdf_full[t] = pdf_full[t]/coeR
-            # np.trapz(x_range, pdf_full.transpose())
 
-            # for t in range(time_steps):
+            coeR = np.trapz( pdf_full, x_range)
+
+            for t in range(time_steps):
+                pdf_full[t] = pdf_full[t]/coeR[t]
                 idx = int(len(x_range) * 95 / 100 + 1)
-                irt[t] = np.trapz(x_range[idx:], pdf_full[t, idx:])
+                irt[t] = np.trapz( pdf_full[t, idx:], x_range[idx:])
 
             pdf = np.zeros(time_steps)
             for t in range(1, time_steps-1):
@@ -418,23 +420,25 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                     upper_bound75[t] = sp.stats.norm.ppf((coet2) - 0.25 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
 
                     pdf_full[t] = pdf_full[t]*coeAmp
-                if coet >= 0.000005 and 1 - coet2 >= 0.00005:
+                if coet >= 0.000005 and 1 - coet2 >= 0.000005:
                     coeAmp = 1/(coet2 - coet)
                     lower_bound95[t] = sp.stats.norm.ppf(0.05/coeAmp+coet, target_mean_recovery[t], total_standard_deviation[t])
                     upper_bound95[t] = sp.stats.norm.ppf(coet2-0.05/coeAmp, target_mean_recovery[t], total_standard_deviation[t])
-                    lower_bound75[t] = sp.stats.norm.ppf(0.25/coeAmp, target_mean_recovery[t], total_standard_deviation[t])
+                    lower_bound75[t] = sp.stats.norm.ppf(0.25/coeAmp+coet, target_mean_recovery[t], total_standard_deviation[t])
                     upper_bound75[t] = sp.stats.norm.ppf(coet2-0.25/coeAmp, target_mean_recovery[t], total_standard_deviation[t])
 
-            for t in range(100):
-                if lower_bound75[t] < 0:
-                    lower_bound75[t] = 1
-                if upper_bound75[t] < 0:
-                    upper_bound75[t] = 1
-            for t in range(100, time_steps):
-                if lower_bound95[t] < 0:
-                    lower_bound95[t] = 1
-                if upper_bound95[t] < 0:
-                    upper_bound95[t] = 1
+            #TODO: Confirm with PI that these conditions are never hit
+            # Commenting out to be able to provide weeks < 100
+            # for t in range(100):
+            #     if lower_bound75[t] < 0:
+            #         lower_bound75[t] = 1
+            #     if upper_bound75[t] < 0:
+            #         upper_bound75[t] = 1
+            # for t in range(100, time_steps):
+            #     if lower_bound95[t] < 0:
+            #         lower_bound95[t] = 1
+            #     if upper_bound95[t] < 0:
+            #         upper_bound95[t] = 1
 
             # END: Additional Code for uncertainty Analysis
 
@@ -450,17 +454,18 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             output_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output'))
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
-            output_image2 = os.path.join(output_directory, output_base_name+'2.png')
+            output_image2 = os.path.join(output_directory, output_base_name + 'portfolio-recovery' +'.png')
             fig2.savefig(output_image2)
 
-            output_file = os.path.join(output_directory, output_base_name+'.csv')
+            output_file = os.path.join(output_directory, output_base_name + 'portfolio-recovery' +'.csv')
             with open(output_file, 'w+', newline='') as output_file:
-                spam_writer = csv.writer(output_file, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                spam_writer.writerow(['Week', 'Recovery Percentage', '75% Upper Bound', '75% Lower Bound', '95% Upper Bound',
-                                      '95% Lower Bound'])
+                spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', '75P_Upper_Bound', '75P_Lower_Bound', '95P_Upper_Bound',
+                                      '95P_Lower_Bound', 'RecPercent_RE', 'RecPercent_RU', 'RecPercent_RO', 'RecPercent_BF', 'RecPercent_FF',
+                                      'Probability_Density_Func'])
                 for i in range(time_steps):
-                    spam_writer.writerow([i, mean_recovery_output[i], lower_bound75[i], upper_bound75[i], lower_bound95[i],
-                                          upper_bound95[i]])
+                    spam_writer.writerow([i+1, mean_recovery_output[i], lower_bound75[i], upper_bound75[i], lower_bound95[i],
+                                          upper_bound95[i]] + list(mean_recovery[i]) + [pdf[i]])
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
 
@@ -648,7 +653,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             'input_parameters': [
                 {
                     'id': 'result_name',
-                    'required': True,
+                    'required': False,
                     'description': 'Result dataset name',
                     'type': str
                 },
@@ -670,12 +675,12 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                     'description': 'Number of iterations for Monte Carlo Simulation',
                     'type': int
                 },
-                # {
-                #     'id': 'mapping_id',
-                #     'required': True,
-                #     'description': 'Occupancy code mapping dataset',
-                #     'type': str
-                # },
+                {
+                    'id': 'no_of_weeks',
+                    'required': True,
+                    'description': 'Number of weeks to run the recovery model',
+                    'type': int
+                },
                 {
                     'id': 'num_cpu',
                     'required': False,

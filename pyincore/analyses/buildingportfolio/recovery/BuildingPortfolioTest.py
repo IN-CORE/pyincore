@@ -31,10 +31,10 @@ if __name__ == "__main__":
 
 
         bldg_portfolio_recovery = BuildingPortfolioRecoveryAnalysis(client)
-        bldg_portfolio_recovery.set_parameter("result_name", "building_portfolio_recovery_feb19")
         bldg_portfolio_recovery.set_parameter("uncertainty", True)
-        bldg_portfolio_recovery.set_parameter("sample_size", 50)
-        bldg_portfolio_recovery.set_parameter("random_sample_size", 100)
+        bldg_portfolio_recovery.set_parameter("sample_size", 40) # default none to get all samples form the input dataset
+        bldg_portfolio_recovery.set_parameter("random_sample_size", 50) #default 10000
+        bldg_portfolio_recovery.set_parameter("no_of_weeks", 100) #default 250
         bldg_portfolio_recovery.set_parameter("num_cpu", 1)
 
         bldg_portfolio_recovery.set_input_dataset("building_damage", bldg_damage_dataset)
