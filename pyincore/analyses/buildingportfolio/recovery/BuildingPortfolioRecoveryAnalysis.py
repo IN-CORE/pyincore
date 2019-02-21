@@ -119,7 +119,6 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             ]
         }
 
-
     def run(self):
 
         uncertainty = self.get_parameter("uncertainty")
@@ -128,11 +127,11 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         building_data = self.get_input_dataset("building_data").get_dataframe_from_csv()
         mean_repair = self.get_input_dataset("dmg_ratios").get_dataframe_from_csv()
         occupancy_mapping = self.get_input_dataset("occupancy_mapping").get_dataframe_from_csv()
-        coeFL =self.get_input_dataset("coefFL").get_dataframe_from_csv()
+        coeFL = self.get_input_dataset("coefFL").get_dataframe_from_csv()
 
         print('INFO: Data for Building Portfolio Recovery Analysis loaded successfully.')
 
-        sample_size = self.get_parameter("sample_size") # len(building  _damage_results)
+        sample_size = self.get_parameter("sample_size")  # len(building  _damage_results)
         if sample_size is None:
             sample_size = len(building_damage_results)
         else:
@@ -143,16 +142,16 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         permutation = np.random.permutation(len(building_data))
         permutation_subset = permutation[0:sample_size]
         sample_buildings = [BuildingData(building_data['Tract_ID'][i], building_data['X_Lon'][i],
-                                         building_data['Y_Lat'][i], building_data['Structural'][i],
-                                         building_data['Code_Level'][i], building_data['EPSANodeID'][i],
-                                         building_data['PWSANodeID'][i], building_data['TEP_ID'][i],
-                                         building_data['Build_ID_X'][i], building_data['EPSAID'][i],
-                                         building_data['PWSAID'][i], building_data['Finance'][i],
-                                         building_data['EP_PW_ID'][i], building_data['Occu_Code'][i]
-                                         )
+            building_data['Y_Lat'][i], building_data['Structural'][i],
+            building_data['Code_Level'][i], building_data['EPSANodeID'][i],
+            building_data['PWSANodeID'][i], building_data['TEP_ID'][i],
+            building_data['Build_ID_X'][i], building_data['EPSAID'][i],
+            building_data['PWSAID'][i], building_data['Finance'][i],
+            building_data['EP_PW_ID'][i], building_data['Occu_Code'][i]
+        )
                             for i in permutation_subset]
         occupancy_map = {occupancy_mapping["Occu_ID"][i]: occupancy_mapping['Occupancy'][i] for i in
-                         range(len(occupancy_mapping)) }
+                         range(len(occupancy_mapping))}
         repair_mean = {mean_repair['Occupancy'][i]: [mean_repair['RC1'][i], mean_repair['RC2'][i],
                                                      mean_repair['RC3'][i], mean_repair['RC4'][i]]
                        for i in range(len(mean_repair))}
@@ -165,7 +164,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                            for i in range(len(building_damage_results))]
 
         # START: Calculate waiting time statistics using Monte Carlo Simulations
-        nsd = 5000 #TODO: Input?
+        nsd = 5000  # TODO: Input?
         number_of_simulations = self.get_parameter("random_sample_size")
 
         output_base_name = self.get_parameter("result_name")
@@ -201,7 +200,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # The utility matrix uses utility Initial input file for the first 22 weeks and ones for the rest of the time.
 
         for i in range(time_steps):
-            utility[:, i] = [1-j for j in utility_initial[str(i)]]
+            utility[:, i] = [1 - j for j in utility_initial[str(i)]]
 
         # with concurrent.futures.ProcessPoolExecutor(max_workers=sample_size) as executor:
         #     for response in executor.map(self.calculate_transition_probability_matrix(sample_size, time_steps, sample_buildings,
@@ -222,10 +221,10 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         mean_recovery = response["mean_recovery"]
 
         # Trajectory for the Restricted entry, Restricted Use, Reoccupancy, Best Line Functionality, Full Functionality
-        mean_recovery = mean_recovery/sample_size
+        mean_recovery = mean_recovery / sample_size
 
         # Trajectory for Best Line Functionality and Full Functionality
-        mean_recovery_output = sum(recovery_fp)/sample_size
+        mean_recovery_output = sum(recovery_fp) / sample_size
 
         fig = plt.figure(1)
         plt.plot(range(time_steps), mean_recovery_output)
@@ -243,7 +242,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         with open(output_file, 'w+', newline='') as output_file:
             spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             spam_writer.writerow(['Building_ID', 'Building_Lon', 'Building_Lat']
-                                 + list(range(1, time_steps+1)))
+                                 + list(range(1, time_steps + 1)))
             for i in range(sample_size):
                 spam_writer.writerow([building_data['Build_ID_X'][i], building_data['X_Lon'][i],
                                       building_data['Y_Lat'][i]] + list(recovery_fp[i]))
@@ -251,7 +250,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         if uncertainty:
             # START: Additional Code for uncertainty analysis
             mean_u = np.zeros(sample_size)
-            covar = np.matrix(coeFL) # np.zeros([sample_size, sample_size])
+            covar = np.matrix(coeFL)  # np.zeros([sample_size, sample_size])
             random_distribution = np.random.multivariate_normal(mean_u, covar, 10000)
             random_samples = sp.stats.norm.cdf(random_distribution)
 
@@ -268,7 +267,6 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 number_of_simulations, variance_over_time, mean_over_time, temporary_correlation1,
                 temporary_correlation2, sample_total)
 
-
             # Calculate distribution of Portfolio Recovery Time (PRT) assume normal distribution
             x_range = np.arange(0.0, 1.001, 0.001)
             pdf_full = np.zeros((time_steps, len(x_range)))
@@ -278,17 +276,16 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 target_mean_recovery[t] = mean_recovery[t][3] + mean_recovery[t][4]
                 pdf_full[t] = sp.stats.norm.pdf(x_range, target_mean_recovery[t], total_standard_deviation[t])
 
-            coeR = np.trapz( pdf_full, x_range)
+            coeR = np.trapz(pdf_full, x_range)
 
             for t in range(time_steps):
-                pdf_full[t] = pdf_full[t]/coeR[t]
+                pdf_full[t] = pdf_full[t] / coeR[t]
                 idx = int(len(x_range) * 95 / 100 + 1)
-                irt[t] = np.trapz( pdf_full[t, idx:], x_range[idx:])
+                irt[t] = np.trapz(pdf_full[t, idx:], x_range[idx:])
 
             pdf = np.zeros(time_steps)
-            for t in range(1, time_steps-1):
-                pdf[t] = (irt[t+1] - irt[t]) if irt[t+1] - irt[t] > 0 else 0
-
+            for t in range(1, time_steps - 1):
+                pdf[t] = (irt[t + 1] - irt[t]) if irt[t + 1] - irt[t] > 0 else 0
 
             # Calculate truncated normal distribution and 75% & 95% percentile band
             # 75% percentile upper bound
@@ -339,7 +336,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                     upper_bound75[t] = sp.stats.norm.ppf(coet2 - 0.25 / coeAmp, target_mean_recovery[t],
                         total_standard_deviation[t])
 
-            #TODO: Confirm with PI if this can be removed. These conditions are never hit
+            # TODO: Confirm with PI if this can be removed. These conditions are never hit
             if time_steps > 100:
                 for t in range(100):
                     if lower_bound75[t] < 0:
@@ -363,19 +360,20 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             plt.xlabel('Expected recovery time (weeks)')
             plt.ylabel('Percentage of Buildings Recovered')
             plt.title('Building Portfolio Recovery Analysis with uncertainty')
-            output_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output'))
+            output_directory = os.path.abspath(
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output'))
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
-            output_image2 = os.path.join(output_directory, output_base_name + 'portfolio-recovery' +'.png')
+            output_image2 = os.path.join(output_directory, output_base_name + 'portfolio-recovery' + '.png')
             fig2.savefig(output_image2)
 
-            output_file = os.path.join(output_directory, output_base_name + 'portfolio-recovery' +'.csv')
+            output_file = os.path.join(output_directory, output_base_name + 'portfolio-recovery' + '.csv')
             with open(output_file, 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', '75P_Upper_Bound',
-                                      '75P_Lower_Bound', '95P_Upper_Bound','95P_Lower_Bound', 'RecPercent_RE',
-                                      'RecPercent_RU', 'RecPercent_RO', 'RecPercent_BF', 'RecPercent_FF',
-                                      'Probability_Density_Func'])
+                                      '75P_Lower_Bound', '95P_Upper_Bound', '95P_Lower_Bound',
+                                      'RecPercent_RE', 'RecPercent_RU', 'RecPercent_RO', 'RecPercent_BF',
+                                      'RecPercent_FF', 'Probability_Density_Func'])
                 for i in range(time_steps):
                     spam_writer.writerow([i + 1, mean_recovery_output[i], lower_bound75[i], upper_bound75[i],
                                           lower_bound95[i], upper_bound95[i]] + list(mean_recovery[i]) +
@@ -383,13 +381,14 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
 
-    def calculate_transition_probability_matrix(self, time_steps, sample_buildings, repair_mean, occupancy_map,
+    def calculate_transition_probability_matrix(self, time_steps, sample_buildings, repair_mean,
+                                                occupancy_map,
                                                 uncertainty, impeding_mean, impeding_std, building_damage,
                                                 utility, utility2):
         sample_size = len(sample_buildings)
         total_mean = np.zeros((4, 4))
         total_var = np.zeros((4, 4))
-        transition_probability = np.zeros((4,4))
+        transition_probability = np.zeros((4, 4))
         state_probabilities = np.zeros((time_steps, 5))
         output = np.zeros(time_steps)
         temporary_correlation1 = np.zeros((time_steps, sample_size, 5))
@@ -398,9 +397,9 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         variance_over_time = np.zeros((time_steps, sample_size))
         recovery_fp = np.zeros((sample_size, time_steps))
         mean_recovery = np.zeros((time_steps, 5))
-        print("Calculating transition probability matrix for each building.." )
+        print("Calculating transition probability matrix for each building..")
         for k in range(sample_size):
-            #print("Calculating transition probability matrix for " + str(k))
+            # print("Calculating transition probability matrix for " + str(k))
             # The index for finance starts in 1 they are one off from the matrix
             finance_id = sample_buildings[k].finance - 1
             utility_id = sample_buildings[k].ep_pw_id
@@ -409,7 +408,6 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 std = impeding_std[finance_id, j] ** 2
 
                 for i in range(j, 4):
-
                     mean += repair_mean[occupancy_map[sample_buildings[k].occupation_code]][i]
                     total_mean[j][i] = mean
                     std += 0.4 * repair_mean[occupancy_map[sample_buildings[k].occupation_code]][i] ** 2
@@ -418,9 +416,9 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             for t in range(time_steps):
                 for i in range(4):
                     for j in range(i, 4):
-                        zeta = math.sqrt(math.log(1+(total_var[i][j]/total_mean[i][j])**2))
-                        lambda_log = math.log(total_mean[i][j]) - 1/2 * zeta **2
-                        transition_probability[i][j] = self.log_n_cdf(t+1, lambda_log, zeta)
+                        zeta = math.sqrt(math.log(1 + (total_var[i][j] / total_mean[i][j]) ** 2))
+                        lambda_log = math.log(total_mean[i][j]) - 1 / 2 * zeta ** 2
+                        transition_probability[i][j] = self.log_n_cdf(t + 1, lambda_log, zeta)
                 # tpm = transition probability matrix
                 tpm = np.matrix([[1 - transition_probability[0, 0],
                                   transition_probability[0, 0] - transition_probability[0, 1],
@@ -446,11 +444,13 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                     # Considering the effect of utility availability
                     # Utility Dependence Matrix
                     utility_matrix = np.matrix([[1, 0, 0, 0, 0],
-                                      [0, 1, 0, 0, 0],
-                                      [0, 0, 1, utility[utility_id][t], utility[utility_id][t]],
-                                      [0, 0, 0, 1 - utility[utility_id][t], utility2[utility_id][t]],
-                                      [0, 0, 0, 0, 1 - utility[utility_id][t] - utility2[utility_id][t]]
-                                      ], dtype=float)
+                                                [0, 1, 0, 0, 0],
+                                                [0, 0, 1, utility[utility_id][t], utility[utility_id][t]],
+                                                [0, 0, 0, 1 - utility[utility_id][t],
+                                                 utility2[utility_id][t]],
+                                                [0, 0, 0, 0,
+                                                 1 - utility[utility_id][t] - utility2[utility_id][t]]
+                                                ], dtype=float)
                     updated_tpm = np.matmul(tpm, utility_matrix.transpose())
                     state_probabilities[t] = np.matmul(state_probabilities[t], utility_matrix.transpose())
 
@@ -466,7 +466,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                     temporary_correlation2[t][k][3] = updated_tpm[3, 4]
                     temporary_correlation2[t][k][4] = updated_tpm[4, 4]
                     mean_over_time[t][k] = state_probabilities[t][3] + state_probabilities[t][4]
-                    variance_over_time[t][k] = (state_probabilities[t][3]+state_probabilities[t][4]) * \
+                    variance_over_time[t][k] = (state_probabilities[t][3] + state_probabilities[t][4]) * \
                                                (1 - (state_probabilities[t][3] + state_probabilities[t][4]))
 
             # Considering the effect of utility availability
@@ -496,7 +496,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 "recovery_fp": recovery_fp,
                 "mean_recovery": mean_recovery}
 
-    #TODO: nS=10000 should be used line:301
+    # TODO: nS=10000 should be used line:301
     def calculate_sample_total(self, number_of_simulations, sample_size, building_damage, random_samples):
         sample_total = np.zeros((sample_size, number_of_simulations))
         for j in range(number_of_simulations):
@@ -522,7 +522,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
     def calculate_std_of_mean_concurrent_future(self, function_name, parallelism, *args):
 
         output = []
-        with concurrent.futures.ProcessPoolExecutor(max_workers = parallelism) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
             for ret in executor.map(function_name, *args):
                 output.extend(ret)
         return output
@@ -546,26 +546,29 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         output = np.sum(variance_over_time[t])
 
         # Building i
-        #start = timer()
+        # start = timer()
         for i in range(sample_size - 1):
-            #start = timer()
+            # start = timer()
             # Building j
             for j in range(i + 1, sample_size):
-                #starti = timer()
+                # starti = timer()
                 expect1 = 0
                 # Joint probability of initial functionality state P(S0i=k, S0j=l)
                 joint_probability = self.joint_probability_calculation(sample_total[i], sample_total[j],
-                                                                       number_of_simulations)
+                    number_of_simulations)
 
                 # Functionality State k
                 for k in range(5):
                     # Functionality State l
                     for l in range(5):
                         expect1 += joint_probability[k][l] * (temporary_correlation1[t][i][k] * \
-                                   temporary_correlation1[t][j][l] \
-                                   + temporary_correlation1[t][i][k] * temporary_correlation1[t][j][l] \
-                                   + temporary_correlation2[t][i][k] * temporary_correlation1[t][j][l] \
-                                   + temporary_correlation2[t][i][k] * temporary_correlation2[t][j][l])
+                                                              temporary_correlation1[t][j][l] \
+                                                              + temporary_correlation1[t][i][k] *
+                                                              temporary_correlation1[t][j][l] \
+                                                              + temporary_correlation2[t][i][k] *
+                                                              temporary_correlation1[t][j][l] \
+                                                              + temporary_correlation2[t][i][k] *
+                                                              temporary_correlation2[t][j][l])
                 expect2 = mean_over_time[t][i] * mean_over_time[t][j]
 
                 if variance_over_time[t][i] > 0 and variance_over_time[t][j] > 0 and expect1 - expect2 > 0:
@@ -574,7 +577,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         return output
 
-    #TODO: Review
+    # TODO: Review
     def calculate_delay_time(self, res_buildings, finance):
         """
         This function calculates the delay time given an initial functionality state and a financing resource
@@ -647,61 +650,60 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         return impeding[0] + max(impeding[1:4]) + impeding[4]
 
-
-    #TODO: Improve readability
+    # TODO: Improve readability
     def joint_probability_calculation(self, sample_i, sample_j, number_of_samples):
-        output = np.zeros((5,5))
+        output = np.zeros((5, 5))
         for n in range(number_of_samples):
             if sample_i[n] == 1 and sample_j[n] == 1:
-                output[0][0] += 1.0/number_of_samples
+                output[0][0] += 1.0 / number_of_samples
             elif sample_i[n] == 1 and sample_j[n] == 2:
-                output[0][1] += 1.0/number_of_samples
+                output[0][1] += 1.0 / number_of_samples
             elif sample_i[n] == 1 and sample_j[n] == 3:
-                output[0][2] += 1.0/number_of_samples
+                output[0][2] += 1.0 / number_of_samples
             elif sample_i[n] == 1 and sample_j[n] == 4:
-                output[0][3] += 1.0/number_of_samples
+                output[0][3] += 1.0 / number_of_samples
             elif sample_i[n] == 1 and sample_j[n] == 5:
-                output[0][4] += 1.0/number_of_samples
+                output[0][4] += 1.0 / number_of_samples
             if sample_i[n] == 2 and sample_j[n] == 1:
-                output[1][0] += 1.0/number_of_samples
+                output[1][0] += 1.0 / number_of_samples
             elif sample_i[n] == 2 and sample_j[n] == 2:
-                output[1][1] += 1.0/number_of_samples
+                output[1][1] += 1.0 / number_of_samples
             elif sample_i[n] == 2 and sample_j[n] == 3:
-                output[1][2] += 1.0/number_of_samples
+                output[1][2] += 1.0 / number_of_samples
             elif sample_i[n] == 2 and sample_j[n] == 4:
-                output[1][3] += 1.0/number_of_samples
+                output[1][3] += 1.0 / number_of_samples
             elif sample_i[n] == 2 and sample_j[n] == 5:
-                output[1][4] += 1.0/number_of_samples
+                output[1][4] += 1.0 / number_of_samples
             if sample_i[n] == 3 and sample_j[n] == 1:
-                output[2][0] += 1.0/number_of_samples
+                output[2][0] += 1.0 / number_of_samples
             elif sample_i[n] == 3 and sample_j[n] == 2:
-                output[2][1] += 1.0/number_of_samples
+                output[2][1] += 1.0 / number_of_samples
             elif sample_i[n] == 3 and sample_j[n] == 3:
-                output[2][2] += 1.0/number_of_samples
+                output[2][2] += 1.0 / number_of_samples
             elif sample_i[n] == 3 and sample_j[n] == 4:
-                output[2][3] += 1.0/number_of_samples
+                output[2][3] += 1.0 / number_of_samples
             elif sample_i[n] == 3 and sample_j[n] == 5:
-                output[2][4] += 1.0/number_of_samples
+                output[2][4] += 1.0 / number_of_samples
             if sample_i[n] == 4 and sample_j[n] == 1:
-                output[3][0] += 1.0/number_of_samples
+                output[3][0] += 1.0 / number_of_samples
             elif sample_i[n] == 4 and sample_j[n] == 2:
-                output[3][1] += 1.0/number_of_samples
+                output[3][1] += 1.0 / number_of_samples
             elif sample_i[n] == 4 and sample_j[n] == 3:
-                output[3][2] += 1.0/number_of_samples
+                output[3][2] += 1.0 / number_of_samples
             elif sample_i[n] == 4 and sample_j[n] == 4:
-                output[3][3] += 1.0/number_of_samples
+                output[3][3] += 1.0 / number_of_samples
             elif sample_i[n] == 4 and sample_j[n] == 5:
-                output[3][4] += 1.0/number_of_samples
+                output[3][4] += 1.0 / number_of_samples
             if sample_i[n] == 5 and sample_j[n] == 1:
-                output[4][0] += 1.0/number_of_samples
+                output[4][0] += 1.0 / number_of_samples
             elif sample_i[n] == 5 and sample_j[n] == 2:
-                output[4][1] += 1.0/number_of_samples
+                output[4][1] += 1.0 / number_of_samples
             elif sample_i[n] == 5 and sample_j[n] == 3:
-                output[4][2] += 1.0/number_of_samples
+                output[4][2] += 1.0 / number_of_samples
             elif sample_i[n] == 5 and sample_j[n] == 4:
-                output[4][3] += 1.0/number_of_samples
+                output[4][3] += 1.0 / number_of_samples
             elif sample_i[n] == 5 and sample_j[n] == 5:
-                output[4][4] += 1.0/number_of_samples
+                output[4][4] += 1.0 / number_of_samples
 
         return output
 
@@ -711,9 +713,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         elif sp.isposinf(x):
             cdf = 1
         else:
-            z = (sp.log(x)-mean)/float(sig)
-            cdf = 0.5 * (math.erfc(-z/sp.sqrt(2)))
+            z = (sp.log(x) - mean) / float(sig)
+            cdf = 0.5 * (math.erfc(-z / sp.sqrt(2)))
 
         return cdf
-
-
