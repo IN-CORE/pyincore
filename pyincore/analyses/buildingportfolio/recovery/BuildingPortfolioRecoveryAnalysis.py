@@ -199,8 +199,13 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # Utility matrix. Represents the recovery for each of the utility areas at a given number of weeks after the event
         # The utility matrix uses utility Initial input file for the first 22 weeks and ones for the rest of the time.
 
-        for i in range(time_steps):
-            utility[:, i] = [1 - j for j in utility_initial[str(i)]]
+        if uncertainty:
+            for i in range(time_steps):
+                utility[:, i] = [1 - j for j in utility_initial[str(i)]]
+        else:
+            for i in range(time_steps):
+                utility[:, i] = [j for j in utility_initial[str(i)]]
+
 
         # with concurrent.futures.ProcessPoolExecutor(max_workers=sample_size) as executor:
         #     for response in executor.map(self.calculate_transition_probability_matrix(sample_size, time_steps, sample_buildings,
@@ -226,17 +231,10 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # Trajectory for Best Line Functionality and Full Functionality
         mean_recovery_output = sum(recovery_fp) / sample_size
 
-        fig = plt.figure(1)
-        plt.plot(range(time_steps), mean_recovery_output)
-        plt.xlabel('# of Weeks since event')
-        plt.ylabel('Probability of Portfolio Recovery')
-        plt.title('Building Portfolio Recovery Analysis')
         output_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
             'output'))
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
-        output_image = os.path.join(output_directory, 'mean-recovery' + '.png')
-        fig.savefig(output_image)
 
         output_file = os.path.join(output_directory, output_base_name + 'building-recovery' + '.csv')
         with open(output_file, 'w+', newline='') as output_file:
@@ -351,22 +349,6 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
             # END: Additional Code for uncertainty Analysis
 
-            fig2 = plt.figure(2)
-            plt.plot(range(time_steps), target_mean_recovery, color="black")
-            plt.plot(range(time_steps), lower_bound75, color="red")
-            plt.plot(range(time_steps), upper_bound75, color="red")
-            plt.plot(range(time_steps), lower_bound95, color="blue")
-            plt.plot(range(time_steps), upper_bound95, color="blue")
-            plt.xlabel('Expected recovery time (weeks)')
-            plt.ylabel('Percentage of Buildings Recovered')
-            plt.title('Building Portfolio Recovery Analysis with uncertainty')
-            output_directory = os.path.abspath(
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output'))
-            if not os.path.exists(output_directory):
-                os.makedirs(output_directory)
-            output_image2 = os.path.join(output_directory, output_base_name + 'portfolio-recovery' + '.png')
-            fig2.savefig(output_image2)
-
             output_file = os.path.join(output_directory, output_base_name + 'portfolio-recovery' + '.csv')
             with open(output_file, 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -378,6 +360,31 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                     spam_writer.writerow([i + 1, mean_recovery_output[i], lower_bound75[i], upper_bound75[i],
                                           lower_bound95[i], upper_bound95[i]] + list(mean_recovery[i]) +
                                          [pdf[i]])
+        else:
+            output_file = os.path.join(output_directory, output_base_name + 'portfolio-recovery' + '.csv')
+            with open(output_file, 'w+', newline='') as output_file:
+                spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', 'RecPercent_RE',
+                                      'RecPercent_RU', 'RecPercent_RO', 'RecPercent_BF', 'RecPercent_FF'])
+                for i in range(time_steps):
+                    spam_writer.writerow([i + 1, mean_recovery_output[i]] + list(mean_recovery[i]))
+
+        fig2 = plt.figure(2)
+        plt.plot(range(time_steps), mean_recovery_output, color="black")
+        if uncertainty:
+            plt.plot(range(time_steps), lower_bound75, color="red")
+            plt.plot(range(time_steps), upper_bound75, color="red")
+            plt.plot(range(time_steps), lower_bound95, color="blue")
+            plt.plot(range(time_steps), upper_bound95, color="blue")
+        plt.xlabel('Expected recovery time (weeks)')
+        plt.ylabel('Percentage of Buildings Recovered')
+        plt.title('Building Portfolio Recovery Analysis with uncertainty')
+        output_directory = os.path.abspath(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output'))
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        output_image2 = os.path.join(output_directory, output_base_name + 'portfolio-recovery' + '.png')
+        fig2.savefig(output_image2)
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
 
