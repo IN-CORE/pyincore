@@ -29,8 +29,7 @@ import scipy.stats
 from scipy.special import ndtri
 import matplotlib.pyplot as plt
 import concurrent.futures
-import datetime
-from timeit import default_timer as timer
+
 
 #from BuildingData import BuildingData
 from pyincore.analyses.buildingportfolio.recovery.BuildingData import BuildingData
@@ -281,9 +280,8 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         #                                                                          repair_mean, occupancy_map, uncertainty,
         #                                                                          impeding_mean, impeding_std,
         #                                                                          building_damage, utility, utility2)):
-        response = self.calculate_transition_probability_matrix(sample_size,
-            time_steps, sample_buildings, repair_mean, occupancy_map, uncertainty,
-            impeding_mean, impeding_std, building_damage, utility, utility2)
+        response = self.calculate_transition_probability_matrix(time_steps, sample_buildings, repair_mean, occupancy_map,
+            uncertainty, impeding_mean, impeding_std, building_damage, utility, utility2)
         temporary_correlation1 = response["temporary_correlation1"]
         temporary_correlation2 = response["temporary_correlation2"]
         mean_over_time = response["mean_over_time"]
@@ -427,18 +425,18 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                     lower_bound75[t] = sp.stats.norm.ppf(0.25/coeAmp+coet, target_mean_recovery[t], total_standard_deviation[t])
                     upper_bound75[t] = sp.stats.norm.ppf(coet2-0.25/coeAmp, target_mean_recovery[t], total_standard_deviation[t])
 
-            #TODO: Confirm with PI that these conditions are never hit
-            # Commenting out to be able to provide weeks < 100
-            # for t in range(100):
-            #     if lower_bound75[t] < 0:
-            #         lower_bound75[t] = 1
-            #     if upper_bound75[t] < 0:
-            #         upper_bound75[t] = 1
-            # for t in range(100, time_steps):
-            #     if lower_bound95[t] < 0:
-            #         lower_bound95[t] = 1
-            #     if upper_bound95[t] < 0:
-            #         upper_bound95[t] = 1
+            #TODO: Confirm with PI if this can be removed. These conditions are never hit
+            if time_steps > 100:
+                for t in range(100):
+                    if lower_bound75[t] < 0:
+                        lower_bound75[t] = 1
+                    if upper_bound75[t] < 0:
+                        upper_bound75[t] = 1
+                for t in range(100, time_steps):
+                    if lower_bound95[t] < 0:
+                        lower_bound95[t] = 1
+                    if upper_bound95[t] < 0:
+                        upper_bound95[t] = 1
 
             # END: Additional Code for uncertainty Analysis
 
@@ -469,8 +467,9 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
 
-    def calculate_transition_probability_matrix(self, sample_size, time_steps, sample_buildings, repair_mean, occupancy_map,
+    def calculate_transition_probability_matrix(self, time_steps, sample_buildings, repair_mean, occupancy_map,
                                                 uncertainty, impeding_mean, impeding_std, building_damage, utility, utility2):
+        sample_size = len(sample_buildings)
         total_mean = np.zeros((4, 4))
         total_var = np.zeros((4, 4))
         transition_probability = np.zeros((4,4))
