@@ -1,5 +1,0 @@
-pandas==0.22.0
-scipy==1.0.0
-matplotlib
-argparse
-git+https://bitbucket.org/ncsaincore/pyincore#egg=pyincore
