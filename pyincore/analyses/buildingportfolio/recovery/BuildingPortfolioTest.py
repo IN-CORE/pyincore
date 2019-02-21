@@ -3,7 +3,8 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.buildingportfolio.recovery.BuildingPortfolioRecoveryAnalysis import  BuildingPortfolioRecoveryAnalysis
+from pyincore.analyses.buildingportfolio.recovery.BuildingPortfolioRecoveryAnalysis import \
+    BuildingPortfolioRecoveryAnalysis
 from pyincore import Dataset
 from pyincore import InsecureIncoreClient
 
@@ -11,7 +12,6 @@ if __name__ == "__main__":
     cred = None
     try:
         client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
-
 
         bldg_damage_file = "./data/DamageAnalysisResults.csv"
         bldg_damage_dataset = Dataset.from_file(bldg_damage_file, "ergo:buildingDamageVer4")
@@ -34,16 +34,15 @@ if __name__ == "__main__":
         occupancy_mapping = "./data/Occupancy_Code_Mapping.csv"
         occupancy_dataset = Dataset.from_file(occupancy_mapping, "ergo:mapping")
 
-
         bldg_portfolio_recovery = BuildingPortfolioRecoveryAnalysis(client)
         bldg_portfolio_recovery.set_parameter("uncertainty", True)
-        bldg_portfolio_recovery.set_parameter("sample_size", 50) # default none to get all samples form the input dataset
-        bldg_portfolio_recovery.set_parameter("random_sample_size", 50) #default 10000
-        bldg_portfolio_recovery.set_parameter("no_of_weeks", 100) #default 250
+        bldg_portfolio_recovery.set_parameter("sample_size", 35)  # default none. Gets size form input dataset
+        bldg_portfolio_recovery.set_parameter("random_sample_size", 50)  # default 10000
+        bldg_portfolio_recovery.set_parameter("no_of_weeks", 100)  # default 250
         bldg_portfolio_recovery.set_parameter("num_cpu", 1)
 
         bldg_portfolio_recovery.set_input_dataset("building_damage", bldg_damage_dataset)
-        bldg_portfolio_recovery.set_input_dataset("occupancy_mapping", occupancy_dataset )
+        bldg_portfolio_recovery.set_input_dataset("occupancy_mapping", occupancy_dataset)
         bldg_portfolio_recovery.set_input_dataset("building_data", bldg_data_dataset)
         bldg_portfolio_recovery.set_input_dataset("utility", utility_dataset)
         bldg_portfolio_recovery.set_input_dataset("utility_partial", utility_dataset2)
@@ -54,4 +53,4 @@ if __name__ == "__main__":
 
     except EnvironmentError:
         print("exception")
-        #traceback.print_exc()
+        # traceback.print_exc()

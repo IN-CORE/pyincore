@@ -42,7 +42,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 {
                     'id': 'sample_size',
                     'required': False,
-                    'description': 'Sample Size',
+                    'description': 'No. of buildings to be considered from input buildings',
                     'type': int
                 },
                 {
@@ -86,7 +86,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 {
                     'id': 'utility',
                     'required': True,
-                    'description': '% utility availability at each utility service area - joint area of power '
+                    'description': '% utility availability at each utility service area - joint area of power'
                                    'and water (row), at each week (column)"',
                     'type': ['ergo:utilityAvailability'],
                 },
@@ -203,18 +203,13 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         for i in range(time_steps):
             utility[:, i] = [1-j for j in utility_initial[str(i)]]
 
-
-
-
-
-
         # with concurrent.futures.ProcessPoolExecutor(max_workers=sample_size) as executor:
         #     for response in executor.map(self.calculate_transition_probability_matrix(sample_size, time_steps, sample_buildings,
         #                                                                          repair_mean, occupancy_map, uncertainty,
         #                                                                          impeding_mean, impeding_std,
         #                                                                          building_damage, utility, utility2)):
-        response = self.calculate_transition_probability_matrix(time_steps, sample_buildings, repair_mean, occupancy_map,
-            uncertainty, impeding_mean, impeding_std, building_damage, utility, utility2)
+        response = self.calculate_transition_probability_matrix(time_steps, sample_buildings, repair_mean,
+            occupancy_map, uncertainty, impeding_mean, impeding_std, building_damage, utility, utility2)
         temporary_correlation1 = response["temporary_correlation1"]
         temporary_correlation2 = response["temporary_correlation2"]
         mean_over_time = response["mean_over_time"]
@@ -237,7 +232,8 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         plt.xlabel('# of Weeks since event')
         plt.ylabel('Probability of Portfolio Recovery')
         plt.title('Building Portfolio Recovery Analysis')
-        output_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output'))
+        output_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+            'output'))
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
         output_image = os.path.join(output_directory, 'mean-recovery' + '.png')
@@ -246,9 +242,11 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         output_file = os.path.join(output_directory, output_base_name + 'building-recovery' + '.csv')
         with open(output_file, 'w+', newline='') as output_file:
             spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            spam_writer.writerow(['Building_ID', 'Building_Lon', 'Building_Lat'] + list(range(1, time_steps+1)))
+            spam_writer.writerow(['Building_ID', 'Building_Lon', 'Building_Lat']
+                                 + list(range(1, time_steps+1)))
             for i in range(sample_size):
-                spam_writer.writerow([building_data['Build_ID_X'][i], building_data['X_Lon'][i], building_data['Y_Lat'][i]] + list(recovery_fp[i]))
+                spam_writer.writerow([building_data['Build_ID_X'][i], building_data['X_Lon'][i],
+                                      building_data['Y_Lat'][i]] + list(recovery_fp[i]))
 
         if uncertainty:
             # START: Additional Code for uncertainty analysis
@@ -266,9 +264,9 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                         variance_over_time[t][k] = 0
 
             # Start calculating standard deviation of the mean recovery trajectory
-            total_standard_deviation = self.calculate_std_of_mean_bulk_input(range(time_steps), sample_size, number_of_simulations, variance_over_time,
-                                         mean_over_time, temporary_correlation1, temporary_correlation2, sample_total)
-
+            total_standard_deviation = self.calculate_std_of_mean_bulk_input(range(time_steps), sample_size,
+                number_of_simulations, variance_over_time, mean_over_time, temporary_correlation1,
+                temporary_correlation2, sample_total)
 
 
             # Calculate distribution of Portfolio Recovery Time (PRT) assume normal distribution
@@ -308,26 +306,38 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
                 if coet >= 0.000005 and 1 - coet2 < 0.00005:
                     coeAmp = 1 / (1 - coet)
-                    lower_bound95[t] = sp.stats.norm.ppf(0.05 / coeAmp + coet, target_mean_recovery[t], total_standard_deviation[t])
-                    upper_bound95[t] = sp.stats.norm.ppf(0.95 / coeAmp + coet, target_mean_recovery[t], total_standard_deviation[t])
-                    lower_bound75[t] = sp.stats.norm.ppf(0.25 / coeAmp + coet, target_mean_recovery[t], total_standard_deviation[t])
-                    upper_bound75[t] = sp.stats.norm.ppf(0.75 / coeAmp + coet, target_mean_recovery[t], total_standard_deviation[t])
+                    lower_bound95[t] = sp.stats.norm.ppf(0.05 / coeAmp + coet, target_mean_recovery[t],
+                        total_standard_deviation[t])
+                    upper_bound95[t] = sp.stats.norm.ppf(0.95 / coeAmp + coet, target_mean_recovery[t],
+                        total_standard_deviation[t])
+                    lower_bound75[t] = sp.stats.norm.ppf(0.25 / coeAmp + coet, target_mean_recovery[t],
+                        total_standard_deviation[t])
+                    upper_bound75[t] = sp.stats.norm.ppf(0.75 / coeAmp + coet, target_mean_recovery[t],
+                        total_standard_deviation[t])
 
                     pdf_full[t] = pdf_full[t] * coeAmp
                 if coet < 0.00005 and 1 - coet2 >= 0.000005:
-                    coeAmp = 1/ coet2
-                    lower_bound95[t] = sp.stats.norm.ppf((coet2) - 0.95 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
-                    upper_bound95[t] = sp.stats.norm.ppf((coet2) - 0.05 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
-                    lower_bound75[t] = sp.stats.norm.ppf((coet2) - 0.75 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
-                    upper_bound75[t] = sp.stats.norm.ppf((coet2) - 0.25 / coeAmp, target_mean_recovery[t], total_standard_deviation[t])
+                    coeAmp = 1 / coet2
+                    lower_bound95[t] = sp.stats.norm.ppf((coet2) - 0.95 / coeAmp, target_mean_recovery[t],
+                        total_standard_deviation[t])
+                    upper_bound95[t] = sp.stats.norm.ppf((coet2) - 0.05 / coeAmp, target_mean_recovery[t],
+                        total_standard_deviation[t])
+                    lower_bound75[t] = sp.stats.norm.ppf((coet2) - 0.75 / coeAmp, target_mean_recovery[t],
+                        total_standard_deviation[t])
+                    upper_bound75[t] = sp.stats.norm.ppf((coet2) - 0.25 / coeAmp, target_mean_recovery[t],
+                        total_standard_deviation[t])
 
-                    pdf_full[t] = pdf_full[t]*coeAmp
+                    pdf_full[t] = pdf_full[t] * coeAmp
                 if coet >= 0.000005 and 1 - coet2 >= 0.000005:
-                    coeAmp = 1/(coet2 - coet)
-                    lower_bound95[t] = sp.stats.norm.ppf(0.05/coeAmp+coet, target_mean_recovery[t], total_standard_deviation[t])
-                    upper_bound95[t] = sp.stats.norm.ppf(coet2-0.05/coeAmp, target_mean_recovery[t], total_standard_deviation[t])
-                    lower_bound75[t] = sp.stats.norm.ppf(0.25/coeAmp+coet, target_mean_recovery[t], total_standard_deviation[t])
-                    upper_bound75[t] = sp.stats.norm.ppf(coet2-0.25/coeAmp, target_mean_recovery[t], total_standard_deviation[t])
+                    coeAmp = 1 / (coet2 - coet)
+                    lower_bound95[t] = sp.stats.norm.ppf(0.05 / coeAmp + coet, target_mean_recovery[t],
+                        total_standard_deviation[t])
+                    upper_bound95[t] = sp.stats.norm.ppf(coet2 - 0.05 / coeAmp, target_mean_recovery[t],
+                        total_standard_deviation[t])
+                    lower_bound75[t] = sp.stats.norm.ppf(0.25 / coeAmp + coet, target_mean_recovery[t],
+                        total_standard_deviation[t])
+                    upper_bound75[t] = sp.stats.norm.ppf(coet2 - 0.25 / coeAmp, target_mean_recovery[t],
+                        total_standard_deviation[t])
 
             #TODO: Confirm with PI if this can be removed. These conditions are never hit
             if time_steps > 100:
@@ -362,17 +372,20 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             output_file = os.path.join(output_directory, output_base_name + 'portfolio-recovery' +'.csv')
             with open(output_file, 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', '75P_Upper_Bound', '75P_Lower_Bound', '95P_Upper_Bound',
-                                      '95P_Lower_Bound', 'RecPercent_RE', 'RecPercent_RU', 'RecPercent_RO', 'RecPercent_BF', 'RecPercent_FF',
+                spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', '75P_Upper_Bound',
+                                      '75P_Lower_Bound', '95P_Upper_Bound','95P_Lower_Bound', 'RecPercent_RE',
+                                      'RecPercent_RU', 'RecPercent_RO', 'RecPercent_BF', 'RecPercent_FF',
                                       'Probability_Density_Func'])
                 for i in range(time_steps):
-                    spam_writer.writerow([i+1, mean_recovery_output[i], lower_bound75[i], upper_bound75[i], lower_bound95[i],
-                                          upper_bound95[i]] + list(mean_recovery[i]) + [pdf[i]])
+                    spam_writer.writerow([i + 1, mean_recovery_output[i], lower_bound75[i], upper_bound75[i],
+                                          lower_bound95[i], upper_bound95[i]] + list(mean_recovery[i]) +
+                                         [pdf[i]])
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
 
     def calculate_transition_probability_matrix(self, time_steps, sample_buildings, repair_mean, occupancy_map,
-                                                uncertainty, impeding_mean, impeding_std, building_damage, utility, utility2):
+                                                uncertainty, impeding_mean, impeding_std, building_damage,
+                                                utility, utility2):
         sample_size = len(sample_buildings)
         total_mean = np.zeros((4, 4))
         total_var = np.zeros((4, 4))
@@ -410,15 +423,20 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                         transition_probability[i][j] = self.log_n_cdf(t+1, lambda_log, zeta)
                 # tpm = transition probability matrix
                 tpm = np.matrix([[1 - transition_probability[0, 0],
-                        transition_probability[0, 0] - transition_probability[0, 1],
-                        transition_probability[0, 1] - transition_probability[0, 2],
-                        transition_probability[0, 2] - transition_probability[0, 3], transition_probability[0, 3]],
-                       [0.0, 1 - transition_probability[1, 1], transition_probability[1, 1] - transition_probability[1, 2],
-                        transition_probability[1, 2] - transition_probability[1, 3], transition_probability[1, 3]],
-                       [0.0, 0.0, 1 - transition_probability[2, 2],
-                        transition_probability[2, 2] - transition_probability[2, 3], transition_probability[2, 3]],
-                       [0.0, 0.0, 0.0, 1 - transition_probability[3, 3], transition_probability[3, 3]],
-                       [0.0, 0.0, 0.0, 0.0, 1.0]], dtype=float)
+                                  transition_probability[0, 0] - transition_probability[0, 1],
+                                  transition_probability[0, 1] - transition_probability[0, 2],
+                                  transition_probability[0, 2] - transition_probability[0, 3],
+                                  transition_probability[0, 3]],
+                                 [0.0, 1 - transition_probability[1, 1],
+                                  transition_probability[1, 1] - transition_probability[1, 2],
+                                  transition_probability[1, 2] - transition_probability[1, 3],
+                                  transition_probability[1, 3]],
+                                 [0.0, 0.0, 1 - transition_probability[2, 2],
+                                  transition_probability[2, 2] - transition_probability[2, 3],
+                                  transition_probability[2, 3]],
+                                 [0.0, 0.0, 0.0, 1 - transition_probability[3, 3],
+                                  transition_probability[3, 3]],
+                                 [0.0, 0.0, 0.0, 0.0, 1.0]], dtype=float)
                 # State Probability vector, pie(t) = initial vector * Transition Probability Matrix
                 state_probabilities[t] = np.matmul(building_damage[k], tpm)
                 if not uncertainty:
@@ -472,8 +490,10 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         print("Transition probability matrix calculation complete.")
 
-        return {"temporary_correlation1": temporary_correlation1, "temporary_correlation2": temporary_correlation2,
-                "mean_over_time": mean_over_time, "variance_over_time": variance_over_time, "recovery_fp": recovery_fp,
+        return {"temporary_correlation1": temporary_correlation1,
+                "temporary_correlation2": temporary_correlation2,
+                "mean_over_time": mean_over_time, "variance_over_time": variance_over_time,
+                "recovery_fp": recovery_fp,
                 "mean_recovery": mean_recovery}
 
     #TODO: nS=10000 should be used line:301
@@ -485,12 +505,14 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 threshold = building_damage[i]
                 if random_samples[j][i] <= threshold[0]:
                     sample[i] = 1
-                elif random_samples[j][i] <= threshold[0] + threshold[1] and random_samples[j][i] >= threshold[0]:
+                elif random_samples[j][i] <= threshold[0] + threshold[1] and \
+                        random_samples[j][i] >= threshold[0]:
                     sample[i] = 2
-                elif threshold[0] + threshold[1] <= random_samples[j][i] <= threshold[0] + threshold[1] + threshold[2]:
+                elif threshold[0] + threshold[1] <= random_samples[j][i] <= \
+                        threshold[0] + threshold[1] + threshold[2]:
                     sample[i] = 3
-                elif threshold[0] + threshold[1] + threshold[2] <= random_samples[j][i] <= threshold[0] + threshold[1] + \
-                        threshold[2] + threshold[3]:
+                elif threshold[0] + threshold[1] + threshold[2] <= random_samples[j][i] <= \
+                        threshold[0] + threshold[1] + threshold[2] + threshold[3]:
                     sample[i] = 4
                 else:
                     sample[i] = 5
@@ -505,13 +527,15 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 output.extend(ret)
         return output
 
-    def calculate_std_of_mean_bulk_input(self, time_steps, sample_size, number_of_simulations, variance_over_time,
-                                         mean_over_time, temporary_correlation1, temporary_correlation2, sample_total):
+    def calculate_std_of_mean_bulk_input(self, time_steps, sample_size, number_of_simulations,
+                                         variance_over_time, mean_over_time, temporary_correlation1,
+                                         temporary_correlation2, sample_total):
         result = []
         for step in time_steps:
-            result.append(self.calculate_std_of_mean(step, sample_size, number_of_simulations, variance_over_time,
-                                                     mean_over_time, temporary_correlation1, temporary_correlation2,
-                                                     sample_total))
+            result.append(
+                self.calculate_std_of_mean(step, sample_size, number_of_simulations, variance_over_time,
+                    mean_over_time, temporary_correlation1, temporary_correlation2,
+                    sample_total))
         return result
 
     # calculating standard deviation of the mean recovery trajectory
