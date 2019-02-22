@@ -388,6 +388,8 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
 
+        return True
+
     def calculate_transition_probability_matrix(self, time_steps, sample_buildings, repair_mean,
                                                 occupancy_map,
                                                 uncertainty, impeding_mean, impeding_std, building_damage,
