@@ -16,7 +16,7 @@ if __name__ == "__main__":
         bldg_damage_file = "./data/DamageAnalysisResults.csv"
         bldg_damage_dataset = Dataset.from_file(bldg_damage_file, "ergo:buildingDamageVer4")
 
-        bldg_data_file = "./data/Building_data.csv"
+        bldg_data_file = "./data/Building_Data.csv"
         bldg_data_dataset = Dataset.from_file(bldg_data_file, "ergo:buildingDamageVer4")
 
         utility_file = "./data/utility.csv"
