@@ -5,11 +5,9 @@
 import copy
 import networkx as nx
 import random
-from pyincore.analyses.transportationrecovery import freeflow_traveltime as ft
 from pyincore.analyses.transportationrecovery.nsga2 import Solution
 from pyincore.analyses.transportationrecovery import WIPW as WIPW
-import pandas as pd
-import os
+from pyincore.analyses.transportationrecovery.transportationrecoveryutil import TransportationRecoveryUtil
 
 
 class PostDisasterLongTermSolution(Solution):
@@ -201,7 +199,7 @@ class PostDisasterLongTermSolution(Solution):
                 # calculate the travel efficiency based on different
                 # performance metrics based on travel time
                 if self.pm == 1:
-                    te = ft.traveltime_freeflow(self.network)
+                    te = TransportationRecoveryUtil.traveltime_freeflow(self.network)
 
                 # based on WIPW
                 elif self.pm == 0:
