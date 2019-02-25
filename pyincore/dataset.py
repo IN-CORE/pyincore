@@ -150,7 +150,6 @@ class Dataset:
             df = pd.read_csv(filename, header="infer")
         return df
 
-
     def close(self):
         for key in self.readers:
             self.readers[key].close()
