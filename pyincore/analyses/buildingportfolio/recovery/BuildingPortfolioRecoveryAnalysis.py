@@ -66,55 +66,54 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'building_damage',
+                    'id': 'building_data',
                     'required': True,
-                    'description': 'Building Damage Results',
-                    'type': ['ergo:buildingDamageVer4'],
+                    'description': 'Building Data',
+                    'type': ['incore:portfolioBuildingInventory'],
                 },
                 {
                     'id': 'occupancy_mapping',
                     'required': True,
                     'description': 'Occupancy code mapping',
-                    'type': ['ergo:mapping'],
+                    'type': ['incore:portfolioOccupancyMapping'],
                 },
                 {
-                    'id': 'building_data',
+                    'id': 'building_damage',
                     'required': True,
-                    'description': 'Building Data',
-                    'type': ['ergo:buildingDamageVer4'],
+                    'description': 'Building Damage Results',
+                    'type': ['incore:portfolioBuildingDamage'],
+                },
+                {
+                    'id': 'dmg_ratios',
+                    'required': True,
+                    'description': 'Percentage of mean repair by occupancy / building type',
+                    'type': ['incore:portfolioDamageRatios'],
                 },
                 {
                     'id': 'utility',
                     'required': True,
                     'description': 'Full utility availability at each utility service area - joint area of power'
                                    'and water (row), at each week (column)"',
-                    'type': ['ergo:utilityAvailability'],
+                    'type': ['incore:portfolioUtilityAvailability'],
                 },
                 {
                     'id': 'utility_partial',
                     'required': True,
                     'description': 'Partial utility availability at each utility service area',
-                    'type': ['ergo:utilityAvailability'],
-                },
-                {
-                    'id': 'dmg_ratios',
-                    'required': True,
-                    'description': 'Percentage of mean repair by occupancy / building type',
-                    'type': ['ergo:buildingDamageRatios'],
+                    'type': ['incore:portfolioUtilityAvailability'],
                 },
                 {
                     'id': 'coefFL',
                     'required': True,
                     'description': 'Correlation coefficient of initial functionality states',
-                    'type': ['ergo:coefFL'],
+                    'type': ['incore:portfolioCoefficients'],
                 },
-
             ],
             'output_datasets': [
                 {
                     'id': 'result',
                     'parent_type': 'buildingPortfolio',
-                    'type': 'ergo:buildingDamageVer4'
+                    'type': 'incore:portfolioRecovery'
                 }
             ]
         }

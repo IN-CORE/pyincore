@@ -13,26 +13,13 @@ if __name__ == "__main__":
     try:
         client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
 
-        bldg_damage_file = "./data/DamageAnalysisResults.csv"
-        bldg_damage_dataset = Dataset.from_file(bldg_damage_file, "ergo:buildingDamageVer4")
-
-        bldg_data_file = "./data/Building_Data.csv"
-        bldg_data_dataset = Dataset.from_file(bldg_data_file, "ergo:buildingDamageVer4")
-
-        utility_file = "./data/utility.csv"
-        utility_dataset = Dataset.from_file(utility_file, "ergo:utilityAvailability")
-
-        utility_file2 = "./data/utility2.csv"
-        utility_dataset2 = Dataset.from_file(utility_file2, "ergo:utilityAvailability")
-
-        mean_repair_file = "./data/Mean_Repair.csv"
-        mean_repair_dataset = Dataset.from_file(mean_repair_file, "ergo:buildingDamageRatios")
-
-        coefFL_file = "./data/coefFL.csv"
-        coefFL_dataset = Dataset.from_file(coefFL_file, "ergo:coefFL")
-
-        occupancy_mapping = "./data/Occupancy_Code_Mapping.csv"
-        occupancy_dataset = Dataset.from_file(occupancy_mapping, "ergo:mapping")
+        bldg_data_dataset = "5c756966c11bb369a33a0b0a"
+        occupancy_dataset = "5c7569f9c11bb369a33a0b16"
+        bldg_damage_dataset = "5c756a2fc11bb369a33a0b22"
+        mean_repair_dataset = "5c756ac5c11bb369a33a0b34"
+        utility_dataset = "5c756af4c11bb369a33a0b40"
+        utility_partial_dataset = "5c756b1ec11bb369a33a0b4c"
+        coefFL_dataset = "5c756b56c11bb369a33a0b58"
 
         bldg_portfolio_recovery = BuildingPortfolioRecoveryAnalysis(client)
         bldg_portfolio_recovery.set_parameter("uncertainty", True)
@@ -41,13 +28,13 @@ if __name__ == "__main__":
         bldg_portfolio_recovery.set_parameter("no_of_weeks", 100)  # default 250
         bldg_portfolio_recovery.set_parameter("num_cpu", 1)
 
-        bldg_portfolio_recovery.set_input_dataset("building_damage", bldg_damage_dataset)
-        bldg_portfolio_recovery.set_input_dataset("occupancy_mapping", occupancy_dataset)
-        bldg_portfolio_recovery.set_input_dataset("building_data", bldg_data_dataset)
-        bldg_portfolio_recovery.set_input_dataset("utility", utility_dataset)
-        bldg_portfolio_recovery.set_input_dataset("utility_partial", utility_dataset2)
-        bldg_portfolio_recovery.set_input_dataset("dmg_ratios", mean_repair_dataset)
-        bldg_portfolio_recovery.set_input_dataset("coefFL", coefFL_dataset)
+        bldg_portfolio_recovery.load_remote_input_dataset("building_data", bldg_data_dataset)
+        bldg_portfolio_recovery.load_remote_input_dataset("occupancy_mapping", occupancy_dataset)
+        bldg_portfolio_recovery.load_remote_input_dataset("building_damage", bldg_damage_dataset)
+        bldg_portfolio_recovery.load_remote_input_dataset("dmg_ratios", mean_repair_dataset)
+        bldg_portfolio_recovery.load_remote_input_dataset("utility", utility_dataset)
+        bldg_portfolio_recovery.load_remote_input_dataset("utility_partial", utility_partial_dataset)
+        bldg_portfolio_recovery.load_remote_input_dataset("coefFL", coefFL_dataset)
 
         bldg_portfolio_recovery.run_analysis()
 
