@@ -86,14 +86,14 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 {
                     'id': 'utility',
                     'required': True,
-                    'description': '% utility availability at each utility service area - joint area of power'
+                    'description': 'Full utility availability at each utility service area - joint area of power'
                                    'and water (row), at each week (column)"',
                     'type': ['ergo:utilityAvailability'],
                 },
                 {
                     'id': 'utility_partial',
                     'required': True,
-                    'description': 'Partial utility availability',
+                    'description': 'Partial utility availability at each utility service area',
                     'type': ['ergo:utilityAvailability'],
                 },
                 {
@@ -105,7 +105,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 {
                     'id': 'coefFL',
                     'required': True,
-                    'description': 'CoefFL',
+                    'description': 'Correlation coefficient of initial functionality states',
                     'type': ['ergo:coefFL'],
                 },
 
