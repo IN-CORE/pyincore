@@ -5,7 +5,6 @@
 
 from pyincore.analyses.buildingportfolio.recovery.BuildingPortfolioRecoveryAnalysis import \
     BuildingPortfolioRecoveryAnalysis
-from pyincore import Dataset
 from pyincore import InsecureIncoreClient
 
 if __name__ == "__main__":
