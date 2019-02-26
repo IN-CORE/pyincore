@@ -374,11 +374,8 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         plt.xlabel('Expected recovery time (weeks)')
         plt.ylabel('Percentage of Buildings Recovered')
         plt.title('Building Portfolio Recovery Analysis with uncertainty')
-        output_directory = os.path.abspath(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output'))
-        if not os.path.exists(output_directory):
-            os.makedirs(output_directory)
-        output_image2 = os.path.join(output_directory, output_base_name + 'portfolio-recovery' + '.png')
+
+        output_image2 = output_base_name + 'portfolio-recovery' + '.png'
         fig2.savefig(output_image2)
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
