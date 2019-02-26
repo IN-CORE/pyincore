@@ -7,11 +7,13 @@ Environment) initiative. Pyincore allows users to apply hazards on infrastructur
 Python framework acceses underlying data through local or remote services and facilitates moving 
 and synthesizing results.
                       
-**Pyincore** as a python module can be used to write hazard workflow tools.
-
-## Installation
+**Pyincore** as a python module can be used to write hazard workflow tools. We envision users writing tools 
+as a [Jupyter](https://jupyter.org/) notebooks.
 
 ### Prerequisites
+
+A user must have an account recognized by the **Incore** service. [Contact us](https://incore.ncsa.illinois.edu), please 
+and credentials will be sent to you.
 
 [Python 3.5](https://www.python.org) or greater
 
@@ -43,9 +45,11 @@ and synthesizing results.
 **Optional**: `virtualenv` (available by running `pip install virtualenv`) or [Anaconda](https://www.anaconda.com/distribution/), 
 note that a full Anaconda distribution will include Python, so installing Python first isn't needed if you use Anaconda
 
+## Installation
+
 ### All Platforms
 
-1. Download or clone the source code from [NCSA Git](https://git.ncsa.illinois.edu/incore/pyincore) repository.
+1. Download **pyincore** as an archive file from NCSA's server.
 2. Change into the ```pyincore``` directory (or prepend the path to the directory onto files reference from here on out)
 3. **Optional**: Activate your virtual or conda environment
 4. From the terminal, in the project folder (pyincore) run:
@@ -80,40 +84,18 @@ note that a full Anaconda distribution will include Python, so installing Python
 
 ## Running
 
-Verify the installation by running the test script
-```
-python setup.py test
-```
-
-## For developers
-
-- Installation directly from `Git`:
+- Verify the installation by running the test script
     ```
-    git clone https://git.ncsa.illinois.edu/incore/pyincore
-    cd pyincore
-    pip install -e
+    python setup.py test
     ```
-- **Pyincore documentation*** can be found on [Incore server](http://incore2.ncsa.illinois.edu/doc).
-- ***Jupyter notebooks*** can be run interactively with [Jupyter](https://git.ncsa.illinois.edu/incore/pyincore).
-- **Tests** In order to run Tests, you need to create a file called, `.incorepw` under tests folder. The file needs 
-    two lines: `user name` in the 1st line and `password` in the 2nd line
-- There is a known issue running analyses on multiple threads in some versions of 
-    `python 3.6.x` running on `MacOS High Sierra 10.13.x`. If you see such errors on your environment, 
-    set the following environment variable in your `.bash_profile` as a workaround: 
-    ```
-    export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
-    ``` 
-    Issue details can be found [here](http://sealiesoftware.com/blog/archive/2017/6/5/Objective-C_and_fork_in_macOS_1013.html)
+- Run **[Jupyter](https://jupyter.org/) notebook** interactively in ([Incore Lab](https://incore-jupyter.ncsa.illinois.edu/hub/login) lab).
 
-## Data
+## Documentation
 
-To access data in the **Incore**, you must have an account recognized by `Incore Auth`, 
-or a [free Incore ID](https://incore.ncsa.illinois.edu).
+**Pyincore** documentation can be found on [Incore server](http://incore2.ncsa.illinois.edu/).
 
-## Contributions
-If you find a bug or want a feature, feel free to open an issue on [NCSA Jira](https://jira.ncsa.illinois.edu/login.jsp).
 
-## Support
+## Acknowledgement
 This work was performed under financial assistance award 70NANB15H044 from 
 the National Institute of Standards and Technology (NIST) as part of 
 the Interdependent Networked Community Resilience Modeling 
