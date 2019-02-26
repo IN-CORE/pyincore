@@ -231,12 +231,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # Trajectory for Best Line Functionality and Full Functionality
         mean_recovery_output = sum(recovery_fp) / sample_size
 
-        output_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
-            'output'))
-        if not os.path.exists(output_directory):
-            os.makedirs(output_directory)
-
-        output_file = os.path.join(output_directory, output_base_name + 'building-recovery' + '.csv')
+        output_file = output_base_name + 'building-recovery' + '.csv'
         with open(output_file, 'w+', newline='') as output_file:
             spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             spam_writer.writerow(['Building_ID', 'Building_Lon', 'Building_Lat']
@@ -349,7 +344,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
             # END: Additional Code for uncertainty Analysis
 
-            output_file = os.path.join(output_directory, output_base_name + 'portfolio-recovery' + '.csv')
+            output_file = output_base_name + 'portfolio-recovery' + '.csv'
             with open(output_file, 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', '75P_Upper_Bound',
@@ -361,7 +356,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                                           lower_bound95[i], upper_bound95[i]] + list(mean_recovery[i]) +
                                          [pdf[i]])
         else:
-            output_file = os.path.join(output_directory, output_base_name + 'portfolio-recovery' + '.csv')
+            output_file = output_base_name + 'portfolio-recovery' + '.csv'
             with open(output_file, 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', 'RecPercent_RE',
