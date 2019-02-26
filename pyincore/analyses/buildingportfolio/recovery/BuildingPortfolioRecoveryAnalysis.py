@@ -363,19 +363,20 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 for i in range(time_steps):
                     spam_writer.writerow([i + 1, mean_recovery_output[i]] + list(mean_recovery[i]))
 
-        fig2 = plt.figure(2)
-        plt.plot(range(time_steps), mean_recovery_output, color="black")
-        if uncertainty:
-            plt.plot(range(time_steps), lower_bound75, color="red")
-            plt.plot(range(time_steps), upper_bound75, color="red")
-            plt.plot(range(time_steps), lower_bound95, color="blue")
-            plt.plot(range(time_steps), upper_bound95, color="blue")
-        plt.xlabel('Expected recovery time (weeks)')
-        plt.ylabel('Percentage of Buildings Recovered')
-        plt.title('Building Portfolio Recovery Analysis with uncertainty')
-
-        output_image2 = output_base_name + 'portfolio-recovery' + '.png'
-        fig2.savefig(output_image2)
+        # Not needed as graphs are generated in jupyter notebook
+        # fig2 = plt.figure(2)
+        # plt.plot(range(time_steps), mean_recovery_output, color="black")
+        # if uncertainty:
+        #     plt.plot(range(time_steps), lower_bound75, color="red")
+        #     plt.plot(range(time_steps), upper_bound75, color="red")
+        #     plt.plot(range(time_steps), lower_bound95, color="blue")
+        #     plt.plot(range(time_steps), upper_bound95, color="blue")
+        # plt.xlabel('Expected recovery time (weeks)')
+        # plt.ylabel('Percentage of Buildings Recovered')
+        # plt.title('Building Portfolio Recovery Analysis with uncertainty')
+        #
+        # output_image2 = output_base_name + 'portfolio-recovery' + '.png'
+        # fig2.savefig(output_image2)
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
 
