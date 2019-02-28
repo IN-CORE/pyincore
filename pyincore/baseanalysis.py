@@ -94,11 +94,12 @@ class BaseAnalysis:
         return self.parameters[id]['value']
 
     def set_parameter(self, id, parameter):
-        if self.validate_parameter(self.parameters[id]['spec'], parameter)[0]:
+        result = self.validate_parameter(self.parameters[id]['spec'], parameter)
+        if result[0]:
             self.parameters[id]['value'] = parameter
             return True
         else:
-            # TOTO handle error message
+            print("Error setting parameter: " + result[1])
             return False
 
     def get_input_datasets(self):
@@ -119,7 +120,6 @@ class BaseAnalysis:
             self.input_datasets[id]['value'] = dataset
             return True
         else:
-            # TODO handle error message
             print(result[1])
             return False
 
@@ -156,12 +156,16 @@ class BaseAnalysis:
         """
         is_valid = True
         err_msg = ''
-        if parameter_spec['required'] and not (type(parameter) is parameter_spec['type']):
-            is_valid = False
-            err_msg = 'parameter type does not match'
+        if parameter_spec['required']:
+            if parameter is None:
+                is_valid = False
+                err_msg = 'required paramter is missing - spec: ' + str(parameter_spec)
+            elif not type(parameter) is parameter_spec['type']:
+                is_valid = False
+                err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)
         elif not isinstance(parameter, type(None)) and not (type(parameter) is parameter_spec['type']):
             is_valid = False
-            err_msg = 'parameter type does not match'
+            err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)
 
         return is_valid, err_msg
 
@@ -233,12 +237,14 @@ class BaseAnalysis:
             id = dataset_spec["id"]
             result = self.validate_input_dataset(dataset_spec, self.input_datasets[id]["value"])
             if not result[0]:
+                print("Error reading dataset: " + result[1])
                 return result
 
         for parameter_spec in self.spec['input_parameters']:
             id = parameter_spec["id"]
             result = self.validate_parameter(parameter_spec, self.get_parameter(id))
             if not result[0]:
+                print("Error reading parameter: "+ result[1])
                 return result
 
         return self.run()
