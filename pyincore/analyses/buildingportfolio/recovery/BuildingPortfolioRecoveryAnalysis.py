@@ -188,10 +188,6 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         # START initializing variables for uncertainty analysis
         target_mean_recovery = np.zeros(time_steps)
-        temporary_correlation1 = np.zeros((time_steps, sample_size, 5))
-        temporary_correlation2 = np.zeros((time_steps, sample_size, 5))
-        mean_over_time = np.zeros((time_steps, sample_size))
-        variance_over_time = np.zeros((time_steps, sample_size))
         utility2 = np.zeros((len(utility_initial), time_steps))
         # END code for uncertainty analysis
 
