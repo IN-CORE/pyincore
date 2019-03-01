@@ -3,18 +3,15 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-import os
 import math
 import csv
 import numpy as np
 import scipy as sp
 import scipy.stats
-import matplotlib.pyplot as plt
 import concurrent.futures
 
 from pyincore.analyses.buildingportfolio.recovery.BuildingData import BuildingData
-
-from pyincore import BaseAnalysis, AnalysisUtil
+from pyincore import BaseAnalysis
 
 
 class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
@@ -200,7 +197,6 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         else:
             for i in range(time_steps):
                 utility[:, i] = [j for j in utility_initial[str(i)]]
-
 
         # with concurrent.futures.ProcessPoolExecutor(max_workers=sample_size) as executor:
         #     for response in executor.map(self.calculate_transition_probability_matrix(sample_size, time_steps, sample_buildings,
