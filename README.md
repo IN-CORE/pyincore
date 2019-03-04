@@ -12,8 +12,7 @@ as a [Jupyter](https://jupyter.org/) notebooks.
 
 ### Prerequisites
 
-A user must have an account recognized by the **Incore** service. [Contact us](https://incore.ncsa.illinois.edu), please 
-and credentials will be sent to you.
+A user must have an account recognized by the **Incore** service. Please [register](https://identity.ncsa.illinois.edu/register/UUMK36FU2M) and use your credentials later on.
 
 [Python 3.5](https://www.python.org) or greater
 
