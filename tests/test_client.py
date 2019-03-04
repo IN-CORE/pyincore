@@ -27,7 +27,7 @@ def test_client_success(cred):
     """
     if cred is None:
         assert False, ".incorepw does not exist!"
-    client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
+    client = IncoreClient("http://incore2-services-dev.ncsa.illinois.edu:8888", cred[0], cred[1])
     assert client.status is "success"
 
 
@@ -35,6 +35,6 @@ def test_client_fail():
     """
     testing failed login
     """
-    client = IncoreClient("https://incore2-services.ncsa.illinois.edu", "xxx", "xxxx")
+    client = IncoreClient("http://incore2-services-dev.ncsa.illinois.edu:8888", "xxx", "xxxx")
     assert client.status is "fail"
 

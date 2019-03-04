@@ -15,7 +15,6 @@ import wntr
 import fiona
 import rasterio
 import pandas as pd
-
 from pyincore import DataService
 
 
@@ -149,7 +148,6 @@ class Dataset:
         if os.path.isfile(filename):
             df = pd.read_csv(filename, header="infer")
         return df
-
 
     def close(self):
         for key in self.readers:
