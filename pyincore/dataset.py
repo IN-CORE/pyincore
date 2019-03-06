@@ -62,7 +62,7 @@ class Dataset:
     def from_csv_data(cls, result_data, name):
         if len(result_data) > 0:
             with open(name, 'w') as csv_file:
-                # Write the parent ID at the top of the result data, if exisis given
+                # Write the parent ID at the top of the result data, if it is given
                 writer = csv.DictWriter(csv_file, dialect="unix", fieldnames=result_data[0].keys())
                 writer.writeheader()
                 writer.writerows(result_data)
