@@ -100,7 +100,7 @@ insert line:
 
 - Locate a file called `.incorepw` and write your credentials in it; the first line contains your username and the second password. 
 The information is used for communicating with **pyincore** services such as hazard, data and fragility. 
-The file is located in the `.incore` folder created during installation in a root directory of your computer. The typical path is `C:\Users\<username>` on Windows OS, 
+The file is located in the `.incore` folder created during installation in a user's HOME directory. The typical path is `C:\Users\<username>` on Windows OS, 
 `/Users/<username>` on MacOS and `/home/<username>` on Linux based machines.
 
 - Start local Jupyter notebook by running the following command at the Terminal (Mac/Linux) or Command Prompt (Windows) **from the top-level pyincore folder**:
