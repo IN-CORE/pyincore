@@ -7,13 +7,13 @@
 import os
 from setuptools import setup, find_packages
 
-from pyincore.globals import PACKAGE_VERSION, PYINCORE_USER_CACHE, CRED_FILE_NAME
+PYINCORE_USER_CACHE = os.path.join(os.path.expanduser('~'), ".incorepw")
+CRED_FILE_NAME = ".incorepw"
 
-version = PACKAGE_VERSION
 
 setup(
     name='pyincore',
-    version=version,
+    version='0.2.0',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     description='IN-CORE analysis tool python package',
     long_description=("Pyincore is a Python package to analyze and visualize various hazard "
