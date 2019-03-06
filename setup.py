@@ -16,12 +16,12 @@ setup(
     version='0.2.0',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     description='IN-CORE analysis tool python package',
-    long_description=("Pyincore is a Python package to analyze and visualize various hazard "
+    long_description=("pyIncore is a Python package to analyze and visualize various hazard "
                       "(earthquake, tornado, hurricane etc.) scenarios developed "
                       "by the Center for Risk-Based Community Resilence Planning team from NCSA. "
                       "The development is part of NIST sponsored IN-CORE (Interdependent Networked Community "
                       "Resilience Modeling Environment) initiative. "
-                      "Pyincore allows users to apply hazards on infrastructure in selected areas. "
+                      "pyIncore allows users to apply hazards on infrastructure in selected areas. "
                       "Python framework acceses underlying data through local or remote services "
                       "and facilitates moving and synthesizing results."),
     install_requires=[
@@ -79,6 +79,6 @@ try:
     if not os.path.exists(pwfile):
         f = open(pwfile, "w")
         f.close()
-        print("Pyincore credentials file created at " + pwfile)
+        print("pyIncore credentials file created at " + pwfile)
 except OSError:
     raise
