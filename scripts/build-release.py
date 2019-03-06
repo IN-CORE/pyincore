@@ -9,7 +9,7 @@ dest_path = os.path.abspath(os.path.join(script_path, '..', '..'))
 with open(os.path.join(script_path, 'release-packages.yml')) as f:
     config = yaml.safe_load(f)
 
-internalExcludes = ['__pycache__', 'build', 'cache_data']
+internalExcludes = ['__pycache__', 'build', 'cache_data', 'dist', 'pyincore.egg-info']
 excludeList = config['exclude'] + internalExcludes
 
 version = config['version']
