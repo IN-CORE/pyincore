@@ -1,18 +1,18 @@
 # pyincore
 
-**Pyincore** is a Python package to analyze and visualize various hazard (earthquake, tornado, hurricane etc.) 
-scenarios developed by the Center for Risk-Based Community Resilence Planning team from NCSA. 
+**pyIncore** is a Python project to analyze and visualize various hazard (earthquake, tornado, hurricane etc.) 
+scenarios developed by the Center for Risk-Based Community Resilience Planning team from NCSA. 
 The development is part of NIST sponsored IN-CORE (Interdependent Networked Community Resilience Modeling 
-Environment) initiative. Pyincore allows users to apply hazards on infrastructure in selected areas. 
-Python framework acceses underlying data through local or remote services and facilitates moving 
+Environment) initiative. pyIncore allows users to apply hazards on infrastructure in selected areas. 
+Python framework accesses underlying data through local or remote services and facilitates moving 
 and synthesizing results.
                       
-**Pyincore** as a python module can be used to write hazard workflow tools. We envision users writing tools 
+**pyincore** as a Python module can be used to write hazard workflow tools. We envision users writing tools 
 as a [Jupyter](https://jupyter.org/) notebooks.
 
 ### Prerequisites
 
-A user must have an account recognized by the **Incore** service. Please [register](https://identity.ncsa.illinois.edu/register/UUMK36FU2M) and use your credentials later on.
+A user must have an account recognized by the **IN-CORE** service. Please [register](https://identity.ncsa.illinois.edu/register/UUMK36FU2M) and use your credentials later on.
 
 [Python 3.5](https://www.python.org) or greater
 
@@ -25,7 +25,7 @@ A user must have an account recognized by the **Incore** service. Please [regist
     ```
     apt-get gdal
     ```
-    Additonal information can be found  at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
+    Additional information can be found  at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
 
 - **Windows**
 
@@ -36,7 +36,7 @@ A user must have an account recognized by the **Incore** service. Please [regist
     from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/). 
     The problem with this is that GDAL header files are not included, so you cannot do a `pip install` of packages that want to utilize 
     the GDAL headers. Fiona and Rasterio will need binaries installed from this page as well, 
-    and if you run into failed dependancies during the setup process you may want to revisit 
+    and if you run into failed dependencies during the setup process you may want to revisit 
     the page and install the binaries for the Python extensions that are causing problems. 
     Additional information can be found at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
 
@@ -48,7 +48,7 @@ called [Anaconda](https://www.anaconda.com/distribution/) by downloading OS spec
 
 Note that a full Anaconda distribution will include Python (and a collection of over 1,500+ open source packages), so installing Python first isn't needed if you use Anaconda.
 
-[Jupyter notebook](https://jupyter.org/) - We recommend using Jupyter notebook for running the **pyincore** projects. 
+[Jupyter notebook](https://jupyter.org/) - We recommend using Jupyter notebook for running the **pyIncore** projects. 
 It as an open-source application that allows you to create projects (documents) that contain live Python code, 
 visualizations and documentation. [Installing Jupyter](https://jupyter.org/install.html) can be done again with pip by 
 running `pip3 install jupyter`. With **Anaconda** you already have installed Jupyter notebook.
@@ -58,7 +58,7 @@ running `pip3 install jupyter`. With **Anaconda** you already have installed Jup
 
 ### All Platforms
 
-We envision a user developing project (in Jupyter notebooks) in his or her Project folder which is separated from the Pyincore package folder. 
+We envision a user developing project (in Jupyter notebooks) in his or her Project folder which is separated from the pyINCORE package folder. 
 Both should run within the same Python virtual environment.
 
 1. Download **pyincore** as an archive file from [NCSA's server](https://incore2.ncsa.illinois.edu/releases/pyincore_0.2.0.zip) to a directory on your computer.
@@ -71,7 +71,10 @@ will now appear in round brackets on the left of the prompt (e.g. `(venv) comput
     pip3 install pyincore_0.2.0.zip
     ```
     
-    The installation creates a folder called `pyincore` which is a Pyincore home directory.
+    The installation creates a folder called `pyincore` which is a pyIncore directory, and `.incore` folder in your HOME directory. 
+    A message *pyIncore credentials file has been created at <HOME directory>/.incore/.incorepw* appears in the terminal/prompt. 
+    The typical location of a HOME directory is `C:\Users\<username>` on Windows OS, `/Users/<username>` on MacOS 
+    and `/home/<username>` on Linux based machines.
 
 **Windows specific installation notes**
     
@@ -99,11 +102,11 @@ insert line:
 ## Running
 
 - Locate a file called `.incorepw` and write your credentials in it; the first line contains your username and the second password. 
-The information is used for communicating with **pyincore** services such as hazard, data and fragility. 
+The information is used for communicating with **IN-CORE** services such as hazard, data and fragility. 
 The file is located in the `.incore` folder created during installation in a user's HOME directory. The typical path is `C:\Users\<username>` on Windows OS, 
 `/Users/<username>` on MacOS and `/home/<username>` on Linux based machines.
 
-- Start local Jupyter notebook by running the following command at the Terminal (Mac/Linux) or Command Prompt (Windows) **from the top-level pyincore folder**:
+- Start local Jupyter notebook by running the following command at the Terminal (Mac/Linux) or Command Prompt (Windows) **from a Project folder**:
     ```
     jupyter notebook
     ```
@@ -121,12 +124,12 @@ and verify the installation by running it from your project folder. For details 
 to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running).
 
 
-Additionally, a user can run Jupyter notebook interactively in NCSA's [Incore Lab](https://incore-jupyter.ncsa.illinois.edu/hub/login).
+Additionally, a user can run Jupyter notebook interactively in NCSA's [IN-CORE Lab](https://incore-jupyter.ncsa.illinois.edu/hub/login).
 
 
 ## Documentation
 
-**Pyincore** documentation can be found on [Incore server](http://incore2.ncsa.illinois.edu/).
+**Pyincore** documentation can be found on [IN-CORE server](http://incore2.ncsa.illinois.edu/).
 
 
 ## Acknowledgement
