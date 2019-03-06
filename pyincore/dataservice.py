@@ -5,14 +5,16 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
+import io
 import json
 import os
-import requests
 import re
 import urllib
 import zipfile
-import io
 
+import requests
+
+import pyincore.globals as globals
 from pyincore import IncoreClient
 
 
@@ -24,15 +26,15 @@ class DataService:
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_url = urllib.parse.urljoin(client.service_url,
-                                             'data/api/datasets/')
+            'data/api/datasets/')
         self.files_url = urllib.parse.urljoin(client.service_url,
-                                              'data/api/files/')
+            'data/api/files/')
         self.spaces_url = urllib.parse.urljoin(client.service_url,
-                                               'data/api/spaces')
+            'data/api/spaces')
         self.base_earthquake_url = urllib.parse.urljoin(client.service_url,
-                                                        'hazard/api/earthquakes/')
+            'hazard/api/earthquakes/')
         self.base_tornado_url = urllib.parse.urljoin(client.service_url,
-                                                     'hazard/api/tornadoes/')
+            'hazard/api/tornadoes/')
 
     def get_dataset_metadata(self, dataset_id: str):
         # construct url with service, dataset api, and id
@@ -47,7 +49,7 @@ class DataService:
 
     def get_dataset_file_metadata(self, dataset_id: str, file_id: str):
         url = urllib.parse.urljoin(self.base_url,
-                                   dataset_id + "/files/" + file_id)
+            dataset_id + "/files/" + file_id)
         r = requests.get(url, headers=self.client.headers)
         return r.json()
 
@@ -63,16 +65,17 @@ class DataService:
             elif join is False:
                 payload['join'] = 'false'
             r = requests.get(url, headers=self.client.headers, stream=True,
-                             params=payload)
+                params=payload)
 
         # extract filename
         disposition = r.headers['content-disposition']
         fname = re.findall("filename=(.+)", disposition)
 
         # construct local directory and filename
-        if not os.path.exists('cache_data'):
-            os.makedirs('cache_data')
-        local_filename = os.path.join('cache_data', fname[0].strip('\"'))
+        cache_data = globals.PYINCORE_USER_DATA_CACHE
+        if not os.path.exists(cache_data):
+            os.makedirs(cache_data)
+        local_filename = os.path.join(cache_data, fname[0].strip('\"'))
 
         # download
         with open(local_filename, 'wb') as f:
@@ -182,7 +185,7 @@ class DataService:
             return None
         # check the folder existance, no unzip
         if os.path.isdir(foldername):
-            print('It already exsists; no unzip')
+            print('Dataset already exists locally. Reading from local cache.')
             return foldername
         os.makedirs(foldername)
 
@@ -201,7 +204,7 @@ class DataService:
         filename = os.path.splitext(first_filename)[0]
 
         r = requests.get(request_str_zip, headers=self.client.headers,
-                         stream=True)
+            stream=True)
         z = zipfile.ZipFile(io.BytesIO(r.content))
         z.extractall(dirname)
         # print(r.status_code)
