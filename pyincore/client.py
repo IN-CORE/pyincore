@@ -5,10 +5,12 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import base64
-import urllib.parse
-import requests
-import pyincore.globals as glb
 import os
+import urllib.parse
+
+import requests
+
+import pyincore.globals as globals
 
 
 class IncoreClient:
@@ -20,20 +22,23 @@ class IncoreClient:
         password (str): Password.
 
     """
+
     def __init__(self, service_url: str = None, username: str = None, password: str = None) -> object:
 
         if service_url is None or len(service_url.strip()) == 0:
-            service_url = glb.INCORE_API_PROD_URL
+            service_url = globals.INCORE_API_PROD_URL
         self.service_url = service_url
 
         if username is None or password is None:
             try:
-                with open(os.path.join(glb.PYINCORE_ROOT_FOLDER, ".incorepw"), 'r') as f:
+                creds_file = os.path.join(globals.PYINCORE_USER_CACHE, globals.CRED_FILE_NAME)
+                with open(creds_file, 'r') as f:
                     creds = f.read().splitlines()
                     username = creds[0]
                     password = creds[1]
-            except EnvironmentError:
-                print("ERROR: Please check if the file .incorepw exists with credentials")
+            except OSError:
+                print("ERROR: Please check if the file " + creds_file + " exists with credentials")
+                raise
 
         self.user = username
         self.auth_token = None
@@ -67,12 +72,13 @@ class InsecureIncoreClient:
         username (str): Username.
 
     """
+
     def __init__(self, service_url: str = None, username: str = None) -> object:
         if service_url is None:
-            service_url = glb.INCORE_API_INSECURE_URL
+            service_url = globals.INCORE_API_INSECURE_URL
 
         if username is None:
-            username = glb.INCORE_LDAP_TEST_USER
+            username = globals.INCORE_LDAP_TEST_USER
 
         self.service_url = service_url
         self.user = username
