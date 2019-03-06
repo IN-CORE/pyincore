@@ -65,7 +65,7 @@ Both should run within the same Python virtual environment.
 2. **Optional**: Activate your virtual (`source virtual_env_name/bin/activate`) or conda (`source activate virtual_env_name`) environment 
 from the folder you downloaded the pyincore package to. The conda is the preferred interface for managing installations and virtual environments with the Anaconda Python distribution. 
 The conda is the preferred interface for managing installations and virtual environments with the Anaconda Python distribution. The name of the current virtual environment 
-will now appear in round brackets on the left of the prompt (e.g. `(venv) computer_name:folder username$`) to let you know that it’s active.
+will now appear in round brackets on the left of the prompt (e.g. `(venv) computer_name:folder username$`) to let you know that it is active.
 3. From the terminal run:
     ```
     pip3 install pyincore.zip
