@@ -61,14 +61,14 @@ running `pip3 install jupyter`. With **Anaconda** you already have installed Jup
 We envision a user developing project (in Jupyter notebooks) in his or her Project folder which is separated from the Pyincore package folder. 
 Both should run within the same Python virtual environment.
 
-1. Download **pyincore** as an archive file from [NCSA's server](http://incore2.ncsa.illinois.edu/pyincore.zip) to a directory on your computer.
+1. Download **pyincore** as an archive file from [NCSA's server](https://incore2.ncsa.illinois.edu/releases/pyincore_0.2.0.zip) to a directory on your computer.
 2. **Optional**: Activate your virtual (`source virtual_env_name/bin/activate`) or conda (`source activate virtual_env_name`) environment 
 from the folder you downloaded the pyincore package to. The conda is the preferred interface for managing installations and virtual environments with the Anaconda Python distribution. 
 The conda is the preferred interface for managing installations and virtual environments with the Anaconda Python distribution. The name of the current virtual environment 
 will now appear in round brackets on the left of the prompt (e.g. `(venv) computer_name:folder username$`) to let you know that it is active.
 3. From the terminal run:
     ```
-    pip3 install pyincore.zip
+    pip3 install pyincore_0.2.0.zip
     ```
     
     The installation creates a folder called `pyincore` which is a Pyincore home directory.
@@ -116,7 +116,7 @@ The file is located in the `.incore` folder created during installation in a use
     for the first time.
 
 
-- Download the **Building damage analysis** Jupyter notebook ([`buildingdamage.ipynb`]((http://incore2.ncsa.illinois.edu/buildingdamage.ipynb))) 
+- Download the **Building damage analysis** Jupyter notebook ([`buildingdamage.ipynb`]((http://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb))) 
 and verify the installation by running it from your project folder. For details of running and manipulating `ipynb` files refer 
 to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running).
 
