@@ -7,7 +7,7 @@
 import os
 from setuptools import setup, find_packages
 
-PYINCORE_USER_CACHE = os.path.join(os.path.expanduser('~'), ".incorepw")
+PYINCORE_USER_CACHE = os.path.join(os.path.expanduser('~'), ".incore")
 CRED_FILE_NAME = ".incorepw"
 
 
