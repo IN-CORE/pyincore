@@ -76,12 +76,12 @@ def test_get_dataset_blob(datasvc):
 
 def test_get_datasets(datasvc):
     errors = []
-    datatype = "buildingCollapseRateTable"
-    metadata = datasvc.get_datasets(datatype=datatype, title="HAZUS")
+    datatype = "ergo:buildingDamageVer4"
+    metadata = datasvc.get_datasets(datatype=datatype, title="building")
 
     if 'id' not in metadata[0].keys():
         errors.append("response is not right!")
-    if not re.search(r'HAZUS', metadata[0]['title']):
+    if not re.search(r'building', metadata[0]['title'].lower()):
         errors.append("title doesn't match!")
     if not re.search(datatype, metadata[0]['dataType']):
         errors.append("datatype doesn't match!")
