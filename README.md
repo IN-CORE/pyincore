@@ -58,19 +58,25 @@ running `pip3 install jupyter`. With **Anaconda** you already have installed Jup
 
 ### All Platforms
 
-1. Download **pyincore** as an archive file from NCSA's server.
-2. Change into the `pyincore` directory (or prepend the path to the directory onto files reference from here on out)
-3. **Optional**: Activate your virtual (`source virtual_env_name/bin/activate`) or conda (`source activate virtual_env_name`) environment. 
-The conda is the preferred interface for managing installations and virtual environments with the Anaconda Python distribution. 
-4. From the terminal, in the project folder (`pyincore`) run:
+We envision a user developing project (in Jupyter notebooks) in his or her Project folder which is separated from the Pyincore package folder. 
+Both should run within the same Python virtual environment.
+
+1. Download **pyincore** as an archive file from [NCSA's server](http://incore2.ncsa.illinois.edu/pyincore.zip) to a directory on your computer.
+2. **Optional**: Activate your virtual (`source virtual_env_name/bin/activate`) or conda (`source activate virtual_env_name`) environment 
+from the folder you downloaded the pyincore package to. The conda is the preferred interface for managing installations and virtual environments with the Anaconda Python distribution. 
+The conda is the preferred interface for managing installations and virtual environments with the Anaconda Python distribution. The name of the current virtual environment 
+will now appear in round brackets on the left of the prompt (e.g. `(venv) computer_name:folder username$`) to let you know that it’s active.
+3. From the terminal run:
     ```
-    python setup.py install
+    pip3 install pyincore.zip
     ```
+    
+    The installation creates a folder called `pyincore` which is a Pyincore home directory.
 
 **Windows specific installation notes**
     
 - Open the `Anaconda` prompt, or `cmd` depending on if you are using Anaconda or not before you activate 
-virtual environment (step 3 above)
+virtual environment (step 2 above)
 
 **Mac specific installation notes**
 
@@ -92,23 +98,26 @@ insert line:
 
 ## Running
 
-- Create a file called `.incorepw`  with credentials; the first line contains your username and the second password. 
+- Locate a file called `.incorepw` and write your credentials in it; the first line contains your username and the second password. 
 The information is used for communicating with **pyincore** services such as hazard, data and fragility. 
-Move the file to the top-level folder of the pyincore package.
+The file is located in the `.incore` folder created during installation in a root directory of your computer. The typical path is `C:\Users\<username>` on Windows OS, 
+`/Users/<username>` on MacOS and `/home/<username>` on Linux based machines.
 
 - Start local Jupyter notebook by running the following command at the Terminal (Mac/Linux) or Command Prompt (Windows) **from the top-level pyincore folder**:
     ```
     jupyter notebook
     ```
+    
+    Again, the name of the current virtual environment could appear in round brackets on the left of the prompt. 
+    
     A message *The Jupyter Notebook is running* appears in the terminal/prompt 
     and you should see the notebook open in your browser. 
     Note that you will be asked to copy/paste a token into your browser when you connect 
     for the first time.
 
 
-- Verify the installation by running the **building damage analysis** in Jupyter. Navigate to the `buildingdamage.ipynb` 
-file using Notebook dashboard. The file is located in the analyses folder of the pyincore package (full 
-path `pyincore/analyses/buildingdamage/`). For details of running and manipulating `ipynb` files refer 
+- Download the **Building damage analysis** Jupyter notebook ([`buildingdamage.ipynb`]((http://incore2.ncsa.illinois.edu/buildingdamage.ipynb))) 
+and verify the installation by running it from your project folder. For details of running and manipulating `ipynb` files refer 
 to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running).
 
 
