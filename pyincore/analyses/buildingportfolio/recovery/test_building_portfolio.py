@@ -3,16 +3,13 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.buildingportfolio.recovery.BuildingPortfolioRecoveryAnalysis import \
-    BuildingPortfolioRecoveryAnalysis
-from pyincore import Dataset
-from pyincore import InsecureIncoreClient
+from pyincore.analyses.buildingportfolio.recovery import BuildingPortfolioRecoveryAnalysis
+from pyincore import IncoreClient
 
 if __name__ == "__main__":
     cred = None
     try:
-        client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
-
+        client = IncoreClient()
         bldg_data_dataset = "5c756966c11bb369a33a0b0a"
         occupancy_dataset = "5c7569f9c11bb369a33a0b16"
         bldg_damage_dataset = "5c756a2fc11bb369a33a0b22"
@@ -39,5 +36,5 @@ if __name__ == "__main__":
         bldg_portfolio_recovery.run_analysis()
 
     except EnvironmentError:
-        print("exception")
+        raise
         # traceback.print_exc()
