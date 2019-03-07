@@ -44,6 +44,7 @@ setup(
         "shapely>=1.6.4.post2",
         "wikidata>=0.6.1",
         "wntr>=0.1.6",
+        "seaborn>=0.9.0"
     ],
     python_requires=">=3.5",
     classifiers=[

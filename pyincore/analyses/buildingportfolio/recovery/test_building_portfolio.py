@@ -3,8 +3,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.buildingportfolio.recovery.BuildingPortfolioRecoveryAnalysis import \
-    BuildingPortfolioRecoveryAnalysis
+from pyincore.analyses.buildingportfolio.recovery import BuildingPortfolioRecoveryAnalysis
 from pyincore import IncoreClient
 
 if __name__ == "__main__":
