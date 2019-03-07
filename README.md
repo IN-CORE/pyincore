@@ -68,7 +68,7 @@ The conda is the preferred interface for managing installations and virtual envi
 will now appear in round brackets on the left of the prompt (e.g. `(venv) computer_name:folder username$`) to let you know that it is active.
 3. From the terminal run:
     ```
-    pip3 install pyincore_0.2.0.tar.gz
+    pip3 install --user pyincore_0.2.0.tar.gz
     ```
     
     The installation creates a folder called `pyincore` which is a pyIncore directory, and `.incore` folder in your HOME directory. 
