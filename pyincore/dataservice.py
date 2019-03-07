@@ -11,10 +11,9 @@ import os
 import re
 import urllib
 import zipfile
-
 import requests
 
-import pyincore.globals as globals
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 
 
@@ -72,7 +71,7 @@ class DataService:
         fname = re.findall("filename=(.+)", disposition)
 
         # construct local directory and filename
-        cache_data = globals.PYINCORE_USER_DATA_CACHE
+        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
         if not os.path.exists(cache_data):
             os.makedirs(cache_data)
         local_filename = os.path.join(cache_data, fname[0].strip('\"'))
