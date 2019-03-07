@@ -58,7 +58,7 @@ running `pip3 install jupyter`. With **Anaconda** you already have installed Jup
 
 ### All Platforms
 
-We envision a user developing project (in Jupyter notebooks) in his or her Project folder which is separated from the pyINCORE package folder. 
+We envision a user developing project (in Jupyter notebooks) in his or her Project folder which is separated from the pyincore package folder. 
 Both should run within the same Python virtual environment.
 
 1. Download **pyincore** as an archive file from [NCSA's server](https://incore2.ncsa.illinois.edu/releases/pyincore_0.2.0.tar.gz) to a directory on your computer.
