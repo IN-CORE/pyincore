@@ -7,10 +7,9 @@
 import base64
 import os
 import urllib.parse
-
 import requests
 
-import pyincore.globals as globals
+import pyincore.globals as pyglobals
 
 
 class IncoreClient:
@@ -26,16 +25,19 @@ class IncoreClient:
     def __init__(self, service_url: str = None, username: str = None, password: str = None) -> object:
 
         if service_url is None or len(service_url.strip()) == 0:
-            service_url = globals.INCORE_API_PROD_URL
+            service_url = pyglobals.INCORE_API_PROD_URL
         self.service_url = service_url
 
         if username is None or password is None:
             try:
-                creds_file = os.path.join(globals.PYINCORE_USER_CACHE, globals.CRED_FILE_NAME)
+                creds_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, pyglobals.CRED_FILE_NAME)
                 with open(creds_file, 'r') as f:
                     creds = f.read().splitlines()
                     username = creds[0]
                     password = creds[1]
+            except IndexError:
+                print("ERROR: Please check if the file " + creds_file + " has credentials in the correct format")
+                raise
             except OSError:
                 print("ERROR: Please check if the file " + creds_file + " exists with credentials")
                 raise
@@ -75,10 +77,10 @@ class InsecureIncoreClient:
 
     def __init__(self, service_url: str = None, username: str = None) -> object:
         if service_url is None:
-            service_url = globals.INCORE_API_INSECURE_URL
+            service_url = pyglobals.INCORE_API_INSECURE_URL
 
         if username is None:
-            username = globals.INCORE_LDAP_TEST_USER
+            username = pyglobals.INCORE_LDAP_TEST_USER
 
         self.service_url = service_url
         self.user = username
