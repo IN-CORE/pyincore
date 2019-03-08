@@ -4,19 +4,24 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+import os
 from setuptools import setup, find_packages
+
+PYINCORE_USER_CACHE = os.path.join(os.path.expanduser('~'), ".incore")
+CRED_FILE_NAME = ".incorepw"
 
 setup(
     name='pyincore',
     version='0.2.0',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
-    description='Incore analysis tool python package',
-    long_description=("Pyincore is a Python package to analyze and visualize various hazard "
+
+    description='IN-CORE analysis tool python package',
+    long_description=("pyIncore is a Python package to analyze and visualize various hazard "
                       "(earthquake, tornado, hurricane etc.) scenarios developed "
                       "by the Center for Risk-Based Community Resilence Planning team from NCSA. "
                       "The development is part of NIST sponsored IN-CORE (Interdependent Networked Community "
                       "Resilience Modeling Environment) initiative. "
-                      "Pyincore allows users to apply hazards on infrastructure in selected areas. "
+                      "pyIncore allows users to apply hazards on infrastructure in selected areas. "
                       "Python framework acceses underlying data through local or remote services "
                       "and facilitates moving and synthesizing results."),
     install_requires=[
@@ -39,6 +44,7 @@ setup(
         "shapely>=1.6.4.post2",
         "wikidata>=0.6.1",
         "wntr>=0.1.6",
+        "seaborn>=0.9.0"
     ],
     python_requires=">=3.5",
     classifiers=[
@@ -65,3 +71,15 @@ setup(
     license="Mozilla Public License v2.0",
     url="https://git.ncsa.illinois.edu/incore/pyincore"
 )
+
+try:
+    if not os.path.exists(PYINCORE_USER_CACHE):
+       os.makedirs(PYINCORE_USER_CACHE)
+
+    pwfile = os.path.join(PYINCORE_USER_CACHE, CRED_FILE_NAME)
+    if not os.path.exists(pwfile):
+        f = open(pwfile, "w")
+        f.close()
+        print("pyIncore credentials file created at " + pwfile)
+except OSError:
+    raise

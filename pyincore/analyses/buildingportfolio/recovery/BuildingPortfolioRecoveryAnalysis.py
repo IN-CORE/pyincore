@@ -3,18 +3,15 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-import os
 import math
 import csv
 import numpy as np
 import scipy as sp
 import scipy.stats
-import matplotlib.pyplot as plt
 import concurrent.futures
 
 from pyincore.analyses.buildingportfolio.recovery.BuildingData import BuildingData
-
-from pyincore import BaseAnalysis, AnalysisUtil
+from pyincore import BaseAnalysis
 
 
 class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
@@ -188,10 +185,6 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
         # START initializing variables for uncertainty analysis
         target_mean_recovery = np.zeros(time_steps)
-        temporary_correlation1 = np.zeros((time_steps, sample_size, 5))
-        temporary_correlation2 = np.zeros((time_steps, sample_size, 5))
-        mean_over_time = np.zeros((time_steps, sample_size))
-        variance_over_time = np.zeros((time_steps, sample_size))
         utility2 = np.zeros((len(utility_initial), time_steps))
         # END code for uncertainty analysis
 
@@ -204,7 +197,6 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         else:
             for i in range(time_steps):
                 utility[:, i] = [j for j in utility_initial[str(i)]]
-
 
         # with concurrent.futures.ProcessPoolExecutor(max_workers=sample_size) as executor:
         #     for response in executor.map(self.calculate_transition_probability_matrix(sample_size, time_steps, sample_buildings,
@@ -363,19 +355,20 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 for i in range(time_steps):
                     spam_writer.writerow([i + 1, mean_recovery_output[i]] + list(mean_recovery[i]))
 
-        fig2 = plt.figure(2)
-        plt.plot(range(time_steps), mean_recovery_output, color="black")
-        if uncertainty:
-            plt.plot(range(time_steps), lower_bound75, color="red")
-            plt.plot(range(time_steps), upper_bound75, color="red")
-            plt.plot(range(time_steps), lower_bound95, color="blue")
-            plt.plot(range(time_steps), upper_bound95, color="blue")
-        plt.xlabel('Expected recovery time (weeks)')
-        plt.ylabel('Percentage of Buildings Recovered')
-        plt.title('Building Portfolio Recovery Analysis with uncertainty')
-
-        output_image2 = output_base_name + 'portfolio-recovery' + '.png'
-        fig2.savefig(output_image2)
+        # Not needed as graphs are generated in jupyter notebook
+        # fig2 = plt.figure(2)
+        # plt.plot(range(time_steps), mean_recovery_output, color="black")
+        # if uncertainty:
+        #     plt.plot(range(time_steps), lower_bound75, color="red")
+        #     plt.plot(range(time_steps), upper_bound75, color="red")
+        #     plt.plot(range(time_steps), lower_bound95, color="blue")
+        #     plt.plot(range(time_steps), upper_bound95, color="blue")
+        # plt.xlabel('Expected recovery time (weeks)')
+        # plt.ylabel('Percentage of Buildings Recovered')
+        # plt.title('Building Portfolio Recovery Analysis with uncertainty')
+        #
+        # output_image2 = output_base_name + 'portfolio-recovery' + '.png'
+        # fig2.savefig(output_image2)
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
 

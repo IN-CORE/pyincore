@@ -17,3 +17,4 @@ from pyincore.fragilityservice import FragilityService
 from pyincore.analysisutil import AnalysisUtil
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
 from pyincore.baseanalysis import BaseAnalysis
+import pyincore.globals
