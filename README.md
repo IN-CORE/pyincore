@@ -8,7 +8,7 @@ Python framework accesses underlying data through local or remote services and f
 and synthesizing results.
                       
 **pyincore** as a Python module can be used to write hazard workflow tools. We envision users writing tools 
-as a [Jupyter](https://jupyter.org/) notebooks.
+as [Jupyter](https://jupyter.org/) notebooks.
 
 ### Prerequisites
 
