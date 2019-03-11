@@ -127,12 +127,12 @@ to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html
 contact us at **incore-dev@lists.illinois.edu**.
 
 
-Additionally, a user can run Jupyter notebook interactively in NCSA's [IN-CORE Lab](https://incore-jupyter.ncsa.illinois.edu/hub/login).
+Additionally, a user can run Jupyter notebook interactively in NCSA's [IN-CORE Lab](https://incore-jupyter.ncsa.illinois.edu/hub/login). (*coming soon*)
 
 
 ## Documentation
 
-**Pyincore** documentation can be found on [IN-CORE server](http://incore2.ncsa.illinois.edu/).
+**pyIncore** documentation can be found on [IN-CORE server](http://incore2.ncsa.illinois.edu/).
 
 
 ## Acknowledgement
