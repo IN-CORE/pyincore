@@ -30,16 +30,22 @@ since your credentials will be required in later steps.
 
 - **Windows**
 
-    GDAL for Windows can be difficult to build, requiring a number of prerequisite software, libraries, and header files. 
-    If you are comfortable building Windows software then building GDAL from source as a develop build is preferred.
-    
-    If you are not comfortable building GDAL then you may want to download the `gdal` binaries 
-    from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/). 
-    The problem with this is that GDAL header files are not included, so you cannot do a `pip install` of packages that want to utilize 
-    the GDAL headers. Fiona and Rasterio will need binaries installed from this page as well, 
-    and if you run into failed dependencies during the setup process you may want to revisit 
-    the page and install the binaries for the Python extensions that are causing problems. 
-    Additional information can be found at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
+    Download the GDAL binaries (`GDAL-2.2.3`) from [Downloading GDAL](https://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries) and install it using pip
+    ```
+    pip3 install <path-to-local-gdal-binary-file>
+    ```
+    Note that GDAL header files are not included, so you cannot install dependencies through the pyincore setup process. 
+    The binary files for the dependent packages have to be preinstalled as well. Download each library below separately 
+    and  pip3 install it (in this order) from the local file.
+
+    ```
+    - numpy-1.13.3+mlk
+    - fiona-1.7.11
+    - shapely-1.6.4.post1
+    - rasterio-1.0a12
+    - pyproj-1.9.5.1
+    - OWSLib-0.16.0
+    ```
 
 - **MacOS**
     The easiest way is to use [Homebrew](https://brew.sh/), a MacOS package manager.
