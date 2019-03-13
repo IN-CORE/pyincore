@@ -10,11 +10,11 @@ from setuptools import setup, find_packages
 PYINCORE_USER_CACHE = os.path.join(os.path.expanduser('~'), ".incore")
 CRED_FILE_NAME = ".incorepw"
 
-
 setup(
     name='pyincore',
     version='0.2.0',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+
     description='IN-CORE analysis tool python package',
     long_description=("pyIncore is a Python package to analyze and visualize various hazard "
                       "(earthquake, tornado, hurricane etc.) scenarios developed "
@@ -41,7 +41,7 @@ setup(
         "requests>=2.21.0",
         "rtree>=0.8.3",
         "scipy>=1.2.0",
-        "shapely>=1.6.4.post2",
+        "shapely>=1.6.4.post1",
         "wikidata>=0.6.1",
         "wntr>=0.1.6",
         "seaborn>=0.9.0"
