@@ -34,7 +34,7 @@ since your credentials will be required in later steps.
 
 - **Windows 64bit**
     The following instruction is tested for Win 64bit. But 32bit has not been tested yet.
-    - Download the `GDAL` binaries for Win 64bit (`GDAL-2.2.3`) from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/) and install it using pip
+    - Download the `GDAL` binaries for Win 64bit (`GDAL-2.3.3`) from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/) and install it using pip
         ```
         pip3 install <path-to-local-gdal-binary-file>
         ```
