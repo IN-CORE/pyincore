@@ -41,7 +41,7 @@ setup(
         "requests>=2.21.0",
         "rtree>=0.8.3",
         "scipy>=1.2.0",
-        "shapely>=1.6.4.post2",
+        "shapely>=1.6.4.post1",
         "wikidata>=0.6.1",
         "wntr>=0.1.6",
         "seaborn>=0.9.0"

@@ -4,25 +4,26 @@
 scenarios developed by the Center for Risk-Based Community Resilience Planning team from NCSA. 
 The development is part of NIST sponsored IN-CORE (Interdependent Networked Community Resilience Modeling 
 Environment) initiative. pyIncore allows users to apply hazards on infrastructure in selected areas. 
-Python framework accesses underlying data through local or remote services and facilitates moving 
-and synthesizing results.
+Python framework accesses underlying data through local or remote services and facilitates moving and synthesizing 
+results.
                       
-**pyincore** as a Python module can be used to write hazard workflow tools. We envision users writing tools 
-as [Jupyter](https://jupyter.org/) notebooks.
+**pyincore** as a Python module can be used to develop scientific analysis/algorithm.
 
 ### Prerequisites
 
-A user must have an account recognized by the **IN-CORE** service. Please [register](https://identity.ncsa.illinois.edu/register/UUMK36FU2M) 
+**IN-CORE account**
+
+- A user must have an account recognized by the **IN-CORE** service. Please [register](https://identity.ncsa.illinois.edu/register/UUMK36FU2M) 
 since your credentials will be required in later steps.
 
-[Python 3.5+](https://www.python.org) or greater
+[Python 3.5+](https://www.python.org)
 
 [GDAL](https://www.gdal.org) - Geospatial Data Abstraction Library
 
 - **Linux** 
 
-    **Pyincore** uses GDAL library which has to be installed separately for example by using `apt-get` package utility 
-    on Debian, Ubuntu, and related Linux distributions.
+    **pyIncore** uses `GDAL` library which has to be installed separately. For example by using `apt-get` package 
+    utility on Debian, Ubuntu, and related Linux distributions.
     ```
     sudo apt-get install gdal-bin
     ```
@@ -30,21 +31,24 @@ since your credentials will be required in later steps.
 
 - **Windows**
 
-    Download the GDAL binaries (`GDAL-2.2.3`) from [Downloading GDAL](https://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries) and install it using pip
-    ```
-    pip3 install <path-to-local-gdal-binary-file>
-    ```
-    Note that GDAL header files are not included, so you cannot install dependencies through the pyincore setup process. 
-    The binary files for the dependent packages have to be preinstalled as well. Download each library below separately 
-    and  pip3 install it (in this order) from the local file.
+    - Download the `GDAL` binaries for Win 64bit (`GDAL-2.2.3`) from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/) and install it using pip
+        ```
+        pip3 install <path-to-local-gdal-binary-file>
+        ```
+        Note that GDAL header files are not included, so you cannot install dependencies through the pyincore setup process, 
+        so you cannot install dependencies through the pyincore setup process. The binary files for the dependent packages 
+        have to be pre-installed as well. 
+    - Download each library below separately (cp35-win_amd64 versions) from the [link above](https://www.lfd.uci.edu/~gohlke/pythonlibs/) 
+    and pip3 install it (in this order) from the local files.
 
     ```
-    - numpy-1.13.3+mlk
-    - fiona-1.7.11
+    - numpy-1.16.2+mlk
+    - fiona-1.8.4
     - shapely-1.6.4.post1
-    - rasterio-1.0a12
-    - pyproj-1.9.5.1
-    - OWSLib-0.16.0
+    - rasterio-1.0.21
+    - pyproj-2.0.1
+    - OWSLib-0.17.1
+    - Rtree-0.8.3
     ```
 
 - **MacOS**
@@ -71,8 +75,7 @@ or environment [manager](https://www.anaconda.com/distribution/); tools that hel
 ## Installation
 
 ### All Platforms
-
-We envision a user developing their project in a Jupyter notebook in his or her **Project folder**. 
+ 
 These steps will guide you on how to install both pyIncore and Jupyter notebook so you can develop your code.
 
 1. Download **pyincore** as an archive file from [NCSA's server](https://incore2.ncsa.illinois.edu/releases/pyincore_0.2.0.tar.gz) to a directory on your computer.
@@ -86,14 +89,17 @@ These steps will guide you on how to install both pyIncore and Jupyter notebook 
     in the terminal/prompt. The typical location of a HOME directory is `C:\Users\<username>` on Windows OS, `/Users/<username>` on MacOS 
     and `/home/<username>` on Linux based machines.
 
-**Windows specific installation notes**
-    
-- Open the `Anaconda` prompt, or `cmd` depending on if you are using Anaconda or not before you activate 
-virtual environment (step 2 above)
+**Linux specific notes**
 
-**Mac specific installation notes**
+`OSError: Could not find libspatialindex_c library file` could appear during installation. The library can be installed 
+by using `apt-get` package utility:
+```
+apt-get install libspatialindex-dev
+```
 
-- `spacialindex` library is needed, but appears to be included on other platforms. The easy way to install 
+**Mac specific notes**
+
+- `spacialindex` library is needed. The easy way to install 
 is to use [Homebrew](https://brew.sh/), and run:
     ```
     brew install spacialindex
@@ -111,10 +117,16 @@ insert line:
 
 ## Running
 
-- Locate a file called `.incorepw` and write your credentials in it; the first line contains your username and the second password. 
+- We assume that users develop python script by using pyIncore in their own **Project folder**.
+- Locate a file called `.incorepw` in your HOME directory and write your credentials in it; the first line contains your username and the second password. 
 The information is used for communicating with **IN-CORE** services such as hazard, data and fragility. 
 The file is located in the `.incore` folder created during installation in your HOME directory. The typical path is `C:\Users\<username>` on Windows OS, 
 `/Users/<username>` on MacOS and `/home/<username>` on Linux based machines.
+
+- Download the **Building damage analysis** Jupyter notebook (<http://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb>) 
+and verify the installation by running it from your project folder. For details of running and manipulating `ipynb` files refer 
+to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running). If you have problems running notebooks, 
+contact us at **incore-dev@lists.illinois.edu**.
 
 - Start local **Jupyter notebook** by running the following command at the terminal or command prompt from a **Project folder**:
     ```
@@ -126,14 +138,7 @@ The file is located in the `.incore` folder created during installation in your 
     Note that you will be asked to copy/paste a token into your browser when you connect 
     for the first time.
 
-
-- Download the **Building damage analysis** Jupyter notebook (<http://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb>) 
-and verify the installation by running it from your project folder. For details of running and manipulating `ipynb` files refer 
-to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running). If you have problems running notebooks, 
-contact us at **incore-dev@lists.illinois.edu**.
-
-
-Additionally, a user can run Jupyter notebook interactively in NCSA's [IN-CORE Lab](https://incore-jupyter.ncsa.illinois.edu/hub/login). (*coming soon*)
+- Additionally, a user can run Jupyter notebook interactively in NCSA's [IN-CORE Lab](https://incore-jupyter.ncsa.illinois.edu/hub/login). (*coming soon*)
 
 
 ## Documentation
