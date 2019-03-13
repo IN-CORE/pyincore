@@ -19,18 +19,21 @@ since your credentials will be required in later steps.
 [Python 3.5+](https://www.python.org)
 
 [GDAL](https://www.gdal.org) - Geospatial Data Abstraction Library
+    
+- **pyIncore** uses `GDAL` library, which has to be installed separately.
 
 - **Linux** 
+    - Install **gdal-bin**. Additional information can be found  at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
+        ```
+        sudo apt-get install gdal-bin
+        ```
+    - Install **libspatialindex-dev**
+        ```
+        apt-get install libspatialindex-dev
+        ```
 
-    **pyIncore** uses `GDAL` library which has to be installed separately. For example by using `apt-get` package 
-    utility on Debian, Ubuntu, and related Linux distributions.
-    ```
-    sudo apt-get install gdal-bin
-    ```
-    Additional information can be found  at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
-
-- **Windows**
-
+- **Windows 64bit**
+    The following instruction is tested for Win 64bit. But 32bit has not been tested yet.
     - Download the `GDAL` binaries for Win 64bit (`GDAL-2.2.3`) from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/) and install it using pip
         ```
         pip3 install <path-to-local-gdal-binary-file>
@@ -41,28 +44,32 @@ since your credentials will be required in later steps.
     - Download each library below separately (cp35-win_amd64 versions) from the [link above](https://www.lfd.uci.edu/~gohlke/pythonlibs/) 
     and pip3 install it (in this order) from the local files.
 
-    ```
-    - numpy-1.16.2+mlk
-    - fiona-1.8.4
-    - shapely-1.6.4.post1
-    - rasterio-1.0.21
-    - pyproj-2.0.1
-    - OWSLib-0.17.1
-    - Rtree-0.8.3
-    ```
+        ```
+        - numpy-1.16.2+mlk
+        - fiona-1.8.4
+        - shapely-1.6.4.post1
+        - rasterio-1.0.21
+        - pyproj-2.0.1
+        - OWSLib-0.17.1
+        - Rtree-0.8.3
+        ```
 
 - **MacOS**
     The easiest way is to use [Homebrew](https://brew.sh/), a MacOS package manager.
     - Follow the instructions to install Homebrew.
     - [Install](https://medium.com/@vascofernandes_13322/how-to-install-gdal-on-macos-6a76fb5e24a4) the current version of gdal:
-    ```
-    brew install gdal
-    ```
+        ```
+        brew install gdal
+        ```
     - Update the `pip` Python package manager and finally install GDAL for Python:
-    ```
-    pip3 install --upgrade pip
-    pip3 install gdal
-    ```
+        ```
+        pip3 install --upgrade pip
+        pip3 install gdal
+        ```
+    - Install `spatialindex` library
+        ```
+        brew install spatialindex
+        ```    
     
 [Jupyter notebook](https://jupyter.org/) - We recommend using Jupyter notebook for running the **pyIncore** projects. 
 It as an open-source application that allows you to create projects (documents) that contain live Python code, 
@@ -91,19 +98,12 @@ These steps will guide you on how to install both pyIncore and Jupyter notebook 
 
 **Linux specific notes**
 
-`OSError: Could not find libspatialindex_c library file` could appear during installation. The library can be installed 
-by using `apt-get` package utility:
+If you see following error, make sure that you installed libspatialindex-dev (see GDAL section above):
 ```
-apt-get install libspatialindex-dev
+OSError: Could not find libspatialindex_c library file
 ```
 
 **Mac specific notes**
-
-- `spacialindex` library is needed. The easy way to install 
-is to use [Homebrew](https://brew.sh/), and run:
-    ```
-    brew install spacialindex
-    ```
     
 - We use `matplotlib` library to create graphs. There is a Mac specific installation issue addressed at 
 StackOverflow [link1](https://stackoverflow.com/questions/4130355/python-matplotlib-framework-under-macosx) and 
