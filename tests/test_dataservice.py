@@ -1,3 +1,10 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+
 import ast
 
 import pytest
@@ -16,7 +23,8 @@ def datasvc():
     except EnvironmentError:
         return None
     # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
+    client = InsecureIncoreClient(
+        "http://incore2-services-dev.ncsa.illinois.edu:8888", cred[0])
 
     return DataService(client)
 
@@ -27,11 +35,11 @@ def test_get_dataset_metadata(datasvc):
     assert metadata['id'] == id
 
 
-def test_get_dataset_fileDescriptors(datasvc):
+def test_get_dataset_files_metadata(datasvc):
     errors = []
     id = "5a284f0ac7d30d13bc0819c4"
     metadata = datasvc.get_dataset_metadata(id)
-    fileDescriptor = datasvc.get_dataset_fileDescriptors(id)
+    fileDescriptor = datasvc.get_dataset_files_metadata(id)
 
     if 'id' not in fileDescriptor[0].keys():
         errors.append("response does not seem right!")
@@ -39,15 +47,23 @@ def test_get_dataset_fileDescriptors(datasvc):
     # compare the id in fileDescriptors field in metadata with the
     # id returned by /file endpoint
     if metadata['fileDescriptors'][0]['id'] != fileDescriptor[0]['id']:
-        errors.append("it doesn't fetch the right fileDescriptors for this id!")
+        errors.append(
+            "it doesn't fetch the right fileDescriptors for this id!")
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
+
+
+def test_get_dataset_file_metadata(datasvc):
+    dataset_id = "5a284f0bc7d30d13bc081a28"
+    file_id = "5a284f0bc7d30d13bc081a2b"
+    metadata = datasvc.get_dataset_file_metadata(dataset_id, file_id)
+    assert 'id' in metadata.keys() and metadata['id'] == file_id
 
 
 def test_get_dataset_blob(datasvc):
     errors = []
     id = "5a284f0ac7d30d13bc0819c4"
-    fname = datasvc.get_dataset_blob(id,join=True)
+    fname = datasvc.get_dataset_blob(id, join=True)
 
     if type(fname) != str:
         errors.append("doesn't return the correct filename!")
@@ -60,12 +76,12 @@ def test_get_dataset_blob(datasvc):
 
 def test_get_datasets(datasvc):
     errors = []
-    datatype = "buildingCollapseRateTable"
-    metadata = datasvc.get_datasets(datatype=datatype, title="HAZUS")
+    datatype = "ergo:buildingDamageVer4"
+    metadata = datasvc.get_datasets(datatype=datatype, title="building")
 
     if 'id' not in metadata[0].keys():
         errors.append("response is not right!")
-    if not re.search(r'HAZUS',metadata[0]['title']):
+    if not re.search(r'building', metadata[0]['title'].lower()):
         errors.append("title doesn't match!")
     if not re.search(datatype, metadata[0]['dataType']):
         errors.append("datatype doesn't match!")
@@ -118,6 +134,15 @@ def test_create_dataset_shpfile(datasvc):
     # TODO: need to delete the test dataset
 
     assert response['id'] == dataset_id
+
+
+def test_update_dataset(datasvc):
+    id = "5ace7322ec230944f695f5cf"
+    property_name = "title"
+    property_value = "test update dataset"
+    response = datasvc.update_dataset(id, property_name, property_value)
+
+    assert response[property_name] == property_value
 
 
 def test_get_files(datasvc):

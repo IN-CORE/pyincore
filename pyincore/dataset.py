@@ -1,13 +1,20 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+
 import csv
-import json
-import numpy
-import os
 import glob
-import wntr
+import json
+import os
 
 import fiona
-import rasterio
+import numpy
 import pandas as pd
+import rasterio
+import wntr
 
 from pyincore import DataService
 
@@ -56,7 +63,7 @@ class Dataset:
         if len(result_data) > 0:
             with open(name, 'w') as csv_file:
                 # Write the parent ID at the top of the result data, if it is given
-                writer = csv.DictWriter(csv_file, dialect="unix", fieldnames= result_data[0].keys())
+                writer = csv.DictWriter(csv_file, dialect="unix", fieldnames=result_data[0].keys())
                 writer.writeheader()
                 writer.writerows(result_data)
         return Dataset.from_file(name, "csv")
@@ -68,6 +75,7 @@ class Dataset:
         return self.local_file_path
 
     """Utility methods for reading different standard file formats"""
+
     def get_inventory_reader(self):
 
         filename = self.local_file_path
@@ -84,7 +92,7 @@ class Dataset:
         if os.path.isdir(filename):
             files = glob.glob(filename + "/*.inp")
             if len(files) > 0:
-               filename = files[0]
+                filename = files[0]
         wn = wntr.network.WaterNetworkModel(filename)
         return wn
 
@@ -130,7 +138,7 @@ class Dataset:
     def get_file_path(self, type='csv'):
         filename = self.local_file_path
         if os.path.isdir(filename):
-            files = glob.glob(filename + "/*."+type)
+            files = glob.glob(filename + "/*." + type)
             if len(files) > 0:
                 filename = files[0]
 
@@ -142,7 +150,6 @@ class Dataset:
         if os.path.isfile(filename):
             df = pd.read_csv(filename, header="infer")
         return df
-
 
     def close(self):
         for key in self.readers:

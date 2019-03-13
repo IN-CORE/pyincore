@@ -1,3 +1,8 @@
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+
 import pandas as pd
 import concurrent.futures
 from itertools import repeat
@@ -344,13 +349,13 @@ class WaterNetworkDamage(BaseAnalysis):
                     'id': 'water_facilities',
                     'required': True,
                     'description': 'Water Network Facility shapefile',
-                    'type': ['facilitySkeletonized', 'facilityDetailsed'],
+                    'type': ['incore:waterFacility'],
                 },
                 {
                     'id': 'water_pipelines',
                     'required': True,
                     'description': 'Water Network Pipeline shapefile',
-                    'type': ['pipelineSkeletonized', 'pipelineDetailed'],
+                    'type': ['incore:waterPipeline'],
                 }
             ],
             'output_datasets': [

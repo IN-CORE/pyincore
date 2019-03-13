@@ -1,0 +1,28 @@
+{
+  "name": "pytest - Seaside Probabilistic Tsunami - 100 yr",
+  "description": "pytest - Seaside dataset based probabilistic tsunami hazard. This is just a test!",
+  "tsunamiType": "dataset",
+  "hazardDatasets": [
+    {
+      "hazardType": "probabilistic",
+      "demandType": "Vmax",
+      "demandUnits": "m/s",
+      "recurrenceInterval": "100",
+      "recurrenceUnit": "years"
+    },
+    {
+      "hazardType": "probabilistic",
+      "demandType": "Mmax",
+      "demandUnits": "m^3/s^2",
+      "recurrenceInterval": "100",
+      "recurrenceUnit": "years"
+    },
+    {
+      "hazardType": "probabilistic",
+      "demandType": "Hmax",
+      "demandUnits": "m",
+      "recurrenceInterval": "100",
+      "recurrenceUnit": "years"
+    }
+  ]
+}

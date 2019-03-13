@@ -1,0 +1,14 @@
+# List of pyincore analyses to either include or exclude for release
+# If provided, 'excludes' takes preference over 'includeOnly'
+
+version: '0.2.0'
+
+includeOnly:
+  - buildingdamage
+  - bridgedamage
+
+exclude:
+  - waternetworkdamage
+  - waternetworkrecovery
+
+# includeOnly feature is not implemented yet

@@ -1,3 +1,7 @@
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
 import pandas as pd
 import numpy as np
 import pickle
@@ -474,49 +478,49 @@ class WaterNetworkRecovery(BaseAnalysis):
                     'id': 'wn_inp_file',
                     'required': True,
                     'description': 'EPAnet input file',
-                    'type': ['waterNetworkEpanetInp'],
+                    'type': ['incore:waterNetworkEpanetInp'],
                 },
                 {
                     'id': 'demand_initial',
                     'required': True,
                     'description': 'intial demand for water netowrk',
-                    'type': ['json', 'waterNetworkDemand'],
+                    'type': ['incore:waterNetworkDemand'],
                 },
                 {
                     'id': 'pipe_dmg',
                     'required': True,
                     'description': 'pipeline damage probability',
-                    'type': ['csv', 'pipelineDamage'],
+                    'type': ['incore:pipelineDamage'],
                 },
                 {
                     'id': 'pump_dmg',
                     'required': True,
                     'description': 'pump damage probability',
-                    'type': ['csv', 'pumpDamage'],
+                    'type': ['incore:pumpDamage'],
                 },
                 {
                     'id': 'tank_dmg',
                     'required': True,
                     'description': 'tank damage probability',
-                    'type': ['csv', 'tankDamage'],
+                    'type': ['incore:tankDamage'],
                 },
                 {
                     'id': 'demand',
                     'required': True,
                     'description': 'demand after dislocation',
-                    'type': ['json', 'waterNetworkDemand'],
+                    'type': ['incore:waterNetworkDemand'],
                 },
                 {
                     'id': 'pipe_zone',
                     'required': True,
                     'description': 'pipezone to decide repair order',
-                    'type': ['csv', 'pipeZoning'],
+                    'type': ['incore:pipeZoning'],
                 },
                 {
                     'id': 'demand_additional',
                     'required': False,
                     'description': 'water network demand after additional dislocation',
-                    'type': ['json', 'waterNetworkDemand'],
+                    'type': ['incore:waterNetworkDemand'],
                 },
             ],
             'output_datasets': [
