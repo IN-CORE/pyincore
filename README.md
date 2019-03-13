@@ -41,7 +41,7 @@ since your credentials will be required in later steps.
         Note that GDAL header files are not included, so you cannot install dependencies through the pyincore setup process, 
         so you cannot install dependencies through the pyincore setup process. The binary files for the dependent packages 
         have to be pre-installed as well. 
-    - Download each library below separately for your python version. For example, if your Python version is 3.7, 
+    - Download each library below separately for your Python version. For example, if your Python version is 3.7, 
     you would download files that have `cp37-win_amd64` from the [link above](https://www.lfd.uci.edu/~gohlke/pythonlibs/) 
     and pip3 install it (in this order) from the local files.
 
