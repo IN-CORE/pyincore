@@ -11,13 +11,13 @@ import pytest
 import os
 import re
 
-from pyincore import IncoreClient, DataService, InsecureIncoreClient
-from pyincore.globals import INCORE_API_DEV_URL
+from pyincore import DataService, InsecureIncoreClient
+from pyincore.globals import INCORE_API_DEV_INSECURE_URL
 
 
 @pytest.fixture
 def datasvc():
-    client = InsecureIncoreClient(INCORE_API_DEV_URL)
+    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL)
 
     return DataService(client)
 

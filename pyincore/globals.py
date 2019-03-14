@@ -9,7 +9,8 @@ PACKAGE_VERSION = "0.2.0"
 
 INCORE_API_PROD_URL = "https://incore2-services.ncsa.illinois.edu"
 INCORE_API_INSECURE_URL = "http://incore2-services.ncsa.illinois.edu:8888"
-INCORE_API_DEV_URL = "http://incore2-services-dev.ncsa.illinois.edu:8888"
+INCORE_API_DEV_INSECURE_URL = "http://incore2-services-dev.ncsa.illinois.edu:8888"
+INCORE_API_DEV_URL = "https://incore2-services-dev.ncsa.illinois.edu"
 INCORE_LDAP_TEST_USER = "incrtest"
 
 PYINCORE_PACKAGE_HOME = os.path.dirname(__file__)
