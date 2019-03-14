@@ -29,7 +29,7 @@ class DataService:
         self.files_url = urllib.parse.urljoin(client.service_url,
             'data/api/files/')
         self.spaces_url = urllib.parse.urljoin(client.service_url,
-            'data/api/spaces')
+            'data/api/spaces/')
         self.base_earthquake_url = urllib.parse.urljoin(client.service_url,
             'hazard/api/earthquakes/')
         self.base_tornado_url = urllib.parse.urljoin(client.service_url,
@@ -89,7 +89,7 @@ class DataService:
             return local_filename
 
     def get_datasets(self, datatype: str = None, title: str = None,
-                     creator: str = None, space: str = None):
+                     creator: str = None):
         url = self.base_url
         payload = {}
         if datatype is not None:
@@ -98,8 +98,6 @@ class DataService:
             payload['title'] = title
         if creator is not None:
             payload['creator'] = creator
-        if space is not None:
-            payload['space'] = space
 
         r = requests.get(url, headers=self.client.headers, params=payload)
         # need to handle there is no datasets
@@ -171,11 +169,6 @@ class DataService:
 
         return local_filename
 
-    def get_spaces(self):
-        url = self.spaces_url
-        r = requests.get(url, headers=self.client.headers)
-        return r.json()
-
     def unzip_dataset(self, local_filename: str):
         foldername, file_extension = os.path.splitext(local_filename)
         # if it is not a zip file, no unzip
@@ -216,3 +209,40 @@ class DataService:
         r = requests.get(request_str, headers=client.headers)
 
         return r.json()['tornadoDatasetId']
+
+    def get_spaces(self):
+        url = self.spaces_url
+        r = requests.get(url, headers=self.client.headers)
+        return r.json()
+
+    def get_space(self, space_id: str):
+        url = urllib.parse.urljoin(self.spaces_url, space_id)
+        r = requests.get(url, headers=self.client.headers)
+        return r
+
+    def get_spaces_with_dataset(self, dataset_id: str):
+        url = urllib.parse.urljoin(self.spaces_url, "?dataset=" + dataset_id)
+        r = requests.get(url, headers=self.client.headers)
+        return r
+
+    def create_space(self, properties: dict):
+        files = {'space': json.dumps(properties)}
+        r = requests.post(self.spaces_url, files=files, headers=self.client.headers)
+        return r
+
+    def add_dataset_to_space(self, space_id: str, dataset_id: str):
+        url = urllib.parse.urljoin(self.spaces_url, space_id + "/datasets/" + dataset_id)
+        r = requests.post(url, headers=self.client.headers)
+        return r
+
+    def grant_privileges_space(self, space_id: str, privileges: dict):
+        url = urllib.parse.urljoin(self.spaces_url, space_id + "/grant")
+        files = {'grant': json.dumps(privileges)}
+        r = requests.post(url, files=files, headers=self.client.headers)
+        return r
+
+    def update_space(self, space_id: str, space: dict):
+        url = urllib.parse.urljoin(self.spaces_url, space_id)
+        files = {'space': json.dumps(space)}
+        r = requests.put(url, files=files, headers=self.client.headers)
+        return r
