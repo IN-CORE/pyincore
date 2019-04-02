@@ -78,7 +78,8 @@ visualizations and documentation. [Installing Jupyter](https://jupyter.org/insta
 running `pip3 install jupyter`.
 
 **Optional**: We recommend to use [virtual](https://www.pythonforbeginners.com/basics/how-to-use-python-virtualenv/) environment 
-or environment [manager](https://www.anaconda.com/distribution/); tools that help keep dependencies separate for different projects.
+or environment [manager](https://www.anaconda.com/distribution/); tools that help keep dependencies separate for different projects. 
+Note that **pyIncore** installation in virtual environments slightly differs from this document. 
 
 ## Installation
 
