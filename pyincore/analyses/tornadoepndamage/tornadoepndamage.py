@@ -81,7 +81,6 @@ class TornadoEpnDamage(BaseAnalysis):
     def run(self):
         node_dataset = self.get_input_dataset("epn_node").get_inventory_reader()
         link_dataset = self.get_input_dataset("epn_link").get_inventory_reader()
-        # tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
 
         tornado_id = self.get_parameter('tornado_id')
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
@@ -118,8 +117,7 @@ class TornadoEpnDamage(BaseAnalysis):
 
         # getting network graph and node coordinates
         is_driected_graph = True
-        # # another method of getting graph, this could be useful when there is no from and to node information
-        # graph, node_coords = GeoUtil.get_network_graph(link_shp_name, is_driected_graph)
+
         graph, node_coords = GeoUtil.create_network_graph_from_field(link_dataset, self.fromnode_fld_name,
                                                                      self.tonode_fld_name, is_driected_graph)
         # reverse the graph to acculate the damage to next to node
@@ -131,10 +129,6 @@ class TornadoEpnDamage(BaseAnalysis):
             connection_sets = list(nx.weakly_connected_components(graph))
         else:
             connection_sets = list(nx.connected_components(graph))
-
-
-        # # to plot graph
-        # GeoUtil.plot_graph_network(graph, node_coords)
 
         # check the first node of the each network line, this first node should lead each separated network
         # also convert connection set to list
@@ -222,20 +216,6 @@ class TornadoEpnDamage(BaseAnalysis):
                     pass
 
                 line = shape(line_feature['geometry'])
-
-                # # if the line consists of multiple segments
-                # seg_coord_list = list(line.coords)
-                # new_line_feature_list = []
-                # if len(seg_coord_list) > 2:
-                #     for seg_start, seg_end in self.align_list_cooridnate(seg_coord_list):
-                #         tmp_line_feature = copy.deepcopy(line_feature)
-                #         single_seg_coord_list = [seg_start, seg_end]
-                #         line_geom = LineString(single_seg_coord_list)
-                #         tmp_line_feature['geometry'] = mapping(line_geom)
-                #         new_line_feature_list.append(tmp_line_feature)
-                # # line only contains a single segment
-                # else:
-                #     new_line_feature_list.append(line_feature)
 
                 # iterate tornado
                 for tornado_feature in tornado_dataset:
@@ -560,4 +540,3 @@ class TornadoEpnDamage(BaseAnalysis):
                 }
             ]
         }
-
