@@ -11,7 +11,7 @@ import networkx as nx
 import collections
 
 from shapely.geometry import shape
-from pyincore import BaseAnalysis, HazardService, FragilityService, DataService
+from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, IncoreClient
 from pyincore import GeoUtil, AnalysisUtil
 
 
@@ -81,10 +81,12 @@ class TornadoEpnDamage(BaseAnalysis):
     def run(self):
         node_dataset = self.get_input_dataset("epn_node").get_inventory_reader()
         link_dataset = self.get_input_dataset("epn_link").get_inventory_reader()
-        tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
+        # tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
 
         tornado_id = self.get_parameter('tornado_id')
-
+        tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
+        self.load_remote_input_dataset("tornado", tornado_metadata["datasetId"])
+        tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
         results = self.get_damage(node_dataset, link_dataset, tornado_dataset, tornado_id)
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
@@ -545,11 +547,10 @@ class TornadoEpnDamage(BaseAnalysis):
                 },
                 {
                     'id': 'tornado',
-                    'required': True,
-                    'description': 'Bridge Damage Ratios',
+                    'required': False,
+                    'description': 'Tornado Dataset',
                     'type': ['tornadowindfield'],
                 }
-
             ],
             'output_datasets': [
                 {
@@ -559,6 +560,3 @@ class TornadoEpnDamage(BaseAnalysis):
                 }
             ]
         }
-
-
-
