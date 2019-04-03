@@ -560,3 +560,4 @@ class TornadoEpnDamage(BaseAnalysis):
                 }
             ]
         }
+
