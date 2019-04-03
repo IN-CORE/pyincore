@@ -9,6 +9,7 @@ from scipy.stats import lognorm, norm
 import folium
 from owslib.wms import WebMapService
 import matplotlib.pyplot as plt
+from pyincore import globals
 
 
 class PlotUtil:
@@ -117,7 +118,7 @@ class PlotUtil:
         return plt
 
     @staticmethod
-    def get_wms_map(layers_config: list, url='http://incore2-geoserver.ncsa.illinois.edu:9999/geoserver/incore/wms',
+    def get_wms_map(layers_config: list, url=globals.INCORE_GEOSERVER_WMS_URL,
                     width=600, height=400):
         """Get a map with WMS layers.
 
@@ -165,7 +166,7 @@ class PlotUtil:
         return m
 
     @staticmethod
-    def get_gdf_wms_map(gdf, layers_config, url='http://incore2-geoserver.ncsa.illinois.edu:9999/geoserver/incore/wms',
+    def get_gdf_wms_map(gdf, layers_config, url=globals.INCORE_GEOSERVER_WMS_URL,
                         width=600, height=400):
         """Get GDF (GeoDataFrame) and WMS map.
 
