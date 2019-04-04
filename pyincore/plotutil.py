@@ -118,8 +118,8 @@ class PlotUtil:
         return plt
 
     @staticmethod
-    def get_wms_map(layers_config: list, url=globals.INCORE_GEOSERVER_WMS_URL,
-                    width=600, height=400):
+    def get_wms_map(layers_config: list,
+                    width=600, height=400, url=globals.INCORE_GEOSERVER_WMS_URL, ):
         """Get a map with WMS layers.
 
         Args:
@@ -166,8 +166,8 @@ class PlotUtil:
         return m
 
     @staticmethod
-    def get_gdf_wms_map(gdf, layers_config, url=globals.INCORE_GEOSERVER_WMS_URL,
-                        width=600, height=400):
+    def get_gdf_wms_map(gdf, layers_config,
+                        width=600, height=400, url=globals.INCORE_GEOSERVER_WMS_URL):
         """Get GDF (GeoDataFrame) and WMS map.
 
         Args:
