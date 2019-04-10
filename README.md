@@ -36,7 +36,7 @@ since your credentials will be required in later steps.
     The following instruction is tested for Win 64bit. But 32bit has not been tested yet.
     - Download the `GDAL` binaries for Win 64bit (`GDAL-2.3.3`) from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) and install it using pip
         ```
-        pip3 install <path-to-local-gdal-binary-file>
+        pip3 install <path-to-local-gdal-binary-whl-file>
         ```
         Note that GDAL header files are not included, so you cannot install dependencies through the pyincore setup process, 
         so you cannot install dependencies through the pyincore setup process. The binary files for the dependent packages 
@@ -45,15 +45,13 @@ since your credentials will be required in later steps.
     you would download files that have `cp37-win_amd64` from the [link above](https://www.lfd.uci.edu/~gohlke/pythonlibs/) 
     and pip3 install it (in this order) from the local files.
 
-        ```
-        - numpy-1.16.2+mlk
-        - fiona-1.8.4
-        - shapely-1.6.4.post1
-        - rasterio-1.0.21
-        - pyproj-2.0.1
-        - OWSLib-0.17.1
-        - Rtree-0.8.3
-        ```
+        - [numpy-1.16.2+mlk](https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy)
+        - [Fiona-1.8.4](https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona)
+        - [Shapely-1.6.4.post1](https://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely)
+        - [rasterio-1.0.21](https://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio)
+        - [pyproj-2.0.1](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj)
+        - [OWSLib-0.17.1](https://www.lfd.uci.edu/~gohlke/pythonlibs/#owslib)
+        - [Rtree-0.8.3](https://www.lfd.uci.edu/~gohlke/pythonlibs/#rtree)
 
 - **MacOS**
     The easiest way is to use [Homebrew](https://brew.sh/), a MacOS package manager.
