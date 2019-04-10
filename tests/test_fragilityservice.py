@@ -9,6 +9,7 @@ import ast
 
 import pytest
 import json
+from pyincore.globals import INCORE_API_DEV_INSECURE_URL
 
 from pyincore import FragilityService, InsecureIncoreClient
 
@@ -22,7 +23,7 @@ def fragilitysvc():
     except EnvironmentError:
         return None
     # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-    client = InsecureIncoreClient("http://incore2-services-dev.ncsa.illinois.edu:8888", cred[0])
+    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, cred[0])
     return FragilityService(client)
 
 

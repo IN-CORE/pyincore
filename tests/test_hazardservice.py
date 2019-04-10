@@ -8,8 +8,9 @@
 import pytest
 import numpy as np
 
-from pyincore import IncoreClient, InsecureIncoreClient
+from pyincore import InsecureIncoreClient
 from pyincore import HazardService
+from pyincore.globals import INCORE_API_DEV_INSECURE_URL
 
 
 @pytest.fixture
@@ -20,10 +21,7 @@ def hazardsvc():
             cred = f.read().splitlines()
     except EnvironmentError:
         return None
-    # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-    client = InsecureIncoreClient(
-        "http://incore2-services-dev.ncsa.illinois.edu:8888",
-        cred[0])
+    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, cred[0])
 
     return HazardService(client)
 
@@ -253,17 +251,17 @@ def test_create_tsunami_hazard(hazardsvc):
     assert response["id"] is not None and response["hazardDatasets"][1][
         "datasetId"] is not None
 
-
-def test_create_hurricane_windfield(hazardsvc):
-    if hazardsvc is None:
-        assert False, ".incorepw does not exist!"
-
-    scenario = ""
-    with open("hurricanewf.json", 'r') as file:
-        hurr_wf_inputs = file.read()
-
-    response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
-    assert response["id"] is not None
+# INCORE-682 is opened to address this
+# def test_create_hurricane_windfield(hazardsvc):
+#     if hazardsvc is None:
+#         assert False, ".incorepw does not exist!"
+#
+#     scenario = ""
+#     with open("hurricanewf.json", 'r') as file:
+#         hurr_wf_inputs = file.read()
+#
+#     response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
+#     assert response["id"] is not None
 
 
 def test_get_hurricanewf_metadata(hazardsvc):
