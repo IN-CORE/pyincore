@@ -125,7 +125,7 @@ The information is used for communicating with **IN-CORE** services such as haza
 The file is located in the `.incore` folder created during installation in your HOME directory. The typical path is `C:\Users\<username>` on Windows OS, 
 `/Users/<username>` on MacOS and `/home/<username>` on Linux based machines.
 
-- Download the **Building damage analysis** Jupyter notebook (<http://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb>) 
+- Download the **Building damage analysis** Jupyter notebook (<https://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb>) 
 and verify the installation by running it from your project folder. For details of running and manipulating `ipynb` files refer 
 to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running). If you have problems running notebooks, 
 contact us at **incore-dev@lists.illinois.edu**.
