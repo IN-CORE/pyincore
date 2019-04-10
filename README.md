@@ -87,7 +87,7 @@ Note that **pyIncore** installation in virtual environments slightly differs fro
  
 These steps will guide you on how to install both pyIncore and Jupyter notebook so you can develop your code.
 
-1. Download **pyincore** as an archive file from [NCSA's server](https://incore2.ncsa.illinois.edu/releases/pyincore_0.2.0.tar.gz) to a directory on your computer.
+1. Download **pyincore** as an archive file from [NCSA's server](https://incore2.ncsa.illinois.edu/) to a directory on your computer.
 2. From the Terminal (Mac/Linux) or Command Prompt (Windows) run:
     ```
     pip3 install --user pyincore_0.2.0.tar.gz
