@@ -30,9 +30,17 @@ class HazardService:
         self.base_hurricanewf_url = urllib.parse.urljoin(client.service_url,
                                                          'hazard/api/hurricaneWindfields/')
 
-    def get_earthquake_hazard_metadata_list(self):
+    def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         url = self.base_earthquake_url
-        r = requests.get(url, headers=self.client.headers)
+        payload = {}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+        if space is not None:
+            payload['space'] = space
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
         response = r.json()
 
         return response
@@ -149,9 +157,29 @@ class HazardService:
         response = r.json()
         return response
 
-    def get_tornado_hazard_metadata_list(self):
+    def search_earthquakes(self, text: str, skip: int = None, limit: int = None):
+        url = urllib.parse.urljoin(self.base_earthquake_url, "search")
+        payload = {"text": text}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
+
+        return r.json()
+
+    def get_tornado_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         url = self.base_tornado_url
-        r = requests.get(url, headers=self.client.headers)
+        payload = {}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+        if space is not None:
+            payload['space'] = space
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
         response = r.json()
 
         return response
@@ -204,9 +232,29 @@ class HazardService:
         response = r.json()
         return response
 
-    def get_tsunami_hazard_metadata_list(self):
+    def search_tornadoes(self, text: str, skip: int = None, limit: int = None):
+        url = urllib.parse.urljoin(self.base_tornado_url, "search")
+        payload = {"text": text}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
+
+        return r.json()
+
+    def get_tsunami_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         url = self.base_tsunami_url
-        r = requests.get(url, headers=self.client.headers)
+        payload = {}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+        if space is not None:
+            payload['space'] = space
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
         response = r.json()
 
         return response
@@ -259,6 +307,18 @@ class HazardService:
         response = r.json()
         return response
 
+    def search_tsunamis(self, text: str, skip: int = None, limit: int = None):
+        url = urllib.parse.urljoin(self.base_tsunami_url, "search")
+        payload = {"text": text}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
+
+        return r.json()
+
     def create_hurricane_windfield(self, hurr_wf_inputs):
         url = self.base_hurricanewf_url
         headers = {'Content-type': 'application/json'}
@@ -268,8 +328,8 @@ class HazardService:
 
         return response
 
-    def get_hurricanewf_metadata_list(self, coast: str = None,
-                                      category: int = None):
+    def get_hurricanewf_metadata_list(self, coast: str = None, category: int = None, skip: int = None,
+                                      limit: int = None, space: str = None):
         url = self.base_hurricanewf_url
         payload = {}
 
@@ -277,6 +337,12 @@ class HazardService:
             payload['coast'] = coast
         if category is not None:
             payload['category'] = category
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+        if space is not None:
+            payload['space'] = space
 
         r = requests.get(url, headers=self.client.headers, params=payload)
         response = r.json()
@@ -301,17 +367,30 @@ class HazardService:
 
         return response
 
-    def get_hurricanewf_json(self, coast: str, category: int, trans_d: float,
-                             land_fall_loc: int,
-                             resolution: int = 6, grid_points: int = 80,
+    def get_hurricanewf_json(self, coast: str, category: int, trans_d: float, land_fall_loc: int, demand_type: str,
+                             demand_units: str, resolution: int = 6, grid_points: int = 80,
                              rf_method: str = "circular"):
+
         # land_fall_loc: IncorePoint e.g.'28.01, -83.85'
         url = urllib.parse.urljoin(self.base_hurricanewf_url, "json/" + coast)
         payload = {"category": category, "TransD": trans_d,
                    "LandfallLoc": land_fall_loc,
+                   "demandType": demand_type, "demandUnits": demand_units,
                    "resolution": resolution, "gridPoints": grid_points,
                    "reductionType": rf_method}
         r = requests.get(url, headers=self.client.headers, params=payload)
         response = r.json()
 
         return response
+
+    def search_hurricanes(self, text: str, skip: int = None, limit: int = None):
+        url = urllib.parse.urljoin(self.base_hurricanewf_url, "search")
+        payload = {"text": text}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
+
+        return r.json()
