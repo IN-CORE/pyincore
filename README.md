@@ -11,6 +11,8 @@ results.
 
 ### Prerequisites
 
+Please read through the instructions at least once completely before actually following them to avoid any installation problems!
+
 **IN-CORE account**
 
 - A user must have an account recognized by the **IN-CORE** service. Please [register](https://identity.ncsa.illinois.edu/register/UUMK36FU2M) 
@@ -19,10 +21,10 @@ since your credentials will be required in later steps.
 [Python 3.5+](https://www.python.org)
 
 [GDAL](https://www.gdal.org) - Geospatial Data Abstraction Library
-    
-- **pyIncore** uses `GDAL` library, which has to be installed separately.
 
 - **Linux** 
+    **pyIncore** uses `GDAL` library, which has to be installed separately.
+    
     - Install **gdal-bin**. Additional information can be found  at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
         ```
         sudo apt-get install gdal-bin
@@ -33,28 +35,18 @@ since your credentials will be required in later steps.
         ```
 
 - **Windows 64bit**
-    The following instruction is tested for Win 64bit. But 32bit has not been tested yet.
-    - Download the `GDAL` binaries for Win 64bit (`GDAL-2.3.3`) from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) and install it using pip
+    We provide installation instructions for [Anaconda](https://www.anaconda.com/distribution/) environment manager using [Miniconda](https://docs.conda.io/en/latest/miniconda.html). Python 3.x and GDAL library will be installed with Anaconda/Miniconda. The following instruction is tested for Win 64bit, the 32bit has not been tested yet.
+    - Download the latest Miniconda3 installer for Windows from [Miniconda](https://docs.conda.io/en/latest/miniconda.html) web page.
+    - Run the installer setup locally (Just Me choice) to avoid the need for administrator privileges.
+    - Leave the default folder installation path (`C:\Users\<user>\..\miniconda3`). Do not add Anaconda to the PATH, do add however register Anaconda as the default Python environment.
+    Open up an Anaconda prompt from the Windows Start menu, create Python environment (called for example `pyincore`) and activate it
         ```
-        pip3 install <path-to-local-gdal-binary-whl-file>
+        conda create -n pyincore python=3
+        conda activate pyincore
         ```
-        Note that GDAL header files are not included, so you cannot install dependencies through the pyincore setup process, 
-        so you cannot install dependencies through the pyincore setup process. The binary files for the dependent packages 
-        have to be pre-installed as well. 
-    - Download each library below separately for your Python version. For example, if your Python version is 3.7, 
-    you would download files that have `cp37-win_amd64` from the [link above](https://www.lfd.uci.edu/~gohlke/pythonlibs/) 
-    and pip3 install it (in this order) from the local files.
-
-        - [numpy-1.16.2+mlk](https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy)
-        - [Fiona-1.8.4](https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona)
-        - [Shapely-1.6.4.post1](https://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely)
-        - [rasterio-1.0.21](https://www.lfd.uci.edu/~gohlke/pythonlibs/#rasterio)
-        - [pyproj-2.0.1](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj)
-        - [OWSLib-0.17.1](https://www.lfd.uci.edu/~gohlke/pythonlibs/#owslib)
-        - [Rtree-0.8.3](https://www.lfd.uci.edu/~gohlke/pythonlibs/#rtree)
-
+ 
 - **MacOS**
-    The easiest way is to use [Homebrew](https://brew.sh/), a MacOS package manager.
+    **pyIncore** uses `GDAL` library, which has to be installed separately. The easiest way is to use [Homebrew](https://brew.sh/), a MacOS package manager.
     - Follow the instructions to install Homebrew.
     - [Install](https://medium.com/@vascofernandes_13322/how-to-install-gdal-on-macos-6a76fb5e24a4) the current version of gdal:
         ```
