@@ -11,6 +11,8 @@ results.
 
 ### Prerequisites
 
+Please read through the instructions at least once completely before actually following them to avoid any installation problems!
+
 **IN-CORE account**
 
 - A user must have an account recognized by the **IN-CORE** service. Please [register](https://identity.ncsa.illinois.edu/register/UUMK36FU2M) 
@@ -19,10 +21,10 @@ since your credentials will be required in later steps.
 [Python 3.5+](https://www.python.org)
 
 [GDAL](https://www.gdal.org) - Geospatial Data Abstraction Library
-    
-- **pyIncore** uses `GDAL` library, which has to be installed separately.
 
 - **Linux** 
+    **pyIncore** uses `GDAL` library, which has to be installed separately.
+    
     - Install **gdal-bin**. Additional information can be found  at the wiki page [How to install GDAL](https://github.com/domlysz/BlenderGIS/wiki/How-to-install-GDAL).
         ```
         sudo apt-get install gdal-bin
@@ -33,30 +35,18 @@ since your credentials will be required in later steps.
         ```
 
 - **Windows 64bit**
-    The following instruction is tested for Win 64bit. But 32bit has not been tested yet.
-    - Download the `GDAL` binaries for Win 64bit (`GDAL-2.3.3`) from [Windows Binaries for Python](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) and install it using pip
+    We provide installation instructions for [Anaconda](https://www.anaconda.com/distribution/) environment manager using [Miniconda](https://docs.conda.io/en/latest/miniconda.html). Python 3.x and GDAL library will be installed with Anaconda/Miniconda. The following instructions are tested for Win 64bit, the 32bit has not been tested yet.
+    - Download the latest Miniconda3 installer for Windows from [Miniconda](https://docs.conda.io/en/latest/miniconda.html) web page.
+    - Run the installer setup locally to avoid the need for administrator privileges.
+    - Leave the default folder installation path (`C:\Users\<user>\..\miniconda3`). Do not add Anaconda to the PATH; however, you should register Anaconda as the default Python environment.
+    Open up an Anaconda prompt from the Windows Start menu, create Python environment (required for the `pyincore` example) and activate it
         ```
-        pip3 install <path-to-local-gdal-binary-file>
+        conda create -n pyincore python=3
+        conda activate pyincore
         ```
-        Note that GDAL header files are not included, so you cannot install dependencies through the pyincore setup process, 
-        so you cannot install dependencies through the pyincore setup process. The binary files for the dependent packages 
-        have to be pre-installed as well. 
-    - Download each library below separately for your Python version. For example, if your Python version is 3.7, 
-    you would download files that have `cp37-win_amd64` from the [link above](https://www.lfd.uci.edu/~gohlke/pythonlibs/) 
-    and pip3 install it (in this order) from the local files.
-
-        ```
-        - numpy-1.16.2+mlk
-        - fiona-1.8.4
-        - shapely-1.6.4.post1
-        - rasterio-1.0.21
-        - pyproj-2.0.1
-        - OWSLib-0.17.1
-        - Rtree-0.8.3
-        ```
-
+ 
 - **MacOS**
-    The easiest way is to use [Homebrew](https://brew.sh/), a MacOS package manager.
+    **pyIncore** uses `GDAL` library, which has to be installed separately. The easiest way is to use [Homebrew](https://brew.sh/), a MacOS package manager.
     - Follow the instructions to install Homebrew.
     - [Install](https://medium.com/@vascofernandes_13322/how-to-install-gdal-on-macos-6a76fb5e24a4) the current version of gdal:
         ```
@@ -78,7 +68,8 @@ visualizations and documentation. [Installing Jupyter](https://jupyter.org/insta
 running `pip3 install jupyter`.
 
 **Optional**: We recommend to use [virtual](https://www.pythonforbeginners.com/basics/how-to-use-python-virtualenv/) environment 
-or environment [manager](https://www.anaconda.com/distribution/); tools that help keep dependencies separate for different projects.
+or environment [manager](https://www.anaconda.com/distribution/); tools that help keep dependencies separate for different projects. 
+Note that **pyIncore** installation in virtual environments slightly differs from this document. 
 
 ## Installation
 
@@ -86,7 +77,7 @@ or environment [manager](https://www.anaconda.com/distribution/); tools that hel
  
 These steps will guide you on how to install both pyIncore and Jupyter notebook so you can develop your code.
 
-1. Download **pyincore** as an archive file from [NCSA's server](https://incore2.ncsa.illinois.edu/releases/pyincore_0.2.0.tar.gz) to a directory on your computer.
+1. Download **pyincore** as an archive file from [NCSA's server](https://incore2.ncsa.illinois.edu/) to a directory on your computer.
 2. From the Terminal (Mac/Linux) or Command Prompt (Windows) run:
     ```
     pip3 install --user pyincore_0.2.0.tar.gz
@@ -124,7 +115,7 @@ The information is used for communicating with **IN-CORE** services such as haza
 The file is located in the `.incore` folder created during installation in your HOME directory. The typical path is `C:\Users\<username>` on Windows OS, 
 `/Users/<username>` on MacOS and `/home/<username>` on Linux based machines.
 
-- Download the **Building damage analysis** Jupyter notebook (<http://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb>) 
+- Download the **Building damage analysis** Jupyter notebook (<https://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb>) 
 and verify the installation by running it from your project folder. For details of running and manipulating `ipynb` files refer 
 to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running). If you have problems running notebooks, 
 contact us at **incore-dev@lists.illinois.edu**.
