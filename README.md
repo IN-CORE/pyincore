@@ -35,11 +35,11 @@ since your credentials will be required in later steps.
         ```
 
 - **Windows 64bit**
-    We provide installation instructions for [Anaconda](https://www.anaconda.com/distribution/) environment manager using [Miniconda](https://docs.conda.io/en/latest/miniconda.html). Python 3.x and GDAL library will be installed with Anaconda/Miniconda. The following instruction is tested for Win 64bit, the 32bit has not been tested yet.
+    We provide installation instructions for [Anaconda](https://www.anaconda.com/distribution/) environment manager using [Miniconda](https://docs.conda.io/en/latest/miniconda.html). Python 3.x and GDAL library will be installed with Anaconda/Miniconda. The following instructions are tested for Win 64bit, the 32bit has not been tested yet.
     - Download the latest Miniconda3 installer for Windows from [Miniconda](https://docs.conda.io/en/latest/miniconda.html) web page.
-    - Run the installer setup locally (Just Me choice) to avoid the need for administrator privileges.
-    - Leave the default folder installation path (`C:\Users\<user>\..\miniconda3`). Do not add Anaconda to the PATH, do add however register Anaconda as the default Python environment.
-    Open up an Anaconda prompt from the Windows Start menu, create Python environment (called for example `pyincore`) and activate it
+    - Run the installer setup locally to avoid the need for administrator privileges.
+    - Leave the default folder installation path (`C:\Users\<user>\..\miniconda3`). Do not add Anaconda to the PATH; however, you should register Anaconda as the default Python environment.
+    Open up an Anaconda prompt from the Windows Start menu, create Python environment (required for the `pyincore` example) and activate it
         ```
         conda create -n pyincore python=3
         conda activate pyincore
