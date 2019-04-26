@@ -64,7 +64,7 @@ class StochasticPopulationAllocation(BaseAnalysis):
                     'id': 'result',
                     'description': 'A csv file with the merged dataset of the inputs, aka Stochastic'
                                    'Population Allocation',
-                    'type': 'csv'
+                    'type': 'incore:PopAllocation'
                 }
             ]
         }

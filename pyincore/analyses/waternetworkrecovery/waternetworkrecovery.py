@@ -490,19 +490,19 @@ class WaterNetworkRecovery(BaseAnalysis):
                     'id': 'pipe_dmg',
                     'required': True,
                     'description': 'pipeline damage probability',
-                    'type': ['incore:pipelineDamage'],
+                    'type': ['ergo:pipelineDamage'],
                 },
                 {
                     'id': 'pump_dmg',
                     'required': True,
                     'description': 'pump damage probability',
-                    'type': ['incore:pumpDamage'],
+                    'type': ['ergo:pumpDamage'],
                 },
                 {
                     'id': 'tank_dmg',
                     'required': True,
                     'description': 'tank damage probability',
-                    'type': ['incore:tankDamage'],
+                    'type': ['ergo:lifelineWaterTankInventoryDamage'],
                 },
                 {
                     'id': 'demand',
