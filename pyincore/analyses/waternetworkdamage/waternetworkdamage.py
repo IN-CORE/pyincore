@@ -349,27 +349,27 @@ class WaterNetworkDamage(BaseAnalysis):
                     'id': 'water_facilities',
                     'required': True,
                     'description': 'Water Network Facility shapefile',
-                    'type': ['incore:waterFacility'],
+                    'type': ['ergo:waterFacilityTopo'],
                 },
                 {
                     'id': 'water_pipelines',
                     'required': True,
                     'description': 'Water Network Pipeline shapefile',
-                    'type': ['incore:waterPipeline'],
+                    'type': ['ergo:buriedPipelineTopology','ergo:pipeline'],
                 }
             ],
             'output_datasets': [
                 {
                     'id': 'pipeline_dmg',
-                    'type': 'csv'
+                    'type': 'ergo:pipelineDamage'
                 },
                 {
                     'id': 'tank_dmg',
-                    'type': 'csv'
+                    'type': 'ergo:pumpDamage'
                 },
                 {
                     'id': 'pump_dmg',
-                    'type': 'csv'
+                    'type': 'ergo:lifelineWaterTankInventoryDamage'
                 }
             ]
         }

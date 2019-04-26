@@ -316,7 +316,7 @@ class BuildingDamage(BaseAnalysis):
             'output_datasets': [
                 {
                     'id': 'result',
-                    'parent_type': 'bridges',
+                    'parent_type': 'buildings',
                     'description': 'CSV file of building structural damage',
                     'type': 'ergo:buildingDamageVer4'
                 }
