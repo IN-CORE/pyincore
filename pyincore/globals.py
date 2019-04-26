@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import os
 
-PACKAGE_VERSION = "0.2.0"
+PACKAGE_VERSION = "0.3.0"
 
 INCORE_API_PROD_URL = "https://incore2-services.ncsa.illinois.edu"
 INCORE_API_INSECURE_URL = "http://incore2-services.ncsa.illinois.edu:8888"
