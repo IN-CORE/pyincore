@@ -100,8 +100,8 @@ class FragilityService:
     def get_fragility_sets(self, demand_type: str = None,
                            hazard_type: str = None, inventory_type: str = None,
                            author: str = None, legacy_id: str = None,
-                           creator: str = None, skip: int = None,
-                           limit: int = None):
+                           creator: str = None, space: str = None,
+                           skip: int = None, limit: int = None):
         url = self.base_frag_url
         payload = {}
 
@@ -121,6 +121,8 @@ class FragilityService:
             payload['skip'] = skip
         if limit is not None:
             payload['limit'] = limit
+        if space is not None:
+            payload['space'] = space
 
         r = requests.get(url, headers=self.client.headers, params=payload)
 
@@ -132,9 +134,14 @@ class FragilityService:
 
         return r.json()
 
-    def search_fragility_sets(self, text: str):
+    def search_fragility_sets(self, text: str, skip: int = None, limit: int = None):
         url = urllib.parse.urljoin(self.base_frag_url, "search")
         payload = {"text": text}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+
         r = requests.get(url, headers=self.client.headers, params=payload)
 
         return r.json()
@@ -151,9 +158,8 @@ class FragilityService:
 
         return r.json()
 
-    def get_fragility_mappings(self, hazard_type: str = None,
-                               inventory_type: str = None, creator: str = None,
-                               skip: int = None, limit: int = None):
+    def get_fragility_mappings(self, hazard_type: str = None, inventory_type: str = None, creator: str = None,
+                               space: str = None, skip: int = None, limit: int = None):
         url = self.base_mapping_url
         payload = {}
 
@@ -167,6 +173,8 @@ class FragilityService:
             payload['skip'] = skip
         if limit is not None:
             payload['limit'] = limit
+        if space is not None:
+            payload['space'] = space
 
         r = requests.get(url, headers=self.client.headers, params=payload)
 

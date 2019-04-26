@@ -11,20 +11,13 @@ import pytest
 import os
 import re
 
-from pyincore import IncoreClient, DataService, InsecureIncoreClient
+from pyincore import DataService, InsecureIncoreClient
+from pyincore.globals import INCORE_API_DEV_INSECURE_URL
 
 
 @pytest.fixture
 def datasvc():
-    cred = None
-    try:
-        with open(".incorepw", 'r') as f:
-            cred = f.read().splitlines()
-    except EnvironmentError:
-        return None
-    # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-    client = InsecureIncoreClient(
-        "http://incore2-services-dev.ncsa.illinois.edu:8888", cred[0])
+    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL)
 
     return DataService(client)
 
@@ -169,7 +162,47 @@ def test_get_file_blob(datasvc):
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
 
-def test_get_spaces(datasvc):
-    metadata = datasvc.get_spaces()
+# These should be moved to a separate test for the refactored space service
+# @pytest.mark.parametrize("space,expected", [
+#     ({'mettadatta': {'name': 'bad'}}, 400),
+# ])
+# def test_create_space(datasvc, space, expected):
+#     response = datasvc.create_space(space)
+#
+#     assert response.status_code == expected
 
-    assert 'datasetIds' in metadata[0].keys()
+
+# @pytest.mark.parametrize("space_id,dataset_id,expected", [
+#    ("5c89287d5648c42a917569d8", "5a284f09c7d30d13bc0819a6", 200),
+#    ("5c89287d5648c42a917569d8", "5a284f09c7d30d13b0000000", 404),
+#    ("5c75bd1a9e503f2ea0000000", "5a284f09c7d30d13bc0819a6", 404),
+# ])
+# def test_add_dataset_to_space(datasvc, space_id, dataset_id, expected):
+#    response = datasvc.add_dataset_to_space(space_id=space_id, dataset_id=dataset_id)
+#
+#    assert response.status_code == expected
+
+
+# @pytest.mark.parametrize("space_id,space,expected", [
+#    ("5c89287d5648c42a917569d8", {'metadata': {'name': 'test-space'}}, 400),
+#    ("5c75bd1a9e503f2ea0500000", {'metadata': {'name': 'not found'}}, 404),
+# ])
+# def test_update_space(datasvc, space_id, space, expected):
+#    """
+#    If the new name already exists, it will throw a bad request exception
+#    """
+#    response = datasvc.update_space(space_id=space_id, space=space)
+
+#   assert response.status_code == expected
+
+
+# def test_get_spaces(datasvc):
+#    metadata = datasvc.get_spaces()
+#
+#    assert 'members' in metadata[0].keys()
+
+
+# def test_get_space(datasvc):
+#    response = datasvc.get_space("5c89287d5648c42a917569d8")
+#
+#    assert response.status_code == 200

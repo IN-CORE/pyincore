@@ -67,7 +67,7 @@ class PopulationDislocation(BaseAnalysis):
                     'id': 'population_allocation',
                     'required': True,
                     'description': 'Population Allocation CSV data',
-                    'type': ['ergo:PopAllocation']
+                    'type': ['incore:PopAllocation']
                 },
                 {
                     'id': 'block_group_data',
@@ -82,7 +82,7 @@ class PopulationDislocation(BaseAnalysis):
                     'parent_type': 'population_block',
                     'description': 'A csv file with population dislocation result '
                                    'aggregated to the block group level',
-                    'type': 'csv'
+                    'type': 'incore:popDislocation'
                 }
             ]
         }

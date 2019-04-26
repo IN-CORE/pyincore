@@ -9,10 +9,12 @@ from scipy.stats import lognorm, norm
 import folium
 from owslib.wms import WebMapService
 import matplotlib.pyplot as plt
+from pyincore import globals
 
 
 class PlotUtil:
     """Plotting utility."""
+
     @staticmethod
     def sample_lognormal_cdf_alt(mean: float, std: float, sample_size: int):
         """Get values from a lognormal distribution.
@@ -26,7 +28,7 @@ class PlotUtil:
             ndarray, ndarray: X sampling, Y cummulative density values.
 
         """
-        dist = lognorm(s = std, loc = 0, scale = numpy.exp(mean))
+        dist = lognorm(s=std, loc=0, scale=numpy.exp(mean))
         start = dist.ppf(0.001)  # cdf inverse
         end = dist.ppf(0.999)  # cdf inverse
         x = numpy.linspace(start, end, sample_size)
@@ -49,7 +51,7 @@ class PlotUtil:
         # convert location and scale parameters to the normal mean and std
         mean = numpy.log(numpy.square(location) / numpy.sqrt(scale + numpy.square(location)))
         std = numpy.sqrt(numpy.log((scale / numpy.square(location)) + 1))
-        dist = lognorm(s = std, loc = 0, scale = numpy.exp(mean))
+        dist = lognorm(s=std, loc=0, scale=numpy.exp(mean))
         start = dist.ppf(0.001)  # cdf inverse
         end = dist.ppf(0.999)  # cdf inverse
         x = numpy.linspace(start, end, sample_size)
@@ -95,7 +97,7 @@ class PlotUtil:
             return PlotUtil.sample_lognormal_cdf(alpha, beta, 200)
         if disttype == 'standardNormal':
             return PlotUtil.sample_normal_cdf(alpha, beta, 200)
-    
+
     @staticmethod
     def get_fragility_plot(fragility_set):
         """Get fragility plot.
@@ -109,14 +111,15 @@ class PlotUtil:
 
         """
         for curve in fragility_set['fragilityCurves']:
-            x,y = PlotUtil.get_x_y(curve['curveType'],curve['median'],curve['beta'])
-            plt.plot(x,y, label=curve['description'])
-        plt.xlabel(fragility_set['demandType']+" ("+fragility_set['demandUnits']+")")
+            x, y = PlotUtil.get_x_y(curve['curveType'], curve['median'], curve['beta'])
+            plt.plot(x, y, label=curve['description'])
+        plt.xlabel(fragility_set['demandType'] + " (" + fragility_set['demandUnits'] + ")")
         plt.legend()
         return plt
-        
+
     @staticmethod
-    def get_wms_map(layers_config: list):
+    def get_wms_map(layers_config: list,
+                    width=600, height=400, url=globals.INCORE_GEOSERVER_WMS_URL, ):
         """Get a map with WMS layers.
 
         Args:
@@ -126,15 +129,14 @@ class PlotUtil:
             obj: A map with WMS layers.
 
         """
-        m = folium.Map(width=600, height=400, tiles = "Stamen Terrain")
-        url = 'http://incore2-geoserver.ncsa.illinois.edu:9999/geoserver/incore/wms' 
+        m = folium.Map(width=width, height=height, tiles="Stamen Terrain")
         bbox_all = [9999, 9999, -9999, -9999]
         for layer in layers_config:
-            wms_layer = folium.raster_layers.WmsTileLayer(url, name=layer['name'], fmt='image/png',transparent=True,
-                                                    layers='incore:'+layer['id'], styles=layer['style'])
+            wms_layer = folium.raster_layers.WmsTileLayer(url, name=layer['name'], fmt='image/png', transparent=True,
+                                                          layers='incore:' + layer['id'], styles=layer['style'])
             wms_layer.add_to(m)
-            wms = WebMapService(url) 
-            bbox = wms[layer['id']].boundingBox 
+            wms = WebMapService(url)
+            bbox = wms[layer['id']].boundingBox
             # merge bbox 
             if bbox[0] < bbox_all[0]: bbox_all[0] = bbox[0]
             if bbox[1] < bbox_all[1]: bbox_all[1] = bbox[1]
@@ -142,12 +144,12 @@ class PlotUtil:
             if bbox[3] > bbox_all[3]: bbox_all[3] = bbox[3]
 
         folium.LayerControl().add_to(m)
-        bounds = ((bbox_all[1], bbox_all[0]), (bbox_all[3],bbox_all[2]))
+        bounds = ((bbox_all[1], bbox_all[0]), (bbox_all[3], bbox_all[2]))
         m.fit_bounds(bounds)
         return m
-    
+
     @staticmethod
-    def get_geopandas_map(geodataframe):
+    def get_geopandas_map(geodataframe, width=600, height=400):
         """Get GeoPandas map.
 
         Args:
@@ -157,14 +159,15 @@ class PlotUtil:
             pd.DataFrame: A map GeoPandas layers.
 
         """
-        m = folium.Map(width=600, height=400, tiles = "Stamen Terrain")
+        m = folium.Map(width=width, height=height, tiles="Stamen Terrain")
         folium.GeoJson(geodataframe.to_json(), name='hospital').add_to(m)
         ext = geodataframe.total_bounds
         m.fit_bounds([[ext[1], ext[0]], [ext[3], ext[2]]])
         return m
-    
+
     @staticmethod
-    def get_gdf_wms_map(gdf, layers_config):
+    def get_gdf_wms_map(gdf, layers_config,
+                        width=600, height=400, url=globals.INCORE_GEOSERVER_WMS_URL):
         """Get GDF (GeoDataFrame) and WMS map.
 
         Args:
@@ -175,15 +178,15 @@ class PlotUtil:
             obj: A folium map with layers.
 
         """
-        m = folium.Map(width=600, height=400, tiles="Stamen Terrain")
+        m = folium.Map(width=width, height=height, tiles="Stamen Terrain")
         folium.GeoJson(gdf.to_json(), name='hospital').add_to(m)
         bbox_all = gdf.total_bounds
-        url = 'http://incore2-geoserver.ncsa.illinois.edu:9999/geoserver/incore/wms'
+
         for layer in layers_config:
             wms_layer = folium.raster_layers.WmsTileLayer(url, name=layer['name'],
                                                           fmt='image/png',
                                                           transparent=True,
-                                                          layers='incore:'+layer['id'],
+                                                          layers='incore:' + layer['id'],
                                                           styles=layer['style'])
 
             wms_layer.add_to(m)

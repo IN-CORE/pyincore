@@ -28,8 +28,6 @@ class DataService:
             'data/api/datasets/')
         self.files_url = urllib.parse.urljoin(client.service_url,
             'data/api/files/')
-        self.spaces_url = urllib.parse.urljoin(client.service_url,
-            'data/api/spaces')
         self.base_earthquake_url = urllib.parse.urljoin(client.service_url,
             'hazard/api/earthquakes/')
         self.base_tornado_url = urllib.parse.urljoin(client.service_url,
@@ -88,8 +86,8 @@ class DataService:
         else:
             return local_filename
 
-    def get_datasets(self, datatype: str = None, title: str = None,
-                     creator: str = None, space: str = None):
+    def get_datasets(self, datatype: str = None, title: str = None, creator: str = None, skip: int = None,
+                     limit: int = None, space: str = None):
         url = self.base_url
         payload = {}
         if datatype is not None:
@@ -98,6 +96,10 @@ class DataService:
             payload['title'] = title
         if creator is not None:
             payload['creator'] = creator
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
         if space is not None:
             payload['space'] = space
 
@@ -171,11 +173,6 @@ class DataService:
 
         return local_filename
 
-    def get_spaces(self):
-        url = self.spaces_url
-        r = requests.get(url, headers=self.client.headers)
-        return r.json()
-
     def unzip_dataset(self, local_filename: str):
         foldername, file_extension = os.path.splitext(local_filename)
         # if it is not a zip file, no unzip
@@ -216,3 +213,15 @@ class DataService:
         r = requests.get(request_str, headers=client.headers)
 
         return r.json()['tornadoDatasetId']
+
+    def search_datasets(self, text: str, skip: int = None, limit: int = None):
+        url = urllib.parse.urljoin(self.base_url, "search")
+        payload = {"text": text}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+
+        r = requests.get(url, headers=self.client.headers, params=payload)
+
+        return r.json()
