@@ -165,7 +165,11 @@ class BuildingDamage(BaseAnalysis):
                 location = GeoUtil.get_location(building)
                 fragility_key = self.get_parameter("fragility_key")
                 local_fragility_set = fragility_set[fragility_key]
+                building_period = 0.0
                 if hazard_type == 'earthquake':
+                    num_stories = building['properties']['no_stories']
+                    building_period = BuildingUtil.get_building_period(num_stories, local_fragility_set)
+
                     # TODO include liquefaction and hazard uncertainty
                     hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
                     demand_units = local_fragility_set['demandUnits']
@@ -210,7 +214,7 @@ class BuildingDamage(BaseAnalysis):
                     else:
                         demand_type = hazard_demand_type
 
-                dmg_probability = AnalysisUtil.calculate_damage_json(local_fragility_set, hazard_val)
+                dmg_probability = AnalysisUtil.calculate_damage_json(local_fragility_set, hazard_val, building_period)
             else:
                 dmg_probability['immocc'] = 0.0
                 dmg_probability['lifesfty'] = 0.0
@@ -235,7 +239,6 @@ class BuildingDamage(BaseAnalysis):
         except Exception as e:
             # This prints the type, value and stacktrace of error being handled.
             traceback.print_exc()
-            print()
             raise e
 
     def get_spec(self):
