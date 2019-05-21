@@ -4,15 +4,12 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
 import collections
 import concurrent.futures
 import traceback
+import string
 from itertools import repeat
-
 from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
-from pyincore.analyses.roaddamage.roadutil import RoadUtil
-
 
 class RoadDamage(BaseAnalysis):
     """Road Damage Analysis calculates the probability of road damage based on
@@ -23,6 +20,8 @@ class RoadDamage(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
 
     """
+    DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
+
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
@@ -34,13 +33,19 @@ class RoadDamage(BaseAnalysis):
         # Road dataset
         road_set = self.get_input_dataset("roads").get_inventory_reader()
 
+        # Get Fragility key
+        fragility_key = self.get_parameter("fragility_key")
+        if fragility_key is None:
+            fragility_key = DEFAULT_FRAGILITY_KEY
+
+        # Get damage ratios
         dmg_ratio_csv = self.get_input_dataset("dmg_ratios").get_csv_reader()
         dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(dmg_ratio_csv)
 
         # Get hazard input
         hazard_dataset_id = self.get_parameter("hazard_id")
 
-        # Hazard type of the exposure
+        # Get hazard type
         hazard_type = self.get_parameter("hazard_type")
 
         # Hazard Uncertainty
@@ -53,14 +58,12 @@ class RoadDamage(BaseAnalysis):
         if self.get_parameter("use_liquefaction") is not None:
             use_liquefaction = self.get_parameter("use_liquefaction")
 
-        # Get Fragility key
-        fragility_key = self.get_parameter("fragility_key")
-        if fragility_key is None:
-            fragility_key = RoadUtil.DEFAULT_FRAGILITY_KEY
+        # Get geology dataset for liquefaction
+        geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
         user_defined_cpu = 1
 
-        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
+        if self.get_parameter("num_cpu") is not None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
         num_workers = AnalysisUtil.determine_parallelism_locally(self, len(road_set), user_defined_cpu)
@@ -73,10 +76,9 @@ class RoadDamage(BaseAnalysis):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers,
-                                                         inventory_args, repeat(hazard_type), repeat(hazard_dataset_id),
-                                                         repeat(dmg_ratio_tbl), repeat(fragility_key),
-                                                         repeat(use_hazard_uncertainty), repeat(use_liquefaction))
+        results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers, inventory_args,
+                                                     repeat(hazard_type), repeat(hazard_dataset_id), repeat(dmg_ratio_tbl), repeat(geology_dataset_id),
+                                                     repeat(fragility_key), repeat(use_liquefaction))
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -94,6 +96,7 @@ class RoadDamage(BaseAnalysis):
             list: A list of ordered dictionaries with road damage values and other data/metadata.
 
         """
+
         output = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
             for ret in executor.map(function_name, *args):
@@ -101,8 +104,8 @@ class RoadDamage(BaseAnalysis):
 
         return output
 
-    def road_damage_analysis_bulk_input(self, roads, hazard_type, hazard_dataset_id, dmg_ratio_tbl, fragility_key,
-                                        use_hazard_uncertainty, use_liquefaction):
+    def road_damage_analysis_bulk_input(self, roads, hazard_type, hazard_dataset_id, dmg_ratio_tbl, geology_dataset_id,
+                                        fragility_key, use_liquefaction):
         """Run analysis for multiple roads.
 
         Args:
@@ -110,9 +113,8 @@ class RoadDamage(BaseAnalysis):
             hazard_type (str): A hazard type of the hazard exposure.
             hazard_dataset_id (str): An id of the hazard exposure.
             dmg_ratio_tbl (obj): A damage ratio table, including weights to compute mean damage.
+            geology_dataset_id (str): An id of the geology for use in liquefaction.
             fragility_key (str): Fragility key describing the type of fragility.
-            use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty when computing damage,
-                False otherwise.
             use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
                 False otherwise.
 
@@ -120,25 +122,23 @@ class RoadDamage(BaseAnalysis):
             list: A list of ordered dictionaries with road damage values and other data/metadata.
 
         """
+
         result = []
-        fragility_key = self.get_parameter("fragility_key")
+        fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), roads, fragility_key)
 
-        fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), roads,
-                                                                          fragility_key)
-
+        if geology_dataset_id is not None:
+            fragility_sets_liq = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), roads,
+                                                                   fragility_key)
         for road in roads:
-            fragility_set = dict()
-            if road["id"] in fragility_sets[fragility_key]:
-                fragility_set[fragility_key] = fragility_sets[fragility_key][road["id"]]
-
-            result.append(self.road_damage_analysis(road, dmg_ratio_tbl, fragility_set, hazard_dataset_id,
-                                                        hazard_type, use_hazard_uncertainty, use_liquefaction))
+            if road["id"] in fragility_sets.keys():
+                result.append(self.road_damage_analysis(road, dmg_ratio_tbl, fragility_sets[road["id"]],
+                                                        hazard_dataset_id, hazard_type,
+                                                        geology_dataset_id, use_liquefaction))
 
         return result
 
-    def road_damage_analysis(self, road, dmg_ratio_tbl, fragility_set, hazard_dataset_id, hazard_type,
-                             use_hazard_uncertainty, use_liquefaction):
+    def road_damage_analysis(self, road, dmg_ratio_tbl, fragility_set, hazard_dataset_id,
+                             hazard_type, geology_dataset_id, use_liquefaction):
         """Calculates road damage results for a single section of road.
 
         Args:
@@ -147,11 +147,15 @@ class RoadDamage(BaseAnalysis):
             fragility_set (obj): A JSON description of fragility assigned to the road.
             hazard_dataset_id (str): A hazard dataset to use.
             hazard_type (str): A hazard type of the hazard exposure.
+            geology_dataset_id (str): An id of the geology for use in liquefaction.
+            use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
+                False otherwise.
 
         Returns:
             OrderedDict: A dictionary with road damage values and other data/metadata.
 
         """
+
         try:
             road_results = collections.OrderedDict()
 
@@ -166,26 +170,41 @@ class RoadDamage(BaseAnalysis):
             mean_damage_dev['mdamagedev'] = 0.0
             hazard_std_dev = 0.0
 
+            road_results['guid'] = road['properties']['guid']
+
             if bool(fragility_set):
                 location = GeoUtil.get_location(road)
                 fragility_key = self.get_parameter("fragility_key")
-                local_fragility_set = fragility_set[fragility_key]
+                #local_fragility_set = fragility_set[fragility_key]
+                demand_type = fragility_set['demandType']
                 if hazard_type == 'earthquake':
-                    # TODO include liquefaction and hazard uncertainty
-                    demand_units = local_fragility_set['demandUnits']
+                    demand_units = fragility_set['demandUnits']
                     #hazard_demand_type = local_fragility_set['demandType']
                     # Hardcoded to PGA currently, need to update
                     hazard_demand_type = "PGA"
                     hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
                                                                             demand_units, location.y, location.x)
-                    # Hardcoding this to see if the error is my analysis or the hazard value
-                    #hazard_val = 126.38
-                    demand_type = local_fragility_set['demandType']
+                    if use_liquefaction and geology_dataset_id is not None:
+                        location_str = str(location.y) + "," + str(location.x)
+                        demand_units_liq = fragility_set['demandUnits']
+                        liquefaction_demand_type = fragility_set['demandType']
+                        liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, geology_dataset_id,
+                                                                              demand_units_liq, [location_str])
+                        if liquefaction_demand_type in liquefaction[0]:
+                            liquefaction_val = liquefaction[0][liquefaction_demand_type]
+                        elif liquefaction_demand_type.lower() in liquefaction[0]:
+                            liquefaction_val = liquefaction[0][liquefaction_demand_type.lower()]
+                        elif liquefaction_demand_type.upper() in liquefaction[0]:
+                            liquefaction_val = liquefaction[0][liquefaction_demand_type.upper]
+                        else:
+                            liquefaction_val = 0.0
+                        dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, liquefaction_val)
+                        road_results['hazardval'] = liquefaction_val
+                    else:
+                        dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, hazard_val)
+                        road_results['hazardval'] = hazard_val
                 else:
                     print("Earthquake is the only hazard supported for road damage")
-
-                dmg_probability = RoadUtil.get_probability_of_damage(road, local_fragility_set, hazard_val,
-                                                                     hazard_std_dev ,use_liquefaction)
             else:
                 dmg_probability['immocc'] = 0.0
                 dmg_probability['lifesfty'] = 0.0
@@ -195,15 +214,17 @@ class RoadDamage(BaseAnalysis):
             mean_damage = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl, dmg_interval)
             mean_damage_dev = AnalysisUtil.calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg_interval,
                                                                                mean_damage['meandamage'])
+            likely_state = None
+            for state in dmg_ratio_tbl:
+                if float(state['LowerBound']) < mean_damage['meandamage'] < float(state['UpperBound']):
+                    likely_state = state['DamageState']
 
-            road_results['guid'] = road['properties']['guid']
             road_results.update(dmg_probability)
             road_results.update(dmg_interval)
             road_results.update(mean_damage)
             road_results.update(mean_damage_dev)
-
             road_results['hazardtype'] = demand_type
-            road_results['hazardval'] = hazard_val
+            road_results['expectval'] = likely_state
 
             return road_results
 
@@ -220,6 +241,7 @@ class RoadDamage(BaseAnalysis):
             obj: A JSON object of specifications of the road damage analysis.
 
         """
+
         return {
             'name': 'road-damage',
             'description': 'road damage analysis',

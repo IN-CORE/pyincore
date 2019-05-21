@@ -31,7 +31,7 @@ def run_with_base_class():
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
 
     uncertainty = False
-    liquefaction = False
+    liquefaction = True
     liq_fragility_key = "pgd"
 
     # Run Memphis earthquake road damage
