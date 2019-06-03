@@ -36,7 +36,7 @@ class RoadDamage(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            fragility_key = DEFAULT_FRAGILITY_KEY
+            fragility_key = self.DEFAULT_FRAGILITY_KEY
 
         # Get damage ratios
         dmg_ratio_csv = self.get_input_dataset("dmg_ratios").get_csv_reader()
@@ -126,9 +126,6 @@ class RoadDamage(BaseAnalysis):
         result = []
         fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), roads, fragility_key)
 
-        if geology_dataset_id is not None:
-            fragility_sets_liq = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), roads,
-                                                                   fragility_key)
         for road in roads:
             if road["id"] in fragility_sets.keys():
                 result.append(self.road_damage_analysis(road, dmg_ratio_tbl, fragility_sets[road["id"]],
@@ -174,8 +171,6 @@ class RoadDamage(BaseAnalysis):
 
             if bool(fragility_set):
                 location = GeoUtil.get_location(road)
-                fragility_key = self.get_parameter("fragility_key")
-                #local_fragility_set = fragility_set[fragility_key]
                 demand_type = fragility_set['demandType']
                 if hazard_type == 'earthquake':
                     demand_units = fragility_set['demandUnits']
@@ -287,12 +282,6 @@ class RoadDamage(BaseAnalysis):
                     'required': False,
                     'description': 'Liquefaction geology/susceptibility dataset id. '
                                    'If not provided, liquefaction will be ignored',
-                    'type': str
-                },
-                {
-                    'id': 'liquefaction_fragility_key',
-                    'required': False,
-                    'description': 'Fragility key to use in liquefaction mapping dataset',
                     'type': str
                 },
                 {
