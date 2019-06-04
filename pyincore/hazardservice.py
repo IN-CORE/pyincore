@@ -21,6 +21,9 @@ class HazardService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
+        self.session = requests.Session()
+        self.session.headers.update(client.headers)
+
         self.base_earthquake_url = urllib.parse.urljoin(client.service_url,
                                                         'hazard/api/earthquakes/')
         self.base_tornado_url = urllib.parse.urljoin(client.service_url,
@@ -68,7 +71,7 @@ class HazardService:
                                    hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units,
                    'point': points}
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         return response
