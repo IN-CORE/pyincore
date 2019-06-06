@@ -11,7 +11,6 @@ import os
 import re
 import urllib
 import zipfile
-import requests
 
 import pyincore.globals as pyglobals
 from pyincore import IncoreClient
@@ -24,6 +23,7 @@ class DataService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
+        self.session = client.session
         self.base_url = urllib.parse.urljoin(client.service_url,
             'data/api/datasets/')
         self.files_url = urllib.parse.urljoin(client.service_url,
@@ -36,32 +36,32 @@ class DataService:
     def get_dataset_metadata(self, dataset_id: str):
         # construct url with service, dataset api, and id
         url = urllib.parse.urljoin(self.base_url, dataset_id)
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         return r.json()
 
     def get_dataset_files_metadata(self, dataset_id: str):
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/files')
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         return r.json()
 
     def get_dataset_file_metadata(self, dataset_id: str, file_id: str):
         url = urllib.parse.urljoin(self.base_url,
             dataset_id + "/files/" + file_id)
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         return r.json()
 
     def get_dataset_blob(self, dataset_id: str, join=None):
         # construct url for file download
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/blob')
         if join is None:
-            r = requests.get(url, headers=self.client.headers, stream=True)
+            r = self.session.get(url, stream=True)
         else:
             payload = {}
             if join is True:
                 payload['join'] = 'true'
             elif join is False:
                 payload['join'] = 'false'
-            r = requests.get(url, headers=self.client.headers, stream=True,
+            r = self.session.get(url, stream=True,
                 params=payload)
 
         # extract filename
@@ -103,14 +103,14 @@ class DataService:
         if space is not None:
             payload['space'] = space
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         # need to handle there is no datasets
         return r.json()
 
     def create_dataset(self, properties: dict):
         payload = {'dataset': json.dumps(properties)}
         url = self.base_url
-        r = requests.post(url, files=payload, headers=self.client.headers)
+        r = self.session.post(url, files=payload)
         return r.json()
 
     def update_dataset(self, dataset_id, property_name: str,
@@ -118,7 +118,7 @@ class DataService:
         url = urllib.parse.urljoin(self.base_url, dataset_id)
         payload = {'update': json.dumps({"property name": property_name,
                                          "property value": property_value})}
-        r = requests.put(url, files=payload, headers=self.client.headers)
+        r = self.session.put(url, files=payload)
         return r.json()
 
     def add_files_to_dataset(self, dataset_id: str, filepaths: list):
@@ -129,7 +129,7 @@ class DataService:
             tuple = ('file', file)
             listfiles.append(tuple)
 
-        r = requests.post(url, files=listfiles, headers=self.client.headers)
+        r = self.session.post(url, files=listfiles)
 
         # close files
         for tuple in listfiles:
@@ -138,23 +138,23 @@ class DataService:
 
     def delete_dataset(self, dataset_id: str):
         url = urllib.parse.urljoin(self.base_url, dataset_id)
-        r = requests.delete(url, headers=self.client.headers)
+        r = self.session.delete(url)
         return r.json()
 
     def get_files(self):
         url = self.files_url
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         return r.json()
 
     def get_file_metadata(self, file_id: str):
         url = urllib.parse.urljoin(self.files_url, file_id)
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         return r.json()
 
     def get_file_blob(self, file_id: str):
         # construct url for file download
         url = urllib.parse.urljoin(self.files_url, file_id + '/blob')
-        r = requests.get(url, headers=self.client.headers, stream=True)
+        r = self.session.get(url, stream=True)
 
         # extract filename
         disposition = r.headers['content-disposition']
@@ -195,22 +195,21 @@ class DataService:
         request_str_zip = request_str + '/blob'
 
         # obtain file name
-        r = requests.get(request_str, headers=self.client.headers)
+        r = self.session.get(request_str)
         first_filename = r.json()['fileDescriptors'][0]['filename']
         filename = os.path.splitext(first_filename)[0]
 
-        r = requests.get(request_str_zip, headers=self.client.headers,
-            stream=True)
+        r = self.session.get(request_str_zip, stream=True)
         z = zipfile.ZipFile(io.BytesIO(r.content))
         z.extractall(dirname)
         # print(r.status_code)
 
         return filename
 
-    def get_tornado_dataset_id_from_service(self, fileid, client):
+    def get_tornado_dataset_id_from_service(self, fileid):
         # dataset
         request_str = self.base_tornado_url + fileid
-        r = requests.get(request_str, headers=client.headers)
+        r = self.session.get(request_str)
 
         return r.json()['tornadoDatasetId']
 
@@ -222,6 +221,6 @@ class DataService:
         if limit is not None:
             payload['limit'] = limit
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
 
         return r.json()

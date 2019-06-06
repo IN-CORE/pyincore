@@ -3,8 +3,8 @@ from pyincore.analyses.buildingdamage import BuildingDamage
 
 
 def run_with_base_class():
-    #client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
-    client = IncoreClient()
+    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    #client = IncoreClient()
 
     # EQ Building Dataset - Memphis Hospitals
     bldg_dataset_id = "5a284f0bc7d30d13bc081a28"

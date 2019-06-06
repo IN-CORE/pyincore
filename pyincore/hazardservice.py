@@ -8,7 +8,6 @@
 import urllib
 
 import numpy
-import requests
 from typing import List
 
 from pyincore import IncoreClient
@@ -21,8 +20,7 @@ class HazardService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.session = requests.Session()
-        self.session.headers.update(client.headers)
+        self.session = client.session
 
         self.base_earthquake_url = urllib.parse.urljoin(client.service_url,
                                                         'hazard/api/earthquakes/')
@@ -43,14 +41,14 @@ class HazardService:
         if space is not None:
             payload['space'] = space
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         return response
 
     def get_earthquake_hazard_metadata(self, hazard_id: str):
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id)
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         response = r.json()
 
         return response
@@ -88,7 +86,7 @@ class HazardService:
                    'minX': bbox[0][0], 'minY': bbox[0][1],
                    'maxX': bbox[1][0], 'maxY': bbox[1][1],
                    'gridSpacing': grid_spacing}
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         # TODO: need to handle error with the request
@@ -111,7 +109,7 @@ class HazardService:
                                    hazard_id + "/liquefaction/values")
         payload = {'demandUnits': demand_units,
                    'geologyDataset': geology_dataset_id, 'point': points}
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
         return response
 
@@ -125,7 +123,7 @@ class HazardService:
                    "siteLat": site_lat, "siteLong": site_long,
                    "demandType": demand_type, "hazard": hazard,
                    "defaultSiteClass": default_site_class}
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
         return response
 
@@ -134,7 +132,7 @@ class HazardService:
 
     def get_supported_earthquake_models(self):
         url = urllib.parse.urljoin(self.base_earthquake_url, 'models')
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         response = r.json()
 
         return response
@@ -156,7 +154,7 @@ class HazardService:
         for file_path in file_paths:
             eq_data.add(('file', open(file_path, 'rb')))
 
-        r = requests.post(url, files=eq_data, headers=self.client.headers)
+        r = self.session.post(url, files=eq_data)
         response = r.json()
         return response
 
@@ -168,7 +166,7 @@ class HazardService:
         if limit is not None:
             payload['limit'] = limit
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
 
         return r.json()
 
@@ -182,14 +180,14 @@ class HazardService:
         if space is not None:
             payload['space'] = space
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         return response
 
     def get_tornado_hazard_metadata(self, hazard_id: str):
         url = urllib.parse.urljoin(self.base_tornado_url, hazard_id)
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         response = r.json()
 
         return response
@@ -209,7 +207,7 @@ class HazardService:
                                    hazard_id + "/values")
         payload = {'demandUnits': demand_units, 'point': points,
                    'simulation': simulation}
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         return response
@@ -231,7 +229,7 @@ class HazardService:
         for file_path in file_paths:
             tornado_data.add(('file', open(file_path, 'rb')))
 
-        r = requests.post(url, files=tornado_data, headers=self.client.headers)
+        r = self.session.post(url, files=tornado_data)
         response = r.json()
         return response
 
@@ -243,7 +241,7 @@ class HazardService:
         if limit is not None:
             payload['limit'] = limit
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
 
         return r.json()
 
@@ -257,14 +255,14 @@ class HazardService:
         if space is not None:
             payload['space'] = space
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         return response
 
     def get_tsunami_hazard_metadata(self, hazard_id: str):
         url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id)
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         response = r.json()
 
         return response
@@ -285,7 +283,7 @@ class HazardService:
                                    hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units,
                    'point': points}
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         return response
@@ -306,7 +304,7 @@ class HazardService:
         for file_path in file_paths:
             tsunami_data.add(('file', open(file_path, 'rb')))
 
-        r = requests.post(url, files=tsunami_data, headers=self.client.headers)
+        r = self.session.post(url, files=tsunami_data)
         response = r.json()
         return response
 
@@ -318,7 +316,7 @@ class HazardService:
         if limit is not None:
             payload['limit'] = limit
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
 
         return r.json()
 
@@ -326,7 +324,7 @@ class HazardService:
         url = self.base_hurricanewf_url
         headers = {'Content-type': 'application/json'}
         new_headers = {**self.client.headers, **headers}
-        r = requests.post(url, data=hurr_wf_inputs, headers=new_headers)
+        r = self.session.post(url, data=hurr_wf_inputs, headers=new_headers)
         response = r.json()
 
         return response
@@ -347,14 +345,14 @@ class HazardService:
         if space is not None:
             payload['space'] = space
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         return response
 
     def get_hurricanewf_metadata(self, hazard_id):
         url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id)
-        r = requests.get(url, headers=self.client.headers)
+        r = self.session.get(url)
         response = r.json()
 
         return response
@@ -365,7 +363,7 @@ class HazardService:
                                    hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units,
                    'point': points}
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         return response
@@ -381,7 +379,7 @@ class HazardService:
                    "demandType": demand_type, "demandUnits": demand_units,
                    "resolution": resolution, "gridPoints": grid_points,
                    "reductionType": rf_method}
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
         response = r.json()
 
         return response
@@ -394,6 +392,6 @@ class HazardService:
         if limit is not None:
             payload['limit'] = limit
 
-        r = requests.get(url, headers=self.client.headers, params=payload)
+        r = self.session.get(url, params=payload)
 
         return r.json()
