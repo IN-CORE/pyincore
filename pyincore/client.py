@@ -11,6 +11,7 @@ import requests
 
 import pyincore.globals as pyglobals
 
+logger = pyglobals.LOGGER
 
 class IncoreClient:
     """Incore service client class. It contains token and service root url.
@@ -35,11 +36,12 @@ class IncoreClient:
                     creds = f.read().splitlines()
                     username = creds[0]
                     password = creds[1]
+
             except IndexError:
-                print("ERROR: Please check if the file " + creds_file + " has credentials in the correct format")
+                logger.exception("Please check if the file " + creds_file + " has credentials in the correct format")
                 raise
             except OSError:
-                print("ERROR: Please check if the file " + creds_file + " exists with credentials")
+                logger.exception("Please check if the file " + creds_file + " exists with credentials")
                 raise
 
         self.user = username
@@ -54,7 +56,7 @@ class IncoreClient:
             self.headers = {'auth-user': self.user, 'auth-token': self.auth_token, 'Authorization': ''}
             self.session.headers.update(self.headers)
         else:
-            print("ERROR: Authentication Failed. Please check the credentials and try again")
+            logger.warning("Authentication Failed. Please check the credentials and try again")
 
     def retrieve_token(self, username: str, password: str):
         if self.auth_token is not None:
@@ -63,7 +65,7 @@ class IncoreClient:
         b64_value = base64.b64encode(bytes('%s:%s' % (username, password), "utf-8"))
         r = requests.get(url, headers={"Authorization": "LDAP %s" % b64_value.decode('ascii')})
         if str(r.status_code).startswith('5'):
-            print("ERROR: Authentication API call failed. Something is wrong with the authentication server")
+            logger.critical("Authentication API call failed. Something is wrong with the authentication server")
         else:
             return r.json()
 
