@@ -16,6 +16,9 @@ def run_with_base_class():
     # Building damage ratios
     dmg_ratio_id = "5a284f2ec7d30d13bc08209a"
 
+    # 5a284f0bc7d30d13bc081a28  5kb
+    # 5bcf2fcbf242fe047ce79dad 300kb
+    # 5a284f37c7d30d13bc08219c 20mb
     bldg_dataset_id = "5a284f0bc7d30d13bc081a28"
 
     # Earthquake mapping

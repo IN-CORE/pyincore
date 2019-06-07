@@ -47,10 +47,12 @@ class IncoreClient:
         self.headers = {}
         self.status = 'fail'
         response = self.retrieve_token(self.user, password)
+        self.session = requests.session()
         if 'result' in response:
             self.auth_token = response['auth-token']
             self.status = 'success'
             self.headers = {'auth-user': self.user, 'auth-token': self.auth_token, 'Authorization': ''}
+            self.session.headers.update(self.headers)
         else:
             print("ERROR: Authentication Failed. Please check the credentials and try again")
 
@@ -86,3 +88,6 @@ class InsecureIncoreClient:
         self.user = username
         self.status = 'success'
         self.headers = {'X-Credential-Username': self.user}
+        self.session = requests.session()
+        self.session.headers.update(self.headers)
+
