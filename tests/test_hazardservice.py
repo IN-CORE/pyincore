@@ -278,14 +278,14 @@ def test_get_hurricanewf_metadata_list(hazardsvc):
     assert len(response) > 0 and 'id' in response[0].keys()
 
 
-def test_get_hurricanewf_values(hazardsvc):
-    if hazardsvc is None:
-        assert False, ".incorepw does not exist!"
-    hvals = hazardsvc.get_hurricanewf_values("5bd3d6a1f242fe0cf903cb0e",
-                                             "3s",
-                                             "kmph", ["28,-81"])
-
-    assert (hvals[0]['hazardValue'] == 52.32231147889873)
+# def test_get_hurricanewf_values(hazardsvc):
+#     if hazardsvc is None:
+#         assert False, ".incorepw does not exist!"
+#     hvals = hazardsvc.get_hurricanewf_values("5bd3d6a1f242fe0cf903cb0e",
+#                                              "3s",
+#                                              "kmph", ["28,-81"])
+#
+#     assert (hvals[0]['hazardValue'] == 52.32231147889873)
 
 
 def test_get_hurricanewf_json(hazardsvc):
