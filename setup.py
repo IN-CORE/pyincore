@@ -14,7 +14,10 @@ setup(
     name='pyincore',
     version='0.3.0',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
-
+    include_package_data=True,
+    package_data={
+        '': ['*.ini']
+    },
     description='IN-CORE analysis tool python package',
     long_description=("pyIncore is a Python package to analyze and visualize various hazard "
                       "(earthquake, tornado, hurricane etc.) scenarios developed "
@@ -34,7 +37,7 @@ setup(
         "owslib>=0.17.1",
         "pandas>=0.24.1",
         "plotly>=3.6.0",
-        "py-expression-eval>=0.3.6",
+        "py-expression-eval>=0.3.5",
         "pyproj>=1.9.6",
         "pyyaml>=3.13",
         "rasterio>=1.0.18",
@@ -42,9 +45,9 @@ setup(
         "rtree>=0.8.3",
         "scipy>=1.2.0",
         "shapely>=1.6.4.post1",
-        "wikidata>=0.6.1",
         "wntr>=0.1.6",
-        "seaborn>=0.9.0"
+        "seaborn>=0.9.0",
+        "pytest>=3.9.0"
     ],
     python_requires=">=3.5",
     classifiers=[
