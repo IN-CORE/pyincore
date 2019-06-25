@@ -42,7 +42,6 @@ class FragilityService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.session = client.session
         self.base_frag_url = urllib.parse.urljoin(client.service_url,
                                                   'fragility/api/fragilities/')
         self.base_mapping_url = urllib.parse.urljoin(client.service_url,
@@ -82,7 +81,8 @@ class FragilityService:
         headers = {'Content-type': 'application/json'}
         # merge two headers
         new_headers = {**self.client.headers, **headers}
-        r = self.session.post(url, data=json, headers=new_headers)
+        kwargs = {"headers": new_headers}
+        r = self.client.post(url, data=json, **kwargs)
 
         response = r.json()
 
@@ -124,13 +124,12 @@ class FragilityService:
         if space is not None:
             payload['space'] = space
 
-        r = self.session.get(url, params=payload)
-
+        r = self.client.get(url, params=payload)
         return r.json()
 
     def get_fragility_set(self, fragility_id: str):
         url = urllib.parse.urljoin(self.base_frag_url, fragility_id)
-        r = self.session.get(url)
+        r = self.client.get(url)
 
         return r.json()
 
@@ -142,19 +141,17 @@ class FragilityService:
         if limit is not None:
             payload['limit'] = limit
 
-        r = self.session.get(url, params=payload)
-
+        r = self.client.get(url, params=payload)
         return r.json()
 
     def create_fragility_set(self, fragility_set: dict):
         url = self.base_frag_url
-        r = self.session.post(url, json=fragility_set)
-
+        r = self.client.post(url, json=fragility_set)
         return r.json()
 
     def create_fragility_mapping(self, mapping_set: dict):
         url = self.base_mapping_url
-        r = self.session.post(url, json=mapping_set)
+        r = self.client.post(url, json=mapping_set)
 
         return r.json()
 
@@ -176,12 +173,12 @@ class FragilityService:
         if space is not None:
             payload['space'] = space
 
-        r = self.session.get(url, params=payload)
+        r = self.client.get(url, params=payload)
 
         return r.json()
 
     def get_fragility_mapping(self, mapping_id):
         url = urllib.parse.urljoin(self.base_mapping_url, mapping_id)
-        r = self.session.get(url)
+        r = self.client.get(url)
 
         return r.json()
