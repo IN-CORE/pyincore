@@ -11,8 +11,8 @@ import math
 import os
 import csv
 import re
-from scipy.stats import norm, lognorm
-from py_expression_eval import Parser
+from scipy.stats import norm
+from pyincore import Parser
 from pyincore import DataService
 
 

@@ -37,7 +37,6 @@ setup(
         "owslib>=0.17.1",
         "pandas>=0.24.1",
         "plotly>=3.6.0",
-        "py-expression-eval>=0.3.5",
         "pyproj>=1.9.6",
         "pyyaml>=3.13",
         "rasterio>=1.0.18",
