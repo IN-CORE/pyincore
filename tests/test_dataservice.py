@@ -11,7 +11,8 @@ import pytest
 import os
 import re
 
-from pyincore import DataService, InsecureIncoreClient
+from pyincore import DataService, InsecureIncoreClient, Dataset, \
+    NetworkDataset, NetworkData
 from pyincore.globals import INCORE_API_DEV_INSECURE_URL
 
 
@@ -206,3 +207,34 @@ def test_get_file_blob(datasvc):
 #    response = datasvc.get_space("5c89287d5648c42a917569d8")
 #
 #    assert response.status_code == 200
+
+
+def test_create_network_dataset(datasvc):
+    # assert that we can't create a network dataset with an invalid path
+    dataset = Dataset(datasvc.get_dataset_metadata("5cf696b05648c477129bfc21"))
+    pytest.raises(TypeError, NetworkDataset, dataset)
+
+    # assert we can successfully create a network dataset
+    dataset = Dataset.from_data_service("5cf696b05648c477129bfc21", datasvc)
+    network_dataset = NetworkDataset(dataset)
+    assert network_dataset.graph is not None
+    assert network_dataset.link is not None
+    assert network_dataset.node is not None
+
+
+def test_create_network_data(datasvc):
+    dataset = Dataset.from_data_service("5cf696b05648c477129bfc21", datasvc)
+    network_dataset = NetworkDataset(dataset)
+
+    assert network_dataset.link is not None
+    assert network_dataset.node is not None
+    assert network_dataset.graph is not None
+
+    # test that we can't create a network data object with an invalid file path
+    with pytest.raises(FileNotFoundError):
+        NetworkData(network_type="", file_path="")
+    with pytest.raises(FileNotFoundError):
+        NetworkData(network_type="test-type", file_path="test-file")
+    with pytest.raises(FileNotFoundError):
+        NetworkData(network_type="test-type", file_path="test-file")
+
