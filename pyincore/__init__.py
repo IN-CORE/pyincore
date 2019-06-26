@@ -18,5 +18,7 @@ from pyincore.fragilityservice import FragilityService
 from pyincore.spaceservice import SpaceService
 from pyincore.utils.analysisutil import AnalysisUtil
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
+from pyincore.networkdata import NetworkData
+from pyincore.networkdataset import NetworkDataset
 from pyincore.baseanalysis import BaseAnalysis
 import pyincore.globals

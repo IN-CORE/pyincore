@@ -14,6 +14,7 @@ from pyincore import AnalysisUtil
 from pyincore import GeoUtil
 from pyincore import BaseAnalysis
 from pyincore.dataset import Dataset
+from pyincore.networkdataset import NetworkDataset
 
 
 class WaterNetworkDamage(BaseAnalysis):
@@ -226,12 +227,14 @@ class WaterNetworkDamage(BaseAnalysis):
         """
 
         # Water network dataset
-        water_pipelines_set = self.get_input_dataset("water_pipelines").get_inventory_reader()
+        water_network_set = NetworkDataset(self.get_input_dataset("water_network"))
+        water_facilities_set = water_network_set.node.get_inventory_reader()
+        water_pipelines_set = water_network_set.link.get_inventory_reader()
+
         water_pipelines = list(water_pipelines_set)
         for item in water_pipelines:
             item['id'] = item['properties']['id']
 
-        water_facilities_set = self.get_input_dataset("water_facilities").get_inventory_reader()
         water_facilities = list(water_facilities_set)
         for item in water_facilities:
             item['id'] = item['properties']['id']
@@ -346,17 +349,11 @@ class WaterNetworkDamage(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'water_facilities',
+                    'id': 'water_network',
                     'required': True,
-                    'description': 'Water Network Facility shapefile',
-                    'type': ['ergo:waterFacilityTopo'],
+                    'description':'',
+                    'type': ['incore:waternetwork']
                 },
-                {
-                    'id': 'water_pipelines',
-                    'required': True,
-                    'description': 'Water Network Pipeline shapefile',
-                    'type': ['ergo:buriedPipelineTopology','ergo:pipeline'],
-                }
             ],
             'output_datasets': [
                 {
