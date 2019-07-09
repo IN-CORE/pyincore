@@ -357,12 +357,12 @@ class HazardService:
 
         return response
 
-    def get_hurricanewf_values(self, hazard_id: str, demand_type: str,
-                               demand_units: str, points: List):
+    def get_hurricanewf_values(self, hazard_id: str, demand_type: str,demand_units: str,
+                               points: List, elevation: float = None, roughness: float = None):
         url = urllib.parse.urljoin(self.base_hurricanewf_url,
                                    hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units,
-                   'point': points}
+                   'point': points, 'elevation': elevation, 'roughness': roughness}
         r = self.client.get(url, params=payload)
         response = r.json()
 

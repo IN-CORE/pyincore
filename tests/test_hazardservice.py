@@ -282,8 +282,7 @@ def test_get_hurricanewf_values(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
     hvals = hazardsvc.get_hurricanewf_values("5cffdcf35648c404a6414f7e",
-                                             "3s",
-                                             "mph", ["28,-81"])
+                                             "3s", "mph", ["28,-81"], 10.0, 0.03)
 
     assert (pytest.approx(hvals[0]['hazardValue'], 1e-6) == 81.57440785011988)
 
