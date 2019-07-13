@@ -19,8 +19,11 @@ from pyincore import IncoreClient
 class DataService:
     """
     Data service client
-    """
 
+    Args:
+        client (IncoreClient): Service authentication.
+
+    """
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_url = urllib.parse.urljoin(client.service_url,
