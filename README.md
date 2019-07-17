@@ -24,16 +24,16 @@ We provide installation instructions for environment manager using [Miniconda](h
 - Download the latest [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/distribution/#download-section) installer.
 - Run the installer setup locally to avoid the need for administrator privileges.
 - Leave the default folder installation path. Do not add Anaconda to the PATH; however, you should register Anaconda as the default Python environment.
-Open up an Anaconda prompt from the Windows Start menu or Terminal, create Python environment (required for the `pyincore` example) and activate it
-        ```
-        conda create -n pyincore python=3
-        conda activate pyincore
-        ```
+Open up an Anaconda prompt from the Windows Start menu or Terminal, create Python environment (required for the `pyincore` example) and activate it:
+    ```
+    conda create -n pyincore python=3
+    conda activate pyincore
+    ```
         
 [**Python 3.5+**](https://www.python.org)
 
 - Anaconda/Miniconda will include Python (Anaconda also includes a collection of over 1,500+ open source packages), so installing Python first isn't needed. 
-- It is common to have more than one Python version installed on your computer. Make sure you are running the correct, Anaconda/Miniconda version of Python.
+- It is common to have more than one Python version installed on your computer. Make sure you are running the correct, Anaconda/Miniconda version of Python by running `python --version` and/or `import sys;sys.executable` in Python console.
     
 [**Jupyter notebook**](https://jupyter.org/) 
 
@@ -47,15 +47,14 @@ visualizations and documentation. Jupyter Notebook is already installed with Ana
  
 These steps will guide you on how to install both pyIncore and Jupyter notebook so you can develop your code.
 
-1.	Add [conda-forge](https://conda-forge.org/) package repository, conda-forge channel to your environment:
+1. Add [conda-forge](https://conda-forge.org/) package repository, a conda-forge channel to your environment:
     ```
     conda config –add channels conda-forge
     ```
 
-2. Add NCSA’s **pyincore** conda channel to your environment:
+2. Add NCSA’s **pyincore** channel to your environment:
     ```
     conda config --append channels https://username:password@incore2.ncsa.illinois.edu/conda/pyincore/
-
     ```
 
 3. From the Terminal (Mac/Linux) or Command Prompt (Windows) run:
@@ -87,7 +86,7 @@ and verify the installation by running it from your project folder. For details 
 to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running). If you have problems running notebooks, 
 contact us at **incore-dev@lists.illinois.edu**.
 
-- Start local **Jupyter notebook** by running the following command at the terminal or command prompt from a **Project folder**.:
+- Start local **Jupyter notebook** by running the following command at the terminal or command prompt from a **Project folder**:
     ```
     jupyter notebook
     ```
@@ -99,12 +98,12 @@ contact us at **incore-dev@lists.illinois.edu**.
     distribution however it has to be installed separately in your virtual environment 
     on Miniconda by running `conda install jupyter`.
 
-- Additionally, a user can run Jupyter notebook interactively in NCSA's [IN-CORE Lab](https://incore-jupyter.ncsa.illinois.edu/hub/login). (*coming soon*)
+- Additionally, a user can run Jupyter notebook interactively in NCSA's [IN-CORE Lab](https://incore-lab.ncsa.illinois.edu/hub/login).
 
 
 ## Documentation
 
-**pyIncore** documentation can be found on [IN-CORE server](http://incore2.ncsa.illinois.edu/).
+**pyIncore** documentation can be found on [IN-CORE server](https://incore2.ncsa.illinois.edu/).
 
 
 ## Acknowledgement
