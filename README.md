@@ -54,9 +54,10 @@ These steps will guide you on how to install both pyIncore and Jupyter notebook 
 
 2. Add NCSA’s **pyincore** channel to your environment:
     ```
-    conda config --append channels https://username:password@incore2.ncsa.illinois.edu/conda/pyincore/
+    conda config --append channels https://channel_credentials@incore2.ncsa.illinois.edu/conda/pyincore/
     ```
-
+    Contact us for details of `channel_credentials`.
+    
 3. From the Terminal (Mac/Linux) or Command Prompt (Windows) run:
     ```
     conda install pyincore
