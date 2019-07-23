@@ -18,9 +18,9 @@ class Client:
     def __init__(self):
         pass
 
-    def get(self, url: str, params=None, **kwargs):
+    def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         try:
-            r = self.session.get(url, params=params, **kwargs)
+            r = self.session.get(url, params=params, timeout=timeout, **kwargs)
             r.raise_for_status()
             return r
         except requests.exceptions.HTTPError:
@@ -37,9 +37,9 @@ class Client:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
-    def post(self, url: str, data=None, json=None, **kwargs):
+    def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
         try:
-            r = self.session.post(url, data=data, json=json, **kwargs)
+            r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
             r.raise_for_status()
             return r
         except requests.exceptions.HTTPError:
@@ -56,9 +56,9 @@ class Client:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
-    def put(self, url: str, data=None, **kwargs):
+    def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
         try:
-            r = self.session.put(url, data=data, **kwargs)
+            r = self.session.put(url, data=data, timeout=timeout, **kwargs)
             r.raise_for_status()
             return r
         except requests.exceptions.HTTPError:
@@ -75,9 +75,9 @@ class Client:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
-    def delete(self, url: str, **kwargs):
+    def delete(self, url: str, timeout=(30, 600), **kwargs):
         try:
-            r = self.session.delete(url, **kwargs)
+            r = self.session.delete(url, timeout=timeout, **kwargs)
             r.raise_for_status()
             return r
         except requests.exceptions.HTTPError:
