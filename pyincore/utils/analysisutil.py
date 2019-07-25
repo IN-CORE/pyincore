@@ -11,8 +11,8 @@ import math
 import os
 import csv
 import re
-from scipy.stats import norm, lognorm
-from py_expression_eval import Parser
+from scipy.stats import norm
+from pyincore import Parser
 from pyincore import DataService
 
 
@@ -66,30 +66,79 @@ class AnalysisUtil:
         return output
 
     @staticmethod
-    def calculate_damage_json(fragility_set, hazard):
+    def calculate_damage_json(fragility_set, hazard, period: float = 0.0):
+        """
+            Computes limit state probabilities.
+            Args:
+                fragility_set: JSON representing the set of fragility curves.
+                hazard: hazard value to compute probability for
+                period: period of the structure, if applicable
+
+            Returns: limit state probabilities
+
+        """
+
         fragility_curves = fragility_set['fragilityCurves']
         output = collections.OrderedDict()
 
         index = 0
         limit_state = ['immocc', 'lifesfty', 'collprev']
         for fragility_curve in fragility_curves:
-            median = float(fragility_curve['median'])
-            beta = float(fragility_curve['beta'])
-            # limit_state = fragility_curve['description']
             probability = float(0.0)
 
+            class_name = fragility_curve['className']
             if hazard > 0.0:
-                if (fragility_curve['curveType'] == 'Normal'):
-                    sp = (math.log(hazard) - math.log(median)) / beta
-                    probability = norm.cdf(sp)
-                elif (fragility_curve['curveType'] == "LogNormal"):
-                    x = (math.log(hazard) - median) / beta
-                    probability = norm.cdf(x)
+                # If there are other classes of fragilities they will need to be added here
+                if class_name in ['edu.illinois.ncsa.incore.service.fragility.models.PeriodBuildingFragilityCurve']:
+                    fs_param0 = fragility_curve['fsParam0']
+                    fs_param1 = fragility_curve['fsParam1']
+                    fs_param2 = fragility_curve['fsParam2']
+                    fs_param3 = fragility_curve['fsParam3']
+                    fs_param4 = fragility_curve['fsParam4']
+                    fs_param5 = fragility_curve['fsParam5']
+
+                    # If no period is provided, assumption is 0 since the user should check their data for missing
+                    # parameters (e.g. number of building stories).
+                    probability = AnalysisUtil.compute_period_building_fragility_value(hazard, period, fs_param0,
+                                                                                       fs_param1, fs_param2, fs_param3,
+                                                                                       fs_param4, fs_param5)
+                elif class_name in ['edu.illinois.ncsa.incore.service.fragility.models.PeriodStandardFragilityCurve',
+                                    'edu.illinois.ncsa.incore.service.fragility.models.StandardFragilityCurve']:
+                    median = float(fragility_curve['median'])
+                    beta = float(fragility_curve['beta'])
+
+                    if fragility_curve['curveType'] == 'Normal':
+                        sp = (math.log(hazard) - math.log(median)) / beta
+                        probability = norm.cdf(sp)
+                    elif fragility_curve['curveType'] == "LogNormal":
+                        x = (math.log(hazard) - median) / beta
+                        probability = norm.cdf(x)
+                else:
+                    # Should not reach this statement unless we find an unsupported fragility type
+                    print("Warning - Unsupported fragility type "+fragility_curve['className'])
 
             output[limit_state[index]] = probability
             index += 1
 
         return output
+
+    @staticmethod
+    def compute_period_building_fragility_value(hazard, period, a11_param, a12_param, a13_param, a14_param, a21_param,
+                                                a22_param):
+        # Assumption from Ergo BuildingLowPeriodSolver
+        cutoff_period = 0.87
+
+        probability = 0.0
+        if period < cutoff_period:
+            multiplier = cutoff_period - period
+            surface_eq = (math.log(hazard) - cutoff_period * a12_param + a11_param) / (
+                        a13_param + a14_param * cutoff_period)
+            probability = norm.cdf(surface_eq + multiplier * (math.log(hazard) - a21_param) / a22_param)
+        else:
+            probability = norm.cdf(
+                (math.log(hazard) - (a11_param + a12_param * period)) / (a13_param + a14_param * period))
+
+        return probability
 
     @staticmethod
     def calculate_damage_json2(fragility_set, hazard):

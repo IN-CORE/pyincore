@@ -9,13 +9,16 @@
 from pyincore.client import IncoreClient
 from pyincore.client import InsecureIncoreClient
 from pyincore.hazardservice import HazardService
+from pyincore.utils.expressioneval import Parser
 from pyincore.dataservice import DataService
-from pyincore.plotutil import PlotUtil
-from pyincore.geoutil import GeoUtil
+from pyincore.utils.plotutil import PlotUtil
+from pyincore.utils.geoutil import GeoUtil
 from pyincore.dataservice import DataService
 from pyincore.fragilityservice import FragilityService
 from pyincore.spaceservice import SpaceService
-from pyincore.analysisutil import AnalysisUtil
+from pyincore.utils.analysisutil import AnalysisUtil
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
+from pyincore.networkdata import NetworkData
+from pyincore.networkdataset import NetworkDataset
 from pyincore.baseanalysis import BaseAnalysis
 import pyincore.globals

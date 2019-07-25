@@ -8,11 +8,94 @@ import base64
 import os
 import urllib.parse
 import requests
-
 import pyincore.globals as pyglobals
 
+logger = pyglobals.LOGGER
 
-class IncoreClient:
+
+class Client:
+
+    def __init__(self):
+        pass
+
+    def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
+        try:
+            r = self.session.get(url, params=params, timeout=timeout, **kwargs)
+            r.raise_for_status()
+            return r
+        except requests.exceptions.HTTPError:
+            logger.error('HTTPError: The server returned a ' + str(r.status_code) + ' failure response code. You can '
+                         'find information about HTTP response status codes here: '
+                         'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status')
+            raise
+        except requests.exceptions.ConnectionError:
+            logger.error("ConnectionError: Failed to establish a connection with the server. "
+                         "This might be due to a refused connection. Please check that you are using the right URLs.")
+            raise
+        except requests.exceptions.RequestException:
+            logger.error("RequestException: There was an exception while trying to handle your request. "
+                         "Please go to the end of this message for more specific information about the exception.")
+            raise
+
+    def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
+        try:
+            r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
+            r.raise_for_status()
+            return r
+        except requests.exceptions.HTTPError:
+            logger.error('HTTPError: The server returned a ' + str(r.status_code) + ' failure response code. You can '
+                         'find information about HTTP response status codes here: '
+                         'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status')
+            raise
+        except requests.exceptions.ConnectionError:
+            logger.error("ConnectionError: Failed to establish a connection with the server. "
+                         "This might be due to a refused connection. Please check that you are using the right URLs.")
+            raise
+        except requests.exceptions.RequestException:
+            logger.error("RequestException: There was an exception while trying to handle your request. "
+                         "Please go to the end of this message for more specific information about the exception.")
+            raise
+
+    def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
+        try:
+            r = self.session.put(url, data=data, timeout=timeout, **kwargs)
+            r.raise_for_status()
+            return r
+        except requests.exceptions.HTTPError:
+            logger.error('HTTPError: The server returned a ' + str(r.status_code) + ' failure response code. You can '
+                         'find information about HTTP response status codes here: '
+                         'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status')
+            raise
+        except requests.exceptions.ConnectionError:
+            logger.error("ConnectionError: Failed to establish a connection with the server. "
+                         "This might be due to a refused connection. Please check that you are using the right URLs.")
+            raise
+        except requests.exceptions.RequestException:
+            logger.error("RequestException: There was an exception while trying to handle your request. "
+                         "Please go to the end of this message for more specific information about the exception.")
+            raise
+
+    def delete(self, url: str, timeout=(30, 600), **kwargs):
+        try:
+            r = self.session.delete(url, timeout=timeout, **kwargs)
+            r.raise_for_status()
+            return r
+        except requests.exceptions.HTTPError:
+            logger.error('HTTPError: The server returned a ' + str(r.status_code) + ' failure response code. You can '
+                         'find information about HTTP response status codes here: '
+                         'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status')
+            raise
+        except requests.exceptions.ConnectionError:
+            logger.error("ConnectionError: Failed to establish a connection with the server. "
+                         "This might be due to a refused connection. Please check that you are using the right URLs.")
+            raise
+        except requests.exceptions.RequestException:
+            logger.error("RequestException: There was an exception while trying to handle your request. "
+                         "Please go to the end of this message for more specific information about the exception.")
+            raise
+
+
+class IncoreClient(Client):
     """Incore service client class. It contains token and service root url.
 
     Args:
@@ -35,11 +118,12 @@ class IncoreClient:
                     creds = f.read().splitlines()
                     username = creds[0]
                     password = creds[1]
+
             except IndexError:
-                print("ERROR: Please check if the file " + creds_file + " has credentials in the correct format")
+                logger.exception("Please check if the file " + creds_file + " has credentials in the correct format")
                 raise
             except OSError:
-                print("ERROR: Please check if the file " + creds_file + " exists with credentials")
+                logger.exception("Please check if the file " + creds_file + " exists with credentials")
                 raise
 
         self.user = username
@@ -47,12 +131,14 @@ class IncoreClient:
         self.headers = {}
         self.status = 'fail'
         response = self.retrieve_token(self.user, password)
-        if 'result' in response:
+        self.session = requests.session()
+        if response is not None and 'result' in response:
             self.auth_token = response['auth-token']
             self.status = 'success'
             self.headers = {'auth-user': self.user, 'auth-token': self.auth_token, 'Authorization': ''}
+            self.session.headers.update(self.headers)
         else:
-            print("ERROR: Authentication Failed. Please check the credentials and try again")
+            logger.warning("Authentication Failed. Please check the credentials and try again")
 
     def retrieve_token(self, username: str, password: str):
         if self.auth_token is not None:
@@ -61,12 +147,12 @@ class IncoreClient:
         b64_value = base64.b64encode(bytes('%s:%s' % (username, password), "utf-8"))
         r = requests.get(url, headers={"Authorization": "LDAP %s" % b64_value.decode('ascii')})
         if str(r.status_code).startswith('5'):
-            print("ERROR: Authentication API call failed. Something is wrong with the authentication server")
+            logger.critical("Authentication API call failed. Something is wrong with the authentication server")
         else:
             return r.json()
 
 
-class InsecureIncoreClient:
+class InsecureIncoreClient(Client):
     """Incore service client class. It contains token and service root url.
 
     Args:
@@ -86,3 +172,5 @@ class InsecureIncoreClient:
         self.user = username
         self.status = 'success'
         self.headers = {'X-Credential-Username': self.user}
+        self.session = requests.session()
+        self.session.headers.update(self.headers)

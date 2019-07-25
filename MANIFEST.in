@@ -1,0 +1,2 @@
+include *.ini
+recursive-include pyincore *.ini
