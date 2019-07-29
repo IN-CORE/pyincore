@@ -149,6 +149,7 @@ class PipelineDamage(BaseAnalysis):
                         liq_fragility_set = fragility_sets_liq[pipeline["id"]]
 
                     result.append(self.pipeline_damage_analysis(pipeline,
+                                                                hazard_type,
                                                                 fragility_sets[
                                                                     pipeline[
                                                                         "id"]],
@@ -160,9 +161,10 @@ class PipelineDamage(BaseAnalysis):
             for pipeline in pipelines:
                 if pipeline["id"] in fragility_sets.keys():
                     liq_fragility_set = None
-                    geology_dataset_id = None
+                    geology_dataset_id = ""
                     use_liquefaction = False
                     result.append(self.pipeline_damage_analysis(pipeline,
+                                                                hazard_type,
                                                                 fragility_sets[
                                                                     pipeline[
                                                                         "id"]],
@@ -173,7 +175,7 @@ class PipelineDamage(BaseAnalysis):
 
         return result
 
-    def pipeline_damage_analysis(self, pipeline, fragility_set,
+    def pipeline_damage_analysis(self, pipeline, hazard_type, fragility_set,
                                  fragility_set_liq, hazard_dataset_id,
                                  geology_dataset_id, use_liquefaction):
         """Run pipeline damage for a single pipeline.
@@ -210,9 +212,22 @@ class PipelineDamage(BaseAnalysis):
             location = GeoUtil.get_location(pipeline)
 
             # Get PGV hazard from hazardsvc
-            hazard_val = self.hazardsvc.get_earthquake_hazard_value(
-                hazard_dataset_id, demand_type, demand_units,
-                location.y, location.x)
+            if hazard_type == 'earthquake':
+                hazard_val = self.hazardsvc.get_earthquake_hazard_value(
+                    hazard_dataset_id, demand_type, demand_units,
+                    location.y, location.x)
+            elif hazard_type == 'tsunami':
+                hazard_val = self.hazardsvc.get_tsunami_hazard_value(hazard_dataset_id,
+                                                                      demand_type,
+                                                                      demand_units,
+                                                                      location.y, location.x)
+
+                # Sometimes the geotiffs give large negative values for out of bounds instead of 0
+                if hazard_val <= 0.0:
+                    hazard_val = 0.0
+
+            # TODO: throw error if other hazard type
+
             diameter = PipelineUtil.get_pipe_diameter(pipeline)
             fragility_vars = {'x': hazard_val, 'y': diameter}
             pgv_repairs = AnalysisUtil.compute_custom_limit_state_probability(
