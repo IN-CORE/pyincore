@@ -384,23 +384,3 @@ class PipelineDamage(BaseAnalysis):
                 }
             ]
         }
-
-if __name__ == "__main__":
-
-    from pyincore.client import InsecureIncoreClient
-
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
-
-    # Create pipeline damage
-    pipeline_dmg = PipelineDamage(client)
-    pipeline_dmg.load_remote_input_dataset("pipeline", "5d2666b5b9219c3c5595ee65")
-    pipeline_dmg.set_parameter("result_name", "seaside_tsunami_pipeline_result")
-    pipeline_dmg.set_parameter("mapping_id", "5d320a87b9219c6d66398b45")
-    pipeline_dmg.set_parameter("hazard_type", "tsunami")
-    pipeline_dmg.set_parameter("hazard_id", "5bc9ea68f7b08533c7e610dd")
-    pipeline_dmg.set_parameter("use_liquefaction", False)
-    pipeline_dmg.set_parameter("fragility_key", "Non-Retrofit inundationDepth Fragility ID Code")
-    pipeline_dmg.set_parameter("num_cpu", 4)
-
-    # Run bridge damage analysis
-    result = pipeline_dmg.run_analysis()
