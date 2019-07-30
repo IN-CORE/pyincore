@@ -15,6 +15,7 @@ logger = pyglobals.LOGGER
 
 class Client:
     """Incore service Client class. It handles connection to the server with INCORE services and user authentication."""
+
     def __init__(self):
         pass
 
@@ -24,7 +25,8 @@ class Client:
         Args:
             url (str): Service url.
             params (obj): Session parameters.
-            kwargs: external parameters.
+            timeout (int): Session timeout.
+            **kwargs: A dictionary of external parameters.
 
         Returns:
             obj: HTTP response.
@@ -56,8 +58,9 @@ class Client:
         Args:
             url (str): Service url.
             data (obj): Data to be posted on the server.
-            json (obj): Description of the data, metadata json
-            kwargs: external parameters.
+            json (obj): Description of the data, metadata json.
+            timeout (int): Session timeout.
+            **kwargs: A dictionary of external parameters.
 
         Returns:
             obj: HTTP response.
@@ -88,7 +91,8 @@ class Client:
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
-            kwargs: external parameters.
+            timeout (int): Session timeout.
+            **kwargs: A dictionary of external parameters.
 
         Returns:
             obj: HTTP response.
@@ -119,7 +123,8 @@ class Client:
 
         Args:
             url (str): Service url.
-            kwargs: external parameters.
+            timeout (int): Session timeout.
+            **kwargs: A dictionary of external parameters.
 
         Returns:
             obj: HTTP response.

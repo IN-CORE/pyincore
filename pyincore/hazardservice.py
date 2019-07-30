@@ -14,10 +14,12 @@ from pyincore import IncoreClient
 
 
 class HazardService:
-    """
-    Hazard service client
-    """
+    """Hazard service client
 
+    Args:
+        client (IncoreClient): Service authentication.
+
+    """
     def __init__(self, client: IncoreClient):
         self.client = client
 
@@ -31,6 +33,17 @@ class HazardService:
                                                          'hazard/api/hurricaneWindfields/')
 
     def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
+        """Function to retrieve earthquake metadata from hazard service. Hazard API endpoint is called.
+
+        Args:
+            skip (int):
+            limit (int):
+            space (str):
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = self.base_earthquake_url
         payload = {}
         if skip is not None:

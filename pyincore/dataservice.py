@@ -18,7 +18,7 @@ from pyincore import IncoreClient
 
 class DataService:
     """
-    Data service client
+    Data service client.
 
     Args:
         client (IncoreClient): Service authentication.
@@ -36,23 +36,61 @@ class DataService:
             'hazard/api/tornadoes/')
 
     def get_dataset_metadata(self, dataset_id: str):
+        """Function to retrieve metadata from data service. Dataset API endpoint is called.
+
+        Args:
+            dataset_id (str): Id of a dataset.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         # construct url with service, dataset api, and id
         url = urllib.parse.urljoin(self.base_url, dataset_id)
         r = self.client.get(url)
         return r.json()
 
     def get_dataset_files_metadata(self, dataset_id: str):
+        """Function to retrieve metadata of all files associated with the dataset. Files API endpoint is called.
+
+        Args:
+            dataset_id (str): Id of a dataset.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/files')
         r = self.client.get(url)
         return r.json()
 
     def get_dataset_file_metadata(self, dataset_id: str, file_id: str):
+        """Function to retrieve metadata of all files associated with the dataset. Files API endpoint is called.
+
+        Args:
+            dataset_id (str): Id of a dataset.
+            file_id (str): Id of a file.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = urllib.parse.urljoin(self.base_url,
             dataset_id + "/files/" + file_id)
         r = self.client.get(url)
         return r.json()
 
     def get_dataset_blob(self, dataset_id: str, join=None):
+        """Function to retrieve a blob of the dataset. Blob API endpoint is called.
+
+        Args:
+            dataset_id (str): Id of a dataset.
+            join (bool): Add join parameter if True. Default None.
+
+        Returns:
+            str: Folder or file name.
+
+        """
         # construct url for file download
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/blob')
         kwargs = {"stream": True}
@@ -90,6 +128,20 @@ class DataService:
 
     def get_datasets(self, datatype: str = None, title: str = None, creator: str = None, skip: int = None,
                      limit: int = None, space: str = None):
+        """Function to get datasets. Blob API endpoint is called.
+
+        Args:
+            datatype (str): Type of the resource, passed to the parameter "type". Default None
+            title (str): Title of the resource, passed to the parameter "title". Default None
+            creator (str): Type of the resource, passed to the parameter "creator". Default None
+            skip (str): Type of the resource, passed to the parameter "skip". Default None
+            limit (int): Type of the resource, passed to the parameter "limit". Default None
+            space (str): Type of the resource, passed to the parameter "space". Default None
+
+        Returns:
+            json: Response with the datasets.
+
+        """
         url = self.base_url
         payload = {}
         if datatype is not None:
@@ -110,6 +162,15 @@ class DataService:
         return r.json()
 
     def create_dataset(self, properties: dict):
+        """Create datasets. Post API endpoint is called.
+
+        Args:
+            properties (dict): Metadata and files of the dataset to be created.
+
+        Returns:
+            json: Post response.
+
+        """
         payload = {'dataset': json.dumps(properties)}
         url = self.base_url
         kwargs = {"files": payload}
@@ -118,6 +179,16 @@ class DataService:
 
     def update_dataset(self, dataset_id, property_name: str,
                        property_value: str):
+        """Update dataset. Put API endpoint is called.
+
+        Args:
+            dataset_id (str): Id of a dataset.
+            property_name (str): Property parameters such as name and value
+
+        Returns:
+            json: Put response.
+
+        """
         url = urllib.parse.urljoin(self.base_url, dataset_id)
         payload = {'update': json.dumps({"property name": property_name,
                                          "property value": property_value})}
@@ -126,6 +197,16 @@ class DataService:
         return r.json()
 
     def add_files_to_dataset(self, dataset_id: str, filepaths: list):
+        """Add files to the dataset. Post API endpoint is called.
+
+        Args:
+            dataset_id (str): Id of a dataset.
+            filepath (list): Path to the files.
+
+        Returns:
+            json: Post response.
+
+        """
         url = urllib.parse.urljoin(self.base_url, dataset_id + "/files")
         listfiles = []
         for filepath in filepaths:
@@ -141,21 +222,54 @@ class DataService:
         return r.json()
 
     def delete_dataset(self, dataset_id: str):
+        """Delete dataset. Delete API endpoint is called.
+
+        Args:
+            dataset_id (str): Id of a dataset.
+
+        Returns:
+            json: Delete response.
+
+        """
         url = urllib.parse.urljoin(self.base_url, dataset_id)
         r = self.client.delete(url)
         return r.json()
 
     def get_files(self):
+        """Get all files. Files API endpoint is called.
+
+        Returns:
+            json: Get response.
+
+        """
         url = self.files_url
         r = self.client.get(url)
         return r.json()
 
     def get_file_metadata(self, file_id: str):
+        """Function to retrieve metadata of a file defined by id. Files API endpoint is called.
+
+        Args:
+            file_id (str): Id of a file.
+
+        Returns:
+            json: response json containing the metadata.
+
+        """
         url = urllib.parse.urljoin(self.files_url, file_id)
         r = self.client.get(url)
         return r.json()
 
     def get_file_blob(self, file_id: str):
+        """Function to retrieve a blob of the file. Blob API endpoint is called.
+
+        Args:
+            file_id (str): Id of a file.
+
+        Returns:
+            str: file name.
+
+        """
         # construct url for file download
         url = urllib.parse.urljoin(self.files_url, file_id + '/blob')
         kwargs = {"stream": True}
@@ -179,6 +293,15 @@ class DataService:
         return local_filename
 
     def unzip_dataset(self, local_filename: str):
+        """Unzip the dataset zip file.
+
+        Args:
+            local_filename (str): Dataset's filename.
+
+        Returns:
+            str: foldername with unzipped files.
+
+        """
         foldername, file_extension = os.path.splitext(local_filename)
         # if it is not a zip file, no unzip
         if not file_extension.lower() == '.zip':
@@ -196,6 +319,16 @@ class DataService:
         return foldername
 
     def get_shpfile_from_service(self, fileid, dirname):
+        """Function to obtain a shape file from Data service.
+
+        Args:
+            fileid (str): An Id of a shape file.
+            dirname (str): Directory the files are being extracted.
+
+        Returns:
+            str: filename with shape files.
+
+        """
         request_str = self.base_url + fileid
         request_str_zip = request_str + '/blob'
 
@@ -213,6 +346,15 @@ class DataService:
         return filename
 
     def get_tornado_dataset_id_from_service(self, fileid):
+        """Function to obtain a tornado dataset Id from Data service.
+
+        Args:
+            fileid (str): An Id of a tornado file.
+
+        Returns:
+            json: Response with Id.
+
+        """
         # dataset
         request_str = self.base_tornado_url + fileid
         r = r = self.client.get(request_str)
@@ -220,6 +362,17 @@ class DataService:
         return r.json()['tornadoDatasetId']
 
     def search_datasets(self, text: str, skip: int = None, limit: int = None):
+        """Function to search datasets.
+
+        Args:
+            text (str): Type of the resource, passed to the parameter "text".
+            skip (int):  Type of the resource, passed to the parameter "skip". Dafault None.
+            limit (int):  Limit the query outputs. Passed to the parameter "limit". Dafault None.
+
+        Returns:
+            json: Response.
+
+        """
         url = urllib.parse.urljoin(self.base_url, "search")
         payload = {"text": text}
         if skip is not None:
