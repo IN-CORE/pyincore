@@ -65,8 +65,8 @@ class BaseAnalysis:
         """Convenience function for loading a remote dataset by id.
 
         Args:
-            analysis_param_id (str): The id of the input dataset in the specifications.
-            remote_id (str): The id of dataset in the Data service.
+            analysis_param_id (str): ID of the input Dataset in the specifications.
+            remote_id (str):  ID of the Dataset in the Data service.
 
         """
         dataset = Dataset.from_data_service(remote_id, self.data_service)

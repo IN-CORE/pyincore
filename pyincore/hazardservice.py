@@ -33,12 +33,12 @@ class HazardService:
                                                          'hazard/api/hurricaneWindfields/')
 
     def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
-        """Function to retrieve earthquake metadata from hazard service. Hazard API endpoint is called.
+        """Function to retrieve earthquake metadata list from hazard service. Hazard API endpoint is called.
 
         Args:
-            skip (int):
-            limit (int):
-            space (str):
+            skip (int):  Skip the first n results, passed to the parameter "skip". Dafault None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit". Dafault None.
+            space (str): User's space on the service, passed to the parameter "space".
 
         Returns:
             json: Response containing the metadata.
@@ -59,6 +59,15 @@ class HazardService:
         return response
 
     def get_earthquake_hazard_metadata(self, hazard_id: str):
+        """Function to retrieve earthquake metadata from hazard service. Hazard API endpoint is called.
+
+        Args:
+            hazard_id (str): ID of the Earthquake.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
@@ -67,6 +76,19 @@ class HazardService:
 
     def get_earthquake_hazard_value(self, hazard_id: str, demand_type: str,
                                     demand_units: str, site_lat, site_long):
+        """Function to retrieve earthquake hazard value from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Earthquake.
+            demand_type (str):  Ground motion demand type. Examples: PGA, PGV, 0.2 SA
+            demand_units (str): Ground motion demand unit. Examples: g, %g, cm/s, etc.
+            site_lat (float): Latitude of a point.
+            site_long (float): Longitude of a point.
+
+        Returns:
+            float: Hazard value.
+
+        """
         hazard_value_set = self.get_earthquake_hazard_values(hazard_id,
                                                              demand_type,
                                                              demand_units,
@@ -77,6 +99,18 @@ class HazardService:
 
     def get_earthquake_hazard_values(self, hazard_id: str, demand_type: str,
                                      demand_units: str, points: List):
+        """Function to retrieve earthquake hazard values from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Earthquake.
+            demand_type (str):  Ground motion demand type. Examples: PGA, PGV, 0.2 SA
+            demand_units (str): Ground motion demand unit. Examples: g, %g, cm/s, etc.
+            points (list): List of points provided as lat,long.
+
+        Returns:
+            float: Hazard value.
+
+        """
         url = urllib.parse.urljoin(self.base_earthquake_url,
                                    hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units,
@@ -89,6 +123,21 @@ class HazardService:
     def get_earthquake_hazard_value_set(self, hazard_id: str, demand_type: str,
                                         demand_units: str, bbox,
                                         grid_spacing: float):
+        """Function to retrieve earthquake hazard value set from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Earthquake.
+            demand_type (str):  Ground motion demand type. Examples: PGA, PGV, 0.2 SA
+            demand_units (str): Ground motion demand unit. Examples: g, %g, cm/s, etc.
+            bbox (list): Bounding box, list of points.
+            grid_spacing (float): Grid spacing.
+
+        Returns:
+            np.array: X values..
+            np.array: Y values.
+            float: Hazard value.
+
+        """
         # bbox: [[minx, miny],[maxx, maxy]]
         # raster?demandType=0.2+SA&demandUnits=g&minX=-90.3099&minY=34.9942&maxX=-89.6231&maxY=35.4129&gridSpacing=0.01696
         # bbox
@@ -117,6 +166,18 @@ class HazardService:
 
     def get_liquefaction_values(self, hazard_id: str, geology_dataset_id: str,
                                 demand_units: str, points: List):
+        """Function to retrieve earthquake liquefaction values.
+
+        Args:
+            hazard_id (str): ID of the Earthquake.
+            geology_dataset_id (str):  ID of the geology dataset.
+            demand_units (str): Ground motion demand unit. Examples: g, %g, cm/s, etc.
+            points (list): List of points provided as lat,long.
+
+        Returns:
+            json: Response.
+
+        """
         url = urllib.parse.urljoin(self.base_earthquake_url,
                                    hazard_id + "/liquefaction/values")
         payload = {'demandUnits': demand_units,
@@ -129,6 +190,21 @@ class HazardService:
                                      site_lat: float, site_long: float,
                                      demand_type: str, hazard: float,
                                      default_site_class: str):
+        """Function to retrieve earthquake liquefaction values.
+
+        Args:
+            method (str): ID of the Earthquake.
+            hazard_id (str): ID of the Earthquake.
+            site_lat (float): Latitude of a point.
+            site_long (float): Longitude of a point.
+            demand_type (str):  Ground motion demand type. Examples: PGA, PGV, 0.2 SA
+            hazard (float): Hazard value.
+            default_site_class (str): Default site classification. Expected A, B, C, D, E or F.
+
+        Returns:
+            json: Response.
+
+        """
         url = urllib.parse.urljoin(self.base_earthquake_url,
                                    'soil/amplification')
         payload = {"method": method, "datasetId": dataset_id,
@@ -143,6 +219,12 @@ class HazardService:
     # def get_slope_amplification_value(self)
 
     def get_supported_earthquake_models(self):
+        """Function to retrieve suported earthquake models.
+
+        Returns:
+            json: Response.
+
+        """
         url = urllib.parse.urljoin(self.base_earthquake_url, 'models')
         r = self.client.get(url)
         response = r.json()
@@ -150,14 +232,15 @@ class HazardService:
         return response
 
     def create_earthquake(self, eq_json, file_paths: List = []):
-        """
-        Creates an Earthquake.
-        Args:
-            eq_json: JSON representing the earthquake.
-            file_paths: List of strings pointing to the paths of the datasets. Not needed for
-            model based earthquakes.
+        """Function to create earthquake on the server. POST API endpoint is called.
 
-        Returns: JSON of the created earthquake.
+        Args:
+            eq_json (json): Json representing the Earthquake.
+            file_paths (str): List of strings pointing to the paths of the datasets. Not needed for
+                model based earthquakes. Default empty list.
+
+        Returns:
+            json: POST Response. Json of the created earthquake.
 
         """
         url = self.base_earthquake_url
@@ -171,6 +254,17 @@ class HazardService:
         return response
 
     def search_earthquakes(self, text: str, skip: int = None, limit: int = None):
+        """Function to search earthquakes.
+
+        Args:
+            text (str): Text to search by, passed to the parameter "text".
+            skip (int):  Skip the first n results, passed to the parameter "skip". Dafault None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit". Dafault None.
+
+        Returns:
+            json: Response with search results.
+
+        """
         url = urllib.parse.urljoin(self.base_earthquake_url, "search")
         payload = {"text": text}
         if skip is not None:
@@ -183,6 +277,17 @@ class HazardService:
         return r.json()
 
     def get_tornado_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
+        """Function to retrieve tornado metadata list from hazard service. Hazard API endpoint is called.
+
+        Args:
+            text (str): Text to search by, passed to the parameter "text".
+            skip (int):  Skip the first n results, passed to the parameter "skip". Dafault None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit". Dafault None.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = self.base_tornado_url
         payload = {}
         if skip is not None:
@@ -198,6 +303,15 @@ class HazardService:
         return response
 
     def get_tornado_hazard_metadata(self, hazard_id: str):
+        """Function to retrieve tornado metadata list from hazard service. Hazard API endpoint is called.
+
+        Args:
+            hazard_id (str): ID of the Tornado.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = urllib.parse.urljoin(self.base_tornado_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
@@ -206,6 +320,19 @@ class HazardService:
 
     def get_tornado_hazard_value(self, hazard_id: str, demand_units: str,
                                  site_lat, site_long, simulation=0):
+        """Function to retrieve tornado hazard value from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Tornado.
+            demand_units (str): Ground motion demand unit. Examples: m.
+            site_lat (float): Latitude of a point.
+            site_long (float): Longitude of a point.
+            simulation (int): Simulated wind hazard. Example: 0, Default 0.
+
+        Returns:
+            float: Hazard value.
+
+        """
         points = str(site_lat) + ',' + str(site_long)
 
         hazard_value_set = self.get_tornado_hazard_values(hazard_id,
@@ -215,6 +342,18 @@ class HazardService:
 
     def get_tornado_hazard_values(self, hazard_id: str, demand_units: str,
                                   points: List, simulation=0):
+        """Function to retrieve tornado hazard values from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Hurricane.
+            demand_units (str): Ground motion demand unit. Examples: g, %g, cm/s, etc.
+            points (list): List of points provided as lat,long.
+            simulation (int): Simulated wind hazard. Example: 0, Default 0.
+
+        Returns:
+            float: Hazard value.
+
+        """
         url = urllib.parse.urljoin(self.base_tornado_url,
                                    hazard_id + "/values")
         payload = {'demandUnits': demand_units, 'point': points,
@@ -225,14 +364,15 @@ class HazardService:
         return response
 
     def create_tornado_scenario(self, tornado_json, file_paths: List = []):
-        """
-        Creates a Tornado.
-        Args:
-            tornado_json: JSON representing the tornado.
-            file_paths: List of strings pointing to the paths of the shapefiles. Not needed for
-            model based tornadoes.
+        """Function to create tornado on the server. POST API endpoint is called.
 
-        Returns: JSON of the created tornado.
+        Args:
+            tornado_json (json): JSON representing the tornado.
+            file_paths (list): List of strings pointing to the paths of the shape files. Not needed for
+                model based tornadoes.
+
+        Returns:
+            POST Response. Json of the created tornado.
 
         """
         url = self.base_tornado_url
@@ -246,6 +386,17 @@ class HazardService:
         return response
 
     def search_tornadoes(self, text: str, skip: int = None, limit: int = None):
+        """Function to search tornadoes.
+
+        Args:
+            text (str): Text to search by, passed to the parameter "text".
+            skip (int):  Skip the first n results, passed to the parameter "skip". Dafault None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit". Dafault None.
+
+        Returns:
+            json: Response with search results.
+
+        """
         url = urllib.parse.urljoin(self.base_tornado_url, "search")
         payload = {"text": text}
         if skip is not None:
@@ -258,6 +409,17 @@ class HazardService:
         return r.json()
 
     def get_tsunami_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
+        """Function to retrieve tsunami metadata list from hazard service. Hazard API endpoint is called.
+
+        Args:
+            text (str): Text to search by, passed to the parameter "text".
+            skip (int): Skip the first n results, passed to the parameter "skip". Dafault None.
+            limit (int): Limit number of results to return. Passed to the parameter "limit". Dafault None.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = self.base_tsunami_url
         payload = {}
         if skip is not None:
@@ -273,6 +435,15 @@ class HazardService:
         return response
 
     def get_tsunami_hazard_metadata(self, hazard_id: str):
+        """Function to retrieve tsunami metadata list from hazard service. Hazard API endpoint is called.
+
+        Args:
+            hazard_id (str): ID of the Tsunami.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
@@ -282,6 +453,19 @@ class HazardService:
     def get_tsunami_hazard_value(self, hazard_id: str, demand_type: str,
                                  demand_units: str,
                                  site_lat: float, site_long: float):
+        """Function to retrieve tsunami hazard value from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Tsunami.
+            demand_type (str): Tsunami demand type. Examples: Hmax, Vmax, Mmax.
+            demand_units (str): Tsunami demand unit. Example: m.
+            site_lat (float): Latitude of a point.
+            site_long (float): Longitude of a point.
+
+        Returns:
+            float: Hazard value.
+
+        """
         points = [str(site_lat) + ',' + str(site_long)]
         hazard_value_set = self.get_tsunami_hazard_values(hazard_id,
                                                           demand_type,
@@ -291,6 +475,18 @@ class HazardService:
 
     def get_tsunami_hazard_values(self, hazard_id: str, demand_type: str,
                                   demand_units: str, points: List):
+        """Function to retrieve tsunami hazard values from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Tsunami.
+            demand_type (str):  Tsunami demand type. Examples: Hmax, Vmax, Mmax
+            demand_units (str): Tsunami demand unit.. Examples: m.
+            points (list): List of points provided as lat,long.
+
+        Returns:
+            float: Hazard value.
+
+        """
         url = urllib.parse.urljoin(self.base_tsunami_url,
                                    hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units,
@@ -301,13 +497,15 @@ class HazardService:
         return response
 
     def create_tsunami_hazard(self, tsunami_json, file_paths: List):
-        """
-        Creates an tsunami.
+        """Function to create tsunami on the server. POST API endpoint is called.
+
         Args:
             tsunami_inputs: JSON representing the tsunami.
             file_paths: List of strings pointing to the paths of the datasets.
 
-        Returns: JSON of the created tsunami.
+        Returns:
+            json: POST Response. Json of the created tsunami.
+
         """
 
         url = self.base_tsunami_url
@@ -321,6 +519,17 @@ class HazardService:
         return response
 
     def search_tsunamis(self, text: str, skip: int = None, limit: int = None):
+        """Function to search tsunamis.
+
+        Args:
+            text (str): Text to search by, passed to the parameter "text".
+            skip (int):  Skip the first n results, passed to the parameter "skip". Default None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit". Dafault None.
+
+        Returns:
+            json: Response with search results.
+
+        """
         url = urllib.parse.urljoin(self.base_tsunami_url, "search")
         payload = {"text": text}
         if skip is not None:
@@ -333,6 +542,15 @@ class HazardService:
         return r.json()
 
     def create_hurricane_windfield(self, hurr_wf_inputs):
+        """Function to create windfields on the server. POST API endpoint is called.
+
+        Args:
+            hurr_wf_inputs: JSON representing the hurricane.
+
+        Returns:
+            json: POST Response. Json of the created hurricane.
+
+        """
         url = self.base_hurricanewf_url
         headers = {'Content-type': 'application/json'}
         new_headers = {**self.client.headers, **headers}
@@ -344,6 +562,19 @@ class HazardService:
 
     def get_hurricanewf_metadata_list(self, coast: str = None, category: int = None, skip: int = None,
                                       limit: int = None, space: str = None):
+        """Function to retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
+
+        Args:
+            coast (str): Coast, passed to the parameter "coast".  Examples: gulf, florida or east.
+            category (int): Hurricane category, passed to the parameter "coast".  Examples: between 1 and 5.
+            skip (int):  Skip the first n results, passed to the parameter "skip". Default None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit". Dafault None.
+            space (str): User's namespace on the server, passed to the parameter "space". Dafault None.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = self.base_hurricanewf_url
         payload = {}
 
@@ -364,6 +595,15 @@ class HazardService:
         return response
 
     def get_hurricanewf_metadata(self, hazard_id):
+        """Function to retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
+
+        Args:
+            hazard_id (str): ID of the Hurricane.
+
+        Returns:
+            json: Response containing the metadata.
+
+        """
         url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
@@ -372,6 +612,20 @@ class HazardService:
 
     def get_hurricanewf_values(self, hazard_id: str, demand_type: str,demand_units: str,
                                points: List, elevation: float = None, roughness: float = None):
+        """Function to retrieve hurricane hazard values from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Hurricane.
+            demand_type (str): Hurricane demand type. Examples: 3s, 60s
+            demand_units (str): Hurricane demand unit. Example: mph.
+            points (list): List of points provided as lat,long.
+            elevation (float): Elevation in meters at which wind speed has to be calculated. Default None.
+            roughness (float): Terrain exposure or roughness length. Default None.
+
+        Returns:
+            float: Hazard values.
+
+        """
         url = urllib.parse.urljoin(self.base_hurricanewf_url,
                                    hazard_id + "/values")
         payload = {'demandType': demand_type, 'demandUnits': demand_units,
@@ -384,7 +638,23 @@ class HazardService:
     def get_hurricanewf_json(self, coast: str, category: int, trans_d: float, land_fall_loc: int, demand_type: str,
                              demand_units: str, resolution: int = 6, grid_points: int = 80,
                              rf_method: str = "circular"):
+        """Function to retrieve hurricane wind field values from the Hazard service.
 
+        Args:
+            coast (str): Coast, passed to the parameter "coast".  Examples: gulf, florida or east.
+            category (int): Hurricane category, passed to the parameter "coast".  Examples: between 1 and 5.
+            trans_d (float):
+            land_fall_loc (float):
+            demand_type (str):
+            demand_units (str):
+            resolution (int): Default 6.
+            grid_points (int): Default 80.
+            rf_method (str): Default "circular"
+
+        Returns:
+            json: Response.
+
+        """
         # land_fall_loc: IncorePoint e.g.'28.01, -83.85'
         url = urllib.parse.urljoin(self.base_hurricanewf_url, "json/" + coast)
         payload = {"category": category, "TransD": trans_d,
@@ -398,6 +668,17 @@ class HazardService:
         return response
 
     def search_hurricanes(self, text: str, skip: int = None, limit: int = None):
+        """Function to search hurricanes.
+
+        Args:
+            text (str): Text to search by, passed to the parameter "text".
+            skip (int):  Skip the first n results, passed to the parameter "skip". Dafault None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit". Dafault None.
+
+        Returns:
+            json: Response with search results.
+
+        """
         url = urllib.parse.urljoin(self.base_hurricanewf_url, "search")
         payload = {"text": text}
         if skip is not None:

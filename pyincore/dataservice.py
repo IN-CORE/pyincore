@@ -39,7 +39,7 @@ class DataService:
         """Function to retrieve metadata from data service. Dataset API endpoint is called.
 
         Args:
-            dataset_id (str): Id of a dataset.
+            dataset_id (str): ID of the Dataset.
 
         Returns:
             json: Response containing the metadata.
@@ -54,7 +54,7 @@ class DataService:
         """Function to retrieve metadata of all files associated with the dataset. Files API endpoint is called.
 
         Args:
-            dataset_id (str): Id of a dataset.
+            dataset_id (str): ID of the Dataset.
 
         Returns:
             json: Response containing the metadata.
@@ -68,8 +68,8 @@ class DataService:
         """Function to retrieve metadata of all files associated with the dataset. Files API endpoint is called.
 
         Args:
-            dataset_id (str): Id of a dataset.
-            file_id (str): Id of a file.
+            dataset_id (str): ID of the Dataset.
+            file_id (str): ID of the File.
 
         Returns:
             json: Response containing the metadata.
@@ -84,7 +84,7 @@ class DataService:
         """Function to retrieve a blob of the dataset. Blob API endpoint is called.
 
         Args:
-            dataset_id (str): Id of a dataset.
+            dataset_id (str): ID of the Dataset.
             join (bool): Add join parameter if True. Default None.
 
         Returns:
@@ -182,7 +182,7 @@ class DataService:
         """Update dataset. Put API endpoint is called.
 
         Args:
-            dataset_id (str): Id of a dataset.
+            dataset_id (str): ID of the Dataset.
             property_name (str): Property parameters such as name and value
 
         Returns:
@@ -200,7 +200,7 @@ class DataService:
         """Add files to the dataset. Post API endpoint is called.
 
         Args:
-            dataset_id (str): Id of a dataset.
+            dataset_id (str): ID of the Dataset.
             filepath (list): Path to the files.
 
         Returns:
@@ -225,7 +225,7 @@ class DataService:
         """Delete dataset. Delete API endpoint is called.
 
         Args:
-            dataset_id (str): Id of a dataset.
+            dataset_id (str): ID of the Dataset.
 
         Returns:
             json: Delete response.
@@ -239,7 +239,7 @@ class DataService:
         """Get all files. Files API endpoint is called.
 
         Returns:
-            json: Get response.
+            json: Response.
 
         """
         url = self.files_url
@@ -250,10 +250,10 @@ class DataService:
         """Function to retrieve metadata of a file defined by id. Files API endpoint is called.
 
         Args:
-            file_id (str): Id of a file.
+            file_id (str): ID of the File.
 
         Returns:
-            json: response json containing the metadata.
+            json: Response json containing the metadata.
 
         """
         url = urllib.parse.urljoin(self.files_url, file_id)
@@ -264,10 +264,10 @@ class DataService:
         """Function to retrieve a blob of the file. Blob API endpoint is called.
 
         Args:
-            file_id (str): Id of a file.
+            file_id (str): ID of the Dataset.
 
         Returns:
-            str: file name.
+            str: Local file name.
 
         """
         # construct url for file download
@@ -296,10 +296,10 @@ class DataService:
         """Unzip the dataset zip file.
 
         Args:
-            local_filename (str): Dataset's filename.
+            local_filename (str): Name of the Dataset.
 
         Returns:
-            str: foldername with unzipped files.
+            str: Folder name with unzipped files.
 
         """
         foldername, file_extension = os.path.splitext(local_filename)
@@ -322,11 +322,11 @@ class DataService:
         """Function to obtain a shape file from Data service.
 
         Args:
-            fileid (str): An Id of a shape file.
+            fileid (str):  ID of the Shape file.
             dirname (str): Directory the files are being extracted.
 
         Returns:
-            str: filename with shape files.
+            str: Filename with shape files.
 
         """
         request_str = self.base_url + fileid
@@ -349,10 +349,10 @@ class DataService:
         """Function to obtain a tornado dataset Id from Data service.
 
         Args:
-            fileid (str): An Id of a tornado file.
+            fileid (str): ID of the Tornado file.
 
         Returns:
-            json: Response with Id.
+            json: Response with the Dataset ID.
 
         """
         # dataset
@@ -365,12 +365,12 @@ class DataService:
         """Function to search datasets.
 
         Args:
-            text (str): Type of the resource, passed to the parameter "text".
-            skip (int):  Type of the resource, passed to the parameter "skip". Dafault None.
-            limit (int):  Limit the query outputs. Passed to the parameter "limit". Dafault None.
+            text (str): Text to search by, passed to the parameter "text".
+            skip (int):  Skip the first n results, passed to the parameter "skip". Dafault None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit". Dafault None.
 
         Returns:
-            json: Response.
+            json: Response with search results.
 
         """
         url = urllib.parse.urljoin(self.base_url, "search")
