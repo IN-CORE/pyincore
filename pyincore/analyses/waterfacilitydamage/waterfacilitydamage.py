@@ -293,6 +293,8 @@ class WaterFacilityDamage(BaseAnalysis):
         elif hazard_type == "tsunami":
             hazard_val_set = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, hazard_demand_type, demand_units, [point])
         hazard_val = hazard_val_set[0]['hazardValue']
+        if hazard_val < 0:
+            hazard_val = 0
 
         limit_states = AnalysisUtil.compute_limit_state_probability(
             fragility['fragilityCurves'],
@@ -330,23 +332,3 @@ class WaterFacilityDamage(BaseAnalysis):
 
         result = {**metadata, **result}
         return result
-
-
-if __name__ == "__main__":
-    from pyincore.client import InsecureIncoreClient
-
-    client = InsecureIncoreClient(
-        "http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
-    wf_dmg = WaterFacilityDamage(client)
-    wf_dmg.load_remote_input_dataset("water_facilities",
-                                     "5d266507b9219c3c5595270c")
-    wf_dmg.set_parameter("result_name", "seaside_tsu_waterfacility_damage")
-    wf_dmg.set_parameter("hazard_type", "tsunami")
-    wf_dmg.set_parameter("hazard_id", "5bc9e25ef7b08533c7e610dc")
-    wf_dmg.set_parameter("mapping_id", "5d31f737b9219c6d66398521")
-    wf_dmg.set_parameter("fragility_key", "Non-Retrofit inundationDepth Fragility ID Code")
-    wf_dmg.set_parameter("use_liquefaction", False)
-    wf_dmg.set_parameter("use_hazard_uncertainty", False)
-    wf_dmg.set_parameter("num_cpu", 4)
-
-    wf_dmg.run_analysis()
