@@ -10,21 +10,24 @@ from pyincore import IncoreClient
 
 
 class SpaceService:
-    """
-        Space service client
-    """
+    """Space service client
 
+    Args:
+        client (IncoreClient): Service authentication.
+
+    """
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_space_url = urllib.parse.urljoin(client.service_url, "space/api/spaces/")
 
     def create_space(self, space_json):
-        """
-        Creates a Space
-        Args:
-            space_json: JSON representing a space
+        """Creates a Space
 
-        Returns: JSON of the created space
+        Args:
+            space_json (json): A space representation.
+
+        Returns:
+            json: Response with the created space information.
 
         """
         url = self.base_space_url
