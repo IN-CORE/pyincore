@@ -313,8 +313,7 @@ class PipelineDamage(BaseAnalysis):
                     fragility_set['fragilityCurves'], hazard_val, 1.0, 0)
                 dmg_intervals = AnalysisUtil.compute_damage_intervals(
                     limit_states)
-                pipeline_results = {**limit_states,
-                                    **dmg_intervals}  # Needs py 3.5+
+                pipeline_results = {**limit_states, **dmg_intervals}  # Needs py 3.5+
                 pipeline_results['guid'] = pipeline['properties']['guid']
                 pipeline_results['hazardtype'] = hazard_type
                 pipeline_results['hazardval'] = hazard_val
