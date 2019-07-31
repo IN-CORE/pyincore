@@ -24,10 +24,10 @@ class SpaceService:
         """Creates a Space
 
         Args:
-            space_json (json): A space representation.
+            space_json (json): A space representation. ID of the Space.
 
         Returns:
-            json: Response with the created space information.
+            obj: HTTP response with the created space information.
 
         """
         url = self.base_space_url
@@ -38,6 +38,15 @@ class SpaceService:
         return response
 
     def get_spaces(self, dataset_id: str = None):
+        """Retrieve  a Space with the dataset.
+
+        Args:
+            dataset_id (str): ID of the Dataset.
+
+        Returns:
+            obj: HTTP response with the created space information.
+
+        """
         url = self.base_space_url
         payload = {}
         if dataset_id is not None:
@@ -49,6 +58,15 @@ class SpaceService:
         return response
 
     def get_space_by_id(self, space_id: str):
+        """Get space information
+
+        Args:
+            space_id (str): A space representation. ID of the Space.
+
+        Returns:
+            obj: HTTP response with the created space information.
+
+        """
         url = urllib.parse.urljoin(self.base_space_url, space_id)
         r = requests.get(url, headers=self.client.headers)
         response = r.json()
@@ -56,13 +74,14 @@ class SpaceService:
         return response
 
     def update_space(self, space_id: str, space_json):
-        """
-        Updates a Space
-        Args:
-            space_id : ID of the space to update
-            space_json: JSON representing a space update
+        """Updates a Space.
 
-        Returns: JSON of the updated space
+        Args:
+            space_id (str): ID of the space to update.
+            space_json (json): JSON representing a space update.
+
+        Returns:
+            obj: HTTP response with the updated space.
 
         """
         url = urllib.parse.urljoin(self.base_space_url, space_id)
@@ -73,6 +92,16 @@ class SpaceService:
         return response
 
     def add_dataset_to_space(self, space_id: str, dataset_id: str):
+        """Add dataset to a Space.
+
+        Args:
+            space_id (str): ID of the space to update.
+            dataset_id (str): ID of the dataset to be added to the space.
+
+        Returns:
+            obj: HTTP response with the updated space.
+
+        """
         url = urllib.parse.urljoin(self.base_space_url, space_id + "/datasets/" + dataset_id)
 
         r = requests.post(url, headers=self.client.headers)
@@ -80,6 +109,16 @@ class SpaceService:
         return response
 
     def grant_privileges_to_space(self, space_id: str, privileges_json):
+        """Updates a Space.
+
+        Args:
+            space_id (str): ID of the space to update.
+            privileges_json (json): JSON representing a space update.
+
+        Returns:
+            obj: HTTP response with space privileges.
+
+        """
         url = urllib.parse.urljoin(self.base_space_url, space_id + "/grant")
         space_privileges = {('grant', privileges_json)}
 

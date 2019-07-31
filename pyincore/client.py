@@ -51,7 +51,6 @@ class Client:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
-
     def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
         """Post data on the server.
 
@@ -116,7 +115,6 @@ class Client:
             logger.error("RequestException: There was an exception while trying to handle your request. "
                          "Please go to the end of this message for more specific information about the exception.")
             raise
-
 
     def delete(self, url: str, timeout=(30, 600), **kwargs):
         """Delete data on the server.
@@ -203,7 +201,7 @@ class IncoreClient(Client):
             password (str): Password used in NCSA's INCORE framework.
 
         Returns:
-            json: json containing the authentication token.
+            obj: json containing the authentication token.
 
         """
         if self.auth_token is not None:

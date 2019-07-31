@@ -17,8 +17,7 @@ from pyincore import IncoreClient
 
 
 class DataService:
-    """
-    Data service client.
+    """Data service client.
 
     Args:
         client (IncoreClient): Service authentication.
@@ -36,13 +35,13 @@ class DataService:
             'hazard/api/tornadoes/')
 
     def get_dataset_metadata(self, dataset_id: str):
-        """Function to retrieve metadata from data service. Dataset API endpoint is called.
+        """Retrieve metadata from data service. Dataset API endpoint is called.
 
         Args:
             dataset_id (str): ID of the Dataset.
 
         Returns:
-            json: Response containing the metadata.
+            obj: HTTP response containing the metadata.
 
         """
         # construct url with service, dataset api, and id
@@ -51,13 +50,13 @@ class DataService:
         return r.json()
 
     def get_dataset_files_metadata(self, dataset_id: str):
-        """Function to retrieve metadata of all files associated with the dataset. Files API endpoint is called.
+        """Retrieve metadata of all files associated with the dataset. Files API endpoint is called.
 
         Args:
             dataset_id (str): ID of the Dataset.
 
         Returns:
-            json: Response containing the metadata.
+            obj: HTTP response containing the metadata.
 
         """
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/files')
@@ -65,14 +64,14 @@ class DataService:
         return r.json()
 
     def get_dataset_file_metadata(self, dataset_id: str, file_id: str):
-        """Function to retrieve metadata of all files associated with the dataset. Files API endpoint is called.
+        """Retrieve metadata of all files associated with the dataset. Files API endpoint is called.
 
         Args:
             dataset_id (str): ID of the Dataset.
             file_id (str): ID of the File.
 
         Returns:
-            json: Response containing the metadata.
+            obj: HTTP response containing the metadata.
 
         """
         url = urllib.parse.urljoin(self.base_url,
@@ -81,7 +80,7 @@ class DataService:
         return r.json()
 
     def get_dataset_blob(self, dataset_id: str, join=None):
-        """Function to retrieve a blob of the dataset. Blob API endpoint is called.
+        """Retrieve a blob of the dataset. Blob API endpoint is called.
 
         Args:
             dataset_id (str): ID of the Dataset.
@@ -131,15 +130,16 @@ class DataService:
         """Function to get datasets. Blob API endpoint is called.
 
         Args:
-            datatype (str): Type of the resource, passed to the parameter "type". Default None
-            title (str): Title of the resource, passed to the parameter "title". Default None
-            creator (str): Type of the resource, passed to the parameter "creator". Default None
-            skip (str): Type of the resource, passed to the parameter "skip". Default None
-            limit (int): Type of the resource, passed to the parameter "limit". Default None
-            space (str): Type of the resource, passed to the parameter "space". Default None
+            datatype (str): Data type of IN-CORE datasets. Examples:: ergo:buildingInventoryVer5,
+                ergo:census, default None
+            title (str): Title of the dataset, passed to the parameter "title", default None
+            creator (str): Dataset creator’s username, default None.
+            skip (str): Skip the first n results, default None.
+            limit (int): Limit number of results to return, default None.
+            space (str): Name of space, default None.
 
         Returns:
-            json: Response with the datasets.
+            obj: HTTP response containing the metadata.
 
         """
         url = self.base_url
@@ -168,7 +168,7 @@ class DataService:
             properties (dict): Metadata and files of the dataset to be created.
 
         Returns:
-            json: Post response.
+            obj: HTTP POST Response. Json of the dataset posted to the server.
 
         """
         payload = {'dataset': json.dumps(properties)}
@@ -186,7 +186,7 @@ class DataService:
             property_name (str): Property parameters such as name and value
 
         Returns:
-            json: Put response.
+            obj: HTTP PUT Response. Json of the dataset updated on the server.
 
         """
         url = urllib.parse.urljoin(self.base_url, dataset_id)
@@ -204,7 +204,7 @@ class DataService:
             filepath (list): Path to the files.
 
         Returns:
-            json: Post response.
+            obj: HTTP POST Response. Json of the files added to the dataset.
 
         """
         url = urllib.parse.urljoin(self.base_url, dataset_id + "/files")
@@ -225,10 +225,10 @@ class DataService:
         """Delete dataset. Delete API endpoint is called.
 
         Args:
-            dataset_id (str): ID of the Dataset.
+            dataset_id (str): ID of the Dataset to be deleted.
 
         Returns:
-            json: Delete response.
+            obj: HTTP DELETE Response. Json model of the delet action.
 
         """
         url = urllib.parse.urljoin(self.base_url, dataset_id)
@@ -239,7 +239,7 @@ class DataService:
         """Get all files. Files API endpoint is called.
 
         Returns:
-            json: Response.
+            obj: HTTP response containing the files.
 
         """
         url = self.files_url
@@ -253,7 +253,7 @@ class DataService:
             file_id (str): ID of the File.
 
         Returns:
-            json: Response json containing the metadata.
+            obj: HTTP response containing the metadata.
 
         """
         url = urllib.parse.urljoin(self.files_url, file_id)
@@ -352,7 +352,7 @@ class DataService:
             fileid (str): ID of the Tornado file.
 
         Returns:
-            json: Response with the Dataset ID.
+            obj: HTTP response containing the tornado Dataset ID.
 
         """
         # dataset
@@ -370,7 +370,7 @@ class DataService:
             limit (int):  Limit number of results to return. Passed to the parameter "limit". Dafault None.
 
         Returns:
-            json: Response with search results.
+            obj: HTTP response with search results.
 
         """
         url = urllib.parse.urljoin(self.base_url, "search")

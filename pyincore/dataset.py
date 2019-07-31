@@ -20,6 +20,12 @@ from pyincore import DataService
 
 
 class Dataset:
+    """Dataset.
+
+    Args:
+        metadata (dict): Dataset metadata.
+
+    """
     def __init__(self, metadata):
         self.metadata = metadata
 
@@ -69,6 +75,15 @@ class Dataset:
         return Dataset.from_file(name, "csv")
 
     def cache_files(self, data_service: DataService):
+        """Get the set of fragility data, curves.
+
+        Args:
+            data_service (obj): Data service.
+
+        Returns:
+            str: A path to the local file.
+
+        """
         if self.local_file_path is not None:
             return
         self.local_file_path = data_service.get_dataset_blob(self.id)
@@ -77,7 +92,12 @@ class Dataset:
     """Utility methods for reading different standard file formats"""
 
     def get_inventory_reader(self):
+        """Utility method for reading different standard file formats: Set of inventory.
 
+        Returns:
+            obj: A Fiona object.
+
+        """
         filename = self.local_file_path
         if os.path.isdir(filename):
             layers = fiona.listlayers(filename)
@@ -88,6 +108,12 @@ class Dataset:
             return fiona.open(filename)
 
     def get_EPAnet_inp_reader(self):
+        """Utility method for reading different standard file formats: EPAnet reader.
+
+        Returns:
+            obj: A Winter model.
+
+        """
         filename = self.local_file_path
         if os.path.isdir(filename):
             files = glob.glob(filename + "/*.inp")
@@ -97,7 +123,13 @@ class Dataset:
         return wn
 
     def get_json_reader(self):
-        if not "json" in self.readers:
+        """Utility method for reading different standard file formats: json reader.
+
+        Returns:
+            obj: A json model data.
+
+        """
+        if "json" not in self.readers:
             filename = self.local_file_path
             if os.path.isdir(filename):
                 files = glob.glob(filename + "/*.json")
@@ -110,7 +142,16 @@ class Dataset:
         return self.readers["json"]
 
     def get_raster_value(self, location):
-        if not "raster" in self.readers:
+        """Utility method for reading different standard file formats: raster value.
+
+        Args:
+            location (obj): A point defined as location.x and location.y.
+
+        Returns:
+            numpy.array: Hazard values.
+
+        """
+        if "raster" not in self.readers:
             filename = self.local_file_path
             self.readers["raster"] = rasterio.open(filename)
 
@@ -123,6 +164,12 @@ class Dataset:
         return numpy.asscalar(data[row, col])
 
     def get_csv_reader(self):
+        """Utility method for reading different standard file formats: csv reader.
+
+         Returns:
+             obj: CSV reader.
+
+         """
         if not "csv" in self.readers:
             filename = self.local_file_path
             if os.path.isdir(filename):
@@ -136,6 +183,15 @@ class Dataset:
         return self.readers["csv"]
 
     def get_file_path(self, type='csv'):
+        """Utility method for reading different standard file formats: file path.
+
+        Args:
+            type (str): A file type.
+
+        Returns:
+            str: File name and path.
+
+        """
         filename = self.local_file_path
         if os.path.isdir(filename):
             files = glob.glob(filename + "/*." + type)
@@ -145,6 +201,12 @@ class Dataset:
         return filename
 
     def get_dataframe_from_csv(self):
+        """Utility method for reading different standard file formats: Pandas DataFrame from csv.
+
+        Returns:
+            obj: Panda's DataFrame.
+
+        """
         filename = self.get_file_path('csv')
         df = pd.DataFrame()
         if os.path.isfile(filename):
@@ -159,8 +221,13 @@ class Dataset:
         self.close()
 
 
-# Added DamageRatioDataset and InventoryDataset for backwards compatibility until analyses are updated
 class DamageRatioDataset:
+    """For backwards compatibility until analyses are updated.
+
+    Args:
+        filename (str): CSV file with damage ratios.
+
+    """
     def __init__(self, filename):
         self.damage_ratio = None
         csvfile = open(filename, 'r')
@@ -171,6 +238,12 @@ class DamageRatioDataset:
 
 
 class InventoryDataset:
+    """For backwards compatibility until analyses are updated.
+
+    Args:
+        filename (str): file with GIS layers.
+
+    """
     def __init__(self, filename):
         self.inventory_set = None
         if os.path.isdir(filename):
