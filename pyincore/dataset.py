@@ -40,6 +40,16 @@ class Dataset:
 
     @classmethod
     def from_data_service(cls, id: str, data_service: DataService):
+        """Get Dataset from Data service, get metadata as well.
+
+        Args:
+            id (str): ID of the Dataset.
+            data_service (obj): Data service.
+
+        Returns:
+            obj: Dataset from Data service.
+
+        """
         metadata = data_service.get_dataset_metadata(id)
         instance = cls(metadata)
         instance.cache_files(data_service)
@@ -47,10 +57,29 @@ class Dataset:
 
     @classmethod
     def from_json_str(cls, json_str):
+        """Get Dataset from json string.
+
+        Args:
+            json_str (str): JSON of the Dataset.
+
+        Returns:
+            obj: Dataset from JSON.
+
+        """
         return cls(json.loads(json_str))
 
     @classmethod
     def from_file(cls, file_path, data_type):
+        """Get Dataset from the file.
+
+        Args:
+            file_path (str): File path.
+            data_type (str): Data type.
+
+        Returns:
+            obj: Dataset from file.
+
+        """
         metadata = {"dataType": data_type,
                     "format": '',
                     "fileDescriptors": [],
@@ -61,11 +90,31 @@ class Dataset:
 
     @classmethod
     def from_dataframe(cls, dataframe, name):
+        """Get Dataset from Panda's DataFrame.
+
+        Args:
+            dataframe (obj): Panda's DataFrame.
+            name (str): filename.
+
+        Returns:
+            obj: Dataset from file.
+
+        """
         dataframe.to_csv(name, index=False)
         return Dataset.from_file(name, "csv")
 
     @classmethod
     def from_csv_data(cls, result_data, name):
+        """Get Dataset from CSV data.
+
+        Args:
+            result_data (obj): Result data and metadata.
+            name (str): A CSV filename.
+
+        Returns:
+            obj: Dataset from file.
+
+        """
         if len(result_data) > 0:
             with open(name, 'w') as csv_file:
                 # Write the parent ID at the top of the result data, if it is given
@@ -170,7 +219,7 @@ class Dataset:
              obj: CSV reader.
 
          """
-        if not "csv" in self.readers:
+        if "csv" not in self.readers:
             filename = self.local_file_path
             if os.path.isdir(filename):
                 files = glob.glob(filename + "/*.csv")
