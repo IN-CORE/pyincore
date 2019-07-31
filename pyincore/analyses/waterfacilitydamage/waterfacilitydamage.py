@@ -252,6 +252,9 @@ class WaterFacilityDamage(BaseAnalysis):
                                                        hazard_type,
                                                        hazard_dataset_id, "",
                                                        False))
+        else:
+            raise ValueError(
+                "Hazard type other than Earthquake and Tsunami are not currently supported.")
 
         return result
 
@@ -291,7 +294,11 @@ class WaterFacilityDamage(BaseAnalysis):
                 hazard_dataset_id, hazard_demand_type,
                 demand_units, [point])
         elif hazard_type == "tsunami":
-            hazard_val_set = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, hazard_demand_type, demand_units, [point])
+            hazard_val_set = self.hazardsvc.get_tsunami_hazard_values(
+                hazard_dataset_id, hazard_demand_type, demand_units, [point])
+        else:
+            raise ValueError(
+                "Hazard type other than Earthquake and Tsunami are not currently supported.")
         hazard_val = hazard_val_set[0]['hazardValue']
         if hazard_val < 0:
             hazard_val = 0
