@@ -331,7 +331,7 @@ class HazardService:
             obj: Hazard value.
 
         """
-        points = [str(site_lat), str(site_long)]
+        points = str(site_lat) + ',' + str(site_long)
 
         hazard_value_set = self.get_tornado_hazard_values(hazard_id,
                                                           demand_units, points,
