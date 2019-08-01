@@ -4,9 +4,7 @@ from pyincore.analyses.buildingdamage import BuildingDamage
 
 def run_with_base_class():
     client = InsecureIncoreClient(
-        "http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
-    # EQ Building Dataset - Memphis Hospitals
-    bldg_dataset_id = "5a284f0bc7d30d13bc081a28"
+        "http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
 
     # New madrid earthquake using Atkinson Boore 1995
     hazard_type = "earthquake"
@@ -14,7 +12,7 @@ def run_with_base_class():
 
     # Building damage ratios
     dmg_ratio_id = "5a284f2ec7d30d13bc08209a"
-
+    # Building dataset
     # 5a284f0bc7d30d13bc081a28  5kb
     # 5bcf2fcbf242fe047ce79dad 300kb
     # 5a284f37c7d30d13bc08219c 20mb
