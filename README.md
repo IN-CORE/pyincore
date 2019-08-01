@@ -39,7 +39,7 @@ Open up an Anaconda prompt from the Windows Start menu or Terminal, create Pytho
 
 - We recommend using Jupyter notebook for running the **pyIncore** projects. 
 It as an open-source application that allows you to create projects (documents) that contain live Python code, 
-visualizations and documentation. Jupyter Notebook is already installed with Anaconda distribution; it has to be installed separately in your virtual environment.
+visualizations and documentation. Jupyter Notebook is already installed with Anaconda distribution; with Miniconda it has to be installed separately in your virtual environment.
 
 ## Installation
 
@@ -56,7 +56,7 @@ These steps will guide you on how to install both pyIncore and Jupyter notebook 
     ```
     conda config --append channels https://channel_credentials@incore2.ncsa.illinois.edu/conda/pyincore/
     ```
-    Contact us for details of `channel_credentials`.
+    Contact us at [incore-dev@lists.illinois.edu](mailto:incore-dev@lists.illinois.edu) for details of `channel_credentials`.
     
 3. From the Terminal (Mac/Linux) or Command Prompt (Windows) run:
     ```
@@ -89,8 +89,7 @@ The file is located in the `.incore` folder created during installation in your 
 
 - Download the **Building damage analysis** Jupyter notebook (<https://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb>) 
 and verify the installation by running it from your project folder. For details of running and manipulating `ipynb` files refer 
-to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running). If you have problems running notebooks, 
-contact us at **incore-dev@lists.illinois.edu**.
+to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running). If you have problems running notebooks, contact us at [incore-dev@lists.illinois.edu](mailto:incore-dev@lists.illinois.edu).
 
 - Start local **Jupyter notebook** by running the following command at the terminal or command prompt from a **Project folder**:
     ```
