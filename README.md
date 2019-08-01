@@ -49,7 +49,7 @@ These steps will guide you on how to install both pyIncore and Jupyter notebook 
 
 1. Add [conda-forge](https://conda-forge.org/) package repository, a conda-forge channel to your environment:
     ```
-    conda config –add channels conda-forge
+    conda config –-add channels conda-forge
     ```
 
 2. Add NCSA’s **pyincore** channel to your environment:
@@ -67,6 +67,11 @@ These steps will guide you on how to install both pyIncore and Jupyter notebook 
     A message *pyIncore credentials file has been created at <HOME directory>/.incore/.incorepw* appears 
     in the terminal/prompt. The typical location of a HOME directory is `C:\Users\<username>` on Windows OS, `/Users/<username>` on MacOS 
     and `/home/<username>` on Linux based machines.
+
+4. (Optional) Remove NCSA’s **pyincore** channel from your environment:
+    ```
+    conda config --remove channels https://channel_credentials@incore2.ncsa.illinois.edu/conda/pyincore/
+    ```
 
 **Mac specific notes**
     
