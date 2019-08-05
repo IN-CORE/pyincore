@@ -130,7 +130,7 @@ class DataService:
         """Function to get datasets. Blob API endpoint is called.
 
         Args:
-            datatype (str): Data type of IN-CORE datasets. Examples:: ergo:buildingInventoryVer5,
+            datatype (str): Data type of IN-CORE datasets. Examples: ergo:buildingInventoryVer5,
                 ergo:census, default None
             title (str): Title of the dataset, passed to the parameter "title", default None
             creator (str): Dataset creator’s username, default None.
@@ -183,7 +183,7 @@ class DataService:
 
         Args:
             dataset_id (str): ID of the Dataset.
-            property_name (str): Property parameters such as name and value
+            property_name (str): Property parameters such as name and value.
 
         Returns:
             obj: HTTP PUT Response. Json of the dataset updated on the server.

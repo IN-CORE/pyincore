@@ -36,7 +36,7 @@ class MappingResponse(object):
 
 
 class FragilityService:
-    """Fragility service client
+    """Fragility service client.
 
     Args:
         client (IncoreClient): Service authentication.
