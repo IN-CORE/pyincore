@@ -10,7 +10,7 @@ from pyincore import IncoreClient
 
 
 class SpaceService:
-    """Space service client
+    """Space service client.
 
     Args:
         client (IncoreClient): Service authentication.
@@ -21,7 +21,7 @@ class SpaceService:
         self.base_space_url = urllib.parse.urljoin(client.service_url, "space/api/spaces/")
 
     def create_space(self, space_json):
-        """Creates a Space
+        """Creates a Space.
 
         Args:
             space_json (json): A space representation. ID of the Space.
@@ -58,7 +58,7 @@ class SpaceService:
         return response
 
     def get_space_by_id(self, space_id: str):
-        """Get space information
+        """Get space information.
 
         Args:
             space_id (str): A space representation. ID of the Space.
