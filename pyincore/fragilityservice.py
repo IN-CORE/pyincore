@@ -36,10 +36,12 @@ class MappingResponse(object):
 
 
 class FragilityService:
-    """
-    Fragility service client
-    """
+    """Fragility service client.
 
+    Args:
+        client (IncoreClient): Service authentication.
+
+    """
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_frag_url = urllib.parse.urljoin(client.service_url,
@@ -47,7 +49,18 @@ class FragilityService:
         self.base_mapping_url = urllib.parse.urljoin(client.service_url,
                                                      'fragility/api/mappings/')
 
-    def map_fragilities(self, mapping_id: str, inventories: list, key: str):
+    def map_fragilities(self, mapping_id: str, inventories: dict, key: str):
+        """Mapping between inventories (buildings, bridges etc.) and fragility sets.
+
+        Args:
+            mapping_id (str): ID of the Mapping file.
+            inventories (dict):  Infrastructure inventory.
+            key (str): Parameter's key in param dictionary.
+
+        Returns:
+            dict: Fragility sets from the response.
+
+        """
         features = []
 
         for inventory in inventories:
@@ -102,6 +115,23 @@ class FragilityService:
                            author: str = None, legacy_id: str = None,
                            creator: str = None, space: str = None,
                            skip: int = None, limit: int = None):
+        """Get the set of fragility data, curves.
+
+        Args:
+            demand_type (str): ID of the Mapping file, default None.
+            hazard_type (str): Hazard type filter, default None.
+            inventory_type (str): Inventory type, default None.
+            author (str): Fragility set creator’s username, default None.
+            legacy_id (str):  Legacy fragility Id from v1, default None.
+            creator (str): Fragility creator’s username, default None.
+            space (str): Name of space, default None.
+            skip (int):  Skip the first n results, default None.
+            limit (int): Limit number of results to return, default None.
+
+        Returns:
+            obj: HTTP response with search results.
+
+        """
         url = self.base_frag_url
         payload = {}
 
@@ -128,12 +158,32 @@ class FragilityService:
         return r.json()
 
     def get_fragility_set(self, fragility_id: str):
+        """Get all fragility sets.
+
+        Args:
+            fragility_id (str): ID of the Fragility set.
+
+        Returns:
+            obj: HTTP response with search results.
+
+        """
         url = urllib.parse.urljoin(self.base_frag_url, fragility_id)
         r = self.client.get(url)
 
         return r.json()
 
     def search_fragility_sets(self, text: str, skip: int = None, limit: int = None):
+        """Search fragility sets, get fragilities based on a specific text.
+
+        Args:
+            text (str): Text to search by.
+            skip (int):  Skip the first n results, default None.
+            limit (int): Limit number of results to return, default None.
+
+        Returns:
+            obj: HTTP response with search results.
+
+        """
         url = urllib.parse.urljoin(self.base_frag_url, "search")
         payload = {"text": text}
         if skip is not None:
@@ -145,11 +195,30 @@ class FragilityService:
         return r.json()
 
     def create_fragility_set(self, fragility_set: dict):
+        """Create fragility set on the server. POST API endpoint call.
+
+        Args:
+            fragility_set (dict): Set of fragilities.
+
+        Returns:
+            obj: HTTP POST Response. Returned value model of the created fragility set.
+
+        """
         url = self.base_frag_url
         r = self.client.post(url, json=fragility_set)
         return r.json()
 
     def create_fragility_mapping(self, mapping_set: dict):
+        """Create fragility mapping on the server. POST API endpoint call.
+
+        Args:
+            mapping_set (dict): Mapping set, relationship between inventories (buildings, bridges etc.)
+                and fragility sets.
+
+        Returns:
+            obj: HTTP POST Response. Returned value model of the created mapping set.
+
+        """
         url = self.base_mapping_url
         r = self.client.post(url, json=mapping_set)
 
@@ -157,6 +226,21 @@ class FragilityService:
 
     def get_fragility_mappings(self, hazard_type: str = None, inventory_type: str = None, creator: str = None,
                                space: str = None, skip: int = None, limit: int = None):
+        """Get the set of fragility mappings. Mapping is a relationship between inventories (buildings, bridges
+            etc.) and fragility sets.
+
+        Args:
+            hazard_type (str): Hazard type filter, default None.
+            inventory_type (str): Inventory type, default None.
+            creator (str): Fragility creator’s username, default None.
+            space (str): Name of space, default None.
+            skip (int):  Skip the first n results, default None.
+            limit (int): Limit number of results to return, default None.
+
+        Returns:
+            obj: HTTP response with search results.
+
+        """
         url = self.base_mapping_url
         payload = {}
 
@@ -178,6 +262,15 @@ class FragilityService:
         return r.json()
 
     def get_fragility_mapping(self, mapping_id):
+        """Get all fragility mapping.
+
+        Args:
+            mapping_id (str): ID of the Mapping set.
+
+        Returns:
+            obj: HTTP response with search results.
+
+        """
         url = urllib.parse.urljoin(self.base_mapping_url, mapping_id)
         r = self.client.get(url)
 

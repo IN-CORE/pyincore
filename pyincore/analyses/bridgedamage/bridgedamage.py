@@ -206,7 +206,7 @@ class BridgeDamage(BaseAnalysis):
 
         return bridge_results
 
-    def get_spec(self):
+    def t :
         """Get specifications of the bridge damage analysis.
 
         Returns:
