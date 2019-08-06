@@ -1,30 +1,37 @@
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
 import pandas as pd
+
 
 class PopulationDislocationUtil:
 
     @staticmethod
-    def merge_damage_population_block(building_dmg_file,
-                                      population_allocation_file,
-                                      block_data_file):
-        """
+    def merge_damage_housing_block(building_dmg_file, housing_allocation_file, block_data_file):
+        """Load CSV files to pandas Dataframes, merge them and drop unused columns.
 
         Args:
-            building_dmg_file: building damage csv
-            population_allocation_file: population inventory intermediate csv
-            block_data_file: block_data.csv
+            building_dmg_file: A building damage file in csv format.
+            housing_allocation_file: A housing unit allocation inventory file in csv format.
+            block_data_file: A block data file in csv format.
 
         Returns:
-            a merged dataframe of all three inputs
-        """
+            pd.DataFrame: A merged table of all three inputs.
 
-        # load csv to dataframe
+        """
+        # load csv to DataFrame
         building_dmg = pd.read_csv(building_dmg_file)
-        population_allocation_inventory = pd.read_csv(population_allocation_file)
+        housing_allocation_inventory = pd.read_csv(housing_allocation_file)
         block_data = pd.read_csv(block_data_file)
 
+        damage_states = ["insignific", "moderate", "heavy", "complete"]
+
+        housing_allocation_inventory = housing_allocation_inventory.drop(columns=damage_states)
+
         # first merge hazard with popluation allocation inventory on "guid"
-        # note guid can be duplicated in population allocation inventory
-        df = pd.merge(building_dmg, population_allocation_inventory,
+        # note guid can be duplicated in housing unit allocation inventory
+        df = pd.merge(building_dmg, housing_allocation_inventory,
                       how="right", on="guid", validate="1:m")
 
         # drop columns in building damage that is not used

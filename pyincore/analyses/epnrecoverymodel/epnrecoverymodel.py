@@ -1,4 +1,7 @@
-# -*- coding: utf-8 -*-
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
 # ----------------------------------------------------------------------
 # EPN_Recovery_UW_GDAL.py
 # Shuoqi Wang
@@ -324,25 +327,16 @@ class EpnRecoveryModel:
     # Calculate outage for each day 'i' where 'i < maxtf' using
     # defined 'getxt' function
     def getxt(self, x0, w, t):
-        """
-            Summary
-            -------
-            Calculate power outage fraction for each zone on day t after
-            hurricane landfall (t = 0 at landfall).
+        """Calculate power outage fraction for each zone on day t after
+        hurricane landfall (t = 0 at landfall).
 
-            Parameters
-            ----------
-            x0 : float
-                The peak power outage fraction at hurricane landfall.
-            w : float
-                Parameters for the recovery function.
-            t : int
-                The number of days after landfall.
+        Args:
+            x0 (float): The peak power outage fraction at hurricane landfall.
+            w (float): Parameters for the recovery function.
+            t (int): The number of days after landfall.
 
-            Returns
-            -------
-            float
-                Power outage fraction for each zone on day t.
+        Returns
+            float: Power outage fraction for each zone on day t.
 
         """
         z = 1.001

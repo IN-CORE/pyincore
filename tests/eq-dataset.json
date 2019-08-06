@@ -1,0 +1,31 @@
+{
+  "name":"pytest - Memphis Deterministic EQ",
+  "description":"Memphis dataset based deterministic hazard - Pytest",
+  "eqType":"dataset",
+  "hazardDatasets":[
+    {
+      "hazardType":"deterministic",
+      "demandType":"SA",
+      "demandUnits":"g",
+      "period":"0.2",
+      "eqParameters":{
+        "srcLatitude":"35.927",
+        "srcLongitude":"-89.919",
+        "magnitude":"7.9",
+        "depth":"10.0"
+      }
+    },
+    {
+      "hazardType":"deterministic",
+      "demandType":"PGA",
+      "demandUnits":"g",
+      "period":"0.0",
+      "eqParameters":{
+        "srcLatitude":"35.927",
+        "srcLongitude":"-89.919",
+        "magnitude":"7.9",
+        "depth":"10.0"
+      }
+    }
+  ]
+}
