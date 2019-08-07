@@ -174,8 +174,7 @@ class RoadDamage(BaseAnalysis):
                 demand_type = fragility_set['demandType']
                 if hazard_type == 'earthquake':
                     demand_units = fragility_set['demandUnits']
-                    #hazard_demand_type = local_fragility_set['demandType']
-                    # Hardcoded to PGA currently, need to update
+                    #hazard_demand_type = fragility_set['demandType']
                     hazard_demand_type = "PGA"
                     hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
                                                                             demand_units, location.y, location.x)
