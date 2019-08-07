@@ -82,8 +82,7 @@ class HazardService:
             hazard_id (str): ID of the Earthquake.
             demand_type (str):  Ground motion demand type. Examples: PGA, PGV, 0.2 SA
             demand_units (str): Ground motion demand unit. Examples: g, %g, cm/s, etc.
-            site_lat (float): Latitude of a point.
-            site_long (float): Longitude of a point.
+            points (list): Latitude and longitude of a point.
 
         Returns:
             obj: Hazard value.
@@ -92,7 +91,7 @@ class HazardService:
         hazard_value_set = self.get_earthquake_hazard_values(hazard_id,
                                                              demand_type,
                                                              demand_units,
-                                                             points=[str(site_lat), str(site_long)])
+                                                             points=[str(site_lat) + "," + str(site_long)])
         return hazard_value_set[0]['hazardValue']
 
     def get_earthquake_hazard_values(self, hazard_id: str, demand_type: str,
@@ -229,12 +228,12 @@ class HazardService:
 
         return response
 
-    def create_earthquake(self, eq_json, file_paths: list):
+    def create_earthquake(self, eq_json, file_paths: List = []):
         """Create earthquake on the server. POST API endpoint is called.
 
         Args:
             eq_json (json): Json representing the Earthquake.
-            file_paths (str): List of strings pointing to the paths of the datasets. Not needed for
+            file_paths (list): List of strings pointing to the paths of the datasets. Not needed for
                 model based earthquakes. Default empty list.
 
         Returns:
