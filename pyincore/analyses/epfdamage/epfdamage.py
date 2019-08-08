@@ -180,6 +180,7 @@ class EpfDamage(BaseAnalysis):
 
                 dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
                 dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
+
                 # TODO add liquefaction and uncertainty support
                 # use ground liquefaction to modify damage interval, not implemented
                 if use_liquefaction:
