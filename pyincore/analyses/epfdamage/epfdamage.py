@@ -178,9 +178,12 @@ class EpfDamage(BaseAnalysis):
                                                                           [point])
                 hazard_val = hazard_resp[0]['hazardValue']
 
-                dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
-                dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
+                dmg_probability = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
+                                                                            hazard_val, 1.0, 0)
 
+                # dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
+                # dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
+                dmg_interval = AnalysisUtil.compute_damage_intervals(dmg_probability)
                 # TODO add liquefaction and uncertainty support
                 # use ground liquefaction to modify damage interval, not implemented
                 if use_liquefaction:
@@ -204,17 +207,7 @@ class EpfDamage(BaseAnalysis):
         epf_results["flow"] = facility["properties"]["flow"]
         epf_results["indpnode"] = facility["properties"]["indpnode"]
 
-        # epf_results.update(dmg_probability)
-        epf_results["ls-slight"] = dmg_probability[0]
-        epf_results["ls-moderat"] = dmg_probability[1]
-        epf_results["ls-extensi"] = dmg_probability[2]
-        epf_results["ls-complet"] = dmg_probability[3]
-        # epf_results.update(dmg_interval)
-        epf_results["none"] = dmg_interval[0]
-        epf_results["slight-mod"] = dmg_interval[1]
-        epf_results["mod-extens"] = dmg_interval[2]
-        epf_results["ext-comple"] = dmg_interval[3]
-        epf_results["complete"] = dmg_interval[4]
+        epf_results = {**dmg_probability, **dmg_interval}  # Needs py 3.5+
 
         return epf_results
 
