@@ -113,21 +113,25 @@ class EpfDamage(BaseAnalysis):
 
         """
         result = []
-        fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), epfs, fragility_key)
+
+        fragility_key = self.get_parameter("fragility_key")
+
+        fragility_sets = dict()
+        fragility_sets[fragility_key] = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), epfs, fragility_key)
 
         # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
 
         for epf in epfs:
             fragility_set = dict()
-            if epf["id"] in fragility_sets:
-                fragility_set = fragility_sets[epf["id"]]
+            if epf["id"] in fragility_sets[fragility_key]:
+                fragility_set = fragility_sets[fragility_key][epf["id"]]
 
             result.append(self.epf_damage_analysis(epf, fragility_set, hazard_type, hazard_dataset_id,
-                                                   fragility_key, use_hazard_uncertainty, use_liquefaction))
+                                                   use_hazard_uncertainty, use_liquefaction))
 
         return result
 
-    def epf_damage_analysis(self, facility, fragility_set, hazard_type, hazard_dataset_id, fragility_key,
+    def epf_damage_analysis(self, facility, fragility_set, hazard_type, hazard_dataset_id,
                             use_hazard_uncertainty, use_liquefaction):
         """Calculates epf damage results for a single epf.
 
@@ -156,14 +160,13 @@ class EpfDamage(BaseAnalysis):
         if fragility_set is not None:
             location = GeoUtil.get_location(facility)
             demand_type = fragility_set['demandType']
-            fragility_key = self.get_parameter("fragility_key")
-            local_fragility_set = fragility_set[fragility_key]
+
             if hazard_type == 'earthquake':
                 # TODO include liquefaction and hazard uncertainty
-                hazard_demand_type = EpfUtil.get_hazard_demand_type(local_fragility_set, hazard_type)
-                demand_units = local_fragility_set['demandUnits']
+                hazard_demand_type = EpfUtil.get_hazard_demand_type(fragility_set, hazard_type)
+                demand_units = fragility_set['demandUnits']
 
-                demand_type = local_fragility_set['demandType']
+                demand_type = fragility_set['demandType']
 
                 if hazard_demand_type != demand_type:
                     print("Mismatch in hazard type.")
