@@ -20,6 +20,12 @@ from pyincore import DataService
 
 
 class Dataset:
+    """Dataset.
+
+    Args:
+        metadata (dict): Dataset metadata.
+
+    """
     def __init__(self, metadata):
         self.metadata = metadata
 
@@ -34,6 +40,16 @@ class Dataset:
 
     @classmethod
     def from_data_service(cls, id: str, data_service: DataService):
+        """Get Dataset from Data service, get metadata as well.
+
+        Args:
+            id (str): ID of the Dataset.
+            data_service (obj): Data service.
+
+        Returns:
+            obj: Dataset from Data service.
+
+        """
         metadata = data_service.get_dataset_metadata(id)
         instance = cls(metadata)
         instance.cache_files(data_service)
@@ -41,10 +57,29 @@ class Dataset:
 
     @classmethod
     def from_json_str(cls, json_str):
+        """Get Dataset from json string.
+
+        Args:
+            json_str (str): JSON of the Dataset.
+
+        Returns:
+            obj: Dataset from JSON.
+
+        """
         return cls(json.loads(json_str))
 
     @classmethod
     def from_file(cls, file_path, data_type):
+        """Get Dataset from the file.
+
+        Args:
+            file_path (str): File path.
+            data_type (str): Data type.
+
+        Returns:
+            obj: Dataset from file.
+
+        """
         metadata = {"dataType": data_type,
                     "format": '',
                     "fileDescriptors": [],
@@ -55,11 +90,31 @@ class Dataset:
 
     @classmethod
     def from_dataframe(cls, dataframe, name):
+        """Get Dataset from Panda's DataFrame.
+
+        Args:
+            dataframe (obj): Panda's DataFrame.
+            name (str): filename.
+
+        Returns:
+            obj: Dataset from file.
+
+        """
         dataframe.to_csv(name, index=False)
         return Dataset.from_file(name, "csv")
 
     @classmethod
     def from_csv_data(cls, result_data, name):
+        """Get Dataset from CSV data.
+
+        Args:
+            result_data (obj): Result data and metadata.
+            name (str): A CSV filename.
+
+        Returns:
+            obj: Dataset from file.
+
+        """
         if len(result_data) > 0:
             with open(name, 'w') as csv_file:
                 # Write the parent ID at the top of the result data, if it is given
@@ -69,6 +124,15 @@ class Dataset:
         return Dataset.from_file(name, "csv")
 
     def cache_files(self, data_service: DataService):
+        """Get the set of fragility data, curves.
+
+        Args:
+            data_service (obj): Data service.
+
+        Returns:
+            str: A path to the local file.
+
+        """
         if self.local_file_path is not None:
             return
         self.local_file_path = data_service.get_dataset_blob(self.id)
@@ -77,7 +141,12 @@ class Dataset:
     """Utility methods for reading different standard file formats"""
 
     def get_inventory_reader(self):
+        """Utility method for reading different standard file formats: Set of inventory.
 
+        Returns:
+            obj: A Fiona object.
+
+        """
         filename = self.local_file_path
         if os.path.isdir(filename):
             layers = fiona.listlayers(filename)
@@ -88,6 +157,12 @@ class Dataset:
             return fiona.open(filename)
 
     def get_EPAnet_inp_reader(self):
+        """Utility method for reading different standard file formats: EPAnet reader.
+
+        Returns:
+            obj: A Winter model.
+
+        """
         filename = self.local_file_path
         if os.path.isdir(filename):
             files = glob.glob(filename + "/*.inp")
@@ -97,7 +172,13 @@ class Dataset:
         return wn
 
     def get_json_reader(self):
-        if not "json" in self.readers:
+        """Utility method for reading different standard file formats: json reader.
+
+        Returns:
+            obj: A json model data.
+
+        """
+        if "json" not in self.readers:
             filename = self.local_file_path
             if os.path.isdir(filename):
                 files = glob.glob(filename + "/*.json")
@@ -110,7 +191,16 @@ class Dataset:
         return self.readers["json"]
 
     def get_raster_value(self, location):
-        if not "raster" in self.readers:
+        """Utility method for reading different standard file formats: raster value.
+
+        Args:
+            location (obj): A point defined as location.x and location.y.
+
+        Returns:
+            numpy.array: Hazard values.
+
+        """
+        if "raster" not in self.readers:
             filename = self.local_file_path
             self.readers["raster"] = rasterio.open(filename)
 
@@ -123,7 +213,13 @@ class Dataset:
         return numpy.asscalar(data[row, col])
 
     def get_csv_reader(self):
-        if not "csv" in self.readers:
+        """Utility method for reading different standard file formats: csv reader.
+
+         Returns:
+             obj: CSV reader.
+
+         """
+        if "csv" not in self.readers:
             filename = self.local_file_path
             if os.path.isdir(filename):
                 files = glob.glob(filename + "/*.csv")
@@ -136,6 +232,15 @@ class Dataset:
         return self.readers["csv"]
 
     def get_file_path(self, type='csv'):
+        """Utility method for reading different standard file formats: file path.
+
+        Args:
+            type (str): A file type.
+
+        Returns:
+            str: File name and path.
+
+        """
         filename = self.local_file_path
         if os.path.isdir(filename):
             files = glob.glob(filename + "/*." + type)
@@ -145,6 +250,12 @@ class Dataset:
         return filename
 
     def get_dataframe_from_csv(self):
+        """Utility method for reading different standard file formats: Pandas DataFrame from csv.
+
+        Returns:
+            obj: Panda's DataFrame.
+
+        """
         filename = self.get_file_path('csv')
         df = pd.DataFrame()
         if os.path.isfile(filename):
@@ -159,8 +270,13 @@ class Dataset:
         self.close()
 
 
-# Added DamageRatioDataset and InventoryDataset for backwards compatibility until analyses are updated
 class DamageRatioDataset:
+    """For backwards compatibility until analyses are updated.
+
+    Args:
+        filename (str): CSV file with damage ratios.
+
+    """
     def __init__(self, filename):
         self.damage_ratio = None
         csvfile = open(filename, 'r')
@@ -171,6 +287,12 @@ class DamageRatioDataset:
 
 
 class InventoryDataset:
+    """For backwards compatibility until analyses are updated.
+
+    Args:
+        filename (str): file with GIS layers.
+
+    """
     def __init__(self, filename):
         self.inventory_set = None
         if os.path.isdir(filename):

@@ -25,7 +25,7 @@ class HousingUnitAllocation(BaseAnalysis):
                 {
                     'id': 'seed',
                     'required': True,
-                    'description': 'Initial Seed for the Probabilistic model',
+                    'description': 'Initial seed for the probabilistic model',
                     'type': int
                 },
                 {
@@ -74,7 +74,7 @@ class HousingUnitAllocation(BaseAnalysis):
          one csv result per iteration.
 
         Returns:
-               bool: True if successful, False otherwise
+            bool: True if successful, False otherwise
 
         """
 
@@ -113,16 +113,16 @@ class HousingUnitAllocation(BaseAnalysis):
         """Merge order to Building and Address inventories.
 
         Args:
-            housing_unit_inventory (pd.DataFrame): Housing unit inventory
-            seed (int): random number generator seed for reproducibility
+            housing_unit_inventory (pd.DataFrame): Housing unit inventory.
+            seed (int): Random number generator seed for reproducibility.
 
         Returns:
-            pd.DataFrame: Sorted housing unit inventory
+            pd.DataFrame: Sorted housing unit inventory.
 
         """
         size_row, size_col = housing_unit_inventory.shape
         np.random.seed(seed)
-        sorted_housing_unit0 = housing_unit_inventory.sort_values(by=["lvtypuntid"])
+        sorted_housing_unit0 = housing_unit_inventory.sort_values(by=["huid"])
 
         # Create Random merge order for housing unit inventory
         random_order_housing_unit = np.random.uniform(0, 1, size_row)
@@ -218,8 +218,7 @@ class HousingUnitAllocation(BaseAnalysis):
                                                                    sorted_infrastructure.columns,
                                                                    housing_unit_address_point_inventory)
 
-        sorted_housing_unit_address_inventory = housing_unit_address_point_inventory.sort_values(
-            by=["lvtypuntid"])
+        sorted_housing_unit_address_inventory = housing_unit_address_point_inventory.sort_values(by=["huid"])
 
         output = sorted_housing_unit_address_inventory[sorted_housing_unit_address_inventory["exists3"] == 'both']
         return output
