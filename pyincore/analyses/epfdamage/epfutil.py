@@ -1,11 +1,8 @@
-"""pyincore.analyses.epfdamage.epfutil
-
-Copyright (c) 2017 University of Illinois and others.  All rights reserved.
-This program and the accompanying materials are made available under the
-terms of the BSD-3-Clause which accompanies this distribution,
-and is available at https://opensource.org/licenses/BSD-3-Clause
-
-"""
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
 class EpfUtil:
@@ -25,7 +22,8 @@ class EpfUtil:
         "EDC2", "Distribution Circuit (Standard Components)"
     }
 
-    DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
+    # DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
+    DEFAULT_FRAGILITY_KEY = "pga"
 
     @staticmethod
     def get_hazard_demand_type(fragility_set, hazard_type):

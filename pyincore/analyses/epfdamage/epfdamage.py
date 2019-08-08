@@ -1,18 +1,14 @@
-"""pyincore.analyses.epfdamage.epfdamage
-
-Copyright (c) 2017 University of Illinois and others.  All rights reserved.
-This program and the accompanying materials are made available under the
-terms of the BSD-3-Clause which accompanies this distribution,
-and is available at https://opensource.org/licenses/BSD-3-Clause
-
-"""
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import collections
 import concurrent.futures
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore.analyses.epfdamage.epfutil import EpfUtil
 from itertools import repeat
-import traceback
 
 
 class EpfDamage(BaseAnalysis):
@@ -36,6 +32,7 @@ class EpfDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
             fragility_key = EpfUtil.DEFAULT_FRAGILITY_KEY
+            self.set_parameter("fragility_key", fragility_key)
 
         # Get hazard input
         hazard_dataset_id = self.get_parameter("hazard_id")
@@ -53,7 +50,6 @@ class EpfDamage(BaseAnalysis):
         if self.get_parameter("use_liquefaction") is not None:
             use_liquefaction = self.get_parameter("use_liquefaction")
 
-        results = []
         user_defined_cpu = 1
 
         if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
@@ -119,22 +115,10 @@ class EpfDamage(BaseAnalysis):
         result = []
         fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), epfs, fragility_key)
 
-        #fragility_sets = self.fragilitysvc.map_fragilities(mapping_id, epfs, "Non-Retrofit Fragility ID Code")
-
         # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
-        # fragility_sets_liq = self.fragilitysvc.map_fragilities(mapping_id, epfs, "Liquefaction-Fragility-Key")
-        #for epf in epfs:
-        #    if epf["id"] in fragility_sets.keys():
-        #        liq_fragility_set = None
-                # Check if mapping contains liquefaction fragility
-        #        if epf_dataset_id is not None and epf["id"] in fragility_sets_liq:
-        #            liq_fragility_set = fragility_sets_liq[epf["id"]]
-        #
-        #        result.append(self.epf_damage_analysis(epf, fragility_sets[epf["id"]], liq_fragility_set,
-        #                                               hazardsvc, hazard_dataset_id, epf_dataset_id))
 
         for epf in epfs:
-            fragility_set = None
+            fragility_set = dict()
             if epf["id"] in fragility_sets:
                 fragility_set = fragility_sets[epf["id"]]
 
@@ -169,97 +153,64 @@ class EpfDamage(BaseAnalysis):
         dmg_probability = [0.0, 0.0, 0.0, 0.0]
         dmg_interval = [0.0, 0.0, 0.0, 0.0, 0.0]
 
-        try:
-            if fragility_set is not None:
-                location = GeoUtil.get_location(facility)
-                demand_type = EpfUtil.get_hazard_demand_type(fragility_set, hazard_type)
-                # demand_type = fragility_set['demandType']
-                demand_units = fragility_set['demandUnits']
+        if fragility_set is not None:
+            location = GeoUtil.get_location(facility)
+            demand_type = fragility_set['demandType']
+            fragility_key = self.get_parameter("fragility_key")
+            local_fragility_set = fragility_set[fragility_key]
+            if hazard_type == 'earthquake':
+                # TODO include liquefaction and hazard uncertainty
+                hazard_demand_type = EpfUtil.get_hazard_demand_type(local_fragility_set, hazard_type)
+                demand_units = local_fragility_set['demandUnits']
 
-                #fragility_key = self.get_parameter("fragility_key")
-                local_fragility_set = fragility_set[fragility_key]
-                if hazard_type == 'earthquake':
-                    # TODO include liquefaction and hazard uncertainty
-                    hazard_demand_type = EpfUtil.get_hazard_demand_type(local_fragility_set, hazard_type)
-                    demand_units = local_fragility_set['demandUnits']
+                demand_type = local_fragility_set['demandType']
 
-                    demand_type = local_fragility_set['demandType']
+                if hazard_demand_type != demand_type:
+                    print("Mismatch in hazard type.")
+                    # exit(1)
 
-                    if hazard_demand_type != demand_type:
-                        print("Mismatch in hazard type.")
-                        # exit(1)
+                # Start here, need to add the hazard dataset id to the analysis parameter list
+                hazard_resp = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, demand_type,
+                                                                          demand_units,
+                                                                          [location.y, location.x])
+                hazard_val = hazard_resp[0]['hazardValue']
 
-                    # Start here, need to add the hazard dataset id to the analysis parameter list
-                    hazard_resp = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, demand_type,
-                                                                              demand_units,
-                                                                              [location.y, location.x])
-                    hazard_val = hazard_resp[0]['hazardValue']
+                dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
+                dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
+                # TODO add liquefaction and uncertainty support
+                # use ground liquefaction to modify damage interval, not implemented
+                if use_liquefaction:
+                    pass
+                # use hazard uncertainty, not implemented
+                if use_hazard_uncertainty:
+                    pass
 
-                    dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
-                    dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
-
-                    # use ground liquifacition to modify damage interval, not implemented
-                    if use_liquefaction:
-                        liq_hazard_type = ""
-                        liq_hazard_val = 0.0
-                        liquefaction_prob = 0.0
-
-                        geology_dataset_id = ""
-                        pgd_demand_units = ""
-                        fragility_set_liq = None
-                        if fragility_set_liq is not None and geology_dataset_id is not None:
-                            liq_fragility_curve = fragility_set_liq['fragilityCurves'][0]
-                            liq_hazard_type = fragility_set_liq['demandType']
-                            pgd_demand_units = fragility_set_liq['demandUnits']
-
-                            # Get PGD hazard value from hazard service
-                            location_str = str(location.y) + "," + str(location.x)
-
-                            liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, geology_dataset_id,
-                                                                              pgd_demand_units, [location_str])
-                            liq_hazard_val = liquefaction[0]['pgd']
-                            liquefaction_prob = liquefaction[0]['liqProbability']
-
-                            liq_fragility_vars = {'x': liq_hazard_val, 'y': liquefaction_prob}
-                            pgd_repairs = AnalysisUtil.compute_custom_limit_state_probability(fragility_set_liq,
-                                                                                              liq_fragility_vars)
-
-                    # use hazard uncertainty, not implemented
-                    if use_hazard_uncertainty:
-                        pass
-
-                else:
-                    print("Missing hazard type.")
             else:
-                print("Missing fragility set.")
+                print("Missing hazard type.")
+        else:
+            print("Missing fragility set.")
 
-            epf_results['guid'] = facility['properties']['guid']
-            epf_results["hazardtype"] = demand_type
-            epf_results["hazardval"] = hazard_val
-            epf_results["nodenwid"] = facility["properties"]["nodenwid"]
-            epf_results["fltytype"] = facility["properties"]["fltytype"]
-            epf_results["strctype"] = facility["properties"]["strctype"]
-            epf_results["utilfcltyc"] = facility["properties"]["utilfcltyc"]
-            epf_results["flow"] = facility["properties"]["flow"]
-            epf_results["indpnode"] = facility["properties"]["indpnode"]
+        epf_results['guid'] = facility['properties']['guid']
+        epf_results["hazardtype"] = demand_type
+        epf_results["hazardval"] = hazard_val
+        epf_results["nodenwid"] = facility["properties"]["nodenwid"]
+        epf_results["fltytype"] = facility["properties"]["fltytype"]
+        epf_results["strctype"] = facility["properties"]["strctype"]
+        epf_results["utilfcltyc"] = facility["properties"]["utilfcltyc"]
+        epf_results["flow"] = facility["properties"]["flow"]
+        epf_results["indpnode"] = facility["properties"]["indpnode"]
 
-            # epf_results.update(dmg_probability)
-            epf_results["ls-slight"] = dmg_probability[0]
-            epf_results["ls-moderat"] = dmg_probability[1]
-            epf_results["ls-extensi"] = dmg_probability[2]
-            epf_results["ls-complet"] = dmg_probability[3]
-            # epf_results.update(dmg_interval)
-            epf_results["none"] = dmg_interval[0]
-            epf_results["slight-mod"] = dmg_interval[1]
-            epf_results["mod-extens"] = dmg_interval[2]
-            epf_results["ext-comple"] = dmg_interval[3]
-            epf_results["complete"] = dmg_interval[4]
-
-        except Exception as ex:
-            # This prints the type, value and stacktrace of error being handled.
-            traceback.print_exc()
-            print()
-            # raise e
+        # epf_results.update(dmg_probability)
+        epf_results["ls-slight"] = dmg_probability[0]
+        epf_results["ls-moderat"] = dmg_probability[1]
+        epf_results["ls-extensi"] = dmg_probability[2]
+        epf_results["ls-complet"] = dmg_probability[3]
+        # epf_results.update(dmg_interval)
+        epf_results["none"] = dmg_interval[0]
+        epf_results["slight-mod"] = dmg_interval[1]
+        epf_results["mod-extens"] = dmg_interval[2]
+        epf_results["ext-comple"] = dmg_interval[3]
+        epf_results["complete"] = dmg_interval[4]
 
         return epf_results
 
@@ -329,7 +280,7 @@ class EpfDamage(BaseAnalysis):
                     'id': 'epfs',
                     'required': True,
                     'description': 'Electric Power Facility Inventory',
-                    'type': ['ergo:epfs'],
+                    'type': ['incore:epf'],
                 },
 
             ],
@@ -337,7 +288,7 @@ class EpfDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'epfs',
-                    'type': 'epf-damage'
+                    'type': 'incore:epfVer1'
                 }
             ]
         }
