@@ -172,10 +172,10 @@ class EpfDamage(BaseAnalysis):
                     print("Mismatch in hazard type.")
                     # exit(1)
 
-                # Start here, need to add the hazard dataset id to the analysis parameter list
+                point = str(location.y) + "," + str(location.x)
                 hazard_resp = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, demand_type,
                                                                           demand_units,
-                                                                          [location.y, location.x])
+                                                                          [point])
                 hazard_val = hazard_resp[0]['hazardValue']
 
                 dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
