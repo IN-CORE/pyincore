@@ -18,6 +18,7 @@ class EpfDamage(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
@@ -117,7 +118,8 @@ class EpfDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), epfs, fragility_key)
+        fragility_sets[fragility_key] = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), epfs,
+                                                                          fragility_key)
 
         # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
 
@@ -160,28 +162,20 @@ class EpfDamage(BaseAnalysis):
         if fragility_set is not None:
             location = GeoUtil.get_location(facility)
             demand_type = fragility_set['demandType']
+            point = str(location.y) + "," + str(location.x)
+            demand_units = fragility_set['demandUnits']
 
             if hazard_type == 'earthquake':
-                # TODO include liquefaction and hazard uncertainty
                 hazard_demand_type = EpfUtil.get_hazard_demand_type(fragility_set, hazard_type)
-                demand_units = fragility_set['demandUnits']
-
-                demand_type = fragility_set['demandType']
-
                 if hazard_demand_type != demand_type:
                     print("Mismatch in hazard type.")
-                    # exit(1)
+                    exit(1)
 
-                point = str(location.y) + "," + str(location.x)
                 hazard_resp = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, demand_type,
                                                                           demand_units,
                                                                           [point])
                 hazard_val = hazard_resp[0]['hazardValue']
 
-                dmg_probability = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
-                                                                            hazard_val, 1.0, 0)
-
-                dmg_interval = AnalysisUtil.compute_damage_intervals(dmg_probability)
                 # TODO add liquefaction and uncertainty support
                 # use ground liquefaction to modify damage interval, not implemented
                 if use_liquefaction:
@@ -190,8 +184,22 @@ class EpfDamage(BaseAnalysis):
                 if use_hazard_uncertainty:
                     pass
 
+            elif hazard_type == 'tornado':
+                hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
+                                                                     location.x, 0)
+            elif hazard_type == 'hurricane':
+                pass
+
+            elif hazard_type == 'tsunami':
+                pass
+
             else:
                 print("Missing hazard type.")
+
+            dmg_probability = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
+                                                                           hazard_val, 1.0, 0)
+            dmg_interval = AnalysisUtil.compute_damage_intervals(dmg_probability)
+
         else:
             print("Missing fragility set.")
 
