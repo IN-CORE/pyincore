@@ -176,25 +176,27 @@ class EpfDamage(BaseAnalysis):
                                                                           [point])
                 hazard_val = hazard_resp[0]['hazardValue']
 
-                # TODO add liquefaction and uncertainty support
+                # TODO include liquefaction and hazard uncertainty
                 # use ground liquefaction to modify damage interval, not implemented
                 if use_liquefaction:
-                    pass
+                    raise ValueError('Liquefaction has not yet been implemented!')
                 # use hazard uncertainty, not implemented
                 if use_hazard_uncertainty:
-                    pass
+                    raise ValueError('Hazard uncertainty has not yet been implemented!')
 
             elif hazard_type == 'tornado':
                 hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
                                                                      location.x, 0)
             elif hazard_type == 'hurricane':
-                pass
+                # TODO: implement hurricane
+                raise ValueError('Hurricane hazard has not yet been implemented!')
 
             elif hazard_type == 'tsunami':
-                pass
+                # TODO: implement tsunami
+                raise ValueError('Tsunami hazard has not yet been implemented!')
 
             else:
-                print("Missing hazard type.")
+                raise ValueError("Missing hazard type.")
 
             dmg_probability = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
                                                                            hazard_val, 1.0, 0)
