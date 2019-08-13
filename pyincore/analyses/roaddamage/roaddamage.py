@@ -7,7 +7,6 @@
 import collections
 import concurrent.futures
 import traceback
-import string
 from itertools import repeat
 from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
 
@@ -47,11 +46,6 @@ class RoadDamage(BaseAnalysis):
 
         # Get hazard type
         hazard_type = self.get_parameter("hazard_type")
-
-        # Hazard Uncertainty
-        use_hazard_uncertainty = False
-        if self.get_parameter("use_hazard_uncertainty") is not None:
-            use_hazard_uncertainty = self.get_parameter("use_hazard_uncertainty")
 
         # Liquefaction
         use_liquefaction = False
@@ -156,16 +150,13 @@ class RoadDamage(BaseAnalysis):
         try:
             road_results = collections.OrderedDict()
 
-            hazard_val = 0.0
             demand_type = "None"
 
             dmg_probability = collections.OrderedDict()
-            dmg_interval = collections.OrderedDict()
             mean_damage = collections.OrderedDict()
             mean_damage['meandamage'] = 0.0
             mean_damage_dev = collections.OrderedDict()
             mean_damage_dev['mdamagedev'] = 0.0
-            hazard_std_dev = 0.0
 
             road_results['guid'] = road['properties']['guid']
 
@@ -174,11 +165,8 @@ class RoadDamage(BaseAnalysis):
                 demand_type = fragility_set['demandType']
                 if hazard_type == 'earthquake':
                     demand_units = fragility_set['demandUnits']
-                    #hazard_demand_type = fragility_set['demandType']
-                    hazard_demand_type = "PGA"
-                    hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
-                                                                            demand_units, location.y, location.x)
-                    if use_liquefaction and geology_dataset_id is not None:
+                    hazard_demand_type = fragility_set['demandType']
+                    if hazard_demand_type.lower() == 'pgd' and use_liquefaction and geology_dataset_id is not None:
                         location_str = str(location.y) + "," + str(location.x)
                         demand_units_liq = fragility_set['demandUnits']
                         liquefaction_demand_type = fragility_set['demandType']
@@ -195,6 +183,8 @@ class RoadDamage(BaseAnalysis):
                         dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, liquefaction_val)
                         road_results['hazardval'] = liquefaction_val
                     else:
+                        hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
+                                                                                demand_units, location.y, location.x)
                         dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, hazard_val)
                         road_results['hazardval'] = hazard_val
                 else:
