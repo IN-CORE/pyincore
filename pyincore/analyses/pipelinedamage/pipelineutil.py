@@ -10,7 +10,6 @@ class PipelineUtil:
     """Utility methods for pipeline analysis"""
 
     DEFAULT_EQ_FRAGILITY_KEY = "pgv"
-    DEFAULT_TSU_FRAGILITY_KEY = "Non-Retrofit inundationDepth Fragility ID Code"
     LIQ_FRAGILITY_KEY = "pgd"
 
 

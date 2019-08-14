@@ -113,11 +113,9 @@ class PipelineDamage(BaseAnalysis):
         if fragility_key is None:
             if hazard_type == "earthquake":
                 fragility_key = PipelineUtil.DEFAULT_EQ_FRAGILITY_KEY
-            elif hazard_type == "tsunami":
-                fragility_key = PipelineUtil.DEFAULT_TSU_FRAGILITY_KEY
             else:
                 raise ValueError(
-                    "Hazard type other than Earthquake and Tsunami are not currently supported.")
+                    "Hazard type other than Earthquake are not currently supported.")
 
         # get fragility set
         fragility_sets = self.fragilitysvc.map_fragilities(
@@ -162,24 +160,9 @@ class PipelineDamage(BaseAnalysis):
                                                                 hazard_dataset_id,
                                                                 geology_dataset_id,
                                                                 use_liquefaction))
-        elif hazard_type == "tsunami":
-            for pipeline in pipelines:
-                if pipeline["id"] in fragility_sets.keys():
-                    liq_fragility_set = None
-                    geology_dataset_id = ""
-                    use_liquefaction = False
-                    result.append(self.pipeline_damage_analysis(pipeline,
-                                                                hazard_type,
-                                                                fragility_sets[
-                                                                    pipeline[
-                                                                        "id"]],
-                                                                liq_fragility_set,
-                                                                hazard_dataset_id,
-                                                                geology_dataset_id,
-                                                                use_liquefaction))
         else:
             raise ValueError(
-                "Hazard type other than Earthquake and Tsunami are not currently supported.")
+                "Hazard types other than Earthquake and Tsunami are not currently supported.")
 
         return result
 
@@ -299,32 +282,9 @@ class PipelineDamage(BaseAnalysis):
                 pipeline_results['numpgdrpr'] = num_pgd_repairs
                 pipeline_results['numrepairs'] = num_repairs
 
-            # tsunami pipeline damage produce limit states instead of repair rates
-            elif hazard_type == 'tsunami':
-                hazard_val = self.hazardsvc.get_tsunami_hazard_value(
-                    hazard_dataset_id,
-                    demand_type,
-                    demand_units,
-                    location.y, location.x)
-                if hazard_val <= 0.0:
-                    hazard_val = 0.0
-
-                limit_states = AnalysisUtil.compute_limit_state_probability(
-                    fragility_set['fragilityCurves'], hazard_val, 1.0, 0)
-                dmg_intervals = AnalysisUtil.compute_damage_intervals(
-                    limit_states)
-                pipeline_results = {**limit_states, **dmg_intervals}  # Needs py 3.5+
-                pipeline_results['guid'] = pipeline['properties']['guid']
-                pipeline_results['hazardtype'] = hazard_type
-                pipeline_results['hazardval'] = hazard_val
-                pipeline_results['demandtype'] = demand_type
-                pipeline_results['liqhaztype'] = liq_hazard_type
-                pipeline_results['liqhazval'] = liq_hazard_val
-                pipeline_results['liqprobability'] = liquefaction_prob
-
             else:
                 raise ValueError(
-                    "Hazard type other than Earthquake and Tsunami are not currently supported.")
+                    "Hazard types other than Earthquake are not currently supported.")
 
         return pipeline_results
 

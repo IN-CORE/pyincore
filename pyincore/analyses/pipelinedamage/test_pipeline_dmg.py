@@ -1,9 +1,9 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.pipelinedamage import PipelineDamage
 
 
 def test_pipeline_dmg():
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     # This is the Memphis Water Buried Pipeline with Topology dataset the Ergo repository
     pipeline_dataset_id = "5a284f28c7d30d13bc081d14"
@@ -32,17 +32,6 @@ def test_pipeline_dmg():
     pipeline_dmg.set_parameter("use_liquefaction", False)
     pipeline_dmg.set_parameter("num_cpu", 4)
     pipeline_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
-
-    # # test tsunami pipeline
-    # pipeline_dmg.load_remote_input_dataset("pipeline",
-    #                                        "5d2666b5b9219c3c5595ee65")
-    # pipeline_dmg.set_parameter("result_name",
-    #                            "seaside_tsunami_pipeline_result")
-    # pipeline_dmg.set_parameter("mapping_id", "5d320a87b9219c6d66398b45")
-    # pipeline_dmg.set_parameter("hazard_type", "tsunami")
-    # pipeline_dmg.set_parameter("hazard_id", "5bc9eaf7f7b08533c7e610e1")
-    # pipeline_dmg.set_parameter("use_liquefaction", False)
-    # pipeline_dmg.set_parameter("num_cpu", 4)
 
     # Run pipeline damage analysis
     result = pipeline_dmg.run_analysis()
