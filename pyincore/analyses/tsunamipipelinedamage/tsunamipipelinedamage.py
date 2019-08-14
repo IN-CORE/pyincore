@@ -133,6 +133,7 @@ class TsunamiPipelineDamage(BaseAnalysis):
 
         pipeline_results = collections.OrderedDict()
         hazard_val = 0.0
+        demand_type = ""
 
         if fragility_set is not None:
             demand_type = fragility_set['demandType'].lower()
