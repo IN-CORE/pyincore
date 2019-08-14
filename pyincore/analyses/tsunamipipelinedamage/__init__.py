@@ -6,4 +6,3 @@
 
 
 from pyincore.analyses.tsunamipipelinedamage.tsunamipipelinedamage import TsunamiPipelineDamage
-from pyincore.analyses.tsunamipipelinedamage.tsunamipipelineutil import TsunamiPipelineUtil
