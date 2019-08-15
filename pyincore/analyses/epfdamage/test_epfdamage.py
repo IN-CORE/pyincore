@@ -15,12 +15,11 @@ def run_with_base_class():
     # Earthquake mapping
     mapping_id = "5b47be72337d4a37ba8090e2"
 
-    # Run Memphis earthquake building damage
+    # Run epf damage
     epf_dmg = EpfDamage(client)
     epf_dmg.load_remote_input_dataset("epfs", epf_dataset_id)
 
     result_name = "hazus_epf_dmg_result"
-    # epf_dmg.set_parameter("fragility_key", "pga")
     epf_dmg.set_parameter("result_name", result_name)
     epf_dmg.set_parameter("mapping_id", mapping_id)
     epf_dmg.set_parameter("hazard_type", hazard_type)
