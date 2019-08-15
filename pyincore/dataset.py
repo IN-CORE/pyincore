@@ -249,8 +249,12 @@ class Dataset:
 
         return filename
 
-    def get_dataframe_from_csv(self):
+    def get_dataframe_from_csv(self, low_memory=True):
         """Utility method for reading different standard file formats: Pandas DataFrame from csv.
+
+        Args:
+            low_memory (bool): A flag to suppress warning. Pandas is guessing dtypes for each column
+            if column dtype is not specified which is very memory demanding.
 
         Returns:
             obj: Panda's DataFrame.
@@ -259,7 +263,7 @@ class Dataset:
         filename = self.get_file_path('csv')
         df = pd.DataFrame()
         if os.path.isfile(filename):
-            df = pd.read_csv(filename, header="infer")
+            df = pd.read_csv(filename, header="infer", low_memory=low_memory)
         return df
 
     def close(self):
