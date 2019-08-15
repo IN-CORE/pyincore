@@ -13,9 +13,9 @@ def run_without_base_class():
     # Population Dislocation
     podi = PopulationDislocation(client)
     merged_block_inv = PopulationDislocationUtil.merge_damage_housing_block(
-        building_dmg_file='seaside_bldg_dmg_result.csv',
-        housing_unit_allocation_file='pop_allocation_2222.csv',
-        block_data_file='IN-CORE_01av3_SetupSeaside_FourInventories_2018-08-29_bgdata.csv')
+        building_dmg_file='bldg_dmg_result.csv',
+        housing_unit_allocation_file='housingunitallocation_1111.csv',
+        block_data_file='bgdata.csv')
 
     merged_final_inv = podi.get_dislocation(seed_i, merged_block_inv)
 
@@ -26,9 +26,16 @@ def run_without_base_class():
 def run_with_base_class():
     client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
 
+    # Seaside
     building_dmg = "5c12856d1f5e0d0667d6410e"
-    housing_unit_alloc = "5c12d96f1f5e0d0667d66b2c"
-    bg_data = "5c128a161f5e0d0667d64116"
+    housing_unit_alloc = "5d543b06b9219c0689b987af"
+    bg_data = "5d542bd8b9219c0689b90408"
+
+    # Joplin
+    #building_dmg = ""
+    #housing_unit_alloc = ""
+    #bg_data = "5d4c9545b9219c0689b2358a"
+
 
     pop_dis = PopulationDislocation(client)
 
