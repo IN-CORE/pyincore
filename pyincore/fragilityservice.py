@@ -45,9 +45,9 @@ class FragilityService:
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_frag_url = urllib.parse.urljoin(client.service_url,
-                                                  'fragility/api/fragilities/')
+                                                  'dfr3/api/fragilities/')
         self.base_mapping_url = urllib.parse.urljoin(client.service_url,
-                                                     'fragility/api/mappings/')
+                                                     'dfr3/api/mappings/')
 
     def map_fragilities(self, mapping_id: str, inventories: dict, key: str):
         """Mapping between inventories (buildings, bridges etc.) and fragility sets.
