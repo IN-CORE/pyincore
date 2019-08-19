@@ -23,7 +23,8 @@ def fragilitysvc():
     except EnvironmentError:
         return None
     # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, cred[0])
+    # client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, cred[0])
+    client = InsecureIncoreClient("http://localhost:8080", cred[0])
     return FragilityService(client)
 
 
@@ -92,6 +93,6 @@ def test_create_fragility_set(fragilitysvc):
 def test_create_fragility_mapping(fragilitysvc):
     with open("fragility_mappingset.json", 'r') as f:
         mapping_set = json.load(f)
-    created = fragilitysvc.create_fragility_mapping(mapping_set)
+    created = fragilitysvc.create_mapping(mapping_set)
 
     assert "id" in created.keys()

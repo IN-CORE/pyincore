@@ -14,6 +14,7 @@ from pyincore.dataservice import DataService
 from pyincore.utils.plotutil import PlotUtil
 from pyincore.utils.geoutil import GeoUtil
 from pyincore.dataservice import DataService
+from pyincore.dfr3service import Dfr3Service
 from pyincore.fragilityservice import FragilityService
 from pyincore.spaceservice import SpaceService
 from pyincore.utils.analysisutil import AnalysisUtil

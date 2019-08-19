@@ -2,6 +2,7 @@
   "name": "pytest - Tsunami Building Fragility Mapping",
   "hazardType": "tsunami",
   "inventoryType": "building",
+  "mappingType": "fragility",
   "mappings": [
       {
           "legacyEntry": {
