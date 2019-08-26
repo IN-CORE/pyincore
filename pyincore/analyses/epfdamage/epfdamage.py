@@ -208,12 +208,6 @@ class EpfDamage(BaseAnalysis):
         epf_results['guid'] = facility['properties']['guid']
         epf_results["hazardtype"] = demand_type
         epf_results["hazardval"] = hazard_val
-        epf_results["nodenwid"] = facility["properties"]["nodenwid"]
-        epf_results["fltytype"] = facility["properties"]["fltytype"]
-        epf_results["strctype"] = facility["properties"]["strctype"]
-        epf_results["utilfcltyc"] = facility["properties"]["utilfcltyc"]
-        epf_results["flow"] = facility["properties"]["flow"]
-        epf_results["indpnode"] = facility["properties"]["indpnode"]
 
         epf_results = {**dmg_probability, **dmg_interval}  # Needs py 3.5+
 

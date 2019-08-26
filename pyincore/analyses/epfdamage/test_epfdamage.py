@@ -4,16 +4,16 @@ from pyincore.analyses.epfdamage import EpfDamage
 
 def run_with_base_class():
     client = InsecureIncoreClient(
-        "http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
+        "http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
 
     hazard_type = "earthquake"
 
-    hazard_id = "5b902cb273c3371e1236b36b"
+    hazard_id = "5d3b6a31b9219cf53284c73d"
 
-    epf_dataset_id = "5d4ae03a5648c4049cea28c7"
+    epf_dataset_id = "5d263f08b9219cf93c056c68"
 
     # Earthquake mapping
-    mapping_id = "5b47be72337d4a37ba8090e2"
+    mapping_id = "5d489aa1b9219c0689f1988e"
 
     # Run epf damage
     epf_dmg = EpfDamage(client)
