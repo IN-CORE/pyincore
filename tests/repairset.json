@@ -1,0 +1,42 @@
+{
+"description": "pytest EPN sub-station earthquake repair models",
+    "authors": [
+        "HAZUS"
+    ],
+    "paperReference": null,
+    "resultUnit": null,
+    "resultType": "Limit State",
+    "timeUnits": "days",
+    "hazardType": "earthquake",
+    "inventoryType": "electric_power_facility",
+    "repairCurves": [
+        {
+            "className": "edu.illinois.ncsa.incore.service.dfr3.models.StandardRepairCurve",
+            "description": "Slight",
+            "median": 1,
+            "beta": 0.47,
+            "curveType": "LogNormal"
+        },
+        {
+            "className": "edu.illinois.ncsa.incore.service.dfr3.models.StandardRepairCurve",
+            "description": "Moderate",
+            "median": 2.7,
+            "beta": 0.47,
+            "curveType": "LogNormal"
+        },
+        {
+            "className": "edu.illinois.ncsa.incore.service.dfr3.models.StandardRepairCurve",
+            "description": "Extensive",
+            "median": 6.3,
+            "beta": 0.47,
+            "curveType": "LogNormal"
+        },
+        {
+            "className": "edu.illinois.ncsa.incore.service.dfr3.models.StandardRepairCurve",
+            "description": "Complete",
+            "median": 27,
+            "beta": 0.47,
+            "curveType": "LogNormal"
+        }
+    ]
+}

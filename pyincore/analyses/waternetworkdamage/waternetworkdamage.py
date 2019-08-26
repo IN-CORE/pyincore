@@ -264,7 +264,7 @@ class WaterNetworkDamage(BaseAnalysis):
             count += pipes_per_process
 
         water_pipeline_fragility_sets = \
-            self.fragilitysvc.map_fragilities(water_pipeline_mapping_id,
+            self.fragilitysvc.map_inventory(water_pipeline_mapping_id,
                                               water_pipelines,
                                               "pgv")
 
@@ -282,7 +282,7 @@ class WaterNetworkDamage(BaseAnalysis):
         # facility damage states
         parallelism = AnalysisUtil.determine_parallelism_locally(
             len(water_facilities), user_defined_cpu)
-        water_facility_fragility_sets = self.fragilitysvc.map_fragilities(
+        water_facility_fragility_sets = self.fragilitysvc.map_inventory(
             water_facility_mapping_id, water_facilities, "pga")
         facility_per_process = int(len(water_facilities) / parallelism)
         inventory_args = []

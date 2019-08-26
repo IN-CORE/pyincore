@@ -44,10 +44,8 @@ class Dfr3Service:
     """
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_frag_url = urllib.parse.urljoin(client.service_url,
-                                                  'dfr3/api/fragilities/')
         self.base_mapping_url = urllib.parse.urljoin(client.service_url,
-                                                     'dfr3/api/fragility-mappings/')
+                                                     'dfr3/api/mappings/')
 
     def map_inventory(self, mapping_id: str, inventories: dict, key: str):
         """Mapping between inventories (buildings, bridges etc.) and fragility sets.
@@ -110,52 +108,6 @@ class Dfr3Service:
 
         return fragility_sets
 
-    def get_dfr3_sets(self, demand_type: str = None,
-                           hazard_type: str = None, inventory_type: str = None,
-                           author: str = None, legacy_id: str = None,
-                           creator: str = None, space: str = None,
-                           skip: int = None, limit: int = None):
-        """Get the set of fragility data, curves.
-
-        Args:
-            demand_type (str): ID of the Mapping file, default None.
-            hazard_type (str): Hazard type filter, default None.
-            inventory_type (str): Inventory type, default None.
-            author (str): Fragility set creator’s username, default None.
-            legacy_id (str):  Legacy fragility Id from v1, default None.
-            creator (str): Fragility creator’s username, default None.
-            space (str): Name of space, default None.
-            skip (int):  Skip the first n results, default None.
-            limit (int): Limit number of results to return, default None.
-
-        Returns:
-            obj: HTTP response with search results.
-
-        """
-        url = self.base_frag_url
-        payload = {}
-
-        if demand_type is not None:
-            payload['demand'] = demand_type
-        if hazard_type is not None:
-            payload['hazard'] = hazard_type
-        if inventory_type is not None:
-            payload['inventory'] = inventory_type
-        if author is not None:
-            payload['author'] = author
-        if legacy_id is not None:
-            payload['legacy_id'] = legacy_id
-        if creator is not None:
-            payload['creator'] = creator
-        if skip is not None:
-            payload['skip'] = skip
-        if limit is not None:
-            payload['limit'] = limit
-        if space is not None:
-            payload['space'] = space
-
-        r = self.client.get(url, params=payload)
-        return r.json()
 
     def get_dfr3_set(self, fragility_id: str):
         """Get all fragility sets.
@@ -167,7 +119,7 @@ class Dfr3Service:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_frag_url, fragility_id)
+        url = urllib.parse.urljoin(self.base_dfr3_url, fragility_id)
         r = self.client.get(url)
 
         return r.json()
@@ -184,7 +136,7 @@ class Dfr3Service:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_frag_url, "search")
+        url = urllib.parse.urljoin(self.base_dfr3_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip
@@ -204,7 +156,7 @@ class Dfr3Service:
             obj: HTTP POST Response. Returned value model of the created fragility set.
 
         """
-        url = self.base_frag_url
+        url = self.base_dfr3_url
         r = self.client.post(url, json=fragility_set)
         return r.json()
 
@@ -224,14 +176,15 @@ class Dfr3Service:
 
         return r.json()
 
-    def get_mappings(self, hazard_type: str = None, inventory_type: str = None, creator: str = None,
-                               space: str = None, skip: int = None, limit: int = None):
+    def get_mappings(self, hazard_type: str = None, inventory_type: str = None,  mapping_type: str = None,
+                     creator: str = None, space: str = None, skip: int = None, limit: int = None):
         """Get the set of fragility mappings. Mapping is a relationship between inventories (buildings, bridges
             etc.) and fragility sets.
 
         Args:
             hazard_type (str): Hazard type filter, default None.
             inventory_type (str): Inventory type, default None.
+            mapping_type (str): mapping type, default None.
             creator (str): Fragility creator’s username, default None.
             space (str): Name of space, default None.
             skip (int):  Skip the first n results, default None.
@@ -248,6 +201,8 @@ class Dfr3Service:
             payload['hazard'] = hazard_type
         if inventory_type is not None:
             payload['inventory'] = inventory_type
+        if mapping_type is not None:
+            payload['mappingType'] = mapping_type
         if creator is not None:
             payload['creator'] = creator
         if skip is not None:

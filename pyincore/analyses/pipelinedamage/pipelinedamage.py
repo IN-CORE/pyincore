@@ -123,11 +123,11 @@ class PipelineDamage(BaseAnalysis):
 
         """
         result = []
-        fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), pipelines, fragility_key)
+        fragility_sets = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), pipelines, fragility_key)
 
         # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
         if geology_dataset_id is not None:
-            fragility_sets_liq = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), pipelines,
+            fragility_sets_liq = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), pipelines,
                                                                    liquefaction_fragility_key)
         for pipeline in pipelines:
             if pipeline["id"] in fragility_sets.keys():
