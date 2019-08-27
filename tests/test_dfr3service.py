@@ -24,8 +24,7 @@ except EnvironmentError:
     raise
 
 # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-# client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, cred[0])
-client = InsecureIncoreClient("http://localhost:8080", cred[0]) #TODO: Change to DEV Client after review
+client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, "incrtest")
 
 @pytest.fixture
 def fragilitysvc():
@@ -122,6 +121,6 @@ def test_create_repair_mapping(repairsvc):
     assert "id" in created.keys()
 
 def test_get_repair_sets(repairsvc):
-    metadata = repairsvc.get_dfr3_sets(hazard_type="earthquake", creator="vnarah2")
+    metadata = repairsvc.get_dfr3_sets(hazard_type="earthquake", creator="incrtest")
 
     assert 'id' in metadata[0].keys()
