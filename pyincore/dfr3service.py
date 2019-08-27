@@ -31,12 +31,12 @@ class MappingResponse(object):
         self.mapping = mapping
 
     def __init__(self):
-        self.sets = dict()  # fragility id to fragility
-        self.mapping = dict()  # inventory id to fragility id
+        self.sets = dict()  # dfr3set id to dfr3set
+        self.mapping = dict()  # inventory id to dfr3set id
 
 
 class Dfr3Service:
-    """Fragility service client.
+    """DFR3 service client.
 
     Args:
         client (IncoreClient): Service authentication.
@@ -48,7 +48,7 @@ class Dfr3Service:
                                                      'dfr3/api/mappings/')
 
     def map_inventory(self, mapping_id: str, inventories: dict, key: str):
-        """Mapping between inventories (buildings, bridges etc.) and fragility sets.
+        """Mapping between inventories (buildings, bridges etc.) and DFR3 sets.
 
         Args:
             mapping_id (str): ID of the Mapping file.
@@ -56,7 +56,7 @@ class Dfr3Service:
             key (str): Parameter's key in param dictionary.
 
         Returns:
-            dict: Fragility sets from the response.
+            dict: DFR3 sets from the response.
 
         """
         features = []
@@ -64,7 +64,7 @@ class Dfr3Service:
         for inventory in inventories:
             # hack, change null to an empty string
             # Some metadata field values are null even though the field is defined
-            # in the “Default Building Fragility Mapping” as a string
+            # in the Mapping as a string
             if "occ_type" in inventory["properties"] and \
                     inventory["properties"]["occ_type"] is None:
                 inventory["properties"]["occ_type"] = ""
@@ -97,35 +97,35 @@ class Dfr3Service:
 
         response = r.json()
 
-        # construct list of fragility sets
+        # construct list of DFR3 sets
         mapping = response["mapping"]
         sets = response["sets"]
 
-        # reconstruct a dictionary of fragility sets from the response
-        fragility_sets = {}
+        # reconstruct a dictionary of DFR3 sets from the response
+        dfr3_sets = {}
         for k, v in mapping.items():
-            fragility_sets[k] = sets[v]
+            dfr3_sets[k] = sets[v]
 
-        return fragility_sets
+        return dfr3_sets
 
 
-    def get_dfr3_set(self, fragility_id: str):
-        """Get all fragility sets.
+    def get_dfr3_set(self, dfr3_id: str):
+        """Get all DFR3 sets.
 
         Args:
-            fragility_id (str): ID of the Fragility set.
+            dfr3_id (str): ID of the DFR3 set.
 
         Returns:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_dfr3_url, fragility_id)
+        url = urllib.parse.urljoin(self.base_dfr3_url, dfr3_id)
         r = self.client.get(url)
 
         return r.json()
 
     def search_dfr3_sets(self, text: str, skip: int = None, limit: int = None):
-        """Search fragility sets, get fragilities based on a specific text.
+        """Search DFR3 sets based on a specific text.
 
         Args:
             text (str): Text to search by.
@@ -146,26 +146,26 @@ class Dfr3Service:
         r = self.client.get(url, params=payload)
         return r.json()
 
-    def create_dfr3_set(self, fragility_set: dict):
-        """Create fragility set on the server. POST API endpoint call.
+    def create_dfr3_set(self, dfr3_set: dict):
+        """Create DFR3 set on the server. POST API endpoint call.
 
         Args:
-            fragility_set (dict): Set of fragilities.
+            dfr3_set (dict): Set of DFR3 jsons.
 
         Returns:
-            obj: HTTP POST Response. Returned value model of the created fragility set.
+            obj: HTTP POST Response. Returned value model of the created DFR3 set.
 
         """
         url = self.base_dfr3_url
-        r = self.client.post(url, json=fragility_set)
+        r = self.client.post(url, json=dfr3_set)
         return r.json()
 
     def create_mapping(self, mapping_set: dict):
-        """Create fragility mapping on the server. POST API endpoint call.
+        """Create DFR3 mapping on the server. POST API endpoint call.
 
         Args:
             mapping_set (dict): Mapping set, relationship between inventories (buildings, bridges etc.)
-                and fragility sets.
+                and DFR3 sets.
 
         Returns:
             obj: HTTP POST Response. Returned value model of the created mapping set.
@@ -178,14 +178,14 @@ class Dfr3Service:
 
     def get_mappings(self, hazard_type: str = None, inventory_type: str = None,  mapping_type: str = None,
                      creator: str = None, space: str = None, skip: int = None, limit: int = None):
-        """Get the set of fragility mappings. Mapping is a relationship between inventories (buildings, bridges
-            etc.) and fragility sets.
+        """Get the set of mappings. Mapping is a relationship between inventories (buildings, bridges
+            etc.) and DFR3 sets.
 
         Args:
             hazard_type (str): Hazard type filter, default None.
             inventory_type (str): Inventory type, default None.
             mapping_type (str): mapping type, default None.
-            creator (str): Fragility creator’s username, default None.
+            creator (str): creator’s username, default None.
             space (str): Name of space, default None.
             skip (int):  Skip the first n results, default None.
             limit (int): Limit number of results to return, default None.
@@ -217,7 +217,7 @@ class Dfr3Service:
         return r.json()
 
     def get_mapping(self, mapping_id):
-        """Get all fragility mapping.
+        """Get all inventory mappings.
 
         Args:
             mapping_id (str): ID of the Mapping set.
