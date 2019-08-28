@@ -53,10 +53,10 @@ class RoadDamage(BaseAnalysis):
             use_liquefaction = self.get_parameter("use_liquefaction")
 
         # Get geology dataset for liquefaction
-        geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
+        if self.get_parameter("liquefaction_geology_dataset_id") is not None:
+            geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
         user_defined_cpu = 1
-
         if self.get_parameter("num_cpu") is not None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
@@ -153,10 +153,6 @@ class RoadDamage(BaseAnalysis):
             demand_type = "None"
 
             dmg_probability = collections.OrderedDict()
-            mean_damage = collections.OrderedDict()
-            mean_damage['meandamage'] = 0.0
-            mean_damage_dev = collections.OrderedDict()
-            mean_damage_dev['mdamagedev'] = 0.0
 
             road_results['guid'] = road['properties']['guid']
 
@@ -180,35 +176,26 @@ class RoadDamage(BaseAnalysis):
                             liquefaction_val = liquefaction[0][liquefaction_demand_type.upper]
                         else:
                             liquefaction_val = 0.0
-                        dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, liquefaction_val)
+                        dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, liquefaction_val)
                         road_results['hazardval'] = liquefaction_val
                     else:
                         hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
                                                                                 demand_units, location.y, location.x)
-                        dmg_probability = AnalysisUtil.calculate_damage_json(fragility_set, hazard_val)
+                        dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
                         road_results['hazardval'] = hazard_val
                 else:
-                    print("Earthquake is the only hazard supported for road damage")
+                    raise ValueError("Earthquake is the only hazard supported for road damage")
             else:
-                dmg_probability['immocc'] = 0.0
-                dmg_probability['lifesfty'] = 0.0
-                dmg_probability['collprev'] = 0.0
+                dmg_probability['DS_Slight'] = 0.0
+                dmg_probability['DS_Moderate'] = 0.0
+                dmg_probability['DS_Extensive'] = 0.0
+                dmg_probability['DS_Complete'] = 0.0
 
             dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
-            mean_damage = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl, dmg_interval)
-            mean_damage_dev = AnalysisUtil.calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg_interval,
-                                                                               mean_damage['meandamage'])
-            likely_state = None
-            for state in dmg_ratio_tbl:
-                if float(state['LowerBound']) < mean_damage['meandamage'] < float(state['UpperBound']):
-                    likely_state = state['DamageState']
 
             road_results.update(dmg_probability)
             road_results.update(dmg_interval)
-            road_results.update(mean_damage)
-            road_results.update(mean_damage_dev)
             road_results['hazardtype'] = demand_type
-            road_results['expectval'] = likely_state
 
             return road_results
 
@@ -291,7 +278,7 @@ class RoadDamage(BaseAnalysis):
                     'id': 'roads',
                     'required': True,
                     'description': 'Road Inventory',
-                    'type': 'ergo:roadLinkTopo'
+                    'type': ['ergo:roadLinkTopo','incore:roads']
                 },
                 {
                     'id': 'dmg_ratios',
