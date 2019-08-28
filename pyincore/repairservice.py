@@ -8,7 +8,7 @@
 import urllib
 
 from pyincore import IncoreClient
-from pyincore import Dfr3Service
+from pyincore.dfr3service import Dfr3Service
 
 
 class RepairService(Dfr3Service):
