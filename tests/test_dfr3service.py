@@ -83,10 +83,10 @@ def test_get_fragility_mappings(fragilitysvc):
 
 
 def test_get_fragility_mapping(fragilitysvc):
-    id = "5b47b2d9337d4a36187c7563"
-    mapping = fragilitysvc.get_mapping(id)
+    mapping_id = "5b47b2d9337d4a36187c7563"
+    mapping = fragilitysvc.get_mapping(mapping_id)
 
-    assert mapping["id"] == id
+    assert mapping["id"] == mapping_id
 
 
 def test_create_fragility_set(fragilitysvc):
