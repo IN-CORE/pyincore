@@ -110,7 +110,7 @@ class NonStructBuildingUtil:
 
         fragility_curve = fragility_set['fragilityCurves'][0]
         if fragility_curve[
-            'className'] == 'edu.illinois.ncsa.incore.services.fragility.model.PeriodStandardFragilityCurve':
+            'className'] == 'edu.illinois.ncsa.incore.services.dfr3.model.PeriodStandardFragilityCurve':
             period_equation_type = fragility_curve['periodEqnType']
             if period_equation_type == 1:
                 period = fragility_curve['periodParam0']

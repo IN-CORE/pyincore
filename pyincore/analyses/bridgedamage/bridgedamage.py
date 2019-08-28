@@ -118,7 +118,7 @@ class BridgeDamage(BaseAnalysis):
 
         """
         result = []
-        fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), bridges, fragility_key)
+        fragility_sets = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), bridges, fragility_key)
         for bridge in bridges:
             fragility_set = None
             if bridge["id"] in fragility_sets:
