@@ -26,9 +26,11 @@ except EnvironmentError:
 # client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
 client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, "incrtest")
 
+
 @pytest.fixture
 def fragilitysvc():
     return FragilityService(client)
+
 
 @pytest.fixture
 def repairsvc():
@@ -46,6 +48,7 @@ def test_get_fragility_set(fragilitysvc):
     metadata = fragilitysvc.get_dfr3_set(id)
 
     assert metadata['id'] == id
+
 
 def test_search_fragility_sets(fragilitysvc):
     text = "Elnashai and Jeong"
