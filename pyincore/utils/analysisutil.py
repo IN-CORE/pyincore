@@ -358,13 +358,16 @@ class AnalysisUtil:
             print(str(e))
 
     @staticmethod
-    def get_csv_table_rows(csv_reader: csv.DictReader):
+    def get_csv_table_rows(csv_reader: csv.DictReader, ignore_first_row=True):
         csv_rows = []
 
-        # Ignore the header
         row_index = 0
         for row in csv_reader:
-            if row_index > 0:
+            if ignore_first_row:
+                # Ignore the first row
+                if row_index > 0:
+                    csv_rows.append(row)
+            else:
                 csv_rows.append(row)
 
             row_index += 1
