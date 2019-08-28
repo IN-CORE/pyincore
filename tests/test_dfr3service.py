@@ -120,6 +120,7 @@ def test_create_repair_mapping(repairsvc):
 
     assert "id" in created.keys()
 
+
 def test_get_repair_sets(repairsvc):
     metadata = repairsvc.get_dfr3_sets(hazard_type="earthquake", creator="incrtest")
 
