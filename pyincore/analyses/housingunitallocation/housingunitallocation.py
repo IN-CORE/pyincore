@@ -87,14 +87,10 @@ class HousingUnitAllocation(BaseAnalysis):
         # Get desired result name
         result_name = self.get_parameter("result_name")
 
-        # Housing Unit Inventory Dataset
-        pop_inv = self.get_input_dataset("housing_unit_inventory").get_dataframe_from_csv()
-
-        # Address Point Inventory Dataset
-        addr_point_inv = self.get_input_dataset("address_point_inventory").get_dataframe_from_csv()
-
-        # Building Inventory dataset
-        bg_inv = self.get_input_dataset("building_inventory").get_dataframe_from_csv()
+        # Datasets
+        pop_inv = self.get_input_dataset("housing_unit_inventory").get_dataframe_from_csv(low_memory=False)
+        addr_point_inv = self.get_input_dataset("address_point_inventory").get_dataframe_from_csv(low_memory=False)
+        bg_inv = self.get_input_dataset("building_inventory").get_dataframe_from_csv(low_memory=False)
 
         csv_source = "dataframe"
 
@@ -127,20 +123,20 @@ class HousingUnitAllocation(BaseAnalysis):
         # Create Random merge order for housing unit inventory
         random_order_housing_unit = np.random.uniform(0, 1, size_row)
 
-        sorted_housing_unit0["randomblock"] = random_order_housing_unit
+        sorted_housing_unit0["randomhu"] = random_order_housing_unit
 
         #  gsort BlockID -LiveTypeUnit Tenure randomaorderpop
-        sorted_housing_unit1 = sorted_housing_unit0.sort_values(by=["blockid", "ownershp", "vacancy", "randomblock"],
+        sorted_housing_unit1 = sorted_housing_unit0.sort_values(by=["blockid", "ownershp", "vacancy", "randomhu"],
                                                                 ascending=[True, True, True, True])
 
-        # by BlockID: gen RandomMergeOrder = _n
-        sorted_housing_unit1["mergeorder"] = sorted_housing_unit1.groupby(["blockid"]).cumcount()
+        # by BlockID: gen RandomMergeOrder = _n (+1 to be consistent with STATA starting from 1)
+        sorted_housing_unit1["randommergeorder"] = sorted_housing_unit1.groupby(["blockid"]).cumcount() + 1
 
-        sorted_housing_unit2 = sorted_housing_unit1.sort_values(by=["blockid", "mergeorder"],
-                                                                ascending=[True, False])
+        sorted_housing_unit2 = sorted_housing_unit1.sort_values(by=["blockid", "randommergeorder"],
+                                                                ascending=[True, True])
         return sorted_housing_unit2
 
-    def merge_infrastructure_inventory(self, address_point_inventory, building_inventory ):
+    def merge_infrastructure_inventory(self, address_point_inventory, building_inventory):
         """Merge order to Building and Address inventories.
 
         Args:
@@ -160,13 +156,22 @@ class HousingUnitAllocation(BaseAnalysis):
                                           sort=True, copy=True, indicator=True,
                                           validate="1:m")
 
-        addresspt_building_inv = self.compare_merges(sorted_pnt_0.columns, sorted_bld_0.columns,
-                                                     addresspt_building_inv)
+        # addresspt_building_inv = self.compare_merges(sorted_pnt_0.columns, sorted_bld_0.columns,
+        #                                             addresspt_building_inv)
+
+        match_column = set(sorted_pnt_0.columns).intersection(sorted_bld_0.columns)
+        for col in match_column:
+            # Compare two columns, keep one from the address, rename and drop
+            if col + "_x" in addresspt_building_inv.columns and col + "_y" in addresspt_building_inv.columns:
+                addresspt_building_inv[col] = addresspt_building_inv[col + "_y"]
+                addresspt_building_inv = addresspt_building_inv.drop(columns=[col + "_x", col + "_y"])
+
+        addresspt_building_inv = addresspt_building_inv.drop(columns=["_merge"])
 
         return addresspt_building_inv
 
     def prepare_infrastructure_inventory(self, seed_i: int, critical_bld_inv: pd.DataFrame):
-        """Assign Random merge order to Building, Water and Address inventories. Use main
+        """Assign Random merge order to Building and Address inventories. Use main
         seed value.
 
         Args:
@@ -184,14 +189,15 @@ class HousingUnitAllocation(BaseAnalysis):
         seed_i2: int = seed_i + 1
         np.random.seed(seed_i2)
 
-        randomaparcel = np.random.uniform(0, 1, size_row)
-        sort_critical_bld_0["randomaparcel"] = randomaparcel
+        randomap = np.random.uniform(0, 1, size_row)
+        sort_critical_bld_0["randomap"] = randomap
+        sort_critical_bld_1 = sort_critical_bld_0.sort_values(by=["blockid", "residential", "huestimate", "randomap"],
+                                                              ascending=[True, False, True, True])
 
-        sort_critical_bld_1 = sort_critical_bld_0.sort_values(by=["blockid", "huestimate", "randomaparcel"],
-                                                              ascending=[True, True, True])
-        sort_critical_bld_1["mergeorder"] = sort_critical_bld_1.groupby(["blockid"]).cumcount()
+        # +1 to be consistent with STATA starting from 1
+        sort_critical_bld_1["randommergeorder"] = sort_critical_bld_1.groupby(["blockid"]).cumcount() + 1
 
-        sort_critical_bld_2 = sort_critical_bld_1.sort_values(by=["blockid", "mergeorder"],
+        sort_critical_bld_2 = sort_critical_bld_1.sort_values(by=["blockid", "randommergeorder"],
                                                               ascending=[True, False])
         return sort_critical_bld_2
 
@@ -208,22 +214,22 @@ class HousingUnitAllocation(BaseAnalysis):
 
         """
         housing_unit_address_point_inventory = pd.merge(sorted_infrastructure, sorted_housing_unit,
-                                                        how='outer', left_on=["blockid", "mergeorder"],
-                                                        right_on=["blockid", "mergeorder"],
+                                                        how='outer', left_on=["blockid", "randommergeorder"],
+                                                        right_on=["blockid", "randommergeorder"],
                                                         sort=True, suffixes=("_x", "_y"),
-                                                        copy=True, indicator="exists3", validate="1:1")
+                                                        copy=True, indicator="aphumerge", validate="1:1")
 
         # check for duplicate columns from merge
         housing_unit_address_point_inventory = self.compare_merges(sorted_housing_unit.columns,
                                                                    sorted_infrastructure.columns,
                                                                    housing_unit_address_point_inventory)
 
-        sorted_housing_unit_address_inventory = housing_unit_address_point_inventory.sort_values(by=["huid"])
+        output = housing_unit_address_point_inventory.sort_values(by=["aphumerge", "blockid"], ascending=[False, True])
 
-        output = sorted_housing_unit_address_inventory[sorted_housing_unit_address_inventory["exists3"] == 'both']
         return output
 
-    def get_iteration_probabilistic_allocation(self, housing_unit_inventory, address_point_inventory, building_inventory, seed):
+    def get_iteration_probabilistic_allocation(self, housing_unit_inventory, address_point_inventory,
+                                               building_inventory, seed):
         """Merge inventories
 
         Args:

@@ -4,7 +4,7 @@ from pyincore.analyses.bridgedamage import BridgeDamage
 
 def run_with_base_class():
     client = InsecureIncoreClient(
-        "http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+        "http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
 
     # New madrid earthquake using Atkinson Boore 1995
     hazard_type = "earthquake"
