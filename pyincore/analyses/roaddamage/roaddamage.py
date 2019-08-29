@@ -161,37 +161,35 @@ class RoadDamage(BaseAnalysis):
                 demand_type = fragility_set['demandType']
                 if hazard_type == 'earthquake':
                     demand_units = fragility_set['demandUnits']
-                    hazard_demand_type = fragility_set['demandType']
-                    if hazard_demand_type.lower() == 'pgd' and use_liquefaction and geology_dataset_id is not None:
+                    if demand_type.lower() == 'pgd' and use_liquefaction and geology_dataset_id is not None:
                         location_str = str(location.y) + "," + str(location.x)
-                        demand_units_liq = fragility_set['demandUnits']
-                        liquefaction_demand_type = fragility_set['demandType']
                         liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, geology_dataset_id,
-                                                                              demand_units_liq, [location_str])
-                        if liquefaction_demand_type in liquefaction[0]:
-                            liquefaction_val = liquefaction[0][liquefaction_demand_type]
-                        elif liquefaction_demand_type.lower() in liquefaction[0]:
-                            liquefaction_val = liquefaction[0][liquefaction_demand_type.lower()]
-                        elif liquefaction_demand_type.upper() in liquefaction[0]:
-                            liquefaction_val = liquefaction[0][liquefaction_demand_type.upper]
+                                                                              demand_units, [location_str])
+                        if demand_type in liquefaction[0]:
+                            liquefaction_val = liquefaction[0][demand_type]
+                        elif demand_type.lower() in liquefaction[0]:
+                            liquefaction_val = liquefaction[0][demand_type.lower()]
+                        elif demand_type.upper() in liquefaction[0]:
+                            liquefaction_val = liquefaction[0][demand_type.upper]
                         else:
                             liquefaction_val = 0.0
-                        dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, liquefaction_val)
+                        #dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, liquefaction_val)
                         road_results['hazardval'] = liquefaction_val
                     else:
-                        hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
+                        hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, demand_type,
                                                                                 demand_units, location.y, location.x)
-                        dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
+                        #dmg_probability = AnalysisUtil.calculate_damage_json2(fragility_set, hazard_val)
                         road_results['hazardval'] = hazard_val
+                    dmg_probability = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'], road_results['hazardval'], 0, 0.0)
                 else:
                     raise ValueError("Earthquake is the only hazard supported for road damage")
             else:
-                dmg_probability['DS_Slight'] = 0.0
-                dmg_probability['DS_Moderate'] = 0.0
-                dmg_probability['DS_Extensive'] = 0.0
-                dmg_probability['DS_Complete'] = 0.0
+                dmg_probability['ls_Slight'] = 0.0
+                dmg_probability['ls_Moderate'] = 0.0
+                dmg_probability['ls_Extensive'] = 0.0
+                dmg_probability['ls_Complete'] = 0.0
 
-            dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
+            dmg_interval = AnalysisUtil.compute_damage_intervals(dmg_probability)
 
             road_results.update(dmg_probability)
             road_results.update(dmg_interval)
