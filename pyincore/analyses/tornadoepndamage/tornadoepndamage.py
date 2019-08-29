@@ -103,9 +103,9 @@ class TornadoEpnDamage(BaseAnalysis):
         self.set_node_variables(node_dataset)
 
         # get fragility curves set - tower for transmission, pole for distribution
-        fragility_set_tower = self.fragilitysvc.get_fragility_set(self.fragility_tower_id)
+        fragility_set_tower = self.fragilitysvc.get_dfr3_set(self.fragility_tower_id)
         assert fragility_set_tower['id'] == self.fragility_tower_id
-        fragility_set_pole = self.fragilitysvc.get_fragility_set(self.fragility_pole_id)
+        fragility_set_pole = self.fragilitysvc.get_dfr3_set(self.fragility_pole_id)
         assert fragility_set_pole['id'] == self.fragility_pole_id
 
         # network test

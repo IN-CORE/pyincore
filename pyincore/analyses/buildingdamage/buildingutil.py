@@ -30,8 +30,8 @@ class BuildingUtil:
         fragility_curve = fragility_set['fragilityCurves'][0]
 
         fragility_class_name = fragility_curve['className']
-        if fragility_class_name in ['edu.illinois.ncsa.incore.service.fragility.models.PeriodStandardFragilityCurve',
-                                    'edu.illinois.ncsa.incore.service.fragility.models.PeriodBuildingFragilityCurve']:
+        if fragility_class_name in ['edu.illinois.ncsa.incore.service.dfr3.models.PeriodStandardFragilityCurve',
+                                    'edu.illinois.ncsa.incore.service.dfr3.models.PeriodBuildingFragilityCurve']:
 
             period_equation_type = fragility_curve['periodEqnType']
             if period_equation_type == 1:

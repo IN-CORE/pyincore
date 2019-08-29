@@ -3,7 +3,7 @@ from pyincore import InsecureIncoreClient
 from pyincore.analyses.nonstructbuildingdamage import NonStructBuildingDamage
 
 def run_with_base_class():
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = InsecureIncoreClient("http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
 
     # Memphis 7.9 AB-95
     hazard_type = "earthquake"

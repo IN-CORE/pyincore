@@ -3,7 +3,7 @@ from pyincore.analyses.pipelinedamage import PipelineDamage
 
 
 def test_pipeline_dmg():
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = InsecureIncoreClient("http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
 
     # This is the Memphis Water Buried Pipeline with Topology dataset the Ergo repository
     pipeline_dataset_id = "5a284f28c7d30d13bc081d14"

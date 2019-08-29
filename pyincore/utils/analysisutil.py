@@ -33,7 +33,7 @@ class AnalysisUtil:
 
         fragility_curve = fragility_set['fragilityCurves'][0]
         if fragility_curve[
-            'className'] == 'edu.illinois.ncsa.incore.services.fragility.model.PeriodStandardFragilityCurve':
+            'className'] == 'edu.illinois.ncsa.incore.services.dfr3.model.PeriodStandardFragilityCurve':
             period_equation_type = fragility_curve['periodEqnType']
             if period_equation_type == 1:
                 period = fragility_curve['periodParam0']
@@ -89,7 +89,7 @@ class AnalysisUtil:
             class_name = fragility_curve['className']
             if hazard > 0.0:
                 # If there are other classes of fragilities they will need to be added here
-                if class_name in ['edu.illinois.ncsa.incore.service.fragility.models.PeriodBuildingFragilityCurve']:
+                if class_name in ['edu.illinois.ncsa.incore.service.dfr3.models.PeriodBuildingFragilityCurve']:
                     fs_param0 = fragility_curve['fsParam0']
                     fs_param1 = fragility_curve['fsParam1']
                     fs_param2 = fragility_curve['fsParam2']
@@ -102,8 +102,8 @@ class AnalysisUtil:
                     probability = AnalysisUtil.compute_period_building_fragility_value(hazard, period, fs_param0,
                                                                                        fs_param1, fs_param2, fs_param3,
                                                                                        fs_param4, fs_param5)
-                elif class_name in ['edu.illinois.ncsa.incore.service.fragility.models.PeriodStandardFragilityCurve',
-                                    'edu.illinois.ncsa.incore.service.fragility.models.StandardFragilityCurve']:
+                elif class_name in ['edu.illinois.ncsa.incore.service.dfr3.models.PeriodStandardFragilityCurve',
+                                    'edu.illinois.ncsa.incore.service.dfr3.models.StandardFragilityCurve']:
                     median = float(fragility_curve['median'])
                     beta = float(fragility_curve['beta'])
 
@@ -285,7 +285,7 @@ class AnalysisUtil:
         limit_state_prob = 0.0
         for fragility_curve in fragility_curves:
             if fragility_curve['className'] == \
-                    'edu.illinois.ncsa.incore.service.fragility.models.CustomExpressionFragilityCurve':
+                    'edu.illinois.ncsa.incore.service.dfr3.models.CustomExpressionFragilityCurve':
                 expression = fragility_curve['expression']
                 parser = Parser()
                 limit_state_prob = parser.parse(expression).evaluate(variables)
@@ -358,13 +358,16 @@ class AnalysisUtil:
             print(str(e))
 
     @staticmethod
-    def get_csv_table_rows(csv_reader: csv.DictReader):
+    def get_csv_table_rows(csv_reader: csv.DictReader, ignore_first_row=True):
         csv_rows = []
 
-        # Ignore the header
         row_index = 0
         for row in csv_reader:
-            if row_index > 0:
+            if ignore_first_row:
+                # Ignore the first row
+                if row_index > 0:
+                    csv_rows.append(row)
+            else:
                 csv_rows.append(row)
 
             row_index += 1

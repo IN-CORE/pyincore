@@ -111,11 +111,11 @@ class BuildingDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), buildings,
+        fragility_sets[fragility_key] = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), buildings,
                                                                           fragility_key)
 
         if hazard_type == 'tsunami':
-            other_fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), buildings,
+            other_fragility_sets = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), buildings,
                                                                      BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY)
             fragility_sets[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY] = other_fragility_sets
 
