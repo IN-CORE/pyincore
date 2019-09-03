@@ -14,11 +14,25 @@ logger = pyglobals.LOGGER
 
 
 class Client:
+    """Incore service Client class. It handles connection to the server with INCORE services and user authentication."""
 
     def __init__(self):
         pass
 
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
+        """Get server connection response.
+
+        Args:
+            url (str): Service url.
+            params (obj): Session parameters.
+            timeout (int): Session timeout.
+            **kwargs: A dictionary of external parameters.
+
+        Returns:
+            obj: HTTP response.
+
+        """
+        r = None
         try:
             r = self.session.get(url, params=params, timeout=timeout, **kwargs)
             r.raise_for_status()
@@ -38,6 +52,20 @@ class Client:
             raise
 
     def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
+        """Post data on the server.
+
+        Args:
+            url (str): Service url.
+            data (obj): Data to be posted on the server.
+            json (obj): Description of the data, metadata json.
+            timeout (int): Session timeout.
+            **kwargs: A dictionary of external parameters.
+
+        Returns:
+            obj: HTTP response.
+
+        """
+        r = None
         try:
             r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
             r.raise_for_status()
@@ -57,6 +85,19 @@ class Client:
             raise
 
     def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
+        """Put data on the server.
+
+        Args:
+            url (str): Service url.
+            data (obj): Data to be put onn the server.
+            timeout (int): Session timeout.
+            **kwargs: A dictionary of external parameters.
+
+        Returns:
+            obj: HTTP response.
+
+        """
+        r = None
         try:
             r = self.session.put(url, data=data, timeout=timeout, **kwargs)
             r.raise_for_status()
@@ -76,6 +117,18 @@ class Client:
             raise
 
     def delete(self, url: str, timeout=(30, 600), **kwargs):
+        """Delete data on the server.
+
+        Args:
+            url (str): Service url.
+            timeout (int): Session timeout.
+            **kwargs: A dictionary of external parameters.
+
+        Returns:
+            obj: HTTP response.
+
+        """
+        r = None
         try:
             r = self.session.delete(url, timeout=timeout, **kwargs)
             r.raise_for_status()
@@ -96,15 +149,14 @@ class Client:
 
 
 class IncoreClient(Client):
-    """Incore service client class. It contains token and service root url.
+    """Incore service Client class. It contains token and service root url.
 
     Args:
         service_url (str): Service url.
-        username (str): Username.
-        password (str): Password.
+        username (str): Username used by NCSA's INCORE framework.
+        password (str): Password used in NCSA's INCORE framework.
 
     """
-
     def __init__(self, service_url: str = None, username: str = None, password: str = None) -> object:
 
         if service_url is None or len(service_url.strip()) == 0:
@@ -112,6 +164,7 @@ class IncoreClient(Client):
         self.service_url = service_url
 
         if username is None or password is None:
+            creds_file = None
             try:
                 creds_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, pyglobals.CRED_FILE_NAME)
                 with open(creds_file, 'r') as f:
@@ -141,6 +194,16 @@ class IncoreClient(Client):
             logger.warning("Authentication Failed. Please check the credentials and try again")
 
     def retrieve_token(self, username: str, password: str):
+        """Function to retrieve token from the login service. Authentication API endpoint is called.
+
+        Args:
+            username (str): Username used by NCSA's INCORE framework.
+            password (str): Password used in NCSA's INCORE framework.
+
+        Returns:
+            obj: json containing the authentication token.
+
+        """
         if self.auth_token is not None:
             return self.auth_token
         url = urllib.parse.urljoin(self.service_url, "auth/api/login")
@@ -153,14 +216,13 @@ class IncoreClient(Client):
 
 
 class InsecureIncoreClient(Client):
-    """Incore service client class. It contains token and service root url.
+    """Incore service Client class used for development and testing. It contains service root url.
 
     Args:
         service_url (str): Service url.
-        username (str): Username.
+        username (str): Username from the group of developers used by NCSA's INCORE team.
 
     """
-
     def __init__(self, service_url: str = None, username: str = None) -> object:
         if service_url is None:
             service_url = pyglobals.INCORE_API_INSECURE_URL

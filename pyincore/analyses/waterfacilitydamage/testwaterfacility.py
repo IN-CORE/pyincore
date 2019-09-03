@@ -7,7 +7,7 @@ from pyincore import InsecureIncoreClient
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
 
 def run_with_base_class():
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = InsecureIncoreClient("http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
     hazard_type = "earthquake"
     hazard_id = "5b902cb273c3371e1236b36b"
     facility_datasetid = "5a284f2ac7d30d13bc081e52"
@@ -17,7 +17,7 @@ def run_with_base_class():
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
 
     uncertainty = False
-    liquefaction = True
+    liquefaction = False
     liq_fragility_key = "pgd"
 
     wf_dmg = WaterFacilityDamage(client)

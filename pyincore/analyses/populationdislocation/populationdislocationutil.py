@@ -27,9 +27,10 @@ class PopulationDislocationUtil:
 
         damage_states = ["insignific", "moderate", "heavy", "complete"]
 
-        housing_allocation_inventory = housing_allocation_inventory.drop(columns=damage_states)
+        if set(damage_states).issubset(housing_allocation_inventory.columns):
+            housing_allocation_inventory = housing_allocation_inventory.drop(columns=damage_states)
 
-        # first merge hazard with popluation allocation inventory on "guid"
+        # first merge hazard with population allocation inventory on "guid"
         # note guid can be duplicated in housing unit allocation inventory
         df = pd.merge(building_dmg, housing_allocation_inventory,
                       how="right", on="guid", validate="1:m")

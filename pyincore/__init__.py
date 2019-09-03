@@ -15,6 +15,8 @@ from pyincore.utils.plotutil import PlotUtil
 from pyincore.utils.geoutil import GeoUtil
 from pyincore.dataservice import DataService
 from pyincore.fragilityservice import FragilityService
+from pyincore.repairservice import RepairService
+from pyincore.restorationservice import RestorationService
 from pyincore.spaceservice import SpaceService
 from pyincore.utils.analysisutil import AnalysisUtil
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset

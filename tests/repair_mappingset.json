@@ -1,8 +1,8 @@
 {
-  "name": "pytest - Tsunami Building Fragility Mapping",
+  "name": "pytest - Tsunami Building Repair Mapping",
   "hazardType": "tsunami",
   "inventoryType": "building",
-  "mappingType": "fragility",
+  "mappingType": "repair",
   "mappings": [
       {
           "entry": {

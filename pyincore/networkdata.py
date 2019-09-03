@@ -9,6 +9,13 @@ import fiona
 
 
 class NetworkData:
+    """ Network data from Fiona package. Fiona can read and write data using GIS formats.
+
+    Args:
+        network_type (str): Network type.
+        file_path (str): Path to a file with GIS layers.
+
+    """
     def __init__(self, network_type: str, file_path: str):
         self.network_type = network_type
         if os.path.exists(file_path):
@@ -18,6 +25,7 @@ class NetworkData:
                 errno.ENOENT, os.strerror(errno.ENOENT), file_path)
 
     def get_inventory_reader(self):
+        """ getter """
         filename = self.file_path
         if os.path.isdir(filename):
             layers = fiona.listlayers(filename)

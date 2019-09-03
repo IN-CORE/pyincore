@@ -13,7 +13,7 @@ class NetworkDataset:
     """ This class wraps around the Dataset class.
 
     Args:
-        dataset (Dataset): the dataset object we want to extract the network data from.
+        dataset (obj): The dataset object we want to extract the network data from.
 
     """
 
