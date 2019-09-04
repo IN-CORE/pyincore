@@ -5,13 +5,11 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-
 class PipelineUtil:
     """Utility methods for pipeline analysis"""
 
     DEFAULT_EQ_FRAGILITY_KEY = "pgv"
     LIQ_FRAGILITY_KEY = "pgd"
-
 
     @staticmethod
     def convert_result_unit(result_unit: str, result: float):

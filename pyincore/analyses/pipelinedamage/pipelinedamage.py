@@ -5,20 +5,19 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-"""Buried Pipeline Damage Analysis
+"""Tsunami Buried Pipeline Damage Analysis
 
 """
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, \
     AnalysisUtil, GeoUtil
-from pyincore.analyses.pipelinedamage.pipelineutil import PipelineUtil
 import concurrent.futures
 from itertools import repeat
 import collections
 import math
 
 
-class PipelineDamage(BaseAnalysis):
+class TsunamiPipelineDamage(BaseAnalysis):
     """Computes pipeline damage for a hazard.
 
     Args:
@@ -30,16 +29,13 @@ class PipelineDamage(BaseAnalysis):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
 
-        super(PipelineDamage, self).__init__(incore_client)
+        super(TsunamiPipelineDamage, self).__init__(incore_client)
 
     def run(self):
         """Execute pipeline damage analysis """
         # Pipeline dataset
         pipeline_dataset = self.get_input_dataset(
             "pipeline").get_inventory_reader()
-
-        # Get hazard type
-        hazard_type = self.get_parameter("hazard_type")
 
         # Get hazard input
         hazard_dataset_id = self.get_parameter("hazard_id")
@@ -65,7 +61,7 @@ class PipelineDamage(BaseAnalysis):
 
         results = self.pipeline_damage_concurrent_future(
             self.pipeline_damage_analysis_bulk_input, num_workers,
-            inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
+            inventory_args, repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", results,
                                  name=self.get_parameter("result_name"))
@@ -93,13 +89,11 @@ class PipelineDamage(BaseAnalysis):
 
         return output
 
-    def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_type,
-                                            hazard_dataset_id):
+    def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_dataset_id):
         """Run pipeline damage analysis for multiple pipelines.
 
         Args:
             pipelines (list): multiple pipelines from pieline dataset.
-            hazard_type (str): Hazard type
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
@@ -111,172 +105,59 @@ class PipelineDamage(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            if hazard_type == "earthquake":
-                fragility_key = PipelineUtil.DEFAULT_EQ_FRAGILITY_KEY
-            else:
-                raise ValueError(
-                    "Hazard type other than Earthquake are not currently supported.")
+            fragility_key = "Non-Retrofit inundationDepth Fragility ID Code"
 
         # get fragility set
         fragility_sets = self.fragilitysvc.map_inventory(
             self.get_parameter("mapping_id"), pipelines, fragility_key)
 
-        # Get geology dataset id
-        geology_dataset_id = self.get_parameter(
-            "liquefaction_geology_dataset_id")
-
-        # Get Liquefaction Fragility Key
-        liquefaction_fragility_key = self.get_parameter(
-            "liquefaction_fragility_key")
-        if liquefaction_fragility_key is None:
-            liquefaction_fragility_key = PipelineUtil.LIQ_FRAGILITY_KEY
-
-        # Liquefaction
-        use_liquefaction = False
-        if self.get_parameter("use_liquefaction") is not None:
-            use_liquefaction = self.get_parameter("use_liquefaction")
-
-        if geology_dataset_id is not None:
-            fragility_sets_liq = self.fragilitysvc.map_inventory(
-                self.get_parameter("mapping_id"), pipelines,
-                liquefaction_fragility_key)
-
-        if hazard_type == "earthquake":
-            for pipeline in pipelines:
-                if pipeline["id"] in fragility_sets.keys():
-                    liq_fragility_set = None
-                    # Check if mapping contains liquefaction fragility
-                    if geology_dataset_id is not None and \
-                            fragility_sets_liq is not None and \
-                            pipeline["id"] in fragility_sets_liq:
-                        liq_fragility_set = fragility_sets_liq[pipeline["id"]]
-
-                    result.append(self.pipeline_damage_analysis(pipeline,
-                                                                hazard_type,
-                                                                fragility_sets[
-                                                                    pipeline[
-                                                                        "id"]],
-                                                                liq_fragility_set,
-                                                                hazard_dataset_id,
-                                                                geology_dataset_id,
-                                                                use_liquefaction))
-        else:
-            raise ValueError(
-                "Hazard types other than Earthquake and Tsunami are not currently supported.")
+        for pipeline in pipelines:
+            if pipeline["id"] in fragility_sets.keys():
+                result.append(self.pipeline_damage_analysis(pipeline,
+                                                            fragility_sets[pipeline["id"]],
+                                                            hazard_dataset_id))
 
         return result
 
-    def pipeline_damage_analysis(self, pipeline, hazard_type, fragility_set,
-                                 fragility_set_liq, hazard_dataset_id,
-                                 geology_dataset_id, use_liquefaction):
+    def pipeline_damage_analysis(self, pipeline, fragility_set, hazard_dataset_id):
         """Run pipeline damage for a single pipeline.
 
         Args:
             pipeline (obj): a single pipeline.
-            hazard_type (str): hazard type.
             fragility_set (obj): A JSON description of fragility assigned to the building.
-            fragility_set_liq (obj): A JSON description of fragility assigned to the building with liqufaction.
             hazard_dataset_id (str): A hazard dataset to use.
-            geology_dataset_id (str): A dataset id for geology dataset for liqufaction.
-            use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
-                False otherwise.
 
         Returns:
             OrderedDict: A dictionary with pipeline damage values and other data/metadata.
         """
 
         pipeline_results = collections.OrderedDict()
-        pgv_repairs = 0.0
-        pgd_repairs = 0.0
-        liq_hazard_type = ""
-        liq_hazard_val = 0.0
-        liquefaction_prob = 0.0
+        hazard_val = 0.0
+        demand_type = ""
 
         if fragility_set is not None:
             demand_type = fragility_set['demandType'].lower()
             demand_units = fragility_set['demandUnits']
             location = GeoUtil.get_location(pipeline)
 
-            # Get PGV hazard from hazardsvc
-            if hazard_type == 'earthquake':
-                hazard_val = self.hazardsvc.get_earthquake_hazard_value(
-                    hazard_dataset_id, demand_type, demand_units,
-                    location.y, location.x)
+            # tsunami pipeline damage produce limit states instead of repair rates
+            hazard_val = self.hazardsvc.get_tsunami_hazard_value(
+                hazard_dataset_id,
+                demand_type,
+                demand_units,
+                location.y, location.x)
+            if hazard_val <= 0.0:
+                hazard_val = 0.0
 
-                diameter = PipelineUtil.get_pipe_diameter(pipeline)
-                fragility_vars = {'x': hazard_val, 'y': diameter}
-                pgv_repairs = AnalysisUtil.compute_custom_limit_state_probability(
-                    fragility_set, fragility_vars)
-                fragility_curve = fragility_set['fragilityCurves'][0]
+            limit_states = AnalysisUtil.compute_limit_state_probability(
+                fragility_set['fragilityCurves'], hazard_val, 1.0, 0)
+            dmg_intervals = AnalysisUtil.compute_damage_intervals(
+                limit_states)
+            pipeline_results = {**limit_states, **dmg_intervals}
 
-                # Convert PGV repairs to SI units
-                pgv_repairs = PipelineUtil.convert_result_unit(
-                    fragility_curve['description'], pgv_repairs)
-
-                if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
-                    liq_fragility_curve = fragility_set_liq['fragilityCurves'][
-                        0]
-                    liq_hazard_type = fragility_set_liq['demandType']
-                    pgd_demand_units = fragility_set_liq['demandUnits']
-
-                    # Get PGD hazard value from hazard service
-                    location_str = str(location.y) + "," + str(location.x)
-                    liquefaction = self.hazardsvc.get_liquefaction_values(
-                        hazard_dataset_id, geology_dataset_id,
-                        pgd_demand_units, [location_str])
-                    liq_hazard_val = liquefaction[0]['pgd']
-                    liquefaction_prob = liquefaction[0]['liqProbability']
-
-                    liq_fragility_vars = {'x': liq_hazard_val,
-                                          'y': liquefaction_prob}
-                    pgd_repairs = AnalysisUtil.compute_custom_limit_state_probability(
-                        fragility_set_liq,
-                        liq_fragility_vars)
-                    # Convert PGD repairs to SI units
-                    pgd_repairs = PipelineUtil.convert_result_unit(
-                        liq_fragility_curve['description'], pgd_repairs)
-
-                total_repair_rate = pgd_repairs + pgv_repairs
-                break_rate = 0.2 * pgv_repairs + 0.8 * pgd_repairs
-                leak_rate = 0.8 * pgv_repairs + 0.2 * pgd_repairs
-
-                length = PipelineUtil.get_pipe_length(pipeline)
-
-                failure_probability = 1 - math.exp(-1.0 * break_rate * length)
-                num_pgd_repairs = pgd_repairs * length
-                num_pgv_repairs = pgv_repairs * length
-                num_repairs = num_pgd_repairs + num_pgv_repairs
-
-                pipeline_results['guid'] = pipeline['properties']['guid']
-                if 'pipetype' in pipeline['properties']:
-                    pipeline_results['pipeclass'] = pipeline['properties'][
-                        'pipetype']
-                elif 'pipelinesc' in pipeline['properties']:
-                    pipeline_results['pipeclass'] = pipeline['properties'][
-                        'pipelinesc']
-                else:
-                    pipeline_results['pipeclass'] = ""
-
-                # TODO consider converting PGD/PGV values to SI units
-                pipeline_results['pgvrepairs'] = pgv_repairs
-                pipeline_results['pgdrepairs'] = pgd_repairs
-                pipeline_results['repairspkm'] = total_repair_rate
-                pipeline_results['breakrate'] = break_rate
-                pipeline_results['leakrate'] = leak_rate
-                pipeline_results['failprob'] = failure_probability
-                pipeline_results['demandtype'] = demand_type
-                pipeline_results['hazardtype'] = hazard_type
-                pipeline_results['hazardval'] = hazard_val
-                pipeline_results['liqhaztype'] = liq_hazard_type
-                pipeline_results['liqhazval'] = liq_hazard_val
-                pipeline_results['liqprobability'] = liquefaction_prob
-                pipeline_results['numpgvrpr'] = num_pgv_repairs
-                pipeline_results['numpgdrpr'] = num_pgd_repairs
-                pipeline_results['numrepairs'] = num_repairs
-
-            else:
-                raise ValueError(
-                    "Hazard types other than Earthquake are not currently supported.")
+        pipeline_results['guid'] = pipeline['properties']['guid']
+        pipeline_results['hazardval'] = hazard_val
+        pipeline_results['demandtype'] = demand_type
 
         return pipeline_results
 
@@ -304,12 +185,6 @@ class PipelineDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'hazard_type',
-                    'required': True,
-                    'description': 'Hazard Type (e.g. earthquake)',
-                    'type': str
-                },
-                {
                     'id': 'hazard_id',
                     'required': True,
                     'description': 'Hazard ID',
@@ -319,18 +194,6 @@ class PipelineDamage(BaseAnalysis):
                     'id': 'fragility_key',
                     'required': False,
                     'description': 'Fragility key to use in mapping dataset',
-                    'type': str
-                },
-                {
-                    'id': 'use_liquefaction',
-                    'required': False,
-                    'description': 'Use liquefaction',
-                    'type': bool
-                },
-                {
-                    'id': 'liquefaction_fragility_key',
-                    'required': False,
-                    'description': 'Fragility key to use in liquefaction mapping dataset',
                     'type': str
                 },
                 {
