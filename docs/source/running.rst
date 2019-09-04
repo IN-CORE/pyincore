@@ -26,9 +26,9 @@ Running a Building Damage Analysis locally
     A message *The Jupyter Notebook is running* appears in the terminal/prompt and you should see the notebook dashboard open in your browser.
     **Note**  that you might be asked to copy/paste a URL into your browser when you connect for the first time:
 
-.. image:: images/jupyter_token.jpg
-    :height: 255px
-    :width: 465px
+.. image:: images/jupyter_token2.jpg
+    :height: 70px
+    :width: 610px
     :scale: 100%
     :alt: Jupyter Notebook token, running for the first time.
     :align: center
