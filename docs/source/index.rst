@@ -12,9 +12,7 @@ the impact on communities. The development is part of NIST sponsored initiative.
 **pyIncore** is a Python package to analyze and visualize various hazard (earthquake, tornado, hurricane etc.)
 scenarios developed by the Center for Risk-Based Community Resilence Planning team from NCSA. PyIncore allows users to apply hazards on infrastructure in selected areas.
 Python framework acceses underlying data through local or remote services and facilitates moving
-and synthesizing results.
-
-**pyincore** as a Python module can be used to develop scientific analysis/algorithm.
+and synthesizing results. **pyincore** as a Python module can be used to develop scientific analysis/algorithm.
 
 **IN-CORE Lab** is a customized Jupyter Lab with **pyIncore** installed on NCSA's server for running and editing
 various analyses as Jupyter Notebooks.

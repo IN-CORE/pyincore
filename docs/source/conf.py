@@ -35,9 +35,9 @@ copyright = 'Mozilla Public License v2.0'
 author = 'ISDA NCSA'
 
 # The short X.Y version
-version = 'pyincore v0.5.0'
+version = 'pyincore v0.5.1'
 # The full version, including alpha/beta/rc tags
-release = 'pyincore v0.5.0'
+release = 'pyincore v0.5.1'
 
 
 # -- General configuration ---------------------------------------------------
