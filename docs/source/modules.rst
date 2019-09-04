@@ -73,9 +73,9 @@ networkdataset
 ..  autoclass:: networkdataset.NetworkDataset
     :members:
 
-repeairservice
-==============
-..  autoclass:: repeairservice.RepairService
+repairservice
+=============
+..  autoclass:: repairservice.RepairService
     :members:
 
 restorationservice
