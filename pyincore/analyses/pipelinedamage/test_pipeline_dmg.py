@@ -1,4 +1,4 @@
-from pyincore import IncoreClient
+from pyincore import InsecureIncoreClient
 from pyincore.analyses.pipelinedamage import PipelineDamage
 
 
