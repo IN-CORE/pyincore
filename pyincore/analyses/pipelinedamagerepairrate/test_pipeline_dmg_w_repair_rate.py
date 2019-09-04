@@ -19,24 +19,24 @@ def test_pipeline_dmg_w_repair_rate():
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
 
     # Create pipeline damage
-    pipeline_dmg = PipelineDamageRepairRate(client)
+    test_pipeline_dmg_w_rr = PipelineDamageRepairRate(client)
     # Load input datasets
-    pipeline_dmg.load_remote_input_dataset("pipeline", pipeline_dataset_id)
+    test_pipeline_dmg_w_rr.load_remote_input_dataset("pipeline", pipeline_dataset_id)
     # Specify the result name
     result_name = "pipeline_result"
     # Set analysis parameters
-    pipeline_dmg.set_parameter("result_name", result_name)
-    pipeline_dmg.set_parameter("mapping_id", mapping_id)
-    pipeline_dmg.set_parameter("hazard_type", hazard_type)
-    pipeline_dmg.set_parameter("hazard_id", hazard_id)
-    pipeline_dmg.set_parameter("liquefaction_fragility_key", "pgd")
-    pipeline_dmg.set_parameter("use_liquefaction", False)
-    pipeline_dmg.set_parameter("num_cpu", 4)
-    pipeline_dmg.set_parameter("liquefaction_geology_dataset_id",
+    test_pipeline_dmg_w_rr.set_parameter("result_name", result_name)
+    test_pipeline_dmg_w_rr.set_parameter("mapping_id", mapping_id)
+    test_pipeline_dmg_w_rr.set_parameter("hazard_type", hazard_type)
+    test_pipeline_dmg_w_rr.set_parameter("hazard_id", hazard_id)
+    test_pipeline_dmg_w_rr.set_parameter("liquefaction_fragility_key", "pgd")
+    test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", False)
+    test_pipeline_dmg_w_rr.set_parameter("num_cpu", 4)
+    test_pipeline_dmg_w_rr.set_parameter("liquefaction_geology_dataset_id",
                                liq_geology_dataset_id)
 
     # Run pipeline damage analysis
-    result = pipeline_dmg.run_analysis()
+    result = test_pipeline_dmg_w_rr.run_analysis()
 
     assert result is True
 
