@@ -13,7 +13,7 @@
   "inventoryType": "building",
   "fragilityCurves": [
     {
-      "className": "edu.illinois.ncsa.incore.service.fragility.models.PeriodStandardFragilityCurve",
+      "className": "edu.illinois.ncsa.incore.service.dfr3.models.PeriodStandardFragilityCurve",
       "description": "Moderate",
       "median": 1170.0,
       "beta": 0.79,
@@ -24,7 +24,7 @@
       "periodEqnType": 0
     },
     {
-      "className": "edu.illinois.ncsa.incore.service.fragility.models.PeriodStandardFragilityCurve",
+      "className": "edu.illinois.ncsa.incore.service.dfr3.models.PeriodStandardFragilityCurve",
       "description": "Extensive",
       "median": 3259.0,
       "beta": 0.79,
@@ -35,7 +35,7 @@
       "periodEqnType": 0
     },
     {
-      "className": "edu.illinois.ncsa.incore.service.fragility.models.PeriodStandardFragilityCurve",
+      "className": "edu.illinois.ncsa.incore.service.dfr3.models.PeriodStandardFragilityCurve",
       "description": "Complete",
       "median": 5347.0,
       "beta": 0.79,

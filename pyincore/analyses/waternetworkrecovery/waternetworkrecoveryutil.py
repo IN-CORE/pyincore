@@ -327,13 +327,13 @@ class WaterNetworkRecoveryUtil:
 
     @staticmethod
     def calc_waternode_population(waternode_bldg_relations_file,
-                                  stochastic_population_file):
-        """takes output of stochastic population model (pandas) and aggregate
+                                  population_file):
+        """takes output of house unit allocation model (pandas) and aggregate
         the population for each water node
 
         Args:
             waternode_bldg_relations_file:
-            stochastic_population_file:
+            population_file:
 
         Returns: dictionary that contains { waternode: population }
 
@@ -348,16 +348,16 @@ class WaterNetworkRecoveryUtil:
                      'buildings': ast.literal_eval(row['buildings'])}
 
         # get the corrected number per building based on "dislocated" flag
-        stochastic_population = pd.read_csv(stochastic_population_file)
-        if 'dislocated' in stochastic_population.columns:
-            stochastic_population.loc[
-                stochastic_population.dislocated == True, ['numprec']] = 0.0
+        population = pd.read_csv(population_file)
+        if 'dislocated' in population.columns:
+            population.loc[
+                population.dislocated == True, ['numprec']] = 0.0
 
         # get population of each water node
         waternode_population = {}
         for waternode_id, content in waternode_bldg_relations.items():
             total_population = \
-                stochastic_population[stochastic_population['strctid'].isin(
+                population[population['strctid'].isin(
                     content['buildings'])]['numprec'].sum()
             waternode_population[waternode_id] = total_population
 

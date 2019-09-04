@@ -65,12 +65,12 @@ class BaseAnalysis:
         """Convenience function for loading a remote dataset by id.
 
         Args:
-            analysis_param_id (str): The id of the input dataset in the specifications.
-            remote_id (str): The id of dataset in the Data service.
+            analysis_param_id (str): ID of the input Dataset in the specifications.
+            remote_id (str):  ID of the Dataset in the Data service.
 
         """
         dataset = Dataset.from_data_service(remote_id, self.data_service)
-        #TODO: Need to handle failing to set input dataset
+        # TODO: Need to handle failing to set input dataset
         self.set_input_dataset(analysis_param_id, dataset)
 
     def get_name(self):
@@ -140,7 +140,7 @@ class BaseAnalysis:
             self.output_datasets[id]['value'] = dataset
             return True
         else:
-            # TOTO handle error message
+            # TODO handle error message
             return False
 
     def validate_parameter(self, parameter_spec, parameter):
@@ -183,18 +183,19 @@ class BaseAnalysis:
         is_valid = True
         err_msg = ''
         if not isinstance(dataset, type(None)):
-            #if dataset is not none, check data type
+            # if dataset is not none, check data type
             if not (dataset.data_type in dataset_spec['type']):
                 # if dataset type is not equal to spec, then return false
                 is_valid = False
-                err_msg = 'dataset type does not match - ' + 'given type: '+dataset.data_type+' spec types: '+ str(dataset_spec['type'])
+                err_msg = 'dataset type does not match - ' + 'given type: ' + \
+                          dataset.data_type + ' spec types: ' + str(dataset_spec['type'])
         else:
-            #if dataset is none, check 'requirement'
+            # if dataset is none, check 'requirement'
             if dataset_spec['required']:
                 # if dataset is 'required', return false
                 is_valid = False
                 err_msg = 'required dataset is missing - spec: ' + str(dataset_spec)
-        return (is_valid, err_msg)
+        return is_valid, err_msg
 
     def validate_output_dataset(self, dataset_spec, dataset):
         """Match output dataset by type.
@@ -244,7 +245,7 @@ class BaseAnalysis:
             id = parameter_spec["id"]
             result = self.validate_parameter(parameter_spec, self.get_parameter(id))
             if not result[0]:
-                print("Error reading parameter: "+ result[1])
+                print("Error reading parameter: " + result[1])
                 return result
 
         return self.run()
@@ -254,5 +255,3 @@ class BaseAnalysis:
 
     def show_gdocstr_docs(self):
         return AnalysisUtil.create_gdocstr_from_spec(self.get_spec())
-
-

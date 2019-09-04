@@ -6,9 +6,10 @@
 
 
 import pytest
+import requests
 
-from pyincore import IncoreClient
-from pyincore.globals import INCORE_API_DEV_URL
+from pyincore import IncoreClient, InsecureIncoreClient
+from pyincore.globals import INCORE_API_DEV_URL, INCORE_API_DEV_INSECURE_URL
 
 
 @pytest.fixture
@@ -28,7 +29,8 @@ def test_client_success(cred):
     """
     if cred is None:
         assert False, ".incorepw does not exist!"
-    client = IncoreClient(INCORE_API_DEV_URL, cred[0], cred[1])
+    # client = IncoreClient(INCORE_API_DEV_URL, cred[0], cred[1])
+    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, cred[0])
     assert client.status is "success"
 
 
@@ -36,6 +38,5 @@ def test_client_fail():
     """
     testing failed login
     """
-    client = IncoreClient(INCORE_API_DEV_URL, "xxx", "xxxx")
+    client = IncoreClient(INCORE_API_DEV_URL, "foo", "pass")
     assert client.status is "fail"
-

@@ -280,14 +280,14 @@ class TransportationRecovery(BaseAnalysis):
                 {
                     'id': 'optimal_solution_of_bridge_repair_schedule',
                     'description': 'List the Bridge id and its ending repair time.',
-                    'type': 'csv'
+                    'type': 'incore:transportationRepairSchedule'
                 },
                 {
                     'id': 'overall_transportation_recovery_trajectory',
                     'description': 'shows the overall recovery trajectory of the ' +
                                    'transportation system. List the ending time and ' +
                                    'travel efficiency for the whole network.',
-                    'type': 'csv'
+                    'type': 'incore:transportationRecovery'
                 }
             ]
         }

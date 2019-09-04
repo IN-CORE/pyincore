@@ -121,10 +121,10 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         """
         result = []
-        fragility_sets_as = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"),
+        fragility_sets_as = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"),
                                                               buildings,
                                                               self.get_parameter("fragility_key_as"))
-        fragility_sets_ds = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"),
+        fragility_sets_ds = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"),
                                                               buildings,
                                                               self.get_parameter("fragility_key_ds"))
 
@@ -413,7 +413,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'buildings',
                     'description': 'CSV file of building non-structural damage',
-                    'type': 'building-damage'
+                    'type': 'ergo:nsBuildingInventoryDamage'
                 }
             ]
         }

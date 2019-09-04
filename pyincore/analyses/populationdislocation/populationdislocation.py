@@ -11,7 +11,7 @@ from pyincore.analyses.populationdislocation.populationdislocationutil import Po
 
 class PopulationDislocation(BaseAnalysis):
     """Population Dislocation Analysis computes dislocation for each residential structure based on the direct
-    economic damage. The dislocation is calculated from four probabilites of dislocation based on a random normal
+    economic damage. The dislocation is calculated from four probabilities of dislocation based on a random normal
     distribution of the four damage factors presented by Bai, Hueste, Gardoni 2009.
 
     These four damage factors correspond to value loss. The sum of the four probabilities multiplied
@@ -51,8 +51,8 @@ class PopulationDislocation(BaseAnalysis):
                 {
                     'id': 'seed',
                     'required': True,
-                    'description': 'Seed to ensure replication if run as part of a stochastic analysis, '
-                                   'for example in connection with Population Allocation analysis.',
+                    'description': 'Seed to ensure replication if run as part of a probabilistic analysis, '
+                                   'for example in connection with Housing Unit Allocation analysis.',
                     'type': int
                 }
             ],
@@ -64,16 +64,17 @@ class PopulationDislocation(BaseAnalysis):
                     'type': ['ergo:buildingDamageVer4']
                 },
                 {
-                    'id': 'population_allocation',
+                    'id': 'housing_unit_allocation',
                     'required': True,
-                    'description': 'Population Allocation CSV data',
-                    'type': ['ergo:PopAllocation']
+                    'description': 'A csv file with the merged dataset of the inputs, aka Probabilistic'
+                                   'House Unit Allocation',
+                    'type': ['incore:housingUnitAllocation']
                 },
                 {
                     'id': 'block_group_data',
                     'required': True,
                     'description': 'Block group racial distribution census CSV data',
-                    'type': ['ergo:blockGroupData']
+                    'type': ['incore:blockGroupData']
                 }
             ],
             'output_datasets': [
@@ -82,7 +83,7 @@ class PopulationDislocation(BaseAnalysis):
                     'parent_type': 'population_block',
                     'description': 'A csv file with population dislocation result '
                                    'aggregated to the block group level',
-                    'type': 'csv'
+                    'type': 'incore:popDislocation'
                 }
             ]
         }
@@ -103,14 +104,14 @@ class PopulationDislocation(BaseAnalysis):
         # Building Damage Dataset
         building_dmg = self.get_input_dataset("building_dmg").get_file_path('csv')
 
-        # Population Allocation Dataset
-        sto_pop_alloc = self.get_input_dataset("population_allocation").get_file_path('csv')
+        # housing unit allocation Dataset
+        housing_unit_alloc = self.get_input_dataset("housing_unit_allocation").get_file_path('csv')
 
         # Block Group data
         bg_data = self.get_input_dataset("block_group_data").get_file_path('csv')
 
-        merged_block_inv = PopulationDislocationUtil.merge_damage_population_block(
-            building_dmg, sto_pop_alloc, bg_data
+        merged_block_inv = PopulationDislocationUtil.merge_damage_housing_block(
+            building_dmg, housing_unit_alloc, bg_data
         )
 
         # Returns dataframe
@@ -133,8 +134,8 @@ class PopulationDislocation(BaseAnalysis):
 
         Args:
             seed_i (int): Seed for random normal to ensure replication if run as part of a stochastic analysis,
-                for example in connection with Population Allocation analysis.
-            inventory (pd.DataFrame): Merged building, population allocation and block group inventories
+                for example in connection with housing unit allocation analysis.
+            inventory (pd.DataFrame): Merged building, housing unit allocation and block group inventories
 
         Returns:
             pd.DataFrame: An inventory with probabilities of dislocation in a separate column
@@ -180,7 +181,7 @@ class PopulationDislocation(BaseAnalysis):
         """
         Calculate dislocation, the probability of dislocation for the household and population.
         Probability of dislocation Damage factor,
-        based on current IN-COREv1 algorithm and Bai et al 2009 damage factors.
+        based on current IN-COREv1 algorithm and Bai et al. 2009 damage factors.
 
         The following variables are need to predict dislocation using logistic model
         see detailed explanation https://opensource.ncsa.illinois.edu/confluence/

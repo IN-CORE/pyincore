@@ -3,6 +3,8 @@
 	"description": "Simulated pytest hurricane",
 	"coast": "florida",
 	"category": 1,
+	"demandType": "3s",
+	"demandUnits": "mph",
 	"gridResolution": 6,
 	"rasterResolution": 6,
 	"transD": -83,

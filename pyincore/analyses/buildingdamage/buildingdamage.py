@@ -111,23 +111,13 @@ class BuildingDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), buildings,
+        fragility_sets[fragility_key] = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), buildings,
                                                                           fragility_key)
-
-        if hazard_type == 'tsunami':
-            other_fragility_sets = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), buildings,
-                                                                     BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY)
-            fragility_sets[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY] = other_fragility_sets
 
         for building in buildings:
             fragility_set = dict()
             if building["id"] in fragility_sets[fragility_key]:
                 fragility_set[fragility_key] = fragility_sets[fragility_key][building["id"]]
-
-            if hazard_type == 'tsunami' and building["id"] in \
-                    fragility_sets[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY]:
-                other_fragility_set = fragility_sets[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY][building["id"]]
-                fragility_set[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY] = other_fragility_set
 
             result.append(self.building_damage_analysis(building, dmg_ratio_tbl, fragility_set, hazard_dataset_id,
                                                         hazard_type))
@@ -155,7 +145,6 @@ class BuildingDamage(BaseAnalysis):
             demand_type = "None"
 
             dmg_probability = collections.OrderedDict()
-            dmg_interval = collections.OrderedDict()
             mean_damage = collections.OrderedDict()
             mean_damage['meandamage'] = 0.0
             mean_damage_dev = collections.OrderedDict()
@@ -165,7 +154,11 @@ class BuildingDamage(BaseAnalysis):
                 location = GeoUtil.get_location(building)
                 fragility_key = self.get_parameter("fragility_key")
                 local_fragility_set = fragility_set[fragility_key]
+                building_period = 0.0
                 if hazard_type == 'earthquake':
+                    num_stories = building['properties']['no_stories']
+                    building_period = BuildingUtil.get_building_period(num_stories, local_fragility_set)
+
                     # TODO include liquefaction and hazard uncertainty
                     hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
                     demand_units = local_fragility_set['demandUnits']
@@ -190,27 +183,12 @@ class BuildingDamage(BaseAnalysis):
                                                                           hazard_demand_type,
                                                                           demand_units,
                                                                           [point])[0]["hazardValue"]
-
+                    demand_type = hazard_demand_type
                     # Sometimes the geotiffs give large negative values for out of bounds instead of 0
                     if hazard_val <= 0.0:
-                        if BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY in fragility_set:
-                            local_fragility_set = fragility_set[BuildingUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY]
-                            hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set,
-                                                                                     hazard_type)
-                            demand_units = local_fragility_set["demandUnits"]
-                            hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
-                                                                                  hazard_demand_type,
-                                                                                  demand_units,
-                                                                                  [point])[0]["hazardValue"]
-                            if hazard_val <= 0.0:
-                                hazard_val = 0.0
-                            else:
-                                demand_type = hazard_demand_type
+                        hazard_val = 0.0
 
-                    else:
-                        demand_type = hazard_demand_type
-
-                dmg_probability = AnalysisUtil.calculate_damage_json(local_fragility_set, hazard_val)
+                dmg_probability = AnalysisUtil.calculate_damage_json(local_fragility_set, hazard_val, building_period)
             else:
                 dmg_probability['immocc'] = 0.0
                 dmg_probability['lifesfty'] = 0.0
@@ -235,7 +213,6 @@ class BuildingDamage(BaseAnalysis):
         except Exception as e:
             # This prints the type, value and stacktrace of error being handled.
             traceback.print_exc()
-            print()
             raise e
 
     def get_spec(self):
@@ -316,7 +293,7 @@ class BuildingDamage(BaseAnalysis):
             'output_datasets': [
                 {
                     'id': 'result',
-                    'parent_type': 'bridges',
+                    'parent_type': 'buildings',
                     'description': 'CSV file of building structural damage',
                     'type': 'ergo:buildingDamageVer4'
                 }

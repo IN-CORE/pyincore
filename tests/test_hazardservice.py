@@ -251,17 +251,17 @@ def test_create_tsunami_hazard(hazardsvc):
     assert response["id"] is not None and response["hazardDatasets"][1][
         "datasetId"] is not None
 
-# INCORE-682 is opened to address this
-# def test_create_hurricane_windfield(hazardsvc):
-#     if hazardsvc is None:
-#         assert False, ".incorepw does not exist!"
-#
-#     scenario = ""
-#     with open("hurricanewf.json", 'r') as file:
-#         hurr_wf_inputs = file.read()
-#
-#     response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
-#     assert response["id"] is not None
+
+def test_create_hurricane_windfield(hazardsvc):
+    if hazardsvc is None:
+        assert False, ".incorepw does not exist!"
+
+    scenario = ""
+    with open("hurricanewf.json", 'r') as file:
+        hurr_wf_inputs = file.read()
+
+    response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
+    assert response["id"] is not None
 
 
 def test_get_hurricanewf_metadata(hazardsvc):
@@ -281,17 +281,16 @@ def test_get_hurricanewf_metadata_list(hazardsvc):
 def test_get_hurricanewf_values(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    hvals = hazardsvc.get_hurricanewf_values("5bd3d6a1f242fe0cf903cb0e",
-                                             "velocity",
-                                             "kmph", ["28,-81"])
+    hvals = hazardsvc.get_hurricanewf_values("5cffdcf35648c404a6414f7e",
+                                             "3s", "mph", ["28,-81"], 10.0, 0.03)
 
-    assert (hvals[0]['hazardValue'] == 60.21153835934114)
+    assert (pytest.approx(hvals[0]['hazardValue'], 1e-6) == 81.57440785011988)
 
 
 def test_get_hurricanewf_json(hazardsvc):
     if hazardsvc is None:
         assert False, ".incorepw does not exist!"
-    hjson = hazardsvc.get_hurricanewf_json("florida", 1, -83, "28,-81", 6, 10,
+    hjson = hazardsvc.get_hurricanewf_json("florida", 1, -83, "28,-81", "3s", "kmph", 6, 10,
                                            "circular")
 
     assert len(hjson["hurricaneSimulations"]) > 0

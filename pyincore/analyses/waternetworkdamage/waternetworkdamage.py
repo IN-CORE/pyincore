@@ -14,6 +14,7 @@ from pyincore import AnalysisUtil
 from pyincore import GeoUtil
 from pyincore import BaseAnalysis
 from pyincore.dataset import Dataset
+from pyincore.networkdataset import NetworkDataset
 
 
 class WaterNetworkDamage(BaseAnalysis):
@@ -226,12 +227,14 @@ class WaterNetworkDamage(BaseAnalysis):
         """
 
         # Water network dataset
-        water_pipelines_set = self.get_input_dataset("water_pipelines").get_inventory_reader()
+        water_network_set = NetworkDataset(self.get_input_dataset("water_network"))
+        water_facilities_set = water_network_set.node.get_inventory_reader()
+        water_pipelines_set = water_network_set.link.get_inventory_reader()
+
         water_pipelines = list(water_pipelines_set)
         for item in water_pipelines:
             item['id'] = item['properties']['id']
 
-        water_facilities_set = self.get_input_dataset("water_facilities").get_inventory_reader()
         water_facilities = list(water_facilities_set)
         for item in water_facilities:
             item['id'] = item['properties']['id']
@@ -261,7 +264,7 @@ class WaterNetworkDamage(BaseAnalysis):
             count += pipes_per_process
 
         water_pipeline_fragility_sets = \
-            self.fragilitysvc.map_fragilities(water_pipeline_mapping_id,
+            self.fragilitysvc.map_inventory(water_pipeline_mapping_id,
                                               water_pipelines,
                                               "pgv")
 
@@ -279,7 +282,7 @@ class WaterNetworkDamage(BaseAnalysis):
         # facility damage states
         parallelism = AnalysisUtil.determine_parallelism_locally(
             len(water_facilities), user_defined_cpu)
-        water_facility_fragility_sets = self.fragilitysvc.map_fragilities(
+        water_facility_fragility_sets = self.fragilitysvc.map_inventory(
             water_facility_mapping_id, water_facilities, "pga")
         facility_per_process = int(len(water_facilities) / parallelism)
         inventory_args = []
@@ -346,30 +349,24 @@ class WaterNetworkDamage(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'water_facilities',
+                    'id': 'water_network',
                     'required': True,
-                    'description': 'Water Network Facility shapefile',
-                    'type': ['incore:waterFacility'],
+                    'description':'',
+                    'type': ['incore:waternetwork']
                 },
-                {
-                    'id': 'water_pipelines',
-                    'required': True,
-                    'description': 'Water Network Pipeline shapefile',
-                    'type': ['incore:waterPipeline'],
-                }
             ],
             'output_datasets': [
                 {
                     'id': 'pipeline_dmg',
-                    'type': 'csv'
+                    'type': 'ergo:pipelineDamage'
                 },
                 {
                     'id': 'tank_dmg',
-                    'type': 'csv'
+                    'type': 'ergo:pumpDamage'
                 },
                 {
                     'id': 'pump_dmg',
-                    'type': 'csv'
+                    'type': 'ergo:lifelineWaterTankInventoryDamage'
                 }
             ]
         }
