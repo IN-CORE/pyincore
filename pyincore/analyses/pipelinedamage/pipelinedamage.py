@@ -118,7 +118,7 @@ class PipelineDamage(BaseAnalysis):
                     "Hazard type other than Earthquake are not currently supported.")
 
         # get fragility set
-        fragility_sets = self.fragilitysvc.map_fragilities(
+        fragility_sets = self.fragilitysvc.map_inventory(
             self.get_parameter("mapping_id"), pipelines, fragility_key)
 
         # Get geology dataset id
@@ -137,7 +137,7 @@ class PipelineDamage(BaseAnalysis):
             use_liquefaction = self.get_parameter("use_liquefaction")
 
         if geology_dataset_id is not None:
-            fragility_sets_liq = self.fragilitysvc.map_fragilities(
+            fragility_sets_liq = self.fragilitysvc.map_inventory(
                 self.get_parameter("mapping_id"), pipelines,
                 liquefaction_fragility_key)
 

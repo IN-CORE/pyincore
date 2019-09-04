@@ -108,7 +108,7 @@ class TsunamiPipelineDamage(BaseAnalysis):
             fragility_key = "Non-Retrofit inundationDepth Fragility ID Code"
 
         # get fragility set
-        fragility_sets = self.fragilitysvc.map_fragilities(
+        fragility_sets = self.fragilitysvc.map_inventory(
             self.get_parameter("mapping_id"), pipelines, fragility_key)
 
         for pipeline in pipelines:
