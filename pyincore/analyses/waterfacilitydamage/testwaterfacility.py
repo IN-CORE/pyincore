@@ -25,8 +25,6 @@ def run_with_base_class():
 
     result_name = "wf-dmg-results.csv"
     wf_dmg.set_parameter("result_name", result_name)
-    print(wf_dmg.spec)
-
     wf_dmg.set_parameter("hazard_type", hazard_type)
     wf_dmg.set_parameter("hazard_id", hazard_id)
     wf_dmg.set_parameter("mapping_id", mapping_id)
@@ -36,19 +34,6 @@ def run_with_base_class():
     wf_dmg.set_parameter("liquefaction_fragility_key", liq_fragility_key)
     wf_dmg.set_parameter("use_hazard_uncertainty", uncertainty)
     wf_dmg.set_parameter("num_cpu", 4)
-
-    # # test tsunami seaside
-    # wf_dmg.load_remote_input_dataset("water_facilities",
-    #                                  "5d266507b9219c3c5595270c")
-    # wf_dmg.set_parameter("result_name", "seaside_tsu_waterfacility_damage")
-    # wf_dmg.set_parameter("hazard_type", "tsunami")
-    # wf_dmg.set_parameter("hazard_id", "5bc9eaf7f7b08533c7e610e1")
-    # wf_dmg.set_parameter("mapping_id", "5d31f737b9219c6d66398521")
-    # wf_dmg.set_parameter("fragility_key",
-    #                      "Non-Retrofit inundationDepth Fragility ID Code")
-    # wf_dmg.set_parameter("use_liquefaction", False)
-    # wf_dmg.set_parameter("use_hazard_uncertainty", False)
-    # wf_dmg.set_parameter("num_cpu", 4)
 
     wf_dmg.run_analysis()
 
