@@ -173,6 +173,7 @@ class PipelineDamage(BaseAnalysis):
 
         Args:
             pipeline (obj): a single pipeline.
+            hazard_type (str): hazard type.
             fragility_set (obj): A JSON description of fragility assigned to the building.
             fragility_set_liq (obj): A JSON description of fragility assigned to the building with liqufaction.
             hazard_dataset_id (str): A hazard dataset to use.
