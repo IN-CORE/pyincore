@@ -188,15 +188,6 @@ class PipelineDamage(BaseAnalysis):
         pipeline_results = collections.OrderedDict()
         pgv_repairs = 0.0
         pgd_repairs = 0.0
-        total_repair_rate = 0.0
-        break_rate = 0.0
-        leak_rate = 0.0
-        failure_probability = 0.0
-        num_pgd_repairs = 0.0
-        num_pgv_repairs = 0.0
-        num_repairs = 0.0
-        demand_type = None
-        hazard_val = 0.0
         liq_hazard_type = ""
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
