@@ -114,22 +114,19 @@ class PipelineDamageRepairRate(BaseAnalysis):
         if fragility_key is None:
             if hazard_type == "earthquake":
                 fragility_key = PipelineUtil.DEFAULT_EQ_FRAGILITY_KEY
+            elif hazard_type == "tsunami":
+                fragility_key = PipelineUtil.DEFAULT_TSU_FRAGILITY_KEY
             else:
-                raise ValueError(
-                    "Hazard type other than Earthquake are not currently supported.")
+                raise ValueError("You have to define the fragility key!")
 
         # get fragility set
         fragility_sets = self.fragilitysvc.map_inventory(
             self.get_parameter("mapping_id"), pipelines, fragility_key)
 
-        # Get geology dataset id
-        geology_dataset_id = self.get_parameter(
-            "liquefaction_geology_dataset_id")
 
         # Get Liquefaction Fragility Key
-        liquefaction_fragility_key = self.get_parameter(
-            "liquefaction_fragility_key")
-        if liquefaction_fragility_key is None:
+        liquefaction_fragility_key = self.get_parameter("liquefaction_fragility_key")
+        if hazard_type == "earthquake" and liquefaction_fragility_key is None:
             liquefaction_fragility_key = PipelineUtil.LIQ_FRAGILITY_KEY
 
         # Liquefaction
@@ -137,33 +134,31 @@ class PipelineDamageRepairRate(BaseAnalysis):
         if hazard_type == "earthquake" and self.get_parameter("use_liquefaction") is not None:
             use_liquefaction = self.get_parameter("use_liquefaction")
 
+        # Get geology dataset id
+        geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
         if geology_dataset_id is not None:
             fragility_sets_liq = self.fragilitysvc.map_inventory(
                 self.get_parameter("mapping_id"), pipelines,
                 liquefaction_fragility_key)
 
-        if hazard_type == "earthquake":
-            for pipeline in pipelines:
-                if pipeline["id"] in fragility_sets.keys():
-                    liq_fragility_set = None
-                    # Check if mapping contains liquefaction fragility
-                    if geology_dataset_id is not None and \
-                            fragility_sets_liq is not None and \
-                            pipeline["id"] in fragility_sets_liq:
-                        liq_fragility_set = fragility_sets_liq[pipeline["id"]]
+        for pipeline in pipelines:
+            if pipeline["id"] in fragility_sets.keys():
+                liq_fragility_set = None
+                # Check if mapping contains liquefaction fragility
+                if geology_dataset_id is not None and \
+                        fragility_sets_liq is not None and \
+                        pipeline["id"] in fragility_sets_liq:
+                    liq_fragility_set = fragility_sets_liq[pipeline["id"]]
 
-                    result.append(self.pipeline_damage_analysis(pipeline,
-                                                                hazard_type,
-                                                                fragility_sets[
-                                                                    pipeline[
-                                                                        "id"]],
-                                                                liq_fragility_set,
-                                                                hazard_dataset_id,
-                                                                geology_dataset_id,
-                                                                use_liquefaction))
-        else:
-            raise ValueError(
-                "Hazard types other than Earthquake and Tsunami are not currently supported.")
+                result.append(self.pipeline_damage_analysis(pipeline,
+                                                            hazard_type,
+                                                            fragility_sets[
+                                                                pipeline[
+                                                                    "id"]],
+                                                            liq_fragility_set,
+                                                            hazard_dataset_id,
+                                                            geology_dataset_id,
+                                                            use_liquefaction))
 
         return result
 
@@ -199,7 +194,6 @@ class PipelineDamageRepairRate(BaseAnalysis):
             location = GeoUtil.get_location(pipeline)
             point = str(location.y) + "," + str(location.x)
 
-            # Get PGV hazard from hazardsvc
             if hazard_type == 'earthquake':
                 hazard_resp = self.hazardsvc.get_earthquake_hazard_values(
                     hazard_dataset_id, demand_type, demand_units, [point])
@@ -217,6 +211,9 @@ class PipelineDamageRepairRate(BaseAnalysis):
                     "Hazard type are not currently supported.")
 
             hazard_val = hazard_resp[0]['hazardValue']
+            if hazard_val <= 0.0:
+                hazard_val = 0.0
+
             diameter = PipelineUtil.get_pipe_diameter(pipeline)
             fragility_vars = {'x': hazard_val, 'y': diameter}
             pgv_repairs = AnalysisUtil.compute_custom_limit_state_probability(fragility_set, fragility_vars)

@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-"""Tsunami Buried Pipeline Damage Analysis
+"""Buried Pipeline Damage Analysis with limit state calculation
 
 """
 
@@ -14,10 +14,9 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, \
 import concurrent.futures
 from itertools import repeat
 import collections
-import math
 
 
-class TsunamiPipelineDamage(BaseAnalysis):
+class PipelineDamage(BaseAnalysis):
     """Computes pipeline damage for a hazard.
 
     Args:
@@ -29,7 +28,7 @@ class TsunamiPipelineDamage(BaseAnalysis):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
 
-        super(TsunamiPipelineDamage, self).__init__(incore_client)
+        super(PipelineDamage, self).__init__(incore_client)
 
     def run(self):
         """Execute pipeline damage analysis """
@@ -38,6 +37,7 @@ class TsunamiPipelineDamage(BaseAnalysis):
             "pipeline").get_inventory_reader()
 
         # Get hazard input
+        hazard_type = self.get_parameter("hazard_type")
         hazard_dataset_id = self.get_parameter("hazard_id")
         user_defined_cpu = 1
 
@@ -61,7 +61,7 @@ class TsunamiPipelineDamage(BaseAnalysis):
 
         results = self.pipeline_damage_concurrent_future(
             self.pipeline_damage_analysis_bulk_input, num_workers,
-            inventory_args, repeat(hazard_dataset_id))
+            inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", results,
                                  name=self.get_parameter("result_name"))
@@ -89,11 +89,13 @@ class TsunamiPipelineDamage(BaseAnalysis):
 
         return output
 
-    def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_dataset_id):
+    def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_type,
+                                            hazard_dataset_id):
         """Run pipeline damage analysis for multiple pipelines.
 
         Args:
             pipelines (list): multiple pipelines from pieline dataset.
+            hazard_type (str): Hazard Type
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
@@ -105,7 +107,12 @@ class TsunamiPipelineDamage(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            fragility_key = "Non-Retrofit inundationDepth Fragility ID Code"
+            if hazard_type == "earthquake":
+                fragility_key = "pgv"
+            elif hazard_type == "tsunami":
+                fragility_key = "Non-Retrofit inundationDepth Fragility ID Code"
+            else:
+                raise ValueError("You have to define the fragility key!")
 
         # get fragility set
         fragility_sets = self.fragilitysvc.map_inventory(
@@ -113,17 +120,18 @@ class TsunamiPipelineDamage(BaseAnalysis):
 
         for pipeline in pipelines:
             if pipeline["id"] in fragility_sets.keys():
-                result.append(self.pipeline_damage_analysis(pipeline,
+                result.append(self.pipeline_damage_analysis(pipeline, hazard_type,
                                                             fragility_sets[pipeline["id"]],
                                                             hazard_dataset_id))
 
         return result
 
-    def pipeline_damage_analysis(self, pipeline, fragility_set, hazard_dataset_id):
+    def pipeline_damage_analysis(self, pipeline, hazard_type, fragility_set, hazard_dataset_id):
         """Run pipeline damage for a single pipeline.
 
         Args:
             pipeline (obj): a single pipeline.
+            hazard_type (str): hazard type
             fragility_set (obj): A JSON description of fragility assigned to the building.
             hazard_dataset_id (str): A hazard dataset to use.
 
@@ -139,20 +147,32 @@ class TsunamiPipelineDamage(BaseAnalysis):
             demand_type = fragility_set['demandType'].lower()
             demand_units = fragility_set['demandUnits']
             location = GeoUtil.get_location(pipeline)
+            point = str(location.y) + "," + str(location.x)
 
             # tsunami pipeline damage produce limit states instead of repair rates
-            hazard_val = self.hazardsvc.get_tsunami_hazard_value(
-                hazard_dataset_id,
-                demand_type,
-                demand_units,
-                location.y, location.x)
+            if hazard_type == 'earthquake':
+                hazard_resp = self.hazardsvc.get_earthquake_hazard_values(
+                    hazard_dataset_id, demand_type, demand_units, [point])
+            elif hazard_type == 'tsunami':
+                hazard_resp = self.hazardsvc.get_tsunami_hazard_values(
+                    hazard_dataset_id, demand_type, demand_units, [point])
+            elif hazard_type == 'tornado':
+                hazard_resp = self.hazardsvc.get_tornado_hazard_values(
+                    hazard_dataset_id, demand_units, [point])
+            elif hazard_type == 'hurricane':
+                hazard_resp = self.hazardsvc.get_hurricanewf_values(
+                    hazard_dataset_id, demand_type, demand_units, [point])
+            else:
+                raise ValueError(
+                    "Hazard type are not currently supported.")
+
+            hazard_val = hazard_resp[0]['hazardValue']
             if hazard_val <= 0.0:
                 hazard_val = 0.0
 
             limit_states = AnalysisUtil.compute_limit_state_probability(
                 fragility_set['fragilityCurves'], hazard_val, 1.0, 0)
-            dmg_intervals = AnalysisUtil.compute_damage_intervals(
-                limit_states)
+            dmg_intervals = AnalysisUtil.compute_damage_intervals(limit_states)
             pipeline_results = {**limit_states, **dmg_intervals}
 
         pipeline_results['guid'] = pipeline['properties']['guid']
@@ -182,6 +202,12 @@ class TsunamiPipelineDamage(BaseAnalysis):
                     'id': 'mapping_id',
                     'required': True,
                     'description': 'Fragility mapping dataset',
+                    'type': str
+                },
+                {
+                    'id': 'hazard_type',
+                    'required': True,
+                    'description': 'Hazard Type',
                     'type': str
                 },
                 {

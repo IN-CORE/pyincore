@@ -10,6 +10,7 @@ class PipelineUtil:
 
     DEFAULT_EQ_FRAGILITY_KEY = "pgv"
     LIQ_FRAGILITY_KEY = "pgd"
+    DEFAULT_TSU_FRAGILITY_KEY = "Non-Retrofit inundationDepth Fragility ID Code"
 
     @staticmethod
     def convert_result_unit(result_unit: str, result: float):

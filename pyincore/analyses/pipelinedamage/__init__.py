@@ -5,4 +5,4 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.tsunamipipelinedamage.tsunamipipelinedamage import TsunamiPipelineDamage
+from pyincore.analyses.pipelinedamage.pipelinedamage import PipelineDamage
