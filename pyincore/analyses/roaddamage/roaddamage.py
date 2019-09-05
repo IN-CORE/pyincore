@@ -193,7 +193,7 @@ class RoadDamage(BaseAnalysis):
 
             road_results.update(dmg_probability)
             road_results.update(dmg_interval)
-            road_results['hazardtype'] = demand_type
+            road_results['demandtype'] = demand_type
 
             return road_results
 
