@@ -247,7 +247,7 @@ class PipelineDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'pipeline',
-                    'type': 'ergo:pipelineDamage'
+                    'type': 'incore:pipelineDamage'
                 }
             ]
         }
