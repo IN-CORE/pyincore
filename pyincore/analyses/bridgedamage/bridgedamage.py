@@ -11,6 +11,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
 from itertools import repeat
+import random
 
 
 class BridgeDamage(BaseAnalysis):
@@ -20,6 +21,7 @@ class BridgeDamage(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
@@ -31,56 +33,47 @@ class BridgeDamage(BaseAnalysis):
         # Bridge dataset
         bridge_set = self.get_input_dataset("bridges").get_inventory_reader()
 
-        dmg_ratio_csv = self.get_input_dataset("dmg_ratios").get_csv_reader()
-        dmg_ratio_tbl = BridgeUtil.get_damage_ratio_rows(dmg_ratio_csv)
-
-        # Get Fragility key
-        fragility_key = self.get_parameter("fragility_key")
-        if fragility_key is None:
-            fragility_key = BridgeUtil.DEFAULT_FRAGILITY_KEY
+        dmg_ratio_tbl = None
+        if self.get_input_dataset("dmg_ratios") is not None:
+            dmg_ratio_csv = self.get_input_dataset(
+                "dmg_ratios").get_csv_reader()
+            dmg_ratio_tbl = BridgeUtil.get_damage_ratio_rows(dmg_ratio_csv)
 
         # Get hazard input
-        hazard_dataset_id = self.get_parameter("hazard_id")
-
-        # Hazard type, note this is here for future use if additional hazards are supported by this analysis
         hazard_type = self.get_parameter("hazard_type")
-
-        # Hazard Uncertainty
-        use_hazard_uncertainty = False
-        if self.get_parameter("use_hazard_uncertainty") is not None:
-            use_hazard_uncertainty = self.get_parameter("use_hazard_uncertainty")
-
-        # Liquefaction
-        use_liquefaction = False
-        if self.get_parameter("use_liquefaction") is not None:
-            use_liquefaction = self.get_parameter("use_liquefaction")
+        hazard_dataset_id = self.get_parameter("hazard_id")
 
         results = []
         user_defined_cpu = 1
 
-        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
+        if not self.get_parameter("num_cpu") is None and self.get_parameter(
+                "num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(bridge_set), user_defined_cpu)
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(
+            bridge_set), user_defined_cpu)
 
         avg_bulk_input_size = int(len(bridge_set) / num_workers)
         inventory_args = []
         count = 0
         inventory_list = list(bridge_set)
         while count < len(inventory_list):
-            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
+            inventory_args.append(
+                inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.bridge_damage_concurrent_future(self.bridge_damage_analysis_bulk_input, num_workers,
-                                                       inventory_args, repeat(hazard_dataset_id), repeat(dmg_ratio_tbl),
-                                                       repeat(fragility_key), repeat(use_hazard_uncertainty),
-                                                       repeat(use_liquefaction))
+        results = self.bridge_damage_concurrent_future(
+            self.bridge_damage_analysis_bulk_input, num_workers,
+            inventory_args, repeat(hazard_type),
+            repeat(hazard_dataset_id), repeat(dmg_ratio_tbl))
 
-        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
+        self.set_result_csv_data("result", results,
+                                 name=self.get_parameter("result_name"))
 
         return True
 
-    def bridge_damage_concurrent_future(self, function_name, num_workers, *args):
+    def bridge_damage_concurrent_future(self, function_name, num_workers,
+                                        *args):
         """Utilizes concurrent.future module.
 
         Args:
@@ -93,49 +86,76 @@ class BridgeDamage(BaseAnalysis):
 
         """
         output = []
-        with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+        with concurrent.futures.ProcessPoolExecutor(
+                max_workers=num_workers) as executor:
             for ret in executor.map(function_name, *args):
                 output.extend(ret)
 
         return output
 
-    def bridge_damage_analysis_bulk_input(self, bridges, hazard_dataset_id, dmg_ratio_tbl, fragility_key,
-                                          use_hazard_uncertainty, use_liquefaction):
+    def bridge_damage_analysis_bulk_input(self, bridges, hazard_type,
+                                          hazard_dataset_id, dmg_ratio_tbl):
         """Run analysis for multiple bridges.
 
         Args:
             bridges (list): Multiple bridges from input inventory set.
+            hazard_type (str): Hazard type, either earthquake, tornadoes, tsunami, or hurricane
             hazard_dataset_id (str): An id of the hazard exposure.
             dmg_ratio_tbl (obj): A damage ratio table, including weights to compute mean damage.
-            fragility_key (str): Fragility key describing the type of fragility.
-            use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty when computing damage,
-                False otherwise.
-            use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
-                False otherwise.
 
         Returns:
             list: A list of ordered dictionaries with bridge damage values and other data/metadata.
 
         """
+        # Get Fragility key
+        fragility_key = self.get_parameter("fragility_key")
+        if fragility_key is None:
+            if hazard_type == "tsunami":
+                fragility_key = BridgeUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY
+            else:
+                fragility_key = BridgeUtil.DEFAULT_FRAGILITY_KEY
+
+        # Hazard Uncertainty
+        use_hazard_uncertainty = False
+        if hazard_type == "earthquake" and self.get_parameter(
+                "use_hazard_uncertainty") is not None:
+            use_hazard_uncertainty = self.get_parameter(
+                "use_hazard_uncertainty")
+
+        # Liquefaction
+        use_liquefaction = False
+        if hazard_type == "earthquake" and self.get_parameter(
+                "use_liquefaction") is not None:
+            use_liquefaction = self.get_parameter("use_liquefaction")
+
         result = []
-        fragility_sets = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), bridges, fragility_key)
+        fragility_sets = self.fragilitysvc.map_inventory(
+            self.get_parameter("mapping_id"), bridges, fragility_key)
         for bridge in bridges:
             fragility_set = None
             if bridge["id"] in fragility_sets:
                 fragility_set = fragility_sets[bridge["id"]]
 
-            result.append(self.bridge_damage_analysis(bridge, fragility_set, hazard_dataset_id, dmg_ratio_tbl,
-                                                      fragility_key, use_hazard_uncertainty, use_liquefaction))
+            result.append(self.bridge_damage_analysis(bridge, fragility_set,
+                                                      hazard_type,
+                                                      hazard_dataset_id,
+                                                      dmg_ratio_tbl,
+                                                      fragility_key,
+                                                      use_hazard_uncertainty,
+                                                      use_liquefaction))
 
         return result
 
-    def bridge_damage_analysis(self, bridge, fragility_set, hazard_dataset_id, dmg_ratio_tbl, fragility_key,
+    def bridge_damage_analysis(self, bridge, fragility_set, hazard_type,
+                               hazard_dataset_id,
+                               dmg_ratio_tbl, fragility_key,
                                use_hazard_uncertainty, use_liquefaction):
         """Calculates bridge damage results for a single bridge.
 
         Args:
             bridge (obj): A JSON mapping of a geometric object from the inventory: current bridge.
             fragility_set (obj): A JSON description of fragility assigned to the bridge.
+            hazard_type (str): Hazard type earthquake, tsunami, tornado and hurricane
             hazard_dataset_id (str): A hazard dataset to use.
             dmg_ratio_tbl (obj): A table of damage ratios for mean damage.
             fragility_key (str): A fragility key to use for mapping bridges to fragilities.
@@ -164,26 +184,49 @@ class BridgeDamage(BaseAnalysis):
             demand_type = fragility_set['demandType']
             demand_units = fragility_set['demandUnits']
             point = str(location.y) + "," + str(location.x)
-            # Start here, need to add the hazard dataset id to the analysis parameter list
-            hazard_resp = \
-                self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id,
-                                                            demand_type, demand_units,
-                                                            [point])
+
+            if hazard_type == "earthquake":
+                hazard_resp = \
+                    self.hazardsvc.get_earthquake_hazard_values(
+                        hazard_dataset_id,
+                        demand_type,
+                        demand_units,
+                        [point])
+            elif hazard_type == "tsunami":
+                hazard_resp = self.hazardsvc.get_tsunami_hazard_values(
+                    hazard_dataset_id, demand_type, demand_units, [point])
+            elif hazard_type == "tornado":
+                hazard_resp = self.hazardsvc.get_tornado_hazard_values(
+                    hazard_dataset_id, demand_units, [point])
+            elif hazard_type == "hurricane":
+                hazard_resp = self.hazardsvc.get_hurricanewf_values(
+                    hazard_dataset_id, demand_type, demand_units, [point])
+            else:
+                raise ValueError(
+                    "We only support Earthquake, Tornado, Tsunami, and Hurricane at the moment!")
+
             hazard_val = hazard_resp[0]['hazardValue']
             hazard_std_dev = 0.0
 
-            # if use_hazard_uncertainty:
-            # TODO this value needs to come from the hazard service
-            # hazard_std_dev = ...
+            # TODO Get this from API once implemented
+            if use_hazard_uncertainty:
+                hazard_std_dev = random.random()
 
-            exceedence_probability = BridgeUtil.get_probability_of_exceedence(bridge, fragility_set,
-                                                                              hazard_val,
-                                                                              hazard_std_dev,
-                                                                              use_liquefaction)
+            exceedence_probability = BridgeUtil.get_probability_of_exceedence(
+                bridge, fragility_set,
+                hazard_val,
+                hazard_std_dev,
+                use_liquefaction)
 
-            dmg_intervals = BridgeUtil.get_damage_state_intervals(exceedence_probability)
-            mean_damage = BridgeUtil.get_mean_damage(dmg_intervals, 1, bridge, dmg_ratio_tbl)
-            expected_damage = BridgeUtil.get_expected_damage(mean_damage, dmg_ratio_tbl)
+            dmg_intervals = BridgeUtil.get_damage_state_intervals(
+                exceedence_probability)
+
+            if dmg_ratio_tbl is not None:
+                mean_damage = BridgeUtil.get_mean_damage(dmg_intervals, 1,
+                                                         bridge,
+                                                         dmg_ratio_tbl)
+                expected_damage = BridgeUtil.get_expected_damage(mean_damage,
+                                                                 dmg_ratio_tbl)
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 
@@ -201,7 +244,8 @@ class BridgeDamage(BaseAnalysis):
         bridge_results["expectval"] = expected_damage
         bridge_results["retrofit"] = retrofit_type
         bridge_results["retro_cost"] = retrofit_cost
-        bridge_results["hazardtype"] = demand_type
+        bridge_results["demand_type"] = demand_type
+        bridge_results["hazardtype"] = hazard_type
         bridge_results["hazardval"] = hazard_val
 
         return bridge_results
@@ -275,7 +319,7 @@ class BridgeDamage(BaseAnalysis):
                 },
                 {
                     'id': 'dmg_ratios',
-                    'required': True,
+                    'required': False,
                     'description': 'Bridge Damage Ratios',
                     'type': ['ergo:bridgeDamageRatios'],
                 },
