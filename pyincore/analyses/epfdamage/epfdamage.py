@@ -152,8 +152,6 @@ class EpfDamage(BaseAnalysis):
             OrderedDict: A dictionary with epf damage values and other data/metadata.
 
         """
-        epf_results = collections.OrderedDict()
-
         hazard_val = 0.0
         demand_type = "Unknown"
         dmg_probability = [0.0, 0.0, 0.0, 0.0]
@@ -204,13 +202,14 @@ class EpfDamage(BaseAnalysis):
 
         else:
             print("Missing fragility set.")
-
-        epf_results['guid'] = facility['properties']['guid']
-        epf_results["hazardtype"] = demand_type
-        epf_results["hazardval"] = hazard_val
-
-        epf_results = {**dmg_probability, **dmg_interval}  # Needs py 3.5+
-
+        # Needs py 3.5+
+        epf_results = {
+            'guid': facility['properties']['guid'],
+            'hazardtype': demand_type,
+            'hazard_val': hazard_val,
+            **dmg_probability,
+            **dmg_interval
+        }
         return epf_results
 
     def get_spec(self):
