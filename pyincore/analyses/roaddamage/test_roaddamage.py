@@ -6,7 +6,7 @@ def run_with_base_class():
     client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "fredrick")
 
     # EQ Road Dataset - Seaside roads
-    road_damage_id = "5d25118eb9219c0692cd7527"
+    road_dataset_id = "5d25118eb9219c0692cd7527"
 
     # Seaside Earthquake
     hazard_type = "earthquake"
@@ -26,7 +26,7 @@ def run_with_base_class():
 
     # Run Seaside earthquake road damage
     road_dmg = RoadDamage(client)
-    road_dmg.load_remote_input_dataset("roads", road_damage_id)
+    road_dmg.load_remote_input_dataset("roads", road_dataset_id)
     road_dmg.load_remote_input_dataset("dmg_ratios", dmg_ratio_id)
 
     result_name = "seaside_road_dmg_result"
