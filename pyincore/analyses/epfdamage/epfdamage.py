@@ -3,7 +3,7 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-import collections
+
 import concurrent.futures
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore import AnalysisUtil, GeoUtil
@@ -118,8 +118,8 @@ class EpfDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.map_fragilities(self.get_parameter("mapping_id"), epfs,
-                                                                          fragility_key)
+        fragility_sets[fragility_key] = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), epfs,
+                                                                        fragility_key)
 
         # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
 
