@@ -9,6 +9,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore.analyses.epfdamage.epfutil import EpfUtil
 from itertools import repeat
+import random
 
 
 class EpfDamage(BaseAnalysis):
@@ -18,6 +19,8 @@ class EpfDamage(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
 
     """
+
+    DEFAULT_LIQ_FRAGILITY_KEY = "pgd"
 
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
@@ -95,19 +98,19 @@ class EpfDamage(BaseAnalysis):
 
         return output
 
-    def epf_damage_analysis_bulk_input(self, epfs, hazard_type, hazard_dataset_id, fragility_key,
-                                       use_hazard_uncertainty, use_liquefaction):
+    def epf_damage_analysis_bulk_input(self, epfs, hazard_type, hazard_dataset_id,
+                                       use_hazard_uncertainty, use_liquefaction, liq_geology_dataset_id):
         """Run analysis for multiple epfs.
 
         Args:
             epfs (list): Multiple epfs from input inventory set.
             hazard_type (str): A tyoe of hazard exposure (earthquake etc.).
             hazard_dataset_id (str): An id of the hazard exposure.
-            fragility_key (str): Fragility key describing the type of fragility.
             use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty when computing damage,
                 False otherwise.
             use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
                 False otherwise.
+            liq_geology_dataset_id (str): geology_dataset_id (str): A dataset id for geology dataset for liquefaction.
 
         Returns:
             list: A list of ordered dictionaries with epf damage values and other data/metadata.
@@ -116,52 +119,62 @@ class EpfDamage(BaseAnalysis):
         result = []
 
         fragility_key = self.get_parameter("fragility_key")
+        mapping_id = self.get_parameter("mapping_id")
 
         fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), epfs,
+        fragility_sets[fragility_key] = self.fragilitysvc.map_inventory(mapping_id, epfs,
                                                                         fragility_key)
 
+        liq_fragility_set = []
+        if use_liquefaction and liq_geology_dataset_id is not None:
+            liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
+            if liq_fragility_key is None:
+                liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
+            liq_fragility_set = self.fragilitysvc.map_inventory(mapping_id, epfs, liq_fragility_key)
+
         # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
+        liq_fragility = None
 
         for epf in epfs:
             fragility_set = dict()
             if epf["id"] in fragility_sets[fragility_key]:
                 fragility_set = fragility_sets[fragility_key][epf["id"]]
+                if liq_geology_dataset_id is not None and epf["id"] in liq_fragility_set:
+                    liq_fragility = liq_fragility_set[epf["id"]]
 
-            result.append(self.epf_damage_analysis(epf, fragility_set, hazard_type, hazard_dataset_id,
+            result.append(self.epf_damage_analysis(epf, fragility_set, liq_fragility, hazard_type, hazard_dataset_id,
                                                    use_hazard_uncertainty, use_liquefaction))
 
         return result
 
-    def epf_damage_analysis(self, facility, fragility_set, hazard_type, hazard_dataset_id,
-                            use_hazard_uncertainty, use_liquefaction):
+    def epf_damage_analysis(self, facility, fragility_set, liq_fragility, hazard_type, hazard_dataset_id,
+                            liq_geology_dataset_id, uncertainty):
         """Calculates epf damage results for a single epf.
 
         Args:
             facility (obj): A JSON mapping of a geometric object from the inventory: current Electric Power facility.
             fragility_set (obj): A JSON description of fragility assigned to the epf.
-            hazard_type (str): A tyoe of hazard exposure (earthquake etc.).
+            liq_fragility(obj): A JSON description of liquefaction fragility mapped to the facility.
+            hazard_type (str): A type of hazard exposure (earthquake etc.).
             hazard_dataset_id (str): An id of the hazard exposure.
-            fragility_key (str): A fragility key to use for mapping epfs to fragilities.
-            use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty in damage analysis,
-                False otherwise.
-            use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
-                False otherwise.
+            liq_geology_dataset_id(str): Geology dataset id from data service to use for liquefaction calculation,
+                if applicable
+            uncertainty(bool): Whether to use hazard standard deviation values for uncertainty
 
         Returns:
             OrderedDict: A dictionary with epf damage values and other data/metadata.
 
         """
-        hazard_val = 0.0
         demand_type = "Unknown"
-        dmg_probability = [0.0, 0.0, 0.0, 0.0]
-        dmg_interval = [0.0, 0.0, 0.0, 0.0, 0.0]
-
         if fragility_set is not None:
             location = GeoUtil.get_location(facility)
             demand_type = fragility_set['demandType']
             point = str(location.y) + "," + str(location.x)
             demand_units = fragility_set['demandUnits']
+
+            std_dev = 0.0
+            if uncertainty:
+                std_dev = random.random()
 
             if hazard_type == 'earthquake':
                 hazard_demand_type = EpfUtil.get_hazard_demand_type(fragility_set, hazard_type)
@@ -173,14 +186,19 @@ class EpfDamage(BaseAnalysis):
                                                                           demand_units,
                                                                           [point])
                 hazard_val = hazard_resp[0]['hazardValue']
+                liq_hazard_val = 0.0
+                liquefaction_prob = 0.0
+                liq_hazard_type = None
+                # use ground liquefaction to modify damage interval
+                if liq_fragility is not None and liq_geology_dataset_id:
+                    liq_hazard_type = liq_fragility['demandType']
+                    pgd_demand_units = liq_fragility['demandUnits']
+                    point = str(location.y) + "," + str(location.x)
 
-                # TODO include liquefaction and hazard uncertainty
-                # use ground liquefaction to modify damage interval, not implemented
-                if use_liquefaction:
-                    raise ValueError('Liquefaction has not yet been implemented!')
-                # use hazard uncertainty, not implemented
-                if use_hazard_uncertainty:
-                    raise ValueError('Hazard uncertainty has not yet been implemented!')
+                    liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, liq_geology_dataset_id,
+                                                                          pgd_demand_units, [point])
+                    liq_hazard_val = liquefaction[0][liq_hazard_type]
+                    liquefaction_prob = liquefaction[0]['liqProbability']
 
             elif hazard_type == 'tornado':
                 hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
@@ -190,25 +208,52 @@ class EpfDamage(BaseAnalysis):
                 raise ValueError('Hurricane hazard has not yet been implemented!')
 
             elif hazard_type == 'tsunami':
-                # TODO: implement tsunami
-                raise ValueError('Tsunami hazard has not yet been implemented!')
+                hazard_demand_type = EpfUtil.get_hazard_demand_type(fragility_set, hazard_type)
+
+                demand_units = fragility_set["demandUnits"]
+                point = str(location.y) + "," + str(location.x)
+                hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
+                                                                      hazard_demand_type,
+                                                                      demand_units,
+                                                                      [point])[0]["hazardValue"]
+                demand_type = hazard_demand_type
+                # Sometimes the geotiffs give large negative values for out of bounds instead of 0
+                if hazard_val <= 0.0:
+                    hazard_val = 0.0
 
             else:
                 raise ValueError("Missing hazard type.")
 
             dmg_probability = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
-                                                                           hazard_val, 1.0, 0)
+                                                                           hazard_val, 1.0, std_dev)
             dmg_interval = AnalysisUtil.compute_damage_intervals(dmg_probability)
 
         else:
             print("Missing fragility set.")
+            hazard_val = 0.0
+            dmg_probability = {
+                'ls_slight': 0.0,
+                'ls_moderate': 0.0,
+                'ls_extensive': 0.0,
+                'ls_complete': 0.0,
+                'none': 0.0
+            }
+            dmg_interval = {
+                'slight-mod': 0.0,
+                'mod-extens': 0.0,
+                'ext-comple': 0.0,
+                'complete': 0.0
+            }
         # Needs py 3.5+
         epf_results = {
             'guid': facility['properties']['guid'],
             'hazardtype': demand_type,
             'hazard_val': hazard_val,
             **dmg_probability,
-            **dmg_interval
+            **dmg_interval,
+            'liqhaztype': liq_hazard_type,
+            'liqhazval': liq_hazard_val,
+            'liqprobability': liquefaction_prob
         }
         return epf_results
 
@@ -259,6 +304,13 @@ class EpfDamage(BaseAnalysis):
                     'required': False,
                     'description': 'Use a ground liquifacition to modify damage interval.',
                     'type': bool
+                },
+                {
+                    'id': 'liquefaction_geology_dataset_id',
+                    'required': False,
+                    'description': 'Liquefaction geology/susceptibility dataset id. '
+                                   'If not provided, liquefaction will be ignored',
+                    'type': str
                 },
                 {
                     'id': 'use_hazard_uncertainty',
