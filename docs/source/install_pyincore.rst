@@ -12,7 +12,7 @@ pyIncore installation
             conda install -c https://inconda:CHANNEL_PWD_HERE@incore2.ncsa.illinois.edu/conda/pyincore/ pyincore
 
 
-       Contact us at ``incore-dev@lists.illinois.edu`` for details of **channel password** (CHANNEL_PWD_HERE). This command tells conda to install the ``pyincore`` package from the NCSA's conda ``incore`` channel.
+       Contact us at ``incore-dev@lists.illinois.edu`` for details of **channel password** (CHANNEL_PWD_HERE is a placeholder for the real password). This command tells conda to install the ``pyincore`` package from the NCSA's conda ``incore`` channel.
 
     An alternative approach is to register conda channel in ``.condarc`` file which contains names and url links of the channels. The file is usually stored in your HOME directory. The typical location of a HOME directory is ``C:\Users\<username>\`` on Windows OS, ``/Users/<username>`` on Mac OS and ``/home/<username>/`` on Linux based machines.
 

@@ -56,7 +56,7 @@ These steps will guide you on how to install both pyIncore and Jupyter notebook 
     ```
     conda install -c https://inconda:CHANNEL_PWD_HERE@incore2.ncsa.illinois.edu/conda/pyincore/ pyincore
     ```
-    Contact us at [incore-dev@lists.illinois.edu](mailto:incore-dev@lists.illinois.edu) for details of **channel password** (CHANNEL_PWD_HERE). This command tells conda to install the ``pyincore`` package from the NCSA's conda ``incore`` channel.
+    Contact us at [incore-dev@lists.illinois.edu](mailto:incore-dev@lists.illinois.edu) for details of **channel password** (CHANNEL_PWD_HERE is a placeholder for the real password). This command tells conda to install the ``pyincore`` package from the NCSA's conda ``incore`` channel.
 
     An alternative approach is to register NCSA's conda channel in `.condarc` file which contains names and url links of the channels.
     ```
