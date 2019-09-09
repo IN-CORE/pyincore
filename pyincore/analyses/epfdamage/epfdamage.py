@@ -53,6 +53,7 @@ class EpfDamage(BaseAnalysis):
         use_liquefaction = False
         if self.get_parameter("use_liquefaction") is not None:
             use_liquefaction = self.get_parameter("use_liquefaction")
+        liq_geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
         user_defined_cpu = 1
 
@@ -71,8 +72,8 @@ class EpfDamage(BaseAnalysis):
 
         results = self.epf_damage_concurrent_future(self.epf_damage_analysis_bulk_input, num_workers,
                                                     inventory_args, repeat(hazard_type), repeat(hazard_dataset_id),
-                                                    repeat(fragility_key), repeat(use_hazard_uncertainty),
-                                                    repeat(use_liquefaction))
+                                                    repeat(use_hazard_uncertainty),
+                                                    repeat(use_liquefaction), repeat(liq_geology_dataset_id))
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -143,12 +144,12 @@ class EpfDamage(BaseAnalysis):
                     liq_fragility = liq_fragility_set[epf["id"]]
 
             result.append(self.epf_damage_analysis(epf, fragility_set, liq_fragility, hazard_type, hazard_dataset_id,
-                                                   use_hazard_uncertainty, use_liquefaction))
+                                                   liq_geology_dataset_id, use_hazard_uncertainty))
 
         return result
 
     def epf_damage_analysis(self, facility, fragility_set, liq_fragility, hazard_type, hazard_dataset_id,
-                            liq_geology_dataset_id, uncertainty):
+                            liq_geology_dataset_id, use_hazard_uncertainty):
         """Calculates epf damage results for a single epf.
 
         Args:
@@ -159,7 +160,7 @@ class EpfDamage(BaseAnalysis):
             hazard_dataset_id (str): An id of the hazard exposure.
             liq_geology_dataset_id(str): Geology dataset id from data service to use for liquefaction calculation,
                 if applicable
-            uncertainty(bool): Whether to use hazard standard deviation values for uncertainty
+            use_hazard_uncertainty(bool): Whether to use hazard standard deviation values for uncertainty
 
         Returns:
             OrderedDict: A dictionary with epf damage values and other data/metadata.
@@ -173,7 +174,7 @@ class EpfDamage(BaseAnalysis):
             demand_units = fragility_set['demandUnits']
 
             std_dev = 0.0
-            if uncertainty:
+            if use_hazard_uncertainty:
                 std_dev = random.random()
 
             if hazard_type == 'earthquake':
@@ -182,27 +183,36 @@ class EpfDamage(BaseAnalysis):
                     print("Mismatch in hazard type.")
                     exit(1)
 
+                liq_hazard_val = 0.0
+                liquefaction_prob = 0.0
+                liq_hazard_type = None
+
                 hazard_resp = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, demand_type,
                                                                           demand_units,
                                                                           [point])
                 hazard_val = hazard_resp[0]['hazardValue']
-                liq_hazard_val = 0.0
-                liquefaction_prob = 0.0
-                liq_hazard_type = None
+                limit_states = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
+                                                                            hazard_val, 1.0, std_dev)
+
                 # use ground liquefaction to modify damage interval
                 if liq_fragility is not None and liq_geology_dataset_id:
                     liq_hazard_type = liq_fragility['demandType']
                     pgd_demand_units = liq_fragility['demandUnits']
                     point = str(location.y) + "," + str(location.x)
-
                     liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, liq_geology_dataset_id,
                                                                           pgd_demand_units, [point])
                     liq_hazard_val = liquefaction[0][liq_hazard_type]
                     liquefaction_prob = liquefaction[0]['liqProbability']
+                    pgd_limit_states = AnalysisUtil.compute_limit_state_probability(liq_fragility['fragilityCurves'],
+                                                                                    liq_hazard_val, 1.0,
+                                                                                    std_dev)
+                    limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
 
             elif hazard_type == 'tornado':
                 hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
                                                                      location.x, 0)
+                limit_states = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
+                                                                            hazard_val, 1.0, std_dev)
             elif hazard_type == 'hurricane':
                 # TODO: implement hurricane
                 raise ValueError('Hurricane hazard has not yet been implemented!')
@@ -220,18 +230,17 @@ class EpfDamage(BaseAnalysis):
                 # Sometimes the geotiffs give large negative values for out of bounds instead of 0
                 if hazard_val <= 0.0:
                     hazard_val = 0.0
-
+                limit_states = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
+                                                                            hazard_val, 1.0, std_dev)
             else:
                 raise ValueError("Missing hazard type.")
 
-            dmg_probability = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
-                                                                           hazard_val, 1.0, std_dev)
-            dmg_interval = AnalysisUtil.compute_damage_intervals(dmg_probability)
+            dmg_interval = AnalysisUtil.compute_damage_intervals(limit_states)
 
         else:
             print("Missing fragility set.")
             hazard_val = 0.0
-            dmg_probability = {
+            limit_states = {
                 'ls_slight': 0.0,
                 'ls_moderate': 0.0,
                 'ls_extensive': 0.0,
@@ -249,7 +258,7 @@ class EpfDamage(BaseAnalysis):
             'guid': facility['properties']['guid'],
             'hazardtype': demand_type,
             'hazard_val': hazard_val,
-            **dmg_probability,
+            **limit_states,
             **dmg_interval,
             'liqhaztype': liq_hazard_type,
             'liqhazval': liq_hazard_val,
