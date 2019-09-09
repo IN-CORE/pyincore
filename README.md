@@ -47,31 +47,35 @@ visualizations and documentation. Jupyter Notebook is already installed with Ana
  
 These steps will guide you on how to install both pyIncore and Jupyter notebook so you can develop your code.
 
-1. Add [conda-forge](https://conda-forge.org/) package repository, a conda-forge channel to your environment:
+1. From the Terminal (Mac/Linux) or Command Prompt (Windows) add [conda-forge](https://conda-forge.org/) package repository/channel to your environment:
     ```
     conda config –-add channels conda-forge
     ```
 
-2. Add NCSA’s **pyincore** channel to your environment:
+2. To install pyIncore, navigate to the directory you want to use for running Jupyter Notebooks and run the following command (single line command):
     ```
-    conda config --append channels https://channel_credentials@incore2.ncsa.illinois.edu/conda/pyincore/
+    conda install -c https://inconda:CHANNEL_PWD_HERE@incore2.ncsa.illinois.edu/conda/pyincore/ pyincore
     ```
-    Contact us at [incore-dev@lists.illinois.edu](mailto:incore-dev@lists.illinois.edu) for details of `channel_credentials`.
-    
-3. From the Terminal (Mac/Linux) or Command Prompt (Windows) run:
+    Contact us at [incore-dev@lists.illinois.edu](mailto:incore-dev@lists.illinois.edu) for details of **channel password** (CHANNEL_PWD_HERE is a placeholder for the real password). This command tells conda to install the ``pyincore`` package from the NCSA's conda ``incore`` channel.
+
+    An alternative approach is to register NCSA's conda channel in `.condarc` file which contains names and url links of the channels.
     ```
+    conda config --append channels https://inconda:CHANNEL_PWD_HERE@incore2.ncsa.illinois.edu/conda/pyincore/
+    ```
+   and then
+     ```
     conda install pyincore
     ```
-    
-    The installation installs pyIncore and creates a `.incore` folder in your HOME directory to store cached files. 
-    A message *pyIncore credentials file has been created at <HOME directory>/.incore/.incorepw* appears 
-    in the terminal/prompt. The typical location of a HOME directory is `C:\Users\<username>` on Windows OS, `/Users/<username>` on MacOS 
-    and `/home/<username>` on Linux based machines.
+   Note, that the `.condarc` file is usually stored in your HOME directory. The typical location of a HOME directory is `C:\Users\<username>\` on Windows OS, `/Users/<username>` on Mac OS and `/home/<username>/` on Linux based machines.
 
-4. (Optional) Remove NCSA’s **pyincore** channel from your environment:
-    ```
-    conda config --remove channels https://channel_credentials@incore2.ncsa.illinois.edu/conda/pyincore/
-    ```
+The installation installs pyIncore and creates a `.incore` folder in your HOME directory to store cached files. 
+A message *pyIncore credentials file has been created at <HOME directory>/.incore/.incorepw* appears 
+in the terminal/prompt. The typical location of a HOME directory is `C:\Users\<username>` on Windows OS, `/Users/<username>` on MacOS 
+and `/home/<username>` on Linux based machines.
+
+To check that the package is installed run `conda list command`.
+
+Replace `install` command above with `update` to update pyIncore to the latest version that is compatible with all other packages in the environment.
 
 **Mac specific notes**
     
@@ -84,10 +88,9 @@ insert line: `backend : Agg` into `~/.matplotlib/matplotlibrc` file.
 - We assume that users develop python script by using pyIncore in their own **Project folder**.
 - Locate a file called `.incorepw` in your HOME directory and write your credentials in it; the first line contains your username and the second password. 
 The information is used for communicating with **IN-CORE** services such as hazard, data and fragility. 
-The file is located in the `.incore` folder created during installation in your HOME directory. The typical path is `C:\Users\<username>` on Windows OS, 
-`/Users/<username>` on MacOS and `/home/<username>` on Linux based machines.
+The file is located in the `.incore` folder created during installation in your HOME directory.
 
-- Download the **Building damage analysis** Jupyter notebook (<https://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb>) 
+- Download the **Building damage analysis** Jupyter notebook (<https://incore2.ncsa.illinois.edu/doc/examples/buildingdamage.ipynb>) (right-click and choose "save link as") 
 and verify the installation by running it from your project folder. For details of running and manipulating `ipynb` files refer 
 to [Jupyter documentation](https://jupyter.readthedocs.io/en/latest/running.html#running). If you have problems running notebooks, contact us at [incore-dev@lists.illinois.edu](mailto:incore-dev@lists.illinois.edu).
 
