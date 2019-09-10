@@ -21,6 +21,7 @@ class EpfDamage(BaseAnalysis):
     """
 
     DEFAULT_LIQ_FRAGILITY_KEY = "pgd"
+    DEFAULT_FRAGILITY_KEY = "pga"
 
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
@@ -35,7 +36,7 @@ class EpfDamage(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            fragility_key = EpfUtil.DEFAULT_FRAGILITY_KEY
+            fragility_key = self.DEFAULT_FRAGILITY_KEY
             self.set_parameter("fragility_key", fragility_key)
 
         # Get hazard input
@@ -178,11 +179,6 @@ class EpfDamage(BaseAnalysis):
                 std_dev = random.random()
 
             if hazard_type == 'earthquake':
-                hazard_demand_type = EpfUtil.get_hazard_demand_type(fragility_set, hazard_type)
-                if hazard_demand_type != demand_type:
-                    print("Mismatch in hazard type.")
-                    exit(1)
-
                 liq_hazard_val = 0.0
                 liquefaction_prob = 0.0
                 liq_hazard_type = None
@@ -218,15 +214,12 @@ class EpfDamage(BaseAnalysis):
                 raise ValueError('Hurricane hazard has not yet been implemented!')
 
             elif hazard_type == 'tsunami':
-                hazard_demand_type = EpfUtil.get_hazard_demand_type(fragility_set, hazard_type)
-
                 demand_units = fragility_set["demandUnits"]
                 point = str(location.y) + "," + str(location.x)
                 hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
-                                                                      hazard_demand_type,
+                                                                      demand_type,
                                                                       demand_units,
                                                                       [point])[0]["hazardValue"]
-                demand_type = hazard_demand_type
                 # Sometimes the geotiffs give large negative values for out of bounds instead of 0
                 if hazard_val <= 0.0:
                     hazard_val = 0.0
