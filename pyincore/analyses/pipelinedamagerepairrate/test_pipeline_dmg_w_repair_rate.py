@@ -33,8 +33,7 @@ def test_pipeline_dmg_w_repair_rate():
     test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", False)
     test_pipeline_dmg_w_rr.set_parameter("num_cpu", 4)
     test_pipeline_dmg_w_rr.set_parameter("liquefaction_geology_dataset_id",
-                               liq_geology_dataset_id)
-
+                                         liq_geology_dataset_id)
     # Run pipeline damage analysis
     result = test_pipeline_dmg_w_rr.run_analysis()
 
