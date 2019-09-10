@@ -266,7 +266,6 @@ class PipelineDamageRepairRate(BaseAnalysis):
             else:
                 pipeline_results['pipeclass'] = ""
 
-            # TODO consider converting PGD/PGV values to SI units
             pipeline_results['pgvrepairs'] = pgv_repairs
             pipeline_results['pgdrepairs'] = pgd_repairs
             pipeline_results['repairspkm'] = total_repair_rate
