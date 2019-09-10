@@ -13,9 +13,7 @@ def run_with_base_class():
     facility_datasetid = "5a284f2ac7d30d13bc081e52"
 
     mapping_id = "5b47c3b1337d4a387e85564b"  # Hazus Potable Water Facility Fragility Mapping - Only PGA
-    #mapping_id = "5b47c383337d4a387669d592" #Potable Water Facility Fragility Mapping for INA - Has PGD
 
-    liq_geology_dataset_id = None
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
 
     uncertainty = False
@@ -25,12 +23,8 @@ def run_with_base_class():
     wf_dmg = WaterFacilityDamage(client)
     wf_dmg.load_remote_input_dataset("water_facilities", facility_datasetid)
 
-    #wf_dmg.show_gdocstr_docs()
-
     result_name = "wf-dmg-results.csv"
     wf_dmg.set_parameter("result_name", result_name)
-    print(wf_dmg.spec)
-
     wf_dmg.set_parameter("hazard_type", hazard_type)
     wf_dmg.set_parameter("hazard_id", hazard_id)
     wf_dmg.set_parameter("mapping_id", mapping_id)
@@ -42,6 +36,7 @@ def run_with_base_class():
     wf_dmg.set_parameter("num_cpu", 4)
 
     wf_dmg.run_analysis()
+
 
 if __name__ == '__main__':
     run_with_base_class()
