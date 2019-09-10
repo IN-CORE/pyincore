@@ -123,7 +123,6 @@ class PipelineDamageRepairRate(BaseAnalysis):
         fragility_sets = self.fragilitysvc.map_inventory(
             self.get_parameter("mapping_id"), pipelines, fragility_key)
 
-
         # Get Liquefaction Fragility Key
         liquefaction_fragility_key = self.get_parameter("liquefaction_fragility_key")
         if hazard_type == "earthquake" and liquefaction_fragility_key is None:
