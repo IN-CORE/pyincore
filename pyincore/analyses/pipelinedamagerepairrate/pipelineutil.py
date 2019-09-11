@@ -5,13 +5,12 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-
 class PipelineUtil:
     """Utility methods for pipeline analysis"""
 
-    DEFAULT_FRAGILITY_KEY = "pgv"
+    DEFAULT_EQ_FRAGILITY_KEY = "pgv"
     LIQ_FRAGILITY_KEY = "pgd"
-
+    DEFAULT_TSU_FRAGILITY_KEY = "Non-Retrofit inundationDepth Fragility ID Code"
 
     @staticmethod
     def convert_result_unit(result_unit: str, result: float):
