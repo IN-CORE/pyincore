@@ -17,10 +17,12 @@ class BridgeUtil:
         "restrainer cables retrofit fragility id code": ["Restrainer Cables", "rc"],
         "seat extender retrofit fragility id code": ["Seat Extender", "se"],
         "shear key retrofit fragility id code": ["Shear Key", "sk"],
-        "non-retrofit fragility id code": ["as built", "none"]
+        "non-retrofit fragility id code": ["as built", "none"],
+        "non-retrofit inundationdepth fragility id code": ["as built", "none"]
     }
 
     DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
+    DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY = "Non-Retrofit inundationDepth Fragility ID Code"
 
     @staticmethod
     def get_damage_ratio_rows(csv_reader: csv.DictReader):
@@ -191,23 +193,28 @@ class BridgeUtil:
         """
         exceedence_probability = []
         for fragility in fragility_set["fragilityCurves"]:
-            median = float(fragility['median'])
-            beta = float(fragility['beta'])
 
-            if use_liquefaction and 'liq' in bridge['properties']:
-                fragility = BridgeUtil.adjust_fragility_for_liquefaction(fragility, bridge['properties']['liq'])
+            if hazard_val == 0:
+                probability = 0
+            else:
                 median = float(fragility['median'])
-            if fragility["className"].endswith("StandardFragilityCurve"):
-                beta = math.sqrt(math.pow(fragility["beta"], 2) + math.pow(std_dev, 2))
+                beta = float(fragility['beta'])
 
-            # Compute probability
-            probability = 0.0
-            if fragility['curveType'] == 'Normal':
-                sp = (math.log(hazard_val) - math.log(median)) / beta
-                probability = norm.cdf(sp)
-            elif fragility['curveType'] == "LogNormal":
-                x = (math.log(hazard_val) - median) / beta
-                probability = norm.cdf(x)
+                if use_liquefaction and 'liq' in bridge['properties']:
+                    fragility = BridgeUtil.adjust_fragility_for_liquefaction(fragility, bridge['properties']['liq'])
+                    median = float(fragility['median'])
+                if fragility["className"].endswith("StandardFragilityCurve"):
+                    beta = math.sqrt(math.pow(fragility["beta"], 2) + math.pow(std_dev, 2))
+
+                # Compute probability
+                probability = 0.0
+                if fragility['curveType'] == 'Normal':
+                    sp = (math.log(hazard_val) - math.log(median)) / beta
+                    probability = norm.cdf(sp)
+                elif fragility['curveType'] == "LogNormal":
+                    x = (math.log(hazard_val) - median) / beta
+                    probability = norm.cdf(x)
+
             exceedence_probability.append(probability)
 
         return exceedence_probability
@@ -259,7 +266,7 @@ class BridgeUtil:
         if target_fragility_key.lower() == BridgeUtil.DEFAULT_FRAGILITY_KEY.lower():
             return retrofit_cost
         else:
-            retrofit_code = BridgeUtil.get_retrofit_code()
+            retrofit_code = BridgeUtil.get_retrofit_code(target_fragility_key)
         return retrofit_cost
 
     @staticmethod
