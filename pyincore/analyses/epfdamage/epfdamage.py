@@ -7,7 +7,6 @@
 import concurrent.futures
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore import AnalysisUtil, GeoUtil
-from pyincore.analyses.epfdamage.epfutil import EpfUtil
 from itertools import repeat
 import random
 
@@ -174,15 +173,15 @@ class EpfDamage(BaseAnalysis):
             point = str(location.y) + "," + str(location.x)
             demand_units = fragility_set['demandUnits']
 
+            liq_hazard_val = "NA"
+            liquefaction_prob = "NA"
+            liq_hazard_type = "NA"
+
             std_dev = 0.0
             if use_hazard_uncertainty:
                 std_dev = random.random()
 
             if hazard_type == 'earthquake':
-                liq_hazard_val = 0.0
-                liquefaction_prob = 0.0
-                liq_hazard_type = None
-
                 hazard_resp = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, demand_type,
                                                                           demand_units,
                                                                           [point])
@@ -332,7 +331,7 @@ class EpfDamage(BaseAnalysis):
                     'id': 'epfs',
                     'required': True,
                     'description': 'Electric Power Facility Inventory',
-                    'type': ['incore:epf'],
+                    'type': ['incore:epf', 'ergo:epf'],
                 },
 
             ],
