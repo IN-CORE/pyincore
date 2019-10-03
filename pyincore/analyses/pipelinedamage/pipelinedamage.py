@@ -9,11 +9,12 @@
 
 """
 
-from pyincore import BaseAnalysis, HazardService, FragilityService, \
-    AnalysisUtil, GeoUtil
+import collections
 import concurrent.futures
 from itertools import repeat
-import collections
+
+from pyincore import BaseAnalysis, HazardService, FragilityService, \
+    AnalysisUtil, GeoUtil
 
 
 class PipelineDamage(BaseAnalysis):
@@ -142,6 +143,8 @@ class PipelineDamage(BaseAnalysis):
         pipeline_results = collections.OrderedDict()
         hazard_val = 0.0
         demand_type = ""
+        limit_states = {"ls-slight": 0.0, "ls-moderat": 0.0,
+                        "ls-extensi": 0.0, "ls-complet": 0.0}
 
         if fragility_set is not None:
             demand_type = fragility_set['demandType'].lower()
@@ -170,11 +173,11 @@ class PipelineDamage(BaseAnalysis):
             if hazard_val <= 0.0:
                 hazard_val = 0.0
 
-            limit_states = AnalysisUtil.compute_limit_state_probability(
-                fragility_set['fragilityCurves'], hazard_val, 1.0, 0)
-            dmg_intervals = AnalysisUtil.compute_damage_intervals(limit_states)
-            pipeline_results = {**limit_states, **dmg_intervals}
+            limit_states = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val)
 
+        dmg_intervals = AnalysisUtil.calculate_damage_interval(limit_states)
+
+        pipeline_results = {**limit_states, **dmg_intervals}
         pipeline_results['guid'] = pipeline['properties']['guid']
         pipeline_results['hazardval'] = hazard_val
         pipeline_results['demandtype'] = demand_type

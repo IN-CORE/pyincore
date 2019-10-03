@@ -5,10 +5,11 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import concurrent.futures
-from pyincore import BaseAnalysis, HazardService, FragilityService
-from pyincore import AnalysisUtil, GeoUtil
-from itertools import repeat
 import random
+from itertools import repeat
+
+from pyincore import AnalysisUtil, GeoUtil
+from pyincore import BaseAnalysis, HazardService, FragilityService
 
 
 class EpfDamage(BaseAnalysis):
@@ -167,6 +168,10 @@ class EpfDamage(BaseAnalysis):
 
         """
         demand_type = "Unknown"
+        hazard_val = 0.0
+        limit_states = {"ls-slight": 0.0, "ls-moderat": 0.0,
+                        "ls-extensi": 0.0, "ls-complet": 0.0}
+
         if fragility_set is not None:
             location = GeoUtil.get_location(facility)
             demand_type = fragility_set['demandType']
@@ -186,8 +191,8 @@ class EpfDamage(BaseAnalysis):
                                                                           demand_units,
                                                                           [point])
                 hazard_val = hazard_resp[0]['hazardValue']
-                limit_states = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
-                                                                            hazard_val, 1.0, std_dev)
+                limit_states = AnalysisUtil.calculate_limit_state(
+                    fragility_set, hazard_val, std_dev=std_dev)
 
                 # use ground liquefaction to modify damage interval
                 if liq_fragility is not None and liq_geology_dataset_id:
@@ -198,16 +203,16 @@ class EpfDamage(BaseAnalysis):
                                                                           pgd_demand_units, [point])
                     liq_hazard_val = liquefaction[0][liq_hazard_type]
                     liquefaction_prob = liquefaction[0]['liqProbability']
-                    pgd_limit_states = AnalysisUtil.compute_limit_state_probability(liq_fragility['fragilityCurves'],
-                                                                                    liq_hazard_val, 1.0,
-                                                                                    std_dev)
+                    pgd_limit_states = AnalysisUtil.calculate_limit_state(
+                        liq_fragility, liq_hazard_val, std_dev=std_dev)
                     limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
 
             elif hazard_type == 'tornado':
                 hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
                                                                      location.x, 0)
-                limit_states = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
-                                                                            hazard_val, 1.0, std_dev)
+                limit_states = AnalysisUtil.calculate_limit_state(
+                    fragility_set, hazard_val, std_dev=std_dev)
+
             elif hazard_type == 'hurricane':
                 # TODO: implement hurricane
                 raise ValueError('Hurricane hazard has not yet been implemented!')
@@ -222,29 +227,14 @@ class EpfDamage(BaseAnalysis):
                 # Sometimes the geotiffs give large negative values for out of bounds instead of 0
                 if hazard_val <= 0.0:
                     hazard_val = 0.0
-                limit_states = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
-                                                                            hazard_val, 1.0, std_dev)
+                limit_states = AnalysisUtil.calculate_limit_state(
+                    fragility_set, hazard_val, std_dev=std_dev)
+
             else:
                 raise ValueError("Missing hazard type.")
 
-            dmg_interval = AnalysisUtil.compute_damage_intervals(limit_states)
+        dmg_interval = AnalysisUtil.calculate_damage_interval(limit_states)
 
-        else:
-            print("Missing fragility set.")
-            hazard_val = 0.0
-            limit_states = {
-                'ls_slight': 0.0,
-                'ls_moderate': 0.0,
-                'ls_extensive': 0.0,
-                'ls_complete': 0.0,
-                'none': 0.0
-            }
-            dmg_interval = {
-                'slight-mod': 0.0,
-                'mod-extens': 0.0,
-                'ext-comple': 0.0,
-                'complete': 0.0
-            }
         # Needs py 3.5+
         epf_results = {
             'guid': facility['properties']['guid'],

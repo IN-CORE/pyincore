@@ -11,8 +11,6 @@ def run_with_base_class():
     hazard_type = "earthquake"
     hazard_id = "5b902cb273c3371e1236b36b"
 
-    # Building damage ratios
-    dmg_ratio_id = "5a284f2ec7d30d13bc08209a"
     # Building dataset
     # 5a284f0bc7d30d13bc081a28  5kb
     # 5bcf2fcbf242fe047ce79dad 300kb
@@ -23,7 +21,6 @@ def run_with_base_class():
     mapping_id = "5b47b350337d4a3629076f2c"
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    bldg_dmg.load_remote_input_dataset("dmg_ratios", dmg_ratio_id)
 
     result_name = "memphis_bldg_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)

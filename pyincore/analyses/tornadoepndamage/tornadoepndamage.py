@@ -2,16 +2,17 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import os
-import math
-import numpy
-import sys
-import random
-import networkx as nx
 import collections
+import math
+import os
+import random
+import sys
 
+import networkx as nx
+import numpy
 from shapely.geometry import shape
-from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, IncoreClient
+
+from pyincore import BaseAnalysis, HazardService, FragilityService, DataService
 from pyincore import GeoUtil, AnalysisUtil
 
 
@@ -294,9 +295,9 @@ class TornadoEpnDamage(BaseAnalysis):
 
                                     # check if the line is tower or transmission
                                     if linetype_val.lower() == self.line_transmission:
-                                        resistivity_probability = AnalysisUtil.calculate_damage_json(fragility_set_tower, windspeed)
+                                        resistivity_probability = AnalysisUtil.calculate_limit_state(fragility_set_tower, windspeed)
                                     else:
-                                        resistivity_probability = AnalysisUtil.calculate_damage_json(fragility_set_pole, windspeed)
+                                        resistivity_probability = AnalysisUtil.calculate_limit_state(fragility_set_pole, windspeed)
 
                                     # randomly generated capacity of each poles ; 1 m/s is 2.23694 mph
                                     poleresist = resistivity_probability.get('immocc') * 2.23694

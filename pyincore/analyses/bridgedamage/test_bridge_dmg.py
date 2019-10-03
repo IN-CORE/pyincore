@@ -9,7 +9,6 @@ def run_with_base_class():
     # New madrid earthquake using Atkinson Boore 1995
     hazard_type = "earthquake"
     hazard_id = "5b902cb273c3371e1236b36b"
-    dmg_ratio_id = "5a284f2cc7d30d13bc081f96"
 
     # NBSR bridges
     bridge_dataset_id = "5a284f2dc7d30d13bc082040"
@@ -26,7 +25,6 @@ def run_with_base_class():
     bridge_dmg = BridgeDamage(client)
     # Load input datasets
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
-    bridge_dmg.load_remote_input_dataset("dmg_ratios", dmg_ratio_id)
     # Specify the result name
     result_name = "bridge_result"
     # Set analysis parameters
