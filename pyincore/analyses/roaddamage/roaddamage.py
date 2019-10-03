@@ -147,8 +147,8 @@ class RoadDamage(BaseAnalysis):
             road_results = collections.OrderedDict()
 
             demand_type = "None"
-
-            dmg_probability = collections.OrderedDict()
+            dmg_probability = {"ls-slight": 0.0, "ls-moderat": 0.0,
+                               "ls-extensi": 0.0, "ls-complet": 0.0}
 
             road_results['guid'] = road['properties']['guid']
 
@@ -183,15 +183,9 @@ class RoadDamage(BaseAnalysis):
                         road_results['hazardval'] = 0
                 else:
                     raise ValueError("Earthquake and tsunamis are the only hazards supported for road damage")
-                dmg_probability = AnalysisUtil.compute_limit_state_probability(fragility_set['fragilityCurves'],
-                                                                               road_results['hazardval'], 0, 0.0)
-            else:
-                dmg_probability['ls_slight'] = 0.0
-                dmg_probability['ls_moderate'] = 0.0
-                dmg_probability['ls_extensive'] = 0.0
-                dmg_probability['ls_complete'] = 0.0
+                dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, road_results['hazardval'])
 
-            dmg_interval = AnalysisUtil.compute_damage_intervals(dmg_probability)
+            dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
             road_results.update(dmg_probability)
             road_results.update(dmg_interval)
@@ -280,7 +274,6 @@ class RoadDamage(BaseAnalysis):
                     'description': 'Road Inventory',
                     'type': ['ergo:roadLinkTopo','incore:roads']
                 },
-
             ],
             'output_datasets': [
                 {

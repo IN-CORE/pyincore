@@ -6,10 +6,11 @@
 
 import collections
 import concurrent.futures
-from pyincore import BaseAnalysis, HazardService, FragilityService
+
 from pyincore import AnalysisUtil, GeoUtil
-from pyincore.analyses.nonstructbuildingdamage.nonstructbuildingutil import NonStructBuildingUtil
-from itertools import repeat
+from pyincore import BaseAnalysis, HazardService, FragilityService
+from pyincore.analyses.nonstructbuildingdamage.nonstructbuildingutil import \
+    NonStructBuildingUtil
 
 
 class NonStructBuildingDamage(BaseAnalysis):
@@ -29,16 +30,6 @@ class NonStructBuildingDamage(BaseAnalysis):
         """Executes building damage analysis."""
         # Building dataset
         building_set = self.get_input_dataset("buildings").get_inventory_reader()
-
-        # Damage Ratio
-        dmg_ratio_csv_as = self.get_input_dataset("dmg_ratios_as").get_csv_reader()
-        dmg_ratio_tbl_as = NonStructBuildingUtil.get_damage_ratio_rows(dmg_ratio_csv_as)
-
-        dmg_ratio_csv_ds = self.get_input_dataset("dmg_ratios_ds").get_csv_reader()
-        dmg_ratio_tbl_ds = NonStructBuildingUtil.get_damage_ratio_rows(dmg_ratio_csv_ds)
-
-        dmg_ratio_csv_content = self.get_input_dataset("dmg_ratios_content").get_csv_reader()
-        dmg_ratio_tbl_content = NonStructBuildingUtil.get_damage_ratio_rows(dmg_ratio_csv_content)
 
         # set Default Fragility key
         fragility_key_as = self.get_parameter("fragility_key_as")
@@ -78,10 +69,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         results = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
                                                          num_workers,
-                                                         inventory_args,
-                                                         repeat(dmg_ratio_tbl_as),
-                                                         repeat(dmg_ratio_tbl_ds),
-                                                         repeat(dmg_ratio_tbl_content))
+                                                         inventory_args)
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -106,15 +94,11 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         return output
 
-    def building_damage_analysis_bulk_input(self, buildings, dmg_ratio_tbl_as,
-                                            dmg_ratio_tbl_ds, dmg_ratio_tbl_content):
+    def building_damage_analysis_bulk_input(self, buildings):
         """Run analysis for multiple buildings.
 
         Args:
             buildings (list): Multiple buildings from input inventory set.
-            dmg_ratio_tbl_as (obj): A table of acceleration-sensitive (AS) damage ratios for mean damage.
-            dmg_ratio_tbl_ds (obj): A table of drift-sensitive (DS) damage ratios for mean damage.
-            dmg_ratio_tbl_content (obj): A table of content damage ratios for mean damage.
 
         Returns:
             list: A list of ordered dictionaries with building damage values and other data/metadata.
@@ -139,15 +123,11 @@ class NonStructBuildingDamage(BaseAnalysis):
 
             result.append(self.building_damage_analysis(building,
                                                         fragility_set_as,
-                                                        fragility_set_ds,
-                                                        dmg_ratio_tbl_as,
-                                                        dmg_ratio_tbl_ds,
-                                                        dmg_ratio_tbl_content))
+                                                        fragility_set_ds))
 
         return result
 
-    def building_damage_analysis(self, building, fragility_set_as, fragility_set_ds,
-                                 dmg_ratio_tbl_as, dmg_ratio_tbl_ds, dmg_ratio_tbl_content):
+    def building_damage_analysis(self, building, fragility_set_as, fragility_set_ds):
         """Calculates bridge damage results for a single building.
 
         Args:
@@ -156,9 +136,6 @@ class NonStructBuildingDamage(BaseAnalysis):
                 assigned to the building.
             fragility_set_ds (obj): A JSON description of drift-sensitive (DS) fragility
                 assigned to the building.
-            dmg_ratio_tbl_as (obj): A table of acceleration-sensitive (AS) damage ratios for mean damage.
-            dmg_ratio_tbl_ds (obj): A table of drift-sensitive (DS) damage ratios for mean damage.
-            dmg_ratio_tbl_content (obj): A table of content damage ratios for mean damage.
 
         Returns:
             OrderedDict: A dictionary with building damage values and other data/metadata.
@@ -193,11 +170,11 @@ class NonStructBuildingDamage(BaseAnalysis):
                 demand_units_as,
                 points=[point])[0]['hazardValue']
 
-            dmg_probability_as = AnalysisUtil.calculate_damage_json(fragility_set_as,
+            dmg_probability_as = AnalysisUtil.calculate_limit_state(fragility_set_as,
                                                                  hazard_val_as)
             # adjust dmg probability for liquefaction
             if use_liquefaction:
-                if liq_geology_dataset_id != None:
+                if liq_geology_dataset_id is not None:
                     liqufaction_dmg = self.hazardsvc.get_liquefaction_values(
                         hazard_dataset_id, liq_geology_dataset_id,
                         'in',
@@ -220,15 +197,12 @@ class NonStructBuildingDamage(BaseAnalysis):
             dmg_probability_as['collprev'] = 0.0
 
         dmg_interval_as = AnalysisUtil.calculate_damage_interval(dmg_probability_as)
-        mean_damage_as = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl_as, dmg_interval_as)
-        mean_damage_dev_as = AnalysisUtil.calculate_mean_damage_std_deviation(
-            dmg_ratio_tbl_as,dmg_interval_as, mean_damage_as['meandamage'])
 
         # Drift-Sensitive Fragility ID Code
         if fragility_set_ds is not None:
             hazard_demand_type_ds = NonStructBuildingUtil.get_hazard_demand_type(building,
-                                                                     fragility_set_ds,
-                                                                     'earthquake')
+                                                                                 fragility_set_ds,
+                                                                                 'earthquake')
             demand_units_ds = fragility_set_ds['demandUnits']
             location = GeoUtil.get_location(building)
 
@@ -238,12 +212,12 @@ class NonStructBuildingDamage(BaseAnalysis):
                 hazard_dataset_id, hazard_demand_type_ds,
                 demand_units_ds, points=[point])[0]['hazardValue']
 
-            dmg_probability_ds = AnalysisUtil.calculate_damage_json(fragility_set_ds,
-                                                                 hazard_val_ds)
+            dmg_probability_ds = AnalysisUtil.calculate_limit_state(fragility_set_ds,
+                                                                    hazard_val_ds)
 
             # adjust hazard value for liquefaction
             if use_liquefaction:
-                if liq_geology_dataset_id != None:
+                if liq_geology_dataset_id is not None:
                     liqufaction_dmg = self.hazardsvc.get_liquefaction_values(
                         hazard_dataset_id, liq_geology_dataset_id,
                         'in',
@@ -267,14 +241,6 @@ class NonStructBuildingDamage(BaseAnalysis):
             dmg_probability_ds['collprev'] = 0.0
 
         dmg_interval_ds = AnalysisUtil.calculate_damage_interval(dmg_probability_ds)
-        mean_damage_ds = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl_ds, dmg_interval_ds)
-        mean_damage_dev_ds = AnalysisUtil.calculate_mean_damage_std_deviation(
-            dmg_ratio_tbl_ds,dmg_interval_ds, mean_damage_ds['meandamage'])
-
-        # Content
-        mean_damage_contents = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl_content, dmg_interval_as)
-        mean_damage_dev_contents = AnalysisUtil.calculate_mean_damage_std_deviation(
-            dmg_ratio_tbl_content, dmg_interval_as, mean_damage_contents['meandamage'])
 
         # put results in dictionary
         building_results['guid'] = building['properties']['guid']
@@ -285,9 +251,6 @@ class NonStructBuildingDamage(BaseAnalysis):
         building_results['mod_as'] = dmg_interval_as['moderate']
         building_results['heavy_as'] = dmg_interval_as['heavy']
         building_results['comp_as'] = dmg_interval_as['complete']
-        building_results['meandmg_as'] = mean_damage_as['meandamage']
-        building_results['mdmgdev_as'] = mean_damage_dev_as['mdamagedev']
-
         building_results['immocc_ds'] = dmg_probability_ds['immocc']
         building_results['lifsfty_ds'] = dmg_probability_ds['lifesfty']
         building_results['collpre_ds'] = dmg_probability_ds['collprev']
@@ -295,12 +258,6 @@ class NonStructBuildingDamage(BaseAnalysis):
         building_results['mod_ds'] = dmg_interval_ds['moderate']
         building_results['heavy_ds'] = dmg_interval_ds['heavy']
         building_results['comp_ds'] = dmg_interval_ds['complete']
-        building_results['meandmg_ds'] = mean_damage_ds['meandamage']
-        building_results['mdmgdev_ds'] = mean_damage_dev_ds['mdamagedev']
-
-        building_results['meandmg_c'] = mean_damage_contents['meandamage']
-        building_results['mdmgdev_c'] = mean_damage_dev_contents['mdamagedev']
-
         building_results["hzrdtyp_as"] = hazard_demand_type_as
         building_results["hzrdval_as"] = hazard_val_as
         building_results["hzrdtyp_ds"] = hazard_demand_type_ds
@@ -387,26 +344,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'required': True,
                     'description': 'building Inventory',
                     'type': ['ergo:buildingInventoryVer4'],
-                },
-                {
-                    'id': 'dmg_ratios_as',
-                    'required': True,
-                    'description': 'Building Damage Ratios',
-                    'type': ['ergo:buildingASDamageRatios'],
-                },
-                {
-                    'id': 'dmg_ratios_ds',
-                    'required': True,
-                    'description': 'Building Damage Ratios',
-                    'type': ['ergo:buildingDSDamageRatios'],
-                },
-                {
-                    'id': 'dmg_ratios_content',
-                    'required': True,
-                    'description': 'Building Damage Ratios',
-                    'type': ['ergo:buildingContentDamageRatios'],
-                },
-
+                }
             ],
             'output_datasets': [
                 {

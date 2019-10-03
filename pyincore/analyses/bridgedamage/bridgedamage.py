@@ -7,11 +7,12 @@
 
 import collections
 import concurrent.futures
-from pyincore import BaseAnalysis, HazardService, FragilityService
-from pyincore import AnalysisUtil, GeoUtil
-from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
-from itertools import repeat
 import random
+from itertools import repeat
+
+from pyincore import AnalysisUtil, GeoUtil
+from pyincore import BaseAnalysis, HazardService, FragilityService
+from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
 
 
 class BridgeDamage(BaseAnalysis):
@@ -33,17 +34,9 @@ class BridgeDamage(BaseAnalysis):
         # Bridge dataset
         bridge_set = self.get_input_dataset("bridges").get_inventory_reader()
 
-        dmg_ratio_tbl = None
-        if self.get_input_dataset("dmg_ratios") is not None:
-            dmg_ratio_csv = self.get_input_dataset(
-                "dmg_ratios").get_csv_reader()
-            dmg_ratio_tbl = BridgeUtil.get_damage_ratio_rows(dmg_ratio_csv)
-
         # Get hazard input
         hazard_type = self.get_parameter("hazard_type")
         hazard_dataset_id = self.get_parameter("hazard_id")
-
-        results = []
         user_defined_cpu = 1
 
         if not self.get_parameter("num_cpu") is None and self.get_parameter(
@@ -65,7 +58,7 @@ class BridgeDamage(BaseAnalysis):
         results = self.bridge_damage_concurrent_future(
             self.bridge_damage_analysis_bulk_input, num_workers,
             inventory_args, repeat(hazard_type),
-            repeat(hazard_dataset_id), repeat(dmg_ratio_tbl))
+            repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", results,
                                  name=self.get_parameter("result_name"))
@@ -94,14 +87,13 @@ class BridgeDamage(BaseAnalysis):
         return output
 
     def bridge_damage_analysis_bulk_input(self, bridges, hazard_type,
-                                          hazard_dataset_id, dmg_ratio_tbl):
+                                          hazard_dataset_id):
         """Run analysis for multiple bridges.
 
         Args:
             bridges (list): Multiple bridges from input inventory set.
             hazard_type (str): Hazard type, either earthquake, tornadoes, tsunami, or hurricane
             hazard_dataset_id (str): An id of the hazard exposure.
-            dmg_ratio_tbl (obj): A damage ratio table, including weights to compute mean damage.
 
         Returns:
             list: A list of ordered dictionaries with bridge damage values and other data/metadata.
@@ -139,7 +131,6 @@ class BridgeDamage(BaseAnalysis):
             result.append(self.bridge_damage_analysis(bridge, fragility_set,
                                                       hazard_type,
                                                       hazard_dataset_id,
-                                                      dmg_ratio_tbl,
                                                       fragility_key,
                                                       use_hazard_uncertainty,
                                                       use_liquefaction))
@@ -147,8 +138,7 @@ class BridgeDamage(BaseAnalysis):
         return result
 
     def bridge_damage_analysis(self, bridge, fragility_set, hazard_type,
-                               hazard_dataset_id,
-                               dmg_ratio_tbl, fragility_key,
+                               hazard_dataset_id, fragility_key,
                                use_hazard_uncertainty, use_liquefaction):
         """Calculates bridge damage results for a single bridge.
 
@@ -157,7 +147,6 @@ class BridgeDamage(BaseAnalysis):
             fragility_set (obj): A JSON description of fragility assigned to the bridge.
             hazard_type (str): Hazard type earthquake, tsunami, tornado and hurricane
             hazard_dataset_id (str): A hazard dataset to use.
-            dmg_ratio_tbl (obj): A table of damage ratios for mean damage.
             fragility_key (str): A fragility key to use for mapping bridges to fragilities.
             use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty in damage analysis,
                 False otherwise.
@@ -172,10 +161,10 @@ class BridgeDamage(BaseAnalysis):
 
         hazard_val = 0.0
         demand_type = "Unknown"
-        exceedence_probability = [0.0, 0.0, 0.0, 0.0]
-        dmg_intervals = [0.0, 0.0, 0.0, 0.0, 0.0]
-        mean_damage = 0.0
-        expected_damage = "Unknown"
+
+        # default
+        dmg_probability = {"ls-slight": 0.0, "ls-moderat": 0.0,
+                           "ls-extensi": 0.0, "ls-complet": 0.0}
         retrofit_type = "Non-Retrofit"
         retrofit_cost = 0.0
 
@@ -207,46 +196,42 @@ class BridgeDamage(BaseAnalysis):
 
             hazard_val = hazard_resp[0]['hazardValue']
             hazard_std_dev = 0.0
+            adjusted_fragility_set = fragility_set
 
             # TODO Get this from API once implemented
             if use_hazard_uncertainty:
                 hazard_std_dev = random.random()
 
-            exceedence_probability = BridgeUtil.get_probability_of_exceedence(
-                bridge, fragility_set,
-                hazard_val,
-                hazard_std_dev,
-                use_liquefaction)
+            if use_liquefaction and 'liq' in bridge['properties']:
+                for fragility in fragility_set["fragilityCurves"]:
+                    adjusted_fragility_set.append(
+                        AnalysisUtil.adjust_fragility_for_liquefaction(
+                            fragility, bridge['properties']['liq']))
 
-            dmg_intervals = BridgeUtil.get_damage_state_intervals(
-                exceedence_probability)
-
-            if dmg_ratio_tbl is not None:
-                mean_damage = BridgeUtil.get_mean_damage(dmg_intervals, 1,
-                                                         bridge,
-                                                         dmg_ratio_tbl)
-                expected_damage = BridgeUtil.get_expected_damage(mean_damage,
-                                                                 dmg_ratio_tbl)
+            dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, std_dev=hazard_std_dev)
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 
+        dmg_intervals = AnalysisUtil.calculate_damage_interval(dmg_probability)
+
         bridge_results['guid'] = bridge['properties']['guid']
-        bridge_results["ls-slight"] = exceedence_probability[0]
-        bridge_results["ls-moderat"] = exceedence_probability[1]
-        bridge_results["ls-extensi"] = exceedence_probability[2]
-        bridge_results["ls-complet"] = exceedence_probability[3]
-        bridge_results["none"] = dmg_intervals[0]
-        bridge_results["slight-mod"] = dmg_intervals[1]
-        bridge_results["mod-extens"] = dmg_intervals[2]
-        bridge_results["ext-comple"] = dmg_intervals[3]
-        bridge_results["complete"] = dmg_intervals[4]
-        bridge_results["meandamage"] = mean_damage
-        bridge_results["expectval"] = expected_damage
+        bridge_results.update(dmg_probability)
+        bridge_results.update(dmg_intervals)
         bridge_results["retrofit"] = retrofit_type
         bridge_results["retro_cost"] = retrofit_cost
         bridge_results["demand_type"] = demand_type
         bridge_results["hazardtype"] = hazard_type
         bridge_results["hazardval"] = hazard_val
+
+        # add spans to bridge output so mean damage calculation can use that info
+        if "spans" in bridge["properties"] and bridge["properties"]["spans"] \
+                is not None and bridge["properties"]["spans"].isdigit():
+            bridge_results['spans'] = int(bridge["properties"]["spans"])
+        elif "SPANS" in bridge["properties"] and bridge["properties"]["SPANS"] \
+                is not None and bridge["properties"]["SPANS"].isdigit():
+            bridge_results['spans'] = int(bridge["properties"]["SPANS"])
+        else:
+            bridge_results['spans'] = 1
 
         return bridge_results
 
@@ -316,21 +301,14 @@ class BridgeDamage(BaseAnalysis):
                     'required': True,
                     'description': 'Bridge Inventory',
                     'type': ['ergo:bridges'],
-                },
-                {
-                    'id': 'dmg_ratios',
-                    'required': False,
-                    'description': 'Bridge Damage Ratios',
-                    'type': ['ergo:bridgeDamageRatios'],
-                },
-
+                }
             ],
             'output_datasets': [
                 {
                     'id': 'result',
                     'parent_type': 'bridges',
                     'description': 'CSV file of bridge structural damage',
-                    'type': 'bridge-damage'
+                    'type': 'ergo:bridgeDamage'
                 }
             ]
         }

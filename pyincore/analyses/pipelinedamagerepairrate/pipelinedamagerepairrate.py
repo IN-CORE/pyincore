@@ -9,14 +9,15 @@
 
 """
 
+import collections
+import concurrent.futures
+import math
+from itertools import repeat
+
 from pyincore import BaseAnalysis, HazardService, FragilityService, \
     AnalysisUtil, GeoUtil
 from pyincore.analyses.pipelinedamagerepairrate.pipelineutil import \
     PipelineUtil
-import concurrent.futures
-from itertools import repeat
-import collections
-import math
 
 
 class PipelineDamageRepairRate(BaseAnalysis):
@@ -124,17 +125,20 @@ class PipelineDamageRepairRate(BaseAnalysis):
             self.get_parameter("mapping_id"), pipelines, fragility_key)
 
         # Get Liquefaction Fragility Key
-        liquefaction_fragility_key = self.get_parameter("liquefaction_fragility_key")
+        liquefaction_fragility_key = self.get_parameter(
+            "liquefaction_fragility_key")
         if hazard_type == "earthquake" and liquefaction_fragility_key is None:
             liquefaction_fragility_key = PipelineUtil.LIQ_FRAGILITY_KEY
 
         # Liquefaction
         use_liquefaction = False
-        if hazard_type == "earthquake" and self.get_parameter("use_liquefaction") is not None:
+        if hazard_type == "earthquake" and self.get_parameter(
+                "use_liquefaction") is not None:
             use_liquefaction = self.get_parameter("use_liquefaction")
 
         # Get geology dataset id
-        geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
+        geology_dataset_id = self.get_parameter(
+            "liquefaction_geology_dataset_id")
         if geology_dataset_id is not None:
             fragility_sets_liq = self.fragilitysvc.map_inventory(
                 self.get_parameter("mapping_id"), pipelines,
@@ -215,7 +219,8 @@ class PipelineDamageRepairRate(BaseAnalysis):
 
             diameter = PipelineUtil.get_pipe_diameter(pipeline)
             fragility_vars = {'x': hazard_val, 'y': diameter}
-            pgv_repairs = AnalysisUtil.compute_custom_limit_state_probability(fragility_set, fragility_vars)
+            pgv_repairs = AnalysisUtil.compute_custom_limit_state_probability(
+                fragility_set, fragility_vars)
             fragility_curve = fragility_set['fragilityCurves'][0]
 
             # Convert PGV repairs to SI units

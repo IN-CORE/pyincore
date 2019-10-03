@@ -3,16 +3,18 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-import pandas as pd
 import concurrent.futures
-from itertools import repeat
 from collections import OrderedDict
+from itertools import repeat
 
-from pyincore.analyses.waternetworkdamage.waternetworkutil import WaterNetworkUtil
-from pyincore import HazardService, FragilityService
+import pandas as pd
+
 from pyincore import AnalysisUtil
-from pyincore import GeoUtil
 from pyincore import BaseAnalysis
+from pyincore import GeoUtil
+from pyincore import HazardService, FragilityService
+from pyincore.analyses.waternetworkdamage.waternetworkutil import \
+    WaterNetworkUtil
 from pyincore.dataset import Dataset
 from pyincore.networkdataset import NetworkDataset
 
@@ -158,7 +160,7 @@ class WaterNetworkDamage(BaseAnalysis):
             pump_PEDS['hazardval'] = hazard_val
 
             # calculate cdf
-            dmg_probability = AnalysisUtil.calculate_damage_json2(
+            dmg_probability = AnalysisUtil.calculate_limit_state(
                 fragility_sets[pump['id']], hazard_val)
             for key, val in dmg_probability.items():
                 pump_PEDS[key] = val
@@ -194,7 +196,7 @@ class WaterNetworkDamage(BaseAnalysis):
             tank_PEDS['hazardval'] = hazard_val
 
             # calculate cdf
-            dmg_probability = AnalysisUtil.calculate_damage_json2(
+            dmg_probability = AnalysisUtil.calculate_limit_state(
                 fragility_sets[tank['id']],
                 hazard_val)
             for key, val in dmg_probability.items():
