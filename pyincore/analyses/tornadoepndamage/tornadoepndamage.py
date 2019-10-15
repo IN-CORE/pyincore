@@ -300,7 +300,7 @@ class TornadoEpnDamage(BaseAnalysis):
                                         resistivity_probability = AnalysisUtil.calculate_limit_state(fragility_set_pole, windspeed)
 
                                     # randomly generated capacity of each poles ; 1 m/s is 2.23694 mph
-                                    poleresist = resistivity_probability.get('immocc') * 2.23694
+                                    poleresist = resistivity_probability.get('failure') * 2.23694
                                     npoles = int(round(inter_length_meter / self.pole_distance))
                                     repairtime_list = []
 
