@@ -68,14 +68,16 @@ class AnalysisUtil:
 
         index = 0
 
-        if len(fragility_curves) == 3:
+        if len(fragility_curves) == 1:
+            limit_state = ['failure']
+        elif len(fragility_curves) == 3:
             limit_state = ['immocc', 'lifesfty', 'collprev']
         elif len(fragility_curves) == 4:
             limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi',
                            'ls-complet']
         else:
             raise ValueError(
-                "We can only handle fragility curves with 3 or 4 limit states!")
+                "We can only handle fragility curves with 1, 3 or 4 limit states!")
 
         for fragility_curve in fragility_curves:
             probability = float(0.0)
