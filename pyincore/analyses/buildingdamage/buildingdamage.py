@@ -190,7 +190,7 @@ class BuildingDamage(BaseAnalysis):
             bldg_results['guid'] = building['properties']['guid']
             bldg_results.update(dmg_probability)
             bldg_results.update(dmg_interval)
-            bldg_results['hazardtype'] = demand_type
+            bldg_results['demandtype'] = demand_type
             bldg_results['hazardval'] = hazard_val
 
             return bldg_results

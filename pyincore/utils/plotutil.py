@@ -111,8 +111,10 @@ class PlotUtil:
 
         """
         for curve in fragility_set['fragilityCurves']:
-            x, y = PlotUtil.get_x_y(curve['curveType'], curve['median'], curve['beta'])
+            x, y = PlotUtil.get_x_y(curve['curveType'], curve['alpha'], curve['beta'])
             plt.plot(x, y, label=curve['description'])
+
+        # TODO: Also show what alphaType is in the label?
         plt.xlabel(fragility_set['demandType'] + " (" + fragility_set['demandUnits'] + ")")
         plt.legend()
         return plt

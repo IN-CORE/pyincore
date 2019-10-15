@@ -35,7 +35,7 @@ class AnalysisUtil:
 
         fragility_curve = fragility_set['fragilityCurves'][0]
         if fragility_curve[
-            'className'] == 'edu.illinois.ncsa.incore.services.dfr3.model.PeriodStandardFragilityCurve':
+            'className'] == 'PeriodStandardFragilityCurve':
             period_equation_type = fragility_curve['periodEqnType']
             if period_equation_type == 1:
                 period = fragility_curve['periodParam0']
@@ -84,7 +84,7 @@ class AnalysisUtil:
             if hazard > 0.0:
                 # If there are other classes of fragilities they will need to be added here
                 if class_name in [
-                    'edu.illinois.ncsa.incore.service.dfr3.models.PeriodBuildingFragilityCurve']:
+                    'PeriodBuildingFragilityCurve']:
                     fs_param0 = fragility_curve['fsParam0']
                     fs_param1 = fragility_curve['fsParam1']
                     fs_param2 = fragility_curve['fsParam2']
@@ -92,23 +92,21 @@ class AnalysisUtil:
                     fs_param4 = fragility_curve['fsParam4']
                     fs_param5 = fragility_curve['fsParam5']
 
-                    # If no period is provided, assumption is 0 since the user should check their data for missing
-                    # parameters (e.g. number of building stories).
+                    # If no period is provided, assumption is 0 since the user should check their
+                    # data for missing parameters (e.g. number of building stories).
                     probability = AnalysisUtil.compute_period_building_fragility_value(
                         hazard, period, fs_param0,
                         fs_param1, fs_param2, fs_param3,
                         fs_param4, fs_param5)
-                elif class_name in [
-                    'edu.illinois.ncsa.incore.service.dfr3.models.PeriodStandardFragilityCurve',
-                    'edu.illinois.ncsa.incore.service.dfr3.models.StandardFragilityCurve']:
-                    median = float(fragility_curve['median'])
+                elif class_name in ['PeriodStandardFragilityCurve','StandardFragilityCurve']:
+                    alpha = float(fragility_curve['alpha'])
                     beta = math.sqrt(math.pow(fragility_curve["beta"], 2) + math.pow(std_dev, 2))
 
-                    if fragility_curve['curveType'] == 'Normal':
-                        sp = (math.log(hazard) - math.log(median)) / beta
+                    if fragility_curve['alphaType'] == 'median':
+                        sp = (math.log(hazard) - math.log(alpha)) / beta
                         probability = norm.cdf(sp)
-                    elif fragility_curve['curveType'] == "LogNormal":
-                        x = (math.log(hazard) - median) / beta
+                    elif fragility_curve['alphaType'] == "lambda":
+                        x = (math.log(hazard) - alpha) / beta
                         probability = norm.cdf(x)
                 else:
                     raise ValueError("Warning - Unsupported fragility type " +
@@ -146,7 +144,7 @@ class AnalysisUtil:
     def calculate_damage_interval(damage):
         output = collections.OrderedDict()
         if len(damage) == 4:
-            output['none'] = 1 - damage['ls-slight']
+            output['ds-none'] = 1 - damage['ls-slight']
             output['ds-slight'] = damage['ls-slight'] - \
                                           damage['ls-moderat']
             output['ds-moderat'] = damage['ls-moderat'] - \
@@ -326,7 +324,7 @@ class AnalysisUtil:
         limit_state_prob = 0.0
         for fragility_curve in fragility_curves:
             if fragility_curve['className'] == \
-                    'edu.illinois.ncsa.incore.service.dfr3.models.CustomExpressionFragilityCurve':
+                    'CustomExpressionFragilityCurve':
                 expression = fragility_curve['expression']
                 parser = Parser()
                 limit_state_prob = parser.parse(expression).evaluate(variables)
@@ -482,9 +480,10 @@ class AnalysisUtil:
         fragility_curve_adj = {
             "className": fragility_curve["className"],
             "description": fragility_curve['description'],
-            "median": fragility_curve[
-                          'median'] * multiplier,
+            "alpha": fragility_curve[
+                          'alpha'] * multiplier,
             "beta": fragility_curve['beta'],
+            "alphaType": fragility_curve['alphaType'],
             'curveType': fragility_curve['curveType']}
 
         return fragility_curve_adj
