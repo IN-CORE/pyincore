@@ -335,4 +335,3 @@ class WaterFacilityDamage(BaseAnalysis):
 
         result = {**metadata, **result}
         return result
-
