@@ -1,7 +1,7 @@
 # List of pyincore analyses to either include or exclude for release
 # If provided, 'excludes' takes preference over 'includeOnly'
 
-version: '0.5.1'
+version: '0.5.2'
 
 includeOnly:
   - buildingdamage
