@@ -12,7 +12,7 @@ CRED_FILE_NAME = ".incorepw"
 
 setup(
     name='pyincore',
-    version='0.5.1',
+    version='0.5.2',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     package_data={
