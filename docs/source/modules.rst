@@ -1,10 +1,112 @@
-pyincore
+analyses
 ^^^^^^^^
 
-analysisutil
+bridgedamage
 ============
-..  autoclass:: utils.analysisutil.AnalysisUtil
+..  autoclass:: bridgedamage.bridgedamage.BridgeDamage
     :members:
+..  autoclass:: bridgedamage.bridgeutil.BridgeUtil
+    :members:
+
+buildingdamage
+==============
+..  autoclass:: buildingdamage.buildingdamage.BuildingDamage
+    :members:
+..  autoclass:: buildingdamage.buildingutil.BuildingUtil
+    :members:
+
+buildingportfolio
+=================
+..  autoclass:: from pyincore.analyses.buildingportfolio.recovery.BuildingData
+    :members:
+
+cumulativebuildingdamage
+========================
+..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
+    :members:
+
+epfdamage
+=========
+..  autoclass:: epfdamage.epfdamage.EpfDamage
+    :members:
+..  autoclass:: epfdamage.epfutil.EpfUtil
+    :members:
+
+epnrecoverymodel
+================
+..  autoclass:: epnrecoverymodel.epnrecoverymodel.EpnRecoveryModel
+    :members:
+
+example
+=======
+..  autoclass:: example.exampleanalysis.ExampleAnalysis
+    :members:
+
+housingunitallocation
+=====================
+..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
+    :members:
+
+joplincgeanalysis
+=================
+..  autoclass:: joplincgeanalysis.joplincgeanalysis.JoplinCGEModel
+    :members:
+
+montecarlofailureprobability
+============================
+..  autoclass:: montecarlofailureprobability.montecarlofailureprobability.MonteCarloFailureProbability
+    :members:
+
+nonstructbuildingdamage
+=======================
+..  autoclass:: nonstructbuildingdamage.nonstructbuildingdamage.NonStructBuildingDamage
+    :members:
+..  autoclass:: nonstructbuildingdamage.nonstructbuildingutil.NonStructBuildingUtil
+    :members:
+
+pipelinedamage
+==============
+..  autoclass:: pipelinedamage.pipelinedamage.PipelineDamage
+    :members:
+
+pipelinedamagerepairrate
+========================
+..  autoclass:: pipelinedamagerepairrate.pipelinedamagerepairrate.PipelineDamageRepairRate
+    :members:
+..  autoclass:: pipelinedamagerepairrate.pipelineutil.PipelineUtil
+    :members:
+
+populationdislocation
+=====================
+..  autoclass:: populationdislocation.populationdislocation.PopulationDislocation
+    :members:
+..  autoclass:: populationdislocation.populationdislocationutil.PopulationDislocationUtil
+    :members:
+
+roaddamage
+==========
+..  autoclass:: roaddamage.roaddamage.RoadDamage
+    :members:
+
+tornadoepndamage
+================
+..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
+    :members:
+
+transportationrecovery
+======================
+..  autoclass:: transportationrecovery.transportationrecovery.TransportationRecovery
+    :members:
+..  autoclass:: transportationrecovery.transportationrecoveryutil.TransportationRecoveryUtil
+    :members:
+
+waterfacilitydamage
+===================
+..  autoclass:: waterfacilitydamage.waterfacilitydamage.WaterFacilityDamage
+    :members:
+
+services
+^^^^^^^^
 
 baseanalysis
 ============
@@ -48,11 +150,6 @@ fragilityservice
 ..  autoclass:: fragilityservice.FragilityService
     :members:
 
-geoutil
-=======
-..  autoclass:: utils.geoutil.GeoUtil
-    :members:
-
 hazardservice
 =============
 ..  autoclass:: hazardservice.HazardService
@@ -61,11 +158,6 @@ hazardservice
 networkdata
 ===========
 ..  autoclass:: networkdata.NetworkData
-    :members:
-
-plotutil
-========
-..  autoclass:: utils.plotutil.PlotUtil
     :members:
 
 networkdataset
@@ -88,87 +180,24 @@ spaceservice
 ..  autoclass:: spaceservice.SpaceService
     :members:
 
-pyincore analyses
-^^^^^^^^^^^^^^^^^
+utilitities
+^^^^^^^^^^^
 
-bridgedamage
-============
-..  autoclass:: bridgedamage.bridgedamage.BridgeDamage
-    :members:
-..  autoclass:: bridgedamage.bridgeutil.BridgeUtil
+utils/analysisutil
+==================
+..  autoclass:: utils.analysisutil.AnalysisUtil
     :members:
 
-buildingdamage
+utils/geoutil
+=============
+..  autoclass:: utils.geoutil.GeoUtil
+    :members:
+
+utils/plotutil
 ==============
-..  autoclass:: buildingdamage.buildingdamage.BuildingDamage
-    :members:
-..  autoclass:: buildingdamage.buildingutil.BuildingUtil
+..  autoclass:: utils.plotutil.PlotUtil
     :members:
 
-cumulativebuildingdamage
-========================
-..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
-    :members:
-
-epnrecoverymodel
-================
-..  autoclass:: epnrecoverymodel.epnrecoverymodel.EpnRecoveryModel
-    :members:
-
-housingunitallocation
-=====================
-..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
-    :members:
-
-joplincgeanalysis
-=================
-..  autoclass:: joplincgeanalysis.joplincgeanalysis.JoplinCGEModel
-    :members:
-
-nonstructbuildingdamage
-=======================
-..  autoclass:: nonstructbuildingdamage.nonstructbuildingdamage.NonStructBuildingDamage
-    :members:
-..  autoclass:: nonstructbuildingdamage.nonstructbuildingutil.NonStructBuildingUtil
-    :members:
-
-pipelinedamage
-==============
-..  autoclass:: pipelinedamage.pipelinedamage.PipelineDamage
-    :members:
-..  autoclass:: pipelinedamage.pipelineutil.PipelineUtil
-    :members:
-
-populationdislocation
-=====================
-..  autoclass:: populationdislocation.populationdislocation.PopulationDislocation
-    :members:
-
-tornadoepndamage
-================
-..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
-    :members:
-
-transportationrecovery
-======================
-..  autoclass:: transportationrecovery.transportationrecovery.TransportationRecovery
-    :members:
-..  autoclass:: transportationrecovery.transportationrecoveryutil.TransportationRecoveryUtil
-    :members:
-
-waterfacilitydamage
-===================
-..  autoclass:: waterfacilitydamage.waterfacilitydamage.WaterFacilityDamage
-    :members:
-
-..
-    example docstrings
-..
-    ^^^^^^^^^^^^^^^^^^
-..
-    ..  automodule:: example_docstrings
-..
-        :members:
 
 ----
 
