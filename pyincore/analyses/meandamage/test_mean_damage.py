@@ -1,0 +1,23 @@
+from pyincore import InsecureIncoreClient
+from pyincore.globals import INCORE_API_DEV_INSECURE_URL
+from pyincore.analyses.meandamage import MeanDamage
+
+
+def run_with_base_class():
+    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL)
+
+    md = MeanDamage(client)
+
+    md.load_remote_input_dataset("damage", "5a29782fc7d30d4af537ace5")
+    md.load_remote_input_dataset("dmg_ratios", "5a284f2ec7d30d13bc08209a")
+    md.set_parameter("result_name", "mean_damage")
+    md.set_parameter("damage_interval_keys",
+                     ["insignific", "moderate", "heavy", "complete"])
+    md.set_parameter("num_cpu", 1)
+
+    # Run analysis
+    md.run_analysis()
+
+
+if __name__ == '__main__':
+    run_with_base_class()

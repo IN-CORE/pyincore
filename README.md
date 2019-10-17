@@ -62,7 +62,7 @@ These steps will guide you on how to install both pyIncore and Jupyter notebook 
     ```
     conda config --append channels https://inconda:CHANNEL_PWD_HERE@incore2.ncsa.illinois.edu/conda/pyincore/
     ```
-   and then
+    and then
      ```
     conda install pyincore
     ```
