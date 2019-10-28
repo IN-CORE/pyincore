@@ -148,7 +148,7 @@ class BuildingDamage(BaseAnalysis):
                 building_period = 0.0
                 if hazard_type == 'earthquake':
                     num_stories = building['properties']['no_stories']
-                    building_period = BuildingUtil.get_building_period(num_stories, local_fragility_set)
+                    building_period = AnalysisUtil.get_building_period(num_stories, local_fragility_set)
 
                     # TODO include liquefaction and hazard uncertainty
                     hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)

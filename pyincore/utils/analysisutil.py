@@ -31,6 +31,16 @@ class AnalysisUtil:
 
     @staticmethod
     def get_building_period(num_stories, fragility_set):
+        """Get building period from the fragility curve.
+
+        Args:
+            num_stories (int): Number of building stories.
+            fragility_set (obj): A JSON description of fragility applicable to the building.
+
+        Returns:
+            float: Building period.
+
+        """
         period = 0.0
 
         fragility_curve = fragility_set['fragilityCurves'][0]
