@@ -4,9 +4,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import base64
-import os
-import urllib.parse
+import getpass
 import requests
 import pyincore.globals as pyglobals
 
@@ -157,82 +155,42 @@ class IncoreClient(Client):
         password (str): Password used in NCSA's INCORE framework.
 
     """
-    def __init__(self, service_url: str = None, username: str = None, password: str = None) -> object:
+    def __init__(self, service_url: str = None) -> object:
 
         if service_url is None or len(service_url.strip()) == 0:
             service_url = pyglobals.INCORE_API_PROD_URL
         self.service_url = service_url
 
-        if username is None or password is None:
-            creds_file = None
-            try:
-                creds_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, pyglobals.CRED_FILE_NAME)
-                with open(creds_file, 'r') as f:
-                    creds = f.read().splitlines()
-                    username = creds[0]
-                    password = creds[1]
-
-            except IndexError:
-                logger.exception("Please check if the file " + creds_file + " has credentials in the correct format")
-                raise
-            except OSError:
-                logger.exception("Please check if the file " + creds_file + " exists with credentials")
-                raise
-
-        self.user = username
-        self.auth_token = None
-        self.headers = {}
-        self.status = 'fail'
-        response = self.retrieve_token(self.user, password)
-        self.session = requests.session()
-        if response is not None and 'result' in response:
-            self.auth_token = response['auth-token']
-            self.status = 'success'
-            self.headers = {'auth-user': self.user, 'auth-token': self.auth_token, 'Authorization': ''}
-            self.session.headers.update(self.headers)
-        else:
+        token_url = pyglobals.KEYCLOAK_TOKEN_URL
+        username = input("Enter username: ")
+        password = getpass.getpass("Enter password: ")
+        r = requests.post(token_url, data={'grant_type': 'password', 'client_id': pyglobals.CLIENT_ID,
+                                           'username': username,
+                                           'password': password})
+        if r.status_code != 200:
             logger.warning("Authentication Failed. Please check the credentials and try again")
-
-    def retrieve_token(self, username: str, password: str):
-        """Function to retrieve token from the login service. Authentication API endpoint is called.
-
-        Args:
-            username (str): Username used by NCSA's INCORE framework.
-            password (str): Password used in NCSA's INCORE framework.
-
-        Returns:
-            obj: json containing the authentication token.
-
-        """
-        if self.auth_token is not None:
-            return self.auth_token
-        url = urllib.parse.urljoin(self.service_url, "auth/api/login")
-        b64_value = base64.b64encode(bytes('%s:%s' % (username, password), "utf-8"))
-        r = requests.get(url, headers={"Authorization": "LDAP %s" % b64_value.decode('ascii')})
-        if str(r.status_code).startswith('5'):
-            logger.critical("Authentication API call failed. Something is wrong with the authentication server")
-        else:
-            return r.json()
+            exit(0)
+        self.session = requests.session()
+        self.session.headers['Authorization'] = str("bearer " + r.json()["access_token"])
 
 
 class InsecureIncoreClient(Client):
-    """Incore service Client class used for development and testing. It contains service root url.
+    """Incore service Client class. It contains token and service root url.
 
     Args:
         service_url (str): Service url.
-        username (str): Username from the group of developers used by NCSA's INCORE team.
+        user_info (str): Preferred username field from keycloak's user-info
 
     """
-    def __init__(self, service_url: str = None, username: str = None) -> object:
-        if service_url is None:
-            service_url = pyglobals.INCORE_API_INSECURE_URL
+    def __init__(self, service_url: str = None, user_info: str = None) -> object:
 
-        if username is None:
-            username = pyglobals.INCORE_LDAP_TEST_USER
-
+        if service_url is None or len(service_url.strip()) == 0:
+            service_url = pyglobals.INCORE_API_DEV_INSECURE_URL
         self.service_url = service_url
-        self.user = username
-        self.status = 'success'
-        self.headers = {'X-Credential-Username': self.user}
+
+        if user_info is None or len(user_info.strip()) == 0:
+            user_info = pyglobals.INCORE_LDAP_TEST_USER_INFO
+
         self.session = requests.session()
-        self.session.headers.update(self.headers)
+        self.session.headers['x-auth-userinfo'] = str(user_info)
+

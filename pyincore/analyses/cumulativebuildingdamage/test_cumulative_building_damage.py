@@ -1,11 +1,10 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.cumulativebuildingdamage.cumulativebuildingdamage import \
     CumulativeBuildingDamage
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient(
-        "http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     # Setting up Id's for Dataset inputs: Earthquake building damage, Tsunami Building Damage and Damage Ratios
     eq_bldg_dmg_id = "5c5c9686c5c0e488fcf91903"

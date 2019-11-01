@@ -1,9 +1,9 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.joplincgeanalysis import JoplinCGEModel
 
 
 def run_base_analysis():
-    client = InsecureIncoreClient(service_url="http://incore2-services-dev.ncsa.illinois.edu:8888")
+    client = IncoreClient()
     joplin_cge = JoplinCGEModel(client)
 
     # SAM

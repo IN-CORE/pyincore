@@ -1,10 +1,11 @@
 
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.transportationrecovery import TransportationRecovery
+
 
 def run_with_base_class():
 
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
     transportation_recovery = TransportationRecovery(client)
 
     nodes = "5c5de1dec5c0e488fc0355f7"
@@ -34,6 +35,7 @@ def run_with_base_class():
     transportation_recovery.set_parameter("crossover_rate", 1.0)
 
     transportation_recovery.run_analysis()
+
 
 if __name__ == '__main__':
     run_with_base_class()

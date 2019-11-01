@@ -91,7 +91,7 @@ class Dfr3Service:
             "utf-8")
         headers = {'Content-type': 'application/json'}
         # merge two headers
-        new_headers = {**self.client.headers, **headers}
+        new_headers = {**self.client.session.headers, **headers}
         kwargs = {"headers": new_headers}
         r = self.client.post(url, data=json, **kwargs)
 

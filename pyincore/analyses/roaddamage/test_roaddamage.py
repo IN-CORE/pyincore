@@ -1,9 +1,9 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.roaddamage import RoadDamage
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     # EQ Road Dataset - Seaside roads
     road_dataset_id = "5d25118eb9219c0692cd7527"

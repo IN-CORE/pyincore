@@ -1,10 +1,10 @@
 from pyincore.analyses.tornadoepndamage.tornadoepndamage import \
     TornadoEpnDamage
-from pyincore import IncoreClient, InsecureIncoreClient
+from pyincore import IncoreClient
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient("http://incore2-services-dev:8888")
+    client = IncoreClient()
 
     ted = TornadoEpnDamage(client)
 
@@ -20,6 +20,7 @@ def run_with_base_class():
     ted.set_parameter('tornado_id', tornado_id)
 
     ted.run_analysis()
+
 
 if __name__ == '__main__':
     run_with_base_class()

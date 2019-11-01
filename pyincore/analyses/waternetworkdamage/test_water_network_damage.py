@@ -1,9 +1,9 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.waternetworkdamage import WaterNetworkDamage
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient("http://incore2-services-dev:8888/", 'incrtest')
+    client = IncoreClient()
     wn_dmg = WaterNetworkDamage(client)
     wn_dmg.load_remote_input_dataset("water_network",
                                      "5cf696b05648c477129bfc21")

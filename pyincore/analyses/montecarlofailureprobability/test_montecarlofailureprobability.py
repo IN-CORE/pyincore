@@ -1,11 +1,10 @@
-from pyincore.client import InsecureIncoreClient
+from pyincore.client import IncoreClient
 from pyincore.analyses.montecarlofailureprobability import \
     MonteCarloFailureProbability
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient(
-        "http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
     mc = MonteCarloFailureProbability(client)
 
     # # example of using local dataset

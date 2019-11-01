@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore import InsecureIncoreClient, InventoryDataset, HazardService
+from pyincore import IncoreClient, InventoryDataset
 from pyincore.analyses.bridgedamage import BridgeDamage
 import traceback
 import os
@@ -16,8 +16,7 @@ if __name__ == '__main__':
         with open("/home/cnavarro/git/pyincore/tests/.incorepw", 'r') as f:
             cred = f.read().splitlines()
 
-
-        client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", cred[0])
+        client = IncoreClient()
 
         # local hazard
         hazard_service = "earthquake/5b89921560a0286995e2882d"
