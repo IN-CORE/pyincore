@@ -1,10 +1,9 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.epfdamage import EpfDamage
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient(
-        "http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     hazard_type = "earthquake"
 

@@ -9,31 +9,39 @@ import ast
 
 import pytest
 import json
-from pyincore.globals import INCORE_API_DEV_INSECURE_URL, LOGGER
+from jose import jwt
+from pyincore.globals import LOGGER
 
-from pyincore import FragilityService, RepairService, InsecureIncoreClient
+from pyincore import FragilityService, RepairService, IncoreClient
 
 logger = LOGGER
 
-cred = None
-try:
-    with open(".incorepw", 'r') as f:
-        cred = f.read().splitlines()
-except EnvironmentError:
-    logger.error('The.incorepw is either missing or is in incorrect format')
-    raise
-
-# client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, "incrtest")
-
 
 @pytest.fixture
-def fragilitysvc():
+def fragilitysvc(monkeypatch):
+    try:
+        with open(".incorepw", 'r') as f:
+            cred = f.read().splitlines()
+    except EnvironmentError:
+        assert False
+    credentials = jwt.decode(cred[0], cred[1])
+    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
+    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
+    client = IncoreClient()
     return FragilityService(client)
 
 
 @pytest.fixture
-def repairsvc():
+def repairsvc(monkeypatch):
+    try:
+        with open(".incorepw", 'r') as f:
+            cred = f.read().splitlines()
+    except EnvironmentError:
+        assert False
+    credentials = jwt.decode(cred[0], cred[1])
+    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
+    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
+    client = IncoreClient()
     return RepairService(client)
 
 

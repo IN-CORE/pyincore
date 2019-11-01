@@ -1,8 +1,7 @@
 import logging
 import warnings
-from pyincore import InsecureIncoreClient
-from pyincore.analyses.waternetworkrecovery import WaterNetworkRecovery, \
-    WaterNetworkRecoveryUtil
+from pyincore import IncoreClient
+from pyincore.analyses.waternetworkrecovery import WaterNetworkRecovery
 
 warnings.filterwarnings('ignore')
 logger = logging.getLogger()
@@ -10,8 +9,7 @@ logger.setLevel(logging.CRITICAL)
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient(
-        "http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     # Water Network Recovery (without additional dislocation)
     # - Note: some times the model does not converge, you have to run this block several times to get it converge.

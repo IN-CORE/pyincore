@@ -46,8 +46,9 @@ setup(
         "shapely>=1.6.4.post1",
         "wntr>=0.1.6",
         "seaborn>=0.9.0",
-        "pyomo>=5.6"
-        "pytest>=3.9.0"
+        "pyomo>=5.6",
+        "pytest>=3.9.0",
+        "python-jose>=3.0"
     ],
     python_requires=">=3.5",
     classifiers=[

@@ -3,11 +3,12 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
 
+
 def run_with_base_class():
-    client = InsecureIncoreClient("http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
     hazard_type = "earthquake"
     hazard_id = "5b902cb273c3371e1236b36b"
     facility_datasetid = "5a284f2ac7d30d13bc081e52"
