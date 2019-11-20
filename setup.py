@@ -31,7 +31,6 @@ setup(
         "fiona>=1.8.4",
         "folium>=0.7.0",
         "jsonpickle>=1.1",
-        "matplotlib>=2.1.0",
         "networkx>=2.2",
         "numpy>=1.16.1",
         "owslib>=0.17.1",
@@ -45,7 +44,6 @@ setup(
         "scipy>=1.2.0",
         "shapely>=1.6.4.post1",
         "wntr>=0.1.6",
-        "seaborn>=0.9.0",
         "pyomo>=5.6",
         "pytest>=3.9.0",
         "python-jose>=3.0"
