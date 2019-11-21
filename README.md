@@ -76,13 +76,7 @@ and `/home/<username>` on Linux based machines.
 To check that the package is installed run `conda list command`.
 
 Replace `install` command above with `update` to update pyIncore to the latest version that is compatible with all other packages in the environment.
-
-**Mac specific notes**
-    
-- We use `matplotlib` library to create graphs. There is a Mac specific installation issue addressed at [here](https://stackoverflow.com/questions/4130355/python-matplotlib-framework-under-macosx) and 
-[here](https://stackoverflow.com/questions/21784641/installation-issue-with-matplotlib-python). In a nutshell, 
-insert line: `backend : Agg` into `~/.matplotlib/matplotlibrc` file.
-
+``
 ## Running
 
 - We assume that users develop python script by using pyIncore in their own **Project folder**.

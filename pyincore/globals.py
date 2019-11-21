@@ -16,8 +16,6 @@ INCORE_API_INSECURE_URL = "http://incore2-services.ncsa.illinois.edu:8888"
 # INCORE_API_DEV_INSECURE_URL = "http://incore2-services-dev.ncsa.illinois.edu:8888"
 INCORE_API_DEV_INSECURE_URL = "http://localhost:8080"
 INCORE_API_DEV_URL = "https://incore2-services-dev.ncsa.illinois.edu"
-INCORE_GEOSERVER_WMS_URL = "http://incore2-geoserver.ncsa.illinois.edu:9999/geoserver/incore/wms"
-INCORE_GEOSERVER_DEV_WMS_URL = "http://incore2-mongo-dev.ncsa.illinois.edu/geoserver/incore/wms"
 INCORE_LDAP_TEST_USER = "incrtest"
 
 KEYCLOAK_TOKEN_URL = "https://incore-dev-kube.ncsa.illinois.edu/auth/realms/In-core/protocol/openid-connect/token"

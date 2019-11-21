@@ -12,7 +12,7 @@ CRED_FILE_NAME = ".incorepw"
 
 setup(
     name='pyincore',
-    version='0.5.2',
+    version='0.5.3',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     package_data={
@@ -29,13 +29,11 @@ setup(
                       "and facilitates moving and synthesizing results."),
     install_requires=[
         "fiona>=1.8.4",
-        "folium>=0.7.0",
         "jsonpickle>=1.1",
         "networkx>=2.2",
         "numpy>=1.16.1",
         "owslib>=0.17.1",
         "pandas>=0.24.1",
-        "plotly>=3.6.0",
         "pyproj>=1.9.6",
         "pyyaml>=3.13",
         "rasterio>=1.0.18",

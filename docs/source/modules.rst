@@ -193,11 +193,6 @@ utils/geoutil
 ..  autoclass:: utils.geoutil.GeoUtil
     :members:
 
-utils/plotutil
-==============
-..  autoclass:: utils.plotutil.PlotUtil
-    :members:
-
 
 ----
 
