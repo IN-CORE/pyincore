@@ -35,7 +35,7 @@ class BuildingFunctionality(BaseAnalysis):
                 {
                     'id': 'num_samples',
                     'required': True,
-                    'description': 'Number of MC samples',
+                    'description': 'Number of Monte Carlo samples',
                     'type': int
                 }
             ],
