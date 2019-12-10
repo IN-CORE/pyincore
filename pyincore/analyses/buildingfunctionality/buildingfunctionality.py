@@ -18,7 +18,7 @@ class BuildingFunctionality(BaseAnalysis):
 
         return {
             'name': 'functionality_probability',
-            'description': 'calculate the funcationality probability of each building',
+            'description': 'calculate the functionality probability of each building',
             'input_parameters': [
                 {
                     'id': 'result_name',
