@@ -10,15 +10,15 @@ def run_with_base_class():
     bldg_func = BuildingFunctionality(client)
 
     # load datasets locally
-    building_damage_mcs_samples = Dataset.from_file("/Users/diegoac2/Downloads/Joplin_mcs_buildings_samples.csv",
+    building_damage_mcs_samples = Dataset.from_file("",
                                                     "ergo:buildingDamage")
     bldg_func.set_input_dataset("building_damage_mcs_samples", building_damage_mcs_samples)
 
-    substations_damage_mcs_samples = Dataset.from_file("/Users/diegoac2/Downloads/Joplin_mcs_substations_samples.csv",
+    substations_damage_mcs_samples = Dataset.from_file("",
                                                        "incore:substationsDamage")
     bldg_func.set_input_dataset("substations_damage_mcs_samples", substations_damage_mcs_samples)
 
-    poles_damage_mcs_samples = Dataset.from_file("/Users/diegoac2/Downloads/Joplin_mcs_poles_samples.csv",
+    poles_damage_mcs_samples = Dataset.from_file("",
                                                  "incore:polesDamage")
     bldg_func.set_input_dataset("poles_damage_mcs_samples", poles_damage_mcs_samples)
 
