@@ -11,7 +11,6 @@ from pyincore.client import InsecureIncoreClient
 from pyincore.hazardservice import HazardService
 from pyincore.utils.expressioneval import Parser
 from pyincore.dataservice import DataService
-from pyincore.utils.plotutil import PlotUtil
 from pyincore.utils.geoutil import GeoUtil
 from pyincore.dataservice import DataService
 from pyincore.fragilityservice import FragilityService

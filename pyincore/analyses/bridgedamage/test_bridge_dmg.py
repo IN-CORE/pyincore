@@ -1,10 +1,9 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.bridgedamage import BridgeDamage
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient(
-        "http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     # New madrid earthquake using Atkinson Boore 1995
     hazard_type = "earthquake"
