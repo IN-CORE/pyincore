@@ -44,19 +44,19 @@ class BuildingFunctionality(BaseAnalysis):
                     'id': 'building_damage_mcs_samples',
                     'required': True,
                     'description': 'building damage samples',
-                    'type': ['ergo:buildingDamage'],
+                    'type': ['incore:buildingDamageMcSamples'],
                 },
                 {
                     'id': 'substations_damage_mcs_samples',
                     'required': True,
                     'description': 'substations damage samples',
-                    'type': ['incore:substationsDamage'],
+                    'type': ['incore:substationsDamageMcSamples'],
                 },
                 {
                     'id': 'poles_damage_mcs_samples',
                     'required': True,
                     'description': 'poles damage samples',
-                    'type': ['incore:polesDamage'],
+                    'type': ['incore:polesDamageMcSamples'],
                 },
                 {
                     'id': 'interdependency_dictionary',
