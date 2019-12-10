@@ -1,13 +1,12 @@
 """Joplin CGE model"""
-
-import os
-
 from pyincore import BaseAnalysis
-
 from pyincore.analyses.joplincgeanalysis.equationlib import *
-import pandas as pd
+
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
+
+import os
+import pandas as pd
 
 
 class JoplinCGEModel(BaseAnalysis):
@@ -37,82 +36,89 @@ class JoplinCGEModel(BaseAnalysis):
                 {
                     'id': 'solver_path',
                     'required': True,
-                    'description': 'Sys path to ipopt executable.',
+                    'description': 'Path to ipopt package.',
                     'type': str
                 }
+
             ],
             'input_datasets': [
                 {
                     'id': 'SAM',
                     'required': True,
                     'description': 'Social accounting matrix',
-                    'type': ['incore:joplingCGEsam']
+                    'type': ['incore:JoplinCGEsam']
                 },
                 {
                     'id': 'BB',
                     'required': True,
                     'description': 'Capital comp',
-                    'type': ['incore:joplinCGEKc']
+                    'type': ['incore:JoplinCGEbb']
                 },
                 {
                     'id': 'IOUT',
                     'required': True,
                     'description': 'Government parameters and initial values',
-                    'type': ['incore:joplingCGEiout']
+                    'type': ['incore:JoplinCGEiout']
                 },
                 {
                     'id': 'MISC',
                     'required': True,
                     'description': 'Parameters and initial values',
-                    'type': ['incore:joplingCGEmisc']
+                    'type': ['incore:JoplinCGEmisc']
                 },
                 {
                     'id': 'MISCH',
                     'required': True,
                     'description': 'Household parameters and initial values',
-                    'type': ['incore:joplingCGEmisch']
+                    'type': ['incore:JoplinCGEmisch']
                 },
                 {
                     'id': 'LANDCAP',
                     'required': True,
                     'description': 'Land capital',
-                    'type': ['incore:joplingCGElandK']
+                    'type': ['incore:JoplinCGElandcap']
                 },
                 {
                     'id': 'EMPLOY',
                     'required': True,
                     'description': 'Employment',
-                    'type': ['incore:joplinCGEemployment']
+                    'type': ['incore:JoplinCGEemploy']
                 },
                 {
                     'id': 'IGTD',
                     'required': True,
                     'description': 'Exogenous Transfer PMT',
-                    'type': ['incore:joplingCGEigtd']
+                    'type': ['incore:JoplinCGEigtd']
                 },
                 {
                     'id': 'TAUFF',
                     'required': True,
                     'description': 'Tax rates',
-                    'type': ['incore:joplingCGEtauff']
+                    'type': ['incore:JoplinCGEtauff']
                 },
                 {
                     'id': 'TPC',
                     'required': False,
                     'description': 'Factor taxes',
-                    'type': ['incore:joplingCGEtpc']
+                    'type': ['incore:JoplinCGEtpc']
                 },
                 {
                     'id': 'JOBCR',
                     'required': True,
                     'description': 'Labor',
-                    'type': ['incore:joplingCGEjobcr']
+                    'type': ['incore:JoplinCGEjobcr']
                 },
                 {
                     'id': 'OUTCR',
                     'required': True,
                     'description': 'Commuter Labor Groups',
-                    'type': ['incore:joplingCGEoutcr']
+                    'type': ['incore:JoplinCGEoutcr']
+                },
+                {
+                    'id': 'sector_shocks',
+                    'required': True,
+                    'description': 'Aggregation of building functionality states to capital shocks per sector',
+                    'type': ['incore:JoplinCGEshocks']
                 }
             ],
             'output_datasets': [
@@ -346,6 +352,7 @@ class JoplinCGEModel(BaseAnalysis):
         TPC = pd.read_csv(self.get_input_dataset("TPC").get_file_path('csv'), index_col=0)
         JOBCR = pd.read_csv(self.get_input_dataset("JOBCR").get_file_path('csv'), index_col=0)
         OUTCR = pd.read_csv(self.get_input_dataset("OUTCR").get_file_path('csv'), index_col=0)
+        sector_shocks = pd.read_csv(self.get_input_dataset("sector_shocks").get_file_path('csv'), index_col=False)
 
         # ----------------------------------------------------------------
         # PARAMETER DECLARATION
@@ -1060,7 +1067,7 @@ class JoplinCGEModel(BaseAnalysis):
             #   CPI(H)=E=
             #   SUM(I, P(I) * ( 1 + SUM(GS, TAUC(GS,I) ) ) * CH(I,H) )
             #       / SUM(I, P0(I) * ( 1 + SUM(GS, TAUQ(GS,I) ) ) * CH(I,H) );
-            print('CPIEQ(H)')
+            # print('CPIEQ(H)')
             line1 = (P.loc(I) * ExprM(vars, m=1 + TAUC.loc[GS, I].sum(0)) * CH.loc(I, H)).sum(I)
             line2 = (ExprM(vars, m=P0.loc[I] * (1 + TAUQ.loc[GS, I].sum(0))) * CH.loc(I, H)).sum(I)
 
@@ -1075,7 +1082,7 @@ class JoplinCGEModel(BaseAnalysis):
             #                                 + SUM(LA,  A(H,LA) * HW(H) / SUM(H1, A(H1,LA) * HW(H1)) * (Y(LA)+ LNFOR(LA))*( 1 - SUM(G, TAUFLA(G,LA) ) ) )
             #                                 + SUM(K,  A(H,K) * HW(H) / SUM(H1, A(H1,K) * HW(H1)) * (Y(K) + KPFOR(K)) * ( 1 - SUM(G, TAUFK(G,K) ) ) );
 
-            print('YEQ(H)')
+            # print('YEQ(H)')
             line1 = (ExprM(vars, m=A.loc[H, L]) * HW.loc(H) / (ExprM(vars, m=A.loc[H1, L]) * HW.loc(H1)).sum(H1) * (
                     Y.loc(L) - ExprM(vars, m=CMIWAGE.loc[L]) * CMI.loc(L)) * ExprM(vars, m=1 - TAUFL.loc[G, L].sum(
                 0))).sum(L)
@@ -1093,7 +1100,7 @@ class JoplinCGEModel(BaseAnalysis):
             #                                         + SUM(G, TP(H,G) * HH(H))
             #                                         - SUM(GI, PIT(GI,H)  * Y(H))
             #                                         - SUM(G, TAUH(G,H)  * HH(H));
-            print('YDEQ(H)')
+            # print('YDEQ(H)')
             line1 = Y.loc(H) + ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)
             line2 = (ExprM(vars, m=TP.loc[H, G]) * HH.loc(H)).sum(G)
             line3 = ~(ExprM(vars, m=PIT.loc[GI, H]) * Y.loc(H)).sum(GI)
@@ -1105,7 +1112,7 @@ class JoplinCGEModel(BaseAnalysis):
 
             #  CHEQ(I,H).. CH(I,H)      =E= CH0(I,H)* ((YD(H) / YD0(H)) / ( CPI(H) / CPI0(H)))**(BETA(I,H))
             #   * PROD(J, ((P(J)*( 1 + SUM(GS, TAUC(GS,J))))/ (P0(J)*(1 + SUM(GS, TAUQ(GS,J)))))** (LAMBDA(J,I)));
-            print('CHEQ(I,H)')
+            # print('CHEQ(I,H)')
             line1 = ExprM(vars, m=CH0.loc[I, H]) * (
                     (YD.loc(H) / ExprM(vars, m=YD0.loc[H])) / (CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** ExprM(
                 vars, m=BETA.loc[I, H])
@@ -1119,7 +1126,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(CHEQ)
 
             #  SHEQ(H).. S(H)           =E= YD(H) - SUM(I, P(I) * CH(I,H) * ( 1 + SUM(GS, TAUC(GS,I))));
-            print('SHEQ(H)')
+            # print('SHEQ(H)')
             line = YD.loc(H) - ~((P.loc(I) * CH.loc(I, H) * ExprM(vars, m=1 + TAUC.loc[GS, I].sum(0))).sum(I))
 
             SHEQ = (line - S.loc(H))
@@ -1127,7 +1134,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(SHEQ)
 
             #  PVAEQ(I).. PVA(I)        =E= PD(I) - SUM(J, AD(J,I) * P(J) * (1 + SUM(GS, TAUQ(GS, J))));
-            print('PVAEQ(I)')
+            # print('PVAEQ(I)')
             line = PD.loc(I) - ~(
                 (ExprM(vars, m=AD.loc[J, I]) * P.loc(J) * ExprM(vars, m=1 + TAUQ.loc[GS, J].sum(0))).sum(0))
 
@@ -1136,7 +1143,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(PVAEQ)
 
             #  PFEQ(I)..DS(I)           =E= DELTA(I)*PROD(F, (FD(F,I))**ALPHA(F,I));
-            print('PFEQ(I)')
+            # print('PFEQ(I)')
             line = ExprM(vars, m=DELTA.loc[I]) * (FD.loc(F, I) ** ExprM(vars, m=ALPHA.loc[F, I])).prod(F)
 
             PFEQ = (line - DS.loc(I))
@@ -1145,7 +1152,7 @@ class JoplinCGEModel(BaseAnalysis):
 
             # FDEQ(F,I).. R(F,I) * RA(F) * (1 + SUM(GF,TAUFX(GF,F,I) ) )* (FD(F,I))
             #                         =E= PVA(I) * DS(I) * ALPHA(F,I);
-            print('FDEQ(F,I)')
+            # print('FDEQ(F,I)')
             left = R.loc(F, I) * RA.loc(F) * ExprM(vars, m=1 + TAUFX_SUM.loc[F, I]) * FD.loc(F, I)
             right = ~(PVA.loc(I) * DS.loc(I) * ExprM(vars, m=ALPHA.loc[F, I]))
 
@@ -1154,7 +1161,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(FDEQ)
 
             #   VEQ(I).. V(I) =E= SUM(J, AD(I,J) * DS(J) );
-            print('VEQ(I)')
+            # print('VEQ(I)')
             line = (ExprM(vars, m=AD.loc[I, J]) * ~DS.loc(J)).sum(1)
 
             VEQ = (line - V.loc(I))
@@ -1162,7 +1169,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(VEQ)
 
             #   YFEQL(L).. Y(L) =E= SUM(IG, R(L,IG)* RA(L)*FD(L,IG));
-            print('YFEQL(L)')
+            # print('YFEQL(L)')
             line = (R.loc(L, IG) * RA.loc(L) * FD.loc(L, IG)).sum(IG)
 
             YFEQL = (line - Y.loc(L))
@@ -1170,7 +1177,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(YFEQL)
 
             # YFEQK(K).. Y('KAP') =E= SUM(IG, R('KAP',IG) * RA('KAP') * FD('KAP',IG));
-            print('YFEQK(K)')
+            # print('YFEQK(K)')
             line = (R.loc(['KAP'], IG) * RA.loc(['KAP']) * FD.loc(['KAP'], IG)).sum(IG)
 
             YFEQK = (line - Y.loc(['KAP']))
@@ -1178,7 +1185,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(YFEQK)
 
             #  YFEQLA(LA).. Y('LAND')   =E= SUM(IG, R('LAND',IG) * RA('LAND') * FD('LAND',IG));
-            print('YFEQLA(LA)')
+            # print('YFEQLA(LA)')
             line = (R.loc(['LAND'], IG) * RA.loc(['LAND']) * FD.loc(['LAND'], IG)).sum(IG)
 
             YFEQLA = (line - Y.loc(['LAND']))
@@ -1186,7 +1193,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(YFEQLA)
 
             #  LANFOR(LA).. LNFOR(LA)   =E= LFOR(LA) * Y(LA);
-            print('LANFOR(LA)')
+            # print('LANFOR(LA)')
             line = ExprM(vars, m=LFOR.loc[LA]) * Y.loc(LA)
 
             LANFOR = (line - LNFOR.loc(LA))
@@ -1194,7 +1201,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LANFOR)
 
             #  KAPFOR(K).. KPFOR(K)     =E= KFOR(K) * Y(K);
-            print('KAPFOR(K)')
+            # print('KAPFOR(K)')
             line = ExprM(vars, m=KFOR.loc[K]) * Y.loc(K)
 
             KAPFOR = (line - KPFOR.loc(K))
@@ -1202,7 +1209,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(KAPFOR)
 
             #  XEQ(I).. CX(I)           =E= CX0(I)*((PD(I))/(PWM0(I)))**(ETAE(I));
-            print('XEQ(I)')
+            # print('XEQ(I)')
             line = ExprM(vars, m=CX0.loc[I]) * ((PD.loc(I)) / ExprM(vars, m=PWM0.loc[I])) ** ExprM(vars, m=ETAE.loc[I])
 
             XEQ = (line - CX.loc(I))
@@ -1210,7 +1217,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(XEQ)
 
             #  DEQ(I)$PWM0(I).. D(I)    =E= D0(I) *(PD(I)/PWM0(I))**(ETAD(I));
-            print('DEQ(I)$PWM0(I)')
+            # print('DEQ(I)$PWM0(I)')
             line = ExprM(vars, m=D0.loc[I]) * (PD.loc(I) / ExprM(vars, m=PWM0.loc[I])) ** ExprM(vars, m=ETAD.loc[I])
 
             DEQ = (line - D.loc(I))
@@ -1219,7 +1226,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(DEQ)
 
             #  PEQ(I)..  P(I)           =E= D(I) * PD(I) + ( 1 - D(I) ) * PWM0(I);
-            print('PEQ(I)')
+            # print('PEQ(I)')
             line = (D.loc(I) * PD.loc(I) + (1 - D.loc(I)) * ExprM(vars, m=PWM0.loc[I]))
 
             PEQ = (line - P.loc(I))
@@ -1227,7 +1234,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(PEQ)
 
             #  MEQ(I).. M(I)            =E= ( 1 - D(I) ) * DD(I);
-            print('MEQ(I)')
+            # print('MEQ(I)')
             line = (1 - D.loc(I)) * DD.loc(I)
 
             MEQ = (line - M.loc(I))
@@ -1243,7 +1250,7 @@ class JoplinCGEModel(BaseAnalysis):
             #                                 - SUM(CM,CMOWAGE(CM)*CMO(CM))
             #                                 + SUM(L,CMIWAGE(L)*CMI(L));
 
-            print('NKIEQ')
+            # print('NKIEQ')
             line1 = (M.loc(I) * ExprM(vars, m=PWM0.loc[I])).sum(I)
             line2 = (CX.loc(I) * PD.loc(I)).sum(I)
             line3 = (ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)).sum(H)
@@ -1258,7 +1265,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(NKIEQ)
 
             #  NEQ(K,I).. N(K,I)        =E= N0(K,I)*(R(K,I)/R0(K,I))**(ETAIX(K,I));
-            print('NEQ(K,I)')
+            # print('NEQ(K,I)')
             line = ExprM(vars, m=N0.loc[K, I]) * (R.loc(K, I) / ExprM(vars, m=R0.loc[K, I])) ** ExprM(vars,
                                                                                                       m=ETAIX.loc[K, I])
 
@@ -1268,7 +1275,7 @@ class JoplinCGEModel(BaseAnalysis):
 
             #  CNEQ(I).. P(I)*(1 + SUM(GS, TAUN(GS,I)))*CN(I)
             #                         =E= SUM(IG, B(I,IG)*(SUM(K, N(K,IG))));
-            print('CNEQ(I)')
+            # print('CNEQ(I)')
             left = P.loc(I) * ExprM(vars, m=1 + TAUN.loc[GS, I].sum(0)) * CN.loc(I)
             right = (ExprM(vars, m=B.loc[I, IG]) * N.loc(K, IG).sum(K)).sum(IG)
 
@@ -1277,7 +1284,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(CNEQ)
 
             #  KSEQ(K,IG).. KS(K,IG)    =E= KS0(K,IG) * ( 1 - DEPR) + N(K,IG) ;
-            print('KSEQ(K,IG)')
+            # print('KSEQ(K,IG)')
             line = ExprM(vars, m=KS0.loc[K, IG] * (1 - DEPR)) + N.loc(K, IG)
 
             KSEQ = (line - KS.loc(K, IG))
@@ -1289,7 +1296,7 @@ class JoplinCGEModel(BaseAnalysis):
             #                                 * (SUM(G, TP(H,G)/ CPI(H)) / SUM(G, TP(H,G) / CPI0(H) ))**(ETAPT(H))
             #                                 * ((SUM(GI, PIT0(GI,H)* HH0(H))+ SUM(G, TAUH0(G,H)*HH0(H)))/ (SUM(GI, PIT(GI,H)* HH(H))+ SUM(G, TAUH(G,H)*HH(H))))**(ETAPIT(H));
 
-            print('LSEQ1(H)')
+            # print('LSEQ1(H)')
             line1 = ExprM(vars, m=HW0.loc[H] / HH0.loc[H])
             LSEQ1line2pre = FD.loc(L, Z).sum(1)
             line2 = (((RA.loc(L) / ExprM(vars, m=RA0.loc[L])).sum(L) / 3) / (CPI.loc(H) / ExprM(vars, m=CPI0[H]))
@@ -1311,7 +1318,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LSEQ1)
 
             #    LSEQ2a(CM1).. CMO(CM1)   =E= CMO0(CM1)* (((EXWGEO(CM1) /RA('L1') ))** ECOMO(CM1));
-            print('LSEQ2a')
+            # print('LSEQ2a')
             line = ExprM(vars, m=CMO0.loc[CM1]) * (ExprM(vars, m=EXWGEO.loc[CM1]) / RA.loc(["L1"])) ** (
                 ExprM(vars, m=ECOMO.loc[CM1]))
 
@@ -1320,7 +1327,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LSEQ2a)
 
             #    LSEQ2b(CM2).. CMO(CM2)   =E= CMO0(CM2)* (((EXWGEO(CM2) /RA('L2') ))** ECOMO(CM2));
-            print('LSEQ2b')
+            # print('LSEQ2b')
             line = ExprM(vars, m=CMO0.loc[CM2]) * (ExprM(vars, m=EXWGEO.loc[CM2]) / RA.loc(["L2"])) ** (
                 ExprM(vars, m=ECOMO.loc[CM2]))
 
@@ -1329,7 +1336,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LSEQ2b)
 
             #    LSEQ2c(CM3).. CMO(CM3)   =E= CMO0(CM3)* (((EXWGEO(CM3) /RA('L3') ))** ECOMO(CM3));
-            print('LSEQ2c')
+            # print('LSEQ2c')
             line = ExprM(vars, m=CMO0.loc[CM3]) * (ExprM(vars, m=EXWGEO.loc[CM3]) / RA.loc(["L3"])) ** (
                 ExprM(vars, m=ECOMO.loc[CM3]))
 
@@ -1338,7 +1345,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LSEQ2c)
 
             #    LSEQ3a.. CMI('L1')       =E= CMI0('L1')* (((RA('L1')/(SUM( H, CPI(H))/5)/EXWGEI('L1')))** ECOMI('L1'));
-            print('LSEQ3a')
+            # print('LSEQ3a')
             line = ExprM(vars, m=CMI0.loc["L1"]) * (
                     RA.loc(["L1"]) / (CPI.loc(H).sum(H) / 5) / ExprM(vars, m=EXWGEI.loc["L1"])) ** (
                        ExprM(vars, m=ECOMI.loc["L1"]))
@@ -1348,7 +1355,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LSEQ3a)
 
             #    LSEQ3b.. CMI('L2')       =E= CMI0('L2')* (((RA('L2')/(SUM( H, CPI(H))/5)/EXWGEI('L2')))** ECOMI('L2'));
-            print('LSEQ3b')
+            # print('LSEQ3b')
             line = ExprM(vars, m=CMI0.loc["L2"]) * (
                     RA.loc(["L2"]) / (CPI.loc(H).sum(H) / 5) / ExprM(vars, m=EXWGEI.loc["L2"])) ** (
                        ExprM(vars, m=ECOMI.loc["L2"]))
@@ -1358,7 +1365,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LSEQ3b)
 
             #    LSEQ3c.. CMI('L3')       =E= CMI0('L3')* (((RA('L3')/(SUM( H, CPI(H))/5)/EXWGEI('L3')))** ECOMI('L3'));
-            print('LSEQ3c')
+            # print('LSEQ3c')
             line = ExprM(vars, m=CMI0.loc["L3"]) * (
                     RA.loc(["L3"]) / (CPI.loc(H).sum(H) / 5) / ExprM(vars, m=EXWGEI.loc["L3"])) ** (
                        ExprM(vars, m=ECOMI.loc["L3"]))
@@ -1368,7 +1375,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LSEQ3c)
 
             #  LASEQ1(LA,I).. LAS(LA,I) =E= LAS0(LA,I)*(R(LA, I)/R0(LA, I))**(ETAL(LA,I));
-            print('LASEQ1(LA,I)')
+            # print('LASEQ1(LA,I)')
             line = ExprM(vars, m=LAS0.loc[LA, I]) * (R.loc(LA, I) / ExprM(vars, m=R0.loc[LA, I])) ** ExprM(vars,
                                                                                                            m=ETAL.loc[
                                                                                                                LA, I])
@@ -1383,7 +1390,7 @@ class JoplinCGEModel(BaseAnalysis):
             #                              - MO0(H) *((YD0(H)/HH0(H))/(YD(H)/HH(H))/(CPI0(H)/CPI(H))) ** (ETAYDO(H))
             #                                         *((HN0(H)/HH0(H))/(HN(H)/HH(H))) ** (ETAUO(H));
 
-            print('POPEQ(H)')
+            # print('POPEQ(H)')
             line1 = ExprM(vars, m=HH0.loc[H] * NRPG.loc[H])
             line2 = ExprM(vars, m=MI0.loc[H]) * ((YD.loc(H) / HH.loc(H)) / ExprM(vars, m=YD0.loc[H] / HH0.loc[H]) / (
                     CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** ExprM(vars, m=ETAYDI.loc[H])
@@ -1397,7 +1404,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(POPEQ)
 
             #  ANEQ(H).. HN(H)          =E= HH(H) - HW(H);
-            print('ANEQ(H)')
+            # print('ANEQ(H)')
             line = HH.loc(H) - HW.loc(H)
 
             ANEQ = (line - HN.loc(H))
@@ -1415,7 +1422,7 @@ class JoplinCGEModel(BaseAnalysis):
             #                                 + SUM(H, PIT(GX,H) * Y(H) )
             #                                 + SUM(H, TAUH(GX,H) * HH(H) )
             #                                 + SUM(GX1, IGT(GX,GX1));
-            print('YGEQ')
+            # print('YGEQ')
             line1 = (ExprM(vars, m=TAUV.loc[GX, I]) * V.loc(I) * P.loc(I)).sum(I)
             line2 = (ExprM(vars, m=TAUX.loc[GX, I]) * CX.loc(I) * PD.loc(I)).sum(I)
 
@@ -1456,7 +1463,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(YGEQ)
 
             #    YGEQ2(GT).. Y(GT)        =E= SUM(GX, IGT(GT,GX));
-            print('YGEQ2(GT)')
+            # print('YGEQ2(GT)')
             line = IGT.loc(GT, GX).sum(GX)
 
             YGEQ2 = (line - Y.loc(GT))
@@ -1464,7 +1471,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(YGEQ2)
 
             #  YGEQ1(GNL).. Y(GNL)      =E= TAXS1(GNL)*Y('CYGF');
-            print('YGEQ1(GNL)')
+            # print('YGEQ1(GNL)')
             line = ExprM(vars, m=TAXS1.loc[GNL]) * Y.loc(['CYGF'])
 
             YGEQ1 = (line - Y.loc(GNL))
@@ -1472,7 +1479,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(YGEQ1)
 
             #  GOVFOR(G).. GVFOR(G)     =E= GFOR(G)*Y(G);
-            print('GOVFOR(G)')
+            # print('GOVFOR(G)')
             line = ExprM(vars, m=GFOR.loc[G]) * Y.loc(G)
 
             GOVFOR = (line - GVFOR.loc(G))
@@ -1481,7 +1488,7 @@ class JoplinCGEModel(BaseAnalysis):
 
             #  CGEQ(I,GN).. P(I)*(1 + SUM(GS, TAUG(GS,I))) * CG(I,GN)
             #                         =E= AG(I,GN) * (Y(GN)+ GFOR(GN)*Y(GN));
-            print('CGEQ(I,GN)')
+            # print('CGEQ(I,GN)')
             left = P.loc(I) * ExprM(vars, m=1 + TAUG.loc[GS, I].sum(0)) * CG.loc(I, GN)
             right = ExprM(vars, m=AG.loc[I, GN]) * (Y.loc(GN) + ExprM(vars, m=GFOR.loc[GN]) * Y.loc(GN))
 
@@ -1491,7 +1498,7 @@ class JoplinCGEModel(BaseAnalysis):
 
             #  GFEQ(F,GN)..  FD(F,GN) * R(F,GN) * RA(F)*( 1 + SUM(GF, TAUFX(GF,F,GN)))
             #                         =E= AG(F,GN) * (Y(GN)+ GFOR(GN)*Y(GN));
-            print('GFEQ(F,GN)')
+            # print('GFEQ(F,GN)')
             left = FD.loc(F, GN) * R.loc(F, GN) * RA.loc(F) * (1 + ExprM(vars, m=TAUFX_SUM.loc[F, GN]))
             right = ExprM(vars, m=AG.loc[F, GN]) * (Y.loc(GN) + ExprM(vars, m=GFOR.loc[GN]) * Y.loc(GN))
 
@@ -1502,7 +1509,7 @@ class JoplinCGEModel(BaseAnalysis):
             #  GSEQL(GN).. S(GN)        =E= (Y(GN)+ GVFOR(GN))
             #                                 - SUM(I, CG(I,GN)*P(I)*(1 + SUM(GS, TAUG(GS,I))))
             #                                 - SUM(F, FD(F,GN)*R(F,GN)*RA(F)*(1 + SUM(GF, TAUFX(GF,F,GN))));
-            print('GSEQL(GN)')
+            # print('GSEQL(GN)')
             line1 = Y.loc(GN) + GVFOR.loc(GN)
             line2 = (CG.loc(I, GN) * P.loc(I) * (1 + ExprM(vars, m=TAUG.loc[GS, I]).sum(GS))).sum(I)
             line3 = (FD.loc(F, GN) * R.loc(F, GN) * RA.loc(F) * (1 + ExprM(vars, m=TAUFX_SUM.loc[F, GN]))).sum(F)
@@ -1512,7 +1519,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(GSEQL)
 
             #  GSEQ(GX).. S(GX)         =E= (Y(GX) + GFOR(GX)*Y(GX)) - SUM(H, (TP(H,GX)*HH(H))) - SUM(G,IGT(G,GX));
-            print('GSEQ(GX)')
+            # print('GSEQ(GX)')
             line1 = (Y.loc(GX) + ExprM(vars, m=GFOR.loc[GX]) * Y.loc(GX))
             line2 = (ExprM(vars, m=TP.loc[H, GX]) * HH.loc(H)).sum(H)
             line3 = IGT.loc(G, GX).sum(G)
@@ -1523,7 +1530,7 @@ class JoplinCGEModel(BaseAnalysis):
 
             #  TDEQ(G,GX)$(IGTD(G,GX) EQ 1).. IGT(G,GX)
             #                         =E= TAXS(G,GX)*(Y(GX) + GVFOR(GX)- SUM(H, (TP(H,GX)*HH(H))));
-            print('TDEQ(G,GX)$(IGTD(G,GX) EQ 1)')
+            # print('TDEQ(G,GX)$(IGTD(G,GX) EQ 1)')
             line = ExprM(vars, m=TAXS.loc[G, GX]) * (
                     Y.loc(GX) + GVFOR.loc(GX) - ~(ExprM(vars, m=TP.loc[H, GX]) * HH.loc(H)).sum(H))
 
@@ -1533,7 +1540,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(TDEQ)
 
             #  SPIEQ.. SPI              =E= SUM(H, Y(H)) + SUM((H,G), TP(H,G)*HH(H)) + SUM(H, PRIVRET(H)*HH(H));
-            print('SPIEQ')
+            # print('SPIEQ')
             line = Y.loc(H).sum(H) + (ExprM(vars, m=TP.loc[H, G]) * HH.loc(H)).sum() + (
                     ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)).sum(H)
 
@@ -1542,7 +1549,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(SPIEQ)
 
             #  LMEQ1.. SUM(H, HW(H)* JOBCOR(H,'L1')) + CMI('L1') =E= SUM(Z, FD('L1',Z)) + SUM(CM1, SUM(H, HW(H)*OUTCR(H, CM1)));
-            print('LMEQ1')
+            # print('LMEQ1')
             left = (ExprM(vars, m=JOBCOR.loc[H, 'L1']) * HW.loc(H)).sum(H) + CMI.loc(['L1'])
             right = FD.loc(['L1'], Z).sum(Z) + (HW.loc(H) * ExprM(vars, m=OUTCOR.loc[H, CM1])).sum()
             # right = FD.loc(['L1'], Z).sum(Z) + CMO.loc(CM1).sum(CM1)
@@ -1552,7 +1559,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LMEQ1)
 
             #  LMEQ2.. SUM(H, HW(H)* JOBCOR(H,'L2')) + CMI('L2') =E= SUM(Z, FD('L2',Z)) + SUM(CM2, SUM(H, HW(H)*OUTCR(H, CM2)));
-            print('LMEQ2')
+            # print('LMEQ2')
             left = (ExprM(vars, m=JOBCOR.loc[H, "L2"]) * HW.loc(H)).sum(H) + CMI.loc(["L2"])
             right = FD.loc(['L2'], Z).sum(Z) + (HW.loc(H) * ExprM(vars, m=OUTCOR.loc[H, CM2])).sum()
             # right = FD.loc(["L2"], Z).sum(Z) + CMO.loc(CM2).sum(CM2)
@@ -1562,7 +1569,7 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LMEQ2)
 
             #  LMEQ3.. SUM(H, HW(H)* JOBCOR(H,'L3')) + CMI('L3') =E= SUM(Z, FD('L3',Z)) + SUM(CM3, SUM(H, HW(H)*OUTCR(H, CM3)));
-            print('LMEQ3')
+            # print('LMEQ3')
             left = (ExprM(vars, m=JOBCOR.loc[H, "L3"]) * HW.loc(H)).sum(H) + CMI.loc(["L3"])
             right = FD.loc(['L3'], Z).sum(Z) + (HW.loc(H) * ExprM(vars, m=OUTCOR.loc[H, CM3])).sum()
             # right = FD.loc(["L3"], Z).sum(Z) + CMO.loc(CM3).sum(CM3)
@@ -1572,62 +1579,62 @@ class JoplinCGEModel(BaseAnalysis):
             # print(LMEQ3)
 
             #  KMEQ(K,IG).. KS(K,IG)    =E= FD(K,IG);
-            print('KMEQ(K,IG)')
+            # print('KMEQ(K,IG)')
             KMEQ = (FD.loc(K, IG) - KS.loc(K, IG))
             KMEQ.write(count, filename)
             # print(KMEQ)
 
             #  LAMEQ(LA,IG).. LAS(LA,IG)=E= FD(LA,IG);
-            print('LAMEQ(LA,IG)')
+            # print('LAMEQ(LA,IG)')
             LAMEQ = (FD.loc(LA, IG) - LAS.loc(LA, IG))
             LAMEQ.write(count, filename)
             # print(LAMEQ)
 
             #  GMEQ(I).. DS(I)          =E= DD(I) + CX(I) - M(I);
-            print('GMEQ(I)')
+            # print('GMEQ(I)')
             GMEQ = (DD.loc(I) + CX.loc(I) - M.loc(I) - DS.loc(I))
             GMEQ.write(count, filename)
             # print(GMEQ)
 
             #  DDEQ(I).. DD(I)          =E= V(I) + SUM(H, CH(I,H) ) + SUM(G, CG(I,G) ) + CN(I);
-            print('DDEQ(I)')
+            # print('DDEQ(I)')
             DDEQ = (V.loc(I) + CH.loc(I, H).sum(H) + CG.loc(I, G).sum(G) + CN.loc(I) - DD.loc(I))
             DDEQ.write(count, filename)
             # print(DDEQ)
 
             # IGT.FX(G,GX)$(NOT IGT0(G,GX))=0;
-            print('IGT.FX(G,GX)$(NOT IGT0(G,GX))=0')
+            # print('IGT.FX(G,GX)$(NOT IGT0(G,GX))=0')
             FX1 = IGT.loc(G, GX)
             FX1.set_condition(IGT0.loc[G, GX], 'EQ', 0)
             FX1.write(count, filename)
             # print(FX1)
 
             # IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX);
-            print('IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX)')
+            # print('IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX)')
             FX2 = IGT.loc(G, GX) - ExprM(vars, m=IGT0.loc[G, GX])
             FX2.set_condition(IGTD.loc[G, GX], 'EQ', 2)
             FX2.write(count, filename)
             # print(FX2)
 
             # R.FX(L,Z)=R0(L,Z);
-            print('R.FX(L,Z)=R0(L,Z)')
+            # print('R.FX(L,Z)=R0(L,Z)')
             FX3 = R.loc(L, Z) - ExprM(vars, m=R0.loc[L, Z])
             FX3.write(count, filename)
             # print(FX3)
 
             # RA.FX(LA)=RA0(LA);
-            print('RA.FX(LA)=RA0(LA)')
+            # print('RA.FX(LA)=RA0(LA)')
             FX4 = RA.loc(LA) - ExprM(vars, m=RA0.loc[LA])
             FX4.write(count, filename)
             # print(FX4)
 
             # RA.FX(K)=RA0(K);
-            print('RA.FX(K)=RA0(K)')
+            # print('RA.FX(K)=RA0(K)')
             FX5 = RA.loc(K) - ExprM(vars, m=RA0.loc[K])
             FX5.write(count, filename)
             # print(FX5)
 
-            print("Objective")
+            # print("Objective")
             obj = vars.get_index('SPI')
 
             with open(filename, 'a') as f:
@@ -1714,7 +1721,7 @@ class JoplinCGEModel(BaseAnalysis):
         soln = []
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "solverconstants/ipopt_cons.py")
         tmp = os.path.join(os.path.dirname(os.path.realpath(__file__)), "solverconstants/tmp.py")
-        print("Calibration: ")
+        # print("Calibration: ")
         run_solver(filename, tmp)
 
         '''
@@ -1730,16 +1737,16 @@ class JoplinCGEModel(BaseAnalysis):
         iNum = self.get_parameter("model_iterations")  # dynamic model iterations
 
         for ittr in range(iNum):
-            print("Simulation: ", ittr + 1)
+            # print("Simulation: ", ittr + 1)
             if ittr == 0:  # if it is the first simulation, apply the shock
                 # DELTA.loc[I] = 1.02 * DELTA.loc[I]
                 # KS0.loc[K, I] = KS0.loc[K, I]*0.9
-                KS0.loc[K, ['HS1']] = KS0.loc[K, ['HS1']] * 0.671
-                KS0.loc[K, ['HS2']] = KS0.loc[K, ['HS2']] * 0.739
-                KS0.loc[K, ['HS3']] = KS0.loc[K, ['HS3']] * 0.958
-                KS0.loc[K, ['GOODS']] = KS0.loc[K, ['GOODS']] * 0.658
-                KS0.loc[K, ['TRADE']] = KS0.loc[K, ['TRADE']] * 0.961
-                KS0.loc[K, ['OTHER']] = KS0.loc[K, ['OTHER']] * 0.673
+                KS0.loc[K, ['HS1']] = KS0.loc[K, ['HS1']] * float(sector_shocks["HS1"])
+                KS0.loc[K, ['HS2']] = KS0.loc[K, ['HS2']] * float(sector_shocks["HS2"])
+                KS0.loc[K, ['HS3']] = KS0.loc[K, ['HS3']] * float(sector_shocks["HS3"])
+                KS0.loc[K, ['GOODS']] = KS0.loc[K, ['GOODS']] * float(sector_shocks["GOODS"])
+                KS0.loc[K, ['TRADE']] = KS0.loc[K, ['TRADE']] * float(sector_shocks["TRADE"])
+                KS0.loc[K, ['OTHER']] = KS0.loc[K, ['OTHER']] * float(sector_shocks["OTHER"])
             else:  # other simulations
                 KS0 = KSNEW * (1 - DEPR) + vars.get('N', x=soln[-1])
             result = run_solver(filename, tmp)
