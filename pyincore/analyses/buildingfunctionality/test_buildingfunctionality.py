@@ -22,7 +22,7 @@ def run_with_base_class():
                                                  "incore:polesDamage")
     bldg_func.set_input_dataset("poles_damage_mcs_samples", poles_damage_mcs_samples)
 
-    bldg_func.load_remote_input_dataset("interdependency_dictionary", "5dcf4a34b9219ca5e4118312")
+    bldg_func.load_remote_input_dataset("interdependency_dictionary", "5defc8c663a6cc000172b2a9")
 
     bldg_func.set_parameter("result_name", "Joplin_mcs_functionality_probability")
     bldg_func.set_parameter("num_samples", 10000)
