@@ -142,6 +142,8 @@ class PopulationDislocation(BaseAnalysis):
 
         """
         # pd.Series to np.array
+        if "d_sf" not in inventory.columns:
+            inventory["d_sf"] = (inventory["huestimate"] > 1).astype(int)
         dsf = inventory["d_sf"].values
         pbd = inventory["pblackbg"].values
         phd = inventory["phispbg"].values
