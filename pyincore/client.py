@@ -17,6 +17,20 @@ class Client:
     def __init__(self):
         pass
 
+    def make_request(self, func):
+        def request_wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except requests.exceptions:
+                access_token = self.login()
+                self.session["Authorization"] = access_token
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    raise e
+            return request_wrapper
+
+    @make_request
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.
 
@@ -49,6 +63,7 @@ class Client:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
+    @make_request
     def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
         """Post data on the server.
 
@@ -82,6 +97,7 @@ class Client:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
+    @make_request
     def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
         """Put data on the server.
 
@@ -114,6 +130,7 @@ class Client:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
+    @make_request
     def delete(self, url: str, timeout=(30, 600), **kwargs):
         """Delete data on the server.
 
