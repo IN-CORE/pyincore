@@ -3,6 +3,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import pandas as pd
+import numpy as np
 
 
 class PopulationDislocationUtil:

@@ -7,6 +7,7 @@ import pandas as pd
 import warnings
 from pyincore import BaseAnalysis
 from pyincore.analyses.populationdislocation.populationdislocationutil import PopulationDislocationUtil
+from pyincore.utils.analysisutil import AnalysisUtil
 
 
 class PopulationDislocation(BaseAnalysis):
@@ -103,6 +104,10 @@ class PopulationDislocation(BaseAnalysis):
 
         # Building Damage Dataset
         building_dmg = self.get_input_dataset("building_dmg").get_file_path('csv')
+        dmg_fact_name = ["insignific", "moderate", "heavy", "complete"]
+        # add damage factors if they do not exist
+        if not all(item in building_dmg.columns for item in dmg_fact_name):
+            building_dmg = AnalysisUtil.calculate_damage_factor(building_dmg, dmg_fact_name)
 
         # housing unit allocation Dataset
         housing_unit_alloc = self.get_input_dataset("housing_unit_allocation").get_file_path('csv')
