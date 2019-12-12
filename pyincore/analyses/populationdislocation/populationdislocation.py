@@ -108,7 +108,7 @@ class PopulationDislocation(BaseAnalysis):
 
         # add damage factors if they do not exist
         if not all(item in building_dmg.columns for item in dmg_fact_name):
-            building_dmg = AnalysisUtil.calculate_damage_factor(building_dmg, dmg_fact_name)
+            building_dmg = AnalysisUtil.calculate_damage_factor(seed_i, building_dmg, dmg_fact_name)
 
         # housing unit allocation Dataset
         housing_unit_alloc = self.get_input_dataset("housing_unit_allocation").get_file_path('csv')
@@ -139,7 +139,7 @@ class PopulationDislocation(BaseAnalysis):
         to have a random number less than the probability predicted.
 
         Args:
-            seed_i (int): Seed for random normal to ensure replication if run as part of a stochastic analysis,
+            seed_i (int): Seed for random number generator to ensure replication if run as part of a stochastic analysis,
                 for example in connection with housing unit allocation analysis.
             inventory (pd.DataFrame): Merged building, housing unit allocation and block group inventories
 

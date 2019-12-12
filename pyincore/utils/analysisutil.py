@@ -503,10 +503,11 @@ class AnalysisUtil:
         return fragility_curve_adj
 
     @staticmethod
-    def calculate_damage_factor(building_inv: pd.DataFrame, dmg_factors_name):
+    def calculate_damage_factor(seed: int, building_inv: pd.DataFrame, dmg_factors_name):
         """Assign building damage in four states using numpy array ('all at once').
 
             Args:
+                seed (int): Seed for random number generator to ensure replication if run as part of a stochastic analysis
                 building_inv (pd.DataFrame): building inventory
                 dmg_factor_name (list): Name of damage factors columns
 
@@ -533,9 +534,10 @@ class AnalysisUtil:
         return building_inv
 
     @staticmethod
-    def calculate_value_loss(idx, damage_factors, size_row):
+    def calculate_value_loss(seed: int, idx: int, damage_factors:pd.DataFrame, size_row: int):
         mean_damage = float(damage_factors["meandmgfactor"][idx])
         std_damage = float(damage_factors["stddmgfactor"][idx])
+        np.random.seed(seed=seed)
         p_loss = np.random.beta(mean_damage, std_damage, size_row)
 
         # A[A==val1]=val2, A==val1 produces a boolean array that can be used as an index for A
