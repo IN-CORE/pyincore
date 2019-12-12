@@ -519,48 +519,27 @@ class AnalysisUtil:
         damage_factors = pd.DataFrame({"label": dmg_factors_name,
                                        "meandmgfactor": [0.005, 0.155, 0.555, 0.9],
                                        "stddmgfactor": [0.002, 0.058, 0.1, 0.04]})
-        decimal = 4
         try:
-            mean_damage_insig = float(damage_factors["meandmgfactor"][0])
-            std_damage_insig = float(damage_factors["stddmgfactor"][0])
-            p_insig_loss = np.lognormal(mean_damage_insig, std_damage_insig, size_row)
-
-            # A[A==val1]=val2, A==val1 produces a boolean array that can be used as an index for A
-            p_insig_loss[p_insig_loss < 0] = 0.0
-            p_insig_loss[p_insig_loss > 1] = 1.0
-
-            building_inv["insignific"] = np.around(p_insig_loss, decimals=decimal)
-            mean_damage_moder = float(damage_factors["meandmgfactor"][1])
-            std_damage_moder = float(damage_factors["stddmgfactor"][1])
-            p_moder_loss = np.lognormal(mean_damage_moder, std_damage_moder, size_row)
-
-            p_moder_loss[p_moder_loss < 0] = 0.0
-            p_moder_loss[p_moder_loss > 1] = 1.0
-            building_inv["moderate"] = np.around(p_moder_loss, decimals=decimal)
-
-            mean_damage_heavy = float(damage_factors["meandmgfactor"][2])
-            std_damage_heavy = float(damage_factors["stddmgfactor"][2])
-            p_heavy_loss = np.lognormal(mean_damage_heavy, std_damage_heavy, size_row)
-
-            p_heavy_loss[p_heavy_loss < 0] = 0.0
-            p_heavy_loss[p_heavy_loss > 1] = 1.0
-            building_inv["heavy"] = np.around(p_heavy_loss, decimals=decimal)
-
-            mean_damage_compl = float(damage_factors["meandmgfactor"][3])
-            std_damage_compl = float(damage_factors["stddmgfactor"][3])
-            p_compl_loss = np.lognormal(mean_damage_compl, std_damage_compl, size_row)
-
-            p_compl_loss[p_compl_loss < 0] = 0.0
-            p_compl_loss[p_compl_loss > 1] = 1.0
-            building_inv["complete"] = np.around(p_compl_loss, decimals=decimal)
+            for name in range(dmg_factors_name):
+                building_inv[name] = AnalysisUtil.calculate_value_loss(damage_factors, size_row)
 
             # sort by unique strctid
             building_inv = building_inv.sort_values(by=["strctid"])
 
         except Exception as e:
-            building_inv["insignific"] = np.nan
-            building_inv["moderate"] = np.nan
-            building_inv["heavy"] = np.nan
-            building_inv["complete"] = np.nan
+            for name in range(dmg_factors_name):
+                building_inv[name] = np.nan
 
         return building_inv
+
+    @staticmethod
+    def calculate_value_loss(damage_factors, size_row):
+        mean_damage = float(damage_factors["meandmgfactor"][0])
+        std_damage = float(damage_factors["stddmgfactor"][0])
+        p_loss = np.lognormal(mean_damage, std_damage, size_row)
+
+        # A[A==val1]=val2, A==val1 produces a boolean array that can be used as an index for A
+        p_loss[p_loss < 0] = 0.0
+        p_loss[p_loss > 1] = 1.0
+
+        return np.around(p_loss, decimals=4)

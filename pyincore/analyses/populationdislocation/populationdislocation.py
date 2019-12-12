@@ -61,8 +61,8 @@ class PopulationDislocation(BaseAnalysis):
                 {
                     'id': 'building_dmg',
                     'required': True,
-                    'description': 'Building damage results CSV file from hazard service',
-                    'type': ['ergo:buildingDamageVer4']
+                    'description': 'Building damage factor results CSV file',
+                    'type': ['incore:buildingDamage', 'incore:buildingFactorDamage']
                 },
                 {
                     'id': 'housing_unit_allocation',
@@ -104,7 +104,8 @@ class PopulationDislocation(BaseAnalysis):
 
         # Building Damage Dataset
         building_dmg = self.get_input_dataset("building_dmg").get_file_path('csv')
-        dmg_fact_name = ["insignific", "moderate", "heavy", "complete"]
+        dmg_fact_name = ["df_insignific", "df_moderate", "df_heavy", "df_complete"]
+
         # add damage factors if they do not exist
         if not all(item in building_dmg.columns for item in dmg_fact_name):
             building_dmg = AnalysisUtil.calculate_damage_factor(building_dmg, dmg_fact_name)
