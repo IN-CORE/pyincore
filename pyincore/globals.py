@@ -31,6 +31,11 @@ CRED_FILE_NAME = ".incorepw"
 DATA_CACHE_FOLDER_NAME = "cache_data"
 PYINCORE_USER_DATA_CACHE = os.path.join(PYINCORE_USER_CACHE, DATA_CACHE_FOLDER_NAME)
 
+TOKEN_FILE_NAME = ".incoretoken"
+PYINCORE_TOKEN_DIR = os.path.join(PYINCORE_USER_CACHE, TOKEN_FILE_NAME)
+
 LOGGING_CONFIG = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini'))
 logging_config.fileConfig(LOGGING_CONFIG)
 LOGGER = logging.getLogger('pyincore')
+
+MAX_LOGIN_ATTEMPTS = 3

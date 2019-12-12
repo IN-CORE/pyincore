@@ -151,27 +151,74 @@ class IncoreClient(Client):
 
     Args:
         service_url (str): Service url.
-        username (str): Username used by NCSA's INCORE framework.
-        password (str): Password used in NCSA's INCORE framework.
 
     """
-    def __init__(self, service_url: str = None) -> object:
-
+    def __init__(self, service_url: str = None, token_file: str = None) -> object:
         if service_url is None or len(service_url.strip()) == 0:
             service_url = pyglobals.INCORE_API_PROD_URL
         self.service_url = service_url
 
-        token_url = pyglobals.KEYCLOAK_TOKEN_URL
-        username = input("Enter username: ")
-        password = getpass.getpass("Enter password: ")
-        r = requests.post(token_url, data={'grant_type': 'password', 'client_id': pyglobals.CLIENT_ID,
-                                           'username': username,
-                                           'password': password})
-        if r.status_code != 200:
-            logger.warning("Authentication Failed. Please check the credentials and try again")
-            exit(0)
+        r = self.retrieve_token_from_file(token_file)
+        if r is None:
+            r = self.login()
+            if r is None:
+                logger.warning("Authentication Failed. Please check the credentials and try again")
+                exit(0)
+            self.store_authorization_in_file(token_file, str("bearer" + r["access_token"]))
+
         self.session = requests.session()
-        self.session.headers['Authorization'] = str("bearer " + r.json()["access_token"])
+        self.session.headers['Authorization'] = r["Authorization"]
+
+    @staticmethod
+    def login():
+        token_url = pyglobals.KEYCLOAK_TOKEN_URL
+        for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
+            username = input("Enter username: ")
+            password = getpass.getpass("Enter password: ")
+            r = requests.post(token_url, data={'grant_type': 'password',
+                                               'client_id': pyglobals.CLIENT_ID,
+                                               'username': username, 'password': password})
+            if r.status_code == 200:
+                return r.json()
+            logger.warning("Authentication failed, please try again.")
+
+        return None
+
+    @staticmethod
+    def store_authorization_in_file(token_file: str, authorization: str):
+        """
+        Store the access token in local file. If the file does not exist, this function creates it.
+        :param token_file: Name of file to store authorization
+        :param authorization: authorization in the format "bearer access_token"
+        :return: None
+        """
+        if token_file is None:
+            token_file = pyglobals.TOKEN_FILE_NAME
+        print(authorization, token_file)
+        return None
+
+    @staticmethod
+    def retrieve_token_from_file(token_file: str):
+        """
+        Attempts to retrieve authorization from a local file, if it exists.
+        :param token_file: Name of file to retrieve authorization from
+        :return: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
+        """
+        if token_file is None:
+            token_file = pyglobals.TOKEN_FILE_NAME
+            print(token_file)
+        if True:
+            return {'Authorization': 'bearer token'}
+        else:
+            return None
+
+    def update_session_authorization(self, authorization: str):
+        """
+        Update the header authorization
+        :param authorization: Authorization in the format "bearer access_token"
+        :return: None
+        """
+        self.session["Authorization"] = authorization
 
 
 class InsecureIncoreClient(Client):
