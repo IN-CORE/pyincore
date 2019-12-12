@@ -104,7 +104,7 @@ class PopulationDislocation(BaseAnalysis):
 
         # Building Damage Dataset
         building_dmg = self.get_input_dataset("building_dmg").get_file_path('csv')
-        dmg_fact_name = ["df_insignific", "df_moderate", "df_heavy", "df_complete"]
+        dmg_fact_name = ["df-insignific", "df-moderate", "df-heavy", "df-complete"]
 
         # add damage factors if they do not exist
         if not all(item in building_dmg.columns for item in dmg_fact_name):

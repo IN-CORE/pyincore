@@ -306,7 +306,7 @@ class AnalysisUtil:
             else:
                 return min(number_of_cpu, number_of_loops)
         else:
-            return number_of_cpu;
+            return number_of_cpu
 
     @staticmethod
     def create_result_dataset(datasvc: DataService, parentid: str,
@@ -520,8 +520,8 @@ class AnalysisUtil:
                                        "meandmgfactor": [0.005, 0.155, 0.555, 0.9],
                                        "stddmgfactor": [0.002, 0.058, 0.1, 0.04]})
         try:
-            for name in range(dmg_factors_name):
-                building_inv[name] = AnalysisUtil.calculate_value_loss(damage_factors, size_row)
+            for idx in range(dmg_factors_name):
+                building_inv[dmg_factors_name[idx]] = AnalysisUtil.calculate_value_loss(idx, damage_factors, size_row)
 
             # sort by unique strctid
             building_inv = building_inv.sort_values(by=["strctid"])
@@ -533,10 +533,10 @@ class AnalysisUtil:
         return building_inv
 
     @staticmethod
-    def calculate_value_loss(damage_factors, size_row):
-        mean_damage = float(damage_factors["meandmgfactor"][0])
-        std_damage = float(damage_factors["stddmgfactor"][0])
-        p_loss = np.lognormal(mean_damage, std_damage, size_row)
+    def calculate_value_loss(idx, damage_factors, size_row):
+        mean_damage = float(damage_factors["meandmgfactor"][idx])
+        std_damage = float(damage_factors["stddmgfactor"][idx])
+        p_loss = np.random.beta(mean_damage, std_damage, size_row)
 
         # A[A==val1]=val2, A==val1 produces a boolean array that can be used as an index for A
         p_loss[p_loss < 0] = 0.0
