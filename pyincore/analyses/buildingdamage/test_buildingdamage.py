@@ -1,10 +1,9 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.buildingdamage import BuildingDamage
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient(
-        "http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     # Memphis Earthquake damage
     # New madrid earthquake using Atkinson Boore 1995

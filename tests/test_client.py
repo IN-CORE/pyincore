@@ -3,40 +3,44 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
-
 import pytest
-import requests
-
+from jose import jwt
 from pyincore import IncoreClient, InsecureIncoreClient
-from pyincore.globals import INCORE_API_DEV_URL, INCORE_API_DEV_INSECURE_URL
 
 
-@pytest.fixture
-def cred():
-    c = []
-    try:
-        with open(".incorepw", 'r') as f:
-            c = f.read().splitlines()
-        return c
-    except EnvironmentError:
-        return None
-
-
-def test_client_success(cred):
+def test_client_success(monkeypatch):
     """
     testing successful login
     """
-    if cred is None:
-        assert False, ".incorepw does not exist!"
-    # client = IncoreClient(INCORE_API_DEV_URL, cred[0], cred[1])
-    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, cred[0])
-    assert client.status is "success"
+    try:
+        with open(".incorepw", 'r') as f:
+            cred = f.read().splitlines()
+    except EnvironmentError:
+        assert False
+    credentials = jwt.decode(cred[0], cred[1])
+    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
+    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
+    client = IncoreClient()
+    assert "bearer" in str(client.session.headers["Authorization"])
 
 
-def test_client_fail():
+def test_client_fail(monkeypatch):
     """
     testing failed login
     """
-    client = IncoreClient(INCORE_API_DEV_URL, "foo", "pass")
-    assert client.status is "fail"
+    with pytest.raises(SystemExit):
+        monkeypatch.setattr("builtins.input", lambda x: "incrtest")
+        monkeypatch.setattr("getpass.getpass", lambda y: "invalid-password")
+        IncoreClient()
+
+
+@pytest.mark.skip(reason="only working on Chen's branch on localhost")
+def test_insecure_client():
+    """
+    test that insecure client can access resources with x-auth-userinfo header
+    """
+    client = InsecureIncoreClient()
+    r = client.get(client.service_url + "/hazard/api/earthquakes")
+    assert r.status_code == 200
+
+

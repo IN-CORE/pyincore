@@ -1,10 +1,9 @@
-from pyincore import InsecureIncoreClient
-from pyincore.globals import INCORE_API_DEV_INSECURE_URL
+from pyincore import IncoreClient
 from pyincore.analyses.meandamage import MeanDamage
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL)
+    client = IncoreClient()
 
     md = MeanDamage(client)
 

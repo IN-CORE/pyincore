@@ -2,13 +2,12 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import InsecureIncoreClient
-from pyincore import Dataset
+from pyincore import IncoreClient
 from pyincore.analyses.housingunitallocation.housingunitallocation import HousingUnitAllocation
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient()
+    client = IncoreClient()
 
     # Seaside
     housing_unit_inv = "5d543087b9219c0689b98234"
@@ -25,13 +24,16 @@ def run_with_base_class():
     spa.load_remote_input_dataset("building_inventory", building_inv)
 
     # local
-    #housing_unit_inv = Dataset.from_file("IN-CORE_2ev2_SetupJoplin_FourInventories_2019-08-01_HUinventory.csv","incore:housingUnitInventory")
-    #address_point_inv = Dataset.from_file("IN-CORE_2ev2_SetupJoplin_FourInventories_2019-08-01_addresspointinventory.csv","incore:addressPoints")
-    #building_inv = Dataset.from_file("IN-CORE_2ev2_SetupJoplin_FourInventories_2019-08-01_buildinginventory.csv","ergo:buildingInventory")
+    # housing_unit_inv = Dataset.from_file("IN-CORE_2ev2_SetupJoplin_FourInventories_2019-08-01_HUinventory.csv",
+    #                                      "incore:housingUnitInventory")
+    # address_point_inv = Dataset.from_file(
+    #     "IN-CORE_2ev2_SetupJoplin_FourInventories_2019-08-01_addresspointinventory.csv","incore:addressPoints")
+    # building_inv = Dataset.from_file("IN-CORE_2ev2_SetupJoplin_FourInventories_2019-08-01_buildinginventory.csv",
+    #                                  "ergo:buildingInventory")
 
-    #spa.set_input_dataset("housing_unit_inventory", housing_unit_inv)
-    #spa.set_input_dataset("address_point_inventory", address_point_inv)
-    #spa.set_input_dataset("building_inventory", building_inv)
+    # spa.set_input_dataset("housing_unit_inventory", housing_unit_inv)
+    # spa.set_input_dataset("address_point_inventory", address_point_inv)
+    # spa.set_input_dataset("building_inventory", building_inv)
 
     spa.set_parameter("result_name", result_name)
     spa.set_parameter("seed", seed)

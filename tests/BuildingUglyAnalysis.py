@@ -9,15 +9,16 @@ import random
 
 import collections
 
-from pyincore import InsecureIncoreClient, AnalysisUtil
+from pyincore import IncoreClient
 from pyincore.baseanalysis import BaseAnalysis
 import pprint
+
 
 class BuildingUglyAnalysis(BaseAnalysis):
     def run(self):
 
-        #omitting concurrency here, we could just to the same determine_parallelism_locally
-        #as is done in other existing anlayses
+        # omitting concurrency here, we could just to the same determine_parallelism_locally
+        # as is done in other existing anlayses
 
         building_set = self.get_input_dataset("buildings").get_inventory_reader()
         results = []
@@ -36,7 +37,6 @@ class BuildingUglyAnalysis(BaseAnalysis):
         ugly_results["backward_guid"] = str(building['properties']['guid'])[::-1]
 
         return ugly_results
-
 
     def get_spec(self):
         return {
@@ -70,14 +70,14 @@ class BuildingUglyAnalysis(BaseAnalysis):
 
 if __name__ == "__main__":
 
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "ywkim")
+    client = IncoreClient()
     analysis = BuildingUglyAnalysis(client)
 
     analysis.load_remote_input_dataset("buildings", "5a284f1fc7d30d13bc081a7e")
-    #or you could do analysis.load_local_input_dataset("buildings", "/tmp/file.shp")
+    # or you could do analysis.load_local_input_dataset("buildings", "/tmp/file.shp")
 
-    #if you tried to load a dataset of the wrong type, like bridges:
-    #analysis.load_remote_input_dataset("buildings", "xyzPretendBridgeId")
+    # if you tried to load a dataset of the wrong type, like bridges:
+    # analysis.load_remote_input_dataset("buildings", "xyzPretendBridgeId")
     # then the validation step would barf and complain that the dataset has the
     # wrong data type
 

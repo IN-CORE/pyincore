@@ -2,12 +2,12 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.populationdislocation import PopulationDislocation, PopulationDislocationUtil
 
 
 def run_without_base_class():
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     seed_i = 1111
     # Population Dislocation
@@ -24,7 +24,7 @@ def run_without_base_class():
 
 
 def run_with_base_class():
-    client = InsecureIncoreClient("http://incore2-services.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     # Seaside
     building_dmg = "5c12856d1f5e0d0667d6410e"

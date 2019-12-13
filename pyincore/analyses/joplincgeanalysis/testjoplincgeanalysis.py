@@ -1,9 +1,9 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.joplincgeanalysis import JoplinCGEModel
 
 
 def run_base_analysis():
-    client = InsecureIncoreClient(service_url="http://incore2-services-dev.ncsa.illinois.edu:8888")
+    client = IncoreClient()
     joplin_cge = JoplinCGEModel(client)
 
     # SAM
@@ -23,7 +23,11 @@ def run_base_analysis():
     TPC = "5cdc805a5648c4048fb531d8"
     JOBCR = "5cdc7ed25648c4048fb5310c"
     OUTCR = "5cdc7fde5648c4048fb53194"
+    sector_shocks = "5dea78760b396f0464313a83"
 
+    # for this variable, open a terminal window, activate your environment where you installed
+    # pyIncore, and then type "which ipopt" in mac, or "where ipopt" in windows and paste
+    # the path here
     joplin_cge.set_parameter("solver_path", "")
     joplin_cge.set_parameter("model_iterations", 1)
 
@@ -39,6 +43,7 @@ def run_base_analysis():
     joplin_cge.load_remote_input_dataset("TPC", TPC)
     joplin_cge.load_remote_input_dataset("JOBCR", JOBCR)
     joplin_cge.load_remote_input_dataset("OUTCR", OUTCR)
+    joplin_cge.load_remote_input_dataset("sector_shocks", sector_shocks)
 
     joplin_cge.run_analysis()
 
