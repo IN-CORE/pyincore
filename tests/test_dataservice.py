@@ -4,16 +4,13 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+from jose import jwt
+from pyincore import DataService, IncoreClient, Dataset, NetworkDataset, NetworkData
 
 import ast
-import pytest
 import os
+import pytest
 import re
-
-from jose import jwt
-
-from pyincore import DataService, IncoreClient, Dataset, \
-    NetworkDataset, NetworkData
 
 
 @pytest.fixture

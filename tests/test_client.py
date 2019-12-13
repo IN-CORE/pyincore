@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import pytest
 from jose import jwt
-from pyincore import IncoreClient, InsecureIncoreClient
+from pyincore import IncoreClient
 
 
 def test_client_success(monkeypatch):
@@ -32,15 +32,3 @@ def test_client_fail(monkeypatch):
         monkeypatch.setattr("builtins.input", lambda x: "incrtest")
         monkeypatch.setattr("getpass.getpass", lambda y: "invalid-password")
         IncoreClient()
-
-
-@pytest.mark.skip(reason="only working on Chen's branch on localhost")
-def test_insecure_client():
-    """
-    test that insecure client can access resources with x-auth-userinfo header
-    """
-    client = InsecureIncoreClient()
-    r = client.get(client.service_url + "/hazard/api/earthquakes")
-    assert r.status_code == 200
-
-

@@ -5,14 +5,13 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-import ast
-
-import pytest
-import json
 from jose import jwt
+from pyincore import FragilityService, RepairService, IncoreClient
 from pyincore.globals import LOGGER
 
-from pyincore import FragilityService, RepairService, IncoreClient
+import ast
+import json
+import pytest
 
 logger = LOGGER
 
