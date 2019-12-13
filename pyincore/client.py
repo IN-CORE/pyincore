@@ -65,11 +65,9 @@ class Client:
             except IndexError as e:
                 logger.exception("Error reading authorization from token file. "
                                  "Index error({0}): {1}".format(e.errno, e.strerror))
-                raise
             except OSError as e:
                 logger.exception("Error attempting to open token file."
                                  "OS error({0}): {1}".format(e.errno, e.strerror))
-                raise
 
     def refresh_token(self):
         """
@@ -78,38 +76,13 @@ class Client:
         """
         r = self.login()
         if r is not None and r["access_token"] is not None:
-            authorization = str("bearer" + r["access_token"])
+            authorization = str("bearer " + r["access_token"])
             self.store_authorization_in_file(authorization)
             self.session.headers["Authorization"] = authorization
         else:
             logger.warning("Authentication failed.")
             exit(0)
 
-    @staticmethod
-    def make_request(func):
-        def request_wrapper(*args, **kwargs):
-            try:
-                r = func(*args, **kwargs)
-                r.raise_for_status()
-            except requests.exceptions.HTTPError:
-                logger.error('HTTPError: The server returned a '
-                             + str(r.status_code) + ' failure response code. You can '
-                             'find information about HTTP response status codes here: '
-                             'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status')
-                raise
-            except requests.exceptions.ConnectionError:
-                logger.error("ConnectionError: Failed to establish a connection with the server. "
-                             "This might be due to a refused connection. "
-                             "Please check that you are using the right URLs.")
-                raise
-            except requests.exceptions.RequestException:
-                logger.error("RequestException: There was an exception while trying to handle your request. "
-                             "Please go to the end of this message for more specific information about the exception.")
-                raise
-
-            return request_wrapper
-
-    @make_request
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.
 
@@ -129,9 +102,8 @@ class Client:
             self.refresh_token()
             r = self.session.get(url, params=params, timeout=timeout, **kwargs)
 
-        return r
+        return self.return_http_response(r)
 
-    @make_request
     def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
         """Post data on the server.
 
@@ -152,9 +124,8 @@ class Client:
             self.refresh_token()
             r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
 
-        return r
+        return self.return_http_response(r)
 
-    @make_request
     def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
         """Put data on the server.
 
@@ -174,9 +145,8 @@ class Client:
             self.refresh_token()
             r = self.session.put(url, data=data, timeout=timeout, **kwargs)
 
-        return r
+        return self.return_http_response(r)
 
-    @make_request
     def delete(self, url: str, timeout=(30, 600), **kwargs):
         """Delete data on the server.
 
@@ -195,7 +165,29 @@ class Client:
             self.refresh_token()
             r = self.session.delete(url, timeout=timeout, **kwargs)
 
-        return r
+        return self.return_http_response(r)
+
+    @staticmethod
+    def return_http_response(http_response):
+        try:
+            http_response.raise_for_status()
+            return http_response
+        except requests.exceptions.HTTPError:
+            logger.error('HTTPError: The server returned a '
+                         + str(http_response.status_code) + ' failure response code. You can '
+                                                            'find information about HTTP response '
+                                                            'status codes here: '
+                                                            'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status')
+            raise
+        except requests.exceptions.ConnectionError:
+            logger.error("ConnectionError: Failed to establish a connection with the server. "
+                         "This might be due to a refused connection. "
+                         "Please check that you are using the right URLs.")
+            raise
+        except requests.exceptions.RequestException:
+            logger.error("RequestException: There was an exception while trying to handle your request. "
+                         "Please go to the end of this message for more specific information about the exception.")
+            raise
 
 
 class IncoreClient(Client):
@@ -215,15 +207,16 @@ class IncoreClient(Client):
             token_file_name = pyglobals.TOKEN_FILE_NAME
         self.token_file = Path(os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name))
 
-        r = self.retrieve_token_from_file()
-        if r is None or r["access_token"] is None:
-            r = self.login()
-            if r is None or r["access_token"] is None:
+        authorization = self.retrieve_token_from_file()
+        if authorization is None:
+            token = self.login()
+            if token is None or token["access_token"] is None:
                 logger.warning("Authentication Failed.")
                 exit(0)
-            self.store_authorization_in_file(token_file_name, str("bearer" + r["access_token"]))
+            authorization = str("bearer " + token["access_token"])
+            self.store_authorization_in_file(authorization)
 
-        self.session.headers['Authorization'] = r["Authorization"]
+        self.session.headers['Authorization'] = authorization
 
 
 class InsecureIncoreClient(Client):

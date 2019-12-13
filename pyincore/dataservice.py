@@ -25,14 +25,10 @@ class DataService:
     """
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_url = urllib.parse.urljoin(client.service_url,
-            'data/api/datasets/')
-        self.files_url = urllib.parse.urljoin(client.service_url,
-            'data/api/files/')
-        self.base_earthquake_url = urllib.parse.urljoin(client.service_url,
-            'hazard/api/earthquakes/')
-        self.base_tornado_url = urllib.parse.urljoin(client.service_url,
-            'hazard/api/tornadoes/')
+        self.base_url = urllib.parse.urljoin(client.service_url, 'data/api/datasets/')
+        self.files_url = urllib.parse.urljoin(client.service_url, 'data/api/files/')
+        self.base_earthquake_url = urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes/')
+        self.base_tornado_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tornadoes/')
 
     def get_dataset_metadata(self, dataset_id: str):
         """Retrieve metadata from data service. Dataset API endpoint is called.
