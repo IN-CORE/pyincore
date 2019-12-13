@@ -35,7 +35,7 @@ def test_create_space(spacesvc, space, expected):
 def test_add_dataset_to_space(spacesvc):
     # this is the id of the space "incrtest". If that space is deleted, this test will throw an error.
     space_id = "5c813be55648c42a9168d5c1"
-    member_id = "5c813be55648c42a9168d5bf"
+    member_id = "5a284f83c7d30d13bc0827ec"
     space = spacesvc.add_dataset_to_space(space_id=space_id, dataset_id=member_id)
     assert member_id in space["members"]
     # TODO: add a test_remove_dataset_to_space
