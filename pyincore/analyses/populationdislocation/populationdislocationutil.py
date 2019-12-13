@@ -50,3 +50,46 @@ class PopulationDislocationUtil:
                             validate="m:1")
 
         return final_df
+
+    @staticmethod
+    def get_disl_probability(value_loss: np.array, d_sf: np.array,
+                             percent_black_bg: np.array, percent_hisp_bg: np.array):
+        """
+        Calculate dislocation, the probability of dislocation for the household and population.
+        Probability of dislocation Damage factor,
+        based on current IN-COREv1 algorithm and Bai et al. 2009 damage factors.
+
+        The following variables are need to predict dislocation using logistic model
+        see detailed explanation https://opensource.ncsa.illinois.edu/confluence/
+        display/INCORE1/Household+and+Population+Dislocation?
+        preview=%2F66224473%2F68289561%2FAlgorithm+3+Logistic.pdf
+
+        Args:
+            value_loss (np.array): Value loss.
+            d_sf (np.array): 'Dummy' parameter.
+            percent_black_bg (np.array): Block group data, percentage of black minority.
+            percent_hisp_bg (np.array): Block group data, percentage of hispanic minority.
+
+        Returns:
+            numpy.array: Dislocation probability for the household and population.
+
+        """
+        # coefficients for the Logistic regression model
+        coefficient = {"beta0": -0.42523,
+                       "beta1": 0.02480,
+                       "beta2": -0.50166,  # single family coefficient
+                       "beta3": -0.01826,  # black block group coefficient
+                       "beta4": -0.01198}  # hispanic block group coefficient
+
+        disl_prob = np.zeros_like(d_sf)
+        try:
+            disl_prob = 1.0 / (1 + np.exp(-1.0 * (coefficient["beta0"] * 1 +
+                                                  coefficient["beta1"] * (value_loss * 100) +
+                                                  coefficient["beta2"] * d_sf +
+                                                  coefficient["beta3"] * percent_black_bg +
+                                                  coefficient["beta4"] * percent_hisp_bg)))
+        except Exception as e:
+            print()
+            # raise e
+
+        return disl_prob

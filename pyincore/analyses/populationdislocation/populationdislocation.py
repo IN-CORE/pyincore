@@ -7,7 +7,6 @@ import pandas as pd
 import warnings
 from pyincore import BaseAnalysis
 from pyincore.analyses.populationdislocation.populationdislocationutil import PopulationDislocationUtil
-from pyincore.utils.analysisutil import AnalysisUtil
 
 
 class PopulationDislocation(BaseAnalysis):
@@ -28,14 +27,6 @@ class PopulationDislocation(BaseAnalysis):
 
     """
     def __init__(self, incore_client):
-        # coefficients for the Logistic regression model
-        self.coefficient = {"beta0": -0.42523,
-                            "beta1": 0.02480,
-                            "beta2": -0.50166,  # single family coefficient
-                            "beta3": -0.01826,  # black block group coefficient
-                            "beta4": -0.01198   # hispanic block group coefficient
-                            }
-
         super(PopulationDislocation, self).__init__(incore_client)
 
     def get_spec(self):
@@ -76,6 +67,12 @@ class PopulationDislocation(BaseAnalysis):
                     'required': True,
                     'description': 'Block group racial distribution census CSV data',
                     'type': ['incore:blockGroupData']
+                },
+                {
+                    'id': 'value_poss_param',
+                    'required': True,
+                    'description': 'A table with value loss beta distribution parameters based on Bai et al. 2009',
+                    'type': ['incore:valuLossParam']
                 }
             ],
             'output_datasets': [
@@ -102,33 +99,31 @@ class PopulationDislocation(BaseAnalysis):
         # Get desired result name
         result_name = self.get_parameter("result_name")
 
-        # Building Damage Dataset
+        # Building damage dataset
         building_dmg = self.get_input_dataset("building_dmg").get_file_path('csv')
-        dmg_fact_name = ["df-insignific", "df-moderate", "df-heavy", "df-complete"]
 
-        # add damage factors if they do not exist
-        if not all(item in building_dmg.columns for item in dmg_fact_name):
-            building_dmg = AnalysisUtil.calculate_damage_factor(seed_i, building_dmg, dmg_fact_name)
-
-        # housing unit allocation Dataset
+        # Housing unit allocation dataset
         housing_unit_alloc = self.get_input_dataset("housing_unit_allocation").get_file_path('csv')
 
-        # Block Group data
+        # Block group data
         bg_data = self.get_input_dataset("block_group_data").get_file_path('csv')
+
+        # Get value loss parameters
+        value_loss = self.get_input_dataset("value_poss_param").get_file_path('csv')
 
         merged_block_inv = PopulationDislocationUtil.merge_damage_housing_block(
             building_dmg, housing_unit_alloc, bg_data
         )
 
         # Returns dataframe
-        merged_final_inv = self.get_dislocation(seed_i, merged_block_inv)
+        merged_final_inv = self.get_dislocation(seed_i, merged_block_inv, value_loss)
 
         csv_source = "dataframe"
         self.set_result_csv_data("result", merged_final_inv, result_name, csv_source)
 
         return True
 
-    def get_dislocation(self, seed_i: int, inventory: pd.DataFrame):
+    def get_dislocation(self, seed_i: int, inventory: pd.DataFrame, valueloss: pd.DataFrame):
         """Calculates dislocation probability.
 
         Probability of dislocation, a binary variable based on the logistic probability of dislocation.
@@ -139,17 +134,18 @@ class PopulationDislocation(BaseAnalysis):
         to have a random number less than the probability predicted.
 
         Args:
-            seed_i (int): Seed for random number generator to ensure replication if run as part of a stochastic analysis,
-                for example in connection with housing unit allocation analysis.
+            seed_i (int): Seed for random number generator to ensure replication if run as part
+            of a stochastic analysis, for example in connection with housing unit allocation analysis.
             inventory (pd.DataFrame): Merged building, housing unit allocation and block group inventories
+            valueloss (pd.DataFrame): Table used for value loss estimates, beta distribution
 
         Returns:
             pd.DataFrame: An inventory with probabilities of dislocation in a separate column
 
         """
         # pd.Series to np.array
-        if "d_sf" not in inventory.columns:
-            inventory["d_sf"] = (inventory["huestimate"] > 1).astype(int)
+        # creats d_sf column it if it does not exist, overwrites d_sf values if it does
+        inventory["d_sf"] = (inventory["huestimate"] > 1).astype(int)
         dsf = inventory["d_sf"].values
         pbd = inventory["pblackbg"].values
         phd = inventory["phispbg"].values
@@ -159,10 +155,21 @@ class PopulationDislocation(BaseAnalysis):
         prob_hvy = inventory["heavy"].values
         prob_cmp = inventory["complete"].values
 
-        prob_disl_ins = self.get_disl_probability(prob_ins, dsf, pbd, phd)
-        prob_disl_mod = self.get_disl_probability(prob_mod, dsf, pbd, phd)
-        prob_disl_hvy = self.get_disl_probability(prob_hvy, dsf, pbd, phd)
-        prob_disl_cmp = self.get_disl_probability(prob_cmp, dsf, pbd, phd)
+        # include random value loss by damage state
+        rploss_ins = self.get_random_valueloss(seed_i, valueloss, "insignific", dsf.size)
+        rploss_mod = self.get_random_valueloss(seed_i, valueloss, "moderate", dsf.size)
+        rploss_hvy = self.get_random_valueloss(seed_i, valueloss, "heavy", dsf.size)
+        rploss_cmp = self.get_random_valueloss(seed_i, valueloss, "complete", dsf.size)
+
+        inventory["rploss_ins"] = rploss_ins
+        inventory["rploss_med"] = rploss_mod
+        inventory["rploss_hwy"] = rploss_hvy
+        inventory["rploss_cmp"] = rploss_cmp
+
+        prob_disl_ins = PopulationDislocationUtil.get_disl_probability(rploss_ins, dsf, pbd, phd)
+        prob_disl_mod = PopulationDislocationUtil.get_disl_probability(rploss_mod, dsf, pbd, phd)
+        prob_disl_hvy = PopulationDislocationUtil.get_disl_probability(rploss_hvy, dsf, pbd, phd)
+        prob_disl_cmp = PopulationDislocationUtil.get_disl_probability(rploss_cmp, dsf, pbd, phd)
 
         # total_prob_disl is the sum of the probability of dislocation at four damage states
         # times the probability of being in that damage state.
@@ -183,38 +190,3 @@ class PopulationDislocation(BaseAnalysis):
         inventory["dislocated"] = dislocated
 
         return inventory
-
-    def get_disl_probability(self, value_loss: np.array, d_sf: np.array,
-                             percent_black_bg: np.array, percent_hisp_bg: np.array):
-        """
-        Calculate dislocation, the probability of dislocation for the household and population.
-        Probability of dislocation Damage factor,
-        based on current IN-COREv1 algorithm and Bai et al. 2009 damage factors.
-
-        The following variables are need to predict dislocation using logistic model
-        see detailed explanation https://opensource.ncsa.illinois.edu/confluence/
-        display/INCORE1/Household+and+Population+Dislocation?
-        preview=%2F66224473%2F68289561%2FAlgorithm+3+Logistic.pdf
-
-        Args:
-            value_loss (np.array): Value loss.
-            d_sf (np.array): 'Dummy' parameter.
-            percent_black_bg (np.array): Block group data, percentage of black minority.
-            percent_hisp_bg (np.array): Block group data, percentage of hispanic minority.
-
-        Returns:
-            numpy.array: Dislocation probability for the household and population.
-
-        """
-        disl_prob = np.zeros_like(d_sf)
-        try:
-            disl_prob = 1.0 / (1 + np.exp(-1.0 * (self.coefficient["beta0"] * 1 +
-                                                  self.coefficient["beta1"] * (value_loss * 100) +
-                                                  self.coefficient["beta2"] * d_sf +
-                                                  self.coefficient["beta3"] * percent_black_bg +
-                                                  self.coefficient["beta4"] * percent_hisp_bg)))
-        except Exception as e:
-            print()
-            # raise e
-
-        return disl_prob
