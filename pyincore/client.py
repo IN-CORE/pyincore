@@ -45,7 +45,6 @@ class Client:
         try:
             with open(self.token_file, 'w') as f:
                 f.write(authorization)
-                f.close()
         except IOError as e:
             logger.warning("Unable to write file. I/O error({0}): {1}".format(e.errno, e.strerror))
 
@@ -60,7 +59,6 @@ class Client:
             try:
                 with open(self.token_file, 'r') as f:
                     auth = f.read().splitlines()
-                    f.close()
                 return auth[0]
             except IndexError as e:
                 logger.exception("Error reading authorization from token file. "

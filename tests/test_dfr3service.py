@@ -21,7 +21,6 @@ def fragilitysvc(monkeypatch):
     try:
         with open(".incorepw", 'r') as f:
             cred = f.read().splitlines()
-            f.close()
     except EnvironmentError:
         assert False
     credentials = jwt.decode(cred[0], cred[1])
