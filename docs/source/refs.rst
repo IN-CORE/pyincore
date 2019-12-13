@@ -5,7 +5,7 @@ References
 
     <embed>
         <ul>
-            <li><a href="../incore" target="_blank">Incore</a> documentation</li>
-            <li><a href="../api" target="_blank">IN-CORE API</a> specifications</li>
+            <li><a href="../incore" target="_blank">IN-CORE</a> Manual</li>
+            <li><a href="https://incore2.ncsa.illinois.edu/doc/api/" target="_blank">IN-CORE Web Services API</a> specifications</li>
         </ul>
     </embed>
