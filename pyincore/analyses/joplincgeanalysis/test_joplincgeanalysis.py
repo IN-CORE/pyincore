@@ -20,7 +20,6 @@ def run_base_analysis():
     EMPLOY = "5cdc7df65648c4048fb530ab"
     IGTD = "5cdc7e405648c4048fb530cd"
     TAUFF = "5cdc81da5648c4048fb532b7"
-    TPC = "5cdc805a5648c4048fb531d8"
     JOBCR = "5cdc7ed25648c4048fb5310c"
     OUTCR = "5cdc7fde5648c4048fb53194"
     sector_shocks = "5dea78760b396f0464313a83"
@@ -40,7 +39,6 @@ def run_base_analysis():
     joplin_cge.load_remote_input_dataset("EMPLOY", EMPLOY)
     joplin_cge.load_remote_input_dataset("IGTD", IGTD)
     joplin_cge.load_remote_input_dataset("TAUFF", TAUFF)
-    joplin_cge.load_remote_input_dataset("TPC", TPC)
     joplin_cge.load_remote_input_dataset("JOBCR", JOBCR)
     joplin_cge.load_remote_input_dataset("OUTCR", OUTCR)
     joplin_cge.load_remote_input_dataset("sector_shocks", sector_shocks)

@@ -10,9 +10,15 @@ import pandas as pd
 
 
 class JoplinCGEModel(BaseAnalysis):
-    """Computable general equilibrium (CGE) models are used to estimate how an economy might react to economic shocks,
-    such as changes in policy, technology, or natural disasters. A CGE model consists of equations describing model
-    variables and a detailed database consistent with the model equations.
+    """A computable general equilibrium (CGE) model is based on fundamental economic principles.
+    A CGE model uses multiple data sources to reflect the interactions of households,
+    firms and relevant government entities as they contribute to economic activity.
+    The model is based on (1) utility-maximizing households that supply labor and capital,
+     using the proceeds to pay for goods and services (both locally produced and imported)
+     and taxes; (2) the production sector, with perfectly competitive, profit-maximizing firms
+      using intermediate inputs, capital, land and labor to produce goods and services for both
+       domestic consumption and export; (3) the government sector that collects taxes and uses
+        tax revenues in order to finance the provision of public services; and (4) the rest of the world.
 
     Args:
         incore_client (IncoreClient): Service authentication.
@@ -45,73 +51,80 @@ class JoplinCGEModel(BaseAnalysis):
                 {
                     'id': 'SAM',
                     'required': True,
-                    'description': 'Social accounting matrix',
+                    'description': 'Social accounting matrix (SAM) contains data for firms, '
+                                   'households and government which are organized in a way to '
+                                   'represent the interactions of all three entities in a typical economy.',
                     'type': ['incore:JoplinCGEsam']
                 },
                 {
                     'id': 'BB',
                     'required': True,
-                    'description': 'Capital comp',
+                    'description': 'BB is a matrix which describes how investment in physical infrastructure is'
+                                   ' transformed into functioning capital such as commercial and residential buildings.'
+                                   ' These data are collected from the Bureau of Economic Analysis (BEA).',
                     'type': ['incore:JoplinCGEbb']
                 },
                 {
                     'id': 'IOUT',
                     'required': True,
-                    'description': 'Government parameters and initial values',
+                    'description': 'IOUT is a matrix that describes the transfer of tax revenue collected by the local'
+                                   ' government to help finance local government expenditures.',
                     'type': ['incore:JoplinCGEiout']
                 },
                 {
                     'id': 'MISC',
                     'required': True,
-                    'description': 'Parameters and initial values',
+                    'description': 'MISC is the name of a file that contains data for commercial sector employment'
+                                   ' and physical capital. It also contains data for the number of households and'
+                                   ' working households in the economy.',
                     'type': ['incore:JoplinCGEmisc']
                 },
                 {
                     'id': 'MISCH',
                     'required': True,
-                    'description': 'Household parameters and initial values',
+                    'description': 'MISCH is a file that contains elasticities for the supply of labor with'
+                                   ' respect to paying income taxes.',
                     'type': ['incore:JoplinCGEmisch']
                 },
                 {
                     'id': 'LANDCAP',
                     'required': True,
-                    'description': 'Land capital',
+                    'description': 'LANDCAP contains information regarding elasticity values for the response of '
+                                   'changes in the price of physical capital with respect to the supply of investment.',
                     'type': ['incore:JoplinCGElandcap']
                 },
                 {
                     'id': 'EMPLOY',
                     'required': True,
-                    'description': 'Employment',
+                    'description': 'EMPLOY is a table name containing data for commercial sector employment.',
                     'type': ['incore:JoplinCGEemploy']
                 },
                 {
                     'id': 'IGTD',
                     'required': True,
-                    'description': 'Exogenous Transfer PMT',
+                    'description': 'IGTD variable represents a matrix describing the transfer of taxes collected'
+                                   ' to a variable which permits governments to spend the tax revenue on workers and'
+                                   ' intermediate inputs.',
                     'type': ['incore:JoplinCGEigtd']
                 },
                 {
                     'id': 'TAUFF',
                     'required': True,
-                    'description': 'Tax rates',
+                    'description': 'TAUFF represents social security tax rates',
                     'type': ['incore:JoplinCGEtauff']
-                },
-                {
-                    'id': 'TPC',
-                    'required': False,
-                    'description': 'Factor taxes',
-                    'type': ['incore:JoplinCGEtpc']
                 },
                 {
                     'id': 'JOBCR',
                     'required': True,
-                    'description': 'Labor',
+                    'description': 'JOBCR is a matrix describing the supply of workers'
+                                   ' coming from each household group in the economy.',
                     'type': ['incore:JoplinCGEjobcr']
                 },
                 {
                     'id': 'OUTCR',
                     'required': True,
-                    'description': 'Commuter Labor Groups',
+                    'description': 'OUTCR is a matrix describing the number of workers who'
+                                   ' live in Joplin but commute outside of town to work.',
                     'type': ['incore:JoplinCGEoutcr']
                 },
                 {
@@ -349,7 +362,6 @@ class JoplinCGEModel(BaseAnalysis):
         EMPLOY = pd.read_csv(self.get_input_dataset("EMPLOY").get_file_path('csv'), index_col=0)
         IGTD = pd.read_csv(self.get_input_dataset("IGTD").get_file_path('csv'), index_col=0)
         TAUFF = pd.read_csv(self.get_input_dataset("TAUFF").get_file_path('csv'), index_col=0)
-        TPC = pd.read_csv(self.get_input_dataset("TPC").get_file_path('csv'), index_col=0)
         JOBCR = pd.read_csv(self.get_input_dataset("JOBCR").get_file_path('csv'), index_col=0)
         OUTCR = pd.read_csv(self.get_input_dataset("OUTCR").get_file_path('csv'), index_col=0)
         sector_shocks = pd.read_csv(self.get_input_dataset("sector_shocks").get_file_path('csv'), index_col=False)
