@@ -5,14 +5,13 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-import ast
-
-import pytest
-import json
 from jose import jwt
+from pyincore import FragilityService, RepairService, IncoreClient
 from pyincore.globals import LOGGER
 
-from pyincore import FragilityService, RepairService, IncoreClient
+import ast
+import json
+import pytest
 
 logger = LOGGER
 
@@ -27,7 +26,7 @@ def fragilitysvc(monkeypatch):
     credentials = jwt.decode(cred[0], cred[1])
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient()
+    client = IncoreClient(token_file_name=".incrtesttoken")
     return FragilityService(client)
 
 
@@ -41,7 +40,7 @@ def repairsvc(monkeypatch):
     credentials = jwt.decode(cred[0], cred[1])
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient()
+    client = IncoreClient(token_file_name=".incrtesttoken")
     return RepairService(client)
 
 

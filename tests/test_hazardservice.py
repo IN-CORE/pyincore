@@ -5,11 +5,12 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-import pytest
-import numpy as np
 from jose import jwt
-from pyincore import IncoreClient
 from pyincore import HazardService
+from pyincore import IncoreClient
+
+import numpy as np
+import pytest
 
 
 @pytest.fixture
@@ -22,7 +23,7 @@ def hazardsvc(monkeypatch):
     credentials = jwt.decode(cred[0], cred[1])
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient()
+    client = IncoreClient(token_file_name=".incrtesttoken")
     return HazardService(client)
 
 
