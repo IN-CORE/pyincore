@@ -5,8 +5,9 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import pytest
-from pyincore import SpaceService, IncoreClient
 from jose import jwt
+
+from pyincore import IncoreClient, SpaceService
 
 
 @pytest.fixture
@@ -19,7 +20,7 @@ def spacesvc(monkeypatch):
     credentials = jwt.decode(cred[0], cred[1])
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient()
+    client = IncoreClient(token_file_name=".incrtesttoken")
     return SpaceService(client)
 
 
