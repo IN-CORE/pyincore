@@ -21,7 +21,7 @@ def spacesvc(monkeypatch):
     credentials = jwt.decode(cred[0], cred[1])
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient()
+    client = IncoreClient(token_file_name=".incrtesttoken")
     return SpaceService(client)
 
 

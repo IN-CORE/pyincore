@@ -20,7 +20,7 @@ def test_client_success(monkeypatch):
     credentials = jwt.decode(cred[0], cred[1])
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient()
+    client = IncoreClient(token_file_name=".incrtesttoken")
     assert "bearer" in str(client.session.headers["Authorization"])
 
 
@@ -31,4 +31,4 @@ def test_client_fail(monkeypatch):
     with pytest.raises(SystemExit):
         monkeypatch.setattr("builtins.input", lambda x: "incrtest")
         monkeypatch.setattr("getpass.getpass", lambda y: "invalid-password")
-        IncoreClient()
+        IncoreClient(token_file_name=".none")
