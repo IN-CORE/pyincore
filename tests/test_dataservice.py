@@ -8,6 +8,9 @@ import ast
 import os
 import re
 
+import pytest
+from jose import jwt
+
 from pyincore import (
     DataService,
     Dataset,
@@ -15,9 +18,6 @@ from pyincore import (
     NetworkData,
     NetworkDataset,
 )
-
-import pytest
-from jose import jwt
 
 
 @pytest.fixture

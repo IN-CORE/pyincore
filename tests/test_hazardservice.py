@@ -5,7 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import numpy as np
-
 import pytest
 from jose import jwt
 

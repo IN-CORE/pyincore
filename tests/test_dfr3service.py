@@ -4,14 +4,14 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
-from jose import jwt
-from pyincore import FragilityService, RepairService, IncoreClient
-from pyincore.globals import LOGGER
-
 import ast
+
 import json
 import pytest
+from jose import jwt
+
+from pyincore import FragilityService, RepairService, IncoreClient
+from pyincore.globals import LOGGER
 
 logger = LOGGER
 
