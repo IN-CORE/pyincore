@@ -16,10 +16,21 @@ logger = pyglobals.LOGGER
 
 class Client:
     """Incore service Client class. It handles connection to the server with INCORE services and user authentication."""
-
     def __init__(self):
         self.token_file = None
         self.session = requests.session()
+
+        # if .incore is not a directory, create it and add a cache directory
+        if not os.path.isdir(pyglobals.PYINCORE_USER_CACHE):
+            os.makedirs(pyglobals.PYINCORE_USER_CACHE)
+            os.makedirs(pyglobals.PYINCORE_USER_DATA_CACHE)
+            if not os.path.isdir(pyglobals.PYINCORE_USER_CACHE):
+                logger.warn("Unable to create .incore directory.")
+        # if .incore is a directory but there is no cache directory, create it
+        if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
+            os.makedirs(pyglobals.PYINCORE_USER_DATA_CACHE)
+            if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
+                logger.warn("Unable to create cache directory.")
 
     @staticmethod
     def login():
@@ -53,7 +64,7 @@ class Client:
         Attempts to retrieve authorization from a local file, if it exists.
         :return: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
         """
-        if not self.token_file.is_file():
+        if not os.path.isfile(self.token_file):
             return None
         else:
             try:
