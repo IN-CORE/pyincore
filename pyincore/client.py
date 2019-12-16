@@ -35,8 +35,7 @@ class Client:
             if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
                 logger.warn("Unable to create cache directory.")
 
-    @staticmethod
-    def login():
+    def login(self):
         token_url = pyglobals.KEYCLOAK_TOKEN_URL
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
             username = input("Enter username: ")
@@ -45,9 +44,17 @@ class Client:
                                                'client_id': pyglobals.CLIENT_ID,
                                                'username': username, 'password': password})
             if r.status_code == 200:
-                return r.json()
-            logger.warning("Authentication failed, please try again.")
+                token = r.json()
+                if token is None or token["access_token"] is None:
+                    logger.warning("Authentication Failed.")
+                    exit(0)
+                authorization = str("bearer " + token["access_token"])
+                self.store_authorization_in_file(authorization)
+                self.session.headers['Authorization'] = authorization
+                return True
+            logger.warning("Authentication failed, attempting login again.")
 
+        logger.warning("Authentication failed.")
         return None
 
     def store_authorization_in_file(self, authorization: str):
@@ -80,20 +87,6 @@ class Client:
             except OSError as e:
                 logger.exception("Error attempting to open token file."
                                  "OS error({0}): {1}".format(e.errno, e.strerror))
-
-    def refresh_token(self):
-        """
-        Call login function and update session's headers
-        :return:
-        """
-        r = self.login()
-        if r is not None and r["access_token"] is not None:
-            authorization = str("bearer " + r["access_token"])
-            self.store_authorization_in_file(authorization)
-            self.session.headers["Authorization"] = authorization
-        else:
-            logger.warning("Authentication failed.")
-            exit(0)
 
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.
@@ -182,7 +175,7 @@ class Client:
             raise
 
     @staticmethod
-    def delete_cache():
+    def clear_cache():
         if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
             logger.warning("User data cache does not exist")
             return None
@@ -212,15 +205,10 @@ class IncoreClient(Client):
         self.token_file = Path(os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name))
 
         authorization = self.retrieve_token_from_file()
-        if authorization is None:
-            token = self.login()
-            if token is None or token["access_token"] is None:
-                logger.warning("Authentication Failed.")
-                exit(0)
-            authorization = str("bearer " + token["access_token"])
-            self.store_authorization_in_file(authorization)
-
-        self.session.headers['Authorization'] = authorization
+        if authorization is not None:
+            self.session.headers["Authorization"] = authorization
+        else:
+            self.login()
 
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.
@@ -238,7 +226,7 @@ class IncoreClient(Client):
         r = self.session.get(url, params=params, timeout=timeout, **kwargs)
 
         if r.status_code == 401:
-            self.refresh_token()
+            self.login()
             r = self.session.get(url, params=params, timeout=timeout, **kwargs)
 
         return self.return_http_response(r)
@@ -260,7 +248,7 @@ class IncoreClient(Client):
         r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
 
         if r.status_code == 401:
-            self.refresh_token()
+            self.login()
             r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
 
         return self.return_http_response(r)
@@ -281,7 +269,7 @@ class IncoreClient(Client):
         r = self.session.put(url, data=data, timeout=timeout, **kwargs)
 
         if r.status_code == 401:
-            self.refresh_token()
+            self.login()
             r = self.session.put(url, data=data, timeout=timeout, **kwargs)
 
         return self.return_http_response(r)
@@ -301,7 +289,7 @@ class IncoreClient(Client):
         r = self.session.delete(url, timeout=timeout, **kwargs)
 
         if r.status_code == 401:
-            self.refresh_token()
+            self.login()
             r = self.session.delete(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r)

@@ -26,22 +26,6 @@ def test_client_success(monkeypatch):
     assert "bearer" in str(client.session.headers["Authorization"])
 
 
-def test_login(monkeypatch):
-    """
-    testing Client static login
-    """
-    try:
-        with open(".incorepw", 'r') as f:
-            cred = f.read().splitlines()
-    except EnvironmentError:
-        assert False
-    credentials = jwt.decode(cred[0], cred[1])
-    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
-    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    token = Client.login()
-    assert "access_token" in token
-
-
 def test_client_fail(monkeypatch):
     """
     testing failed login
@@ -54,5 +38,5 @@ def test_client_fail(monkeypatch):
 
 @pytest.mark.skip(reason="needs for thought on what to assert")
 def test_delete_cache():
-    r = Client.delete_cache()
+    r = Client.clear_cache()
     assert r is None
