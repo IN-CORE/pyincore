@@ -7,7 +7,7 @@
 import pytest
 from jose import jwt
 
-from pyincore import IncoreClient
+from pyincore import Client, IncoreClient
 
 
 def test_client_success(monkeypatch):
@@ -26,6 +26,22 @@ def test_client_success(monkeypatch):
     assert "bearer" in str(client.session.headers["Authorization"])
 
 
+def test_login(monkeypatch):
+    """
+    testing Client static login
+    """
+    try:
+        with open(".incorepw", 'r') as f:
+            cred = f.read().splitlines()
+    except EnvironmentError:
+        assert False
+    credentials = jwt.decode(cred[0], cred[1])
+    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
+    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
+    token = Client.login()
+    assert "access_token" in token
+
+
 def test_client_fail(monkeypatch):
     """
     testing failed login
@@ -34,3 +50,9 @@ def test_client_fail(monkeypatch):
         monkeypatch.setattr("builtins.input", lambda x: "incrtest")
         monkeypatch.setattr("getpass.getpass", lambda y: "invalid-password")
         IncoreClient(token_file_name=".none")
+
+
+@pytest.skip(reason="needs more thought on what to assert")
+def test_delete_cache():
+    r = Client.delete_cache()
+    assert r is None

@@ -6,6 +6,7 @@
 
 import getpass
 import os
+import shutil
 from pathlib import Path
 
 import requests
@@ -179,6 +180,18 @@ class Client:
             logger.error("RequestException: There was an exception while trying to handle your request. "
                          "Please go to the end of this message for more specific information about the exception.")
             raise
+
+    @staticmethod
+    def delete_cache():
+        if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
+            logger.warning("User data cache does not exist")
+            return None
+        for root, dirs, files in os.walk(pyglobals.PYINCORE_USER_DATA_CACHE):
+            for f in files:
+                os.unlink(os.path.join(root, f))
+            for d in dirs:
+                shutil.rmtree(os.path.join(root, d))
+        return None
 
 
 class IncoreClient(Client):
