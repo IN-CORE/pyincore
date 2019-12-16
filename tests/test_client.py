@@ -52,7 +52,7 @@ def test_client_fail(monkeypatch):
         IncoreClient(token_file_name=".none")
 
 
-@pytest.skip(reason="needs more thought on what to assert")
+@pytest.mark.skip(reason="needs for thought on what to assert")
 def test_delete_cache():
     r = Client.delete_cache()
     assert r is None
