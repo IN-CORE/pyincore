@@ -55,7 +55,7 @@ class Client:
             logger.warning("Authentication failed, attempting login again.")
 
         logger.warning("Authentication failed.")
-        return None
+        exit(0)
 
     def store_authorization_in_file(self, authorization: str):
         """
