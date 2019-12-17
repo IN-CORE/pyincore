@@ -4,9 +4,11 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+import base64
 import getpass
 import os
 import shutil
+import urllib.parse
 from pathlib import Path
 
 import requests
@@ -293,3 +295,42 @@ class IncoreClient(Client):
             r = self.session.delete(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r)
+
+
+class LdapClient(Client):
+    """Incore service Client class. It contains token and service root url.
+
+    Args:
+        service_url (str): Service url.
+
+    """
+    def __init__(self, service_url: str = None):
+        super().__init__()
+        if service_url is None or len(service_url.strip()) == 0:
+            service_url = pyglobals.KONG_INCORE_API_DEV_URL
+        self.service_url = service_url
+
+        self.auth_token = None
+        self.headers = {}
+        self.login()
+
+    def login(self):
+        """Function to retrieve token from the login service. Authentication API endpoint is called.
+        Returns:
+            True if successful, system exit if not
+        """
+        username = input("Enter username: ")
+        password = getpass.getpass("Enter password: ")
+        url = urllib.parse.urljoin(self.service_url, "auth/api/login")
+        b64_value = base64.b64encode(bytes('%s:%s' % (username, password), "utf-8"))
+        r = requests.get(url, headers={"Authorization": "LDAP %s" % b64_value.decode('ascii')})
+        if str(r.status_code).startswith('5'):
+            logger.critical("Authentication API call failed. Something is wrong with the authentication server")
+        elif r is not None and 'auth-token' in r.json():
+            auth = r.json()
+            self.auth_token = auth['auth-token']
+            self.headers = {'auth-user': username, 'auth-token': self.auth_token, 'Authorization': ''}
+            self.session.headers.update(self.headers)
+            return True
+        logger.warning("Authentication failed.")
+        exit(0)

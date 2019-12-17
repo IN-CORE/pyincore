@@ -14,6 +14,9 @@ PACKAGE_VERSION = "0.5.2"
 INCORE_API_PROD_URL = "https://incore-dev-kube.ncsa.illinois.edu"
 INCORE_API_DEV_INSECURE_URL = "http://localhost:8080"
 
+KONG_INCORE_API_PROD_URL = "https://incore2-services.ncsa.illinois.edu"
+KONG_INCORE_API_DEV_URL = "https://incore2-services-dev.ncsa.illinois.edu"
+
 KEYCLOAK_TOKEN_URL = "https://incore-dev-kube.ncsa.illinois.edu/auth/realms/In-core/protocol/openid-connect/token"
 CLIENT_ID = "react-auth"
 INCORE_LDAP_TEST_USER_INFO = "{\"preferred_username\": \"incrtest\"}"
