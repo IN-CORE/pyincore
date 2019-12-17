@@ -100,13 +100,14 @@ class PopulationDislocation(BaseAnalysis):
         result_name = self.get_parameter("result_name")
 
         # Building damage dataset
-        building_dmg = self.get_input_dataset("building_dmg").get_file_path('csv')
+        building_dmg = self.get_input_dataset("building_dmg").get_dataframe_from_csv(low_memory=False)
 
         # Housing unit allocation dataset
-        housing_unit_alloc = self.get_input_dataset("housing_unit_allocation").get_file_path('csv')
+        housing_unit_alloc = self.get_input_dataset("housing_unit_allocation"). \
+            get_dataframe_from_csv(low_memory=False)
 
-        # Block group data
-        bg_data = self.get_input_dataset("block_group_data").get_file_path('csv')
+        # Block group dataset
+        bg_data = self.get_input_dataset("block_group_data").get_dataframe_from_csv(low_memory=False)
 
         # Get value loss parameters
         value_loss = self.get_input_dataset("value_poss_param").get_file_path('csv')

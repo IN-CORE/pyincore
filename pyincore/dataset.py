@@ -253,6 +253,7 @@ class Dataset:
         """Utility method for reading different standard file formats: Pandas DataFrame from csv.
 
         Args:
+            index_col (int, str, sequence of int/str): Column(s) to use as the row labels of the DataFrame.
             low_memory (bool): A flag to suppress warning. Pandas is guessing dtypes for each column
             if column dtype is not specified which is very memory demanding.
 

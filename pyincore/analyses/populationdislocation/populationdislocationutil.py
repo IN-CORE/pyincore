@@ -9,23 +9,19 @@ import numpy as np
 class PopulationDislocationUtil:
 
     @staticmethod
-    def merge_damage_housing_block(building_dmg_file, housing_allocation_file, block_data_file):
+    def merge_damage_housing_block(building_dmg: pd.DataFrame, housing_allocation_inventory: pd.DataFrame,
+                                   block_data: pd.DataFrame):
         """Load CSV files to pandas Dataframes, merge them and drop unused columns.
 
         Args:
-            building_dmg_file: A building damage file in csv format.
-            housing_allocation_file: A housing unit allocation inventory file in csv format.
-            block_data_file: A block data file in csv format.
+            building_dmg (pd.DataFrame): A building damage file in csv format.
+            housing_allocation_inventory (pd.DataFrame): A housing unit allocation inventory file in csv format.
+            block_data (pd.DataFrame): A block data file in csv format.
 
         Returns:
             pd.DataFrame: A merged table of all three inputs.
 
         """
-        # load csv to DataFrame
-        building_dmg = pd.read_csv(building_dmg_file, low_memory=False)
-        housing_allocation_inventory = pd.read_csv(housing_allocation_file, low_memory=False)
-        block_data = pd.read_csv(block_data_file, low_memory=False)
-
         damage_states = ["insignific", "moderate", "heavy", "complete"]
 
         if set(damage_states).issubset(housing_allocation_inventory.columns):
