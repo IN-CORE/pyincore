@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.abspath('../../docs'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'pyincore'
+project = 'pyIncore'
 author = ''
 
 # The short X.Y version
