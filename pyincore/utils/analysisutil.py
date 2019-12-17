@@ -304,7 +304,7 @@ class AnalysisUtil:
             else:
                 return min(number_of_cpu, number_of_loops)
         else:
-            return number_of_cpu;
+            return number_of_cpu
 
     @staticmethod
     def create_result_dataset(datasvc: DataService, parentid: str,
