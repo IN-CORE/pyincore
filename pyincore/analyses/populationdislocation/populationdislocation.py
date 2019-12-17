@@ -187,7 +187,6 @@ class PopulationDislocation(BaseAnalysis):
         prob_disl_hvy = PopulationDislocationUtil.get_disl_probability(rploss_hvy, dsf, pbd, phd)
         prob_disl_cmp = PopulationDislocationUtil.get_disl_probability(rploss_cmp, dsf, pbd, phd)
 
-        print(prob_disl_ins, prob_ins, prob_disl_mod, prob_mod, prob_disl_hvy, prob_hvy, prob_disl_cmp, prob_cmp)
         # total_prob_disl is the sum of the probability of dislocation at four damage states
         # times the probability of being in that damage state.
         total_prob_disl = prob_disl_ins * prob_ins + prob_disl_mod * prob_mod + prob_disl_hvy * prob_hvy + \

@@ -42,21 +42,22 @@ class PopulationDislocationUtil:
             if col_drop in df.columns:
                 df = df.drop(columns=[col_drop])
 
-        # further add block data information to the dataframe
+        # further add block data information to the dataframe. BTW astype("Int64") converts floats to int
+        # and keeps NaN. We need the conversions for a merge.
         if "bgid" in df.columns:
-            df["bgid"] = df["bgid"].astype(str)
+            df["bgid"] = df["bgid"].astype("Int64")
         elif "blockid" in df.columns:
-            df["bgid"] = df["blockid"].astype(str)
+            df["bgid"] = df["blockid"].astype("Int64")
         elif "blockid_x" in df.columns:
             df = PopulationDislocationUtil.compare_columns(df, "blockid_x", "blockid_y", True)
             if "blockid_x-blockid_y" in df.columns:
                 exit("Column bgid is ambiguous, check the input datasets!")
             else:
-                df["bgid"] = df["blockid"].astype(str)
-        block_data["bgid"] = block_data["bgid"].astype(str)
+                df["bgid"] = df["blockid"].astype("Int64")
+        block_data["bgid"] = block_data["bgid"].astype("Int64")
 
         # outer merge on bgid
-        final_df = pd.merge(df, block_data, how="outer", on="bgid",
+        final_df = pd.merge(df, block_data, how="left", on="bgid",
                             validate="m:1")
 
         return final_df
@@ -145,7 +146,7 @@ class PopulationDislocationUtil:
         Args:
             table1_cols (list): columns in table 1
             table2_cols (list): columns in table 2
-            table_merged (pd.DataFrame):merged table
+            table_merged (pd.DataFrame): merged table
 
             Returns:
                 pd.DataFrame: Merged table

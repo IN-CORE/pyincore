@@ -29,10 +29,10 @@ def run_with_base_class():
 
     # Seaside
     # kube
-    # building_dmg = "5df7ccde425e0b00092cff7f"
-    # housing_unit_alloc = "5df7cc5c425e0b00092cff5a"
-    # bg_data = "5df7c88c425e0b00092c5e8f"
-    # value_loss = "5df8384a425e0b00092de799"
+    building_dmg = "5df7ccde425e0b00092cff7f"
+    housing_unit_alloc = "5df7cc5c425e0b00092cff5a"
+    bg_data = "5df86a8f425e0b00092e25e7"
+    value_loss = "5df8384a425e0b00092de799"
 
     # incore2
     # building_dmg = "5d5433edb9219c0689b98344"
@@ -42,10 +42,10 @@ def run_with_base_class():
 
     # Joplin
     # kube
-    building_dmg = "5df815ec425e0b00092daee1"
-    housing_unit_alloc = "5df7c989425e0b00092c5eb4"
-    bg_data = "5df7cb0b425e0b00092c9464"
-    value_loss = "5df8384a425e0b00092de799"
+    # building_dmg = "5df815ec425e0b00092daee1"
+    # housing_unit_alloc = "5df7c989425e0b00092c5eb4"
+    # bg_data = "5df7cb0b425e0b00092c9464"
+    # value_loss = "5df8384a425e0b00092de799"
 
     # incore2
     # building_dmg = ""
