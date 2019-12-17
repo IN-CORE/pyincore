@@ -13,8 +13,6 @@ import re
 from typing import List, Dict
 
 from scipy.stats import norm
-import numpy as np
-import pandas as pd
 
 from pyincore import DataService
 from pyincore import Parser

@@ -6,24 +6,6 @@ from pyincore import IncoreClient
 from pyincore.analyses.populationdislocation import PopulationDislocation, PopulationDislocationUtil
 
 
-def run_without_base_class():
-    client = IncoreClient()
-
-    seed_i = 1111
-    # Population Dislocation
-    podi = PopulationDislocation(client)
-    merged_block_inv = PopulationDislocationUtil.merge_damage_housing_block(
-        building_dmg_file='bldg_dmg_result.csv',
-        housing_unit_allocation_file='housingunitallocation_1111.csv',
-        block_data_file='bgdata.csv')
-    value_loss = 'value_loss.csv'
-
-    merged_final_inv = podi.get_dislocation(seed_i, merged_block_inv, value_loss)
-
-    # save to csv
-    merged_final_inv.to_csv("final_inventory" + str(seed_i) + ".csv", sep=",")
-
-
 def run_with_base_class():
     client = IncoreClient()
 
