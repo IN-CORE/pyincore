@@ -53,7 +53,7 @@ class PopulationDislocation(BaseAnalysis):
                     'id': 'building_dmg',
                     'required': True,
                     'description': 'Building damage factor results CSV file',
-                    'type': ['incore:buildingDamage', 'incore:buildingFactorDamage']
+                    'type': ['incore:buildingDamage', 'incore:buildingFactorDamage', 'ergo:buildingDamageVer4', 'ergo:buildingInventory' ]
                 },
                 {
                     'id': 'housing_unit_allocation',
@@ -110,6 +110,7 @@ class PopulationDislocation(BaseAnalysis):
 
         # Get value loss parameters
         value_loss = self.get_input_dataset("value_poss_param").get_file_path('csv')
+        value_loss = pd.read_csv(value_loss, index_col ="damagestate", low_memory=False)
 
         merged_block_inv = PopulationDislocationUtil.merge_damage_housing_block(
             building_dmg, housing_unit_alloc, bg_data
@@ -123,7 +124,7 @@ class PopulationDislocation(BaseAnalysis):
 
         return True
 
-    def get_dislocation(self, seed_i: int, inventory: pd.DataFrame, valueloss: pd.DataFrame):
+    def get_dislocation(self, seed_i: int, inventory: pd.DataFrame, value_loss: pd.DataFrame):
         """Calculates dislocation probability.
 
         Probability of dislocation, a binary variable based on the logistic probability of dislocation.
@@ -137,7 +138,7 @@ class PopulationDislocation(BaseAnalysis):
             seed_i (int): Seed for random number generator to ensure replication if run as part
             of a stochastic analysis, for example in connection with housing unit allocation analysis.
             inventory (pd.DataFrame): Merged building, housing unit allocation and block group inventories
-            valueloss (pd.DataFrame): Table used for value loss estimates, beta distribution
+            value_loss (pd.DataFrame): Table used for value loss estimates, beta distribution
 
         Returns:
             pd.DataFrame: An inventory with probabilities of dislocation in a separate column
@@ -145,7 +146,22 @@ class PopulationDislocation(BaseAnalysis):
         """
         # pd.Series to np.array
         # creats d_sf column it if it does not exist, overwrites d_sf values if it does
-        inventory["d_sf"] = (inventory["huestimate"] > 1).astype(int)
+        if "huestimate" in inventory.columns:
+            inventory["d_sf"] = (inventory["huestimate"] > 1).astype(int)
+        elif "huestimate_x" in inventory.columns:
+            inventory = PopulationDislocationUtil.compare_columns(inventory,
+                                                                  "huestimate_x",
+                                                                  "huestimate_y", True)
+            if "huestimate_x-huestimate_y" in inventory.columns:
+                exit("Column huestimate is ambiguous, check the input datasets!")
+            else:
+                inventory["d_sf"] = (inventory["huestimate"] > 1).astype(int)
+
+        # drop d_sf_x, d_sf_y if they exist
+        if "d_sf_x" in inventory.columns:
+            inventory = inventory.drop(columns=["d_sf_x"])
+        if "d_sf_y" in inventory.columns:
+            inventory = inventory.drop(columns=["d_sf_y"])
         dsf = inventory["d_sf"].values
         pbd = inventory["pblackbg"].values
         phd = inventory["phispbg"].values
@@ -156,10 +172,10 @@ class PopulationDislocation(BaseAnalysis):
         prob_cmp = inventory["complete"].values
 
         # include random value loss by damage state
-        rploss_ins = self.get_random_valueloss(seed_i, valueloss, "insignific", dsf.size)
-        rploss_mod = self.get_random_valueloss(seed_i, valueloss, "moderate", dsf.size)
-        rploss_hvy = self.get_random_valueloss(seed_i, valueloss, "heavy", dsf.size)
-        rploss_cmp = self.get_random_valueloss(seed_i, valueloss, "complete", dsf.size)
+        rploss_ins = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "insignific", dsf.size)
+        rploss_mod = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "moderate", dsf.size)
+        rploss_hvy = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "heavy", dsf.size)
+        rploss_cmp = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "complete", dsf.size)
 
         inventory["rploss_ins"] = rploss_ins
         inventory["rploss_med"] = rploss_mod
@@ -171,6 +187,7 @@ class PopulationDislocation(BaseAnalysis):
         prob_disl_hvy = PopulationDislocationUtil.get_disl_probability(rploss_hvy, dsf, pbd, phd)
         prob_disl_cmp = PopulationDislocationUtil.get_disl_probability(rploss_cmp, dsf, pbd, phd)
 
+        print(prob_disl_ins, prob_ins, prob_disl_mod, prob_mod, prob_disl_hvy, prob_hvy, prob_disl_cmp, prob_cmp)
         # total_prob_disl is the sum of the probability of dislocation at four damage states
         # times the probability of being in that damage state.
         total_prob_disl = prob_disl_ins * prob_ins + prob_disl_mod * prob_mod + prob_disl_hvy * prob_hvy + \

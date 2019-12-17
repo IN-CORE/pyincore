@@ -22,27 +22,37 @@ class PopulationDislocationUtil:
 
         """
         # load csv to DataFrame
-        building_dmg = pd.read_csv(building_dmg_file)
-        housing_allocation_inventory = pd.read_csv(housing_allocation_file)
-        block_data = pd.read_csv(block_data_file)
+        building_dmg = pd.read_csv(building_dmg_file, low_memory=False)
+        housing_allocation_inventory = pd.read_csv(housing_allocation_file, low_memory=False)
+        block_data = pd.read_csv(block_data_file, low_memory=False)
 
         damage_states = ["insignific", "moderate", "heavy", "complete"]
 
         if set(damage_states).issubset(housing_allocation_inventory.columns):
             housing_allocation_inventory = housing_allocation_inventory.drop(columns=damage_states)
 
-        # first merge hazard with population allocation inventory on "guid"
+        # first merge hazard with house unit allocation inventory on "guid"
         # note guid can be duplicated in housing unit allocation inventory
         df = pd.merge(building_dmg, housing_allocation_inventory,
                       how="right", on="guid", validate="1:m")
 
         # drop columns in building damage that is not used
-        df = df.drop(columns=["immocc", "lifesfty", "collprev", "hazardtype",
-                              "hazardval", "meandamage",
-                              "mdamagedev"])
+        col_drops = ["immocc", "lifesfty", "collprev", "hazardtype", "hazardval", "meandamage", "mdamagedev"]
+        for col_drop in col_drops:
+            if col_drop in df.columns:
+                df = df.drop(columns=[col_drop])
 
         # further add block data information to the dataframe
-        df["bgid"] = df["blockid"].astype(str)
+        if "bgid" in df.columns:
+            df["bgid"] = df["bgid"].astype(str)
+        elif "blockid" in df.columns:
+            df["bgid"] = df["blockid"].astype(str)
+        elif "blockid_x" in df.columns:
+            df = PopulationDislocationUtil.compare_columns(df, "blockid_x", "blockid_y", True)
+            if "blockid_x-blockid_y" in df.columns:
+                exit("Column bgid is ambiguous, check the input datasets!")
+            else:
+                df["bgid"] = df["blockid"].astype(str)
         block_data["bgid"] = block_data["bgid"].astype(str)
 
         # outer merge on bgid
@@ -93,3 +103,88 @@ class PopulationDislocationUtil:
             # raise e
 
         return disl_prob
+
+
+    @staticmethod
+    def get_random_valueloss(seed_i: int, df: pd.DataFrame, damagestate: str, size: int):
+        """
+        Calucalates value loss for each structure based on random beta distrbution
+        Value loss based on damage state is an input to the population dislocation model
+
+        Args:
+            seed_i (int): Seed for random normal to ensure replication if run as part of a stochastic analysis,
+                for example in connection with housing unit allocation analysis.
+            df (pd.DataFrame): Sata frame that includes the alpha, beta, lower bound, upper bound
+                for each required damage state
+            damagestate (str): Damage state to calculate value loss for.
+            size (int): Size of array to be generated.
+
+        Returns:
+            numpy.array: random distribution of value loss for each structure
+
+        """
+        # select upper bound and lower bound from input table
+
+        alpha = df.loc[damagestate, 'alpha']
+        beta = df.loc[damagestate, 'beta']
+        ub = df.loc[damagestate, 'ub']
+        lb = df.loc[damagestate, 'lb']
+
+        # Generate array of random values that follow beta distrubtion for damage state
+        np.random.seed(seed_i)
+        rploss = np.random.beta(alpha, beta, size) * (ub - lb) + lb
+
+        return rploss
+
+
+    @staticmethod
+    def compare_merges(table1_cols, table2_cols, table_merged):
+        """Compare two lists of columns and run compare columns on columns in both lists.
+        It assumes that suffixes are _x and _y
+
+        Args:
+            table1_cols (list): columns in table 1
+            table2_cols (list): columns in table 2
+            table_merged (pd.DataFrame):merged table
+
+            Returns:
+                pd.DataFrame: Merged table
+
+        """
+        match_column = set(table1_cols).intersection(table2_cols)
+        for col in match_column:
+            # Compare two columns and marked similarity or rename and drop
+            if col+"_x" in table_merged.columns and col+"_y" in table_merged.columns:
+                table_merged = PopulationDislocationUtil.compare_columns(table_merged,
+                                                                         col+"_x",
+                                                                         col+"_y", True)
+        return table_merged
+
+    @staticmethod
+    def compare_columns(table, col1, col2, drop):
+        """Compare two columns. If not equal create Tru/False column, if equal rename one of them
+        with the base name and drop the other.
+
+        Args:
+            table (pd.DataFrame): Data Frame table
+            col1 (pd.Series): Column 1
+            col2 (pd.Series): Column 2
+            drop (bool): rename and drop column
+
+        Returns:
+            pd.DataFrame: Table with True/False column
+
+        """
+        # Values in columns match or not, add True/False column
+        table.loc[table[col1] == table[col2], col1+"-"+col2] = True
+        table.loc[table[col1] != table[col2], col1+"-"+col2] = False
+
+        if table[col1].equals(table[col2]):
+            col1_base = col1.rsplit("_", 1)[0]
+            col2_base = col1.rsplit("_", 1)[0]
+            if col1_base == col2_base and drop:
+
+                table[col1_base] = table[col1]
+                table = table.drop(columns=[col1, col2, col1+"-"+col2])
+
+        return table

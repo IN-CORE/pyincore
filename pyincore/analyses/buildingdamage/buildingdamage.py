@@ -265,7 +265,7 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'buildings',
                     'required': True,
                     'description': 'Building Inventory',
-                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5'],
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
                 }
             ],
             'output_datasets': [
