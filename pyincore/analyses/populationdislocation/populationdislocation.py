@@ -110,8 +110,8 @@ class PopulationDislocation(BaseAnalysis):
         bg_data = self.get_input_dataset("block_group_data").get_dataframe_from_csv(low_memory=False)
 
         # Get value loss parameters
-        value_loss = self.get_input_dataset("value_poss_param").get_file_path('csv')
-        value_loss = pd.read_csv(value_loss, index_col ="damagestate", low_memory=False)
+        value_loss = self.get_input_dataset("value_poss_param").get_dataframe_from_csv(low_memory=False)
+        value_loss.set_index('damagestate', inplace=True)
 
         merged_block_inv = PopulationDislocationUtil.merge_damage_housing_block(
             building_dmg, housing_unit_alloc, bg_data

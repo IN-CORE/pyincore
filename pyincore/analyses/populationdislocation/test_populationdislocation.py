@@ -27,31 +27,12 @@ def run_without_base_class():
 def run_with_base_class():
     client = IncoreClient()
 
-    # Seaside
-    # kube
-    building_dmg = "5df7ccde425e0b00092cff7f"
-    housing_unit_alloc = "5df7cc5c425e0b00092cff5a"
-    bg_data = "5df86a8f425e0b00092e25e7"
-    value_loss = "5df8384a425e0b00092de799"
-
-    # incore2
-    # building_dmg = "5d5433edb9219c0689b98344"
-    # housing_unit_alloc = "5d543b06b9219c0689b987af"
-    # bg_data = "5d542bd8b9219c0689b90408"
-    # value_loss = "5df404ecb9219c06cf8b0cc4"
-
     # Joplin
-    # kube
-    # building_dmg = "5df815ec425e0b00092daee1"
-    # housing_unit_alloc = "5df7c989425e0b00092c5eb4"
-    # bg_data = "5df7cb0b425e0b00092c9464"
-    # value_loss = "5df8384a425e0b00092de799"
-
-    # incore2
-    # building_dmg = ""
-    # housing_unit_alloc = "5dc1c196b9219c06dd2e3f0b"
-    # bg_data = "5d4c9545b9219c0689b2358a"
-    # value_loss = "5df404ecb9219c06cf8b0cc4"
+    # kube-dev
+    building_dmg = "5df815ec425e0b00092daee1"
+    housing_unit_alloc = "5df7c989425e0b00092c5eb4"
+    bg_data = "5df7cb0b425e0b00092c9464"
+    value_loss = "5df8384a425e0b00092de799"
 
     pop_dis = PopulationDislocation(client)
 
