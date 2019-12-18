@@ -10,6 +10,7 @@ import json
 import pytest
 from jose import jwt
 
+from pyincore import globals as pyglobals
 from pyincore import FragilityService, RepairService, IncoreClient
 from pyincore.globals import LOGGER
 
@@ -40,7 +41,7 @@ def repairsvc(monkeypatch):
     credentials = jwt.decode(cred[0], cred[1])
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient(token_file_name=".incrtesttoken")
+    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
     return RepairService(client)
 
 

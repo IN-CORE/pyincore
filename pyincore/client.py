@@ -4,6 +4,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+import abc
 import base64
 import getpass
 import os
@@ -22,7 +23,6 @@ logger = pyglobals.LOGGER
 class Client:
     """Incore service Client class. It handles connection to the server with INCORE services and user authentication."""
     def __init__(self):
-        self.token_file = None
         self.session = requests.session()
 
         # if .incore is not a directory, create it and add a cache directory
@@ -37,58 +37,11 @@ class Client:
             if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
                 logger.warn("Unable to create cache directory.")
 
+    @abc.abstractmethod
     def login(self):
-        token_url = pyglobals.KEYCLOAK_TOKEN_URL
-        for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
-            username = input("Enter username: ")
-            password = getpass.getpass("Enter password: ")
-            r = requests.post(token_url, data={'grant_type': 'password',
-                                               'client_id': pyglobals.CLIENT_ID,
-                                               'username': username, 'password': password})
-            if r.status_code == 200:
-                token = r.json()
-                if token is None or token["access_token"] is None:
-                    logger.warning("Authentication Failed.")
-                    exit(0)
-                authorization = str("bearer " + token["access_token"])
-                self.store_authorization_in_file(authorization)
-                self.session.headers['Authorization'] = authorization
-                return True
-            logger.warning("Authentication failed, attempting login again.")
-
-        logger.warning("Authentication failed.")
-        exit(0)
-
-    def store_authorization_in_file(self, authorization: str):
         """
-        Store the access token in local file. If the file does not exist, this function creates it.
-        :param authorization: authorization in the format "bearer access_token"
-        :return: None
+        Authenticate client
         """
-        try:
-            with open(self.token_file, 'w') as f:
-                f.write(authorization)
-        except IOError as e:
-            logger.warning("Unable to write file. I/O error({0}): {1}".format(e.errno, e.strerror))
-
-    def retrieve_token_from_file(self):
-        """
-        Attempts to retrieve authorization from a local file, if it exists.
-        :return: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
-        """
-        if not os.path.isfile(self.token_file):
-            return None
-        else:
-            try:
-                with open(self.token_file, 'r') as f:
-                    auth = f.read().splitlines()
-                return auth[0]
-            except IndexError as e:
-                logger.exception("Error reading authorization from token file. "
-                                 "Index error({0}): {1}".format(e.errno, e.strerror))
-            except OSError as e:
-                logger.exception("Error attempting to open token file."
-                                 "OS error({0}): {1}".format(e.errno, e.strerror))
 
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.
@@ -201,6 +154,7 @@ class IncoreClient(Client):
         if service_url is None or len(service_url.strip()) == 0:
             service_url = pyglobals.INCORE_API_PROD_URL
         self.service_url = service_url
+        self.token_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_AUTH_PATH)
 
         if token_file_name is None or len(token_file_name.strip()) == 0:
             token_file_name = pyglobals.TOKEN_FILE_NAME
@@ -211,6 +165,58 @@ class IncoreClient(Client):
             self.session.headers["Authorization"] = authorization
         else:
             self.login()
+
+    def login(self):
+        for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
+            username = input("Enter username: ")
+            password = getpass.getpass("Enter password: ")
+            r = requests.post(self.token_url, data={'grant_type': 'password',
+                                                    'client_id': pyglobals.CLIENT_ID,
+                                                    'username': username, 'password': password})
+            if r.status_code == 200:
+                token = r.json()
+                if token is None or token["access_token"] is None:
+                    logger.warning("Authentication Failed.")
+                    exit(0)
+                authorization = str("bearer " + token["access_token"])
+                self.store_authorization_in_file(authorization)
+                self.session.headers['Authorization'] = authorization
+                return True
+            logger.warning("Authentication failed, attempting login again.")
+
+        logger.warning("Authentication failed.")
+        exit(0)
+
+    def store_authorization_in_file(self, authorization: str):
+        """
+        Store the access token in local file. If the file does not exist, this function creates it.
+        :param authorization: authorization in the format "bearer access_token"
+        :return: None
+        """
+        try:
+            with open(self.token_file, 'w') as f:
+                f.write(authorization)
+        except IOError as e:
+            logger.warning("Unable to write file. I/O error({0}): {1}".format(e.errno, e.strerror))
+
+    def retrieve_token_from_file(self):
+        """
+        Attempts to retrieve authorization from a local file, if it exists.
+        :return: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
+        """
+        if not os.path.isfile(self.token_file):
+            return None
+        else:
+            try:
+                with open(self.token_file, 'r') as f:
+                    auth = f.read().splitlines()
+                return auth[0]
+            except IndexError as e:
+                logger.exception("Error reading authorization from token file. "
+                                 "Index error({0}): {1}".format(e.errno, e.strerror))
+            except OSError as e:
+                logger.exception("Error attempting to open token file."
+                                 "OS error({0}): {1}".format(e.errno, e.strerror))
 
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.
