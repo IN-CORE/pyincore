@@ -4,39 +4,39 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
 import pytest
-import requests
+from jose import jwt
 
-from pyincore import IncoreClient, InsecureIncoreClient
-from pyincore.globals import INCORE_API_DEV_URL, INCORE_API_DEV_INSECURE_URL
-
-
-@pytest.fixture
-def cred():
-    c = []
-    try:
-        with open(".incorepw", 'r') as f:
-            c = f.read().splitlines()
-        return c
-    except EnvironmentError:
-        return None
+from pyincore import Client, IncoreClient
 
 
-def test_client_success(cred):
+def test_client_success(monkeypatch):
     """
     testing successful login
     """
-    if cred is None:
-        assert False, ".incorepw does not exist!"
-    # client = IncoreClient(INCORE_API_DEV_URL, cred[0], cred[1])
-    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, cred[0])
-    assert client.status is "success"
+    try:
+        with open(".incorepw", 'r') as f:
+            cred = f.read().splitlines()
+    except EnvironmentError:
+        assert False
+    credentials = jwt.decode(cred[0], cred[1])
+    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
+    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
+    client = IncoreClient(token_file_name=".incrtesttoken")
+    assert "bearer" in str(client.session.headers["Authorization"])
 
 
-def test_client_fail():
+def test_client_fail(monkeypatch):
     """
     testing failed login
     """
-    client = IncoreClient(INCORE_API_DEV_URL, "foo", "pass")
-    assert client.status is "fail"
+    with pytest.raises(SystemExit):
+        monkeypatch.setattr("builtins.input", lambda x: "incrtest")
+        monkeypatch.setattr("getpass.getpass", lambda y: "invalid-password")
+        IncoreClient(token_file_name=".none")
+
+
+@pytest.mark.skip(reason="needs for thought on what to assert")
+def test_delete_cache():
+    r = Client.clear_cache()
+    assert r is None

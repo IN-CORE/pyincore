@@ -4,36 +4,48 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
 import ast
-
-import pytest
 import os
 import re
 
-from pyincore import DataService, InsecureIncoreClient, Dataset, \
-    NetworkDataset, NetworkData
-from pyincore.globals import INCORE_API_DEV_INSECURE_URL
+import pytest
+from jose import jwt
+
+from pyincore import globals as pyglobals
+from pyincore import (
+    DataService,
+    Dataset,
+    IncoreClient,
+    NetworkData,
+    NetworkDataset,
+)
 
 
 @pytest.fixture
-def datasvc():
-    client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL)
-
+def datasvc(monkeypatch):
+    try:
+        with open(".incorepw", 'r') as f:
+            cred = f.read().splitlines()
+    except EnvironmentError:
+        assert False
+    credentials = jwt.decode(cred[0], cred[1])
+    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
+    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
+    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
     return DataService(client)
 
 
 def test_get_dataset_metadata(datasvc):
-    id = "5a284f0ac7d30d13bc0819c4"
-    metadata = datasvc.get_dataset_metadata(id)
-    assert metadata['id'] == id
+    dataset_id = "5a284f0ac7d30d13bc0819c4"
+    metadata = datasvc.get_dataset_metadata(dataset_id)
+    assert metadata['id'] == dataset_id
 
 
 def test_get_dataset_files_metadata(datasvc):
     errors = []
-    id = "5a284f0ac7d30d13bc0819c4"
-    metadata = datasvc.get_dataset_metadata(id)
-    fileDescriptor = datasvc.get_dataset_files_metadata(id)
+    dataset_id = "5a284f0ac7d30d13bc0819c4"
+    metadata = datasvc.get_dataset_metadata(dataset_id)
+    fileDescriptor = datasvc.get_dataset_files_metadata(dataset_id)
 
     if 'id' not in fileDescriptor[0].keys():
         errors.append("response does not seem right!")
@@ -56,8 +68,8 @@ def test_get_dataset_file_metadata(datasvc):
 
 def test_get_dataset_blob(datasvc):
     errors = []
-    id = "5a284f0ac7d30d13bc0819c4"
-    fname = datasvc.get_dataset_blob(id, join=True)
+    dataset_id = "5a284f0ac7d30d13bc0819c4"
+    fname = datasvc.get_dataset_blob(dataset_id, join=True)
 
     if type(fname) != str:
         errors.append("doesn't return the correct filename!")
@@ -87,7 +99,6 @@ def test_create_dataset_geotif(datasvc):
     """
     Testing create dataset with geotif file
     """
-    dataset_prop = {}
     with open('geotif_sample.json', 'r') as file:
         dataset_prop = ast.literal_eval(file.read())
     response = datasvc.create_dataset(dataset_prop)
@@ -98,18 +109,18 @@ def test_create_dataset_geotif(datasvc):
     dataset_id = response['id']
     print('dataset is created with id ' + dataset_id)
     files = ['geotif_sample.tif']
+
     response = datasvc.add_files_to_dataset(dataset_id, files)
-
-    # TODO: need to delete the test dataset
-
     assert response['id'] == dataset_id
+
+    r = datasvc.delete_dataset(dataset_id)
+    assert r["id"] == dataset_id
 
 
 def test_create_dataset_shpfile(datasvc):
     """
     Testing create dataset with shapefile
     """
-    dataset_prop = {}
     with open('shp_sample.json', 'r') as file:
         dataset_prop = ast.literal_eval(file.read())
     response = datasvc.create_dataset(dataset_prop)
@@ -124,17 +135,17 @@ def test_create_dataset_shpfile(datasvc):
              'shp_sample/shp_sample.shx',
              'shp_sample/shp_sample.prj']
     response = datasvc.add_files_to_dataset(dataset_id, files)
-
-    # TODO: need to delete the test dataset
-
     assert response['id'] == dataset_id
+
+    r = datasvc.delete_dataset(dataset_id)
+    assert r["id"] == dataset_id
 
 
 def test_update_dataset(datasvc):
-    id = "5ace7322ec230944f695f5cf"
+    dataset_id = "5ace7322ec230944f695f5cf"
     property_name = "title"
     property_value = "test update dataset"
-    response = datasvc.update_dataset(id, property_name, property_value)
+    response = datasvc.update_dataset(dataset_id, property_name, property_value)
 
     assert response[property_name] == property_value
 
@@ -151,8 +162,8 @@ def test_get_file_metadata(datasvc):
 
 def test_get_file_blob(datasvc):
     errors = []
-    id = "5a284f24c7d30d13bc081adb"
-    fname = datasvc.get_file_blob(id)
+    dataset_id = "5a284f24c7d30d13bc081adb"
+    fname = datasvc.get_file_blob(dataset_id)
 
     if type(fname) != str:
         errors.append("doesn't return the correct filename!")
@@ -161,52 +172,6 @@ def test_get_file_blob(datasvc):
         errors.append("no file has been downloaded!")
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
-
-
-# These should be moved to a separate test for the refactored space service
-# @pytest.mark.parametrize("space,expected", [
-#     ({'mettadatta': {'name': 'bad'}}, 400),
-# ])
-# def test_create_space(datasvc, space, expected):
-#     response = datasvc.create_space(space)
-#
-#     assert response.status_code == expected
-
-
-# @pytest.mark.parametrize("space_id,dataset_id,expected", [
-#    ("5c89287d5648c42a917569d8", "5a284f09c7d30d13bc0819a6", 200),
-#    ("5c89287d5648c42a917569d8", "5a284f09c7d30d13b0000000", 404),
-#    ("5c75bd1a9e503f2ea0000000", "5a284f09c7d30d13bc0819a6", 404),
-# ])
-# def test_add_dataset_to_space(datasvc, space_id, dataset_id, expected):
-#    response = datasvc.add_dataset_to_space(space_id=space_id, dataset_id=dataset_id)
-#
-#    assert response.status_code == expected
-
-
-# @pytest.mark.parametrize("space_id,space,expected", [
-#    ("5c89287d5648c42a917569d8", {'metadata': {'name': 'test-space'}}, 400),
-#    ("5c75bd1a9e503f2ea0500000", {'metadata': {'name': 'not found'}}, 404),
-# ])
-# def test_update_space(datasvc, space_id, space, expected):
-#    """
-#    If the new name already exists, it will throw a bad request exception
-#    """
-#    response = datasvc.update_space(space_id=space_id, space=space)
-
-#   assert response.status_code == expected
-
-
-# def test_get_spaces(datasvc):
-#    metadata = datasvc.get_spaces()
-#
-#    assert 'members' in metadata[0].keys()
-
-
-# def test_get_space(datasvc):
-#    response = datasvc.get_space("5c89287d5648c42a917569d8")
-#
-#    assert response.status_code == 200
 
 
 def test_create_network_dataset(datasvc):

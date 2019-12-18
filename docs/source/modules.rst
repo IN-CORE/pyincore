@@ -15,11 +15,6 @@ buildingdamage
 ..  autoclass:: buildingdamage.buildingutil.BuildingUtil
     :members:
 
-buildingportfolio
-=================
-..  autoclass:: from pyincore.analyses.buildingportfolio.recovery.BuildingData
-    :members:
-
 cumulativebuildingdamage
 ========================
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
@@ -30,11 +25,6 @@ epfdamage
 ..  autoclass:: epfdamage.epfdamage.EpfDamage
     :members:
 ..  autoclass:: epfdamage.epfutil.EpfUtil
-    :members:
-
-epnrecoverymodel
-================
-..  autoclass:: epnrecoverymodel.epnrecoverymodel.EpnRecoveryModel
     :members:
 
 example
@@ -50,6 +40,11 @@ housingunitallocation
 joplincgeanalysis
 =================
 ..  autoclass:: joplincgeanalysis.joplincgeanalysis.JoplinCGEModel
+    :members:
+
+meandamage
+==========
+..  autoclass:: meandamage.meandamage.MeanDamage
     :members:
 
 montecarlofailureprobability
@@ -81,11 +76,6 @@ populationdislocation
 ..  autoclass:: populationdislocation.populationdislocation.PopulationDislocation
     :members:
 ..  autoclass:: populationdislocation.populationdislocationutil.PopulationDislocationUtil
-    :members:
-
-roaddamage
-==========
-..  autoclass:: roaddamage.roaddamage.RoadDamage
     :members:
 
 tornadoepndamage
@@ -193,12 +183,3 @@ utils/geoutil
 ..  autoclass:: utils.geoutil.GeoUtil
     :members:
 
-utils/plotutil
-==============
-..  autoclass:: utils.plotutil.PlotUtil
-    :members:
-
-
-----
-
-`IN-CORE home <index.html>`_

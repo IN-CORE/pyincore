@@ -10,7 +10,12 @@ with open(os.path.join(script_path, 'release-packages.yml')) as f:
     config = yaml.safe_load(f)
 
 internalExcludes = ['__pycache__', 'build', 'cache_data', 'dist', 'pyincore.egg-info']
-excludeList = config['exclude'] + internalExcludes
+
+excludeList = None
+if config['exclude'] is not None:
+    excludeList = config['exclude'] + internalExcludes
+else:
+    excludeList = internalExcludes
 
 version = config['version']
 

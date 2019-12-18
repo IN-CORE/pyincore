@@ -31,6 +31,16 @@ class AnalysisUtil:
 
     @staticmethod
     def get_building_period(num_stories, fragility_set):
+        """Get building period from the fragility curve.
+
+        Args:
+            num_stories (int): Number of building stories.
+            fragility_set (obj): A JSON description of fragility applicable to the building.
+
+        Returns:
+            float: Building period.
+
+        """
         period = 0.0
 
         fragility_curve = fragility_set['fragilityCurves'][0]
@@ -294,7 +304,7 @@ class AnalysisUtil:
             else:
                 return min(number_of_cpu, number_of_loops)
         else:
-            return number_of_cpu;
+            return number_of_cpu
 
     @staticmethod
     def create_result_dataset(datasvc: DataService, parentid: str,

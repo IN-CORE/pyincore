@@ -5,9 +5,8 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import math
-import csv
 import collections
-
+from pyincore import AnalysisUtil
 
 class NonStructBuildingUtil:
     """Utility methods for the non-structural building damage analysis."""
@@ -20,35 +19,6 @@ class NonStructBuildingUtil:
 
     DEFAULT_FRAGILITY_KEY_DS = "Drift-Sensitive Fragility ID Code"
     DEFAULT_FRAGILITY_KEY_AS = "Acceleration-Sensitive Fragility ID Code"
-
-    @staticmethod
-    def get_building_period(num_stories, fragility_set):
-        """Get building period from the fragility curve.
-
-        Args:
-            num_stories (int): Number of building stories.
-            fragility_set (obj): A JSON-like description of fragility applicable to the bridge.
-
-        Returns:
-            float: Building period.
-
-        """
-        period = 0.0
-
-        fragility_curve = fragility_set['fragilityCurves'][0]
-        if fragility_curve[
-            'className'] == 'PeriodStandardFragilityCurve':
-            period_equation_type = fragility_curve['periodEqnType']
-            if period_equation_type == 1:
-                period = fragility_curve['periodParam0']
-            elif period_equation_type == 3:
-                period = fragility_curve['periodParam0'] * num_stories
-            elif period_equation_type == 3:
-                period = fragility_curve['periodParam1'] * math.pow(
-                    fragility_curve['periodParam0'] * num_stories,
-                    fragility_curve['periodParam2'])
-
-        return period
 
     @staticmethod
     def get_hazard_demand_type(building, fragility_set, hazard_type):
@@ -68,7 +38,7 @@ class NonStructBuildingUtil:
 
         if hazard_type.lower() == "earthquake":
             num_stories = building['properties']['no_stories']
-            building_period = NonStructBuildingUtil.get_building_period(num_stories,
+            building_period = AnalysisUtil.get_building_period(num_stories,
                                                                fragility_set)
 
             if fragility_hazard_type.endswith(

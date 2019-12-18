@@ -1,10 +1,9 @@
-from pyincore import InsecureIncoreClient
+from pyincore import IncoreClient
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
 
 
 def test_pipeline_dmg_w_repair_rate():
-    client = InsecureIncoreClient(
-        "http://incore2-services-dev.ncsa.illinois.edu:8888", "incrtest")
+    client = IncoreClient()
 
     # This is the Memphis Water Buried Pipeline with Topology dataset the Ergo repository
     pipeline_dataset_id = "5a284f28c7d30d13bc081d14"

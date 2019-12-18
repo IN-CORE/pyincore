@@ -550,7 +550,7 @@ class HazardService:
         """
         url = self.base_hurricanewf_url
         headers = {'Content-type': 'application/json'}
-        new_headers = {**self.client.headers, **headers}
+        new_headers = {**self.client.session.headers, **headers}
         kwargs = {"headers": new_headers}
         r = self.client.post(url, data=hurr_wf_inputs, timeout=(30, 10800), **kwargs)
         response = r.json()

@@ -30,14 +30,13 @@ sys.path.insert(0, os.path.abspath('../../docs'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'pyincore'
-copyright = 'Mozilla Public License v2.0'
-author = 'ISDA NCSA'
+project = 'pyIncore'
+author = ''
 
 # The short X.Y version
-version = '0.5.2'
+version = '0.5.3'
 # The full version, including alpha/beta/rc tags
-release = '0.5.2'
+release = '0.5.3'
 
 
 # -- General configuration ---------------------------------------------------

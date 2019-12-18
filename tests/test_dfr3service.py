@@ -4,36 +4,44 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
 import ast
 
-import pytest
 import json
-from pyincore.globals import INCORE_API_DEV_INSECURE_URL, LOGGER
+import pytest
+from jose import jwt
 
-from pyincore import FragilityService, RepairService, InsecureIncoreClient
+from pyincore import globals as pyglobals
+from pyincore import FragilityService, RepairService, IncoreClient
+from pyincore.globals import LOGGER
 
 logger = LOGGER
 
-cred = None
-try:
-    with open(".incorepw", 'r') as f:
-        cred = f.read().splitlines()
-except EnvironmentError:
-    logger.error('The.incorepw is either missing or is in incorrect format')
-    raise
-
-# client = IncoreClient("https://incore2-services.ncsa.illinois.edu", cred[0], cred[1])
-client = InsecureIncoreClient(INCORE_API_DEV_INSECURE_URL, "incrtest")
-
 
 @pytest.fixture
-def fragilitysvc():
+def fragilitysvc(monkeypatch):
+    try:
+        with open(".incorepw", 'r') as f:
+            cred = f.read().splitlines()
+    except EnvironmentError:
+        assert False
+    credentials = jwt.decode(cred[0], cred[1])
+    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
+    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
+    client = IncoreClient(token_file_name=".incrtesttoken")
     return FragilityService(client)
 
 
 @pytest.fixture
-def repairsvc():
+def repairsvc(monkeypatch):
+    try:
+        with open(".incorepw", 'r') as f:
+            cred = f.read().splitlines()
+    except EnvironmentError:
+        assert False
+    credentials = jwt.decode(cred[0], cred[1])
+    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
+    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
+    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
     return RepairService(client)
 
 
