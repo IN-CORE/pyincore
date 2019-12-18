@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.5.3] - 2019-12-20
+pyIncore release for IN-CORE v1.0
 
 ### Added
 
