@@ -197,7 +197,7 @@ class IncoreClient(Client):
             with open(self.token_file, 'w') as f:
                 f.write(authorization)
         except IOError as e:
-            logger.warning("Unable to write file. I/O error({0}): {1}".format(e.errno, e.strerror))
+            logger.warning(e)
 
     def retrieve_token_from_file(self):
         """
@@ -212,11 +212,11 @@ class IncoreClient(Client):
                     auth = f.read().splitlines()
                 return auth[0]
             except IndexError as e:
-                logger.exception("Error reading authorization from token file. "
-                                 "Index error({0}): {1}".format(e.errno, e.strerror))
+                logger.exception(e)
+                return None
             except OSError as e:
-                logger.exception("Error attempting to open token file."
-                                 "OS error({0}): {1}".format(e.errno, e.strerror))
+                logger.exception(e)
+                return None
 
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.

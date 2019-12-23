@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.4] - 2019-12-23
+
+### Fixed
+
+- Update bridge damage type in MonteCarlo Analysis
+- Fixed error handling with formatting problem in pyIncore Client
+
+
 ## [0.5.3] - 2019-12-20
 pyIncore release for IN-CORE v1.0
 
