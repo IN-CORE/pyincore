@@ -4,15 +4,11 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import os
 from setuptools import setup, find_packages
-
-PYINCORE_USER_CACHE = os.path.join(os.path.expanduser('~'), ".incore")
-CRED_FILE_NAME = ".incorepw"
 
 setup(
     name='pyincore',
-    version='0.5.3',
+    version='0.5.4',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     package_data={
@@ -71,15 +67,3 @@ setup(
     license="Mozilla Public License v2.0",
     url="https://git.ncsa.illinois.edu/incore/pyincore"
 )
-
-try:
-    if not os.path.exists(PYINCORE_USER_CACHE):
-       os.makedirs(PYINCORE_USER_CACHE)
-
-    pwfile = os.path.join(PYINCORE_USER_CACHE, CRED_FILE_NAME)
-    if not os.path.exists(pwfile):
-        f = open(pwfile, "w")
-        f.close()
-        print("pyIncore credentials file created at " + pwfile)
-except OSError:
-    raise
