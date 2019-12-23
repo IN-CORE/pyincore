@@ -10,7 +10,7 @@ To **update** pyIncore run the following command:
 
 .. code-block:: bash
 
-    conda update pyincore
+    conda update -c in-core pyincore
 
 .. toctree::
    :maxdepth: 2
