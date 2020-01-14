@@ -214,6 +214,11 @@ class IncoreClient(Client):
             try:
                 with open(self.token_file, 'r') as f:
                     auth = f.read().splitlines()
+                    # check if token is valid
+                    userinfo_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_USERINFO_PATH)
+                    r = requests.get(userinfo_url, headers={'Authorization': auth[0]})
+                    if r.status_code != 200:
+                        return None
                 return auth[0]
             except IndexError as e:
                 logger.exception(e)
