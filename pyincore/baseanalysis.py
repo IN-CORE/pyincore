@@ -247,8 +247,11 @@ class BaseAnalysis:
             if not result[0]:
                 print("Error reading parameter: " + result[1])
                 return result
-
-        return self.run()
+        try:
+            return self.run()
+        except SystemExit:
+            self.client.login()
+            return self.run()
 
     def run(self):
         return True
