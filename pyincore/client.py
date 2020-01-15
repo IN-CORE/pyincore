@@ -173,7 +173,7 @@ class IncoreClient(Client):
                 password = getpass.getpass("Enter password: ")
             except EOFError as e:
                 logger.warning(e)
-                exit(1)
+                raise e
             r = requests.post(self.token_url, data={'grant_type': 'password',
                                                     'client_id': pyglobals.CLIENT_ID,
                                                     'username': username, 'password': password})

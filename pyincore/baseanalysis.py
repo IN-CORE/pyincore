@@ -249,7 +249,7 @@ class BaseAnalysis:
                 return result
         try:
             return self.run()
-        except SystemExit:
+        except EOFError:
             self.client.login()
             return self.run()
 
