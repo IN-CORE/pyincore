@@ -168,8 +168,12 @@ class IncoreClient(Client):
 
     def login(self):
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
-            username = input("Enter username: ")
-            password = getpass.getpass("Enter password: ")
+            try:
+                username = getpass.getpass("Enter username: ")
+                password = getpass.getpass("Enter password: ")
+            except EOFError as e:
+                logger.warning(e)
+                raise e
             r = requests.post(self.token_url, data={'grant_type': 'password',
                                                     'client_id': pyglobals.CLIENT_ID,
                                                     'username': username, 'password': password})
@@ -210,6 +214,11 @@ class IncoreClient(Client):
             try:
                 with open(self.token_file, 'r') as f:
                     auth = f.read().splitlines()
+                    # check if token is valid
+                    userinfo_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_USERINFO_PATH)
+                    r = requests.get(userinfo_url, headers={'Authorization': auth[0]})
+                    if r.status_code != 200:
+                        return None
                 return auth[0]
             except IndexError as e:
                 logger.exception(e)
@@ -325,8 +334,12 @@ class LdapClient(Client):
         Returns:
             True if successful, system exit if not
         """
-        username = input("Enter username: ")
-        password = getpass.getpass("Enter password: ")
+        try:
+            username = input("Enter username: ")
+            password = getpass.getpass("Enter password: ")
+        except EOFError as e:
+            logger.warning(e)
+            exit(1)
         url = urllib.parse.urljoin(self.service_url, "auth/api/login")
         b64_value = base64.b64encode(bytes('%s:%s' % (username, password), "utf-8"))
         r = requests.get(url, headers={"Authorization": "LDAP %s" % b64_value.decode('ascii')})

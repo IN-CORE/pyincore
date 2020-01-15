@@ -18,6 +18,7 @@ KONG_INCORE_API_PROD_URL = "https://incore2-services.ncsa.illinois.edu"
 KONG_INCORE_API_DEV_URL = "https://incore2-services-dev.ncsa.illinois.edu"
 
 KEYCLOAK_AUTH_PATH = "/auth/realms/In-core/protocol/openid-connect/token"
+KEYCLOAK_USERINFO_PATH = "/auth/realms/In-core/protocol/openid-connect/userinfo"
 CLIENT_ID = "react-auth"
 INCORE_LDAP_TEST_USER_INFO = "{\"preferred_username\": \"incrtest\"}"
 
