@@ -247,11 +247,7 @@ class BaseAnalysis:
             if not result[0]:
                 print("Error reading parameter: " + result[1])
                 return result
-        try:
-            return self.run()
-        except EOFError:
-            self.client.login()
-            return self.run()
+        return self.run()
 
     def run(self):
         return True
