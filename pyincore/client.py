@@ -169,7 +169,7 @@ class IncoreClient(Client):
     def login(self):
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
             try:
-                username = getpass.getpass("Enter username: ")
+                username = input("Enter username: ")
                 password = getpass.getpass("Enter password: ")
             except EOFError as e:
                 logger.warning(e)
