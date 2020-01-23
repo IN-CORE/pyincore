@@ -220,11 +220,9 @@ class IncoreClient(Client):
                     if r.status_code != 200:
                         return None
                 return auth[0]
-            except IndexError as e:
-                logger.exception(e)
+            except IndexError:
                 return None
-            except OSError as e:
-                logger.exception(e)
+            except OSError:
                 return None
 
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
