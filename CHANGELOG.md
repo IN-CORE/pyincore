@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- add another layer of folder in cache folder using datasetid to differentiate 
+datasets with the same name
+
+
 ## [0.5.4] - 2019-12-23
 
 ### Fixed
