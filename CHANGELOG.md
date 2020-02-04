@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - add another layer of folder in cache folder using datasetid to differentiate 
-datasets with the same name
+datasets with the same name [INCORE1-433](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-433)
+- Fixed link in pyIncore documentation, page refs
 
 
 ## [0.5.4] - 2019-12-23
