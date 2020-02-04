@@ -8,7 +8,6 @@ import getpass
 import os
 import shutil
 import urllib.parse
-from pathlib import Path
 
 import requests
 
@@ -150,7 +149,7 @@ class IncoreClient(Client):
 
         if token_file_name is None or len(token_file_name.strip()) == 0:
             token_file_name = pyglobals.TOKEN_FILE_NAME
-        self.token_file = Path(os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name))
+        self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
 
         authorization = self.retrieve_token_from_file()
         if authorization is not None:
