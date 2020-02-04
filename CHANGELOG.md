@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added insecure client to test against {url}:31888 when using NCSA's network. [INCORE1-455](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-455)
+- Added documentation to building functionality analysis. [INCORE-435](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-435)
 
 ## [0.5.4] - 2019-12-23
 
@@ -23,7 +24,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Update bridge damage type in MonteCarlo Analysis
 - Fixed error handling with formatting problem in pyIncore Client
-
 
 ## [0.5.3] - 2019-12-20
 pyIncore release for IN-CORE v1.0

@@ -10,7 +10,13 @@ import numpy as np
 
 
 class BuildingFunctionality(BaseAnalysis):
-
+    """The building functionality analysis can be used to calculate building functionality probabilities considering
+    two situations: buildings are in at least a damage state 2 or greater or buildings are not damaged but electric
+    power is not available to the building. Whether buildings can receive electrical power is assumed to depend on
+    the interdependency between buildings and substations, and between buildings and poles in close proximity.
+    If both the nearest pole to the building and the substation where buildings belong to its service area are
+    functional, buildings are considered to be able to receive electric power.
+    """
     def __init__(self, incore_client):
         super().__init__(incore_client)
 
