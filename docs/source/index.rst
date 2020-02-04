@@ -19,5 +19,3 @@ To **update** pyIncore run the following command:
 
    mod_top
    refs
-
-

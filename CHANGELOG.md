@@ -7,12 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-### Added
-### Changed
-### Removed
 ### Fixed
 
-- Fixed end of file exception caused by analysis that run in parallel by checking validity of token on client instantiation. [INCORE1-427](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-427)
+- Fixed link in pyIncore documentation, page refs
+
 
 ## [0.5.4] - 2019-12-23
 
@@ -20,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Update bridge damage type in MonteCarlo Analysis
 - Fixed error handling with formatting problem in pyIncore Client
- 
+
 
 ## [0.5.3] - 2019-12-20
 pyIncore release for IN-CORE v1.0
