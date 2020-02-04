@@ -12,10 +12,9 @@ import os
 PACKAGE_VERSION = "0.5.4"
 
 INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
+TEST_INCORE_API_PROD_URL = "http://incore.ncsa.illinois.edu:31888"
 INCORE_API_DEV_URL = "https://incore-dev-kube.ncsa.illinois.edu"
-
-KONG_INCORE_API_PROD_URL = "https://incore2-services.ncsa.illinois.edu"
-KONG_INCORE_API_DEV_URL = "https://incore2-services-dev.ncsa.illinois.edu"
+TEST_INCORE_API_DEV_URL = "http://incore-dev-kube.ncsa.illinois.edu:31888"
 
 KEYCLOAK_AUTH_PATH = "/auth/realms/In-core/protocol/openid-connect/token"
 KEYCLOAK_USERINFO_PATH = "/auth/realms/In-core/protocol/openid-connect/userinfo"
