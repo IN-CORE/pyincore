@@ -108,12 +108,8 @@ class PipelineDamage(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            if hazard_type == "earthquake":
-                fragility_key = "pgv"
-            elif hazard_type == "tsunami":
-                fragility_key = "Non-Retrofit inundationDepth Fragility ID Code"
-            else:
-                raise ValueError("You have to define the fragility key!")
+            fragility_key = "Non-Retrofit inundationDepth Fragility ID Code" if hazard_type == 'tsunami' else "pgv"
+            self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
         fragility_sets = self.fragilitysvc.map_inventory(

@@ -113,12 +113,9 @@ class PipelineDamageRepairRate(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            if hazard_type == "earthquake":
-                fragility_key = PipelineUtil.DEFAULT_EQ_FRAGILITY_KEY
-            elif hazard_type == "tsunami":
-                fragility_key = PipelineUtil.DEFAULT_TSU_FRAGILITY_KEY
-            else:
-                raise ValueError("You have to define the fragility key!")
+            fragility_key = PipelineUtil.DEFAULT_TSU_FRAGILITY_KEY if hazard_type == 'tsunami' else \
+                PipelineUtil.DEFAULT_EQ_FRAGILITY_KEY
+            self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
         fragility_sets = self.fragilitysvc.map_inventory(
