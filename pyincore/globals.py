@@ -9,7 +9,7 @@ from logging import config as logging_config
 import logging
 import os
 
-PACKAGE_VERSION = "0.5.4"
+PACKAGE_VERSION = "0.5.5"
 
 INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
 TEST_INCORE_API_PROD_URL = "http://incore.ncsa.illinois.edu:31888"
