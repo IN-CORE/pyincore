@@ -43,11 +43,9 @@ class BuildingDamage(BaseAnalysis):
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
-        if fragility_key is None and not hazard_type == 'tsunami':
-            fragility_key = BuildingUtil.DEFAULT_FRAGILITY_KEY
-            self.set_parameter("fragility_key", fragility_key)
-        else:
-            fragility_key = BuildingUtil.DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY
+        if fragility_key is None:
+            fragility_key = BuildingUtil.DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY if hazard_type == 'tsunami' else \
+                BuildingUtil.DEFAULT_FRAGILITY_KEY
             self.set_parameter("fragility_key", fragility_key)
 
         user_defined_cpu = 1

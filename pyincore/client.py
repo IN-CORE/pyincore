@@ -4,13 +4,10 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import abc
-import base64
 import getpass
 import os
 import shutil
 import urllib.parse
-from pathlib import Path
 
 import requests
 
@@ -36,12 +33,6 @@ class Client:
             os.makedirs(pyglobals.PYINCORE_USER_DATA_CACHE)
             if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
                 logger.warn("Unable to create cache directory.")
-
-    @abc.abstractmethod
-    def login(self):
-        """
-        Authenticate client
-        """
 
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.
@@ -143,11 +134,11 @@ class Client:
 
 
 class IncoreClient(Client):
-    """IN-CORE secure service client class. It contains token and service root url.
+    """IN-CORE service client class. It contains token and service root url.
 
     Args:
         service_url (str): Service url.
-
+        token_file_name (str): Path to file containing the authorization token.
     """
     def __init__(self, service_url: str = None, token_file_name: str = None):
         super().__init__()
@@ -158,7 +149,7 @@ class IncoreClient(Client):
 
         if token_file_name is None or len(token_file_name.strip()) == 0:
             token_file_name = pyglobals.TOKEN_FILE_NAME
-        self.token_file = Path(os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name))
+        self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
 
         authorization = self.retrieve_token_from_file()
         if authorization is not None:
@@ -168,8 +159,12 @@ class IncoreClient(Client):
 
     def login(self):
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
-            username = input("Enter username: ")
-            password = getpass.getpass("Enter password: ")
+            try:
+                username = input("Enter username: ")
+                password = getpass.getpass("Enter password: ")
+            except EOFError as e:
+                logger.warning(e)
+                raise e
             r = requests.post(self.token_url, data={'grant_type': 'password',
                                                     'client_id': pyglobals.CLIENT_ID,
                                                     'username': username, 'password': password})
@@ -210,12 +205,15 @@ class IncoreClient(Client):
             try:
                 with open(self.token_file, 'r') as f:
                     auth = f.read().splitlines()
+                    # check if token is valid
+                    userinfo_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_USERINFO_PATH)
+                    r = requests.get(userinfo_url, headers={'Authorization': auth[0]})
+                    if r.status_code != 200:
+                        return None
                 return auth[0]
-            except IndexError as e:
-                logger.exception(e)
+            except IndexError:
                 return None
-            except OSError as e:
-                logger.exception(e)
+            except OSError:
                 return None
 
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
@@ -303,40 +301,21 @@ class IncoreClient(Client):
         return self.return_http_response(r)
 
 
-class LdapClient(Client):
-    """Incore service Client class. It contains token and service root url.
+class InsecureIncoreClient(Client):
+    """IN-CORE service client class that bypasses Ambassador auth. It contains token and service root url.
 
-    Args:
-        service_url (str): Service url.
+        Args:
+            service_url (str): Service url.
+            username (str): Username string.
+        """
 
-    """
-    def __init__(self, service_url: str = None):
+    def __init__(self, service_url: str = None, username: str = None):
         super().__init__()
         if service_url is None or len(service_url.strip()) == 0:
-            service_url = pyglobals.KONG_INCORE_API_DEV_URL
+            service_url = pyglobals.TEST_INCORE_API_PROD_URL
         self.service_url = service_url
-
-        self.auth_token = None
-        self.headers = {}
-        self.login()
-
-    def login(self):
-        """Function to retrieve token from the login service. Authentication API endpoint is called.
-        Returns:
-            True if successful, system exit if not
-        """
-        username = input("Enter username: ")
-        password = getpass.getpass("Enter password: ")
-        url = urllib.parse.urljoin(self.service_url, "auth/api/login")
-        b64_value = base64.b64encode(bytes('%s:%s' % (username, password), "utf-8"))
-        r = requests.get(url, headers={"Authorization": "LDAP %s" % b64_value.decode('ascii')})
-        if str(r.status_code).startswith('5'):
-            logger.critical("Authentication API call failed. Something is wrong with the authentication server")
-        elif r is not None and 'auth-token' in r.json():
-            auth = r.json()
-            self.auth_token = auth['auth-token']
-            self.headers = {'auth-user': username, 'auth-token': self.auth_token, 'Authorization': ''}
-            self.session.headers.update(self.headers)
-            return True
-        logger.warning("Authentication failed.")
-        exit(0)
+        if username is None or len(username.strip()) == 0:
+            self.session.headers["x-auth-userinfo"] = pyglobals.INCORE_LDAP_TEST_USER_INFO
+        else:
+            user_info = "{\"preferred_username\": \"" + username + "\"}"
+            self.session.headers["x-auth-userinfo"] = user_info

@@ -107,7 +107,13 @@ class DataService:
         cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
         if not os.path.exists(cache_data):
             os.makedirs(cache_data)
-        local_filename = os.path.join(cache_data, fname[0].strip('\"'))
+
+        # add another layer of dataset id folder to differentiate datasets with the same filename
+        cache_data_dir = os.path.join(cache_data, dataset_id)
+        if not os.path.exists(cache_data_dir):
+            os.makedirs(cache_data_dir)
+
+        local_filename = os.path.join(cache_data_dir, fname[0].strip('\"'))
 
         # download
         with open(local_filename, 'wb') as f:

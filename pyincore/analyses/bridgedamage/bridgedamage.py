@@ -102,10 +102,9 @@ class BridgeDamage(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            if hazard_type == "tsunami":
-                fragility_key = BridgeUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY
-            else:
-                fragility_key = BridgeUtil.DEFAULT_FRAGILITY_KEY
+            fragility_key = BridgeUtil.DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY if hazard_type == 'tsunami' else \
+                BridgeUtil.DEFAULT_FRAGILITY_KEY
+            self.set_parameter("fragility_key", fragility_key)
 
         # Hazard Uncertainty
         use_hazard_uncertainty = False

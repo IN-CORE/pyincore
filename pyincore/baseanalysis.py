@@ -247,7 +247,6 @@ class BaseAnalysis:
             if not result[0]:
                 print("Error reading parameter: " + result[1])
                 return result
-
         return self.run()
 
     def run(self):
