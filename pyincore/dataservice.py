@@ -86,6 +86,37 @@ class DataService:
             str: Folder or file name.
 
         """
+        local_filename = None
+
+        # construct local directory and filename
+        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
+        if not os.path.exists(cache_data):
+            os.makedirs(cache_data)
+
+        # add another layer of dataset id folder to differentiate datasets with the same filename
+        cache_data_dir = os.path.join(cache_data, dataset_id)
+
+        # if cache_data_dir doesn't exist create one
+        if not os.path.exists(cache_data_dir):
+            os.makedirs(cache_data_dir)
+            local_filename = self.download_dataset_blob(cache_data_dir, dataset_id)
+
+        # if cache_data_dir exist, check if id folder and zip file exist inside
+        else:
+            for fname in os.listdir(cache_data_dir):
+                if fname.endswith('.zip'):
+                    local_filename = os.path.join(cache_data_dir, fname)
+                    print('Dataset already exists locally. Reading from local cached zip.')
+            if not local_filename:
+                local_filename = self.download_dataset_blob(cache_data_dir, dataset_id)
+
+        folder = self.unzip_dataset(local_filename)
+        if folder is not None:
+            return folder
+        else:
+            return local_filename
+
+    def download_dataset_blob(self, cache_data_dir:str, dataset_id:str, join=None):
         # construct url for file download
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/blob')
         kwargs = {"stream": True}
@@ -103,16 +134,6 @@ class DataService:
         disposition = r.headers['content-disposition']
         fname = re.findall("filename=(.+)", disposition)
 
-        # construct local directory and filename
-        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
-        if not os.path.exists(cache_data):
-            os.makedirs(cache_data)
-
-        # add another layer of dataset id folder to differentiate datasets with the same filename
-        cache_data_dir = os.path.join(cache_data, dataset_id)
-        if not os.path.exists(cache_data_dir):
-            os.makedirs(cache_data_dir)
-
         local_filename = os.path.join(cache_data_dir, fname[0].strip('\"'))
 
         # download
@@ -121,11 +142,7 @@ class DataService:
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
 
-        folder = self.unzip_dataset(local_filename)
-        if folder is not None:
-            return folder
-        else:
-            return local_filename
+        return local_filename
 
     def get_datasets(self, datatype: str = None, title: str = None, creator: str = None, skip: int = None,
                      limit: int = None, space: str = None):
@@ -311,7 +328,7 @@ class DataService:
             return None
         # check the folder existance, no unzip
         if os.path.isdir(foldername):
-            print('Dataset already exists locally. Reading from local cache.')
+            print('Unzipped folder found in the local cache. Reading from it...')
             return foldername
         os.makedirs(foldername)
 
