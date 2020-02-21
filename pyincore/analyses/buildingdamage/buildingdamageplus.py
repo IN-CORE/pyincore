@@ -110,21 +110,19 @@ class BuildingDamagePlus(BaseAnalysis):
             self.get_parameter("mapping_id"), buildings, fragility_key)
 
         grouped_buildings = dict()
-
         bldg_results = []
-
         list_buildings = buildings
+
         buildings = dict()
+        # Converting list of buildings into a dictionary for ease of reference
         for b in list_buildings:
             buildings[b["id"]] = b
+
+        list_buildings = None  # Clear as it's not needed anymore
 
         # Create grouped list of buildings by combination of demand type and demand unit
         for frg_key, bldgs in fragility_sets.items():
             for bldg_id, frag in bldgs.items():
-                # TODO: getting by index can be hacky, but iterating through the list to match id field
-                #  can have impact on performance. Better solution can be to create a dict instead of list
-                #  for buildings
-                #TODO: is building_id always an integer? will it be guid anytime?
                 building = buildings[bldg_id]
                 fragility_set = fragility_sets[fragility_key][bldg_id]
 
@@ -182,7 +180,16 @@ class BuildingDamagePlus(BaseAnalysis):
                 bldg_result['hazardval'] = hazard_val
 
                 bldg_results.append(bldg_result)
+                del buildings[bldg_id] # remove processed buildings
                 i = i + 1
+
+        for unmapped_bldg_id,unmapped_bldg in buildings.items():
+            unmapped_bldg_result = collections.OrderedDict()
+            unmapped_bldg_result['guid'] = unmapped_bldg['properties']['guid']
+            unmapped_bldg_result['demandtype'] = "NA"
+            unmapped_bldg_result['demandunits'] = "NA"
+            unmapped_bldg_result['hazardval'] = "NA"  # TODO: What's a good default? use 0?
+            bldg_results.append(unmapped_bldg_result)
 
         return bldg_results
 
