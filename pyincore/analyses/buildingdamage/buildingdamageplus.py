@@ -142,7 +142,7 @@ class BuildingDamagePlus(BaseAnalysis):
             input_demand_units = demand[1]
 
             # For every group of unique demand and demand unit, call the end-point once
-            bldg_chunks = list(AnalysisUtil.chunks(grouped_bldgs, 50))
+            bldg_chunks = list(AnalysisUtil.chunks(grouped_bldgs, 50))  # TODO: Move to globals?
             for bldgs in bldg_chunks:
                 points = []
                 for bldg_id in bldgs:
