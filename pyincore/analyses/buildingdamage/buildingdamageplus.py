@@ -157,7 +157,8 @@ class BuildingDamagePlus(BaseAnalysis):
                 print("hurricane not yet implemented")
 
             i = 0
-            # Parse the batch hazard value results and map them back to the building and fragility
+            # Parse the batch hazard value results and map them back to the building and fragility.
+            # This is a potential pitfall as we are relying on the order of the returned results
             for bldg_id in bldgs:
                 bldg_result = collections.OrderedDict()
                 building = buildings[bldg_id]
