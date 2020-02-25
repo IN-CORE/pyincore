@@ -115,7 +115,7 @@ class RoadDamage(BaseAnalysis):
         """
 
         result = []
-        fragility_sets = self.fragilitysvc.map_inventory(self.get_parameter("mapping_id"), roads, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory(self.get_parameter("mapping_id"), roads, fragility_key)
 
         for road in roads:
             if road["id"] in fragility_sets.keys():

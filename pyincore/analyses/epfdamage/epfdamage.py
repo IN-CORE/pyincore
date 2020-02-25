@@ -124,7 +124,7 @@ class EpfDamage(BaseAnalysis):
         mapping_id = self.get_parameter("mapping_id")
 
         fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.map_inventory(mapping_id, epfs,
+        fragility_sets[fragility_key] = self.fragilitysvc.match_inventory(mapping_id, epfs,
                                                                         fragility_key)
 
         liq_fragility_set = []
@@ -132,7 +132,7 @@ class EpfDamage(BaseAnalysis):
             liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
             if liq_fragility_key is None:
                 liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-            liq_fragility_set = self.fragilitysvc.map_inventory(mapping_id, epfs, liq_fragility_key)
+            liq_fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, liq_fragility_key)
 
         # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
         liq_fragility = None

@@ -10,8 +10,8 @@ import concurrent.futures
 import traceback
 from itertools import repeat
 
-from pyincore import BaseAnalysis, HazardService, FragilityService, \
-    AnalysisUtil, GeoUtil
+from pyincore import BaseAnalysis, HazardService, \
+    FragilityService, AnalysisUtil, GeoUtil
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 
 
@@ -105,7 +105,7 @@ class BuildingDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.map_inventory(
+        fragility_sets[fragility_key] = self.fragilitysvc.match_inventory(
             self.get_parameter("mapping_id"), buildings, fragility_key)
 
         for building in buildings:
