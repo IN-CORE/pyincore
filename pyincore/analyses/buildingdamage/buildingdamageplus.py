@@ -166,10 +166,11 @@ class BuildingDamagePlus(BaseAnalysis):
                     bldg_result = collections.OrderedDict()
                     building = buildings[bldg_id]
                     hazard_val = hazard_vals[i]['hazardValue']
-                    period = float(hazard_vals[i]['period'])
                     output_demand_type = hazard_vals[i]['demand']
-                    if period > 0 :
-                        output_demand_type = str(hazard_vals[i]['period']) + "s " + output_demand_type
+                    if hazard_type == 'earthquake':
+                        period = float(hazard_vals[i]['period'])
+                        if period > 0 :
+                            output_demand_type = str(hazard_vals[i]['period']) + "s " + output_demand_type
 
                     num_stories = building['properties']['no_stories']
                     fragility_set = fragility_sets[fragility_key][bldg_id]
