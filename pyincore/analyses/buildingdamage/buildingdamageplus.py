@@ -192,13 +192,15 @@ class BuildingDamagePlus(BaseAnalysis):
                     bldg_results.append(bldg_result)
                     del buildings[bldg_id] # remove processed buildings
                     i = i + 1
-
+        unmapped_hazard_val = 0.0
+        unmapped_output_demand_type = "None"
+        unmapped_output_demand_unit = "None"
         for unmapped_bldg_id,unmapped_bldg in buildings.items():
             unmapped_bldg_result = collections.OrderedDict()
             unmapped_bldg_result['guid'] = unmapped_bldg['properties']['guid']
-            unmapped_bldg_result['demandtype'] = "NA"
-            unmapped_bldg_result['demandunits'] = "NA"
-            unmapped_bldg_result['hazardval'] = "NA"  # TODO: What's a good default? use 0?
+            unmapped_bldg_result['demandtype'] = unmapped_output_demand_type
+            unmapped_bldg_result['demandunits'] = unmapped_output_demand_unit
+            unmapped_bldg_result['hazardval'] = unmapped_hazard_val
             bldg_results.append(unmapped_bldg_result)
 
         return bldg_results
