@@ -166,6 +166,11 @@ class BuildingDamagePlus(BaseAnalysis):
                     bldg_result = collections.OrderedDict()
                     building = buildings[bldg_id]
                     hazard_val = hazard_vals[i]['hazardValue']
+                    period = float(hazard_vals[i]['period'])
+                    output_demand_type = hazard_vals[i]['demand']
+                    if period > 0 :
+                        output_demand_type = str(hazard_vals[i]['period']) + "s " + output_demand_type
+
                     num_stories = building['properties']['no_stories']
                     fragility_set = fragility_sets[fragility_key][bldg_id]
                     building_period = AnalysisUtil.get_building_period(num_stories, fragility_set)
@@ -179,7 +184,7 @@ class BuildingDamagePlus(BaseAnalysis):
                     bldg_result.update(dmg_interval)
                     # TODO: It might be better to use the applied demand type instead of what's
                     #  specified in the fragility? 0.2 SA returned from API instead of 0.24 Sa
-                    bldg_result['demandtype'] = input_demand_type
+                    bldg_result['demandtype'] = output_demand_type
                     bldg_result['demandunits'] = input_demand_units
                     bldg_result['hazardval'] = hazard_val
 
