@@ -7,7 +7,6 @@
 
 import collections
 import concurrent.futures
-import traceback
 from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, \
@@ -126,8 +125,7 @@ class BuildingDamage(BaseAnalysis):
                 fragility_set = fragility_sets[fragility_key][bldg_id]
 
                 # TODO include liquefaction and hazard uncertainty
-                hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, fragility_set,
-                    hazard_type)
+                hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, fragility_set, hazard_type)
                 demand_type = hazard_demand_type
                 demand_units = frag.get("demandUnits")
                 tpl = (demand_type, demand_units)
@@ -176,8 +174,7 @@ class BuildingDamage(BaseAnalysis):
                     fragility_set = fragility_sets[fragility_key][bldg_id]
                     building_period = AnalysisUtil.get_building_period(num_stories, fragility_set)
 
-                    dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val,
-                        building_period)
+                    dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, building_period)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
                     bldg_result['guid'] = building['properties']['guid']
@@ -188,12 +185,12 @@ class BuildingDamage(BaseAnalysis):
                     bldg_result['hazardval'] = hazard_val
 
                     bldg_results.append(bldg_result)
-                    del buildings[bldg_id] # remove processed buildings
+                    del buildings[bldg_id]  # remove processed buildings
                     i = i + 1
         unmapped_hazard_val = 0.0
         unmapped_output_demand_type = "None"
         unmapped_output_demand_unit = "None"
-        for unmapped_bldg_id,unmapped_bldg in buildings.items():
+        for unmapped_bldg_id, unmapped_bldg in buildings.items():
             unmapped_bldg_result = collections.OrderedDict()
             unmapped_bldg_result['guid'] = unmapped_bldg['properties']['guid']
             unmapped_bldg_result['demandtype'] = unmapped_output_demand_type
