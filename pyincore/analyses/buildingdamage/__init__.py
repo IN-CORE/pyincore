@@ -7,4 +7,3 @@
 
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 from pyincore.analyses.buildingdamage.buildingdamage import BuildingDamage
-from pyincore.analyses.buildingdamage.buildingdamageplus import BuildingDamagePlus
