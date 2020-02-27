@@ -14,6 +14,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, \
     AnalysisUtil, GeoUtil
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 
+
 class BuildingDamagePlus(BaseAnalysis):
     """Building Damage Analysis calculates the probability of building damage based on
     different hazard type such as earthquake, tsunami and tornado by calling fragility
@@ -53,7 +54,6 @@ class BuildingDamagePlus(BaseAnalysis):
             user_defined_cpu = self.get_parameter("num_cpu")
 
         num_workers = AnalysisUtil.determine_parallelism_locally(self, len(bldg_set), user_defined_cpu)
-
 
         avg_bulk_input_size = int(len(bldg_set) / num_workers)
         inventory_args = []
@@ -170,7 +170,7 @@ class BuildingDamagePlus(BaseAnalysis):
                     if hazard_type == 'earthquake':
                         period = float(hazard_vals[i]['period'])
                         if period > 0 :
-                            output_demand_type = str(hazard_vals[i]['period']) + "s " + output_demand_type
+                            output_demand_type = str(hazard_vals[i]['period']) + " " + output_demand_type
 
                     num_stories = building['properties']['no_stories']
                     fragility_set = fragility_sets[fragility_key][bldg_id]
