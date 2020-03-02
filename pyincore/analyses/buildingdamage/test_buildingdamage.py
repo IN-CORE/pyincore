@@ -21,15 +21,37 @@ def run_with_base_class():
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
 
-    result_name = "memphis_bldg_dmg_result"
+    result_name = "memphis_eq_bldg_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("mapping_id", mapping_id)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
-    bldg_dmg.set_parameter("num_cpu", 1)
+    bldg_dmg.set_parameter("num_cpu", 4)
 
     # Run Analysis
     bldg_dmg.run_analysis()
+
+    #TSUNAMI
+
+    # hazard_type = "tsunami"
+    # hazard_id = "5bc9e25ef7b08533c7e610dc"
+    #
+    # # Seaside building dataset
+    # bldg_dataset_id = "5bcf2fcbf242fe047ce79dad"
+    #
+    # # Tsunami mapping
+    # mapping_id = "5b48fb1f337d4a478e7bd54d"
+    #
+    # # Run seaside tsunami building damage
+    # bldg_dmg = BuildingDamage(client)
+    # bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
+    # result_name = "seaside_tsunami_dmg_result"
+    # bldg_dmg.set_parameter("result_name", result_name)
+    # bldg_dmg.set_parameter("mapping_id", mapping_id)
+    # bldg_dmg.set_parameter("hazard_type", hazard_type)
+    # bldg_dmg.set_parameter("hazard_id", hazard_id)
+    # bldg_dmg.set_parameter("num_cpu", 4)
+    # bldg_dmg.run_analysis()
 
 
 if __name__ == '__main__':

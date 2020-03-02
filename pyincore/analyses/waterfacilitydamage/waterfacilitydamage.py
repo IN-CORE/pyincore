@@ -212,7 +212,7 @@ class WaterFacilityDamage(BaseAnalysis):
             if fragility_key is None:
                 fragility_key = self.DEFAULT_EQ_FRAGILITY_KEY
 
-            pga_fragility_set = self.fragilitysvc.map_inventory(mapping_id,
+            pga_fragility_set = self.fragilitysvc.match_inventory(mapping_id,
                                                                   facilities,
                                                                   fragility_key)
 
@@ -222,7 +222,7 @@ class WaterFacilityDamage(BaseAnalysis):
                     "liquefaction_fragility_key")
                 if liq_fragility_key is None:
                     liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-                liq_fragility_set = self.fragilitysvc.map_inventory(
+                liq_fragility_set = self.fragilitysvc.match_inventory(
                     mapping_id, facilities, liq_fragility_key)
 
             for facility in facilities:
@@ -242,7 +242,7 @@ class WaterFacilityDamage(BaseAnalysis):
             if fragility_key is None:
                 fragility_key = self.DEFAULT_TSU_FRAGILITY_KEY
 
-            inundation_fragility_set = self.fragilitysvc.map_inventory(
+            inundation_fragility_set = self.fragilitysvc.match_inventory(
                 mapping_id, facilities, fragility_key)
 
             for facility in facilities:

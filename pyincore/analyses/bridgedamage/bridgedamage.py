@@ -120,7 +120,7 @@ class BridgeDamage(BaseAnalysis):
             use_liquefaction = self.get_parameter("use_liquefaction")
 
         result = []
-        fragility_sets = self.fragilitysvc.map_inventory(
+        fragility_sets = self.fragilitysvc.match_inventory(
             self.get_parameter("mapping_id"), bridges, fragility_key)
         for bridge in bridges:
             fragility_set = None
