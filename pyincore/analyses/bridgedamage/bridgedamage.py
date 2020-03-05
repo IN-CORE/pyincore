@@ -169,8 +169,8 @@ class BridgeDamage(BaseAnalysis):
 
         if fragility_set is not None:
             location = GeoUtil.get_location(bridge)
-            demand_type = fragility_set['demandType']
-            demand_units = fragility_set['demandUnits']
+            demand_type = fragility_set.demand_type
+            demand_units = fragility_set.demand_units
             point = str(location.y) + "," + str(location.x)
 
             if hazard_type == "earthquake":
@@ -202,7 +202,7 @@ class BridgeDamage(BaseAnalysis):
                 hazard_std_dev = random.random()
 
             if use_liquefaction and 'liq' in bridge['properties']:
-                for fragility in fragility_set["fragilityCurves"]:
+                for fragility in fragility_set.fragility_curves:
                     adjusted_fragility_set.append(
                         AnalysisUtil.adjust_fragility_for_liquefaction(
                             fragility, bridge['properties']['liq']))
