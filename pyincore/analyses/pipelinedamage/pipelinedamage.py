@@ -143,8 +143,8 @@ class PipelineDamage(BaseAnalysis):
                         "ls-extensi": 0.0, "ls-complet": 0.0}
 
         if fragility_set is not None:
-            demand_type = fragility_set['demandType'].lower()
-            demand_units = fragility_set['demandUnits']
+            demand_type = fragility_set.demand_type.lower()
+            demand_units = fragility_set.demand_units
             location = GeoUtil.get_location(pipeline)
             point = str(location.y) + "," + str(location.x)
 
