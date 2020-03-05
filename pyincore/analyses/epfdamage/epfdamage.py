@@ -174,9 +174,9 @@ class EpfDamage(BaseAnalysis):
 
         if fragility_set is not None:
             location = GeoUtil.get_location(facility)
-            demand_type = fragility_set['demandType']
+            demand_type = fragility_set.demand_type
             point = str(location.y) + "," + str(location.x)
-            demand_units = fragility_set['demandUnits']
+            demand_units = fragility_set.demand_units
 
             liq_hazard_val = "NA"
             liquefaction_prob = "NA"
@@ -196,8 +196,8 @@ class EpfDamage(BaseAnalysis):
 
                 # use ground liquefaction to modify damage interval
                 if liq_fragility is not None and liq_geology_dataset_id:
-                    liq_hazard_type = liq_fragility['demandType']
-                    pgd_demand_units = liq_fragility['demandUnits']
+                    liq_hazard_type = liq_fragility.demand_type
+                    pgd_demand_units = liq_fragility.demand_units
                     point = str(location.y) + "," + str(location.x)
                     liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, liq_geology_dataset_id,
                                                                           pgd_demand_units, [point])
@@ -218,7 +218,7 @@ class EpfDamage(BaseAnalysis):
                 raise ValueError('Hurricane hazard has not yet been implemented!')
 
             elif hazard_type == 'tsunami':
-                demand_units = fragility_set["demandUnits"]
+                demand_units = fragility_set.demand_units
                 point = str(location.y) + "," + str(location.x)
                 hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
                                                                       demand_type,
