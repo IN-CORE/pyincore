@@ -8,7 +8,7 @@
 import json
 
 
-class DFR3Curves:
+class DFR3Curve:
     """class for dfr3 curves.
 
     Args:
@@ -17,6 +17,7 @@ class DFR3Curves:
     """
 
     def __init__(self, metadata):
+        # TODO think if we need id or not?
         self.id = metadata["id"]
         self.demand_type = metadata["demandType"]
         self.demand_units = metadata["demandUnits"]
@@ -33,23 +34,6 @@ class DFR3Curves:
             self.restorationCurves = metadata['restorationCurves']
         else:
             raise ValueError("Cannot create dfr3 curve object. Missing key field.")
-
-    # @classmethod
-    # def from_dfr3_service(cls, id: str, dfr3_service: Dfr3Service):
-    #     """Get an dfr3set object from dfr3 services.
-    #
-    #     Args:
-    #         id:
-    #         dfr3_service:
-    #
-    #     Returns:
-    #         obj: dfr3set from dfr3 service.
-    #
-    #     """
-    #     metadata = dfr3_service.get_dfr3_set(id)
-    #     instance = cls(metadata)
-    #
-    #     return instance
 
     @classmethod
     def from_dict(cls, metadata):

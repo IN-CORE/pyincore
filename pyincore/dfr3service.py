@@ -12,7 +12,8 @@ import jsonpickle
 import re
 
 from pyincore import IncoreClient
-from pyincore.dfr3curve import DFR3Curves
+from pyincore.dfr3curve import DFR3Curve
+from pyincore.mapping import Mapping
 
 
 class MappingSubject(object):
@@ -49,67 +50,6 @@ class Dfr3Service:
         self.base_mapping_url = urllib.parse.urljoin(client.service_url,
                                                      'dfr3/api/mappings/')
 
-    def map_inventory(self, mapping_id: str, inventories: dict, key: str):
-        """Mapping between inventories (buildings, bridges etc.) and DFR3 sets.
-
-        Args:
-            mapping_id (str): ID of the Mapping file.
-            inventories (dict):  Infrastructure inventory.
-            key (str): Parameter's key in param dictionary.
-
-        Returns:
-            dict: DFR3 sets from the response.
-
-        """
-        features = []
-
-        for inventory in inventories:
-            # hack, change null to an empty string
-            # Some metadata field values are null even though the field is defined
-            # in the Mapping as a string
-            if "occ_type" in inventory["properties"] and \
-                    inventory["properties"]["occ_type"] is None:
-                inventory["properties"]["occ_type"] = ""
-            if "efacility" in inventory["properties"] and \
-                    inventory["properties"]["efacility"] is None:
-                inventory["properties"]["efacility"] = ""
-
-            features.append(inventory)
-
-        feature_collection = {
-            "type": "FeatureCollection",
-            "features": features,
-        }
-
-        mapping_request = MappingRequest()
-        mapping_request.subject.schema = "building"  # currently it is not used in the service side
-        mapping_request.subject.inventory = feature_collection
-        mapping_request.params["key"] = key
-
-        url = urllib.parse.urljoin(self.base_mapping_url,
-                                   mapping_id + "/matched")
-
-        json = jsonpickle.encode(mapping_request, unpicklable=False).encode(
-            "utf-8")
-        headers = {'Content-type': 'application/json'}
-        # merge two headers
-        new_headers = {**self.client.session.headers, **headers}
-        kwargs = {"headers": new_headers}
-        r = self.client.post(url, data=json, **kwargs)
-
-        response = r.json()
-
-        # construct list of DFR3 sets
-        mapping = response["mapping"]
-        sets = response["sets"]
-
-        # reconstruct a dictionary of DFR3 sets from the response
-        dfr3_sets = {}
-        for k, v in mapping.items():
-            dfr3_sets[k] = sets[v]
-
-        return dfr3_sets
-
     def get_dfr3_set(self, dfr3_id: str):
         """Get all DFR3 sets.
 
@@ -128,7 +68,7 @@ class Dfr3Service:
     def batch_get_dfr3_set(self, dfr3_id_lists: list):
         batch_dfr3_sets = {}
         for id in dfr3_id_lists:
-            batch_dfr3_sets[id] = DFR3Curves.from_dict(self.get_dfr3_set(id))
+            batch_dfr3_sets[id] = DFR3Curve.from_dict(self.get_dfr3_set(id))
 
         return batch_dfr3_sets
 
@@ -170,8 +110,8 @@ class Dfr3Service:
 
     def match_inventory(self, mapping_id: str, inventories: dict, entry_key: str):
 
-        # 1. download mapping
-        mapping = self.get_mapping(mapping_id)
+        # 1. download mapping and cast it to mapping object
+        mapping = Mapping.from_dict(self.get_mapping(mapping_id))
         dfr3_sets = {}
 
         # 2. loop through inventory to match the rules
@@ -184,7 +124,7 @@ class Dfr3Service:
                     inventory["properties"]["efacility"] is None:
                 inventory["properties"]["efacility"] = ""
 
-            for m in mapping['mappings']:
+            for m in mapping.mappings:
 
                 if self._property_match(rules=m['rules'], properties=inventory["properties"]):
                     curve_id = m['entry'][entry_key]

@@ -20,7 +20,8 @@ from pyincore.restorationservice import RestorationService
 from pyincore.spaceservice import SpaceService
 from pyincore.utils.analysisutil import AnalysisUtil
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
-from pyincore.dfr3curve import DFR3Curves
+from pyincore.dfr3curve import DFR3Curve
+from pyincore.mapping import Mapping
 from pyincore.networkdata import NetworkData
 from pyincore.networkdataset import NetworkDataset
 from pyincore.baseanalysis import BaseAnalysis
