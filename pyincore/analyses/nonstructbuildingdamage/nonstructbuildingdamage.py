@@ -160,7 +160,7 @@ class NonStructBuildingDamage(BaseAnalysis):
             hazard_demand_type_as = NonStructBuildingUtil.get_hazard_demand_type(building,
                                                                      fragility_set_as,
                                                                      'earthquake')
-            demand_units_as = fragility_set_as['demandUnits']
+            demand_units_as = fragility_set_as.demand_units
             location = GeoUtil.get_location(building)
 
             point = str(location.y) + "," + str(location.x)
@@ -203,7 +203,7 @@ class NonStructBuildingDamage(BaseAnalysis):
             hazard_demand_type_ds = NonStructBuildingUtil.get_hazard_demand_type(building,
                                                                                  fragility_set_ds,
                                                                                  'earthquake')
-            demand_units_ds = fragility_set_ds['demandUnits']
+            demand_units_ds = fragility_set_ds.demand_units
             location = GeoUtil.get_location(building)
 
             point = str(location.y) + "," + str(location.x)
