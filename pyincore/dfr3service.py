@@ -108,10 +108,9 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set)
         return r.json()
 
-    def match_inventory(self, mapping_id: str, inventories: dict, entry_key: str):
+    def match_inventory(self, mapping: object, inventories: dict, entry_key: str):
 
         # 1. download mapping and cast it to mapping object
-        mapping = Mapping.from_dict(self.get_mapping(mapping_id))
         dfr3_sets = {}
 
         # 2. loop through inventory to match the rules

@@ -34,6 +34,9 @@ class BuildingDamage(BaseAnalysis):
         # Building dataset
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
 
+        # Mapping
+        mapping = self.get_input_dfr3_mapping()
+
         # Get hazard input
         hazard_dataset_id = self.get_parameter("hazard_id")
 
@@ -63,7 +66,8 @@ class BuildingDamage(BaseAnalysis):
             count += avg_bulk_input_size
 
         results = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input, num_workers,
-                                                         inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
+                                                         inventory_args, repeat(mapping), repeat(hazard_type),
+                                                         repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -88,11 +92,12 @@ class BuildingDamage(BaseAnalysis):
 
         return output
 
-    def building_damage_analysis_bulk_input(self, buildings, hazard_type, hazard_dataset_id):
+    def building_damage_analysis_bulk_input(self, buildings, mapping, hazard_type, hazard_dataset_id):
         """Run analysis for multiple buildings.
 
         Args:
             buildings (list): Multiple buildings from input inventory set.
+            mapping (obj): dfr3 mapping object.
             hazard_type (str): A hazard type of the hazard exposure.
             hazard_dataset_id (str): An id of the hazard exposure.
 
@@ -105,7 +110,7 @@ class BuildingDamage(BaseAnalysis):
 
         fragility_sets = dict()
         fragility_sets[fragility_key] = self.fragilitysvc.match_inventory(
-            self.get_parameter("mapping_id"), buildings, fragility_key)
+            mapping, buildings, fragility_key)
 
         grouped_buildings = dict()
         bldg_results = []
@@ -218,12 +223,6 @@ class BuildingDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
-                    'type': str
-                },
-                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard Type (e.g. earthquake)',
@@ -260,6 +259,10 @@ class BuildingDamage(BaseAnalysis):
                     'type': int
                 },
             ],
+            'input_dfr3_mapping': {
+                'required':True,
+                'description':"input dfr3 mapping"
+            },
             'input_datasets': [
                 {
                     'id': 'buildings',

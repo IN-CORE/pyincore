@@ -23,7 +23,12 @@ def run_with_base_class():
 
     result_name = "memphis_eq_bldg_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
-    bldg_dmg.set_parameter("mapping_id", mapping_id)
+
+    # Load remote dfr3 mapping
+    # TODO add read local mapping capability
+    bldg_dmg.load_remote_dfr3_mapping(mapping_id)
+
+
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
