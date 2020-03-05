@@ -20,7 +20,6 @@ class Mapping:
         self.id = metadata["id"]
         self.name = metadata["name"]
         self.demand_units = metadata["hazardType"]
-        self.result_type = metadata["resultType"]
         self.inventory_type = metadata['inventoryType']
 
         # TODO need to represent mappings better
