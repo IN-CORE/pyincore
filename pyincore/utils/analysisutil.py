@@ -331,7 +331,7 @@ class AnalysisUtil:
         :return:
         """
 
-        fragility_curves = fragility_set['fragilityCurves']
+        fragility_curves = fragility_set.fragility_curves
         limit_state_prob = 0.0
         for fragility_curve in fragility_curves:
             if fragility_curve['className'] == \
