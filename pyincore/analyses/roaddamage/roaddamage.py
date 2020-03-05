@@ -154,8 +154,8 @@ class RoadDamage(BaseAnalysis):
 
             if fragility_set is not None:
                 location = GeoUtil.get_location(road)
-                demand_type = fragility_set['demandType']
-                demand_units = fragility_set['demandUnits']
+                demand_type = fragility_set.demand_type
+                demand_units = fragility_set.demand_units
                 if hazard_type == 'earthquake':
                     if demand_type.lower() == 'pgd' and use_liquefaction and geology_dataset_id is not None:
                         location_str = str(location.y) + "," + str(location.x)
