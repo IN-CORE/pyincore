@@ -1,4 +1,4 @@
-from pyincore import IncoreClient
+from pyincore import IncoreClient, Mapping
 from pyincore.analyses.buildingdamage import BuildingDamage
 
 
@@ -24,8 +24,9 @@ def run_with_base_class():
     result_name = "memphis_eq_bldg_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
 
-    # Load remote dfr3 mapping
-    # TODO add read local mapping capability
+    # Load dfr3 mapping
+    local_mapping = Mapping.from_json_file('local_mapping.json')
+    bldg_dmg.set_input_dfr3_mapping(local_mapping)
     bldg_dmg.load_remote_dfr3_mapping(mapping_id)
 
     bldg_dmg.set_parameter("hazard_type", hazard_type)
@@ -51,7 +52,12 @@ def run_with_base_class():
     # bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
     # result_name = "seaside_tsunami_dmg_result"
     # bldg_dmg.set_parameter("result_name", result_name)
-    # bldg_dmg.set_parameter("mapping_id", mapping_id)
+    #
+    # # Load dfr3 mapping
+    # local_mapping = Mapping.from_json_file('local_mapping.json')
+    # bldg_dmg.set_input_dfr3_mapping(local_mapping)
+    # bldg_dmg.load_remote_dfr3_mapping(mapping_id)
+    #
     # bldg_dmg.set_parameter("hazard_type", hazard_type)
     # bldg_dmg.set_parameter("hazard_id", hazard_id)
     # bldg_dmg.set_parameter("num_cpu", 4)

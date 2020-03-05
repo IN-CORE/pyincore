@@ -55,7 +55,7 @@ class Mapping:
             obj: dfr3 mapping from file.
 
         """
-        with open(file_path, "w") as f:
+        with open(file_path, "r") as f:
             instance = cls(json.load(f))
 
         return instance

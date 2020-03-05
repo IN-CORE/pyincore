@@ -63,7 +63,7 @@ class DFR3Curve:
             obj: dfr3set from file.
 
         """
-        with open(file_path, "w") as f:
+        with open(file_path, "r") as f:
             instance = cls(json.load(f))
 
         return instance
