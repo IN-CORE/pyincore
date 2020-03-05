@@ -33,8 +33,8 @@ class BaseAnalysis:
         for param in self.spec['input_parameters']:
             self.parameters[param['id']] = {'spec': param, 'value': None}
 
-        # TODO optional not every analysis need dfr3 mapping
-        self.input_dfr3_mapping = None
+        if 'input_dfr3_mapping' in self.spec.keys():
+            self.input_dfr3_mapping = {'spec':self.spec['input_dfr3_mapping'], 'value': None}
 
         self.input_datasets = {}
         for input_dataset in self.spec['input_datasets']:
@@ -139,14 +139,14 @@ class BaseAnalysis:
     def set_input_dfr3_mapping(self, mapping):
         is_valid, err_msg = self.validate_input_dfr3_mapping(self.input_dfr3_mapping['spec'], mapping)
         if is_valid:
-            self.input_dfr3_mapping = mapping
+            self.input_dfr3_mapping['value'] = mapping
             return True
         else:
             print(err_msg)
             return False
 
     def get_input_dfr3_mapping(self):
-        return self.input_dfr3_mapping
+        return self.input_dfr3_mapping['value']
 
     def get_output_datasets(self):
         """Get the output dataset of the analysis."""
@@ -285,7 +285,8 @@ class BaseAnalysis:
                 return result
 
         if 'input_dfr3_mapping' in self.spec.keys():
-            result = self.validate_input_dfr3_mapping(self.spec['input_dfr3_mapping'], self.input_dfr3_mapping)
+            result = self.validate_input_dfr3_mapping(self.spec['input_dfr3_mapping'], self.input_dfr3_mapping[
+                'value'])
             if not result[0]:
                 print("Error reading dfr3 mapping: " + result[1])
                 return result

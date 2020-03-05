@@ -28,7 +28,6 @@ def run_with_base_class():
     # TODO add read local mapping capability
     bldg_dmg.load_remote_dfr3_mapping(mapping_id)
 
-
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
