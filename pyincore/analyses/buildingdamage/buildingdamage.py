@@ -127,12 +127,10 @@ class BuildingDamage(BaseAnalysis):
                 # TODO include liquefaction and hazard uncertainty
                 hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, fragility_set, hazard_type)
                 demand_type = hazard_demand_type
-                demand_units = frag.get("demandUnits")
+                demand_units = frag.demand_units
                 tpl = (demand_type, demand_units)
 
                 grouped_buildings.setdefault(tpl, []).append(bldg_id)
-
-        # print(grouped_buildings)
 
         for demand, grouped_bldgs in grouped_buildings.items():
 
@@ -187,9 +185,11 @@ class BuildingDamage(BaseAnalysis):
                     bldg_results.append(bldg_result)
                     del buildings[bldg_id]  # remove processed buildings
                     i = i + 1
+
         unmapped_hazard_val = 0.0
         unmapped_output_demand_type = "None"
         unmapped_output_demand_unit = "None"
+
         for unmapped_bldg_id, unmapped_bldg in buildings.items():
             unmapped_bldg_result = collections.OrderedDict()
             unmapped_bldg_result['guid'] = unmapped_bldg['properties']['guid']

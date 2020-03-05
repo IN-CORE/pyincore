@@ -12,6 +12,7 @@ import jsonpickle
 import re
 
 from pyincore import IncoreClient
+from pyincore.dfr3curve import DFR3Curves
 
 
 class MappingSubject(object):
@@ -127,7 +128,7 @@ class Dfr3Service:
     def batch_get_dfr3_set(self, dfr3_id_lists: list):
         batch_dfr3_sets = {}
         for id in dfr3_id_lists:
-            batch_dfr3_sets[id] = self.get_dfr3_set(id)
+            batch_dfr3_sets[id] = DFR3Curves.from_dict(self.get_dfr3_set(id))
 
         return batch_dfr3_sets
 

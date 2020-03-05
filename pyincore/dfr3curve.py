@@ -7,8 +7,6 @@
 
 import json
 
-from pyincore.dfr3service import Dfr3Service
-
 
 class DFR3Curves:
     """class for dfr3 curves.
@@ -25,25 +23,37 @@ class DFR3Curves:
         self.result_type = metadata["resultType"]
         self.hazard_type = metadata['hazardType']
         self.inventory_type = metadata['inventoryType']
-        # TODO need to represent fragility curves better
-        self.fragility_curves = metadata["fragilityCurve"]
+
+        # TODO need to represent curves better
+        if 'fragilityCurves' in metadata.keys():
+            self.fragility_curves = metadata["fragilityCurves"]
+        elif 'repairCurves' in metadata.keys():
+            self.repairCurves = metadata['repairCurves']
+        elif 'restorationCurves' in metadata.keys():
+            self.restorationCurves = metadata['restorationCurves']
+        else:
+            raise ValueError("Cannot create dfr3 curve object. Missing key field.")
+
+    # @classmethod
+    # def from_dfr3_service(cls, id: str, dfr3_service: Dfr3Service):
+    #     """Get an dfr3set object from dfr3 services.
+    #
+    #     Args:
+    #         id:
+    #         dfr3_service:
+    #
+    #     Returns:
+    #         obj: dfr3set from dfr3 service.
+    #
+    #     """
+    #     metadata = dfr3_service.get_dfr3_set(id)
+    #     instance = cls(metadata)
+    #
+    #     return instance
 
     @classmethod
-    def from_dfr3_service(cls, id: str, dfr3_service: Dfr3Service):
-        """Get an dfr3set object from dfr3 services.
-
-        Args:
-            id:
-            dfr3_service:
-
-        Returns:
-            obj: dfr3set from dfr3 service.
-
-        """
-        metadata = Dfr3Service.get_dfr3_set(id)
-        instance = cls(metadata)
-
-        return instance
+    def from_dict(cls, metadata):
+        return cls(metadata)
 
     @classmethod
     def from_json_str(cls, json_str):

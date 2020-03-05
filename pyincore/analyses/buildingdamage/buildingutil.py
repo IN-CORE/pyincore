@@ -29,7 +29,7 @@ class BuildingUtil:
             str: A hazard demand type.
 
         """
-        fragility_hazard_type = fragility_set['demandType'].lower()
+        fragility_hazard_type = fragility_set.demand_type.lower()
         hazard_demand_type = fragility_hazard_type
 
         if hazard_type.lower() == "earthquake":

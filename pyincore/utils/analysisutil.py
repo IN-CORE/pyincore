@@ -43,7 +43,7 @@ class AnalysisUtil:
         """
         period = 0.0
 
-        fragility_curve = fragility_set['fragilityCurves'][0]
+        fragility_curve = fragility_set.fragility_curves[0]
         if fragility_curve[
             'className'] == 'PeriodStandardFragilityCurve':
             period_equation_type = fragility_curve['periodEqnType']
@@ -72,8 +72,7 @@ class AnalysisUtil:
             Returns: limit state probabilities
 
         """
-
-        fragility_curves = fragility_set['fragilityCurves']
+        fragility_curves = fragility_set.fragility_curves
         output = collections.OrderedDict()
 
         index = 0
