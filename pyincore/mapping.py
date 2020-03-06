@@ -6,6 +6,7 @@
 
 
 import json
+from pyincore.mappingentry import MappingEntry
 
 
 class Mapping:
@@ -19,13 +20,20 @@ class Mapping:
     def __init__(self, metadata):
         self.id = metadata["id"]
         self.name = metadata["name"]
-        self.demand_units = metadata["hazardType"]
+        self.hazard_type = metadata["hazardType"]
         self.inventory_type = metadata['inventoryType']
 
-        # TODO need to represent mappings better
-        self.mappings = metadata['mappings']
+        mappings = []
+        for m in metadata['mappings']:
+            if isinstance(m, MappingEntry):
+                mappings.append(m)
+            else:
+                # enforce convert dictionary to mapping entry object
+                mappings.append(MappingEntry(m['entry'], m['rules']))
+        self.mappings = mappings
 
         self.mapping_type = metadata['mappingType']
+
 
     @classmethod
     def from_dict(cls, metadata):

@@ -5,15 +5,12 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
+import re
 import urllib
 from typing import Dict
 
-import jsonpickle
-import re
-
 from pyincore import IncoreClient
 from pyincore.dfr3curve import DFR3Curve
-from pyincore.mapping import Mapping
 
 
 class MappingSubject(object):
@@ -125,20 +122,27 @@ class Dfr3Service:
 
             for m in mapping.mappings:
 
-                if self._property_match(rules=m['rules'], properties=inventory["properties"]):
-                    curve_id = m['entry'][entry_key]
-                    dfr3_sets[inventory['id']] = curve_id
-                    if curve_id not in matched_curve_ids:
-                        matched_curve_ids.append(curve_id)
+                if self._property_match(rules=m.rules, properties=inventory["properties"]):
+                    curve = m.entry[entry_key]
+                    dfr3_sets[inventory['id']] = curve
+
+                    # if it's string:id; then need to fetch it from remote and cast to dfr3curve object
+                    if isinstance(curve, str) and curve not in matched_curve_ids:
+                        matched_curve_ids.append(curve)
 
                     # use the first match
                     break
 
         batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
 
-        # 3. replace the curve id in dfr3_sets to the actual content
-        for key, value in dfr3_sets.items():
-            dfr3_sets[key] = batch_dfr3_sets[value]
+        # 3. replace the curve id in dfr3_sets to the dfr3 curve
+        for inventory_id, curve_item in dfr3_sets.items():
+            if isinstance(curve_item, DFR3Curve):
+                pass
+            elif isinstance(curve_item, str):
+                dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]
+            else:
+                raise ValueError("Cannot realize dfr3_set entry. The entry has to be either remote id string; or dfr3curve object!")
 
         return dfr3_sets
 
