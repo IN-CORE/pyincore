@@ -129,8 +129,8 @@ class BridgeDamage(BaseAnalysis):
 
         # Converting list of bridges into a dictionary for ease of reference
         bridges = dict()
-        for b in list_bridges:
-            bridges[b["id"]] = b
+        for br in list_bridges:
+            bridges[br["id"]] = br
 
         list_bridges = None  # Clear as it's not needed anymore
 
@@ -196,7 +196,7 @@ class BridgeDamage(BaseAnalysis):
                                 AnalysisUtil.adjust_fragility_for_liquefaction(
                                     fragility, bridge['properties']['liq']))
 
-                    dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val,
+                    dmg_probability = AnalysisUtil.calculate_limit_state(adjusted_fragility_set, hazard_val,
                                                                          std_dev=hazard_std_dev)
                     retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
                     retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
