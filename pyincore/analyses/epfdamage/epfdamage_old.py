@@ -4,7 +4,6 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import collections
 import concurrent.futures
 import random
 from itertools import repeat
@@ -135,124 +134,118 @@ class EpfDamage(BaseAnalysis):
                 liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
             liq_fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, liq_fragility_key)
 
-        grouped_epfs = dict()
-        epf_results = []
-        list_epfs = epfs
+        # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
+        liq_fragility = None
 
-        epfs = dict()
-        # Converting list of epfs into a dictionary for ease of reference
-        for epf in list_epfs:
-            epfs[epf["id"]] = epf
+        for epf in epfs:
+            fragility_set = dict()
+            if epf["id"] in fragility_sets[fragility_key]:
+                fragility_set = fragility_sets[fragility_key][epf["id"]]
+                if liq_geology_dataset_id is not None and epf["id"] in liq_fragility_set:
+                    liq_fragility = liq_fragility_set[epf["id"]]
 
-        list_epfs = None  # Clear as it's not needed anymore
+            result.append(self.epf_damage_analysis(epf, fragility_set, liq_fragility, hazard_type, hazard_dataset_id,
+                                                   liq_geology_dataset_id, use_hazard_uncertainty))
 
-        # Create grouped list of epfs by combination of demand type and demand unit
-        for frg_key, epf_items in fragility_sets.items():
-            for epf_id, frag in epf_items.items():
-                epf = epfs[epf_id]
-                demand_type = frag['demandType']
-                demand_units = frag["demandUnits"]
-                tpl = (demand_type, demand_units)
-                grouped_epfs.setdefault(tpl, []).append(epf_id)
+        return result
 
-        for demand, grouped_epf_items in grouped_epfs.items():
+    def epf_damage_analysis(self, facility, fragility_set, liq_fragility, hazard_type, hazard_dataset_id,
+                            liq_geology_dataset_id, use_hazard_uncertainty):
+        """Calculates epf damage results for a single epf.
 
-            input_demand_type = demand[0]
-            input_demand_units = demand[1]
+        Args:
+            facility (obj): A JSON mapping of a geometric object from the inventory: current Electric Power facility.
+            fragility_set (obj): A JSON description of fragility assigned to the epf.
+            liq_fragility(obj): A JSON description of liquefaction fragility mapped to the facility.
+            hazard_type (str): A type of hazard exposure (earthquake etc.).
+            hazard_dataset_id (str): An id of the hazard exposure.
+            liq_geology_dataset_id(str): Geology dataset id from data service to use for liquefaction calculation,
+                if applicable
+            use_hazard_uncertainty(bool): Whether to use hazard standard deviation values for uncertainty
 
-            # For every group of unique demand and demand unit, call the end-point once
-            epf_chunks = list(AnalysisUtil.chunks(grouped_epf_items, 50))  # TODO: Move to globals?
-            for epf_chunk in epf_chunks:
-                points = []
-                for epf_id in epf_chunk:
-                    location = GeoUtil.get_location(epfs[epf_id])
-                    points.append(str(location.y) + "," + str(location.x))
+        Returns:
+            OrderedDict: A dictionary with epf damage values and other data/metadata.
 
-                if hazard_type == 'earthquake':
-                    hazard_vals = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, input_demand_type,
-                                                                              input_demand_units,
-                                                                              points)
+        """
+        demand_type = "Unknown"
+        hazard_val = 0.0
+        limit_states = {"ls-slight": 0.0, "ls-moderat": 0.0,
+                        "ls-extensi": 0.0, "ls-complet": 0.0}
 
-                    # use ground liquefaction to modify damage interval
-                    # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
-                    liq_fragility = None
-                    if liq_geology_dataset_id is not None and epf_id in liq_fragility_set:
-                        liq_fragility = liq_fragility_set[epf_id]
-                    if liq_fragility and liq_geology_dataset_id:
-                        liq_hazard_type = liq_fragility['demandType']
-                        pgd_demand_units = liq_fragility['demandUnits']
-                        point = str(location.y) + "," + str(location.x)
-                        liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id,
-                                                                              liq_geology_dataset_id,
-                                                                              pgd_demand_units, [point])
-                        liq_hazard_val = liquefaction[0][liq_hazard_type]
-                        liquefaction_prob = liquefaction[0]['liqProbability']
-                        pgd_limit_states = AnalysisUtil.calculate_limit_state(
-                            liq_fragility, liq_hazard_val, std_dev=std_dev)
-                        limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
+        if fragility_set is not None:
+            location = GeoUtil.get_location(facility)
+            demand_type = fragility_set['demandType']
+            point = str(location.y) + "," + str(location.x)
+            demand_units = fragility_set['demandUnits']
 
-                elif hazard_type == 'tornado':
-                    hazard_vals = self.hazardsvc.get_tornado_hazard_values(hazard_dataset_id, input_demand_units,
-                                                                          points)
-                elif hazard_type == 'hurricane':
-                    # TODO: implement hurricane
-                    raise ValueError('Hurricane hazard has not yet been implemented!')
+            liq_hazard_val = "NA"
+            liquefaction_prob = "NA"
+            liq_hazard_type = "NA"
 
-                elif hazard_type == 'tsunami':
-                    hazard_vals = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
-                                                                          input_demand_type,
-                                                                          input_demand_units,
-                                                                          points)
-                else:
-                    raise ValueError("Missing hazard type.")
+            std_dev = 0.0
+            if use_hazard_uncertainty:
+                std_dev = random.random()
 
-                # Parse the batch hazard value results and map them back to the building and fragility.
-                # This is a potential pitfall as we are relying on the order of the returned results
-                i = 0
-                for epf_id in epf_chunk:
-                    epf_result = collections.OrderedDict()
-                    epf = epfs[epf_id]
-                    hazard_val = hazard_vals[i]['hazardValue']
+            if hazard_type == 'earthquake':
+                hazard_resp = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, demand_type,
+                                                                          demand_units,
+                                                                          [point])
+                hazard_val = hazard_resp[0]['hazardValue']
+                limit_states = AnalysisUtil.calculate_limit_state(
+                    fragility_set, hazard_val, std_dev=std_dev)
 
-                    std_dev = 0.0
-                    if use_hazard_uncertainty:
-                        std_dev = random.random()
+                # use ground liquefaction to modify damage interval
+                if liq_fragility is not None and liq_geology_dataset_id:
+                    liq_hazard_type = liq_fragility['demandType']
+                    pgd_demand_units = liq_fragility['demandUnits']
+                    point = str(location.y) + "," + str(location.x)
+                    liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, liq_geology_dataset_id,
+                                                                          pgd_demand_units, [point])
+                    liq_hazard_val = liquefaction[0][liq_hazard_type]
+                    liquefaction_prob = liquefaction[0]['liqProbability']
+                    pgd_limit_states = AnalysisUtil.calculate_limit_state(
+                        liq_fragility, liq_hazard_val, std_dev=std_dev)
+                    limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
 
-                    fragility_set = fragility_sets[fragility_key][epf_id]
-                    limit_states = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, std_dev=std_dev)
-                    dmg_interval = AnalysisUtil.calculate_damage_interval(limit_states)
+            elif hazard_type == 'tornado':
+                hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
+                                                                     location.x, 0)
+                limit_states = AnalysisUtil.calculate_limit_state(
+                    fragility_set, hazard_val, std_dev=std_dev)
 
-                    epf_result['guid'] = epf['properties']['guid']
-                    epf_result.update(limit_states)
-                    epf_result.update(dmg_interval)
-                    epf_result['demandtype'] = input_demand_type
-                    epf_result['demandunits'] = input_demand_units
-                    epf_result['hazardtype'] = hazard_type
-                    epf_result['hazardval'] = hazard_val
-                    epf_result['liqhaztype'] = liq_hazard_type
-                    epf_result['liqhazval'] = liq_hazard_val
-                    epf_result['liqprobability'] = liquefaction_prob
+            elif hazard_type == 'hurricane':
+                # TODO: implement hurricane
+                raise ValueError('Hurricane hazard has not yet been implemented!')
 
-                    epf_results.append(epf_result)
-                    del epfs[epf_id]  # remove processed epf
-                    i = i + 1
+            elif hazard_type == 'tsunami':
+                demand_units = fragility_set["demandUnits"]
+                point = str(location.y) + "," + str(location.x)
+                hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
+                                                                      demand_type,
+                                                                      demand_units,
+                                                                      [point])[0]["hazardValue"]
+                # Sometimes the geotiffs give large negative values for out of bounds instead of 0
+                if hazard_val <= 0.0:
+                    hazard_val = 0.0
+                limit_states = AnalysisUtil.calculate_limit_state(
+                    fragility_set, hazard_val, std_dev=std_dev)
 
-        unmapped_limit_states = {"ls-slight": 0.0, "ls-moderat": 0.0, "ls-extensi": 0.0, "ls-complet": 0.0}
-        unmapped_dmg_intervals = AnalysisUtil.calculate_damage_interval(unmapped_limit_states)
-        for unmapped_epf_id, unmapped_epf in epfs.items():
-            unmapped_epf_result = collections.OrderedDict()
-            unmapped_epf_result['guid'] = unmapped_epf['properties']['guid']
-            unmapped_epf_result.update(unmapped_limit_states)
-            unmapped_epf_result.update(unmapped_dmg_intervals)
-            unmapped_epf_result["demandtype"] = "None"
-            unmapped_epf_result['demandunits'] = "None"
-            unmapped_epf_result["hazardtype"] = "None"
-            unmapped_epf_result['hazardval'] = 0.0
-            unmapped_epf_result['liqhaztype'] = "NA"
-            unmapped_epf_result['liqhazval'] = "NA"
-            unmapped_epf_result['liqprobability'] = "NA"
-            epf_results.append(unmapped_epf_result)
+            else:
+                raise ValueError("Missing hazard type.")
 
+        dmg_interval = AnalysisUtil.calculate_damage_interval(limit_states)
+
+        # Needs py 3.5+
+        epf_results = {
+            'guid': facility['properties']['guid'],
+            'hazardtype': demand_type,
+            'hazard_val': hazard_val,
+            **limit_states,
+            **dmg_interval,
+            'liqhaztype': liq_hazard_type,
+            'liqhazval': liq_hazard_val,
+            'liqprobability': liquefaction_prob
+        }
         return epf_results
 
     def get_spec(self):
