@@ -1,5 +1,6 @@
 from pyincore import IncoreClient
 from pyincore.analyses.bridgedamage import BridgeDamage
+from pyincore.analyses.bridgedamage.bridgedamage_old import BridgeDamageOld
 
 
 def run_with_base_class():
@@ -22,19 +23,27 @@ def run_with_base_class():
 
     # Create bridge damage
     bridge_dmg = BridgeDamage(client)
+    bridge_dmg_old = BridgeDamageOld(client)
+
     # Load input datasets
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
-    # Specify the result name
-    result_name = "bridge_result"
+    bridge_dmg_old.load_remote_input_dataset("bridges", bridge_dataset_id)
+
     # Set analysis parameters
-    bridge_dmg.set_parameter("result_name", result_name)
+    bridge_dmg.set_parameter("result_name", "bridge_result")
+    bridge_dmg_old.set_parameter("result_name", "bridge_result_old")
     bridge_dmg.set_parameter("mapping_id", mapping_id)
+    bridge_dmg_old.set_parameter("mapping_id", mapping_id)
     bridge_dmg.set_parameter("hazard_type", hazard_type)
+    bridge_dmg_old.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
+    bridge_dmg_old.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("num_cpu", 4)
+    bridge_dmg_old.set_parameter("num_cpu", 4)
 
     # Run bridge damage analysis
     bridge_dmg.run_analysis()
+    bridge_dmg_old.run_analysis()
 
 
 if __name__ == '__main__':
