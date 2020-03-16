@@ -1,21 +1,21 @@
-from pyincore import DFR3Curve, MappingEntry, Mapping, IncoreClient
+from pyincore import DFR3Curve, MappingSet, Mapping, IncoreClient
 from pyincore.analyses.buildingdamage import BuildingDamage
 
 # 1. create DFR3curve objects
 fragility_curve_1 = DFR3Curve.from_json_file('5b47b34f337d4a3629076470.json')
 fragility_curve_2 = DFR3Curve.from_json_file('5b47b34f337d4a3629075de9.json')
 
-# 2. then create MappingEntry objects and put DFR3curve into them
+# 2. then create Mapping objects and put DFR3curve into them
 entry_1 = {"Non-Retrofit Fragility ID Code": fragility_curve_1}
 rules_1 = [[
     "int no_stories GE 4",
     "int no_stories LE 7"
 ]]
-mapping_entry_1 = MappingEntry(entry_1, rules_1)
+mapping_1 = Mapping(entry_1, rules_1)
 
 entry_2 = {"Non-Retrofit Fragility ID Code": fragility_curve_2}
 rules_2 = [["int no_stories GE 1", "int no_stories LE 3"]]
-mapping_entry_2 = MappingEntry(entry_2, rules_2)
+mapping_2 = Mapping(entry_2, rules_2)
 
 # 3. last create Mapping object that put multiple mapping entries into them
 metadata = {
@@ -24,8 +24,8 @@ metadata = {
     'hazardType': 'earthquake',
     'inventoryType': 'building',
     'mappings': [
-        mapping_entry_1,
-        mapping_entry_2,
+        mapping_1,
+        mapping_2,
     ],
     'mappingType': 'fragility'
 }

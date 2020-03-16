@@ -97,7 +97,7 @@ class BuildingDamage(BaseAnalysis):
 
         Args:
             buildings (list): Multiple buildings from input inventory set.
-            mapping (obj): dfr3 mapping object.
+            mapping (obj): dfr3 MappingSet object.
             hazard_type (str): A hazard type of the hazard exposure.
             hazard_dataset_id (str): An id of the hazard exposure.
 
@@ -261,7 +261,7 @@ class BuildingDamage(BaseAnalysis):
             ],
             'input_dfr3_mapping': {
                 'required':True,
-                'description':"input dfr3 mapping"
+                'description':"input dfr3 mapping set"
             },
             'input_datasets': [
                 {
