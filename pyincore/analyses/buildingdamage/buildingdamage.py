@@ -100,7 +100,6 @@ class BuildingDamage(BaseAnalysis):
             list: A list of ordered dictionaries with building damage values and other data/metadata.
 
         """
-        result = []
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()

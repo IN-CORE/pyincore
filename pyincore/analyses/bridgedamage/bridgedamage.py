@@ -119,118 +119,129 @@ class BridgeDamage(BaseAnalysis):
                 "use_liquefaction") is not None:
             use_liquefaction = self.get_parameter("use_liquefaction")
 
-        result = []
+        fragility_sets = dict()
         fragility_sets = self.fragilitysvc.match_inventory(
             self.get_parameter("mapping_id"), bridges, fragility_key)
-        for bridge in bridges:
-            fragility_set = None
-            if bridge["id"] in fragility_sets:
-                fragility_set = fragility_sets[bridge["id"]]
 
-            result.append(self.bridge_damage_analysis(bridge, fragility_set,
-                                                      hazard_type,
-                                                      hazard_dataset_id,
-                                                      fragility_key,
-                                                      use_hazard_uncertainty,
-                                                      use_liquefaction))
+        grouped_bridges = dict()
+        bridge_results = []
+        list_bridges = bridges
 
-        return result
+        # Converting list of bridges into a dictionary for ease of reference
+        bridges = dict()
+        for b in list_bridges:
+            bridges[b["id"]] = b
 
-    def bridge_damage_analysis(self, bridge, fragility_set, hazard_type,
-                               hazard_dataset_id, fragility_key,
-                               use_hazard_uncertainty, use_liquefaction):
-        """Calculates bridge damage results for a single bridge.
+        list_bridges = None  # Clear as it's not needed anymore
 
-        Args:
-            bridge (obj): A JSON mapping of a geometric object from the inventory: current bridge.
-            fragility_set (obj): A JSON description of fragility assigned to the bridge.
-            hazard_type (str): Hazard type earthquake, tsunami, tornado and hurricane
-            hazard_dataset_id (str): A hazard dataset to use.
-            fragility_key (str): A fragility key to use for mapping bridges to fragilities.
-            use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty in damage analysis,
-                False otherwise.
-            use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
-                False otherwise.
-
-        Returns:
-            OrderedDict: A dictionary with bridge damage values and other data/metadata.
-
-        """
-        bridge_results = collections.OrderedDict()
-
-        hazard_val = 0.0
-        demand_type = "Unknown"
-
-        # default
-        dmg_probability = {"ls-slight": 0.0, "ls-moderat": 0.0,
-                           "ls-extensi": 0.0, "ls-complet": 0.0}
-        retrofit_type = "Non-Retrofit"
-        retrofit_cost = 0.0
-
-        if fragility_set is not None:
-            location = GeoUtil.get_location(bridge)
+        # Create grouped list of bridges by combination of demand type and demand unit
+        for bridge_id in fragility_sets.keys():
+            fragility_set = fragility_sets[bridge_id]
             demand_type = fragility_set['demandType']
-            demand_units = fragility_set['demandUnits']
-            point = str(location.y) + "," + str(location.x)
+            demand_units = fragility_set["demandUnits"]
+            tpl = (demand_type, demand_units)
+            grouped_bridges.setdefault(tpl, []).append(bridge_id)
 
-            if hazard_type == "earthquake":
-                hazard_resp = \
-                    self.hazardsvc.get_earthquake_hazard_values(
-                        hazard_dataset_id,
-                        demand_type,
-                        demand_units,
-                        [point])
-            elif hazard_type == "tsunami":
-                hazard_resp = self.hazardsvc.get_tsunami_hazard_values(
-                    hazard_dataset_id, demand_type, demand_units, [point])
-            elif hazard_type == "tornado":
-                hazard_resp = self.hazardsvc.get_tornado_hazard_values(
-                    hazard_dataset_id, demand_units, [point])
-            elif hazard_type == "hurricane":
-                hazard_resp = self.hazardsvc.get_hurricanewf_values(
-                    hazard_dataset_id, demand_type, demand_units, [point])
-            else:
-                raise ValueError(
-                    "We only support Earthquake, Tornado, Tsunami, and Hurricane at the moment!")
+        for demand, grouped_brs in grouped_bridges.items():
 
-            hazard_val = hazard_resp[0]['hazardValue']
-            hazard_std_dev = 0.0
-            adjusted_fragility_set = fragility_set
+            input_demand_type = demand[0]
+            input_demand_units = demand[1]
 
-            # TODO Get this from API once implemented
-            if use_hazard_uncertainty:
-                hazard_std_dev = random.random()
+            # For every group of unique demand and demand unit, call the end-point once
+            br_chunks = list(AnalysisUtil.chunks(grouped_brs, 50))  # TODO: Move to globals?
+            for brs in br_chunks:
+                points = []
+                for br_id in brs:
+                    location = GeoUtil.get_location(bridges[br_id])
+                    points.append(str(location.y) + "," + str(location.x))
 
-            if use_liquefaction and 'liq' in bridge['properties']:
-                for fragility in fragility_set["fragilityCurves"]:
-                    adjusted_fragility_set.append(
-                        AnalysisUtil.adjust_fragility_for_liquefaction(
-                            fragility, bridge['properties']['liq']))
+                if hazard_type == "earthquake":
+                    hazard_vals = \
+                        self.hazardsvc.get_earthquake_hazard_values(
+                            hazard_dataset_id,
+                            input_demand_type,
+                            input_demand_units,
+                            points)
+                elif hazard_type == "tsunami":
+                    hazard_vals = self.hazardsvc.get_tsunami_hazard_values(
+                        hazard_dataset_id, input_demand_type, input_demand_units, points)
+                elif hazard_type == "tornado":
+                    hazard_vals = self.hazardsvc.get_tornado_hazard_values(
+                        hazard_dataset_id, input_demand_units, points)
+                elif hazard_type == "hurricane":
+                    hazard_vals = self.hazardsvc.get_hurricanewf_values(
+                        hazard_dataset_id, input_demand_type, input_demand_units, points)
+                else:
+                    raise ValueError("We only support Earthquake, Tornado, Tsunami, and Hurricane at the moment!")
 
-            dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, std_dev=hazard_std_dev)
-            retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
-            retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
+                # Parse the batch hazard value results and map them back to the building and fragility.
+                # This is a potential pitfall as we are relying on the order of the returned results
+                i = 0
+                for br_id in brs:
+                    bridge_result = collections.OrderedDict()
+                    bridge = bridges[br_id]
+                    fragility_set = fragility_sets[br_id]
 
-        dmg_intervals = AnalysisUtil.calculate_damage_interval(dmg_probability)
+                    hazard_val = hazard_vals[i]['hazardValue']
 
-        bridge_results['guid'] = bridge['properties']['guid']
-        bridge_results.update(dmg_probability)
-        bridge_results.update(dmg_intervals)
-        bridge_results["retrofit"] = retrofit_type
-        bridge_results["retro_cost"] = retrofit_cost
-        bridge_results["demand_type"] = demand_type
-        bridge_results["hazardtype"] = hazard_type
-        bridge_results["hazardval"] = hazard_val
+                    hazard_std_dev = 0.0
+                    if use_hazard_uncertainty:
+                        # TODO Get this from API once implemented
+                        hazard_std_dev = random.random()
 
-        # add spans to bridge output so mean damage calculation can use that info
-        if "spans" in bridge["properties"] and bridge["properties"]["spans"] \
-                is not None and bridge["properties"]["spans"].isdigit():
-            bridge_results['spans'] = int(bridge["properties"]["spans"])
-        elif "SPANS" in bridge["properties"] and bridge["properties"]["SPANS"] \
-                is not None and bridge["properties"]["SPANS"].isdigit():
-            bridge_results['spans'] = int(bridge["properties"]["SPANS"])
-        else:
-            bridge_results['spans'] = 1
+                    adjusted_fragility_set = fragility_set
+                    if use_liquefaction and 'liq' in bridge['properties']:
+                        for fragility in fragility_set["fragilityCurves"]:
+                            adjusted_fragility_set.append(
+                                AnalysisUtil.adjust_fragility_for_liquefaction(
+                                    fragility, bridge['properties']['liq']))
+
+                    dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val,
+                                                                         std_dev=hazard_std_dev)
+                    retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
+                    retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
+
+                    dmg_intervals = AnalysisUtil.calculate_damage_interval(dmg_probability)
+
+                    bridge_result['guid'] = bridge['properties']['guid']
+                    bridge_result.update(dmg_probability)
+                    bridge_result.update(dmg_intervals)
+                    bridge_result["retrofit"] = retrofit_type
+                    bridge_result["retrocost"] = retrofit_cost
+                    bridge_result["demandtype"] = input_demand_type
+                    bridge_result["demandunits"] = input_demand_units
+                    bridge_result["hazardtype"] = hazard_type
+                    bridge_result["hazardval"] = hazard_val
+
+                    # add spans to bridge output so mean damage calculation can use that info
+                    if "spans" in bridge["properties"] and bridge["properties"]["spans"] \
+                            is not None and bridge["properties"]["spans"].isdigit():
+                        bridge_result['spans'] = int(bridge["properties"]["spans"])
+                    elif "SPANS" in bridge["properties"] and bridge["properties"]["SPANS"] \
+                            is not None and bridge["properties"]["SPANS"].isdigit():
+                        bridge_result['spans'] = int(bridge["properties"]["SPANS"])
+                    else:
+                        bridge_result['spans'] = 1
+
+                    bridge_results.append(bridge_result)
+                    del bridges[br_id]  # remove processed bridges
+                    i = i + 1
+
+        unmapped_dmg_probability = {"ls-slight": 0.0, "ls-moderat": 0.0,
+                                    "ls-extensi": 0.0, "ls-complet": 0.0}
+        unmapped_dmg_intervals = AnalysisUtil.calculate_damage_interval(unmapped_dmg_probability)
+        for unmapped_br_id, unmapped_br in bridges.items():
+            unmapped_br_result = collections.OrderedDict()
+            unmapped_br_result['guid'] = unmapped_br['properties']['guid']
+            unmapped_br_result.update(unmapped_dmg_probability)
+            unmapped_br_result.update(unmapped_dmg_intervals)
+            unmapped_br_result["retrofit"] = "Non-Retrofit"
+            unmapped_br_result["retrocost"] = 0.0
+            unmapped_br_result["demandtype"] = "None"
+            unmapped_br_result['demandunits'] = "None"
+            unmapped_br_result["hazardtype"] = "hazard_type"
+            unmapped_br_result['hazardval'] = 0.0
+            bridge_results.append(unmapped_br_result)
 
         return bridge_results
 
