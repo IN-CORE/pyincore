@@ -15,7 +15,3 @@ class MappingEntry:
     def __init__(self, entry: dict, rules: list):
         self.entry = entry
         self.rules = rules
-
-    def dummy(self):
-        # need some function to be able to put local fragility curve object into mapping entry
-        pass

@@ -25,7 +25,6 @@ class DFR3Curve:
         self.hazard_type = metadata['hazardType']
         self.inventory_type = metadata['inventoryType']
 
-        # TODO need to represent curves better
         if 'fragilityCurves' in metadata.keys():
             self.fragility_curves = metadata["fragilityCurves"]
         elif 'repairCurves' in metadata.keys():
