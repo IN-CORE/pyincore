@@ -126,14 +126,6 @@ class EpfDamage(BaseAnalysis):
 
         fragility_set = dict()
         fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, fragility_key)
-
-        liq_fragility_set = []
-        if use_liquefaction and liq_geology_dataset_id is not None:
-            liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
-            if liq_fragility_key is None:
-                liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-            liq_fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, liq_fragility_key)
-
         epf_results = []
 
         # Converting list of epfs into a dictionary for ease of reference
@@ -143,16 +135,14 @@ class EpfDamage(BaseAnalysis):
             epfs[epf["id"]] = epf
         list_epfs = None  # Clear as it's not needed anymore
 
-        grouped_epfs = AnalysisUtil.group_by_demand_type(epfs, fragility_set, hazard_type="earthquake",
-                                                         is_building=False)
-
+        processed_epf = []
+        grouped_epfs = AnalysisUtil.group_by_demand_type(epfs, fragility_set)
         for demand, grouped_epf_items in grouped_epfs.items():
-
             input_demand_type = demand[0]
             input_demand_units = demand[1]
 
             # For every group of unique demand and demand unit, call the end-point once
-            epf_chunks = list(AnalysisUtil.chunks(grouped_epf_items, 50))  # TODO: Move to globals?
+            epf_chunks = list(AnalysisUtil.chunks(grouped_epf_items, 50))
             for epf_chunk in epf_chunks:
                 points = []
                 for epf_id in epf_chunk:
@@ -163,25 +153,6 @@ class EpfDamage(BaseAnalysis):
                     hazard_vals = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, input_demand_type,
                                                                               input_demand_units,
                                                                               points)
-
-                    # use ground liquefaction to modify damage interval
-                    # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
-                    liq_fragility = None
-                    if liq_geology_dataset_id is not None and epf_id in liq_fragility_set:
-                        liq_fragility = liq_fragility_set[epf_id]
-                    if liq_fragility and liq_geology_dataset_id:
-                        liq_hazard_type = liq_fragility['demandType']
-                        pgd_demand_units = liq_fragility['demandUnits']
-                        point = str(location.y) + "," + str(location.x)
-                        liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id,
-                                                                              liq_geology_dataset_id,
-                                                                              pgd_demand_units, [point])
-                        liq_hazard_val = liquefaction[0][liq_hazard_type]
-                        liquefaction_prob = liquefaction[0]['liqProbability']
-                        pgd_limit_states = AnalysisUtil.calculate_limit_state(
-                            liq_fragility, liq_hazard_val, std_dev=std_dev)
-                        limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
-
                 elif hazard_type == 'tornado':
                     hazard_vals = self.hazardsvc.get_tornado_hazard_values(hazard_dataset_id, input_demand_units,
                                                                           points)
@@ -209,8 +180,8 @@ class EpfDamage(BaseAnalysis):
                     if use_hazard_uncertainty:
                         std_dev = random.random()
 
-                    fragility_set = fragility_sets[fragility_key][epf_id]
-                    limit_states = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, std_dev=std_dev)
+                    selected_fragility_set = fragility_set[epf_id]
+                    limit_states = AnalysisUtil.calculate_limit_state(selected_fragility_set, hazard_val, std_dev=std_dev)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(limit_states)
 
                     epf_result['guid'] = epf['properties']['guid']
@@ -220,29 +191,80 @@ class EpfDamage(BaseAnalysis):
                     epf_result['demandunits'] = input_demand_units
                     epf_result['hazardtype'] = hazard_type
                     epf_result['hazardval'] = hazard_val
-                    epf_result['liqhaztype'] = liq_hazard_type
-                    epf_result['liqhazval'] = liq_hazard_val
-                    epf_result['liqprobability'] = liquefaction_prob
 
                     epf_results.append(epf_result)
-                    del epfs[epf_id]  # remove processed epf
+                    processed_epf.append(epf_id)
                     i = i + 1
+
+        # when there is liquefaction, limit state need to be modified
+        if hazard_type == 'earthquake' and use_liquefaction and liq_geology_dataset_id is not None:
+            liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
+            if liq_fragility_key is None:
+                liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
+            liq_fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, liq_fragility_key)
+            grouped_liq_epfs = AnalysisUtil.group_by_demand_type(epfs, liq_fragility_set)
+
+            for liq_demand, grouped_liq_epf_items in grouped_liq_epfs.items():
+                liq_input_demand_type = liq_demand[0]
+                liq_input_demand_units = liq_demand[1]
+
+                # For every group of unique demand and demand unit, call the end-point once
+                liq_epf_chunks = list(AnalysisUtil.chunks(grouped_liq_epf_items, 50))
+                for liq_epf_chunk in liq_epf_chunks:
+                    points = []
+                    for liq_epf_id in liq_epf_chunk:
+                        location = GeoUtil.get_location(epfs[liq_epf_id])
+                        points.append(str(location.y) + "," + str(location.x))
+                    liquefaction_vals = self.hazardsvc.get_liquefaction_values(hazard_dataset_id,
+                                                                          liq_geology_dataset_id,
+                                                                          liq_input_demand_units, points)
+
+                    # Parse the batch hazard value results and map them back to the building and fragility.
+                    # This is a potential pitfall as we are relying on the order of the returned results
+                    i = 0
+                    for liq_epf_id in liq_epf_chunk:
+                        liq_hazard_val = liquefaction_vals[i][liq_input_demand_type]
+
+                        std_dev = 0.0
+                        if use_hazard_uncertainty:
+                            std_dev = random.random()
+
+                        liquefaction_prob = liquefaction_vals[i]['liqProbability']
+
+                        selected_liq_fragility = liq_fragility_set[liq_epf_id]
+                        pgd_limit_states = AnalysisUtil.calculate_limit_state(selected_liq_fragility, liq_hazard_val, std_dev=std_dev)
+
+                        # match id and add liqhaztype, liqhazval, liqprobability field as well as rewrite limit
+                        # statess and dmg_interval
+                        for epf_result in epf_results:
+                            if epf_result['guid'] == epfs[liq_epf_id]['guid']:
+                                limit_states = None # todo retreive that limit state from epf result record
+                                liq_limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states,
+                                                                                         pgd_limit_states)
+                                liq_dmg_interval = AnalysisUtil.calculate_damage_interval(liq_limit_states)
+                                epf_result.update(liq_limit_states)
+                                epf_result.update(liq_dmg_interval)
+                                epf_result['liqhaztype'] = liq_input_demand_type
+                                epf_result['liqhazval'] = liq_hazard_val
+                                epf_result['liqprobability'] = liquefaction_prob
+                        i = i + 1
 
         unmapped_limit_states = {"ls-slight": 0.0, "ls-moderat": 0.0, "ls-extensi": 0.0, "ls-complet": 0.0}
         unmapped_dmg_intervals = AnalysisUtil.calculate_damage_interval(unmapped_limit_states)
-        for unmapped_epf_id, unmapped_epf in epfs.items():
-            unmapped_epf_result = collections.OrderedDict()
-            unmapped_epf_result['guid'] = unmapped_epf['properties']['guid']
-            unmapped_epf_result.update(unmapped_limit_states)
-            unmapped_epf_result.update(unmapped_dmg_intervals)
-            unmapped_epf_result["demandtype"] = "None"
-            unmapped_epf_result['demandunits'] = "None"
-            unmapped_epf_result["hazardtype"] = "None"
-            unmapped_epf_result['hazardval'] = 0.0
-            unmapped_epf_result['liqhaztype'] = "NA"
-            unmapped_epf_result['liqhazval'] = "NA"
-            unmapped_epf_result['liqprobability'] = "NA"
-            epf_results.append(unmapped_epf_result)
+        for epf_id, epf in epfs.items():
+            if epf_id not in processed_epf:
+                unmapped_epf_result = collections.OrderedDict()
+                unmapped_epf_result['guid'] = epf['properties']['guid']
+                unmapped_epf_result.update(unmapped_limit_states)
+                unmapped_epf_result.update(unmapped_dmg_intervals)
+                unmapped_epf_result["demandtype"] = "None"
+                unmapped_epf_result['demandunits'] = "None"
+                unmapped_epf_result["hazardtype"] = "None"
+                unmapped_epf_result['hazardval'] = 0.0
+                unmapped_epf_result['liqhaztype'] = "NA"
+                unmapped_epf_result['liqhazval'] = "NA"
+                unmapped_epf_result['liqprobability'] = "NA"
+                epf_results.append(unmapped_epf_result)
 
         return epf_results
 
