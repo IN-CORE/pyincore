@@ -16,7 +16,6 @@ from scipy.stats import norm
 
 from pyincore import DataService
 from pyincore import Parser
-from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 
 
 class AnalysisUtil:
@@ -506,7 +505,6 @@ class AnalysisUtil:
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
 
-
     @staticmethod
     def get_hazard_demand_type(building, fragility_set, hazard_type):
         """Get hazard demand type.
@@ -520,11 +518,15 @@ class AnalysisUtil:
             str: A hazard demand type.
 
         """
+        BLDG_STORIES = "no_stories"
+        PROPERTIES = "properties"
+        BLDG_PERIOD = "period"
+
         fragility_hazard_type = fragility_set['demandType'].lower()
         hazard_demand_type = fragility_hazard_type
 
         if hazard_type.lower() == "earthquake":
-            num_stories = building[BuildingUtil.PROPERTIES][BuildingUtil.BLDG_STORIES]
+            num_stories = building[PROPERTIES][BLDG_STORIES]
             # Get building period from the fragility if possible
             building_period = AnalysisUtil.get_building_period(num_stories, fragility_set)
 
@@ -539,9 +541,9 @@ class AnalysisUtil:
             # This handles the case where some fragilities only specify Sa, others a specific period of Sa
             if not hazard_demand_type.endswith('pga'):
                 # If the fragility does not contain the period calculation, check if the dataset has it
-                if building_period == 0.0 and BuildingUtil.BLDG_PERIOD in building[BuildingUtil.PROPERTIES]:
-                    if building[BuildingUtil.PROPERTIES][BuildingUtil.BLDG_PERIOD] > 0.0:
-                        building_period = building[BuildingUtil.PROPERTIES][BuildingUtil.BLDG_PERIOD]
+                if building_period == 0.0 and BLDG_PERIOD in building[PROPERTIES]:
+                    if building[PROPERTIES][BLDG_PERIOD] > 0.0:
+                        building_period = building[PROPERTIES][BLDG_PERIOD]
 
                 hazard_demand_type = str(building_period) + " " + fragility_hazard_type
         elif hazard_type.lower() == "tsunami":
