@@ -124,7 +124,7 @@ class BuildingDamage(BaseAnalysis):
                 fragility_set = fragility_sets[fragility_key][bldg_id]
 
                 # TODO include liquefaction and hazard uncertainty
-                hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, fragility_set, hazard_type)
+                hazard_demand_type = AnalysisUtil.get_hazard_demand_type(building, fragility_set, hazard_type)
                 demand_type = hazard_demand_type
                 demand_units = frag.get("demandUnits")
                 tpl = (demand_type, demand_units)

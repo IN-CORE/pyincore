@@ -119,11 +119,10 @@ class BridgeDamage(BaseAnalysis):
                 "use_liquefaction") is not None:
             use_liquefaction = self.get_parameter("use_liquefaction")
 
-        fragility_sets = dict()
-        fragility_sets = self.fragilitysvc.match_inventory(
+        fragility_set = dict()
+        fragility_set = self.fragilitysvc.match_inventory(
             self.get_parameter("mapping_id"), bridges, fragility_key)
 
-        grouped_bridges = dict()
         bridge_results = []
         list_bridges = bridges
 
@@ -131,16 +130,9 @@ class BridgeDamage(BaseAnalysis):
         bridges = dict()
         for br in list_bridges:
             bridges[br["id"]] = br
-
         list_bridges = None  # Clear as it's not needed anymore
 
-        # Create grouped list of bridges by combination of demand type and demand unit
-        for bridge_id in fragility_sets.keys():
-            fragility_set = fragility_sets[bridge_id]
-            demand_type = fragility_set['demandType']
-            demand_units = fragility_set["demandUnits"]
-            tpl = (demand_type, demand_units)
-            grouped_bridges.setdefault(tpl, []).append(bridge_id)
+        grouped_bridges = AnalysisUtil.group_by_demand_type(bridges, fragility_set)
 
         for demand, grouped_brs in grouped_bridges.items():
 
@@ -180,7 +172,7 @@ class BridgeDamage(BaseAnalysis):
                 for br_id in brs:
                     bridge_result = collections.OrderedDict()
                     bridge = bridges[br_id]
-                    fragility_set = fragility_sets[br_id]
+                    selected_fragility_set = fragility_set[br_id]
 
                     hazard_val = hazard_vals[i]['hazardValue']
 
@@ -189,7 +181,7 @@ class BridgeDamage(BaseAnalysis):
                         # TODO Get this from API once implemented
                         hazard_std_dev = random.random()
 
-                    adjusted_fragility_set = fragility_set
+                    adjusted_fragility_set = selected_fragility_set
                     if use_liquefaction and 'liq' in bridge['properties']:
                         for fragility in fragility_set["fragilityCurves"]:
                             adjusted_fragility_set.append(
@@ -239,7 +231,7 @@ class BridgeDamage(BaseAnalysis):
             unmapped_br_result["retrocost"] = 0.0
             unmapped_br_result["demandtype"] = "None"
             unmapped_br_result['demandunits'] = "None"
-            unmapped_br_result["hazardtype"] = "hazard_type"
+            unmapped_br_result["hazardtype"] = "None"
             unmapped_br_result['hazardval'] = 0.0
             bridge_results.append(unmapped_br_result)
 
