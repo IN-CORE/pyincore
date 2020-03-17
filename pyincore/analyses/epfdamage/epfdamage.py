@@ -124,9 +124,8 @@ class EpfDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
         mapping_id = self.get_parameter("mapping_id")
 
-        fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.match_inventory(mapping_id, epfs,
-                                                                        fragility_key)
+        fragility_set = dict()
+        fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, fragility_key)
 
         liq_fragility_set = []
         if use_liquefaction and liq_geology_dataset_id is not None:
@@ -135,25 +134,17 @@ class EpfDamage(BaseAnalysis):
                 liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
             liq_fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, liq_fragility_key)
 
-        grouped_epfs = dict()
         epf_results = []
-        list_epfs = epfs
 
-        epfs = dict()
         # Converting list of epfs into a dictionary for ease of reference
+        list_epfs = epfs
+        epfs = dict()
         for epf in list_epfs:
             epfs[epf["id"]] = epf
-
         list_epfs = None  # Clear as it's not needed anymore
 
-        # Create grouped list of epfs by combination of demand type and demand unit
-        for frg_key, epf_items in fragility_sets.items():
-            for epf_id, frag in epf_items.items():
-                epf = epfs[epf_id]
-                demand_type = frag['demandType']
-                demand_units = frag["demandUnits"]
-                tpl = (demand_type, demand_units)
-                grouped_epfs.setdefault(tpl, []).append(epf_id)
+        grouped_epfs = AnalysisUtil.group_by_demand_type(epfs, fragility_set, hazard_type="earthquake",
+                                                         is_building=False)
 
         for demand, grouped_epf_items in grouped_epfs.items():
 
