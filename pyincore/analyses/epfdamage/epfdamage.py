@@ -238,7 +238,10 @@ class EpfDamage(BaseAnalysis):
                         # statess and dmg_interval
                         for epf_result in epf_results:
                             if epf_result['guid'] == epfs[liq_epf_id]['guid']:
-                                limit_states = None # todo retreive that limit state from epf result record
+                                limit_states = {"ls-slight":epf_result['ls-slight'],
+                                                "ls-moderat": epf_result['ls-moderat'],
+                                                "ls-extensi": epf_result['ls-extensi'],
+                                                "ls-complet": epf_result['ls-complet']}
                                 liq_limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states,
                                                                                          pgd_limit_states)
                                 liq_dmg_interval = AnalysisUtil.calculate_damage_interval(liq_limit_states)
