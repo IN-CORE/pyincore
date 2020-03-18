@@ -102,7 +102,7 @@ class BridgeDamage(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            fragility_key = BridgeUtil.DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY if hazard_type == 'tsunami' else \
+            fragility_key = BridgeUtil.DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY if hazard_type == 'tsunami' else \
                 BridgeUtil.DEFAULT_FRAGILITY_KEY
             self.set_parameter("fragility_key", fragility_key)
 
@@ -132,6 +132,7 @@ class BridgeDamage(BaseAnalysis):
             bridges[br["id"]] = br
         list_bridges = None  # Clear as it's not needed anymore
 
+        processed_bridges = []
         grouped_bridges = AnalysisUtil.group_by_demand_type(bridges, fragility_set)
 
         for demand, grouped_brs in grouped_bridges.items():
@@ -216,24 +217,25 @@ class BridgeDamage(BaseAnalysis):
                         bridge_result['spans'] = 1
 
                     bridge_results.append(bridge_result)
-                    del bridges[br_id]  # remove processed bridges
+                    processed_bridges.append(br_id)  # remove processed bridges
                     i = i + 1
 
         unmapped_dmg_probability = {"ls-slight": 0.0, "ls-moderat": 0.0,
                                     "ls-extensi": 0.0, "ls-complet": 0.0}
         unmapped_dmg_intervals = AnalysisUtil.calculate_damage_interval(unmapped_dmg_probability)
-        for unmapped_br_id, unmapped_br in bridges.items():
-            unmapped_br_result = collections.OrderedDict()
-            unmapped_br_result['guid'] = unmapped_br['properties']['guid']
-            unmapped_br_result.update(unmapped_dmg_probability)
-            unmapped_br_result.update(unmapped_dmg_intervals)
-            unmapped_br_result["retrofit"] = "Non-Retrofit"
-            unmapped_br_result["retrocost"] = 0.0
-            unmapped_br_result["demandtype"] = "None"
-            unmapped_br_result['demandunits'] = "None"
-            unmapped_br_result["hazardtype"] = "None"
-            unmapped_br_result['hazardval'] = 0.0
-            bridge_results.append(unmapped_br_result)
+        for br_id, br in bridges.items():
+            if br_id not in processed_bridges:
+                unmapped_br_result = collections.OrderedDict()
+                unmapped_br_result['guid'] = br['properties']['guid']
+                unmapped_br_result.update(unmapped_dmg_probability)
+                unmapped_br_result.update(unmapped_dmg_intervals)
+                unmapped_br_result["retrofit"] = "Non-Retrofit"
+                unmapped_br_result["retrocost"] = 0.0
+                unmapped_br_result["demandtype"] = "None"
+                unmapped_br_result['demandunits'] = "None"
+                unmapped_br_result["hazardtype"] = "None"
+                unmapped_br_result['hazardval'] = 0.0
+                bridge_results.append(unmapped_br_result)
 
         return bridge_results
 
