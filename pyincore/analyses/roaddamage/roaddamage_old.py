@@ -67,7 +67,8 @@ class RoadDamageOld(BaseAnalysis):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers, inventory_args,
+        results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers,
+                                                     inventory_args,
                                                      repeat(hazard_type), repeat(hazard_dataset_id),
                                                      repeat(geology_dataset_id), repeat(fragility_key),
                                                      repeat(use_liquefaction))

@@ -73,9 +73,10 @@ class RoadDamage(BaseAnalysis):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers, inventory_args,
+        results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers,
+                                                     inventory_args,
                                                      repeat(hazard_type), repeat(hazard_dataset_id),
-                                                     repeat(repeat(use_hazard_uncertainty)),
+                                                     repeat(use_hazard_uncertainty),
                                                      repeat(geology_dataset_id), repeat(fragility_key),
                                                      repeat(use_liquefaction))
 
@@ -120,10 +121,9 @@ class RoadDamage(BaseAnalysis):
             list: A list of ordered dictionaries with road damage values and other data/metadata.
 
         """
-
+        road_results = []
         fragility_sets = self.fragilitysvc.match_inventory(self.get_parameter("mapping_id"), roads, fragility_key)
 
-        road_results = []
         list_roads = roads
 
         # Converting list of roads into a dictionary for ease of reference
