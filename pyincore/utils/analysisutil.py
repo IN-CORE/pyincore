@@ -575,7 +575,7 @@ class AnalysisUtil:
 
             if is_building:
                 inventory = inventories[id]
-                demand_type = AnalysisUtil.get_hazard_demand_type(inventory, fragility_set, hazard_type)
+                demand_type = AnalysisUtil.get_hazard_demand_type(inventory, frag, hazard_type)
 
             tpl = (demand_type, demand_units)
             grouped_inventory.setdefault(tpl, []).append(id)
