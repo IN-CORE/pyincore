@@ -1,5 +1,6 @@
 from pyincore import IncoreClient
 from pyincore.analyses.epfdamage import EpfDamage
+from pyincore.analyses.epfdamage import EpfDamageOld
 
 
 def run_with_base_class():
@@ -16,17 +17,25 @@ def run_with_base_class():
 
     # Run epf damage
     epf_dmg = EpfDamage(client)
-    epf_dmg.load_remote_input_dataset("epfs", epf_dataset_id)
+    epf_dmg_old = EpfDamageOld(client)
 
-    result_name = "earthquake_epf_dmg_result"
-    epf_dmg.set_parameter("result_name", result_name)
+    epf_dmg.load_remote_input_dataset("epfs", epf_dataset_id)
+    epf_dmg_old.load_remote_input_dataset("epfs", epf_dataset_id)
+
+    epf_dmg.set_parameter("result_name", "earthquake_epf_dmg_result")
+    epf_dmg_old.set_parameter("result_name", "earthquake_epf_dmg_result_old")
     epf_dmg.set_parameter("mapping_id", mapping_id)
+    epf_dmg_old.set_parameter("mapping_id", mapping_id)
     epf_dmg.set_parameter("hazard_type", hazard_type)
+    epf_dmg_old.set_parameter("hazard_type", hazard_type)
     epf_dmg.set_parameter("hazard_id", hazard_id)
+    epf_dmg_old.set_parameter("hazard_id", hazard_id)
     epf_dmg.set_parameter("num_cpu", 1)
+    epf_dmg_old.set_parameter("num_cpu", 1)
 
     # Run Analysis
     epf_dmg.run_analysis()
+    epf_dmg_old.run_analysis()
 
     hazard_type = "tsunami"
 
@@ -39,17 +48,24 @@ def run_with_base_class():
 
     # Run epf damage
     epf_dmg = EpfDamage(client)
+    epf_dmg_old = EpfDamageOld(client)
     epf_dmg.load_remote_input_dataset("epfs", epf_dataset_id)
+    epf_dmg_old.load_remote_input_dataset("epfs", epf_dataset_id)
 
-    result_name = "tsunami_epf_dmg_result"
-    epf_dmg.set_parameter("result_name", result_name)
+    epf_dmg.set_parameter("result_name", "tsunami_epf_dmg_result")
+    epf_dmg_old.set_parameter("result_name", "tsunami_epf_dmg_result_old")
     epf_dmg.set_parameter("mapping_id", mapping_id)
+    epf_dmg_old.set_parameter("mapping_id", mapping_id)
     epf_dmg.set_parameter("hazard_type", hazard_type)
+    epf_dmg_old.set_parameter("hazard_type", hazard_type)
     epf_dmg.set_parameter("hazard_id", hazard_id)
+    epf_dmg_old.set_parameter("hazard_id", hazard_id)
     epf_dmg.set_parameter("num_cpu", 1)
+    epf_dmg_old.set_parameter("num_cpu", 1)
 
     # Run Analysis
     epf_dmg.run_analysis()
+    epf_dmg_old.run_analysis()
 
 
 if __name__ == '__main__':

@@ -12,7 +12,7 @@ from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
 
 
-class EpfDamage(BaseAnalysis):
+class EpfDamageOld(BaseAnalysis):
     """Computes electric power facility structural damage for an earthquake hazard.
 
     Args:
@@ -27,7 +27,7 @@ class EpfDamage(BaseAnalysis):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
 
-        super(EpfDamage, self).__init__(incore_client)
+        super(EpfDamageOld, self).__init__(incore_client)
 
     def run(self):
         """Executes electric power facility damage analysis."""

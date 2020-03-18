@@ -176,6 +176,10 @@ class EpfDamage(BaseAnalysis):
                     epf = epfs[epf_id]
                     hazard_val = hazard_vals[i]['hazardValue']
 
+                    # Sometimes the geotiffs give large negative values for out of bounds instead of 0
+                    if hazard_val <= 0.0:
+                        hazard_val = 0.0
+
                     std_dev = 0.0
                     if use_hazard_uncertainty:
                         std_dev = random.random()
