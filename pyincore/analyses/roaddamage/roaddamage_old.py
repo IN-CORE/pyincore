@@ -6,12 +6,11 @@
 
 import collections
 import concurrent.futures
+import traceback
 from itertools import repeat
-import random
-
 from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
 
-class RoadDamage(BaseAnalysis):
+class RoadDamageOld(BaseAnalysis):
     """Road Damage Analysis calculates the probability of road damage based on
     hazard type such as earthquake by calling fragility
     and hazard services.
@@ -26,7 +25,7 @@ class RoadDamage(BaseAnalysis):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
 
-        super(RoadDamage, self).__init__(incore_client)
+        super(RoadDamageOld, self).__init__(incore_client)
 
     def run(self):
         """Executes road damage analysis."""
@@ -54,11 +53,6 @@ class RoadDamage(BaseAnalysis):
         if self.get_parameter("liquefaction_geology_dataset_id") is not None:
             geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
-        # Hazard Uncertainty
-        use_hazard_uncertainty = False
-        if self.get_parameter("use_hazard_uncertainty") is not None:
-            use_hazard_uncertainty = self.get_parameter("use_hazard_uncertainty")
-
         user_defined_cpu = 1
         if self.get_parameter("num_cpu") is not None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
@@ -75,7 +69,6 @@ class RoadDamage(BaseAnalysis):
 
         results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers, inventory_args,
                                                      repeat(hazard_type), repeat(hazard_dataset_id),
-                                                     repeat(repeat(use_hazard_uncertainty)),
                                                      repeat(geology_dataset_id), repeat(fragility_key),
                                                      repeat(use_liquefaction))
 
@@ -103,8 +96,8 @@ class RoadDamage(BaseAnalysis):
 
         return output
 
-    def road_damage_analysis_bulk_input(self, roads, hazard_type, hazard_dataset_id, use_hazard_uncertainty,
-                                        geology_dataset_id, fragility_key, use_liquefaction):
+    def road_damage_analysis_bulk_input(self, roads, hazard_type, hazard_dataset_id, geology_dataset_id,
+                                        fragility_key, use_liquefaction):
         """Run analysis for multiple roads.
 
         Args:
@@ -121,110 +114,90 @@ class RoadDamage(BaseAnalysis):
 
         """
 
+        result = []
         fragility_sets = self.fragilitysvc.match_inventory(self.get_parameter("mapping_id"), roads, fragility_key)
 
-        road_results = []
-        list_roads = roads
+        for road in roads:
+            if road["id"] in fragility_sets.keys():
+                result.append(self.road_damage_analysis(road, fragility_sets[road["id"]],
+                                                        hazard_dataset_id, hazard_type,
+                                                        geology_dataset_id, use_liquefaction))
 
-        # Converting list of roads into a dictionary for ease of reference
-        roads = dict()
-        for rd in list_roads:
-            roads[rd["id"]] = rd
-        list_roads = None  # Clear as it's not needed anymore
+        return result
 
-        processed_roads = []
-        grouped_roads = AnalysisUtil.group_by_demand_type(roads, fragility_sets)
-        for demand, grouped_road_items in grouped_roads.items():
-            input_demand_type = demand[0]
-            input_demand_units = demand[1]
+    def road_damage_analysis(self, road, fragility_set, hazard_dataset_id,
+                             hazard_type, geology_dataset_id, use_liquefaction):
+        """Calculates road damage results for a single section of road.
 
-            # For every group of unique demand and demand unit, call the end-point once
-            road_chunks = list(AnalysisUtil.chunks(grouped_road_items, 50))
-            for road_chunk in road_chunks:
-                points = []
-                for road_id in road_chunk:
-                    location = GeoUtil.get_location(roads[road_id])
-                    points.append(str(location.y) + "," + str(location.x))
+        Args:
+            road (obj): A JSON mapping of a geometric object from the inventory: current road section.
+            fragility_set (obj): A JSON description of fragility assigned to the road.
+            hazard_dataset_id (str): A hazard dataset to use.
+            hazard_type (str): A hazard type of the hazard exposure.
+            geology_dataset_id (str): An id of the geology for use in liquefaction.
+            use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
+                False otherwise.
 
-                liquefaction = []
+        Returns:
+            OrderedDict: A dictionary with road damage values and other data/metadata.
+
+        """
+
+        try:
+            road_results = collections.OrderedDict()
+
+            demand_type = "None"
+            dmg_probability = {"ls-slight": 0.0, "ls-moderat": 0.0,
+                               "ls-extensi": 0.0, "ls-complet": 0.0}
+
+            road_results['guid'] = road['properties']['guid']
+
+            if fragility_set is not None:
+                location = GeoUtil.get_location(road)
+                demand_type = fragility_set['demandType']
+                demand_units = fragility_set['demandUnits']
                 if hazard_type == 'earthquake':
-                    hazard_vals = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, input_demand_type,
-                                                                              input_demand_units,
-                                                                              points)
-
-                    if input_demand_type.lower() == 'pgd' and use_liquefaction and geology_dataset_id is not None:
+                    if demand_type.lower() == 'pgd' and use_liquefaction and geology_dataset_id is not None:
+                        location_str = str(location.y) + "," + str(location.x)
                         liquefaction = self.hazardsvc.get_liquefaction_values(hazard_dataset_id, geology_dataset_id,
-                                                                              input_demand_units, points)
-                elif hazard_type == 'tornado':
-                    raise ValueError('Earthquake and tsunamis are the only hazards supported for road damage')
-                elif hazard_type == 'hurricane':
-                    raise ValueError('Earthquake and tsunamis are the only hazards supported for road damage')
-                elif hazard_type == 'tsunami':
-                    hazard_vals = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, input_demand_type,
-                                                                           input_demand_units, points)
-                else:
-                    raise ValueError("Missing hazard type.")
-
-                # Parse the batch hazard value results and map them back to the building and fragility.
-                # This is a potential pitfall as we are relying on the order of the returned results
-                i = 0
-                for road_id in road_chunk:
-                    road_result = collections.OrderedDict()
-                    road = roads[road_id]
-                    hazard_val = hazard_vals[i]['hazardValue']
-
-                    # Sometimes the geotiffs give large negative values for out of bounds instead of 0
-                    if hazard_val <= 0.0:
-                        hazard_val = 0.0
-
-                    std_dev = 0.0
-                    if use_hazard_uncertainty:
-                        std_dev = random.random()
-
-                    selected_fragility_set = fragility_sets[road_id]
-                    dmg_probability = AnalysisUtil.calculate_limit_state(selected_fragility_set, hazard_val, std_dev=std_dev)
-                    dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
-
-                    road_result['guid'] = road['properties']['guid']
-                    road_result.update(dmg_probability)
-                    road_result.update(dmg_interval)
-                    road_result['demandtype'] = input_demand_type
-                    road_result['demandunits'] = input_demand_units
-                    road_result['hazardtype'] = hazard_type
-                    road_result['hazardval'] = hazard_val
-
-                    # if there is liquefaction, overwrite the hazardval with liquefaction value
-                    if len(liquefaction) > 0:
-                        if input_demand_type in liquefaction[i]:
-                            liquefaction_val = liquefaction[i][input_demand_type]
-                        elif input_demand_type.lower() in liquefaction[i]:
-                            liquefaction_val = liquefaction[i][input_demand_type.lower()]
-                        elif input_demand_type.upper() in liquefaction[i]:
-                            liquefaction_val = liquefaction[i][input_demand_type.upper]
+                                                                              demand_units, [location_str])
+                        if demand_type in liquefaction[0]:
+                            liquefaction_val = liquefaction[0][demand_type]
+                        elif demand_type.lower() in liquefaction[0]:
+                            liquefaction_val = liquefaction[0][demand_type.lower()]
+                        elif demand_type.upper() in liquefaction[0]:
+                            liquefaction_val = liquefaction[0][demand_type.upper]
                         else:
                             liquefaction_val = 0.0
-                        road_result['hazardval'] = liquefaction_val
+                        road_results['hazardval'] = liquefaction_val
+                    else:
+                        road_results['hazardval'] = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id,
+                                                                                               demand_type,
+                                                                                               demand_units, location.y,
+                                                                                               location.x)
+                elif hazard_type == 'tsunami':
+                    road_results['hazardval'] = self.hazardsvc.get_tsunami_hazard_value(hazard_dataset_id,demand_type,
+                                                                                        demand_units, location.y,
+                                                                                        location.x)
+                    if road_results['hazardval'] < 0:
+                        road_results['hazardval'] = 0
+                else:
+                    raise ValueError("Earthquake and tsunamis are the only hazards supported for road damage")
+                dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, road_results['hazardval'])
 
-                    road_results.append(road_result)
-                    processed_roads.append(road_id)
-                    i = i + 1
+            dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
-        unmapped_dmg_probability = {"ls-slight": 0.0, "ls-moderat": 0.0,
-                                    "ls-extensi": 0.0, "ls-complet": 0.0}
-        unmapped_dmg_intervals = AnalysisUtil.calculate_damage_interval(unmapped_dmg_probability)
-        for road_id, rd in roads.items():
-            if road_id not in processed_roads:
-                unmapped_rd_result = collections.OrderedDict()
-                unmapped_rd_result['guid'] = rd['properties']['guid']
-                unmapped_rd_result.update(unmapped_dmg_probability)
-                unmapped_rd_result.update(unmapped_dmg_intervals)
-                unmapped_rd_result['demandtype'] = "None"
-                unmapped_rd_result['demandunits'] = "None"
-                unmapped_rd_result['hazardtype'] = "None"
-                unmapped_rd_result['hazardval'] = 0.0
-                road_results.append(unmapped_rd_result)
+            road_results.update(dmg_probability)
+            road_results.update(dmg_interval)
+            road_results['demandtype'] = demand_type
 
-        return road_results
+            return road_results
+
+        except Exception as e:
+            # This prints the type, value and stacktrace of error being handled.
+            traceback.print_exc()
+            print()
+            raise e
 
     def get_spec(self):
         """Get specifications of the road damage analysis.
