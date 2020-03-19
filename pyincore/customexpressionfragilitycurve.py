@@ -7,20 +7,16 @@
 from pyincore.dfr3curve import DFR3Curve
 
 
-class StandardFragilityCurve(DFR3Curve):
+class CustomExpressionFragilityCurve(DFR3Curve):
 
     def __init__(self, curve_parameters):
-        self.alpha = curve_parameters['alpha']
-        self.beta = curve_parameters['beta']
-        self.alphaType = curve_parameters['alphaType']
-        self.curveType = curve_parameters['curveType']
+        self.expression = curve_parameters['expression']
 
-        super(StandardFragilityCurve, self).__init__(curve_parameters)
+        super(CustomExpressionFragilityCurve, self).__init__(curve_parameters)
 
     def compute_limit_state(self):
         pass
 
     def plot(self):
         pass
-
-
+    

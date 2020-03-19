@@ -10,7 +10,7 @@ import urllib
 from typing import Dict
 
 from pyincore import IncoreClient
-from pyincore.dfr3curve import DFR3Curve
+from pyincore.dfr3curveset import DFR3CurveSet
 
 
 class MappingSubject(object):
@@ -65,7 +65,7 @@ class Dfr3Service:
     def batch_get_dfr3_set(self, dfr3_id_lists: list):
         batch_dfr3_sets = {}
         for id in dfr3_id_lists:
-            batch_dfr3_sets[id] = DFR3Curve.from_dict(self.get_dfr3_set(id))
+            batch_dfr3_sets[id] = DFR3CurveSet.from_dict(self.get_dfr3_set(id))
 
         return batch_dfr3_sets
 
@@ -137,7 +137,7 @@ class Dfr3Service:
 
         # 3. replace the curve id in dfr3_sets to the dfr3 curve
         for inventory_id, curve_item in dfr3_sets.items():
-            if isinstance(curve_item, DFR3Curve):
+            if isinstance(curve_item, DFR3CurveSet):
                 pass
             elif isinstance(curve_item, str):
                 dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]

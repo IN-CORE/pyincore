@@ -7,22 +7,25 @@
 from pyincore.dfr3curve import DFR3Curve
 
 
-class PeriodStandardFragilityCurve(DFR3Curve):
+class PeriodBuildingFragilityCurve(DFR3Curve):
 
     def __init__(self, curve_parameters):
-        self.alpha = curve_parameters['alpha']
-        self.beta = curve_parameters['beta']
-        self.alphaType = curve_parameters['alphaType']
-        self.curveType = curve_parameters['curveType']
-        self.periodParam2 = curve_parameters['periodParam2']
-        self.periodParam1 = curve_parameters['periodParam1']
-        self.periodParam0 = curve_parameters['periodParam0']
         self.periodEqnType = curve_parameters['periodEqnType']
+        self.periodParam1 = curve_parameters['periodParam1']
+        self.periodParam2 = curve_parameters['periodParam2']
+        self.periodParam0 = curve_parameters['periodParam0']
+        self.fsParam0 = curve_parameters['fsParam0']
+        self.fsParam1 = curve_parameters['fsParam1']
+        self.fsParam2 = curve_parameters['fsParam2']
+        self.fsParam3 = curve_parameters['fsParam3']
+        self.fsParam4 = curve_parameters['fsParam4']
+        self.fsParam5 = curve_parameters['fsParam5']
 
-        super(PeriodStandardFragilityCurve, self).__init__(curve_parameters)
+        super(PeriodBuildingFragilityCurve, self).__init__(curve_parameters)
 
     def compute_limit_state(self):
         pass
 
     def plot(self):
         pass
+    
