@@ -5,12 +5,14 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
+import collections
 import json
 
-from pyincore.standardfragilitycurve import StandardFragilityCurve
+from pyincore.customexpressionfragilitycurve import CustomExpressionFragilityCurve
 from pyincore.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
 from pyincore.periodstandardfragilitycurve import PeriodStandardFragilityCurve
-from pyincore.customexpressionfragilitycurve import CustomExpressionFragilityCurve
+from pyincore.standardfragilitycurve import StandardFragilityCurve
+
 
 class DFR3CurveSet:
     """class for dfr3 curves.
@@ -82,3 +84,33 @@ class DFR3CurveSet:
             instance = cls(json.load(f))
 
         return instance
+
+    def calculate_limit_state(self, hazard, period: float = 0.0, std_dev: float = 0.0):
+        """
+            Computes limit state probabilities.
+            Args:
+                hazard: hazard value to compute probability for
+                period: period of the structure, if applicable
+                std_dev: standard deviation
+
+            Returns: limit state probabilities
+
+        """
+        output = collections.OrderedDict()
+        index = 0
+
+        if len(self.fragility_curves) == 1:
+            limit_state = ['failure']
+        elif len(self.fragility_curves) == 3:
+            limit_state = ['immocc', 'lifesfty', 'collprev']
+        elif len(self.fragility_curves) == 4:
+            limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
+        else:
+            raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
+
+        for fragility_curve in self.fragility_curves:
+            probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev)
+            output[limit_state[index]] = probability
+            index += 1
+
+        return output

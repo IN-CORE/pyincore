@@ -170,8 +170,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                 demand_units_as,
                 points=[point])[0]['hazardValue']
 
-            dmg_probability_as = AnalysisUtil.calculate_limit_state(fragility_set_as,
-                                                                 hazard_val_as)
+            dmg_probability_as = fragility_set_as.calculate_limit_state(hazard_val_as)
             # adjust dmg probability for liquefaction
             if use_liquefaction:
                 if liq_geology_dataset_id is not None:
@@ -212,8 +211,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                 hazard_dataset_id, hazard_demand_type_ds,
                 demand_units_ds, points=[point])[0]['hazardValue']
 
-            dmg_probability_ds = AnalysisUtil.calculate_limit_state(fragility_set_ds,
-                                                                    hazard_val_ds)
+            dmg_probability_ds = fragility_set_ds.calculate_limit_state(hazard_val_ds)
 
             # adjust hazard value for liquefaction
             if use_liquefaction:

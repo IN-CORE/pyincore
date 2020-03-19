@@ -295,9 +295,9 @@ class TornadoEpnDamage(BaseAnalysis):
 
                                     # check if the line is tower or transmission
                                     if linetype_val.lower() == self.line_transmission:
-                                        resistivity_probability = AnalysisUtil.calculate_limit_state(fragility_set_tower, windspeed)
+                                        resistivity_probability = fragility_set_tower.calculate_limit_state(windspeed)
                                     else:
-                                        resistivity_probability = AnalysisUtil.calculate_limit_state(fragility_set_pole, windspeed)
+                                        resistivity_probability = fragility_set_pole.calculate_limit_state(windspeed)
 
                                     # randomly generated capacity of each poles ; 1 m/s is 2.23694 mph
                                     poleresist = resistivity_probability.get('failure') * 2.23694

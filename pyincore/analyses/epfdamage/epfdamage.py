@@ -191,8 +191,7 @@ class EpfDamage(BaseAnalysis):
                                                                           demand_units,
                                                                           [point])
                 hazard_val = hazard_resp[0]['hazardValue']
-                limit_states = AnalysisUtil.calculate_limit_state(
-                    fragility_set, hazard_val, std_dev=std_dev)
+                limit_states = fragility_set.calculate_limit_state(hazard_val, std_dev=std_dev)
 
                 # use ground liquefaction to modify damage interval
                 if liq_fragility is not None and liq_geology_dataset_id:
@@ -203,15 +202,13 @@ class EpfDamage(BaseAnalysis):
                                                                           pgd_demand_units, [point])
                     liq_hazard_val = liquefaction[0][liq_hazard_type]
                     liquefaction_prob = liquefaction[0]['liqProbability']
-                    pgd_limit_states = AnalysisUtil.calculate_limit_state(
-                        liq_fragility, liq_hazard_val, std_dev=std_dev)
+                    pgd_limit_states = liq_fragility.calculate_limit_state(liq_hazard_val, std_dev=std_dev)
                     limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
 
             elif hazard_type == 'tornado':
                 hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
                                                                      location.x, 0)
-                limit_states = AnalysisUtil.calculate_limit_state(
-                    fragility_set, hazard_val, std_dev=std_dev)
+                limit_states = fragility_set.calculate_limit_state(hazard_val, std_dev=std_dev)
 
             elif hazard_type == 'hurricane':
                 # TODO: implement hurricane
@@ -227,8 +224,7 @@ class EpfDamage(BaseAnalysis):
                 # Sometimes the geotiffs give large negative values for out of bounds instead of 0
                 if hazard_val <= 0.0:
                     hazard_val = 0.0
-                limit_states = AnalysisUtil.calculate_limit_state(
-                    fragility_set, hazard_val, std_dev=std_dev)
+                limit_states = fragility_set.calculate_limit_state(hazard_val, std_dev=std_dev)
 
             else:
                 raise ValueError("Missing hazard type.")

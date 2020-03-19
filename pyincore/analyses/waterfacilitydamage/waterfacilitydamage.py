@@ -301,8 +301,7 @@ class WaterFacilityDamage(BaseAnalysis):
         if hazard_val < 0:
             hazard_val = 0
 
-        limit_states = AnalysisUtil.calculate_limit_state(fragility,
-                                                          hazard_val, std_dev)
+        limit_states = fragility.calculate_limit_state(hazard_val, std_dev)
 
         if liq_fragility is not None and liq_geology_dataset_id:
             liq_hazard_type = liq_fragility.demand_type
@@ -314,8 +313,7 @@ class WaterFacilityDamage(BaseAnalysis):
                 pgd_demand_units, [point])
             liq_hazard_val = liquefaction[0][liq_hazard_type]
             liquefaction_prob = liquefaction[0]['liqProbability']
-            pgd_limit_states = AnalysisUtil.calculate_limit_state(
-                liq_fragility, liq_hazard_val, std_dev)
+            pgd_limit_states = liq_fragility.calculate_limit_state(liq_hazard_val, std_dev)
 
             limit_states = AnalysisUtil.adjust_limit_states_for_pgd(
                 limit_states, pgd_limit_states)

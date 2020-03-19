@@ -206,7 +206,7 @@ class BridgeDamage(BaseAnalysis):
                 for fragility in fragility_set.fragility_curves:
                     fragility.adjust_fragility_for_liquefaction(bridge['properties']['liq'])
 
-            dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, std_dev=hazard_std_dev)
+            dmg_probability = fragility_set.calculate_limit_state(hazard_val, std_dev=hazard_std_dev)
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 

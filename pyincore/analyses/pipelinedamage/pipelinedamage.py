@@ -169,7 +169,7 @@ class PipelineDamage(BaseAnalysis):
             if hazard_val <= 0.0:
                 hazard_val = 0.0
 
-            limit_states = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val)
+            limit_states = fragility_set.calculate_limit_state(hazard_val)
 
         dmg_intervals = AnalysisUtil.calculate_damage_interval(limit_states)
 

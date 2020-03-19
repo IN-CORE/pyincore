@@ -20,7 +20,7 @@ class StandardFragilityCurve(DFR3Curve):
 
         super(StandardFragilityCurve, self).__init__(curve_parameters)
 
-    def calculate_limit_state_probability(self, hazard, std_dev: float = 0.0):
+    def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0):
         """
             Computes limit state probabilities.
             Args:

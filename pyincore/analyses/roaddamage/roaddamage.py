@@ -183,7 +183,7 @@ class RoadDamage(BaseAnalysis):
                         road_results['hazardval'] = 0
                 else:
                     raise ValueError("Earthquake and tsunamis are the only hazards supported for road damage")
-                dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, road_results['hazardval'])
+                dmg_probability = fragility_set.calculate_limit_state(road_results['hazardval'])
 
             dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
