@@ -175,7 +175,7 @@ class BuildingDamage(BaseAnalysis):
 
                     num_stories = building['properties']['no_stories']
                     fragility_set = fragility_sets[fragility_key][bldg_id]
-                    building_period = AnalysisUtil.get_building_period(num_stories, fragility_set)
+                    building_period = fragility_set[0].get_building_period(num_stories)
 
                     dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, building_period)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)

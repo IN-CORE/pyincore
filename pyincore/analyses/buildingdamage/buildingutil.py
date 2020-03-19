@@ -4,8 +4,6 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import AnalysisUtil
-
 
 class BuildingUtil:
     """Utility methods for the building damage analysis."""
@@ -35,7 +33,7 @@ class BuildingUtil:
         if hazard_type.lower() == "earthquake":
             num_stories = building[BuildingUtil.PROPERTIES][BuildingUtil.BLDG_STORIES]
             # Get building period from the fragility if possible
-            building_period = AnalysisUtil.get_building_period(num_stories, fragility_set)
+            building_period = fragility_set[0].get_building_period(num_stories)
 
             if fragility_hazard_type.endswith('sa') and fragility_hazard_type != 'sa':
                 # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa

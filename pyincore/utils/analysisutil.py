@@ -26,35 +26,6 @@ class AnalysisUtil:
                     "Returns: \n\t" \
                     "$RETS$ "
 
-    # @staticmethod
-    # def get_building_period(num_stories, fragility_set):
-    #     """Get building period from the fragility curve.
-    #
-    #     Args:
-    #         num_stories (int): Number of building stories.
-    #         fragility_set (obj): A JSON description of fragility applicable to the building.
-    #
-    #     Returns:
-    #         float: Building period.
-    #
-    #     """
-    #     period = 0.0
-    #
-    #     fragility_curve = fragility_set.fragility_curves[0]
-    #     if fragility_curve[
-    #         'className'] == 'PeriodStandardFragilityCurve':
-    #         period_equation_type = fragility_curve['periodEqnType']
-    #         if period_equation_type == 1:
-    #             period = fragility_curve['periodParam0']
-    #         elif period_equation_type == 2:
-    #             period = fragility_curve['periodParam0'] * num_stories
-    #         elif period_equation_type == 3:
-    #             period = fragility_curve['periodParam1'] * math.pow(
-    #                 fragility_curve['periodParam0'] * num_stories,
-    #                 fragility_curve['periodParam2'])
-    #
-    #     return period
-
     # TODO watch out the loop through multiple curves and the def of limit state
     # @staticmethod
     # def calculate_limit_state(fragility_set, hazard, period: float = 0.0,

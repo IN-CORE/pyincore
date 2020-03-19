@@ -4,9 +4,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import math
 import collections
-from pyincore import AnalysisUtil
 
 class NonStructBuildingUtil:
     """Utility methods for the non-structural building damage analysis."""
@@ -38,8 +36,7 @@ class NonStructBuildingUtil:
 
         if hazard_type.lower() == "earthquake":
             num_stories = building['properties']['no_stories']
-            building_period = AnalysisUtil.get_building_period(num_stories,
-                                                               fragility_set)
+            building_period = fragility_set[0].get_building_period(num_stories)
 
             if fragility_hazard_type.endswith(
                     'sa') and fragility_hazard_type != 'sa':
