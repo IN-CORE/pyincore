@@ -33,7 +33,7 @@ class BuildingUtil:
         if hazard_type.lower() == "earthquake":
             num_stories = building[BuildingUtil.PROPERTIES][BuildingUtil.BLDG_STORIES]
             # Get building period from the fragility if possible
-            building_period = fragility_set[0].get_building_period(num_stories)
+            building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
 
             if fragility_hazard_type.endswith('sa') and fragility_hazard_type != 'sa':
                 # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa

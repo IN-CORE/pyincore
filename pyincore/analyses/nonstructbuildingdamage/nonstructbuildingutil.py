@@ -36,7 +36,7 @@ class NonStructBuildingUtil:
 
         if hazard_type.lower() == "earthquake":
             num_stories = building['properties']['no_stories']
-            building_period = fragility_set[0].get_building_period(num_stories)
+            building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
 
             if fragility_hazard_type.endswith(
                     'sa') and fragility_hazard_type != 'sa':
