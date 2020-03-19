@@ -17,7 +17,6 @@ class DFR3Curve:
     """
 
     def __init__(self, metadata):
-        # TODO think if we need id or not?
         self.id = metadata["id"]
         self.demand_type = metadata["demandType"]
         self.demand_units = metadata["demandUnits"]
