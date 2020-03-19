@@ -292,26 +292,6 @@ class AnalysisUtil:
 
         return result_dataset_id
 
-    # @staticmethod
-    # def compute_custom_limit_state_probability(fragility_set, variables: dict):
-    #     """Computes custom expression fragility values
-    #     :param fragility_set: fragility set with custom expression
-    #     :param variables: variables to set
-    #     :return:
-    #     """
-    #
-    #     fragility_curves = fragility_set.fragility_curves
-    #     limit_state_prob = 0.0
-    #     for fragility_curve in fragility_curves:
-    #         if fragility_curve['className'] == \
-    #                 'CustomExpressionFragilityCurve':
-    #             expression = fragility_curve['expression']
-    #             parser = Parser()
-    #             limit_state_prob = parser.parse(expression).evaluate(variables)
-    #
-    #     return limit_state_prob
-
-
     @staticmethod
     def adjust_limit_states_for_pgd(limit_states, pgd_limit_states):
         try:
@@ -435,38 +415,6 @@ class AnalysisUtil:
                 return custom_types_str
             else:
                 return types[0]
-
-    # @staticmethod
-    # def adjust_fragility_for_liquefaction(fragility_curve,
-    #                                       liquefaction):
-    #     """Adjusts fragility curve object by input parameter liquefaction.
-    #
-    #     Args:
-    #         fragility_curve (obj): A JSON description of current fragility curve.
-    #         liquefaction (str): Liquefaction type.
-    #
-    #     Returns:
-    #         obj: An adjusted fragility curve.
-    #
-    #     """
-    #     liquefaction_unified = str(liquefaction).upper()
-    #     if liquefaction_unified == "U":
-    #         multiplier = 0.85
-    #     elif liquefaction_unified == "Y":
-    #         multiplier = 0.65
-    #     else:
-    #         multiplier = 1.0
-    #
-    #     fragility_curve_adj = {
-    #         "className": fragility_curve["className"],
-    #         "description": fragility_curve['description'],
-    #         "alpha": fragility_curve[
-    #                       'alpha'] * multiplier,
-    #         "beta": fragility_curve['beta'],
-    #         "alphaType": fragility_curve['alphaType'],
-    #         'curveType': fragility_curve['curveType']}
-    #
-    #     return fragility_curve_adj
 
     def chunks(lst, n):
         """Yield successive n-sized chunks from lst."""

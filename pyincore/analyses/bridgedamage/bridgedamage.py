@@ -201,11 +201,10 @@ class BridgeDamage(BaseAnalysis):
             if use_hazard_uncertainty:
                 hazard_std_dev = random.random()
 
+            # TODO need to verify this local mutation works or not.
             if use_liquefaction and 'liq' in bridge['properties']:
                 for fragility in fragility_set.fragility_curves:
-                    adjusted_fragility_set.append(
-                        AnalysisUtil.adjust_fragility_for_liquefaction(
-                            fragility, bridge['properties']['liq']))
+                    fragility.adjust_fragility_for_liquefaction(bridge['properties']['liq'])
 
             dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, std_dev=hazard_std_dev)
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
