@@ -3,6 +3,7 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
+from pyincore import Parser
 
 from pyincore.dfr3curve import DFR3Curve
 
@@ -14,9 +15,15 @@ class CustomExpressionFragilityCurve(DFR3Curve):
 
         super(CustomExpressionFragilityCurve, self).__init__(curve_parameters)
 
-    def compute_limit_state(self):
-        pass
+    def compute_custom_limit_state_probability(self, variables: dict):
+        """Computes custom limit state probabilities.
+            Args:
+                variables: variables to set
 
-    def plot(self):
-        pass
-    
+            Returns: limit state probability
+        """
+        expression = self.expression
+        parser = Parser()
+        probability = parser.parse(expression).evaluate(variables)
+
+        return probability
