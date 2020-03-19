@@ -39,10 +39,10 @@ bldg_dmg.set_parameter("result_name", 'memphis_eq_bldg_dmg_result')
 
 # Load local dfr3 mapping from file
 local_mapping = MappingSet.from_json_file('local_mapping.json')
-bldg_dmg.set_input_dfr3_mapping(local_mapping)
+bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
 
 # Load locally created dfr3 mapping
-bldg_dmg.set_input_dfr3_mapping(local_mapping_object)
+bldg_dmg.set_input_dfr3_mapping_set(local_mapping_object)
 
 # Load remote dfr3 mapping
 bldg_dmg.load_remote_dfr3_mapping("5b47b350337d4a3629076f2c")

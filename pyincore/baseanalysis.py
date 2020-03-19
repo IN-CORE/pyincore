@@ -10,7 +10,7 @@ import pprint
 from pyincore import DataService, AnalysisUtil
 from pyincore.dfr3service import Dfr3Service
 from pyincore.dataset import Dataset
-from pyincore.mapping import Mapping
+from pyincore.mappingset import MappingSet
 
 
 class BaseAnalysis:
@@ -33,8 +33,8 @@ class BaseAnalysis:
         for param in self.spec['input_parameters']:
             self.parameters[param['id']] = {'spec': param, 'value': None}
 
-        if 'input_dfr3_mapping' in self.spec.keys():
-            self.input_dfr3_mapping = {'spec':self.spec['input_dfr3_mapping'], 'value': None}
+        if 'input_dfr3_mapping_set' in self.spec.keys():
+            self.input_dfr3_mapping_set = {'spec':self.spec['input_dfr3_mapping_set'], 'value': None}
 
         self.input_datasets = {}
         for input_dataset in self.spec['input_datasets']:
@@ -61,7 +61,7 @@ class BaseAnalysis:
             'description': 'this should be replaced by analysis spec',
             'input_parameters': [
             ],
-            'input_dfr3_mapping':{
+            'input_dfr3_mapping_set':{
 
             },
             'input_datasets': [
@@ -71,8 +71,8 @@ class BaseAnalysis:
         }
 
     def load_remote_dfr3_mapping(self, remote_id):
-        mapping = Mapping.from_dict(self.dfr3_service.get_mapping(remote_id))
-        self.set_input_dfr3_mapping(mapping)
+        mapping = MappingSet.from_dict(self.dfr3_service.get_mapping(remote_id))
+        self.set_input_dfr3_mapping_set(mapping)
 
     def load_remote_input_dataset(self, analysis_param_id, remote_id):
         """Convenience function for loading a remote dataset by id.
@@ -136,17 +136,17 @@ class BaseAnalysis:
             print(result[1])
             return False
 
-    def set_input_dfr3_mapping(self, mapping):
-        is_valid, err_msg = self.validate_input_dfr3_mapping(self.input_dfr3_mapping['spec'], mapping)
+    def set_input_dfr3_mapping_set(self, mapping):
+        is_valid, err_msg = self.validate_input_dfr3_mapping_set(self.input_dfr3_mapping_set['spec'], mapping)
         if is_valid:
-            self.input_dfr3_mapping['value'] = mapping
+            self.input_dfr3_mapping_set['value'] = mapping
             return True
         else:
             print(err_msg)
             return False
 
-    def get_input_dfr3_mapping(self):
-        return self.input_dfr3_mapping['value']
+    def get_input_dfr3_mapping_set(self):
+        return self.input_dfr3_mapping_set['value']
 
     def get_output_datasets(self):
         """Get the output dataset of the analysis."""
@@ -194,7 +194,7 @@ class BaseAnalysis:
 
         return is_valid, err_msg
 
-    def validate_input_dfr3_mapping(self, mapping_spec, mapping):
+    def validate_input_dfr3_mapping_set(self, mapping_spec, mapping):
         is_valid = True
         err_msg = ''
         if mapping_spec['required']:
@@ -284,8 +284,8 @@ class BaseAnalysis:
                 print("Error reading parameter: " + result[1])
                 return result
 
-        if 'input_dfr3_mapping' in self.spec.keys():
-            result = self.validate_input_dfr3_mapping(self.spec['input_dfr3_mapping'], self.input_dfr3_mapping[
+        if 'input_dfr3_mapping_set' in self.spec.keys():
+            result = self.validate_input_dfr3_mapping_set(self.spec['input_dfr3_mapping_set'], self.input_dfr3_mapping_set[
                 'value'])
             if not result[0]:
                 print("Error reading dfr3 mapping: " + result[1])

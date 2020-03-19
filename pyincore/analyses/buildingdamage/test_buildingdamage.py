@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, Mapping
+from pyincore import IncoreClient
 from pyincore.analyses.buildingdamage import BuildingDamage
 
 
@@ -26,7 +26,7 @@ def run_with_base_class():
 
     # Load dfr3 mapping
     # local_mapping = Mapping.from_json_file('local_mapping.json')
-    # bldg_dmg.set_input_dfr3_mapping(local_mapping)
+    # bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
     bldg_dmg.load_remote_dfr3_mapping(mapping_id)
 
     bldg_dmg.set_parameter("hazard_type", hazard_type)
@@ -55,7 +55,7 @@ def run_with_base_class():
     #
     # # Load dfr3 mapping
     # local_mapping = Mapping.from_json_file('local_mapping.json')
-    # bldg_dmg.set_input_dfr3_mapping(local_mapping)
+    # bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
     # bldg_dmg.load_remote_dfr3_mapping(mapping_id)
     #
     # bldg_dmg.set_parameter("hazard_type", hazard_type)
