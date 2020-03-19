@@ -194,6 +194,7 @@ class RoadDamage(BaseAnalysis):
                     road_result['hazardval'] = hazard_val
 
                     # if there is liquefaction, overwrite the hazardval with liquefaction value
+                    # recalculate dmg_probability and dmg_interval
                     if len(liquefaction) > 0:
                         if input_demand_type in liquefaction[i]:
                             liquefaction_val = liquefaction[i][input_demand_type]
@@ -203,7 +204,13 @@ class RoadDamage(BaseAnalysis):
                             liquefaction_val = liquefaction[i][input_demand_type.upper]
                         else:
                             liquefaction_val = 0.0
+                        dmg_probability = AnalysisUtil.calculate_limit_state(selected_fragility_set, liquefaction_val,
+                                                                             std_dev=std_dev)
+                        dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
+
                         road_result['hazardval'] = liquefaction_val
+                        road_result.update(dmg_probability)
+                        road_result.update(dmg_interval)
 
                     road_results.append(road_result)
                     processed_roads.append(road_id)
