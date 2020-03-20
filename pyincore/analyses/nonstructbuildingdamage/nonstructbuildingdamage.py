@@ -105,10 +105,11 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         """
         result = []
-        fragility_sets_as = self.fragilitysvc.match_inventory(self.get_parameter("mapping_id"),
+        mapping = self.get_input_dfr3_mapping_set()
+        fragility_sets_as = self.fragilitysvc.match_inventory(mapping,
                                                               buildings,
                                                               self.get_parameter("fragility_key_as"))
-        fragility_sets_ds = self.fragilitysvc.match_inventory(self.get_parameter("mapping_id"),
+        fragility_sets_ds = self.fragilitysvc.match_inventory(mapping,
                                                               buildings,
                                                               self.get_parameter("fragility_key_ds"))
 
@@ -281,12 +282,6 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
-                    'type': str
-                },
-                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard Type (e.g. earthquake)',
@@ -336,6 +331,10 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'type': int
                 },
             ],
+            'input_dfr3_mapping_set': {
+                'required': True,
+                'description': "input dfr3 mapping set"
+            },
             'input_datasets': [
                 {
                     'id': 'buildings',

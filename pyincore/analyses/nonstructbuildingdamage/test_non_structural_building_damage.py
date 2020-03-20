@@ -21,12 +21,14 @@ def run_with_base_class():
     # Load input datasets
     non_structural_building_dmg.load_remote_input_dataset("buildings", building_dataset_id)
 
+    # load remote
+    non_structural_building_dmg.load_remote_dfr3_mapping(mapping_id)
+
     # Specify the result name
     result_name = "non_structural_building_dmg_result"
 
     # Set analysis parameters
     non_structural_building_dmg.set_parameter("result_name", result_name)
-    non_structural_building_dmg.set_parameter("mapping_id", mapping_id)
     non_structural_building_dmg.set_parameter("hazard_type", hazard_type)
     non_structural_building_dmg.set_parameter("hazard_id", hazard_id)
     non_structural_building_dmg.set_parameter("num_cpu", 4)
