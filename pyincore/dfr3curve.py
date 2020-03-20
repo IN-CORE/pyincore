@@ -17,3 +17,49 @@ class DFR3Curve:
 
     def __init__(self, curve_parameters):
         self.description = curve_parameters['description']
+
+    def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0):
+        """
+            Computes limit state probabilities.
+            Args:
+                hazard: hazard value to compute probability for
+                std_dev: standard deviation
+
+            Returns: limit state probability
+
+        """
+        probability = float(0.0)
+        return probability
+
+    def adjust_fragility_for_liquefaction(self, liquefaction: str):
+        """Adjusts fragility curve object by input parameter liquefaction.
+
+        Args:
+            liquefaction (str): Liquefaction type.
+
+        Returns:
+        """
+        pass
+
+    def get_building_period(self, num_stories):
+        """Get building period from the fragility curve.
+
+        Args:
+            num_stories (int): Number of building stories.
+
+        Returns:
+            float: Building period.
+
+        """
+        period = 0.0
+        return period
+
+    def compute_custom_limit_state_probability(self, variables: dict):
+        """Computes custom limit state probabilities.
+            Args:
+                variables: variables to set
+
+            Returns: limit state probability
+        """
+        probability = float(0.0)
+        return probability

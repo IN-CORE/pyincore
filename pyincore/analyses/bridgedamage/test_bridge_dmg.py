@@ -24,7 +24,7 @@ def run_with_base_class():
     bridge_dmg = BridgeDamage(client)
     # Load input datasets
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
-    # load remote
+    # load remote dfr3 mapping
     bridge_dmg.load_remote_dfr3_mapping(mapping_id)
     # Specify the result name
     result_name = "bridge_result"
