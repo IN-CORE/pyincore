@@ -120,8 +120,8 @@ class BridgeDamage(BaseAnalysis):
             use_liquefaction = self.get_parameter("use_liquefaction")
 
         result = []
-        fragility_sets = self.fragilitysvc.match_inventory(
-            self.get_parameter("mapping_id"), bridges, fragility_key)
+        mapping = self.get_input_dfr3_mapping_set()
+        fragility_sets = self.fragilitysvc.match_inventory(mapping, bridges, fragility_key)
         for bridge in bridges:
             fragility_set = None
             if bridge["id"] in fragility_sets:
@@ -251,12 +251,6 @@ class BridgeDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
-                    'type': str
-                },
-                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard Type (e.g. earthquake)',
@@ -293,6 +287,10 @@ class BridgeDamage(BaseAnalysis):
                     'type': int
                 },
             ],
+            'input_dfr3_mapping_set': {
+                'required': True,
+                'description': "input dfr3 mapping set"
+            },
             'input_datasets': [
                 {
                     'id': 'bridges',
