@@ -8,6 +8,7 @@
 import collections
 import json
 
+from pyincore.dfr3curve import DFR3Curve
 from pyincore.customexpressionfragilitycurve import CustomExpressionFragilityCurve
 from pyincore.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
 from pyincore.periodstandardfragilitycurve import PeriodStandardFragilityCurve
@@ -32,19 +33,24 @@ class DFR3CurveSet:
 
         self.fragility_curves = []
         if 'fragilityCurves' in metadata.keys():
-            # based on what type of fragility_curve it is, instantiate different fragility curve object
             for fragility_curve in metadata["fragilityCurves"]:
-                if fragility_curve['className'] == 'StandardFragilityCurve':
-                    self.fragility_curves.append(StandardFragilityCurve(fragility_curve))
-                elif fragility_curve['className'] == 'PeriodBuildingFragilityCurve':
-                    self.fragility_curves.append(PeriodBuildingFragilityCurve(fragility_curve))
-                elif fragility_curve['className'] == 'PeriodStandardFragilityCurve':
-                    self.fragility_curves.append(PeriodStandardFragilityCurve(fragility_curve))
-                elif fragility_curve['className'] == 'CustomExpressionFragilityCurve':
-                    self.fragility_curves.append(CustomExpressionFragilityCurve(fragility_curve))
-                else:
-                    # TODO make a custom fragility curve class that accept whatever
+
+                # if it's already an df3curve object, directly put it in the list:
+                if isinstance(fragility_curve, DFR3Curve):
                     self.fragility_curves.append(fragility_curve)
+                # based on what type of fragility_curve it is, instantiate different fragility curve object
+                else:
+                    if fragility_curve['className'] == 'StandardFragilityCurve':
+                        self.fragility_curves.append(StandardFragilityCurve(fragility_curve))
+                    elif fragility_curve['className'] == 'PeriodBuildingFragilityCurve':
+                        self.fragility_curves.append(PeriodBuildingFragilityCurve(fragility_curve))
+                    elif fragility_curve['className'] == 'PeriodStandardFragilityCurve':
+                        self.fragility_curves.append(PeriodStandardFragilityCurve(fragility_curve))
+                    elif fragility_curve['className'] == 'CustomExpressionFragilityCurve':
+                        self.fragility_curves.append(CustomExpressionFragilityCurve(fragility_curve))
+                    else:
+                        # TODO make a custom fragility curve class that accept whatever
+                        self.fragility_curves.append(fragility_curve)
         elif 'repairCurves' in metadata.keys():
             self.repairCurves = metadata['repairCurves']
         elif 'restorationCurves' in metadata.keys():
