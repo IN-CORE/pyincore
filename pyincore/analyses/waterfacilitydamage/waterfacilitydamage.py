@@ -199,6 +199,7 @@ class WaterFacilityDamage(BaseAnalysis):
         """
         result = []
         liq_fragility = None
+        fragility = None
         mapping = self.get_input_dfr3_mapping_set()
         use_liquefaction = self.get_parameter("use_liquefaction")
         liq_geology_dataset_id = self.get_parameter(
@@ -221,7 +222,8 @@ class WaterFacilityDamage(BaseAnalysis):
                 liq_fragility_set = self.fragilitysvc.match_inventory(mapping, facilities, liq_fragility_key)
 
             for facility in facilities:
-                fragility = pga_fragility_set[facility["id"]]
+                if facility["id"] in pga_fragility_set:
+                    fragility = pga_fragility_set[facility["id"]]
                 if facility["id"] in liq_fragility_set:
                     liq_fragility = liq_fragility_set[facility["id"]]
 
@@ -268,51 +270,67 @@ class WaterFacilityDamage(BaseAnalysis):
         Returns:
             OrderedDict: A dictionary with water facility damage values and other data/metadata.
         """
-        std_dev = 0
-        if uncertainty:
-            std_dev = random.random()
+        if fragility is not None:
+            std_dev = 0
+            if uncertainty:
+                std_dev = random.random()
 
-        hazard_demand_type = fragility.demand_type
-        demand_units = fragility.demand_units
-        liq_hazard_type = ""
-        liq_hazard_val = 0.0
-        liquefaction_prob = 0.0
-        location = GeoUtil.get_location(facility)
+            hazard_demand_type = fragility.demand_type
+            demand_units = fragility.demand_units
+            liq_hazard_type = ""
+            liq_hazard_val = 0.0
+            liquefaction_prob = 0.0
+            location = GeoUtil.get_location(facility)
 
-        point = str(location.y) + "," + str(location.x)
-
-        if hazard_type == "earthquake":
-            hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(
-                hazard_dataset_id, hazard_demand_type,
-                demand_units, [point])
-        elif hazard_type == "tsunami":
-            hazard_val_set = self.hazardsvc.get_tsunami_hazard_values(
-                hazard_dataset_id, hazard_demand_type, demand_units, [point])
-        else:
-            raise ValueError(
-                "Hazard type other than Earthquake and Tsunami are not currently supported.")
-        hazard_val = hazard_val_set[0]['hazardValue']
-        if hazard_val < 0:
-            hazard_val = 0
-
-        limit_states = fragility.calculate_limit_state(hazard_val, std_dev)
-
-        if liq_fragility is not None and liq_geology_dataset_id:
-            liq_hazard_type = liq_fragility.demand_type
-            pgd_demand_units = liq_fragility.demand_units
             point = str(location.y) + "," + str(location.x)
 
-            liquefaction = self.hazardsvc.get_liquefaction_values(
-                hazard_dataset_id, liq_geology_dataset_id,
-                pgd_demand_units, [point])
-            liq_hazard_val = liquefaction[0][liq_hazard_type]
-            liquefaction_prob = liquefaction[0]['liqProbability']
-            pgd_limit_states = liq_fragility.calculate_limit_state(liq_hazard_val, std_dev)
+            if hazard_type == "earthquake":
+                hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(
+                    hazard_dataset_id, hazard_demand_type,
+                    demand_units, [point])
+            elif hazard_type == "tsunami":
+                hazard_val_set = self.hazardsvc.get_tsunami_hazard_values(
+                    hazard_dataset_id, hazard_demand_type, demand_units, [point])
+            else:
+                raise ValueError(
+                    "Hazard type other than Earthquake and Tsunami are not currently supported.")
+            hazard_val = hazard_val_set[0]['hazardValue']
+            if hazard_val < 0:
+                hazard_val = 0
 
-            limit_states = AnalysisUtil.adjust_limit_states_for_pgd(
-                limit_states, pgd_limit_states)
+            limit_states = fragility.calculate_limit_state(hazard_val, std_dev)
 
-        dmg_intervals = AnalysisUtil.calculate_damage_interval(limit_states)
+            if liq_fragility is not None and liq_geology_dataset_id:
+                liq_hazard_type = liq_fragility.demand_type
+                pgd_demand_units = liq_fragility.demand_units
+                point = str(location.y) + "," + str(location.x)
+
+                liquefaction = self.hazardsvc.get_liquefaction_values(
+                    hazard_dataset_id, liq_geology_dataset_id,
+                    pgd_demand_units, [point])
+                liq_hazard_val = liquefaction[0][liq_hazard_type]
+                liquefaction_prob = liquefaction[0]['liqProbability']
+                pgd_limit_states = liq_fragility.calculate_limit_state(liq_hazard_val, std_dev)
+
+                limit_states = AnalysisUtil.adjust_limit_states_for_pgd(
+                    limit_states, pgd_limit_states)
+
+            dmg_intervals = AnalysisUtil.calculate_damage_interval(limit_states)
+
+        else:
+            hazard_type = "None"
+            hazard_demand_type = "None"
+            hazard_val = 0.0
+            liq_hazard_type = "None"
+            liq_hazard_val = 0.0
+            liquefaction_prob = 0.0
+            limit_states = {
+                "ls-slight": 0.0,
+                "ls-moderat": 0.0,
+                "ls-extensi": 0.0,
+                "ls-complet": 0.0,
+            }
+            dmg_intervals = AnalysisUtil.calculate_damage_interval(limit_states)
 
         result = collections.OrderedDict()
         result = {**limit_states, **dmg_intervals}  # Needs py 3.5+
