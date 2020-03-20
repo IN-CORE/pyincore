@@ -1,5 +1,6 @@
 from pyincore import IncoreClient
 from pyincore.analyses.buildingdamage import BuildingDamage
+from pyincore import MappingSet
 
 
 def run_with_base_class():
@@ -24,9 +25,11 @@ def run_with_base_class():
     result_name = "memphis_eq_bldg_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
 
-    # Load dfr3 mapping
-    # local_mapping = Mapping.from_json_file('local_mapping.json')
+    # # Load dfr3 mapping
+    # local_mapping = MappingSet.from_json_file('local_mapping.json')
     # bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
+
+    # load remote
     bldg_dmg.load_remote_dfr3_mapping(mapping_id)
 
     bldg_dmg.set_parameter("hazard_type", hazard_type)

@@ -121,10 +121,10 @@ class EpfDamage(BaseAnalysis):
         result = []
 
         fragility_key = self.get_parameter("fragility_key")
-        mapping_id = self.get_parameter("mapping_id")
+        mapping = self.get_input_dfr3_mapping_set()
 
         fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.match_inventory(mapping_id, epfs,
+        fragility_sets[fragility_key] = self.fragilitysvc.match_inventory(mapping, epfs,
                                                                         fragility_key)
 
         liq_fragility_set = []
@@ -132,7 +132,7 @@ class EpfDamage(BaseAnalysis):
             liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
             if liq_fragility_key is None:
                 liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-            liq_fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, liq_fragility_key)
+            liq_fragility_set = self.fragilitysvc.match_inventory(mapping, epfs, liq_fragility_key)
 
         # TODO there is a chance the fragility key is pgd, we should either update our mappings or add support here
         liq_fragility = None
@@ -262,12 +262,6 @@ class EpfDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset applicable to the EPF.',
-                    'type': str
-                },
-                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard type (e.g. earthquake).',
@@ -312,6 +306,10 @@ class EpfDamage(BaseAnalysis):
                     'type': int
                 },
             ],
+            'input_dfr3_mapping_set': {
+                'required': True,
+                'description': "input dfr3 mapping set"
+            },
             'input_datasets': [
                 {
                     'id': 'epfs',
