@@ -71,7 +71,7 @@ class BaseAnalysis:
         }
 
     def load_remote_dfr3_mapping(self, remote_id):
-        mapping = MappingSet.from_dict(self.dfr3_service.get_mapping(remote_id))
+        mapping = MappingSet(self.dfr3_service.get_mapping(remote_id))
         self.set_input_dfr3_mapping_set(mapping)
 
     def load_remote_input_dataset(self, analysis_param_id, remote_id):

@@ -11,6 +11,7 @@ import pytest
 from jose import jwt
 
 from pyincore import FragilityService, RepairService, IncoreClient
+from pyincore.mappingset import MappingSet
 from pyincore import globals as pyglobals
 from pyincore.globals import LOGGER
 
@@ -65,37 +66,16 @@ def test_search_fragility_sets(fragilitysvc):
     assert len(fragility_sets)>0 and text in fragility_sets[0]['authors']
 
 
-def test_map_fragilities_single_inventory(fragilitysvc):
-    inventory = {}
-    with open("single_inventory.json", 'r') as file:
-        inventory = ast.literal_eval(file.read())
-    mapping_id = '5b47b2d9337d4a36187c7564'
-    key = "High-Retrofit Drift-Sensitive Fragility ID Code"
-    frag_set = fragilitysvc.map_inventory(mapping_id, [inventory], key)
-
-    assert inventory['id'] in frag_set.keys()
-
-
 def test_match_fragilities_single_inventory(fragilitysvc):
     inventory = {}
     with open("single_inventory.json", 'r') as file:
         inventory = ast.literal_eval(file.read())
     mapping_id = '5b47b2d9337d4a36187c7564'
     key = "High-Retrofit Drift-Sensitive Fragility ID Code"
-    frag_set = fragilitysvc.match_inventory(mapping_id, [inventory], key)
+    mapping = MappingSet(fragilitysvc.get_mapping(mapping_id))
+    frag_set = fragilitysvc.match_inventory(mapping, [inventory], key)
 
     assert inventory['id'] in frag_set.keys()
-
-
-def test_map_fragilities_multiple_inventory(fragilitysvc):
-    inventories = []
-    with open("multiple_inventory.json", 'r') as file:
-        inventories = ast.literal_eval(file.read())
-    mapping_id = '5b47b350337d4a3629076f2c'
-    key = "Non-Retrofit Fragility ID Code"
-    frag_set = fragilitysvc.map_inventory(mapping_id, inventories, key)
-
-    assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
 
 
 def test_match_fragilities_multiple_inventory(fragilitysvc):
@@ -104,7 +84,8 @@ def test_match_fragilities_multiple_inventory(fragilitysvc):
         inventories = ast.literal_eval(file.read())
     mapping_id = '5b47b350337d4a3629076f2c'
     key = "Non-Retrofit Fragility ID Code"
-    frag_set = fragilitysvc.match_inventory(mapping_id, inventories, key)
+    mapping = MappingSet(fragilitysvc.get_mapping(mapping_id))
+    frag_set = fragilitysvc.match_inventory(mapping, inventories, key)
 
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
 

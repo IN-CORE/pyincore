@@ -34,11 +34,6 @@ class MappingSet:
 
         self.mapping_type = metadata['mappingType']
 
-
-    @classmethod
-    def from_dict(cls, metadata):
-        return cls(metadata)
-
     @classmethod
     def from_json_str(cls, json_str):
         """Get dfr3 mapping from json string.

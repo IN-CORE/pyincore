@@ -53,10 +53,6 @@ class DFR3CurveSet:
             raise ValueError("Cannot create dfr3 curve object. Missing key field.")
 
     @classmethod
-    def from_dict(cls, metadata):
-        return cls(metadata)
-
-    @classmethod
     def from_json_str(cls, json_str):
         """Get dfr3set from json string.
 
