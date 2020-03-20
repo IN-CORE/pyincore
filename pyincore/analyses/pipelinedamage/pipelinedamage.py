@@ -112,8 +112,8 @@ class PipelineDamage(BaseAnalysis):
             self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
-        fragility_sets = self.fragilitysvc.match_inventory(
-            self.get_parameter("mapping_id"), pipelines, fragility_key)
+        mapping = self.get_input_dfr3_mapping_set()
+        fragility_sets = self.fragilitysvc.match_inventory(mapping, pipelines, fragility_key)
 
         for pipeline in pipelines:
             if pipeline["id"] in fragility_sets.keys():
@@ -198,12 +198,6 @@ class PipelineDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
-                    'type': str
-                },
-                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard Type',
@@ -234,6 +228,10 @@ class PipelineDamage(BaseAnalysis):
                     'type': str,
                 }
             ],
+            'input_dfr3_mapping_set': {
+                'required': True,
+                'description': "input dfr3 mapping set"
+            },
             'input_datasets': [
                 {
                     'id': 'pipeline',
