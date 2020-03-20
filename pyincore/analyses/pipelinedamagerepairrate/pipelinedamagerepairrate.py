@@ -118,8 +118,8 @@ class PipelineDamageRepairRate(BaseAnalysis):
             self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
-        fragility_sets = self.fragilitysvc.match_inventory(
-            self.get_parameter("mapping_id"), pipelines, fragility_key)
+        mapping = self.get_input_dfr3_mapping_set()
+        fragility_sets = self.fragilitysvc.match_inventory(mapping, pipelines, fragility_key)
 
         # Get Liquefaction Fragility Key
         liquefaction_fragility_key = self.get_parameter(
@@ -137,9 +137,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
         geology_dataset_id = self.get_parameter(
             "liquefaction_geology_dataset_id")
         if geology_dataset_id is not None:
-            fragility_sets_liq = self.fragilitysvc.match_inventory(
-                self.get_parameter("mapping_id"), pipelines,
-                liquefaction_fragility_key)
+            fragility_sets_liq = self.fragilitysvc.match_inventory(mapping, pipelines,liquefaction_fragility_key)
 
         for pipeline in pipelines:
             if pipeline["id"] in fragility_sets.keys():
@@ -222,7 +220,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
 
             # Convert PGV repairs to SI units
             pgv_repairs = PipelineUtil.convert_result_unit(
-                fragility_curve['description'], pgv_repairs)
+                fragility_curve.description, pgv_repairs)
 
             if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
                 liq_fragility_curve = fragility_set_liq.fragility_curves[0]
@@ -242,7 +240,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 pgd_repairs = liq_fragility_curve.compute_custom_limit_state_probability(liq_fragility_vars)
                 # Convert PGD repairs to SI units
                 pgd_repairs = PipelineUtil.convert_result_unit(
-                    liq_fragility_curve['description'], pgd_repairs)
+                    liq_fragility_curve.description, pgd_repairs)
 
             total_repair_rate = pgd_repairs + pgv_repairs
             break_rate = 0.2 * pgv_repairs + 0.8 * pgd_repairs
@@ -301,12 +299,6 @@ class PipelineDamageRepairRate(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
-                    'type': str
-                },
-                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard Type (e.g. earthquake)',
@@ -349,6 +341,10 @@ class PipelineDamageRepairRate(BaseAnalysis):
                     'type': str,
                 }
             ],
+            'input_dfr3_mapping_set': {
+                'required': True,
+                'description': "input dfr3 mapping set"
+            },
             'input_datasets': [
                 {
                     'id': 'pipeline',

@@ -21,11 +21,12 @@ def test_pipeline_dmg_w_repair_rate():
     test_pipeline_dmg_w_rr = PipelineDamageRepairRate(client)
     # Load input datasets
     test_pipeline_dmg_w_rr.load_remote_input_dataset("pipeline", pipeline_dataset_id)
+    # load remote dfr3 mapping
+    test_pipeline_dmg_w_rr.load_remote_dfr3_mapping(mapping_id)
     # Specify the result name
     result_name = "pipeline_result"
     # Set analysis parameters
     test_pipeline_dmg_w_rr.set_parameter("result_name", result_name)
-    test_pipeline_dmg_w_rr.set_parameter("mapping_id", mapping_id)
     test_pipeline_dmg_w_rr.set_parameter("hazard_type", hazard_type)
     test_pipeline_dmg_w_rr.set_parameter("hazard_id", hazard_id)
     test_pipeline_dmg_w_rr.set_parameter("liquefaction_fragility_key", "pgd")
