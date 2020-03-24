@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Changed
+- Add batch processing for EPF damage analysis [INCORE1-510](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-510)
+
 ## [0.6.0] - 2020-02-28
 
 ### Added
