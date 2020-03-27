@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Add batch processing for road damage analysis [INCORE1-511](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-511)
+- refactoring building damage batch processing [INCORE1-522](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-522)
 
 ## [0.6.0] - 2020-02-28
 
