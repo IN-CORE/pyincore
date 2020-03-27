@@ -202,12 +202,11 @@ class BridgeDamage(BaseAnalysis):
                 hazard_std_dev = random.random()
 
             if use_liquefaction and 'liq' in bridge['properties']:
-                for fragility in fragility_set["fragilityCurves"]:
-                    adjusted_fragility_set.append(
-                        AnalysisUtil.adjust_fragility_for_liquefaction(
-                            fragility, bridge['properties']['liq']))
+                for fragility in adjusted_fragility_set["fragilityCurves"]:
+                    AnalysisUtil.adjust_fragility_for_liquefaction(
+                            fragility, bridge['properties']['liq'])
 
-            dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, std_dev=hazard_std_dev)
+            dmg_probability = AnalysisUtil.calculate_limit_state(adjusted_fragility_set, hazard_val, std_dev=hazard_std_dev)
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 
