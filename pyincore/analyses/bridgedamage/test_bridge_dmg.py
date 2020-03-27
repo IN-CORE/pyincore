@@ -40,7 +40,7 @@ def run_with_base_class():
     hazard_id = "5e7e4c8ad7fb0a0008519364"
 
     # south carolina bridge
-    bridge_dataset_id = "5e7e56d2459ba70008a8eb22"
+    bridge_dataset_id = "5e7e5a29fb9f440008c94cbf"
 
     # Default Bridge Fragility Mapping on incore-service
     mapping_id = "5b47bcce337d4a37755e0cb2"
@@ -57,7 +57,7 @@ def run_with_base_class():
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
 
     # Set analysis parameters
-    bridge_dmg.set_parameter("result_name", "bridge_result_old_w_liquefaction")
+    bridge_dmg.set_parameter("result_name", "bridge_result_w_liquefaction")
     bridge_dmg.set_parameter("mapping_id", mapping_id)
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
