@@ -555,30 +555,29 @@ class AnalysisUtil:
         return hazard_demand_type
 
     @staticmethod
-    def group_by_demand_type(inventories, fragility_set, hazard_type="earthquake", is_building=False):
+    def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):
         """
 
         Args:
             inventories: dictionary of {id: intentory}
             fragility_sets: fragility_sets
             hazard_type: default to earthquake
-            fragility_set = self.fragilitysvc.match_inventory(mapping_id, inventories,
-                                                                    fragility_key)
+            is_building: if the inventory is builiding or not
 
         Returns: dictionary of grouped inventory with { (demandunit, demandtype):[inventory ids] }
 
         """
         grouped_inventory = dict()
-        for id, frag in fragility_set.items():
+        for fragility_id, frag in fragility_sets.items():
 
             demand_type = frag['demandType']
             demand_units = frag["demandUnits"]
 
             if is_building:
-                inventory = inventories[id]
+                inventory = inventories[fragility_id]
                 demand_type = AnalysisUtil.get_hazard_demand_type(inventory, frag, hazard_type)
 
             tpl = (demand_type, demand_units)
-            grouped_inventory.setdefault(tpl, []).append(id)
+            grouped_inventory.setdefault(tpl, []).append(fragility_id)
 
         return grouped_inventory

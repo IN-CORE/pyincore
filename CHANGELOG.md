@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Add batch processing for bridge damage analysis [INCORE1-500](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-500)
+- refactoring building damage batch processing [INCORE1-522](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-522)
 
 ## [0.6.0] - 2020-02-28
 
