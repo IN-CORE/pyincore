@@ -206,7 +206,7 @@ class BridgeDamage(BaseAnalysis):
                     AnalysisUtil.adjust_fragility_for_liquefaction(
                             fragility, bridge['properties']['liq'])
 
-            dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set,
+            dmg_probability = AnalysisUtil.calculate_limit_state(adjusted_fragility_set,
                                                                  hazard_val,
                                                                  std_dev=hazard_std_dev)
 
