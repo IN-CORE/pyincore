@@ -231,7 +231,7 @@ class EpfDamage(BaseAnalysis):
 
                         std_dev = 0.0
                         if use_hazard_uncertainty:
-                            std_dev = random.random()
+                            raise ValueError("Uncertainty Not Implemented!")
 
                         liquefaction_prob = liquefaction_vals[i]['liqProbability']
 
