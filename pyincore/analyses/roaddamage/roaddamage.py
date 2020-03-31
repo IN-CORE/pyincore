@@ -179,7 +179,7 @@ class RoadDamage(BaseAnalysis):
 
                     std_dev = 0.0
                     if use_hazard_uncertainty:
-                        std_dev = random.random()
+                        raise ValueError("Uncertainty Not Implemented Yet.")
 
                     selected_fragility_set = fragility_sets[road_id]
                     dmg_probability = AnalysisUtil.calculate_limit_state(selected_fragility_set, hazard_val, std_dev=std_dev)
