@@ -7,8 +7,8 @@
 
 import collections
 import concurrent.futures
-import random
 from itertools import repeat
+import copy
 
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
@@ -180,14 +180,13 @@ class BridgeDamage(BaseAnalysis):
                     hazard_std_dev = 0.0
                     if use_hazard_uncertainty:
                         # TODO Get this from API once implemented
-                        hazard_std_dev = random.random()
+                        raise ValueError("Uncertainty Not Implemented!")
 
-                    adjusted_fragility_set = selected_fragility_set
+                    adjusted_fragility_set = copy.deepcopy(fragility_set)
                     if use_liquefaction and 'liq' in bridge['properties']:
-                        for fragility in fragility_set["fragilityCurves"]:
-                            adjusted_fragility_set.append(
-                                AnalysisUtil.adjust_fragility_for_liquefaction(
-                                    fragility, bridge['properties']['liq']))
+                        for fragility in adjusted_fragility_set["fragilityCurves"]:
+                            AnalysisUtil.adjust_fragility_for_liquefaction(
+                                fragility, bridge['properties']['liq'])
 
                     dmg_probability = AnalysisUtil.calculate_limit_state(adjusted_fragility_set, hazard_val,
                                                                          std_dev=hazard_std_dev)

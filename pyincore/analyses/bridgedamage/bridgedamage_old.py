@@ -7,15 +7,15 @@
 
 import collections
 import concurrent.futures
-import random
 from itertools import repeat
+import copy
 
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
 
 
-class BridgeDamageOld(BaseAnalysis):
+class BridgeDamage(BaseAnalysis):
     """Computes bridge structural damage for an earthquake hazard.
 
     Args:
@@ -27,7 +27,7 @@ class BridgeDamageOld(BaseAnalysis):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
 
-        super(BridgeDamageOld, self).__init__(incore_client)
+        super(BridgeDamage, self).__init__(incore_client)
 
     def run(self):
         """Executes bridge damage analysis."""
@@ -126,7 +126,6 @@ class BridgeDamageOld(BaseAnalysis):
             fragility_set = None
             if bridge["id"] in fragility_sets:
                 fragility_set = fragility_sets[bridge["id"]]
-
             result.append(self.bridge_damage_analysis(bridge, fragility_set,
                                                       hazard_type,
                                                       hazard_dataset_id,
@@ -195,19 +194,21 @@ class BridgeDamageOld(BaseAnalysis):
 
             hazard_val = hazard_resp[0]['hazardValue']
             hazard_std_dev = 0.0
-            adjusted_fragility_set = fragility_set
+            adjusted_fragility_set = copy.deepcopy(fragility_set)
 
             # TODO Get this from API once implemented
             if use_hazard_uncertainty:
-                hazard_std_dev = random.random()
+                raise ValueError("Uncertainty Not Implemented!")
 
             if use_liquefaction and 'liq' in bridge['properties']:
-                for fragility in fragility_set["fragilityCurves"]:
-                    adjusted_fragility_set.append(
-                        AnalysisUtil.adjust_fragility_for_liquefaction(
-                            fragility, bridge['properties']['liq']))
+                for fragility in adjusted_fragility_set["fragilityCurves"]:
+                    AnalysisUtil.adjust_fragility_for_liquefaction(
+                            fragility, bridge['properties']['liq'])
 
-            dmg_probability = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val, std_dev=hazard_std_dev)
+            dmg_probability = AnalysisUtil.calculate_limit_state(adjusted_fragility_set,
+                                                                 hazard_val,
+                                                                 std_dev=hazard_std_dev)
+
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 

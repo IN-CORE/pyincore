@@ -489,16 +489,9 @@ class AnalysisUtil:
         else:
             multiplier = 1.0
 
-        fragility_curve_adj = {
-            "className": fragility_curve["className"],
-            "description": fragility_curve['description'],
-            "alpha": fragility_curve[
-                          'alpha'] * multiplier,
-            "beta": fragility_curve['beta'],
-            "alphaType": fragility_curve['alphaType'],
-            'curveType': fragility_curve['curveType']}
+        fragility_curve['alpha'] = fragility_curve['alpha'] * multiplier
 
-        return fragility_curve_adj
+        return fragility_curve
 
     def chunks(lst, n):
         """Yield successive n-sized chunks from lst."""
