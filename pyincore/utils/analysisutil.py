@@ -489,16 +489,9 @@ class AnalysisUtil:
         else:
             multiplier = 1.0
 
-        fragility_curve_adj = {
-            "className": fragility_curve["className"],
-            "description": fragility_curve['description'],
-            "alpha": fragility_curve[
-                          'alpha'] * multiplier,
-            "beta": fragility_curve['beta'],
-            "alphaType": fragility_curve['alphaType'],
-            'curveType': fragility_curve['curveType']}
+        fragility_curve['alpha'] = fragility_curve['alpha'] * multiplier
 
-        return fragility_curve_adj
+        return fragility_curve
 
     def chunks(lst, n):
         """Yield successive n-sized chunks from lst."""
@@ -555,29 +548,29 @@ class AnalysisUtil:
         return hazard_demand_type
 
     @staticmethod
-    def group_by_demand_type(inventories, fragility_set, hazard_type="earthquake", is_building=False):
+    def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):
         """
 
         Args:
             inventories: dictionary of {id: intentory}
             fragility_sets: fragility_sets
-            fragility_set = self.fragilitysvc.match_inventory(mapping_id, inventories,
-                                                                    fragility_key)
+            hazard_type: default to earthquake
+            is_building: if the inventory is builiding or not
 
         Returns: dictionary of grouped inventory with { (demandunit, demandtype):[inventory ids] }
 
         """
         grouped_inventory = dict()
-        for id, frag in fragility_set.items():
+        for fragility_id, frag in fragility_sets.items():
 
             demand_type = frag['demandType']
             demand_units = frag["demandUnits"]
 
             if is_building:
-                inventory = inventories[id]
+                inventory = inventories[fragility_id]
                 demand_type = AnalysisUtil.get_hazard_demand_type(inventory, frag, hazard_type)
 
             tpl = (demand_type, demand_units)
-            grouped_inventory.setdefault(tpl, []).append(id)
+            grouped_inventory.setdefault(tpl, []).append(fragility_id)
 
         return grouped_inventory

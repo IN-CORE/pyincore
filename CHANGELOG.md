@@ -6,8 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
 ### Changed
 - Add batch processing for EPF damage analysis [INCORE1-510](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-510)
+- refactoring building damage batch processing [INCORE1-522](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-522)
+
+### Fixed
+- fix liquefaction calculation bug in bridge damage analysis [INCORE1-535](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-535) 
+
 
 ## [0.6.0] - 2020-02-28
 
