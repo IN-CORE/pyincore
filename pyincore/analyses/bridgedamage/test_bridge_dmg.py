@@ -65,20 +65,29 @@ def run_with_base_class():
 
     # Create bridge damage
     bridge_dmg = BridgeDamage(client)
+    bridge_dmg_old = BridgeDamage(client)
 
     # Load input datasets
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
+    bridge_dmg_old.load_remote_input_dataset("bridges", bridge_dataset_id)
 
     # Set analysis parameters
     bridge_dmg.set_parameter("result_name", "bridge_result_w_liquefaction")
+    bridge_dmg_old.set_parameter("result_name", "bridge_result_w_liquefaction")
     bridge_dmg.set_parameter("mapping_id", mapping_id)
+    bridge_dmg_old.set_parameter("mapping_id", mapping_id)
     bridge_dmg.set_parameter("hazard_type", hazard_type)
+    bridge_dmg_old.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
+    bridge_dmg_old.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("use_liquefaction", use_liquefaction)
+    bridge_dmg_old.set_parameter("use_liquefaction", use_liquefaction)
     bridge_dmg.set_parameter("num_cpu", 1)
+    bridge_dmg_old.set_parameter("num_cpu", 1)
 
     # Run bridge damage analysis
     bridge_dmg.run_analysis()
+    bridge_dmg_old.run_analysis()
 
 
 if __name__ == '__main__':
