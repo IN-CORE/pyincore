@@ -6,7 +6,6 @@
 
 import collections
 import concurrent.futures
-import random
 from itertools import repeat
 
 from pyincore import AnalysisUtil, GeoUtil
