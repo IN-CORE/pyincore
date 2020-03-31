@@ -7,7 +7,6 @@
 import collections
 import concurrent.futures
 from itertools import repeat
-import random
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
 
