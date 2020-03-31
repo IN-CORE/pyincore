@@ -6,4 +6,5 @@
 
 
 from pyincore.analyses.bridgedamage.bridgedamage import BridgeDamage
+from pyincore.analyses.bridgedamage.bridgedamage_old import BridgeDamageOld
 from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil

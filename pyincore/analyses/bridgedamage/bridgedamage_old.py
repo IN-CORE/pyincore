@@ -15,7 +15,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
 
 
-class BridgeDamage(BaseAnalysis):
+class BridgeDamageOld(BaseAnalysis):
     """Computes bridge structural damage for an earthquake hazard.
 
     Args:
@@ -27,7 +27,7 @@ class BridgeDamage(BaseAnalysis):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
 
-        super(BridgeDamage, self).__init__(incore_client)
+        super(BridgeDamageOld, self).__init__(incore_client)
 
     def run(self):
         """Executes bridge damage analysis."""

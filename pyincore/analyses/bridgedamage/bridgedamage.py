@@ -182,7 +182,7 @@ class BridgeDamage(BaseAnalysis):
                         # TODO Get this from API once implemented
                         raise ValueError("Uncertainty Not Implemented!")
 
-                    adjusted_fragility_set = copy.deepcopy(fragility_set)
+                    adjusted_fragility_set = copy.deepcopy(selected_fragility_set)
                     if use_liquefaction and 'liq' in bridge['properties']:
                         for fragility in adjusted_fragility_set["fragilityCurves"]:
                             AnalysisUtil.adjust_fragility_for_liquefaction(

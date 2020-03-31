@@ -73,7 +73,7 @@ def run_with_base_class():
 
     # Set analysis parameters
     bridge_dmg.set_parameter("result_name", "bridge_result_w_liquefaction")
-    bridge_dmg_old.set_parameter("result_name", "bridge_result_w_liquefaction")
+    bridge_dmg_old.set_parameter("result_name", "bridge_result_w_liquefaction_old")
     bridge_dmg.set_parameter("mapping_id", mapping_id)
     bridge_dmg_old.set_parameter("mapping_id", mapping_id)
     bridge_dmg.set_parameter("hazard_type", hazard_type)
@@ -83,7 +83,7 @@ def run_with_base_class():
     bridge_dmg.set_parameter("use_liquefaction", use_liquefaction)
     bridge_dmg_old.set_parameter("use_liquefaction", use_liquefaction)
     bridge_dmg.set_parameter("num_cpu", 1)
-    bridge_dmg_old.set_parameter("num_cpu", 1)
+    bridge_dmg_old.set_parameter("num_cpu", 4)
 
     # Run bridge damage analysis
     bridge_dmg.run_analysis()
