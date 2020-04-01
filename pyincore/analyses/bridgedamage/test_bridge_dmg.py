@@ -22,12 +22,12 @@ def run_with_base_class():
 
     # Create bridge damage
     bridge_dmg = BridgeDamage(client)
+
     # Load input datasets
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
-    # Specify the result name
-    result_name = "bridge_result"
+
     # Set analysis parameters
-    bridge_dmg.set_parameter("result_name", result_name)
+    bridge_dmg.set_parameter("result_name", "bridge_result")
     bridge_dmg.set_parameter("mapping_id", mapping_id)
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
