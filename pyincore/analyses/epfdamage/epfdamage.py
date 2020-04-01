@@ -132,7 +132,7 @@ class EpfDamage(BaseAnalysis):
         epfs = dict()
         for epf in list_epfs:
             epfs[epf["id"]] = epf
-        list_epfs = None  # Clear as it's not needed anymore
+        del list_epfs  # Clear as it's not needed anymore
 
         processed_epf = []
         grouped_epfs = AnalysisUtil.group_by_demand_type(epfs, fragility_set)
@@ -154,16 +154,16 @@ class EpfDamage(BaseAnalysis):
                                                                               points)
                 elif hazard_type == 'tornado':
                     hazard_vals = self.hazardsvc.get_tornado_hazard_values(hazard_dataset_id, input_demand_units,
-                                                                          points)
+                                                                           points)
                 elif hazard_type == 'hurricane':
                     # TODO: implement hurricane
                     raise ValueError('Hurricane hazard has not yet been implemented!')
 
                 elif hazard_type == 'tsunami':
                     hazard_vals = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
-                                                                          input_demand_type,
-                                                                          input_demand_units,
-                                                                          points)
+                                                                           input_demand_type,
+                                                                           input_demand_units,
+                                                                           points)
                 else:
                     raise ValueError("Missing hazard type.")
 
@@ -184,7 +184,8 @@ class EpfDamage(BaseAnalysis):
                         raise ValueError("Uncertainty Not Implemented!")
 
                     selected_fragility_set = fragility_set[epf_id]
-                    limit_states = AnalysisUtil.calculate_limit_state(selected_fragility_set, hazard_val, std_dev=std_dev)
+                    limit_states = AnalysisUtil.calculate_limit_state(selected_fragility_set, hazard_val,
+                                                                      std_dev=std_dev)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(limit_states)
 
                     epf_result['guid'] = epf['properties']['guid']
@@ -219,8 +220,8 @@ class EpfDamage(BaseAnalysis):
                         location = GeoUtil.get_location(epfs[liq_epf_id])
                         points.append(str(location.y) + "," + str(location.x))
                     liquefaction_vals = self.hazardsvc.get_liquefaction_values(hazard_dataset_id,
-                                                                          liq_geology_dataset_id,
-                                                                          liq_input_demand_units, points)
+                                                                               liq_geology_dataset_id,
+                                                                               liq_input_demand_units, points)
 
                     # Parse the batch hazard value results and map them back to the building and fragility.
                     # This is a potential pitfall as we are relying on the order of the returned results
@@ -235,18 +236,19 @@ class EpfDamage(BaseAnalysis):
                         liquefaction_prob = liquefaction_vals[i]['liqProbability']
 
                         selected_liq_fragility = liq_fragility_set[liq_epf_id]
-                        pgd_limit_states = AnalysisUtil.calculate_limit_state(selected_liq_fragility, liq_hazard_val, std_dev=std_dev)
+                        pgd_limit_states = AnalysisUtil.calculate_limit_state(selected_liq_fragility, liq_hazard_val,
+                                                                              std_dev=std_dev)
 
                         # match id and add liqhaztype, liqhazval, liqprobability field as well as rewrite limit
                         # statess and dmg_interval
                         for epf_result in epf_results:
                             if epf_result['guid'] == epfs[liq_epf_id]['guid']:
-                                limit_states = {"ls-slight":epf_result['ls-slight'],
+                                limit_states = {"ls-slight": epf_result['ls-slight'],
                                                 "ls-moderat": epf_result['ls-moderat'],
                                                 "ls-extensi": epf_result['ls-extensi'],
                                                 "ls-complet": epf_result['ls-complet']}
                                 liq_limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states,
-                                                                                         pgd_limit_states)
+                                                                                            pgd_limit_states)
                                 liq_dmg_interval = AnalysisUtil.calculate_damage_interval(liq_limit_states)
                                 epf_result.update(liq_limit_states)
                                 epf_result.update(liq_dmg_interval)
