@@ -131,7 +131,7 @@ class RoadDamage(BaseAnalysis):
         roads = dict()
         for rd in list_roads:
             roads[rd["id"]] = rd
-        list_roads = None  # Clear as it's not needed anymore
+        del list_roads
 
         processed_roads = []
         grouped_roads = AnalysisUtil.group_by_demand_type(roads, fragility_sets)
