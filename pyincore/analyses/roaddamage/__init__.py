@@ -6,4 +6,3 @@
 
 
 from pyincore.analyses.roaddamage.roaddamage import RoadDamage
-from pyincore.analyses.roaddamage.roaddamage_old import RoadDamageOld
