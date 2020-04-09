@@ -16,13 +16,11 @@ def run_with_base_class():
 
     # Run epf damage
     epf_dmg = EpfDamage(client)
+
     epf_dmg.load_remote_input_dataset("epfs", epf_dataset_id)
 
-    # load remote
-    epf_dmg.load_remote_dfr3_mapping(mapping_id)
-
-    result_name = "earthquake_epf_dmg_result"
-    epf_dmg.set_parameter("result_name", result_name)
+    epf_dmg.set_parameter("result_name", "earthquake_epf_dmg_result")
+    epf_dmg.set_parameter("mapping_id", mapping_id)
     epf_dmg.set_parameter("hazard_type", hazard_type)
     epf_dmg.set_parameter("hazard_id", hazard_id)
     epf_dmg.set_parameter("num_cpu", 1)
@@ -43,11 +41,8 @@ def run_with_base_class():
     epf_dmg = EpfDamage(client)
     epf_dmg.load_remote_input_dataset("epfs", epf_dataset_id)
 
-    # load remote
-    epf_dmg.load_remote_dfr3_mapping(mapping_id)
-
-    result_name = "tsunami_epf_dmg_result"
-    epf_dmg.set_parameter("result_name", result_name)
+    epf_dmg.set_parameter("result_name", "tsunami_epf_dmg_result")
+    epf_dmg.set_parameter("mapping_id", mapping_id)
     epf_dmg.set_parameter("hazard_type", hazard_type)
     epf_dmg.set_parameter("hazard_id", hazard_id)
     epf_dmg.set_parameter("num_cpu", 1)

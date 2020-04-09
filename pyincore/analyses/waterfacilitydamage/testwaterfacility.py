@@ -24,13 +24,11 @@ def run_with_base_class():
     wf_dmg = WaterFacilityDamage(client)
     wf_dmg.load_remote_input_dataset("water_facilities", facility_datasetid)
 
-    # load remote dfr3 mapping
-    wf_dmg.load_remote_dfr3_mapping(mapping_id)
-
     result_name = "wf-dmg-results.csv"
     wf_dmg.set_parameter("result_name", result_name)
     wf_dmg.set_parameter("hazard_type", hazard_type)
     wf_dmg.set_parameter("hazard_id", hazard_id)
+    wf_dmg.set_parameter("mapping_id", mapping_id)
     wf_dmg.set_parameter("fragility_key", "pga")
     wf_dmg.set_parameter("use_liquefaction", liquefaction)
     wf_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)

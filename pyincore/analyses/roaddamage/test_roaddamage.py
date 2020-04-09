@@ -38,11 +38,8 @@ def run_with_base_class():
     road_dmg = RoadDamage(client)
     road_dmg.load_remote_input_dataset("roads", road_dataset_id)
 
-    # load remote dfr3 mapping
-    road_dmg.load_remote_dfr3_mapping(mapping_id)
-
-    result_name = "seaside_road_dmg_" + hazard_type
-    road_dmg.set_parameter("result_name", result_name)
+    road_dmg.set_parameter("result_name", "seaside_road_dmg_" + hazard_type)
+    road_dmg.set_parameter("mapping_id", mapping_id)
     road_dmg.set_parameter("hazard_type", hazard_type)
     road_dmg.set_parameter("hazard_id", hazard_id)
     if fragility_key is not None:

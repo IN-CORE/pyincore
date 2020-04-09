@@ -105,11 +105,10 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         """
         result = []
-        mapping = self.get_input_dfr3_mapping_set()
-        fragility_sets_as = self.fragilitysvc.match_inventory(mapping,
+        fragility_sets_as = self.fragilitysvc.match_inventory(self.get_parameter("mapping_id"),
                                                               buildings,
                                                               self.get_parameter("fragility_key_as"))
-        fragility_sets_ds = self.fragilitysvc.match_inventory(mapping,
+        fragility_sets_ds = self.fragilitysvc.match_inventory(self.get_parameter("mapping_id"),
                                                               buildings,
                                                               self.get_parameter("fragility_key_ds"))
 
@@ -161,7 +160,7 @@ class NonStructBuildingDamage(BaseAnalysis):
             hazard_demand_type_as = NonStructBuildingUtil.get_hazard_demand_type(building,
                                                                      fragility_set_as,
                                                                      'earthquake')
-            demand_units_as = fragility_set_as.demand_units
+            demand_units_as = fragility_set_as['demandUnits']
             location = GeoUtil.get_location(building)
 
             point = str(location.y) + "," + str(location.x)
@@ -171,7 +170,8 @@ class NonStructBuildingDamage(BaseAnalysis):
                 demand_units_as,
                 points=[point])[0]['hazardValue']
 
-            dmg_probability_as = fragility_set_as.calculate_limit_state(hazard_val_as)
+            dmg_probability_as = AnalysisUtil.calculate_limit_state(fragility_set_as,
+                                                                 hazard_val_as)
             # adjust dmg probability for liquefaction
             if use_liquefaction:
                 if liq_geology_dataset_id is not None:
@@ -203,7 +203,7 @@ class NonStructBuildingDamage(BaseAnalysis):
             hazard_demand_type_ds = NonStructBuildingUtil.get_hazard_demand_type(building,
                                                                                  fragility_set_ds,
                                                                                  'earthquake')
-            demand_units_ds = fragility_set_ds.demand_units
+            demand_units_ds = fragility_set_ds['demandUnits']
             location = GeoUtil.get_location(building)
 
             point = str(location.y) + "," + str(location.x)
@@ -212,7 +212,8 @@ class NonStructBuildingDamage(BaseAnalysis):
                 hazard_dataset_id, hazard_demand_type_ds,
                 demand_units_ds, points=[point])[0]['hazardValue']
 
-            dmg_probability_ds = fragility_set_ds.calculate_limit_state(hazard_val_ds)
+            dmg_probability_ds = AnalysisUtil.calculate_limit_state(fragility_set_ds,
+                                                                    hazard_val_ds)
 
             # adjust hazard value for liquefaction
             if use_liquefaction:
@@ -282,6 +283,12 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'type': str
                 },
                 {
+                    'id': 'mapping_id',
+                    'required': True,
+                    'description': 'Fragility mapping dataset',
+                    'type': str
+                },
+                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard Type (e.g. earthquake)',
@@ -331,10 +338,6 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'type': int
                 },
             ],
-            'input_dfr3_mapping_set': {
-                'required': True,
-                'description': "input dfr3 mapping set"
-            },
             'input_datasets': [
                 {
                     'id': 'buildings',

@@ -112,8 +112,8 @@ class PipelineDamage(BaseAnalysis):
             self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
-        mapping = self.get_input_dfr3_mapping_set()
-        fragility_sets = self.fragilitysvc.match_inventory(mapping, pipelines, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory(
+            self.get_parameter("mapping_id"), pipelines, fragility_key)
 
         for pipeline in pipelines:
             if pipeline["id"] in fragility_sets.keys():
@@ -143,8 +143,8 @@ class PipelineDamage(BaseAnalysis):
                         "ls-extensi": 0.0, "ls-complet": 0.0}
 
         if fragility_set is not None:
-            demand_type = fragility_set.demand_type.lower()
-            demand_units = fragility_set.demand_units
+            demand_type = fragility_set['demandType'].lower()
+            demand_units = fragility_set['demandUnits']
             location = GeoUtil.get_location(pipeline)
             point = str(location.y) + "," + str(location.x)
 
@@ -169,7 +169,7 @@ class PipelineDamage(BaseAnalysis):
             if hazard_val <= 0.0:
                 hazard_val = 0.0
 
-            limit_states = fragility_set.calculate_limit_state(hazard_val)
+            limit_states = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val)
 
         dmg_intervals = AnalysisUtil.calculate_damage_interval(limit_states)
 
@@ -195,6 +195,12 @@ class PipelineDamage(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
+                    'type': str
+                },
+                {
+                    'id': 'mapping_id',
+                    'required': True,
+                    'description': 'Fragility mapping dataset',
                     'type': str
                 },
                 {
@@ -228,10 +234,6 @@ class PipelineDamage(BaseAnalysis):
                     'type': str,
                 }
             ],
-            'input_dfr3_mapping_set': {
-                'required': True,
-                'description': "input dfr3 mapping set"
-            },
             'input_datasets': [
                 {
                     'id': 'pipeline',
