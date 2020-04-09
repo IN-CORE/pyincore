@@ -105,14 +105,12 @@ class BuildingDamage(BaseAnalysis):
             list: A list of ordered dictionaries with building damage values and other data/metadata.
 
         """
-        result = []
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.match_inventory(
-            mapping, buildings, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory(
+            self.get_parameter("mapping_id"), buildings, fragility_key)
 
-        grouped_buildings = dict()
         bldg_results = []
         list_buildings = buildings
 
@@ -123,19 +121,7 @@ class BuildingDamage(BaseAnalysis):
 
         list_buildings = None  # Clear as it's not needed anymore
 
-        # Create grouped list of buildings by combination of demand type and demand unit
-        for frg_key, bldgs in fragility_sets.items():
-            for bldg_id, frag in bldgs.items():
-                building = buildings[bldg_id]
-                fragility_set = fragility_sets[fragility_key][bldg_id]
-
-                # TODO include liquefaction and hazard uncertainty
-                hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, fragility_set, hazard_type)
-                demand_type = hazard_demand_type
-                demand_units = frag.demand_units
-                tpl = (demand_type, demand_units)
-
-                grouped_buildings.setdefault(tpl, []).append(bldg_id)
+        grouped_buildings = AnalysisUtil.group_by_demand_type(buildings, fragility_sets, hazard_type, is_building=True)
 
         for demand, grouped_bldgs in grouped_buildings.items():
 
@@ -170,14 +156,16 @@ class BuildingDamage(BaseAnalysis):
                     output_demand_type = hazard_vals[i]['demand']
                     if hazard_type == 'earthquake':
                         period = float(hazard_vals[i]['period'])
-                        if period > 0 :
+                        if period > 0:
                             output_demand_type = str(hazard_vals[i]['period']) + " " + output_demand_type
 
                     num_stories = building['properties']['no_stories']
-                    fragility_set = fragility_sets[fragility_key][bldg_id]
-                    building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
+                    selected_fragility_set = fragility_sets[bldg_id]
+                    building_period = AnalysisUtil.get_building_period(num_stories, selected_fragility_set)
 
-                    dmg_probability = fragility_set.calculate_limit_state(hazard_val, building_period)
+                    dmg_probability = AnalysisUtil.calculate_limit_state(selected_fragility_set,
+                                                                         hazard_val,
+                                                                         building_period)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
                     bldg_result['guid'] = building['properties']['guid']
@@ -188,7 +176,7 @@ class BuildingDamage(BaseAnalysis):
                     bldg_result['hazardval'] = hazard_val
 
                     bldg_results.append(bldg_result)
-                    del buildings[bldg_id]  # remove processed buildings
+                    del buildings[bldg_id]
                     i = i + 1
 
         unmapped_hazard_val = 0.0

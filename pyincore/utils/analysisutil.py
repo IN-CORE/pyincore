@@ -322,7 +322,109 @@ class AnalysisUtil:
             else:
                 return types[0]
 
+    @staticmethod
+    def adjust_fragility_for_liquefaction(fragility_curve,
+                                          liquefaction):
+        """Adjusts fragility curve object by input parameter liquefaction.
+
+        Args:
+            fragility_curve (obj): A JSON description of current fragility curve.
+            liquefaction (str): Liquefaction type.
+
+        Returns:
+            obj: An adjusted fragility curve.
+
+        """
+        liquefaction_unified = str(liquefaction).upper()
+        if liquefaction_unified == "U":
+            multiplier = 0.85
+        elif liquefaction_unified == "Y":
+            multiplier = 0.65
+        else:
+            multiplier = 1.0
+
+        fragility_curve['alpha'] = fragility_curve['alpha'] * multiplier
+
+        return fragility_curve
+
     def chunks(lst, n):
         """Yield successive n-sized chunks from lst."""
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
+
+    @staticmethod
+    def get_hazard_demand_type(building, fragility_set, hazard_type):
+        """Get hazard demand type.
+
+        Args:
+            building (obj): A JSON mapping of a geometric object from the inventory: current building.
+            fragility_set (obj): A JSON description of fragility applicable to the building.
+            hazard_type (str): A hazard type such as earthquake, tsunami etc.
+
+        Returns:
+            str: A hazard demand type.
+
+        """
+        BLDG_STORIES = "no_stories"
+        PROPERTIES = "properties"
+        BLDG_PERIOD = "period"
+
+        fragility_hazard_type = fragility_set['demandType'].lower()
+        hazard_demand_type = fragility_hazard_type
+
+        if hazard_type.lower() == "earthquake":
+            num_stories = building[PROPERTIES][BLDG_STORIES]
+            # Get building period from the fragility if possible
+            building_period = AnalysisUtil.get_building_period(num_stories, fragility_set)
+
+            if fragility_hazard_type.endswith('sa') and fragility_hazard_type != 'sa':
+                # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
+                if len(fragility_hazard_type.split()) > 2:
+                    building_period = fragility_hazard_type.split()[0]
+                    fragility_hazard_type = "Sa"
+
+            hazard_demand_type = fragility_hazard_type
+
+            # This handles the case where some fragilities only specify Sa, others a specific period of Sa
+            if not hazard_demand_type.endswith('pga'):
+                # If the fragility does not contain the period calculation, check if the dataset has it
+                if building_period == 0.0 and BLDG_PERIOD in building[PROPERTIES]:
+                    if building[PROPERTIES][BLDG_PERIOD] > 0.0:
+                        building_period = building[PROPERTIES][BLDG_PERIOD]
+
+                hazard_demand_type = str(building_period) + " " + fragility_hazard_type
+        elif hazard_type.lower() == "tsunami":
+            if hazard_demand_type == "momentumflux":
+                hazard_demand_type = "mmax"
+            elif hazard_demand_type == "inundationdepth":
+                hazard_demand_type = "hmax"
+
+        return hazard_demand_type
+
+    @staticmethod
+    def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):
+        """
+
+        Args:
+            inventories: dictionary of {id: intentory}
+            fragility_sets: fragility_sets
+            hazard_type: default to earthquake
+            is_building: if the inventory is builiding or not
+
+        Returns: dictionary of grouped inventory with { (demandunit, demandtype):[inventory ids] }
+
+        """
+        grouped_inventory = dict()
+        for fragility_id, frag in fragility_sets.items():
+
+            demand_type = frag['demandType']
+            demand_units = frag["demandUnits"]
+
+            if is_building:
+                inventory = inventories[fragility_id]
+                demand_type = AnalysisUtil.get_hazard_demand_type(inventory, frag, hazard_type)
+
+            tpl = (demand_type, demand_units)
+            grouped_inventory.setdefault(tpl, []).append(fragility_id)
+
+        return grouped_inventory
