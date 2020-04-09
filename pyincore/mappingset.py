@@ -23,6 +23,11 @@ class MappingSet:
         self.hazard_type = metadata["hazardType"]
         self.inventory_type = metadata['inventoryType']
 
+        if 'data_type' in metadata:
+            self.data_type = metadata["data_type"]
+        else:
+            self.data_type = "incore:dfr3Mapping"
+
         mappings = []
         for m in metadata['mappings']:
             if isinstance(m, Mapping):

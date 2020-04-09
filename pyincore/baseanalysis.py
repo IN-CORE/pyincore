@@ -4,12 +4,10 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import pprint
-
 # TODO: exception handling for validation and set methods
 from pyincore import DataService, AnalysisUtil
-from pyincore.dfr3service import Dfr3Service
 from pyincore.dataset import Dataset
+from pyincore.dfr3service import Dfr3Service
 from pyincore.mappingset import MappingSet
 
 
@@ -32,9 +30,6 @@ class BaseAnalysis:
         self.parameters = {}
         for param in self.spec['input_parameters']:
             self.parameters[param['id']] = {'spec': param, 'value': None}
-
-        if 'input_dfr3_mapping_set' in self.spec.keys():
-            self.input_dfr3_mapping_set = {'spec':self.spec['input_dfr3_mapping_set'], 'value': None}
 
         self.input_datasets = {}
         for input_dataset in self.spec['input_datasets']:
@@ -61,18 +56,11 @@ class BaseAnalysis:
             'description': 'this should be replaced by analysis spec',
             'input_parameters': [
             ],
-            'input_dfr3_mapping_set':{
-
-            },
             'input_datasets': [
             ],
             'output_datasets': [
             ]
         }
-
-    def load_remote_dfr3_mapping(self, remote_id):
-        mapping = MappingSet(self.dfr3_service.get_mapping(remote_id))
-        self.set_input_dfr3_mapping_set(mapping)
 
     def load_remote_input_dataset(self, analysis_param_id, remote_id):
         """Convenience function for loading a remote dataset by id.
@@ -82,7 +70,11 @@ class BaseAnalysis:
             remote_id (str):  ID of the Dataset in the Data service.
 
         """
-        dataset = Dataset.from_data_service(remote_id, self.data_service)
+        if analysis_param_id == 'dfr3_mapping_set':
+            dataset = MappingSet(self.dfr3_service.get_mapping(remote_id))
+        else:
+            dataset = Dataset.from_data_service(remote_id, self.data_service)
+
         # TODO: Need to handle failing to set input dataset
         self.set_input_dataset(analysis_param_id, dataset)
 
@@ -136,18 +128,6 @@ class BaseAnalysis:
             print(result[1])
             return False
 
-    def set_input_dfr3_mapping_set(self, mapping):
-        is_valid, err_msg = self.validate_input_dfr3_mapping_set(self.input_dfr3_mapping_set['spec'], mapping)
-        if is_valid:
-            self.input_dfr3_mapping_set['value'] = mapping
-            return True
-        else:
-            print(err_msg)
-            return False
-
-    def get_input_dfr3_mapping_set(self):
-        return self.input_dfr3_mapping_set['value']
-
     def get_output_datasets(self):
         """Get the output dataset of the analysis."""
         outputs = {}
@@ -191,17 +171,6 @@ class BaseAnalysis:
         elif not isinstance(parameter, type(None)) and not (type(parameter) is parameter_spec['type']):
             is_valid = False
             err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)
-
-        return is_valid, err_msg
-
-    def validate_input_dfr3_mapping_set(self, mapping_spec, mapping):
-        is_valid = True
-        err_msg = ''
-        if mapping_spec['required']:
-            if mapping is None:
-                is_valid = False
-                err_msg = 'required input dfr3 mapping is missing - spec: ' + str(mapping_spec)
-                # TODO may need to furuther check if the mapping is in correct form
 
         return is_valid, err_msg
 
@@ -282,13 +251,6 @@ class BaseAnalysis:
             result = self.validate_parameter(parameter_spec, self.get_parameter(id))
             if not result[0]:
                 print("Error reading parameter: " + result[1])
-                return result
-
-        if 'input_dfr3_mapping_set' in self.spec.keys():
-            result = self.validate_input_dfr3_mapping_set(self.spec['input_dfr3_mapping_set'], self.input_dfr3_mapping_set[
-                'value'])
-            if not result[0]:
-                print("Error reading dfr3 mapping: " + result[1])
                 return result
 
         return self.run()

@@ -30,7 +30,7 @@ def run_with_base_class():
     # bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
 
     # load remote dfr3 mapping
-    bldg_dmg.load_remote_dfr3_mapping(mapping_id)
+    bldg_dmg.load_remote_input_dataset('dfr3_mapping_set', mapping_id)
 
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)

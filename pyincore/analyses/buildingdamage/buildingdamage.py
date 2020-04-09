@@ -35,7 +35,7 @@ class BuildingDamage(BaseAnalysis):
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
 
         # Mapping
-        mapping = self.get_input_dfr3_mapping_set()
+        mapping = self.get_input_dataset("dfr3_mapping_set")
 
         # Get hazard input
         hazard_dataset_id = self.get_parameter("hazard_id")
@@ -259,16 +259,30 @@ class BuildingDamage(BaseAnalysis):
                     'type': int
                 },
             ],
-            'input_dfr3_mapping_set': {
-                'required':True,
-                'description':"input dfr3 mapping set"
-            },
             'input_datasets': [
                 {
                     'id': 'buildings',
                     'required': True,
                     'description': 'Building Inventory',
                     'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
+                },
+                {
+                    'id': 'dfr3_mapping_set',
+                    'required': True,
+                    'description': 'DFR3 Curve mapping set',
+                    'type': [
+                        'incore:dfr3Mapping',
+                        'ergo:electricPowerPlantFragilityMapping',
+                        'ergo:hzElectricPowerFacilityFragilityMapping',
+                        'ergo:hzPipelineFragilityMapping',
+                        'ergo:hzPotableWaterFacilityFragilityMapping',
+                        'ergo:buriedPipeFragilityMapping',
+                        'ergo:electricSubstationFragilityMapping',
+                        'ergo:gasFacilityFragilityMapping',
+                        'ergo:lifelineWaterTankFragilityMapping',
+                        'ergo:bridgeFragilityMapping',
+                        'ergo:buildingFragilityMapping'
+                    ]
                 }
             ],
             'output_datasets': [
