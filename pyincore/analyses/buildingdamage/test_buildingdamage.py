@@ -27,7 +27,7 @@ def run_with_base_class():
 
     # # Load dfr3 mapping
     # local_mapping = MappingSet.from_json_file('local_mapping.json')
-    # bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
+    # bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
 
     # load remote dfr3 mapping
     bldg_dmg.load_remote_input_dataset('dfr3_mapping_set', mapping_id)
@@ -39,8 +39,8 @@ def run_with_base_class():
     # Run Analysis
     bldg_dmg.run_analysis()
 
-    #TSUNAMI
-
+    # #TSUNAMI
+    #
     # hazard_type = "tsunami"
     # hazard_id = "5bc9e25ef7b08533c7e610dc"
     #
@@ -56,10 +56,12 @@ def run_with_base_class():
     # result_name = "seaside_tsunami_dmg_result"
     # bldg_dmg.set_parameter("result_name", result_name)
     #
-    # # Load dfr3 mapping
-    # local_mapping = Mapping.from_json_file('local_mapping.json')
-    # bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
-    # bldg_dmg.load_remote_dfr3_mapping(mapping_id)
+    # # # Load dfr3 mapping
+    # # local_mapping = Mapping.from_json_file('local_mapping.json')
+    # # bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
+    #
+    # # load remote dfr3 mapping
+    # bldg_dmg.load_remote_input_dataset("dfr3_mapping_set", mapping_id)
     #
     # bldg_dmg.set_parameter("hazard_type", hazard_type)
     # bldg_dmg.set_parameter("hazard_id", hazard_id)

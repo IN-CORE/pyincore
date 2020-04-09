@@ -369,13 +369,13 @@ class AnalysisUtil:
         PROPERTIES = "properties"
         BLDG_PERIOD = "period"
 
-        fragility_hazard_type = fragility_set['demandType'].lower()
+        fragility_hazard_type = fragility_set.demand_type.lower()
         hazard_demand_type = fragility_hazard_type
 
         if hazard_type.lower() == "earthquake":
             num_stories = building[PROPERTIES][BLDG_STORIES]
             # Get building period from the fragility if possible
-            building_period = AnalysisUtil.get_building_period(num_stories, fragility_set)
+            building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
 
             if fragility_hazard_type.endswith('sa') and fragility_hazard_type != 'sa':
                 # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
@@ -417,8 +417,8 @@ class AnalysisUtil:
         grouped_inventory = dict()
         for fragility_id, frag in fragility_sets.items():
 
-            demand_type = frag['demandType']
-            demand_units = frag["demandUnits"]
+            demand_type = frag.demand_type
+            demand_units = frag.demand_units
 
             if is_building:
                 inventory = inventories[fragility_id]

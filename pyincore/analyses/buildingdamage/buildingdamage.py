@@ -108,8 +108,7 @@ class BuildingDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets = self.fragilitysvc.match_inventory(
-            self.get_parameter("mapping_id"), buildings, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory(mapping, buildings, fragility_key)
 
         bldg_results = []
         list_buildings = buildings
@@ -161,11 +160,9 @@ class BuildingDamage(BaseAnalysis):
 
                     num_stories = building['properties']['no_stories']
                     selected_fragility_set = fragility_sets[bldg_id]
-                    building_period = AnalysisUtil.get_building_period(num_stories, selected_fragility_set)
+                    building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
 
-                    dmg_probability = AnalysisUtil.calculate_limit_state(selected_fragility_set,
-                                                                         hazard_val,
-                                                                         building_period)
+                    dmg_probability = selected_fragility_set.calculate_limit_state(hazard_val, building_period)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
                     bldg_result['guid'] = building['properties']['guid']

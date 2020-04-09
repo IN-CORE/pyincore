@@ -107,7 +107,6 @@ class Dfr3Service:
 
     def match_inventory(self, mapping: object, inventories: dict, entry_key: str):
 
-        # 1. download mapping and cast it to mapping object
         dfr3_sets = {}
 
         # 2. loop through inventory to match the rules
