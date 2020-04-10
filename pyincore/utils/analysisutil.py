@@ -12,7 +12,10 @@ import os
 import re
 from typing import List, Dict
 
+from scipy.stats import norm
+
 from pyincore import DataService
+from pyincore import Parser
 
 
 class AnalysisUtil:
@@ -25,6 +28,129 @@ class AnalysisUtil:
                     "\n" \
                     "Returns: \n\t" \
                     "$RETS$ "
+
+    @staticmethod
+    def get_building_period(num_stories, fragility_set):
+        """Get building period from the fragility curve.
+
+        Args:
+            num_stories (int): Number of building stories.
+            fragility_set (obj): A JSON description of fragility applicable to the building.
+
+        Returns:
+            float: Building period.
+
+        """
+        period = 0.0
+
+        fragility_curve = fragility_set['fragilityCurves'][0]
+        if fragility_curve[
+            'className'] == 'PeriodStandardFragilityCurve':
+            period_equation_type = fragility_curve['periodEqnType']
+            if period_equation_type == 1:
+                period = fragility_curve['periodParam0']
+            elif period_equation_type == 2:
+                period = fragility_curve['periodParam0'] * num_stories
+            elif period_equation_type == 3:
+                period = fragility_curve['periodParam1'] * math.pow(
+                    fragility_curve['periodParam0'] * num_stories,
+                    fragility_curve['periodParam2'])
+
+        return period
+
+    @staticmethod
+    def calculate_limit_state(fragility_set, hazard, period: float = 0.0,
+                              std_dev: float = 0.0):
+        """
+            Computes limit state probabilities.
+            Args:
+                fragility_set: JSON representing the set of fragility curves.
+                hazard: hazard value to compute probability for
+                period: period of the structure, if applicable
+                std_dev: standard deviation
+
+            Returns: limit state probabilities
+
+        """
+
+        fragility_curves = fragility_set['fragilityCurves']
+        output = collections.OrderedDict()
+
+        index = 0
+
+        if len(fragility_curves) == 1:
+            limit_state = ['failure']
+        elif len(fragility_curves) == 3:
+            limit_state = ['immocc', 'lifesfty', 'collprev']
+        elif len(fragility_curves) == 4:
+            limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi',
+                           'ls-complet']
+        else:
+            raise ValueError(
+                "We can only handle fragility curves with 1, 3 or 4 limit states!")
+
+        for fragility_curve in fragility_curves:
+            probability = float(0.0)
+
+            class_name = fragility_curve['className']
+            if hazard > 0.0:
+                # If there are other classes of fragilities they will need to be added here
+                if class_name in [
+                    'PeriodBuildingFragilityCurve']:
+                    fs_param0 = fragility_curve['fsParam0']
+                    fs_param1 = fragility_curve['fsParam1']
+                    fs_param2 = fragility_curve['fsParam2']
+                    fs_param3 = fragility_curve['fsParam3']
+                    fs_param4 = fragility_curve['fsParam4']
+                    fs_param5 = fragility_curve['fsParam5']
+
+                    # If no period is provided, assumption is 0 since the user should check their
+                    # data for missing parameters (e.g. number of building stories).
+                    probability = AnalysisUtil.compute_period_building_fragility_value(
+                        hazard, period, fs_param0,
+                        fs_param1, fs_param2, fs_param3,
+                        fs_param4, fs_param5)
+                elif class_name in ['PeriodStandardFragilityCurve', 'StandardFragilityCurve']:
+                    alpha = float(fragility_curve['alpha'])
+                    beta = math.sqrt(math.pow(fragility_curve["beta"], 2) + math.pow(std_dev, 2))
+
+                    if fragility_curve['alphaType'] == 'median':
+                        sp = (math.log(hazard) - math.log(alpha)) / beta
+                        probability = norm.cdf(sp)
+                    elif fragility_curve['alphaType'] == "lambda":
+                        x = (math.log(hazard) - alpha) / beta
+                        probability = norm.cdf(x)
+                else:
+                    raise ValueError("Warning - Unsupported fragility type " +
+                                     fragility_curve['className'])
+
+            output[limit_state[index]] = probability
+            index += 1
+
+        return output
+
+    @staticmethod
+    def compute_period_building_fragility_value(hazard, period, a11_param,
+                                                a12_param, a13_param,
+                                                a14_param, a21_param,
+                                                a22_param):
+        # Assumption from Ergo BuildingLowPeriodSolver
+        cutoff_period = 0.87
+
+        probability = 0.0
+        if period < cutoff_period:
+            multiplier = cutoff_period - period
+            surface_eq = (math.log(
+                hazard) - cutoff_period * a12_param + a11_param) / (
+                                 a13_param + a14_param * cutoff_period)
+            probability = norm.cdf(surface_eq + multiplier * (
+                    math.log(hazard) - a21_param) / a22_param)
+        else:
+            probability = norm.cdf(
+                (math.log(hazard) - (a11_param + a12_param * period)) / (
+                        a13_param + a14_param * period))
+
+        return probability
 
     @staticmethod
     def calculate_damage_interval(damage):
@@ -199,6 +325,26 @@ class AnalysisUtil:
         return result_dataset_id
 
     @staticmethod
+    def compute_custom_limit_state_probability(fragility_set, variables: dict):
+        """Computes custom expression fragility values
+        :param fragility_set: fragility set with custom expression
+        :param variables: variables to set
+        :return:
+        """
+
+        fragility_curves = fragility_set['fragilityCurves']
+        limit_state_prob = 0.0
+        for fragility_curve in fragility_curves:
+            if fragility_curve['className'] == \
+                    'CustomExpressionFragilityCurve':
+                expression = fragility_curve['expression']
+                parser = Parser()
+                limit_state_prob = parser.parse(expression).evaluate(variables)
+
+        return limit_state_prob
+
+
+    @staticmethod
     def adjust_limit_states_for_pgd(limit_states, pgd_limit_states):
         try:
             adj_limit_states = collections.OrderedDict()
@@ -369,6 +515,55 @@ class AnalysisUtil:
         PROPERTIES = "properties"
         BLDG_PERIOD = "period"
 
+        fragility_hazard_type = fragility_set['demandType'].lower()
+        hazard_demand_type = fragility_hazard_type
+
+        if hazard_type.lower() == "earthquake":
+            num_stories = building[PROPERTIES][BLDG_STORIES]
+            # Get building period from the fragility if possible
+            building_period = AnalysisUtil.get_building_period(num_stories, fragility_set)
+
+            if fragility_hazard_type.endswith('sa') and fragility_hazard_type != 'sa':
+                # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
+                if len(fragility_hazard_type.split()) > 2:
+                    building_period = fragility_hazard_type.split()[0]
+                    fragility_hazard_type = "Sa"
+
+            hazard_demand_type = fragility_hazard_type
+
+            # This handles the case where some fragilities only specify Sa, others a specific period of Sa
+            if not hazard_demand_type.endswith('pga'):
+                # If the fragility does not contain the period calculation, check if the dataset has it
+                if building_period == 0.0 and BLDG_PERIOD in building[PROPERTIES]:
+                    if building[PROPERTIES][BLDG_PERIOD] > 0.0:
+                        building_period = building[PROPERTIES][BLDG_PERIOD]
+
+                hazard_demand_type = str(building_period) + " " + fragility_hazard_type
+        elif hazard_type.lower() == "tsunami":
+            if hazard_demand_type == "momentumflux":
+                hazard_demand_type = "mmax"
+            elif hazard_demand_type == "inundationdepth":
+                hazard_demand_type = "hmax"
+
+        return hazard_demand_type
+
+    @staticmethod
+    def get_hazard_demand_type_object(building, fragility_set, hazard_type):
+        """Get hazard demand type.
+
+        Args:
+            building (obj): A JSON mapping of a geometric object from the inventory: current building.
+            fragility_set (obj): A JSON description of fragility applicable to the building.
+            hazard_type (str): A hazard type such as earthquake, tsunami etc.
+
+        Returns:
+            str: A hazard demand type.
+
+        """
+        BLDG_STORIES = "no_stories"
+        PROPERTIES = "properties"
+        BLDG_PERIOD = "period"
+
         fragility_hazard_type = fragility_set.demand_type.lower()
         hazard_demand_type = fragility_hazard_type
 
@@ -417,12 +612,40 @@ class AnalysisUtil:
         grouped_inventory = dict()
         for fragility_id, frag in fragility_sets.items():
 
+            demand_type = frag['demandType']
+            demand_units = frag["demandUnits"]
+
+            if is_building:
+                inventory = inventories[fragility_id]
+                demand_type = AnalysisUtil.get_hazard_demand_type(inventory, frag, hazard_type)
+
+            tpl = (demand_type, demand_units)
+            grouped_inventory.setdefault(tpl, []).append(fragility_id)
+
+        return grouped_inventory
+
+    @staticmethod
+    def group_by_demand_type_object(inventories, fragility_sets, hazard_type="earthquake", is_building=False):
+        """
+
+        Args:
+            inventories: dictionary of {id: intentory}
+            fragility_sets: fragility_sets
+            hazard_type: default to earthquake
+            is_building: if the inventory is builiding or not
+
+        Returns: dictionary of grouped inventory with { (demandunit, demandtype):[inventory ids] }
+
+        """
+        grouped_inventory = dict()
+        for fragility_id, frag in fragility_sets.items():
+
             demand_type = frag.demand_type
             demand_units = frag.demand_units
 
             if is_building:
                 inventory = inventories[fragility_id]
-                demand_type = AnalysisUtil.get_hazard_demand_type(inventory, frag, hazard_type)
+                demand_type = AnalysisUtil.get_hazard_demand_type_object(inventory, frag, hazard_type)
 
             tpl = (demand_type, demand_units)
             grouped_inventory.setdefault(tpl, []).append(fragility_id)

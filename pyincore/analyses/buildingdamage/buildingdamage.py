@@ -108,7 +108,7 @@ class BuildingDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets = self.fragilitysvc.match_inventory(mapping, buildings, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory_object(mapping, buildings, fragility_key)
 
         bldg_results = []
         list_buildings = buildings
@@ -120,7 +120,8 @@ class BuildingDamage(BaseAnalysis):
 
         list_buildings = None  # Clear as it's not needed anymore
 
-        grouped_buildings = AnalysisUtil.group_by_demand_type(buildings, fragility_sets, hazard_type, is_building=True)
+        grouped_buildings = AnalysisUtil.group_by_demand_type_object(buildings, fragility_sets, hazard_type,
+                                                               is_building=True)
 
         for demand, grouped_bldgs in grouped_buildings.items():
 
