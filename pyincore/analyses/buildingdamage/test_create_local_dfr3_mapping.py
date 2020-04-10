@@ -93,15 +93,17 @@ bldg_dmg = BuildingDamage(client)
 bldg_dmg.load_remote_input_dataset("buildings", '5a284f0bc7d30d13bc081a28')
 bldg_dmg.set_parameter("result_name", 'local_mapping_fragility_memphis_eq_bldg_dmg_result')
 
-# Load local dfr3 mapping from file
-local_mapping = MappingSet.from_json_file('local_mapping.json')
-bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
-
 # Load locally created dfr3 mapping
-bldg_dmg.set_input_dfr3_mapping_set(local_mapping_set)
+bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping_set)
 
-# Load remote dfr3 mapping
-bldg_dmg.load_remote_dfr3_mapping("5b47b350337d4a3629076f2c")
+# Alternatively you can use the below methods to read mapping
+
+# # Load local dfr3 mapping from file
+# local_mapping = MappingSet.from_json_file('local_mapping.json', 'ergo:buildingFragilityMapping')
+# bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
+
+# # Load remote dfr3 mapping
+# bldg_dmg.load_remote_input_dataset('dfr3_mapping_set', "5b47b350337d4a3629076f2c")
 
 bldg_dmg.set_parameter("hazard_type", 'earthquake')
 bldg_dmg.set_parameter("hazard_id", '5b902cb273c3371e1236b36b')

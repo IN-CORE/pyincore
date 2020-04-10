@@ -22,11 +22,12 @@ def run_with_base_class():
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
 
+    # result_name = "test_local_mapping_result"
     result_name = "memphis_eq_bldg_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
 
     # # Load dfr3 mapping
-    # local_mapping = MappingSet.from_json_file('local_mapping.json')
+    # local_mapping = MappingSet.from_json_file('local_mapping.json', 'ergo:buildingFragilityMapping')
     # bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
 
     # load remote dfr3 mapping
@@ -56,9 +57,9 @@ def run_with_base_class():
     # result_name = "seaside_tsunami_dmg_result"
     # bldg_dmg.set_parameter("result_name", result_name)
     #
-    # # # Load dfr3 mapping
-    # # local_mapping = Mapping.from_json_file('local_mapping.json')
-    # # bldg_dmg.set_input_dfr3_mapping_set(local_mapping)
+    # # Load dfr3 mapping
+    # local_mapping = MappingSet.from_json_file('local_mapping.json', 'ergo:buildingFragilityMapping')
+    # bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
     #
     # # load remote dfr3 mapping
     # bldg_dmg.load_remote_input_dataset("dfr3_mapping_set", mapping_id)

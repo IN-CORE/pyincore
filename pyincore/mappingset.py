@@ -23,8 +23,8 @@ class MappingSet:
         self.hazard_type = metadata["hazardType"]
         self.inventory_type = metadata['inventoryType']
 
-        if 'data_type' in metadata:
-            self.data_type = metadata["data_type"]
+        if 'dataType' in metadata:
+            self.data_type = metadata["dataType"]
         else:
             self.data_type = "incore:dfr3Mapping"
 
@@ -50,20 +50,25 @@ class MappingSet:
             obj: dfr3 mapping from JSON.
 
         """
+
         return cls(json.loads(json_str))
 
     @classmethod
-    def from_json_file(cls, file_path):
+    def from_json_file(cls, file_path, data_type):
         """Get dfr3 mapping from the file.
 
         Args:
             file_path (str): json file path that holds the definition of a dfr3 curve.
+            data_type (str): mapping dataset type
 
         Returns:
             obj: dfr3 mapping from file.
 
         """
         with open(file_path, "r") as f:
-            instance = cls(json.load(f))
+            metadata = json.load(f)
+            metadata["dataType"] = data_type
+
+            instance = cls(metadata)
 
         return instance
