@@ -15,6 +15,11 @@ buildingdamage
 ..  autoclass:: buildingdamage.buildingutil.BuildingUtil
     :members:
 
+buildingfunctionality
+=====================
+..  autoclass:: buildingfunctionality.buildingfunctionality.BuildingFunctionality
+    :members:
+
 cumulativebuildingdamage
 ========================
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage

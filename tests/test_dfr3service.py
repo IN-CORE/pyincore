@@ -5,13 +5,13 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import ast
-
 import json
+
 import pytest
 from jose import jwt
 
-from pyincore import globals as pyglobals
 from pyincore import FragilityService, RepairService, IncoreClient
+from pyincore import globals as pyglobals
 from pyincore.globals import LOGGER
 
 logger = LOGGER
@@ -27,7 +27,7 @@ def fragilitysvc(monkeypatch):
     credentials = jwt.decode(cred[0], cred[1])
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient(token_file_name=".incrtesttoken")
+    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
     return FragilityService(client)
 
 
@@ -76,13 +76,35 @@ def test_map_fragilities_single_inventory(fragilitysvc):
     assert inventory['id'] in frag_set.keys()
 
 
+def test_match_fragilities_single_inventory(fragilitysvc):
+    inventory = {}
+    with open("single_inventory.json", 'r') as file:
+        inventory = ast.literal_eval(file.read())
+    mapping_id = '5b47b2d9337d4a36187c7564'
+    key = "High-Retrofit Drift-Sensitive Fragility ID Code"
+    frag_set = fragilitysvc.match_inventory(mapping_id, [inventory], key)
+
+    assert inventory['id'] in frag_set.keys()
+
+
 def test_map_fragilities_multiple_inventory(fragilitysvc):
     inventories = []
     with open("multiple_inventory.json", 'r') as file:
         inventories = ast.literal_eval(file.read())
-    mapping_id = '5b47b2d9337d4a36187c7564'
-    key = "High-Retrofit Drift-Sensitive Fragility ID Code"
+    mapping_id = '5b47b350337d4a3629076f2c'
+    key = "Non-Retrofit Fragility ID Code"
     frag_set = fragilitysvc.map_inventory(mapping_id, inventories, key)
+
+    assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
+
+
+def test_match_fragilities_multiple_inventory(fragilitysvc):
+    inventories = []
+    with open("multiple_inventory.json", 'r') as file:
+        inventories = ast.literal_eval(file.read())
+    mapping_id = '5b47b350337d4a3629076f2c'
+    key = "Non-Retrofit Fragility ID Code"
+    frag_set = fragilitysvc.match_inventory(mapping_id, inventories, key)
 
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
 

@@ -113,15 +113,12 @@ class PipelineDamageRepairRate(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            if hazard_type == "earthquake":
-                fragility_key = PipelineUtil.DEFAULT_EQ_FRAGILITY_KEY
-            elif hazard_type == "tsunami":
-                fragility_key = PipelineUtil.DEFAULT_TSU_FRAGILITY_KEY
-            else:
-                raise ValueError("You have to define the fragility key!")
+            fragility_key = PipelineUtil.DEFAULT_TSU_FRAGILITY_KEY if hazard_type == 'tsunami' else \
+                PipelineUtil.DEFAULT_EQ_FRAGILITY_KEY
+            self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
-        fragility_sets = self.fragilitysvc.map_inventory(
+        fragility_sets = self.fragilitysvc.match_inventory(
             self.get_parameter("mapping_id"), pipelines, fragility_key)
 
         # Get Liquefaction Fragility Key
@@ -140,7 +137,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
         geology_dataset_id = self.get_parameter(
             "liquefaction_geology_dataset_id")
         if geology_dataset_id is not None:
-            fragility_sets_liq = self.fragilitysvc.map_inventory(
+            fragility_sets_liq = self.fragilitysvc.match_inventory(
                 self.get_parameter("mapping_id"), pipelines,
                 liquefaction_fragility_key)
 

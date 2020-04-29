@@ -5,9 +5,10 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import pytest
+import requests
 from jose import jwt
 
-from pyincore import Client, IncoreClient
+from pyincore import Client, IncoreClient, InsecureIncoreClient, DataService
 
 
 def test_client_success(monkeypatch):
@@ -36,7 +37,20 @@ def test_client_fail(monkeypatch):
         IncoreClient(token_file_name=".none")
 
 
-@pytest.mark.skip(reason="needs for thought on what to assert")
+@pytest.mark.skip(reason="needs more thought on what to assert")
 def test_delete_cache():
     r = Client.clear_cache()
     assert r is None
+
+
+def test_insecure_client():
+    """
+    test insecure client
+    """
+    client = InsecureIncoreClient(username="incrtest")
+    data_svc = DataService(client)
+    try:
+        r = data_svc.get_datasets()
+        assert len(r) != 0
+    except requests.HTTPError:
+        assert False

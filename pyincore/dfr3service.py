@@ -9,6 +9,7 @@ import urllib
 from typing import Dict
 
 import jsonpickle
+import re
 
 from pyincore import IncoreClient
 
@@ -108,7 +109,6 @@ class Dfr3Service:
 
         return dfr3_sets
 
-
     def get_dfr3_set(self, dfr3_id: str):
         """Get all DFR3 sets.
 
@@ -123,6 +123,13 @@ class Dfr3Service:
         r = self.client.get(url)
 
         return r.json()
+
+    def batch_get_dfr3_set(self, dfr3_id_lists: list):
+        batch_dfr3_sets = {}
+        for id in dfr3_id_lists:
+            batch_dfr3_sets[id] = self.get_dfr3_set(id)
+
+        return batch_dfr3_sets
 
     def search_dfr3_sets(self, text: str, skip: int = None, limit: int = None):
         """Search DFR3 sets based on a specific text.
@@ -160,6 +167,109 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set)
         return r.json()
 
+    def match_inventory(self, mapping_id: str, inventories: dict, entry_key: str):
+
+        # 1. download mapping
+        mapping = self.get_mapping(mapping_id)
+        dfr3_sets = {}
+
+        # 2. loop through inventory to match the rules
+        matched_curve_ids = []
+        for inventory in inventories:
+            if "occ_type" in inventory["properties"] and \
+                    inventory["properties"]["occ_type"] is None:
+                inventory["properties"]["occ_type"] = ""
+            if "efacility" in inventory["properties"] and \
+                    inventory["properties"]["efacility"] is None:
+                inventory["properties"]["efacility"] = ""
+
+            for m in mapping['mappings']:
+
+                if self._property_match(rules=m['rules'], properties=inventory["properties"]):
+                    curve_id = m['entry'][entry_key]
+                    dfr3_sets[inventory['id']] = curve_id
+                    if curve_id not in matched_curve_ids:
+                        matched_curve_ids.append(curve_id)
+
+                    # use the first match
+                    break
+
+        batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
+
+        # 3. replace the curve id in dfr3_sets to the actual content
+        for key, value in dfr3_sets.items():
+            dfr3_sets[key] = batch_dfr3_sets[value]
+
+        return dfr3_sets
+
+    def _property_match(self, rules, properties):
+
+        # add more types if needed
+        known_types = {
+            "java.lang.String": "str",
+            "double": "float",
+            "int": "int",
+            "str": "str"
+        }
+
+        # add more operators if needed
+        known_operators = {
+            "EQ": "==",
+            "EQUALS": "==",
+            "NEQUALS": "!=",
+            "GT": ">",
+            "GE": ">=",
+            "LT": "<",
+            "LE": "<=",
+            "NMATCHES": "",
+            "MATCHES": ""
+        }
+
+        # if rules is [[]] meaning it matches without any condition
+        if rules == [[]]:
+            return True
+
+        else:
+            matched = False
+            for rule in rules[0]:
+                elements = rule.split(" ", 3)
+                # the format of a rule is always: rule_type + rule_key + rule_operator + rule_value
+                # e.g. "int no_stories EQ 1",
+                # e.g. "int year_built GE 1992",
+                # e.g. "java.lang.String Soil EQUALS Upland",
+                # e.g. "java.lang.String struct_typ EQUALS W2"
+
+                rule_type = elements[0]
+                if rule_type not in known_types.keys():
+                    raise ValueError(rule_type + " Unknown. Cannot parse the rules of this mapping!")
+
+                rule_key = elements[1]
+
+                rule_operator = elements[2]
+                if rule_operator not in known_operators.keys():
+                    raise ValueError(rule_operator + " Unknown. Cannot parse the rules of this mapping!")
+
+                rule_value = elements[3].strip('\'').strip('\"')
+
+                if rule_key in properties.keys() and isinstance(properties[rule_key],
+                                                                eval(known_types[rule_type])):
+                    if rule_type == 'java.lang.String':
+                        if rule_operator == "MATCHES":
+                            matched = bool(re.search(rule_value, properties[rule_key]))
+                        elif rule_operator == "NMATCHES":
+                            matched = not bool(re.search(rule_value, properties[rule_key]))
+                        else:
+                            matched = eval(
+                                '"{0}"'.format(properties[rule_key]) + known_operators[rule_operator] + '"{0}"'.format(
+                                    rule_value))
+                    else:
+                        matched = eval(str(properties[rule_key]) + known_operators[rule_operator] + rule_value)
+
+                if not matched:
+                    break
+
+            return matched
+
     def create_mapping(self, mapping_set: dict):
         """Create DFR3 mapping on the server. POST API endpoint call.
 
@@ -176,7 +286,7 @@ class Dfr3Service:
 
         return r.json()
 
-    def get_mappings(self, hazard_type: str = None, inventory_type: str = None,  mapping_type: str = None,
+    def get_mappings(self, hazard_type: str = None, inventory_type: str = None, mapping_type: str = None,
                      creator: str = None, space: str = None, skip: int = None, limit: int = None):
         """Get the set of mappings. Mapping is a relationship between inventories (buildings, bridges
             etc.) and DFR3 sets.
@@ -230,3 +340,4 @@ class Dfr3Service:
         r = self.client.get(url)
 
         return r.json()
+

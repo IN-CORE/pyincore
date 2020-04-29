@@ -102,8 +102,11 @@ def test_get_supported_earthquake_models(hazardsvc):
     """
     test /earthquakes/models endpoint
     """
-    models = hazardsvc.get_supported_earthquake_models()
-    assert models == ["AtkinsonBoore1995", "ChiouYoungs2014"]
+    supported_models = hazardsvc.get_supported_earthquake_models()
+    models = ["AtkinsonBoore1995", "ChiouYoungs2014"]
+
+    # check if supported_models contains all elements in the models list
+    assert all(elem in supported_models for elem in models)
 
 
 def test_create_earthquake(hazardsvc):
