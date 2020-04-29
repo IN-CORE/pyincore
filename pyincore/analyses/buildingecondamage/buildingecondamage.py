@@ -10,13 +10,12 @@ import concurrent.futures
 import traceback
 from itertools import repeat
 
-from pyincore import BaseAnalysis, HazardService, FragilityService, \
-    AnalysisUtil, GeoUtil
+from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
 from pyincore.analyses.buildingecondamage.buildingeconutil import BuildingEconUtil
 
 
 class BuildingEconDamage(BaseAnalysis):
-    """Building Damage Analysis calculates the probability of building damage based on
+    """Building Economic Damage Analysis calculates the probability of building damage based on
     different hazard type such as earthquake, tsunami and tornado by calling fragility
     and hazard services.
 
