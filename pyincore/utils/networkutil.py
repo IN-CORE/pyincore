@@ -385,21 +385,3 @@ class NetworkUtil:
                 validate = False
 
         return validate
-
-# if __name__ == "__main__":
-#     ntutil = NetworkUtil()
-#     in_nodefile = 'C:\\rest\\test\\epn_node.shp'
-#     in_linefile = 'C:\\rest\\test\\epn_links.shp'
-#     in_graph = 'C:\\rest\\test\\graph.csv'
-#     fromnode_field = 'fromnode'
-#     tonode_field = 'tonode'
-#     node_id_field = 'NODENWID'
-#     line_id_field = 'linknwid'
-#
-#     out_nodefile = 'C:\\rest\\test\\epn_out_node.shp'
-#     out_linefile = 'C:\\rest\\test\\epn_out_link.shp'
-#     out_graphfile = 'C:\\rest\\test\\epn_out_graph.csv'
-#
-#
-#     ntutil.build_by_node(in_nodefile, in_graph, node_id_field, out_linefile)
-#     ntutil.build_by_line(in_linefile, line_id_field, fromnode_field, tonode_field, out_nodefile, out_graphfile)
