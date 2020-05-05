@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - User warning message when mapping fails due to mismatched datatype [INCORE1-559](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-559)
 
+## [0.6.2] - 2020-04-23
+
+### Fixed
+- pandas error when accessing missing labels in the dataframe of Joplin CGE's BB matrix [INCORE1-557](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-557)
+- make sure in various places that version is bumped up to 0.6.2
+
 ## [0.6.1] - 2020-03-31
 
 ### Fixed
