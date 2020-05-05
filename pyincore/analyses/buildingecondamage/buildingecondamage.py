@@ -207,8 +207,8 @@ class BuildingEconDamage(BaseAnalysis):
 
         """
         return {
-            'name': 'building-damage',
-            'description': 'building damage analysis',
+            'name': 'building-economy-damage',
+            'description': 'building economy damage analysis',
             'input_parameters': [
                 {
                     'id': 'result_name',
@@ -241,18 +241,6 @@ class BuildingEconDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'use_liquefaction',
-                    'required': False,
-                    'description': 'Use liquefaction',
-                    'type': bool
-                },
-                {
-                    'id': 'use_hazard_uncertainty',
-                    'required': False,
-                    'description': 'Use hazard uncertainty',
-                    'type': bool
-                },
-                {
                     'id': 'num_cpu',
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request',
@@ -261,18 +249,36 @@ class BuildingEconDamage(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'buildings',
+                    'id': 'building_dmg',
                     'required': True,
-                    'description': 'Building Inventory',
-                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
+                    'description': 'Building damage results CSV file',
+                    'type': ['ergo:buildingDamageVer4', 'ergo:buildingInventory']
+                },
+                {
+                    'id': 'building_occupancy',
+                    'required': True,
+                    'description': 'Building occupancy, use, efacility and multipliers',
+                    'type': ['incore:buildingOccupancy']
+                },
+                {
+                    'id': 'nsbuildings_dmg',
+                    'required': False,
+                    'description': 'CSV file of building non-structural damage',
+                    'type': ['ergo:nsBuildingInventoryDamage'],
+                },
+                {
+                    'id': 'consumer_price_index',
+                    'required': False,
+                    'description': 'US Consumer Price Index 1913-2020, CSV file',
+                    'type': ['incore:consumerPriceIndexUS']
                 }
             ],
             'output_datasets': [
                 {
                     'id': 'result',
                     'parent_type': 'buildings',
-                    'description': 'CSV file of building structural damage',
-                    'type': 'ergo:buildingDamageVer4'
+                    'description': 'CSV file of building economy damages',
+                    'type': 'ergo:buildingEconomicLossV4'
                 }
             ]
         }
