@@ -48,8 +48,8 @@ def test_get_earthquake_hazard_value(hazardsvc):
     testing getting hazard value
     """
     hval = hazardsvc.get_earthquake_hazard_value("5b902cb273c3371e1236b36b",
-                                                 "0.2 SA", "g", 35.07899,
-                                                 -90.0178)
+        "0.2 SA", "g", 35.07899,
+        -90.0178)
     assert hval == 0.5322993805448739
 
 
@@ -58,9 +58,9 @@ def test_get_earthquake_hazard_values(hazardsvc):
     Testing getting multiple hazard values
     """
     hvals = hazardsvc.get_earthquake_hazard_values("5b902cb273c3371e1236b36b",
-                                                   "0.2 SA", "g",
-                                                   ["35.07899,-90.0178",
-                                                    "35.17899,-90.0178"])
+        "0.2 SA", "g",
+        ["35.07899,-90.0178",
+         "35.17899,-90.0178"])
     assert hvals[0]['hazardValue'] == 0.5322993805448739 and hvals[1][
         'hazardValue'] == 0.5926201634382787
 
@@ -77,10 +77,10 @@ def test_get_earthquake_hazard_value_set(hazardsvc):
 
 def test_get_liquefaction_values(hazardsvc):
     liq_vals = hazardsvc.get_liquefaction_values("5b902cb273c3371e1236b36b",
-                                                 "5a284f53c7d30d13bc08249c",
-                                                 "in",
-                                                 ["35.18,-90.076",
-                                                  "35.19,-90.0178"])
+        "5a284f53c7d30d13bc08249c",
+        "in",
+        ["35.18,-90.076",
+         "35.19,-90.0178"])
     assert liq_vals[0]['pgd'] == 94.28155130685825 and liq_vals[1][
         'pgd'] == 103.2176731165868
 
@@ -90,11 +90,11 @@ def test_get_soil_amplification_value(hazardsvc):
     test /earthquakes/soil/amplification endpoint
     """
     soil_amplification_value = hazardsvc.get_soil_amplification_value("NEHRP",
-                                                                      "5a284f20c7d30d13bc081aa6",
-                                                                      32.3547,
-                                                                      -89.3985,
-                                                                      "pga",
-                                                                      0.2, "A")
+        "5a284f20c7d30d13bc081aa6",
+        32.3547,
+        -89.3985,
+        "pga",
+        0.2, "A")
     assert soil_amplification_value == 0.8
 
 
@@ -120,7 +120,8 @@ def test_create_earthquake(hazardsvc):
     file_paths = ["eq-dataset1.tif", "eq-dataset2.tif"]
 
     dataset_response = hazardsvc.create_earthquake(eq_dataset_json, file_paths)
-    assert dataset_response["id"] is not None and dataset_response["hazardDatasets"][1]["datasetId"] is not None
+    assert dataset_response["id"] is not None and dataset_response["hazardDatasets"][1][
+        "datasetId"] is not None
 
     # Model Based Earthquake without files
     with open("eq-model.json", 'r') as file:
@@ -128,6 +129,28 @@ def test_create_earthquake(hazardsvc):
 
     model_response = hazardsvc.create_earthquake(eqmodel_json)
     assert model_response["id"] is not None
+
+
+def test_get_earthquake_aleatory_uncertainty(hazardsvc):
+    hazard_id = "5c535f57c5c0e4ccead71a1a"
+    demand_type = "PGA"
+    model_response = hazardsvc. \
+        get_earthquake_aleatory_uncertainty(hazard_id, demand_type)
+    assert model_response[demand_type] is not None and \
+           (0 < model_response[demand_type] <= 1)
+
+
+def test_get_earthquake_variance(hazardsvc):
+    hazard_id = "5c535f57c5c0e4ccead71a1a"
+    variance_type = "total"
+    demand_type = "PGA"
+    demand_units = "g"
+    points = ["35.927, -89.919"]
+
+    model_response = hazardsvc.get_earthquake_variance(
+        hazard_id, variance_type, demand_type, demand_units, points)
+    assert model_response[0] is not None and \
+           (0 < model_response[0]["variance"] <= 1)
 
 
 def test_get_tornado_hazard_metadata_list(hazardsvc):
@@ -153,7 +176,7 @@ def test_create_tornado_scenario(hazardsvc):
 
 def test_get_tornado_hazard_value(hazardsvc):
     hval = hazardsvc.get_tornado_hazard_value("5c6726705648c40890ba03a7",
-                                              "mph", 35.228, -97.478, 0)
+        "mph", 35.228, -97.478, 0)
     assert ((hval > 85) and (hval < 165))
 
 
@@ -162,12 +185,12 @@ def test_get_tornado_hazard_values(hazardsvc):
     Testing getting multiple hazard values
     """
     hvals = hazardsvc.get_tornado_hazard_values("5c6726705648c40890ba03a7",
-                                                "mph",
-                                                ["35.228, -97.478",
-                                                 "35.229, -97.465"])
+        "mph",
+        ["35.228, -97.478",
+         "35.229, -97.465"])
 
     assert ((hvals[0]['hazardValue'] > 85) and (
-                hvals[0]['hazardValue'] < 165)) and hvals[1][
+            hvals[0]['hazardValue'] < 165)) and hvals[1][
                'hazardValue'] == 0
 
 
@@ -187,16 +210,16 @@ def test_get_tsunami_hazard_metadata(hazardsvc):
 
 def test_get_tsunami_hazard_value(hazardsvc):
     response = hazardsvc.get_tsunami_hazard_value("5bc9ead7f7b08533c7e610e0",
-                                                  "hmax", "m", 46.006,
-                                                  -123.935)
+        "hmax", "m", 46.006,
+        -123.935)
     assert response == 5.900000095367432
 
 
 def test_get_tsunami_hazard_values(hazardsvc):
     response = hazardsvc.get_tsunami_hazard_values("5bc9ead7f7b08533c7e610e0",
-                                                   "hmax", "m",
-                                                   ["46.006,-123.935",
-                                                    "46.007, -123.969"])
+        "hmax", "m",
+        ["46.006,-123.935",
+         "46.007, -123.969"])
     assert response[0]["hazardValue"] == 5.900000095367432 and response[1]["hazardValue"] == 4.099999904632568
 
 
@@ -235,7 +258,7 @@ def test_get_hurricanewf_metadata_list(hazardsvc):
 @pytest.mark.skip(reason="performance issues")
 def test_get_hurricanewf_values(hazardsvc):
     hvals = hazardsvc.get_hurricanewf_values("5cffdcf35648c404a6414f7e",
-                                             "3s", "mph", ["28,-81"], 10.0, 0.03)
+        "3s", "mph", ["28,-81"], 10.0, 0.03)
 
     assert (pytest.approx(hvals[0]['hazardValue'], 1e-6) == 81.57440785011988)
 
@@ -243,6 +266,6 @@ def test_get_hurricanewf_values(hazardsvc):
 @pytest.mark.skip(reason="performance issues")
 def test_get_hurricanewf_json(hazardsvc):
     hjson = hazardsvc.get_hurricanewf_json("florida", 1, -83, "28,-81", "3s", "kmph", 6, 10,
-                                           "circular")
+        "circular")
 
     assert len(hjson["hurricaneSimulations"]) > 0
