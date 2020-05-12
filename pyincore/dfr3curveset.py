@@ -13,6 +13,7 @@ from pyincore.customexpressionfragilitycurve import CustomExpressionFragilityCur
 from pyincore.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
 from pyincore.periodstandardfragilitycurve import PeriodStandardFragilityCurve
 from pyincore.standardfragilitycurve import StandardFragilityCurve
+from pyincore.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
 
 
 class DFR3CurveSet:
@@ -48,6 +49,8 @@ class DFR3CurveSet:
                         self.fragility_curves.append(PeriodStandardFragilityCurve(fragility_curve))
                     elif fragility_curve['className'] == 'CustomExpressionFragilityCurve':
                         self.fragility_curves.append(CustomExpressionFragilityCurve(fragility_curve))
+                    elif fragility_curve['className'] == 'ConditionalStandardFragilityCurve':
+                        self.fragility_curves.append(ConditionalStandardFragilityCurve(fragility_curve))
                     else:
                         # TODO make a custom fragility curve class that accept whatever
                         self.fragility_curves.append(fragility_curve)
