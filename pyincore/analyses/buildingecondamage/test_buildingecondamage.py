@@ -8,20 +8,35 @@ def run_with_base_class():
     bldg_edmg = BuildingEconDamage(client)
     # Memphis Earthquake damage
     # New madrid earthquake using Atkinson Boore 1995
-    hazard_type = "earthquake"
-    hazard_id = "5b902cb273c3371e1236b36b"
+    # hazard_type = "earthquake"
+    # hazard_id = "5b902cb273c3371e1236b36b"
 
-    # Building dataset
-    # 5a284f0bc7d30d13bc081a28  5kb
-    # 5bcf2fcbf242fe047ce79dad 300kb
-    # 5a284f37c7d30d13bc08219c 20mb
-    #bldg_dataset_id = "5a284f0bc7d30d13bc081a28"
-    bldg_dataset_id = "5df40388b9219c06cf8b0c80"
+    # Building datasets
+    # Building structural damage, earthquake Seaside
+    bldg_dmg_id = "5c5c9686c5c0e488fcf91903"
+    # Building structural damage, tsunami Seaside, csv file
+    # bldg_dmg_id = "5c5c9712c5c0e488fcf91917"
+    # Building structural damage, tornado Joplin, csv file
+    # bldg_dmg_id = "5dbc9525b9219c06dd282637"
+    # Building structural damage,  Memphis, TN, RES3 Structural, shp file, ergo:buildingDamageVer4
+    # bldg_dmg_id = "5a284f30c7d30d13bc0820b3"
+
+    # Building non-structural damage, Seaside
+    bldg_nsdmg_id = "5df40388b9219c06cf8b0c80"
+    # Building non-structural damage, Memphis, TN, RE3 NonStructural, shp file, ergo:buildingNSContentDamageV4
+    # bldg_nsdmg_id = "5a284f4ac7d30d13bc082284"
 
     # Earthquake mapping
-    mapping_id = "5b47b350337d4a3629076f2c"
-    bldg_dmg = BuildingEconDamage(client)
-    bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
+    # mapping_id = "5b47b350337d4a3629076f2c"
+
+    bldg_damage = bldg_edmg.load_remote_input_dataset("building_dmg", bldg_dmg_id)
+    bldg_nsdamage = bldg_edmg.load_remote_input_dataset("nsbuildings_dmg", bldg_nsdmg_id)
+
+    bldg_occupancy_id = "5eb31760532ba10008cc5d44"
+    consumer_price_idx = "5eb311a8532ba10008cc5ce7"
+
+    bldg_occupancy = bldg_edmg.load_remote_input_dataset("building_occupancy", bldg_occupancy_id)
+    cpi = bldg_edmg.load_remote_input_dataset("consumer_price_index", consumer_price_idx)
 
     # # load datasets locally
     # building_damage_mcs_samples = Dataset.from_file("./Joplin_mcs_buildings_samples.csv", "incore:buildingDamageMcSamples")
@@ -32,11 +47,11 @@ def run_with_base_class():
     # bldg_func.set_input_dataset("poles_damage_mcs_samples", poles_damage_mcs_samples)
     # bldg_func.load_remote_input_dataset("interdependency_dictionary", "5defc8c663a6cc000172b2a9")
 
-    result_name = "memphis_bldg_edmg_result"
+    result_name = "seaside_bldg_edmg_result"
     bldg_edmg.set_parameter("result_name", result_name)
-    bldg_edmg.set_parameter("mapping_id", mapping_id)
-    bldg_edmg.set_parameter("hazard_type", hazard_type)
-    bldg_edmg.set_parameter("hazard_id", hazard_id)
+    # bldg_edmg.set_parameter("mapping_id", mapping_id)
+    # bldg_edmg.set_parameter("hazard_type", hazard_type)
+    # bldg_edmg.set_parameter("hazard_id", hazard_id)
     bldg_edmg.set_parameter("num_cpu", 1)
 
     # Run Analysis

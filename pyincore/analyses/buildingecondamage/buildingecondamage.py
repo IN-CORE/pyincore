@@ -216,30 +216,30 @@ class BuildingEconDamage(BaseAnalysis):
                     'description': 'result dataset name',
                     'type': str
                 },
-                {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
-                    'type': str
-                },
-                {
-                    'id': 'hazard_type',
-                    'required': True,
-                    'description': 'Hazard Type (e.g. earthquake)',
-                    'type': str
-                },
-                {
-                    'id': 'hazard_id',
-                    'required': True,
-                    'description': 'Hazard ID',
-                    'type': str
-                },
-                {
-                    'id': 'fragility_key',
-                    'required': False,
-                    'description': 'Fragility key to use in mapping dataset',
-                    'type': str
-                },
+                # {
+                #     'id': 'mapping_id',
+                #     'required': True,
+                #     'description': 'Fragility mapping dataset',
+                #     'type': str
+                # },
+                # {
+                #     'id': 'hazard_type',
+                #     'required': True,
+                #     'description': 'Hazard Type (e.g. earthquake)',
+                #     'type': str
+                # },
+                # {
+                #     'id': 'hazard_id',
+                #     'required': True,
+                #     'description': 'Hazard ID',
+                #     'type': str
+                # },
+                # {
+                #     'id': 'fragility_key',
+                #     'required': False,
+                #     'description': 'Fragility key to use in mapping dataset',
+                #     'type': str
+                # },
                 {
                     'id': 'num_cpu',
                     'required': False,
