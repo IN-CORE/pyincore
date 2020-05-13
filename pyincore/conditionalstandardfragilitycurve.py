@@ -21,7 +21,7 @@ class ConditionalStandardFragilityCurve(DFR3Curve):
 
         super(ConditionalStandardFragilityCurve, self).__init__(curve_parameters)
 
-    def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0):
+    def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         """
             Computes limit state probabilities.
             Args:

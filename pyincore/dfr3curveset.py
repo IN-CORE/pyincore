@@ -93,7 +93,7 @@ class DFR3CurveSet:
 
         return instance
 
-    def calculate_limit_state(self, hazard, period: float = 0.0, std_dev: float = 0.0):
+    def calculate_limit_state(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         """
             Computes limit state probabilities.
             Args:
@@ -117,7 +117,7 @@ class DFR3CurveSet:
             raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
 
         for fragility_curve in self.fragility_curves:
-            probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev)
+            probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
             output[limit_state[index]] = probability
             index += 1
 
