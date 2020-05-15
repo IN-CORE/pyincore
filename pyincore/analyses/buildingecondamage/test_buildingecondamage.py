@@ -19,12 +19,12 @@ def run_with_base_class():
     # Building structural damage, tornado Joplin, csv file
     # bldg_dmg_id = "5dbc9525b9219c06dd282637"
     # Building structural damage,  Memphis, TN, RES3 Structural, shp file, ergo:buildingDamageVer4
-    # bldg_dmg_id = "5a284f30c7d30d13bc0820b3"
+    # bldg_dmg_id = "5ebf0d0f06c907000833f38f"
 
     # Building non-structural damage, Seaside
     bldg_nsdmg_id = "5df40388b9219c06cf8b0c80"
     # Building non-structural damage, Memphis, TN, RE3 NonStructural, shp file, ergo:buildingNSContentDamageV4
-    # bldg_nsdmg_id = "5a284f4ac7d30d13bc082284"
+    # bldg_nsdmg_id = "5ebf0db389964e00082c2476"
 
     # Earthquake mapping
     # mapping_id = "5b47b350337d4a3629076f2c"
