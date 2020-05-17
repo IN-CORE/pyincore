@@ -266,7 +266,7 @@ class Dfr3Service:
                             matched = eval(str(properties[rule_key]) + known_operators[rule_operator] + rule_value)
                     else:
                         raise ValueError("Mismatched datatype found in the mapping rule: " + rule +
-                                         " .Datatype found in the dataset for "+ rule_key+ " : "
+                                         ". Datatype found in the dataset for " + rule_key + " : "
                                          + str(type(properties[rule_key])) + ". Please review the mapping being used.")
 
                 if not matched:
