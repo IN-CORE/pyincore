@@ -274,7 +274,7 @@ class HazardService:
         return r.json()
 
     def get_earthquake_aleatory_uncertainty(self, hazard_id: str, demand_type: str):
-        """ Gets aleatory uncertainty for an eathquake
+        """ Gets aleatory uncertainty for an earthquake
 
         Args:
             hazard_id (str): ID of the Earthquake
