@@ -225,8 +225,8 @@ class Dfr3Service:
             "MATCHES": ""
         }
 
-        # if rules is [[]] meaning it matches without any condition
-        if rules == [[]]:
+        # if rules match without any condition
+        if rules == [[]] or rules == [] or rules == [None]:
             return True
 
         else:
