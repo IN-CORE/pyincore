@@ -101,7 +101,7 @@ class NetworkUtil:
     @staticmethod
     def build_by_line(line_filename, line_id_field, fromnode_field, tonode_field, out_node_filename, out_graph_filename):
         """
-        create line dataset based on node shapefile and graph file
+        create node dataset based on line shapefile and graph file
         graph should be in csv format
         Args:
             line_filename (string):  line shapefile file name pull path with *.shp file extension.
@@ -184,8 +184,6 @@ class NetworkUtil:
             writer = csv.writer(f)
             writer.writerows([[line_id_field, fromnode_field, tonode_field]])
             writer.writerows(graph_list)
-
-        f.close()
 
         return True
 
