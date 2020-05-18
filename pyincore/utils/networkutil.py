@@ -10,7 +10,7 @@ from fiona.crs import from_epsg
 
 class NetworkUtil:
     @staticmethod
-    def build_by_node(node_filename, graph_filename, id_field, out_filename):
+    def build_dataset_by_node(node_filename, graph_filename, id_field, out_filename):
         """
         create line dataset based on node shapefile and graph file
         graph should be in csv format
@@ -99,7 +99,7 @@ class NetworkUtil:
         return True
 
     @staticmethod
-    def build_by_line(line_filename, line_id_field, fromnode_field, tonode_field, out_node_filename, out_graph_filename):
+    def build_dataset_by_line(line_filename, line_id_field, fromnode_field, tonode_field, out_node_filename, out_graph_filename):
         """
         create node dataset based on line shapefile and graph file
         graph should be in csv format
@@ -248,7 +248,7 @@ class NetworkUtil:
         return graph, coords
 
     @staticmethod
-    def plot_graph_network(graph, coords):
+    def plot_network_graph(graph, coords):
         """Plot graph.
 
         Args:
@@ -266,55 +266,7 @@ class NetworkUtil:
         plt.show()
 
     @staticmethod
-    def get_network_graph(filename, is_directed=False):
-        """Get network graph from filename.
-
-        Args:
-            filename (str):  A name of a geo dataset resource recognized by Fiona package.
-            is_directed (bool, optional (Defaults to False)): Graph type. True for directed Graph,
-                False for Graph.
-
-        Returns:
-            obj, dict: Graph and node coordinates.
-
-        """
-        geom = nx.read_shp(filename)
-        node_coords = {k: v for k, v in enumerate(geom.nodes())}
-        # create graph
-        graph = None
-        if is_directed:
-            graph = nx.DiGraph()
-        else:
-            graph = nx.Graph()
-
-        graph.add_nodes_from(node_coords.keys())
-        l = [set(x) for x in geom.edges()]
-        edg = [tuple(k for k, v in node_coords.items() if v in sl) for sl in l]
-
-        graph.add_edges_from(edg)
-
-        return graph, node_coords
-
-    @staticmethod
-    def plot_graph_network(graph, coords):
-        """Plot graph.
-
-        Args:
-            graph (obj):  A nx graph to be drawn.
-            coords (dict): Position coordinates.
-
-        """
-        # nx.draw(graph, coords, with_lables=True, font_weithg='bold')
-
-        # other ways to draw
-        nx.draw_networkx_nodes(graph, coords, cmap=plt.get_cmap('jet'), node_size=100, node_color='g', with_lables=True,
-                               font_weithg='bold')
-        nx.draw_networkx_labels(graph, coords)
-        nx.draw_networkx_edges(graph, coords, edge_color='r', arrows=True)
-        plt.show()
-
-    @staticmethod
-    def get_network_graph(filename, is_directed=False):
+    def read_network_graph_from_file(filename, is_directed=False):
         """Get network graph from filename.
 
         Args:
