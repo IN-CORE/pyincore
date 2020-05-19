@@ -5,8 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-
-#
 # Configuration file for the Sphinx documentation.rst builder.
 #
 # This file does only contain a selection of the most common options. For a
@@ -34,9 +32,9 @@ project = 'pyIncore'
 author = ''
 
 # The short X.Y version
-version = '0.5.4'
+version = '0.6.3'
 # The full version, including alpha/beta/rc tags
-release = '0.5.4'
+release = '0.6.3'
 
 
 # -- General configuration ---------------------------------------------------
@@ -50,11 +48,11 @@ release = '0.5.4'
 # ones.
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
-              #'sphinx.ext.viewcode',
+              # 'sphinx.ext.viewcode',
               'sphinx.ext.ifconfig',
               'sphinx.ext.napoleon',
               'sphinx.ext.todo'
-              #'sphinxcontrib.swaggerdoc'
+              # 'sphinxcontrib.swaggerdoc'
               ]
 
 # Add any paths that contain templates here, relative to this directory.

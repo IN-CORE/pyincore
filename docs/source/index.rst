@@ -1,8 +1,8 @@
 pyIncore modules
 ================
 
-**pyIncore**  is a Python package consisting of three primary components: 1) a set of service classes to interact
-with the IN-CORE web services described below, 2) IN-CORE analyses and 3) visualization. The pyIncore allows users
+**pyIncore**  is a Python package consisting of two primary components: 1) a set of service classes to interact
+with the IN-CORE web services described below and 2) IN-CORE analyses. The pyIncore allows users
 to apply various hazards to infrastructure in selected areas, propagating the effect of physical infrastructure
 damage and loss of functionality to social and economic impacts.
 
