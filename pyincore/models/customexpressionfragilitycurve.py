@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore import Parser
 
-from pyincore.dfr3curve import DFR3Curve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class CustomExpressionFragilityCurve(DFR3Curve):

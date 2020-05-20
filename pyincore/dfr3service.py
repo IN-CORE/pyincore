@@ -10,7 +10,7 @@ import urllib
 from typing import Dict
 
 from pyincore import IncoreClient
-from pyincore.dfr3curveset import DFR3CurveSet
+from pyincore.models.dfr3curveset import DFR3CurveSet
 from pyincore.mappingset import MappingSet
 
 
