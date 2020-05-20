@@ -188,7 +188,7 @@ class NetworkUtil:
         return True
 
     @staticmethod
-    def create_network_graph_from_field(filename, fromnode_fldname, tonode_fldname, is_directed=False):
+    def create_network_graph_from_field(indataset, fromnode_fldname, tonode_fldname, is_directed=False):
         """Create network graph from field.
 
         Args:
@@ -208,7 +208,7 @@ class NetworkUtil:
         node_list = []
         size = 0
 
-        for line_feature in filename:
+        for line_feature in indataset:
             from_node_val = line_feature['properties'][fromnode_fldname.lower()]
             to_node_val = line_feature['properties'][tonode_fldname.lower()]
             fromnode_list.append(from_node_val - 1)
@@ -235,7 +235,7 @@ class NetworkUtil:
 
         # create coordinates
         node_coords_list = [None] * (len(node_list))
-        for line_feature in filename:
+        for line_feature in indataset:
             from_node_val = line_feature['properties'][fromnode_fldname.lower()]
             to_node_val = line_feature['properties'][tonode_fldname.lower()]
             line_geom = (line_feature['geometry'])
@@ -296,12 +296,12 @@ class NetworkUtil:
         return graph, node_coords
 
     @staticmethod
-    def validate_network_node_ids(nodefilename, linkfilename, fromnode_fldname, tonode_fldname, nodeid_fldname):
+    def validate_network_node_ids(nodedataset, linkdataset, fromnode_fldname, tonode_fldname, nodeid_fldname):
         """Check if the node id in from or to node exist in the real node id.
 
         Args:
-            nodefilename (str):  A name of a geo dataset resource recognized by Fiona package.
-            linkfilename (str): A name of the line.
+            nodedataset (str):  A name of a node geo dataset resource recognized by Fiona package.
+            linkdataset (str): A name of a link geo dataset resource recognized by Fiona package.
             fromnode_fldname (str): Line feature, from node field name.
             tonode_fldname (str): Line feature, to node field name.
             nodeid_fldname (str): Node field id name.
@@ -313,7 +313,7 @@ class NetworkUtil:
         validate = True
         # iterate link
         link_node_list = []
-        for line_feature in linkfilename:
+        for line_feature in linkdataset:
             from_node_val = line_feature['properties'][fromnode_fldname.lower()]
             to_node_val = line_feature['properties'][tonode_fldname.lower()]
             link_node_list.append(from_node_val)
@@ -321,7 +321,7 @@ class NetworkUtil:
 
         # iterate node
         node_list = []
-        for node_feature in nodefilename:
+        for node_feature in nodedataset:
             node_val = node_feature['properties'][nodeid_fldname.lower()]
             node_list.append(node_val)
 
@@ -335,3 +335,22 @@ class NetworkUtil:
                 validate = False
 
         return validate
+
+if __name__ == "__main__":
+    ntutil = NetworkUtil()
+    in_nodefile = 'C:\\rest\\test\\epn_node.shp'
+    in_linefile = 'C:\\rest\\test\\epn_links.shp'
+    in_graph = 'C:\\rest\\test\\graph.csv'
+    fromnode_field = 'fromnode'
+    tonode_field = 'tonode'
+    node_id_field = 'NODENWID'
+    line_id_field = 'linknwid'
+
+    out_nodefile = 'C:\\rest\\test\\epn_out_node.shp'
+    out_linefile = 'C:\\rest\\test\\epn_out_link.shp'
+    out_graphfile = 'C:\\rest\\test\\epn_out_graph.csv'
+
+
+    ntutil.build_dataset_by_node(in_nodefile, in_graph, node_id_field, out_linefile)
+    ntutil.build_dataset_by_line(in_linefile, line_id_field, fromnode_field, tonode_field, out_nodefile, out_graphfile)
+    print("done")
