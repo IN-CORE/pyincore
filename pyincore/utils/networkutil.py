@@ -344,7 +344,6 @@ class NetworkUtil:
                 node_val = node_feature['properties'][nodeid_fldname]
             elif nodeid_fldname.lower() in node_feature["properties"]:
                 node_val = node_feature['properties'][nodeid_fldname.lower()]
-            node_val = node_feature['properties'][nodeid_fldname.lower()]
             node_list.append(node_val)
 
         link_node_list.sort()
