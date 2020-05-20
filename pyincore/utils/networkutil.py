@@ -192,7 +192,7 @@ class NetworkUtil:
         """Create network graph from field.
 
         Args:
-            filename (str):  A name of a geo dataset resource recognized by Fiona package.
+            indataset (str):  A name of a geo dataset resource recognized by Fiona package.
             fromnode_fldname (str): Line feature, from node field name.
             tonode_fldname (str): Line feature, to node field name.
             is_directed (bool, optional (Defaults to False)): Graph type. True for directed Graph,
