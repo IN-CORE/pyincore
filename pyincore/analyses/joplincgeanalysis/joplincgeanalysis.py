@@ -354,6 +354,9 @@ class JoplinCGEModel(BaseAnalysis):
         SAM = pd.read_csv(self.get_input_dataset("SAM").get_file_path('csv'), index_col=0)
         # CAPITAL COMP
         BB = pd.read_csv(self.get_input_dataset("BB").get_file_path('csv'), index_col=0)
+        BB.rename(columns=lambda x: x.strip(), inplace=True)  # Skips whitespace around column name from head
+        BB.rename(index=lambda x: x.strip(), inplace=True)  # Skips whitespace around index name from head
+
         # MISC TABLES
         IOUT = pd.read_csv(self.get_input_dataset("IOUT").get_file_path('csv'), index_col=0)
         MISC = pd.read_csv(self.get_input_dataset("MISC").get_file_path('csv'), index_col=0)
@@ -737,6 +740,8 @@ class JoplinCGEModel(BaseAnalysis):
 
         CN0.loc[I] = 0.0
 
+        for col in GN:
+            BB[col] = 0.0
         B.loc[I, IG] = BB.loc[I, IG].fillna(0.0)
         B.loc[I, ["HS1"]] = B.loc[I, ["HS2"]].sum(1)
 

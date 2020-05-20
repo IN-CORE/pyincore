@@ -1,9 +1,9 @@
 from pyincore import IncoreClient
 from pyincore.analyses.joplincgeanalysis import JoplinCGEModel
-
+import pyincore.globals as pyglobals
 
 def run_base_analysis():
-    client = IncoreClient()
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     joplin_cge = JoplinCGEModel(client)
 
     # SAM
@@ -27,7 +27,7 @@ def run_base_analysis():
     # for this variable, open a terminal window, activate your environment where you installed
     # pyIncore, and then type "which ipopt" in mac, or "where ipopt" in windows and paste
     # the path here
-    joplin_cge.set_parameter("solver_path", "")
+    joplin_cge.set_parameter("solver_path", "/YOUR/IPOPT/PATH/GOES/HERE")
     joplin_cge.set_parameter("model_iterations", 1)
 
     joplin_cge.load_remote_input_dataset("SAM", SAM)
