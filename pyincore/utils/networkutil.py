@@ -209,8 +209,14 @@ class NetworkUtil:
         size = 0
 
         for line_feature in indataset:
-            from_node_val = line_feature['properties'][fromnode_fldname.lower()]
-            to_node_val = line_feature['properties'][tonode_fldname.lower()]
+            if fromnode_fldname in line_feature["properties"]:
+                from_node_val = line_feature['properties'][fromnode_fldname]
+            elif fromnode_fldname.lower() in line_feature["properties"]:
+                from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            if tonode_fldname in line_feature["properties"]:
+                to_node_val = line_feature['properties'][tonode_fldname]
+            elif tonode_fldname.lower() in line_feature["properties"]:
+                to_node_val = line_feature['properties'][tonode_fldname.lower()]
             fromnode_list.append(from_node_val - 1)
             tonode_list.append(to_node_val - 1)
             node_list.append(from_node_val - 1)
@@ -236,8 +242,14 @@ class NetworkUtil:
         # create coordinates
         node_coords_list = [None] * (len(node_list))
         for line_feature in indataset:
-            from_node_val = line_feature['properties'][fromnode_fldname.lower()]
-            to_node_val = line_feature['properties'][tonode_fldname.lower()]
+            if fromnode_fldname in line_feature["properties"]:
+                from_node_val = line_feature['properties'][fromnode_fldname]
+            elif fromnode_fldname.lower() in line_feature["properties"]:
+                from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            if tonode_fldname in line_feature["properties"]:
+                to_node_val = line_feature['properties'][tonode_fldname]
+            elif tonode_fldname.lower() in line_feature["properties"]:
+                to_node_val = line_feature['properties'][tonode_fldname.lower()]
             line_geom = (line_feature['geometry'])
             coords_list = line_geom.get('coordinates')
             from_coord = coords_list[0]
@@ -314,14 +326,24 @@ class NetworkUtil:
         # iterate link
         link_node_list = []
         for line_feature in linkdataset:
-            from_node_val = line_feature['properties'][fromnode_fldname.lower()]
-            to_node_val = line_feature['properties'][tonode_fldname.lower()]
+            if fromnode_fldname in line_feature["properties"]:
+                from_node_val = line_feature['properties'][fromnode_fldname]
+            elif fromnode_fldname.lower() in line_feature["properties"]:
+                from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            if tonode_fldname in line_feature["properties"]:
+                to_node_val = line_feature['properties'][tonode_fldname]
+            elif tonode_fldname.lower() in line_feature["properties"]:
+                to_node_val = line_feature['properties'][tonode_fldname.lower()]
             link_node_list.append(from_node_val)
             link_node_list.append(to_node_val)
 
         # iterate node
         node_list = []
         for node_feature in nodedataset:
+            if nodeid_fldname in node_feature["properties"]:
+                node_val = node_feature['properties'][nodeid_fldname]
+            elif nodeid_fldname.lower() in node_feature["properties"]:
+                node_val = node_feature['properties'][nodeid_fldname.lower()]
             node_val = node_feature['properties'][nodeid_fldname.lower()]
             node_list.append(node_val)
 
@@ -335,22 +357,3 @@ class NetworkUtil:
                 validate = False
 
         return validate
-
-if __name__ == "__main__":
-    ntutil = NetworkUtil()
-    in_nodefile = 'C:\\rest\\test\\epn_node.shp'
-    in_linefile = 'C:\\rest\\test\\epn_links.shp'
-    in_graph = 'C:\\rest\\test\\graph.csv'
-    fromnode_field = 'fromnode'
-    tonode_field = 'tonode'
-    node_id_field = 'NODENWID'
-    line_id_field = 'linknwid'
-
-    out_nodefile = 'C:\\rest\\test\\epn_out_node.shp'
-    out_linefile = 'C:\\rest\\test\\epn_out_link.shp'
-    out_graphfile = 'C:\\rest\\test\\epn_out_graph.csv'
-
-
-    ntutil.build_dataset_by_node(in_nodefile, in_graph, node_id_field, out_linefile)
-    ntutil.build_dataset_by_line(in_linefile, line_id_field, fromnode_field, tonode_field, out_nodefile, out_graphfile)
-    print("done")
