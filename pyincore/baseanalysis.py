@@ -75,17 +75,6 @@ class BaseAnalysis:
         # TODO: Need to handle failing to set input dataset
         self.set_input_dataset(analysis_param_id, dataset)
 
-    def load_remote_input_mapping(self, analysis_param_id, remote_id):
-        """Convenience function for loading a remote dataset by id.
-
-        Args:
-            analysis_param_id (str): ID of the input Dataset in the specifications.
-            remote_id (str):  ID of the Dataset in the Data service.
-
-        """
-        dataset = MappingSet(self.dfr3_service.get_mapping(remote_id))
-        self.set_input_dataset(analysis_param_id, dataset)
-
     def get_name(self):
         """Get the analysis name."""
         return self.spec['name']
