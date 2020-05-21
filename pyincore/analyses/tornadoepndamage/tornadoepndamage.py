@@ -13,7 +13,7 @@ import numpy
 from shapely.geometry import shape
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, DataService
-from pyincore import GeoUtil, AnalysisUtil
+from pyincore import GeoUtil, AnalysisUtil, NetworkUtil
 
 
 class TornadoEpnDamage(BaseAnalysis):
@@ -110,7 +110,7 @@ class TornadoEpnDamage(BaseAnalysis):
         assert fragility_set_pole['id'] == self.fragility_pole_id
 
         # network test
-        node_id_validation = GeoUtil.validate_network_node_ids(node_dataset, link_dataset, self.fromnode_fld_name,
+        node_id_validation = NetworkUtil.validate_network_node_ids(node_dataset, link_dataset, self.fromnode_fld_name,
                                                                self.tonode_fld_name, self.nodenwid_fld_name)
         if node_id_validation == False:
             print("ID in from or to node field doesn't exist in the node dataset")
@@ -119,7 +119,7 @@ class TornadoEpnDamage(BaseAnalysis):
         # getting network graph and node coordinates
         is_driected_graph = True
 
-        graph, node_coords = GeoUtil.create_network_graph_from_field(link_dataset, self.fromnode_fld_name,
+        graph, node_coords = NetworkUtil.create_network_graph_from_field(link_dataset, self.fromnode_fld_name,
                                                                      self.tonode_fld_name, is_driected_graph)
         # reverse the graph to acculate the damage to next to node
         graph = nx.DiGraph.reverse(graph, copy=True)
