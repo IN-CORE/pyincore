@@ -7,8 +7,6 @@
 # TODO: exception handling for validation and set methods
 from pyincore import DataService, AnalysisUtil
 from pyincore.dataset import Dataset
-from pyincore.dfr3service import Dfr3Service
-from pyincore.mappingset import MappingSet
 
 
 class BaseAnalysis:
@@ -24,7 +22,6 @@ class BaseAnalysis:
         self.spec = self.get_spec()
         self.client = incore_client
         self.data_service = DataService(self.client)
-        self.dfr3_service = Dfr3Service(self.client)
 
         # initialize parameters, input_datasets, output_datasets, etc
         self.parameters = {}
