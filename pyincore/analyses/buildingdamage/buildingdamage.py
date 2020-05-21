@@ -256,7 +256,10 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'dfr3_mapping_set',
                     'required': True,
                     'description': 'DFR3 Curve mapping set',
-                    'type': ['ergo:buildingFragilityMapping']
+                    'type': [
+                        'incore:dfr3Mapping',
+                        'ergo:buildingFragilityMapping'
+                    ]
                 }
             ],
             'output_datasets': [

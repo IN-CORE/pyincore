@@ -103,7 +103,7 @@ bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping_set)
 # bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
 
 # # Load remote dfr3 mapping
-# bldg_dmg.load_remote_input_dataset('dfr3_mapping_set', "5b47b350337d4a3629076f2c")
+# bldg_dmg.load_remote_input_mapping('dfr3_mapping_set', "5b47b350337d4a3629076f2c")
 
 bldg_dmg.set_parameter("hazard_type", 'earthquake')
 bldg_dmg.set_parameter("hazard_id", '5b902cb273c3371e1236b36b')
