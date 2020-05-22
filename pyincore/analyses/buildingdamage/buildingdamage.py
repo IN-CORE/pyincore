@@ -258,15 +258,6 @@ class BuildingDamage(BaseAnalysis):
                     'description': 'DFR3 Curve mapping set',
                     'type': [
                         'incore:dfr3Mapping',
-                        'ergo:electricPowerPlantFragilityMapping',
-                        'ergo:hzElectricPowerFacilityFragilityMapping',
-                        'ergo:hzPipelineFragilityMapping',
-                        'ergo:hzPotableWaterFacilityFragilityMapping',
-                        'ergo:buriedPipeFragilityMapping',
-                        'ergo:electricSubstationFragilityMapping',
-                        'ergo:gasFacilityFragilityMapping',
-                        'ergo:lifelineWaterTankFragilityMapping',
-                        'ergo:bridgeFragilityMapping',
                         'ergo:buildingFragilityMapping'
                     ]
                 }

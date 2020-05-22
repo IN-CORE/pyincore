@@ -7,8 +7,6 @@
 # TODO: exception handling for validation and set methods
 from pyincore import DataService, AnalysisUtil
 from pyincore.dataset import Dataset
-from pyincore.dfr3service import Dfr3Service
-from pyincore.mappingset import MappingSet
 
 
 class BaseAnalysis:
@@ -24,7 +22,6 @@ class BaseAnalysis:
         self.spec = self.get_spec()
         self.client = incore_client
         self.data_service = DataService(self.client)
-        self.dfr3_service = Dfr3Service(self.client)
 
         # initialize parameters, input_datasets, output_datasets, etc
         self.parameters = {}
@@ -70,10 +67,7 @@ class BaseAnalysis:
             remote_id (str):  ID of the Dataset in the Data service.
 
         """
-        if analysis_param_id == 'dfr3_mapping_set':
-            dataset = MappingSet(self.dfr3_service.get_mapping(remote_id))
-        else:
-            dataset = Dataset.from_data_service(remote_id, self.data_service)
+        dataset = Dataset.from_data_service(remote_id, self.data_service)
 
         # TODO: Need to handle failing to set input dataset
         self.set_input_dataset(analysis_param_id, dataset)

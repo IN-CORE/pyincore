@@ -6,7 +6,7 @@
 
 import math
 
-from pyincore.dfr3curve import DFR3Curve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class ParametricFragilityCurve(DFR3Curve):

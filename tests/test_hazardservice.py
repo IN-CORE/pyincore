@@ -130,6 +130,28 @@ def test_create_earthquake(hazardsvc):
     assert model_response["id"] is not None
 
 
+def test_get_earthquake_aleatory_uncertainty(hazardsvc):
+    hazard_id = "5c535f57c5c0e4ccead71a1a"
+    demand_type = "PGA"
+    model_response = hazardsvc. \
+        get_earthquake_aleatory_uncertainty(hazard_id, demand_type)
+    assert model_response[demand_type] is not None and \
+           (0 < model_response[demand_type] <= 1)
+
+
+def test_get_earthquake_variance(hazardsvc):
+    hazard_id = "5c535f57c5c0e4ccead71a1a"
+    variance_type = "total"
+    demand_type = "PGA"
+    demand_units = "g"
+    points = ["35.927, -89.919"]
+
+    model_response = hazardsvc.get_earthquake_variance(
+        hazard_id, variance_type, demand_type, demand_units, points)
+    assert model_response[0] is not None and \
+           (0 < model_response[0]["variance"] <= 1)
+
+
 def test_get_tornado_hazard_metadata_list(hazardsvc):
     response = hazardsvc.get_tornado_hazard_metadata_list()
     assert len(response) > 0 and 'id' in response[0].keys()

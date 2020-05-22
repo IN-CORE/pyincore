@@ -8,13 +8,13 @@
 import collections
 import json
 
-from pyincore.dfr3curve import DFR3Curve
-from pyincore.customexpressionfragilitycurve import CustomExpressionFragilityCurve
-from pyincore.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
-from pyincore.periodstandardfragilitycurve import PeriodStandardFragilityCurve
-from pyincore.standardfragilitycurve import StandardFragilityCurve
-from pyincore.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
-from pyincore.parametricfragilitycurve import ParametricFragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
+from pyincore.models.customexpressionfragilitycurve import CustomExpressionFragilityCurve
+from pyincore.models.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
+from pyincore.models.periodstandardfragilitycurve import PeriodStandardFragilityCurve
+from pyincore.models.standardfragilitycurve import StandardFragilityCurve
+from pyincore.models.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
+from pyincore.models.parametricfragilitycurve import ParametricFragilityCurve
 
 
 class DFR3CurveSet:

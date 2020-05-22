@@ -5,9 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-import json
-
-
 class DFR3Curve:
     """abstract class for dfr3 curves.
 

@@ -10,7 +10,7 @@ import urllib
 from typing import Dict
 
 from pyincore import IncoreClient
-from pyincore.dfr3curveset import DFR3CurveSet
+from pyincore.models.dfr3curveset import DFR3CurveSet
 from pyincore.mappingset import MappingSet
 
 
@@ -211,8 +211,8 @@ class Dfr3Service:
             "MATCHES": ""
         }
 
-        # if rules is [[]] meaning it matches without any condition
-        if rules == [[]]:
+        # if rules match without any condition
+        if rules == [[]] or rules == [] or rules == [None]:
             return True
 
         else:
@@ -237,19 +237,23 @@ class Dfr3Service:
 
                 rule_value = elements[3].strip('\'').strip('\"')
 
-                if rule_key in properties.keys() and isinstance(properties[rule_key],
-                                                                eval(known_types[rule_type])):
-                    if rule_type == 'java.lang.String':
-                        if rule_operator == "MATCHES":
-                            matched = bool(re.search(rule_value, properties[rule_key]))
-                        elif rule_operator == "NMATCHES":
-                            matched = not bool(re.search(rule_value, properties[rule_key]))
+                if rule_key in properties.keys():
+                    if isinstance(properties[rule_key], eval(known_types[rule_type])):
+                        if rule_type == 'java.lang.String':
+                            if rule_operator == "MATCHES":
+                                matched = bool(re.search(rule_value, properties[rule_key]))
+                            elif rule_operator == "NMATCHES":
+                                matched = not bool(re.search(rule_value, properties[rule_key]))
+                            else:
+                                matched = eval(
+                                    '"{0}"'.format(properties[rule_key]) + known_operators[rule_operator] + '"{0}"'.format(
+                                        rule_value))
                         else:
-                            matched = eval(
-                                '"{0}"'.format(properties[rule_key]) + known_operators[rule_operator] + '"{0}"'.format(
-                                    rule_value))
+                            matched = eval(str(properties[rule_key]) + known_operators[rule_operator] + rule_value)
                     else:
-                        matched = eval(str(properties[rule_key]) + known_operators[rule_operator] + rule_value)
+                        raise ValueError("Mismatched datatype found in the mapping rule: " + rule +
+                                         ". Datatype found in the dataset for " + rule_key + " : "
+                                         + str(type(properties[rule_key])) + ". Please review the mapping being used.")
 
                 if not matched:
                     break
