@@ -6,10 +6,8 @@
 
 
 class FragilityCurve:
-    """abstract class for fragility curves.
-
-    Args:
-
+    """
+    abstract class for fragility curves.
     """
 
     def __init__(self, curve_parameters):
@@ -20,6 +18,7 @@ class FragilityCurve:
             Computes limit state probabilities.
             Args:
                 hazard: hazard value to compute probability for
+                period: building period default to 0
                 std_dev: standard deviation
 
             Returns: limit state probability
