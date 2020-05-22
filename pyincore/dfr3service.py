@@ -10,7 +10,7 @@ import urllib
 from typing import Dict
 
 from pyincore import IncoreClient
-from pyincore.models.dfr3curveset import DFR3CurveSet
+from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.mappingset import MappingSet
 
 
@@ -73,7 +73,7 @@ class Dfr3Service:
     def batch_get_dfr3_set_object(self, dfr3_id_lists: list):
         batch_dfr3_sets = {}
         for id in dfr3_id_lists:
-            batch_dfr3_sets[id] = DFR3CurveSet(self.get_dfr3_set(id))
+            batch_dfr3_sets[id] = FragilityCurveSet(self.get_dfr3_set(id))
 
         return batch_dfr3_sets
 
@@ -168,7 +168,7 @@ class Dfr3Service:
                     curve = m.entry[entry_key]
                     dfr3_sets[inventory['id']] = curve
 
-                    # if it's string:id; then need to fetch it from remote and cast to dfr3curve object
+                    # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
                     if isinstance(curve, str) and curve not in matched_curve_ids:
                         matched_curve_ids.append(curve)
 
@@ -179,7 +179,7 @@ class Dfr3Service:
 
         # 3. replace the curve id in dfr3_sets to the dfr3 curve
         for inventory_id, curve_item in dfr3_sets.items():
-            if isinstance(curve_item, DFR3CurveSet):
+            if isinstance(curve_item, FragilityCurveSet):
                 pass
             elif isinstance(curve_item, str):
                 dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]

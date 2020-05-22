@@ -7,10 +7,10 @@ import math
 
 from scipy.stats import norm
 
-from pyincore.models.dfr3curve import DFR3Curve
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
-class PeriodBuildingFragilityCurve(DFR3Curve):
+class PeriodBuildingFragilityCurve(FragilityCurve):
     """
     class to represent period building fragility curve
     """

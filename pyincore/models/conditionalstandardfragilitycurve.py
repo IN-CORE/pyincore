@@ -7,10 +7,10 @@ import math
 
 from scipy.stats import norm
 
-from pyincore.models.dfr3curve import DFR3Curve
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
-class ConditionalStandardFragilityCurve(DFR3Curve):
+class ConditionalStandardFragilityCurve(FragilityCurve):
     """
     class to represent conditional standard fragility curve
     """

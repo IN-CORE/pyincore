@@ -6,10 +6,10 @@
 
 import math
 
-from pyincore.models.dfr3curve import DFR3Curve
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
-class ParametricFragilityCurve(DFR3Curve):
+class ParametricFragilityCurve(FragilityCurve):
     """
     class to represent parametric fragility curve
     """

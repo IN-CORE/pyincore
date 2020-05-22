@@ -8,7 +8,7 @@
 import collections
 import json
 
-from pyincore.models.dfr3curve import DFR3Curve
+from pyincore.models.fragilitycurve import FragilityCurve
 from pyincore.models.customexpressionfragilitycurve import CustomExpressionFragilityCurve
 from pyincore.models.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
 from pyincore.models.periodstandardfragilitycurve import PeriodStandardFragilityCurve
@@ -17,11 +17,11 @@ from pyincore.models.conditionalstandardfragilitycurve import ConditionalStandar
 from pyincore.models.parametricfragilitycurve import ParametricFragilityCurve
 
 
-class DFR3CurveSet:
-    """class for dfr3 curves.
+class FragilityCurveSet:
+    """class for fragility curves.
 
     Args:
-        metadata (dict): dfr3 curve metadata.
+        metadata (dict): fragility curve metadata.
 
     """
 
@@ -38,7 +38,7 @@ class DFR3CurveSet:
             for fragility_curve in metadata["fragilityCurves"]:
 
                 # if it's already an df3curve object, directly put it in the list:
-                if isinstance(fragility_curve, DFR3Curve):
+                if isinstance(fragility_curve, FragilityCurve):
                     self.fragility_curves.append(fragility_curve)
                 # based on what type of fragility_curve it is, instantiate different fragility curve object
                 else:
