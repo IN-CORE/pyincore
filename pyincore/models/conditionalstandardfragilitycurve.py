@@ -11,6 +11,9 @@ from pyincore.models.dfr3curve import DFR3Curve
 
 
 class ConditionalStandardFragilityCurve(DFR3Curve):
+    """
+    class to represent conditional standard fragility curve
+    """
 
     def __init__(self, curve_parameters):
         self.alpha = curve_parameters['alpha']

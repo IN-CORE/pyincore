@@ -10,6 +10,9 @@ from pyincore.models.dfr3curve import DFR3Curve
 
 
 class ParametricFragilityCurve(DFR3Curve):
+    """
+    class to represent parametric fragility curve
+    """
 
     def __init__(self, curve_parameters):
         # TODO: not sure if i need to define a class of parameters with "name", "unit", "coefficient" and

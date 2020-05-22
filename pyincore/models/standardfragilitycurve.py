@@ -11,6 +11,9 @@ from pyincore.models.dfr3curve import DFR3Curve
 
 
 class StandardFragilityCurve(DFR3Curve):
+    """
+    class to represent standard fragility curve
+    """
 
     def __init__(self, curve_parameters):
         self.alpha = curve_parameters['alpha']

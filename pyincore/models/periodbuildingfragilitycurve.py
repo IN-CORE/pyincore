@@ -11,6 +11,9 @@ from pyincore.models.dfr3curve import DFR3Curve
 
 
 class PeriodBuildingFragilityCurve(DFR3Curve):
+    """
+    class to represent period building fragility curve
+    """
 
     def __init__(self, curve_parameters):
         self.period_eqn_type = curve_parameters['periodEqnType']

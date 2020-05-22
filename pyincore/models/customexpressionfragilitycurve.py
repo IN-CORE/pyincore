@@ -9,6 +9,9 @@ from pyincore.models.dfr3curve import DFR3Curve
 
 
 class CustomExpressionFragilityCurve(DFR3Curve):
+    """
+    class to represent custom expression fragility curve
+    """
 
     def __init__(self, curve_parameters):
         self.expression = curve_parameters['expression']
