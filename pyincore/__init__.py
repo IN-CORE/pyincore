@@ -20,7 +20,7 @@ from pyincore.restorationservice import RestorationService
 from pyincore.spaceservice import SpaceService
 from pyincore.utils.analysisutil import AnalysisUtil
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
-from pyincore.models.dfr3curveset import DFR3CurveSet
+from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.standardfragilitycurve import StandardFragilityCurve
 from pyincore.models.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
 from pyincore.models.periodstandardfragilitycurve import PeriodStandardFragilityCurve

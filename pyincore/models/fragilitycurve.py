@@ -5,8 +5,8 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-class DFR3Curve:
-    """abstract class for dfr3 curves.
+class FragilityCurve:
+    """abstract class for fragility curves.
 
     Args:
 

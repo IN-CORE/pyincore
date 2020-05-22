@@ -7,10 +7,10 @@ import math
 
 from scipy.stats import norm
 
-from pyincore.models.dfr3curve import DFR3Curve
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
-class StandardFragilityCurve(DFR3Curve):
+class StandardFragilityCurve(FragilityCurve):
 
     def __init__(self, curve_parameters):
         self.alpha = curve_parameters['alpha']

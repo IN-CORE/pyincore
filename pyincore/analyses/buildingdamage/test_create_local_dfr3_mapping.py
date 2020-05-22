@@ -1,15 +1,15 @@
-from pyincore import DFR3CurveSet, MappingSet, Mapping, IncoreClient, PeriodStandardFragilityCurve, FragilityService
+from pyincore import FragilityCurveSet, MappingSet, Mapping, IncoreClient, PeriodStandardFragilityCurve, FragilityService
 from pyincore.analyses.buildingdamage import BuildingDamage
 
 """
 Structure:
-DFR3Curve
-DFR3CurveSet contains [DFR3Curve]
-Mapping contains [{rules:[[...]], entry:{"fragility_key": DFR3CurveSet }]
+FragilityCurve
+FragilityCurveSet contains [FragilityCurve]
+Mapping contains [{rules:[[...]], entry:{"fragility_key": FragilityCurveSet }]
 MappingSet contains [ Mapping ]
 """
 
-# 0. create DFR3Curve (if you want to do everything from the very very scratch)
+# 0. create FragilityCurve (if you want to do everything from the very very scratch)
 fragility_curve_1_1 = PeriodStandardFragilityCurve({
     "description": "Moderate",
     "alpha":-0.453,
@@ -43,7 +43,7 @@ fragility_curve_1_3 = PeriodStandardFragilityCurve({
     "periodParam0":0.75,
     "periodEqnType":1
 })
-dfr3curveset_metadata_1 = {
+fragilitycurveset_metadata_1 = {
     "id":"local_fragility_curve_set_1",
     "demandType": "PGA",
     "demandUnits": "g",
@@ -56,12 +56,12 @@ dfr3curveset_metadata_1 = {
         fragility_curve_1_3,
     ]
 }
-fragility_curve_set_1 = DFR3CurveSet(dfr3curveset_metadata_1)
+fragility_curve_set_1 = FragilityCurveSet(fragilitycurveset_metadata_1)
 
-# 1. Alternatively, you can create DFR3CurveSet objects directly from a json
-fragility_curve_set_2 = DFR3CurveSet.from_json_file('5b47b34f337d4a3629076470.json')
+# 1. Alternatively, you can create FragilityCurveSet objects directly from a json
+fragility_curve_set_2 = FragilityCurveSet.from_json_file('5b47b34f337d4a3629076470.json')
 
-# 2. then create Mapping objects and put DFR3CurveSet into them
+# 2. then create Mapping objects and put FragilityCurveSet into them
 entry_1 = {"Non-Retrofit Fragility ID Code": fragility_curve_set_1}
 rules_1 = [[
     "int no_stories GE 4",
