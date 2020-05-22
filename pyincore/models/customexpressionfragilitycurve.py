@@ -20,7 +20,7 @@ class CustomExpressionFragilityCurve(FragilityCurve):
 
     def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         raise ValueError("Custom Expression Fragility Curve does not support this limit state calculation method. "
-                         "Please use computer_custom_limit_state_probability(variables) instead!")
+                         "Please use compute_custom_limit_state_probability(variables) instead!")
 
     def compute_custom_limit_state_probability(self, variables: dict):
         """Computes custom limit state probabilities.
