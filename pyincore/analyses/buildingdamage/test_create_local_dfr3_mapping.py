@@ -59,7 +59,7 @@ fragilitycurveset_metadata_1 = {
 fragility_curve_set_1 = FragilityCurveSet(fragilitycurveset_metadata_1)
 
 # 1. Alternatively, you can create FragilityCurveSet objects directly from a json
-fragility_curve_set_2 = FragilityCurveSet.from_json_file('5b47b34f337d4a3629076470.json')
+fragility_curve_set_2 = FragilityCurveSet.from_json_file('../../../tests/periodStandardFragilityCurve.json')
 
 # 2. then create Mapping objects and put FragilityCurveSet into them
 entry_1 = {"Non-Retrofit Fragility ID Code": fragility_curve_set_1}
@@ -99,7 +99,7 @@ bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping_set)
 # Alternatively you can use the below methods to read mapping
 
 # # Load local dfr3 mapping from file
-# local_mapping = MappingSet.from_json_file('local_mapping.json', 'ergo:buildingFragilityMapping')
+# local_mapping = MappingSet.from_json_file('../../../tests/local_mapping.json', 'ergo:buildingFragilityMapping')
 # bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
 
 # # Load remote dfr3 mapping

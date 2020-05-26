@@ -35,7 +35,8 @@ class FragilityCurve:
 
         Returns:
         """
-        pass
+        raise NotImplementedError("This function is currently only applied to Standard Fragility Curve, "
+                                  "and Period Standard Fragility Curve")
 
     def get_building_period(self, num_stories):
         """Get building period from the fragility curve.
