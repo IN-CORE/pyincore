@@ -28,6 +28,7 @@ class StandardFragilityCurve(FragilityCurve):
             Computes limit state probabilities.
             Args:
                 hazard: hazard value to compute probability for
+                period: building period default to 0
                 std_dev: standard deviation
 
             Returns: limit state probability
