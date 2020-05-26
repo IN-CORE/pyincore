@@ -27,7 +27,7 @@ def run_with_base_class():
     bldg_dmg.set_parameter("result_name", result_name)
 
     # # Load dfr3 mapping
-    # local_mapping = MappingSet.from_json_file('local_mapping.json', 'ergo:buildingFragilityMapping')
+    # local_mapping = MappingSet.from_json_file('../../../tests/local_mapping.json', 'ergo:buildingFragilityMapping')
     # bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
 
     # load remote dfr3 mapping
@@ -60,7 +60,7 @@ def run_with_base_class():
     # bldg_dmg.set_parameter("result_name", result_name)
     #
     # # Load dfr3 mapping
-    # local_mapping = MappingSet.from_json_file('local_mapping.json', 'ergo:buildingFragilityMapping')
+    # local_mapping = MappingSet.from_json_file('../../../tests/local_mapping.json', 'ergo:buildingFragilityMapping')
     # bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
     #
     # # load remote dfr3 mapping
