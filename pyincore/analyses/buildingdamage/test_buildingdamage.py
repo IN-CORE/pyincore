@@ -1,6 +1,5 @@
-from pyincore import IncoreClient, FragilityService
+from pyincore import IncoreClient
 from pyincore.analyses.buildingdamage import BuildingDamage
-from pyincore import MappingSet
 
 
 def run_with_base_class():
@@ -22,19 +21,9 @@ def run_with_base_class():
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
 
-    # result_name = "test_local_mapping_result"
     result_name = "memphis_eq_bldg_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
-
-    # # Load dfr3 mapping
-    # local_mapping = MappingSet.from_json_file('../../../tests/local_mapping.json', 'ergo:buildingFragilityMapping')
-    # bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
-
-    # load remote dfr3 mapping
-    fragility_service = FragilityService(client)
-    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-
+    bldg_dmg.set_parameter("mapping_id", mapping_id)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
@@ -42,8 +31,8 @@ def run_with_base_class():
     # Run Analysis
     bldg_dmg.run_analysis()
 
-    # #TSUNAMI
-    #
+    #TSUNAMI
+
     # hazard_type = "tsunami"
     # hazard_id = "5bc9e25ef7b08533c7e610dc"
     #
@@ -58,14 +47,7 @@ def run_with_base_class():
     # bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
     # result_name = "seaside_tsunami_dmg_result"
     # bldg_dmg.set_parameter("result_name", result_name)
-    #
-    # # Load dfr3 mapping
-    # local_mapping = MappingSet.from_json_file('../../../tests/local_mapping.json', 'ergo:buildingFragilityMapping')
-    # bldg_dmg.set_input_dataset("dfr3_mapping_set", local_mapping)
-    #
-    # # load remote dfr3 mapping
-    # bldg_dmg.load_remote_input_mapping("dfr3_mapping_set", mapping_id)
-    #
+    # bldg_dmg.set_parameter("mapping_id", mapping_id)
     # bldg_dmg.set_parameter("hazard_type", hazard_type)
     # bldg_dmg.set_parameter("hazard_id", hazard_id)
     # bldg_dmg.set_parameter("num_cpu", 4)

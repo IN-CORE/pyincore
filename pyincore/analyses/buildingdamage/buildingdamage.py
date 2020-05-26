@@ -34,9 +34,6 @@ class BuildingDamage(BaseAnalysis):
         # Building dataset
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
 
-        # Mapping
-        mapping = self.get_input_dataset("dfr3_mapping_set")
-
         # Get hazard input
         hazard_dataset_id = self.get_parameter("hazard_id")
 
@@ -66,8 +63,7 @@ class BuildingDamage(BaseAnalysis):
             count += avg_bulk_input_size
 
         results = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input, num_workers,
-                                                         inventory_args, repeat(mapping), repeat(hazard_type),
-                                                         repeat(hazard_dataset_id))
+                                                         inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -92,12 +88,11 @@ class BuildingDamage(BaseAnalysis):
 
         return output
 
-    def building_damage_analysis_bulk_input(self, buildings, mapping, hazard_type, hazard_dataset_id):
+    def building_damage_analysis_bulk_input(self, buildings, hazard_type, hazard_dataset_id):
         """Run analysis for multiple buildings.
 
         Args:
             buildings (list): Multiple buildings from input inventory set.
-            mapping (obj): dfr3 MappingSet object.
             hazard_type (str): A hazard type of the hazard exposure.
             hazard_dataset_id (str): An id of the hazard exposure.
 
@@ -108,7 +103,8 @@ class BuildingDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets = self.fragilitysvc.match_inventory_object(mapping, buildings, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory(
+            self.get_parameter("mapping_id"), buildings, fragility_key)
 
         bldg_results = []
         list_buildings = buildings
@@ -120,8 +116,7 @@ class BuildingDamage(BaseAnalysis):
 
         list_buildings = None  # Clear as it's not needed anymore
 
-        grouped_buildings = AnalysisUtil.group_by_demand_type_object(buildings, fragility_sets, hazard_type,
-                                                               is_building=True)
+        grouped_buildings = AnalysisUtil.group_by_demand_type(buildings, fragility_sets, hazard_type, is_building=True)
 
         for demand, grouped_bldgs in grouped_buildings.items():
 
@@ -161,9 +156,11 @@ class BuildingDamage(BaseAnalysis):
 
                     num_stories = building['properties']['no_stories']
                     selected_fragility_set = fragility_sets[bldg_id]
-                    building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
+                    building_period = AnalysisUtil.get_building_period(num_stories, selected_fragility_set)
 
-                    dmg_probability = selected_fragility_set.calculate_limit_state(hazard_val, building_period)
+                    dmg_probability = AnalysisUtil.calculate_limit_state(selected_fragility_set,
+                                                                         hazard_val,
+                                                                         building_period)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
                     bldg_result['guid'] = building['properties']['guid']
@@ -180,7 +177,6 @@ class BuildingDamage(BaseAnalysis):
         unmapped_hazard_val = 0.0
         unmapped_output_demand_type = "None"
         unmapped_output_demand_unit = "None"
-
         for unmapped_bldg_id, unmapped_bldg in buildings.items():
             unmapped_bldg_result = collections.OrderedDict()
             unmapped_bldg_result['guid'] = unmapped_bldg['properties']['guid']
@@ -206,6 +202,12 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
+                    'type': str
+                },
+                {
+                    'id': 'mapping_id',
+                    'required': True,
+                    'description': 'Fragility mapping dataset',
                     'type': str
                 },
                 {
@@ -251,15 +253,6 @@ class BuildingDamage(BaseAnalysis):
                     'required': True,
                     'description': 'Building Inventory',
                     'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
-                },
-                {
-                    'id': 'dfr3_mapping_set',
-                    'required': True,
-                    'description': 'DFR3 Curve mapping set',
-                    'type': [
-                        'incore:dfr3Mapping',
-                        'ergo:buildingFragilityMapping'
-                    ]
                 }
             ],
             'output_datasets': [
