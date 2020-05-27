@@ -71,6 +71,15 @@ class Dfr3Service:
         return batch_dfr3_sets
 
     def batch_get_dfr3_set_object(self, dfr3_id_lists: list):
+        """
+        this method is intended to replace batch_get_dfr3_set in the future
+        It retrieve dfr3 sets from services using id and instantiate DFR3Curveset objects in bulk
+        Args:
+            dfr3_id_lists: list of ids
+
+        Returns: list of dfr3curve object
+
+        """
         batch_dfr3_sets = {}
         for id in dfr3_id_lists:
             batch_dfr3_sets[id] = FragilityCurveSet(self.get_dfr3_set(id))
@@ -149,7 +158,18 @@ class Dfr3Service:
         return dfr3_sets
 
     def match_inventory_object(self, mapping:MappingSet, inventories: dict, entry_key: str):
+        """
+        This method is intended to replace the match_inventory method in the future. The functionality is same as
+        match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
+        FragilityCurveSet Object
+        Args:
+            mapping: MappingSet Object that has the rules and entries
+            inventories: inventories
+            entry_key: keys such as PGA, pgd, and etc
 
+        Returns: a dictionary of {"inventory id": FragilityCurveSet object}
+
+        """
         dfr3_sets = {}
 
         # 2. loop through inventory to match the rules

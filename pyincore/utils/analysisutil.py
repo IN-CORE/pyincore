@@ -549,11 +549,13 @@ class AnalysisUtil:
 
     @staticmethod
     def get_hazard_demand_type_object(building, fragility_set, hazard_type):
-        """Get hazard demand type.
+        """
+        Get hazard demand type. This method is intended to replace get_hazard_demand_type. Fragility_set is not a
+        json but a fragilityCurveSet object now.
 
         Args:
             building (obj): A JSON mapping of a geometric object from the inventory: current building.
-            fragility_set (obj): A JSON description of fragility applicable to the building.
+            fragility_set (obj): FragilityCurveSet object
             hazard_type (str): A hazard type such as earthquake, tsunami etc.
 
         Returns:
@@ -627,7 +629,8 @@ class AnalysisUtil:
     @staticmethod
     def group_by_demand_type_object(inventories, fragility_sets, hazard_type="earthquake", is_building=False):
         """
-
+        This method should replace group_by_demand_type in the future. Fragility_sets is not list of dictionary (
+        json) anymore but a list of FragilityCurveSet objects
         Args:
             inventories: dictionary of {id: intentory}
             fragility_sets: fragility_sets
