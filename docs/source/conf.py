@@ -21,8 +21,12 @@ import os
 import sys
 import sphinx_rtd_theme
 
-sys.path.append(os.path.abspath('./pyincore'))
-sys.path.append(os.path.abspath('./pyincore/analyses'))
+sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('../../pyincore'))
+sys.path.insert(0, os.path.abspath('../../pyincore/analyses'))
+sys.path.insert(0, os.path.abspath('../../tests'))
+sys.path.insert(0, os.path.abspath('../../docs'))
 
 # -- Project information -----------------------------------------------------
 
