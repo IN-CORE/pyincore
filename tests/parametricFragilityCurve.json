@@ -1,0 +1,522 @@
+{   "id": "5ebb0db727e5d0c756a7575f",
+    "legacyId": null,
+    "hazardType": "earthquake",
+    "inventoryType": "bridge",
+    "authors": [
+      "HAZUS"
+    ],
+    "description": "MSSS_Steel_Bridge",
+    "resultType": "Limit State",
+    "demandType": "PGA",
+    "demandUnits": "g",
+    "fragilityCurves": [
+      {
+        "className": "ParametricFragilityCurve",
+        "curveType": "Logit",
+        "parameters": [
+          {
+            "name": "Constant",
+            "unit": "",
+            "coefficient": -7.779087306,
+            "interceptTermDefault": 1
+          },
+          {
+            "name": "Demand",
+            "unit": "g",
+            "coefficient": 2.744724342,
+            "interceptTermDefault": null
+          },
+          {
+            "name": "fc",
+            "unit": "MPa",
+            "coefficient": -0.02438759,
+            "interceptTermDefault": 33.78
+          },
+          {
+            "name": "fy",
+            "unit": "MPa",
+            "coefficient": -0.00180294,
+            "interceptTermDefault": 459.436160679934
+          },
+          {
+            "name": "EBL",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": -3.22
+          },
+          {
+            "name": "EBT",
+            "unit": "",
+            "coefficient": 0.242332657,
+            "interceptTermDefault": -2.3
+          },
+          {
+            "name": "FBL",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": -1.56
+          },
+          {
+            "name": "FBT",
+            "unit": "",
+            "coefficient": -0.242469282,
+            "interceptTermDefault": 0.99
+          },
+          {
+            "name": "pass_stf",
+            "unit": "N/mm/mm",
+            "coefficient": 0,
+            "interceptTermDefault": 21.545
+          },
+          {
+            "name": "act_stf",
+            "unit": "N/pile",
+            "coefficient": -4.80E-06,
+            "interceptTermDefault": 177795
+          },
+          {
+            "name": "rot_stf",
+            "unit": "N/mm/pile",
+            "coefficient": 0,
+            "interceptTermDefault": 175000
+          },
+          {
+            "name": "trns_stf",
+            "unit": "N/pile",
+            "coefficient": 0,
+            "interceptTermDefault": 222245
+          },
+          {
+            "name": "damp",
+            "unit": "",
+            "coefficient": -0.423772472,
+            "interceptTermDefault": 0.045
+          },
+          {
+            "name": "abt_gp_L1",
+            "unit": "mm",
+            "coefficient": 0.014277084,
+            "interceptTermDefault": 38.1
+          },
+          {
+            "name": "abt_gp_L2",
+            "unit": "mm",
+            "coefficient": -0.00512963,
+            "interceptTermDefault": 38.1
+          },
+          {
+            "name": "hng_gp_L1",
+            "unit": "mm",
+            "coefficient": -0.013161096,
+            "interceptTermDefault": 25.4
+          },
+          {
+            "name": "hng_gp_L2",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 25.4
+          },
+          {
+            "name": "spn_ln",
+            "unit": "mm",
+            "coefficient": 0.000278567,
+            "interceptTermDefault": 13950
+          },
+          {
+            "name": "col_ht",
+            "unit": "mm",
+            "coefficient": 0.001902897,
+            "interceptTermDefault": 4070
+          },
+          {
+            "name": "width",
+            "unit": "ft",
+            "coefficient": 2.45E-06,
+            "interceptTermDefault": 6350
+          }
+        ],
+        "description": "Slight"
+      },
+      {
+        "className": "ParametricFragilityCurve",
+        "curveType": "Logit",
+        "parameters": [
+          {
+            "name": "Constant",
+            "unit": "",
+            "coefficient": -7.755722087,
+            "interceptTermDefault": 1
+          },
+          {
+            "name": "Demand",
+            "unit": "g",
+            "coefficient": 2.401040162,
+            "interceptTermDefault": null
+          },
+          {
+            "name": "fc",
+            "unit": "MPa",
+            "coefficient": -0.00515359,
+            "interceptTermDefault": 33.78
+          },
+          {
+            "name": "fy",
+            "unit": "MPa",
+            "coefficient": -0.000574063,
+            "interceptTermDefault": 459.436160679934
+          },
+          {
+            "name": "EBL",
+            "unit": "",
+            "coefficient": 0.000701378,
+            "interceptTermDefault": -3.22
+          },
+          {
+            "name": "EBT",
+            "unit": "",
+            "coefficient": 0.096521252,
+            "interceptTermDefault": -2.3
+          },
+          {
+            "name": "FBL",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": -1.56
+          },
+          {
+            "name": "FBT",
+            "unit": "",
+            "coefficient": -0.106471211,
+            "interceptTermDefault": 0.99
+          },
+          {
+            "name": "pass_stf",
+            "unit": "N/mm/mm",
+            "coefficient": 0,
+            "interceptTermDefault": 21.545
+          },
+          {
+            "name": "act_stf",
+            "unit": "N/pile",
+            "coefficient": -7.52E-06,
+            "interceptTermDefault": 177795
+          },
+          {
+            "name": "rot_stf",
+            "unit": "N/mm/pile",
+            "coefficient": 0,
+            "interceptTermDefault": 175000
+          },
+          {
+            "name": "trns_stf",
+            "unit": "N/pile",
+            "coefficient": 0,
+            "interceptTermDefault": 222245
+          },
+          {
+            "name": "damp",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": 0.045
+          },
+          {
+            "name": "abt_gp_L1",
+            "unit": "mm",
+            "coefficient": 0.011928621,
+            "interceptTermDefault": 38.1
+          },
+          {
+            "name": "abt_gp_L2",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 38.1
+          },
+          {
+            "name": "hng_gp_L1",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 25.4
+          },
+          {
+            "name": "hng_gp_L2",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 25.4
+          },
+          {
+            "name": "spn_ln",
+            "unit": "mm",
+            "coefficient": 0.00023725,
+            "interceptTermDefault": 13950
+          },
+          {
+            "name": "col_ht",
+            "unit": "mm",
+            "coefficient": 0.001395892,
+            "interceptTermDefault": 4070
+          },
+          {
+            "name": "width",
+            "unit": "ft",
+            "coefficient": 1.48E-05,
+            "interceptTermDefault": 6350
+          }
+        ],
+        "description": "Moderate"
+      },
+      {
+        "className": "ParametricFragilityCurve",
+        "curveType": "Logit",
+        "parameters": [
+          {
+            "name": "Constant",
+            "unit": "",
+            "coefficient": -10.04589897,
+            "interceptTermDefault": 1
+          },
+          {
+            "name": "Demand",
+            "unit": "g",
+            "coefficient": 2.739809257,
+            "interceptTermDefault": null
+          },
+          {
+            "name": "fc",
+            "unit": "MPa",
+            "coefficient": 0,
+            "interceptTermDefault": 33.78
+          },
+          {
+            "name": "fy",
+            "unit": "MPa",
+            "coefficient": 0,
+            "interceptTermDefault": 459.436160679934
+          },
+          {
+            "name": "EBL",
+            "unit": "",
+            "coefficient": 0.030960656,
+            "interceptTermDefault": -3.22
+          },
+          {
+            "name": "EBT",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": -2.3
+          },
+          {
+            "name": "FBL",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": -1.56
+          },
+          {
+            "name": "FBT",
+            "unit": "",
+            "coefficient": -0.124315732,
+            "interceptTermDefault": 0.99
+          },
+          {
+            "name": "pass_stf",
+            "unit": "N/mm/mm",
+            "coefficient": 0,
+            "interceptTermDefault": 21.545
+          },
+          {
+            "name": "act_stf",
+            "unit": "N/pile",
+            "coefficient": -7.93E-06,
+            "interceptTermDefault": 177795
+          },
+          {
+            "name": "rot_stf",
+            "unit": "N/mm/pile",
+            "coefficient": 0,
+            "interceptTermDefault": 175000
+          },
+          {
+            "name": "trns_stf",
+            "unit": "N/pile",
+            "coefficient": 0,
+            "interceptTermDefault": 222245
+          },
+          {
+            "name": "damp",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": 0.045
+          },
+          {
+            "name": "abt_gp_L1",
+            "unit": "mm",
+            "coefficient": 0.008521309,
+            "interceptTermDefault": 38.1
+          },
+          {
+            "name": "abt_gp_L2",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 38.1
+          },
+          {
+            "name": "hng_gp_L1",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 25.4
+          },
+          {
+            "name": "hng_gp_L2",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 25.4
+          },
+          {
+            "name": "spn_ln",
+            "unit": "mm",
+            "coefficient": 0.000273989,
+            "interceptTermDefault": 13950
+          },
+          {
+            "name": "col_ht",
+            "unit": "mm",
+            "coefficient": 0.001510439,
+            "interceptTermDefault": 4070
+          },
+          {
+            "name": "width",
+            "unit": "ft",
+            "coefficient": 4.27E-05,
+            "interceptTermDefault": 6350
+          }
+        ],
+        "description": "Extensive"
+      },
+      {
+        "className": "ParametricFragilityCurve",
+        "curveType": "Logit",
+        "parameters": [
+          {
+            "name": "Constant",
+            "unit": "",
+            "coefficient": -10.04589897,
+            "interceptTermDefault": 1
+          },
+          {
+            "name": "Demand",
+            "unit": "g",
+            "coefficient": 2.739809257,
+            "interceptTermDefault": null
+          },
+          {
+            "name": "fc",
+            "unit": "MPa",
+            "coefficient": 0,
+            "interceptTermDefault": 33.78
+          },
+          {
+            "name": "fy",
+            "unit": "MPa",
+            "coefficient": 0,
+            "interceptTermDefault": 459.436160679934
+          },
+          {
+            "name": "EBL",
+            "unit": "",
+            "coefficient": 0.030960656,
+            "interceptTermDefault": -3.22
+          },
+          {
+            "name": "EBT",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": -2.3
+          },
+          {
+            "name": "FBL",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": -1.56
+          },
+          {
+            "name": "FBT",
+            "unit": "",
+            "coefficient": -0.124315732,
+            "interceptTermDefault": 0.99
+          },
+          {
+            "name": "pass_stf",
+            "unit": "N/mm/mm",
+            "coefficient": 0,
+            "interceptTermDefault": 21.545
+          },
+          {
+            "name": "act_stf",
+            "unit": "N/pile",
+            "coefficient": -7.93E-06,
+            "interceptTermDefault": 177795
+          },
+          {
+            "name": "rot_stf",
+            "unit": "N/mm/pile",
+            "coefficient": 0,
+            "interceptTermDefault": 175000
+          },
+          {
+            "name": "trns_stf",
+            "unit": "N/pile",
+            "coefficient": 0,
+            "interceptTermDefault": 222245
+          },
+          {
+            "name": "damp",
+            "unit": "",
+            "coefficient": 0,
+            "interceptTermDefault": 0.045
+          },
+          {
+            "name": "abt_gp_L1",
+            "unit": "mm",
+            "coefficient": 0.008521309,
+            "interceptTermDefault": 38.1
+          },
+          {
+            "name": "abt_gp_L2",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 38.1
+          },
+          {
+            "name": "hng_gp_L1",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 25.4
+          },
+          {
+            "name": "hng_gp_L2",
+            "unit": "mm",
+            "coefficient": 0,
+            "interceptTermDefault": 25.4
+          },
+          {
+            "name": "spn_ln",
+            "unit": "mm",
+            "coefficient": 0.000273989,
+            "interceptTermDefault": 13950
+          },
+          {
+            "name": "col_ht",
+            "unit": "mm",
+            "coefficient": 0.001510439,
+            "interceptTermDefault": 4070
+          },
+          {
+            "name": "width",
+            "unit": "ft",
+            "coefficient": 4.27E-05,
+            "interceptTermDefault": 6350
+          }
+        ],
+        "description": "Complete"
+      }
+    ]
+  }
