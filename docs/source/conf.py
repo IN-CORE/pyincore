@@ -19,12 +19,10 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../..'))
-sys.path.insert(0, os.path.abspath('../../pyincore'))
-sys.path.insert(0, os.path.abspath('../../pyincore/analyses'))
-sys.path.insert(0, os.path.abspath('../../tests'))
-sys.path.insert(0, os.path.abspath('../../docs'))
+import sphinx_rtd_theme
+
+sys.path.append(os.path.abspath('./pyincore'))
+sys.path.append(os.path.abspath('./pyincore/analyses'))
 
 # -- Project information -----------------------------------------------------
 
@@ -49,12 +47,11 @@ release = '0.6.3'
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               # 'sphinx.ext.viewcode',
+              'sphinx_rtd_theme',
               'sphinx.ext.ifconfig',
               'sphinx.ext.napoleon',
               'sphinx.ext.todo'
-              # 'sphinxcontrib.swaggerdoc'
               ]
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
