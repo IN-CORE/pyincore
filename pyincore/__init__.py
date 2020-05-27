@@ -21,6 +21,15 @@ from pyincore.restorationservice import RestorationService
 from pyincore.spaceservice import SpaceService
 from pyincore.utils.analysisutil import AnalysisUtil
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
+from pyincore.models.fragilitycurveset import FragilityCurveSet
+from pyincore.models.standardfragilitycurve import StandardFragilityCurve
+from pyincore.models.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
+from pyincore.models.periodstandardfragilitycurve import PeriodStandardFragilityCurve
+from pyincore.models.customexpressionfragilitycurve import CustomExpressionFragilityCurve
+from pyincore.models.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
+from pyincore.models.parametricfragilitycurve import ParametricFragilityCurve
+from pyincore.mappingset import MappingSet
+from pyincore.mapping import Mapping
 from pyincore.networkdata import NetworkData
 from pyincore.networkdataset import NetworkDataset
 from pyincore.baseanalysis import BaseAnalysis

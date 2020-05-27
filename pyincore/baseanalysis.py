@@ -4,8 +4,6 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import pprint
-
 # TODO: exception handling for validation and set methods
 from pyincore import DataService, AnalysisUtil
 from pyincore.dataset import Dataset
@@ -70,6 +68,7 @@ class BaseAnalysis:
 
         """
         dataset = Dataset.from_data_service(remote_id, self.data_service)
+
         # TODO: Need to handle failing to set input dataset
         self.set_input_dataset(analysis_param_id, dataset)
 
@@ -247,6 +246,7 @@ class BaseAnalysis:
             if not result[0]:
                 print("Error reading parameter: " + result[1])
                 return result
+
         return self.run()
 
     def run(self):
