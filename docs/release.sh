@@ -6,7 +6,7 @@ set -e
 # use DEBUG=echo ./release-all.sh to print all commands
 export DEBUG=${DEBUG:-""}
 
-$DEBUG docker login hub.ncsa.illinois.edupwd
+$DEBUG docker login hub.ncsa.illinois.edu
 
 # Find out what branch we are on
 BRANCH=${BRANCH:-"$(git rev-parse --abbrev-ref HEAD)"}
