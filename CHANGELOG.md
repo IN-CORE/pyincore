@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - DFR3 service will now handle empty rules better. Acceptable forms are [[]], [], [null] [INCORE1-606](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-606)
 
+### Changed
+- updated documentation modules [INCORE1-617](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-617)
+
 ## [0.6.2] - 2020-04-23
 
 ### Fixed
