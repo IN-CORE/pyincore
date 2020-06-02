@@ -21,7 +21,7 @@ Install [Docker Desktop](https://www.docker.com/) for your OS and change directo
     ```
     docker run --rm -p 80:80 --name doctest pyincore_docs:latest
     ```
-    Optional flag, `-name` sets container's name to **doctest** under which it appears in Docker Desktop.
+    Optional flag, `--name` sets container's name to **doctest** under which it appears in Docker Desktop.
    
 3. Run html pages in your local browser (you might see the nginx main page first)
     ```
