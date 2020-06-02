@@ -41,7 +41,7 @@ is called `anaconda`. Create the environment from the terminal at the project
 folder (called `pyincore_docs` here) and activate it:
     ```
     conda create -n pyincore_docs python=3.7
-    source activate pyincore_docs
+    conda activate pyincore_docs
     ```
     or  
     ```
@@ -71,4 +71,4 @@ folder (called `pyincore_docs` here) and activate it:
     make html
     ```
    
-5. Open `index.html` from `build` directory in a browser.
+5. Open `index.html` from `build/html` directory in a browser.
