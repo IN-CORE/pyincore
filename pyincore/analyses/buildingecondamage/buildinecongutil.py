@@ -199,15 +199,15 @@ class BuildingDirectEconDamage(BaseAnalysis):
 
 
 		resultMap.put(Building.STR_LOSS_FIELD, str_loss)
-		resultMap.put(Building.STR_LOSS_DEV_FIELD, str_loss_dev)
-		resultMap.put(Building.ACC_LOSS_FIELD, acc_loss)
-		resultMap.put(Building.ACC_LOSS_DEV_FIELD, acc_loss_dev)
-		resultMap.put(Building.DRI_LOSS_FIELD, dri_loss);
-		resultMap.put(Building.DRI_LOSS_DEV_FIELD, dri_loss_dev)
-		resultMap.put(Building.CON_LOSS_FIELD, con_loss)
-		resultMap.put(Building.CON_LOSS_DEV_FIELD, con_loss_dev)
-		resultMap.put(Building.TOT_LOSS_FIELD, tot_loss)
-		resultMap.put(Building.TOT_LOSS_DEV_FIELD, tot_loss_dev)
+		# resultMap.put(Building.STR_LOSS_DEV_FIELD, str_loss_dev)
+		# resultMap.put(Building.ACC_LOSS_FIELD, acc_loss)
+		# resultMap.put(Building.ACC_LOSS_DEV_FIELD, acc_loss_dev)
+		# resultMap.put(Building.DRI_LOSS_FIELD, dri_loss);
+		# resultMap.put(Building.DRI_LOSS_DEV_FIELD, dri_loss_dev)
+		# resultMap.put(Building.CON_LOSS_FIELD, con_loss)
+		# resultMap.put(Building.CON_LOSS_DEV_FIELD, con_loss_dev)
+		# resultMap.put(Building.TOT_LOSS_FIELD, tot_loss)
+		# resultMap.put(Building.TOT_LOSS_DEV_FIELD, tot_loss_dev)
 
 	@staticmethod
 	def getAppraisedValue(occtype, appraised_val_col):

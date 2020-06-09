@@ -49,9 +49,6 @@ def run_with_base_class():
 
     result_name = "seaside_bldg_edmg_result"
     bldg_edmg.set_parameter("result_name", result_name)
-    # bldg_edmg.set_parameter("mapping_id", mapping_id)
-    # bldg_edmg.set_parameter("hazard_type", hazard_type)
-    # bldg_edmg.set_parameter("hazard_id", hazard_id)
     bldg_edmg.set_parameter("num_cpu", 1)
 
     # Run Analysis
