@@ -273,6 +273,44 @@ class HazardService:
 
         return r.json()
 
+    def get_earthquake_aleatory_uncertainty(self, hazard_id: str, demand_type: str):
+        """ Gets aleatory uncertainty for an earthquake
+
+        Args:
+            hazard_id (str): ID of the Earthquake
+            demand_type (str):  Ground motion demand type. Examples: PGA, PGV, 0.2 SA
+
+        Returns:
+             obj: HTTP POST Response with aleatory uncertainty value.
+
+        """
+        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/aleatoryuncertainty")
+        payload = {"demandType": demand_type}
+
+        r = self.client.get(url, params=payload)
+        return r.json()
+
+    def get_earthquake_variance(self, hazard_id: str, variance_type: str, demand_type: str,
+                                demand_units: str, points: List):
+        """Gets total and epistemic variance for a model based earthquake
+
+        Args:
+            hazard_id (str): ID of the Earthquake
+            variance_type (str): Type of Variance. epistemic or total
+            demand_type (str):  Ground motion demand type. Examples: PGA, PGV, 0.2 SA
+            demand_units (str): Demand unit. Examples: g, in
+            points (list): List of points provided as lat,long.
+
+        Returns:
+            obj: HTTP POST Response with variance value.
+
+        """
+        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/variance/" + variance_type)
+        payload = {"demandType": demand_type, "demandUnits": demand_units, 'point': points}
+
+        r = self.client.get(url, params=payload)
+        return r.json()
+
     def get_tornado_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         """Retrieve tornado metadata list from hazard service. Hazard API endpoint is called.
 

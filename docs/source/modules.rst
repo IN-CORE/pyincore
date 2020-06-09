@@ -83,6 +83,11 @@ populationdislocation
 ..  autoclass:: populationdislocation.populationdislocationutil.PopulationDislocationUtil
     :members:
 
+roaddamage
+==========
+..  autoclass:: roaddamage.roaddamage.RoadDamage
+    :members:
+
 tornadoepndamage
 ================
 ..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
@@ -110,6 +115,8 @@ baseanalysis
 
 client
 ======
+..  autoclass:: client.Client
+    :members:
 ..  autoclass:: client.IncoreClient
     :members:
 ..  autoclass:: client.InsecureIncoreClient
@@ -131,17 +138,17 @@ dataset
 
 dfr3service
 ===========
+..  autoclass:: dfr3service.MappingSubject
+    :members:
+..  autoclass:: dfr3service.MappingRequest
+    :members:
+..  autoclass:: dfr3service.MappingResponse
+    :members:
 ..  autoclass:: dfr3service.Dfr3Service
     :members:
 
 fragilityservice
 ================
-..  autoclass:: fragilityservice.MappingSubject
-    :members:
-..  autoclass:: fragilityservice.MappingRequest
-    :members:
-..  autoclass:: fragilityservice.MappingResponse
-    :members:
 ..  autoclass:: fragilityservice.FragilityService
     :members:
 
@@ -187,4 +194,3 @@ utils/geoutil
 =============
 ..  autoclass:: utils.geoutil.GeoUtil
     :members:
-
