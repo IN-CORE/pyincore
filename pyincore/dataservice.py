@@ -229,15 +229,12 @@ class DataService:
         url = urllib.parse.urljoin(self.base_url, dataset_id + "/files")
         listfiles = []
         for filepath in filepaths:
-            file = open(filepath, 'rb')
-            tuple = ('file', file)
-            listfiles.append(tuple)
+            with open(filepath, 'rb') as file:
+                file_tuple = ('file', file)
+                listfiles.append(file_tuple)
         kwargs = {"files": listfiles}
         r = self.client.post(url, **kwargs)
 
-        # close files
-        for tuple in listfiles:
-            tuple[1].close()
         return r.json()
 
     def delete_dataset(self, dataset_id: str):

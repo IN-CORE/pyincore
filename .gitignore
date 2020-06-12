@@ -30,7 +30,7 @@ hs_err_pid*
 **/.DS_Store
 
 # incore pw file
-tests/.incorepw
+tests/pyincore/.incorepw
 
 # incore download data or test data
 tests/data/
