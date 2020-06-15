@@ -40,7 +40,8 @@ setup(
         "wntr>=0.1.6",
         "pyomo>=5.6",
         "pytest>=3.9.0",
-        "python-jose>=3.0"
+        "python-jose>=3.0",
+        "pycodestyle>=2.6.0"
     ],
     python_requires=">=3.5",
     classifiers=[
