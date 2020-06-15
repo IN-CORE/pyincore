@@ -229,11 +229,15 @@ class DataService:
         url = urllib.parse.urljoin(self.base_url, dataset_id + "/files")
         listfiles = []
         for filepath in filepaths:
-            with open(filepath, 'rb') as file:
-                file_tuple = ('file', file)
-                listfiles.append(file_tuple)
+            file = open(filepath, 'rb')
+            tuple = ('file', file)
+            listfiles.append(tuple)
         kwargs = {"files": listfiles}
         r = self.client.post(url, **kwargs)
+
+        # close files
+        for tuple in listfiles:
+            tuple[1].close()
 
         return r.json()
 
