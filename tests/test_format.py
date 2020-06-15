@@ -6,8 +6,8 @@
 import pycodestyle
 
 
-def test_conformance():
+def test_conformance(paths=['../pyincore/', './']):
     """Test that pyIncore conforms to PEP-8."""
     style = pycodestyle.StyleGuide(quiet=False, max_line_length=120)
-    result = style.check_files(['../pyincore/', './'])
+    result = style.check_files(paths)
     assert result.total_errors == 0
