@@ -116,7 +116,8 @@ class BuildingDamage(BaseAnalysis):
 
         list_buildings = None  # Clear as it's not needed anymore
 
-        grouped_buildings = AnalysisUtil.group_by_demand_type_object(buildings, fragility_sets, hazard_type, is_building=True)
+        grouped_buildings = AnalysisUtil.group_by_demand_type_object(buildings, fragility_sets, hazard_type,
+                                                                     is_building=True)
 
         for demand, grouped_bldgs in grouped_buildings.items():
 
@@ -132,11 +133,14 @@ class BuildingDamage(BaseAnalysis):
                     points.append(str(location.y) + "," + str(location.x))
 
                 if hazard_type == 'earthquake':
-                    hazard_vals = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, input_demand_type, input_demand_units, points)
+                    hazard_vals = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, input_demand_type,
+                                                                              input_demand_units, points)
                 elif hazard_type == 'tornado':
-                    hazard_vals = self.hazardsvc.get_tornado_hazard_values(hazard_dataset_id, input_demand_units, points)
+                    hazard_vals = self.hazardsvc.get_tornado_hazard_values(hazard_dataset_id, input_demand_units,
+                                                                           points)
                 elif hazard_type == 'tsunami':
-                    hazard_vals = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, input_demand_type, input_demand_units, points)
+                    hazard_vals = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, input_demand_type,
+                                                                           input_demand_units, points)
                 elif hazard_type == 'hurricane':
                     # TODO implement hurricane
                     print("hurricane not yet implemented")
