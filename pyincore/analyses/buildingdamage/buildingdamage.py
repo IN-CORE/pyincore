@@ -103,8 +103,8 @@ class BuildingDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
 
         fragility_sets = dict()
-        fragility_sets = self.fragilitysvc.match_inventory(
-            self.get_parameter("mapping_id"), buildings, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"),
+                                                                  buildings, fragility_key)
 
         bldg_results = []
         list_buildings = buildings
@@ -116,7 +116,7 @@ class BuildingDamage(BaseAnalysis):
 
         list_buildings = None  # Clear as it's not needed anymore
 
-        grouped_buildings = AnalysisUtil.group_by_demand_type(buildings, fragility_sets, hazard_type, is_building=True)
+        grouped_buildings = AnalysisUtil.group_by_demand_type_object(buildings, fragility_sets, hazard_type, is_building=True)
 
         for demand, grouped_bldgs in grouped_buildings.items():
 
@@ -156,11 +156,8 @@ class BuildingDamage(BaseAnalysis):
 
                     num_stories = building['properties']['no_stories']
                     selected_fragility_set = fragility_sets[bldg_id]
-                    building_period = AnalysisUtil.get_building_period(num_stories, selected_fragility_set)
-
-                    dmg_probability = AnalysisUtil.calculate_limit_state(selected_fragility_set,
-                                                                         hazard_val,
-                                                                         building_period)
+                    building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
+                    dmg_probability = selected_fragility_set.calculate_limit_state(hazard_val, building_period)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
                     bldg_result['guid'] = building['properties']['guid']
@@ -202,12 +199,6 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
-                    'type': str
-                },
-                {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
                     'type': str
                 },
                 {
@@ -253,6 +244,12 @@ class BuildingDamage(BaseAnalysis):
                     'required': True,
                     'description': 'Building Inventory',
                     'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
+                },
+                {
+                    'id': 'dfr3_mapping_set',
+                    'required': True,
+                    'description': 'DFR3 Mapping Set Object',
+                    'type': ['incore:dfr3MappingSet'],
                 }
             ],
             'output_datasets': [
