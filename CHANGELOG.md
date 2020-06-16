@@ -5,11 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [Unreleased]
 
 ### Added
 - Added pycodestyle tests to ensure we follow PEP-8 style guide [INCORE1-650](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-650)
 
+
+### Changed
+- refactoring bridge damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
+ tests [INCORE1-652](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-652) 
+ 
 ## [0.6.3] - 2020-05-31
 
 ### Added
