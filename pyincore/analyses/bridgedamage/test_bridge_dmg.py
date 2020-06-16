@@ -1,4 +1,4 @@
-from pyincore import IncoreClient
+from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.bridgedamage import BridgeDamage
 
 
@@ -26,9 +26,13 @@ def run_with_base_class():
     # Load input datasets
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
 
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
     # Set analysis parameters
     bridge_dmg.set_parameter("result_name", "bridge_result")
-    bridge_dmg.set_parameter("mapping_id", mapping_id)
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("num_cpu", 4)
@@ -60,9 +64,13 @@ def run_with_base_class():
     # Load input datasets
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
 
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
     # Set analysis parameters
     bridge_dmg.set_parameter("result_name", "bridge_result_w_liquefaction")
-    bridge_dmg.set_parameter("mapping_id", mapping_id)
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("use_liquefaction", use_liquefaction)

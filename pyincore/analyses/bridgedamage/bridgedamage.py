@@ -120,8 +120,8 @@ class BridgeDamage(BaseAnalysis):
             use_liquefaction = self.get_parameter("use_liquefaction")
 
         fragility_set = dict()
-        fragility_set = self.fragilitysvc.match_inventory(
-            self.get_parameter("mapping_id"), bridges, fragility_key)
+        fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"), bridges,
+                                                          fragility_key)
 
         bridge_results = []
         list_bridges = bridges
@@ -133,7 +133,7 @@ class BridgeDamage(BaseAnalysis):
         list_bridges = None  # Clear as it's not needed anymore
 
         processed_bridges = []
-        grouped_bridges = AnalysisUtil.group_by_demand_type(bridges, fragility_set)
+        grouped_bridges = AnalysisUtil.group_by_demand_type_object(bridges, fragility_set)
 
         for demand, grouped_brs in grouped_bridges.items():
 
@@ -184,12 +184,10 @@ class BridgeDamage(BaseAnalysis):
 
                     adjusted_fragility_set = copy.deepcopy(selected_fragility_set)
                     if use_liquefaction and 'liq' in bridge['properties']:
-                        for fragility in adjusted_fragility_set["fragilityCurves"]:
-                            AnalysisUtil.adjust_fragility_for_liquefaction(
-                                fragility, bridge['properties']['liq'])
+                        for fragility in adjusted_fragility_set.fragility_curves:
+                            fragility.adjust_fragility_for_liquefaction(bridge['properties']['liq'])
 
-                    dmg_probability = AnalysisUtil.calculate_limit_state(adjusted_fragility_set, hazard_val,
-                                                                         std_dev=hazard_std_dev)
+                    dmg_probability = adjusted_fragility_set.calculate_limit_state(hazard_val, std_dev=hazard_std_dev)
                     retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
                     retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 
@@ -256,12 +254,6 @@ class BridgeDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
-                    'type': str
-                },
-                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard Type (e.g. earthquake)',
@@ -304,6 +296,12 @@ class BridgeDamage(BaseAnalysis):
                     'required': True,
                     'description': 'Bridge Inventory',
                     'type': ['ergo:bridges'],
+                },
+                {
+                    'id': 'dfr3_mapping_set',
+                    'required': True,
+                    'description': 'DFR3 Mapping Set Object',
+                    'type': ['incore:dfr3MappingSet'],
                 }
             ],
             'output_datasets': [
