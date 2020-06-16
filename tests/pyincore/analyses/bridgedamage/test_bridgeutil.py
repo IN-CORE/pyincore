@@ -27,8 +27,10 @@ def test_bridge_damage_util():
 def test_get_retrofit_cost():
     assert BridgeUtil.get_retrofit_cost(BridgeUtil.DEFAULT_FRAGILITY_KEY) == 0.0
 
+
 def test_get_retrofit_type():
     assert BridgeUtil.get_retrofit_type(BridgeUtil.DEFAULT_FRAGILITY_KEY) == "as built"
+
 
 def test_get_retrofit_code():
     assert BridgeUtil.get_retrofit_code(BridgeUtil.DEFAULT_FRAGILITY_KEY) == "none"

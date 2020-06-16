@@ -120,8 +120,8 @@ class BridgeDamage(BaseAnalysis):
             use_liquefaction = self.get_parameter("use_liquefaction")
 
         fragility_set = dict()
-        fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"), bridges,
-                                                          fragility_key)
+        fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"),
+                                                                 bridges, fragility_key)
 
         bridge_results = []
         list_bridges = bridges
