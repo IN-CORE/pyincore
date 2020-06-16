@@ -75,20 +75,3 @@ class BridgeUtil:
         return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][
             1] \
             if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
-
-    @staticmethod
-    def write_to_file(output, fieldname_list, output_file_name):
-        """Generates output csv file with header.
-
-        Args:
-            output (str): A content to be written to output.
-            fieldname_list (list): A list of header names.
-            output_file_name (str): Output file name.
-
-        """
-        # Write Output to csv
-        with open(output_file_name, 'w') as csv_file:
-            writer = csv.DictWriter(csv_file, dialect="unix",
-                                    fieldnames=fieldname_list)
-            writer.writeheader()
-            writer.writerows(output)
