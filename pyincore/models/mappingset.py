@@ -6,7 +6,7 @@
 
 
 import json
-from pyincore.mapping import Mapping
+from pyincore.models.mapping import Mapping
 
 
 class MappingSet:
@@ -26,7 +26,7 @@ class MappingSet:
         if 'dataType' in metadata:
             self.data_type = metadata["dataType"]
         else:
-            self.data_type = "incore:dfr3Mapping"
+            self.data_type = "incore:dfr3MappingSet"
 
         mappings = []
         for m in metadata['mappings']:
