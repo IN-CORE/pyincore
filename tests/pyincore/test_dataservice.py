@@ -99,7 +99,7 @@ def test_create_dataset_geotif(datasvc):
     """
     Testing create dataset with geotif file
     """
-    with open(os.path.join(pyglobals.DATA_DIR, 'geotif_sample.json'), 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, 'geotif_sample.json'), 'r') as file:
         dataset_prop = ast.literal_eval(file.read())
     response = datasvc.create_dataset(dataset_prop)
 
@@ -108,7 +108,7 @@ def test_create_dataset_geotif(datasvc):
 
     dataset_id = response['id']
     print('dataset is created with id ' + dataset_id)
-    files = [str(os.path.join(pyglobals.DATA_DIR, 'geotif_sample.tif'))]
+    files = [str(os.path.join(pyglobals.TEST_DATA_DIR, 'geotif_sample.tif'))]
 
     response = datasvc.add_files_to_dataset(dataset_id, files)
     assert response['id'] == dataset_id
@@ -121,7 +121,7 @@ def test_create_dataset_shpfile(datasvc):
     """
     Testing create dataset with shapefile
     """
-    with open(pyglobals.DATA_DIR + '/shp_sample.json', 'r') as file:
+    with open(pyglobals.TEST_DATA_DIR + '/shp_sample.json', 'r') as file:
         dataset_prop = ast.literal_eval(file.read())
     response = datasvc.create_dataset(dataset_prop)
 
@@ -130,10 +130,10 @@ def test_create_dataset_shpfile(datasvc):
 
     dataset_id = response['id']
     print('dataset is created with id ' + dataset_id)
-    files = [str(os.path.join(pyglobals.DATA_DIR, 'shp_sample/shp_sample.shp')),
-             str(os.path.join(pyglobals.DATA_DIR, 'shp_sample/shp_sample.dbf')),
-             str(os.path.join(pyglobals.DATA_DIR, 'shp_sample/shp_sample.shx')),
-             str(os.path.join(pyglobals.DATA_DIR, 'shp_sample/shp_sample.prj'))]
+    files = [str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/shp_sample.shp')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/shp_sample.dbf')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/shp_sample.shx')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/shp_sample.prj'))]
     response = datasvc.add_files_to_dataset(dataset_id, files)
     assert response['id'] == dataset_id
 
