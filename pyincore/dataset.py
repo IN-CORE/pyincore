@@ -56,7 +56,7 @@ class Dataset:
         return instance
 
     @classmethod
-    def from_json_str(cls, json_str):
+    def from_json_str(cls, json_str, data_service: DataService, file_path=None):
         """Get Dataset from json string.
 
         Args:
@@ -66,7 +66,13 @@ class Dataset:
             obj: Dataset from JSON.
 
         """
-        return cls(json.loads(json_str))
+        instance = cls(json.load(json_str))
+        if file_path is not None:
+            instance.local_file_path = file_path
+
+        instance.cache_files(data_service)
+
+        return instance
 
     @classmethod
     def from_file(cls, file_path, data_type):
