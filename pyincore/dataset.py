@@ -61,7 +61,8 @@ class Dataset:
 
         Args:
             json_str (str): JSON of the Dataset.
-
+            data_service (obj): Data Service class.
+            file_path (str): File path.
         Returns:
             obj: Dataset from JSON.
 
