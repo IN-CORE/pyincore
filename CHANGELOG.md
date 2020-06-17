@@ -5,10 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [Unreleased]
 
 ### Added
 - Added pycodestyle tests to ensure we follow PEP-8 style guide [INCORE1-650](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-650)
+
+### Fixed
+- in Dataset Class from_json_str() method, set local_file_path by either from dataservices json definition, or pass
+ in local file path [INCORe1-662](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-662)
 
 ## [0.6.3] - 2020-05-31
 
