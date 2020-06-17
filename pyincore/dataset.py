@@ -66,7 +66,7 @@ class Dataset:
             obj: Dataset from JSON.
 
         """
-        instance = cls(json.load(json_str))
+        instance = cls(json.loads(json_str))
         if file_path is not None:
             instance.local_file_path = file_path
 
