@@ -1,4 +1,4 @@
-from pyincore import IncoreClient
+from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.epfdamage import EpfDamage
 
 
@@ -19,8 +19,12 @@ def run_with_base_class():
 
     epf_dmg.load_remote_input_dataset("epfs", epf_dataset_id)
 
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    epf_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
     epf_dmg.set_parameter("result_name", "earthquake_epf_dmg_result")
-    epf_dmg.set_parameter("mapping_id", mapping_id)
     epf_dmg.set_parameter("hazard_type", hazard_type)
     epf_dmg.set_parameter("hazard_id", hazard_id)
     epf_dmg.set_parameter("num_cpu", 1)
@@ -41,8 +45,12 @@ def run_with_base_class():
     epf_dmg = EpfDamage(client)
     epf_dmg.load_remote_input_dataset("epfs", epf_dataset_id)
 
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    epf_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
     epf_dmg.set_parameter("result_name", "tsunami_epf_dmg_result")
-    epf_dmg.set_parameter("mapping_id", mapping_id)
     epf_dmg.set_parameter("hazard_type", hazard_type)
     epf_dmg.set_parameter("hazard_id", hazard_id)
     epf_dmg.set_parameter("num_cpu", 1)
