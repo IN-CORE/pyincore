@@ -5,10 +5,11 @@
 
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
+from pyincore.globals import INCORE_API_DEV_URL
 
 
 def run_with_base_class():
-    client = IncoreClient()
+    client = IncoreClient(INCORE_API_DEV_URL)
     hazard_type = "earthquake"
     hazard_id = "5b902cb273c3371e1236b36b"
     facility_datasetid = "5a284f2ac7d30d13bc081e52"
