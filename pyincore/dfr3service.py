@@ -11,7 +11,7 @@ from typing import Dict
 
 from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
-from pyincore.mappingset import MappingSet
+from pyincore.models.mappingset import MappingSet
 
 
 class MappingSubject(object):

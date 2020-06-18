@@ -3,7 +3,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore import IncoreClient
+from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
 
 
@@ -24,11 +24,15 @@ def run_with_base_class():
     wf_dmg = WaterFacilityDamage(client)
     wf_dmg.load_remote_input_dataset("water_facilities", facility_datasetid)
 
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    wf_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
     result_name = "wf-dmg-results.csv"
     wf_dmg.set_parameter("result_name", result_name)
     wf_dmg.set_parameter("hazard_type", hazard_type)
     wf_dmg.set_parameter("hazard_id", hazard_id)
-    wf_dmg.set_parameter("mapping_id", mapping_id)
     wf_dmg.set_parameter("fragility_key", "pga")
     wf_dmg.set_parameter("use_liquefaction", liquefaction)
     wf_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
