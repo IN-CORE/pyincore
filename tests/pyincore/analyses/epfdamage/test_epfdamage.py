@@ -1,18 +1,19 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.epfdamage import EpfDamage
+from pyincore.globals import INCORE_API_DEV_URL
 
 
 def run_with_base_class():
-    client = IncoreClient()
+    client = IncoreClient(INCORE_API_DEV_URL)
 
     hazard_type = "earthquake"
 
-    hazard_id = "5d3b6a31b9219cf53284c73d"
+    hazard_id = "5eebcbb08f80fe3899ad6039"
 
-    epf_dataset_id = "5d263f08b9219cf93c056c68"
+    epf_dataset_id = "5eebcaa17a00803abc85ec11"
 
     # Earthquake mapping
-    mapping_id = "5d489aa1b9219c0689f1988e"
+    mapping_id = "5eebcc13e7226233ce4ef0d7"
 
     # Run epf damage
     epf_dmg = EpfDamage(client)
@@ -36,10 +37,10 @@ def run_with_base_class():
 
     hazard_id = "5bc9eaf7f7b08533c7e610e1"
 
-    epf_dataset_id = "5d263f08b9219cf93c056c68"
+    epf_dataset_id = "5eebcaa17a00803abc85ec11"
 
     # Tsunami mapping
-    mapping_id = "5d489acfb9219c0689f19891"
+    mapping_id = "5eebce11e7226233ce4ef305"
 
     # Run epf damage
     epf_dmg = EpfDamage(client)
@@ -50,6 +51,7 @@ def run_with_base_class():
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     epf_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
+    epf_dmg.set_parameter("fragility_key", "Non-Retrofit inundationDepth Fragility ID Code")
     epf_dmg.set_parameter("result_name", "tsunami_epf_dmg_result")
     epf_dmg.set_parameter("hazard_type", hazard_type)
     epf_dmg.set_parameter("hazard_id", hazard_id)
