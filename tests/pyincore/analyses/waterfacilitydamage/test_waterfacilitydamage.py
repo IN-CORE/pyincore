@@ -46,4 +46,3 @@ def run_with_base_class():
 
 if __name__ == '__main__':
     run_with_base_class()
-

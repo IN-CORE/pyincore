@@ -212,8 +212,7 @@ class WaterFacilityDamage(BaseAnalysis):
                 fragility_key = self.DEFAULT_EQ_FRAGILITY_KEY
 
             pga_fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"),
-                                                                  facilities,
-                                                                  fragility_key)
+                                                                         facilities, fragility_key)
 
             liq_fragility_set = []
             if use_liquefaction and liq_geology_dataset_id is not None:
@@ -221,8 +220,8 @@ class WaterFacilityDamage(BaseAnalysis):
                     "liquefaction_fragility_key")
                 if liq_fragility_key is None:
                     liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-                liq_fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"),
-                                                                      facilities, liq_fragility_key)
+                liq_fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset(
+                    "dfr3_mapping_set"), facilities, liq_fragility_key)
 
             for facility in facilities:
                 fragility = pga_fragility_set[facility["id"]]
@@ -267,7 +266,8 @@ class WaterFacilityDamage(BaseAnalysis):
             fragility(obj): A JSON description of fragility mapped to the building.
             liq_fragility(obj): A JSON description of liquefaction fragility mapped to the building.
             hazard_dataset_id(str): Hazard id from the hazard service
-            liq_geology_dataset_id(str): Geology dataset id from data service to use for liquefaction calculation, if applicable
+            liq_geology_dataset_id(str): Geology dataset id from data service to use for liquefaction calculation, if
+            applicable
             uncertainty(bool): Whether to use hazard standard deviation values for uncertainity
 
         Returns:
