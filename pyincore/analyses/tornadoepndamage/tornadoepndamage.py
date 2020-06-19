@@ -151,26 +151,18 @@ class TornadoEpnDamage(BaseAnalysis):
         for node_feature in node_dataset:
             # get guid colum
             guid_fld_val = ''
-            try:
+            if self.guid_fldname.lower() in node_feature['properties']:
                 guid_fld_val = node_feature['properties'][self.guid_fldname.lower()]
-            except:
-                pass
-            try:
+            elif self.guid_fldname in node_feature['properties']:
                 guid_fld_val = node_feature['properties'][self.guid_fldname]
-            except:
-                pass
             guid_list.append(guid_fld_val)
 
             # get nodenwid colum
             nodenwid_fld_val = ''
-            try:
+            if self.nodenwid_fld_name.lower() in node_feature['properties']:
                 nodenwid_fld_val = int(node_feature['properties'][self.nodenwid_fld_name.lower()])
-            except:
-                pass
-            try:
+            elif self.nodenwid_fld_name in node_feature['properties']:
                 nodenwid_fld_val = int(node_feature['properties'][self.nodenwid_fld_name])
-            except:
-                pass
             nodenwid_list.append(nodenwid_fld_val)
 
         for z in range(self.nmcs):
@@ -191,30 +183,20 @@ class TornadoEpnDamage(BaseAnalysis):
                 linetype_val = ""
                 windspeed = 0  # random wind speed in EF
 
-                try:
+                if self.tonode_fld_name.lower() in line_feature['properties']:
                     to_node_val = line_feature['properties'][self.tonode_fld_name.lower()]
-                except:
-                    pass
-                try:
+                elif self.tonode_fld_name in line_feature['properties']:
                     to_node_val = line_feature['properties'][self.tonode_fld_name]
-                except:
-                    pass
-                try:
+
+                if self.fromnode_fld_name in line_feature['properties']:
                     from_node_val = line_feature['properties'][self.fromnode_fld_name]
-                except:
-                    pass
-                try:
+                elif self.fromnode_fld_name.lower() in line_feature['properties']:
                     from_node_val = line_feature['properties'][self.fromnode_fld_name.lower()]
-                except:
-                    pass
-                try:
+
+                if self.linetype_fld_name in line_feature['properties']:
                     linetype_val = line_feature['properties'][self.linetype_fld_name]
-                except:
-                    pass
-                try:
+                elif self.linetype_fld_name.lower() in line_feature['properties']:
                     linetype_val = line_feature['properties'][self.linetype_fld_name.lower()]
-                except:
-                    pass
 
                 line = shape(line_feature['geometry'])
 
@@ -227,22 +209,15 @@ class TornadoEpnDamage(BaseAnalysis):
                     ef_fld_val = ""
 
                     # get EF rating and simulation number column
-                    try:
+                    if self.tornado_sim_field_name.lower() in tornado_feature['properties']:
                         sim_fld_val = int(tornado_feature['properties'][self.tornado_sim_field_name.lower()])
-                    except:
-                        pass
-                    try:
+                    elif self.tornado_sim_field_name in tornado_feature['properties']:
                         sim_fld_val = int(tornado_feature['properties'][self.tornado_sim_field_name])
-                    except:
-                        pass
-                    try:
+
+                    if self.tornado_ef_field_name.lower() in tornado_feature['properties']:
                         ef_fld_val = tornado_feature['properties'][self.tornado_ef_field_name.lower()]
-                    except:
-                        pass
-                    try:
+                    elif self.tornado_ef_field_name in tornado_feature['properties']:
                         ef_fld_val = tornado_feature['properties'][self.tornado_ef_field_name]
-                    except:
-                        pass
 
                     if (sim_fld_val == "" or ef_fld_val == ""):
                         print("unable to convert tornado simulation field value to integer")
@@ -329,7 +304,7 @@ class TornadoEpnDamage(BaseAnalysis):
                                             repairtime_list.append(numpy.random.normal(tmu, tsigma))
 
                                     for k in range(ndamage):
-                                        repaircost =+ numpy.random.lognormal(mu, sigma)
+                                        repaircost += numpy.random.lognormal(mu, sigma)
 
                                     # max of the repair time among different poles is taken as the repair time for that line
                                     if len(repairtime_list) > 0:
@@ -425,22 +400,15 @@ class TornadoEpnDamage(BaseAnalysis):
 
         for ef_poly in tornado_dataset:
             ef_string = ''
-            try:
+            if self.tornado_sim_field_name.lower() in ef_poly['properties']:
                 sim_num_list.append(int(ef_poly['properties'][self.tornado_sim_field_name.lower()]))
-            except:
-                pass
-            try:
+            elif self.tornado_sim_field_name in ef_poly['properties']:
                 sim_num_list.append(int(ef_poly['properties'][self.tornado_sim_field_name]))
-            except:
-                pass
-            try:
+
+            if self.tornado_ef_field_name.lower() in ef_poly['properties']:
                 ef_string = ef_poly['properties'][self.tornado_ef_field_name.lower()]
-            except:
-                pass
-            try:
+            elif self.tornado_ef_field_name in ef_poly['properties']:
                 ef_string = ef_poly['properties'][self.tornado_ef_field_name]
-            except:
-                pass
             # parse the number in EF and the format should be "EF0", "EF1", or something like it
             ef_rate_list.append(int(ef_string.lower().split("ef", 1)[1]))
 
@@ -458,24 +426,16 @@ class TornadoEpnDamage(BaseAnalysis):
         for node_point in node_dataset:
             node_id = None
             indpnode_val = None
-            try:
+            if self.nodenwid_fld_name.lower() in node_point['properties']:
                 node_id = int(node_point['properties'][self.nodenwid_fld_name.lower()])
-            except:
-                pass
-            try:
+            elif self.nodenwid_fld_name in node_point['properties']:
                 node_id = int(node_point['properties'][self.nodenwid_fld_name])
-            except:
-                pass
 
             if self.use_indpnode == True:
-                try:
+                if self.indpnode_fld_name.lower() in node_point['properties']:
                     indpnode_val = int(node_point['properties'][self.indpnode_fld_name.lower()])
-                except:
-                    pass
-                try:
+                elif self.indpnode_fld_name in node_point['properties']:
                     indpnode_val = int(node_point['properties'][self.indpnode_fld_name])
-                except:
-                    pass
 
             if (node_id == None and indpnode_val == None):
                 print("problem getting the value")
