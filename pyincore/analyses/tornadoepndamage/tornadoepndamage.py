@@ -240,7 +240,7 @@ class TornadoEpnDamage(BaseAnalysis):
 
                         # compute the intersection between tornado polygon and line
                         if (sim_fld_val is z) and ef_fld_val.lower() is ef_content.lower():
-                            if (poly is None and line is not None):
+                            if (poly is not None and line is not None):
                                 if poly.intersects(line):
                                     intersection = poly.intersection(line)
                                     any_point = None
