@@ -1,4 +1,4 @@
-    # Copyright (c) 2019 University of Illinois and others. All rights reserved.
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
 #
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
@@ -7,6 +7,7 @@
 import math
 import collections
 from pyincore import AnalysisUtil
+
 
 class NonStructBuildingUtil:
     """Utility methods for the non-structural building damage analysis."""
@@ -44,18 +45,18 @@ class NonStructBuildingUtil:
             # last limit-state-probability, then we should use the
             # second-to-last probability of ground failure instead.
 
-            if i > len(ground_failure_probabilities) -1:
+            if i > len(ground_failure_probabilities) - 1:
                 prob_ground_failure = ground_failure_probabilities[len(ground_failure_probabilities)-2]
             else:
                 prob_ground_failure = ground_failure_probabilities[i]
 
             adjusted_limit_state_probabilities[keys[i]] = limit_state_probabilities[keys[i]] + prob_ground_failure \
-                                                - limit_state_probabilities[keys[i]] * prob_ground_failure
+                - limit_state_probabilities[keys[i]] * prob_ground_failure
 
         # the final one is the last of limitStates should match with the last of ground failures
         j = len(limit_state_probabilities) - 1
         prob_ground_failure = ground_failure_probabilities[-1]
         adjusted_limit_state_probabilities[keys[j]] = limit_state_probabilities[keys[j]] + prob_ground_failure \
-                                            - limit_state_probabilities[keys[j]] * prob_ground_failure
+            - limit_state_probabilities[keys[j]] * prob_ground_failure
 
         return adjusted_limit_state_probabilities
