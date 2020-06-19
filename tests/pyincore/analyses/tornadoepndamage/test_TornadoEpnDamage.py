@@ -1,16 +1,17 @@
 from pyincore.analyses.tornadoepndamage.tornadoepndamage import \
     TornadoEpnDamage
 from pyincore import IncoreClient
+from pyincore.globals import INCORE_API_DEV_URL
 
 
 def run_with_base_class():
-    client = IncoreClient()
+    client = IncoreClient(INCORE_API_DEV_URL)
 
     ted = TornadoEpnDamage(client)
 
     epn_node_id = '5b1fdb50b1cf3e336d7cecb1'
     epn_link_id = '5b1fdc2db1cf3e336d7cecc9'
-    tornado_id = '5d49dd3fb9219c0689f184c4'
+    tornado_id = '5c6323a0c11bb380daa9cbc1'
 
     ted.load_remote_input_dataset("epn_node", epn_node_id)
     ted.load_remote_input_dataset("epn_link", epn_link_id)
