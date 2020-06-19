@@ -1,10 +1,10 @@
-
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.nonstructbuildingdamage import NonStructBuildingDamage
+from pyincore.globals import INCORE_API_DEV_URL
 
 
 def run_with_base_class():
-    client = IncoreClient()
+    client = IncoreClient(INCORE_API_DEV_URL)
 
     # Memphis 7.9 AB-95
     hazard_type = "earthquake"
