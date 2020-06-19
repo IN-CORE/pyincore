@@ -1,5 +1,5 @@
 
-from pyincore import IncoreClient
+from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.nonstructbuildingdamage import NonStructBuildingDamage
 
 
@@ -21,12 +21,16 @@ def run_with_base_class():
     # Load input datasets
     non_structural_building_dmg.load_remote_input_dataset("buildings", building_dataset_id)
 
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    non_structural_building_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
     # Specify the result name
     result_name = "non_structural_building_dmg_result"
 
     # Set analysis parameters
     non_structural_building_dmg.set_parameter("result_name", result_name)
-    non_structural_building_dmg.set_parameter("mapping_id", mapping_id)
     non_structural_building_dmg.set_parameter("hazard_type", hazard_type)
     non_structural_building_dmg.set_parameter("hazard_id", hazard_id)
     non_structural_building_dmg.set_parameter("num_cpu", 4)
