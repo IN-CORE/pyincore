@@ -12,7 +12,7 @@ import networkx as nx
 import numpy
 from shapely.geometry import shape
 
-from pyincore import BaseAnalysis, HazardService, FragilityService, DataService
+from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, FragilityCurveSet
 from pyincore import GeoUtil, AnalysisUtil, NetworkUtil
 
 
@@ -104,10 +104,10 @@ class TornadoEpnDamage(BaseAnalysis):
         self.set_node_variables(node_dataset)
 
         # get fragility curves set - tower for transmission, pole for distribution
-        fragility_set_tower = self.fragilitysvc.get_dfr3_set(self.fragility_tower_id)
-        assert fragility_set_tower['id'] == self.fragility_tower_id
-        fragility_set_pole = self.fragilitysvc.get_dfr3_set(self.fragility_pole_id)
-        assert fragility_set_pole['id'] == self.fragility_pole_id
+        fragility_set_tower = FragilityCurveSet(self.fragilitysvc.get_dfr3_set(self.fragility_tower_id))
+        assert fragility_set_tower.id == self.fragility_tower_id
+        fragility_set_pole = FragilityCurveSet(self.fragilitysvc.get_dfr3_set(self.fragility_pole_id))
+        assert fragility_set_pole.id == self.fragility_pole_id
 
         # network test
         node_id_validation = NetworkUtil.validate_network_node_ids(node_dataset, link_dataset, self.fromnode_fld_name,
@@ -295,9 +295,9 @@ class TornadoEpnDamage(BaseAnalysis):
 
                                     # check if the line is tower or transmission
                                     if linetype_val.lower() == self.line_transmission:
-                                        resistivity_probability = AnalysisUtil.calculate_limit_state(fragility_set_tower, windspeed)
+                                        resistivity_probability = fragility_set_tower.calculate_limit_state(windspeed)
                                     else:
-                                        resistivity_probability = AnalysisUtil.calculate_limit_state(fragility_set_pole, windspeed)
+                                        resistivity_probability = fragility_set_pole.calculate_limit_state(windspeed)
 
                                     # randomly generated capacity of each poles ; 1 m/s is 2.23694 mph
                                     poleresist = resistivity_probability.get('failure') * 2.23694
