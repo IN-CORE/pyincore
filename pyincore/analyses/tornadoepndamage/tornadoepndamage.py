@@ -26,8 +26,8 @@ class TornadoEpnDamage(BaseAnalysis):
         self.fragility_tower_id = '5b201b41b1cf3e336de8fa67'
         self.fragility_pole_id = '5b201d91b1cf3e336de8fa68'
         self.fragility_mapping_id = '5b2bddcbd56d215b9b7471d8'
-
-        self.use_indpnode = False  # this is for deciding to use indpnode field. Not using this could be safer for general dataset
+        # this is for deciding to use indpnode field. Not using this could be safer for general dataset
+        self.use_indpnode = False
         self.nnode = 0
         self.highest_node_num = 0
         self.EF = 0
@@ -110,17 +110,17 @@ class TornadoEpnDamage(BaseAnalysis):
         assert fragility_set_pole['id'] == self.fragility_pole_id
 
         # network test
-        node_id_validation = NetworkUtil.validate_network_node_ids(node_dataset, link_dataset, self.fromnode_fld_name,
-                                                               self.tonode_fld_name, self.nodenwid_fld_name)
-        if node_id_validation == False:
+        node_id_validation = NetworkUtil.validate_network_node_ids(
+            node_dataset, link_dataset, self.fromnode_fld_name, self.tonode_fld_name, self.nodenwid_fld_name)
+        if node_id_validation is False:
             print("ID in from or to node field doesn't exist in the node dataset")
             os.exit(0)
 
         # getting network graph and node coordinates
         is_driected_graph = True
 
-        graph, node_coords = NetworkUtil.create_network_graph_from_field(link_dataset, self.fromnode_fld_name,
-                                                                     self.tonode_fld_name, is_driected_graph)
+        graph, node_coords = NetworkUtil.create_network_graph_from_field(
+            link_dataset, self.fromnode_fld_name, self.tonode_fld_name, is_driected_graph)
         # reverse the graph to acculate the damage to next to node
         graph = nx.DiGraph.reverse(graph, copy=True)
 
@@ -166,10 +166,10 @@ class TornadoEpnDamage(BaseAnalysis):
             nodenwid_list.append(nodenwid_fld_val)
 
         for z in range(self.nmcs):
-            nodedam = [0] * self.nnode    # placeholder for recording number of damaged pole for each node
-            noderepair = [0] * self.nnode # placeholder for recording repair cost for each node
-            poles2repair = [0] * self.nnode   # placeholder for recording total number of poles to repair
-            cost2repairpath = [0] * self.nnode    # placeholder for recording total repair cost for the network
+            nodedam = [0] * self.nnode  # placeholder for recording number of damaged pole for each node
+            noderepair = [0] * self.nnode  # placeholder for recording repair cost for each node
+            poles2repair = [0] * self.nnode  # placeholder for recording total number of poles to repair
+            cost2repairpath = [0] * self.nnode  # placeholder for recording total repair cost for the network
             time2repairpath = [0] * self.nnode  # placeholder for recording total repair time for the network
             nodetimerep = [0] * self.nnode
 
@@ -233,20 +233,20 @@ class TornadoEpnDamage(BaseAnalysis):
                         npoles = 0  # number of poles in tornado ef box
                         poleresist = 0  # pole's resistance value
                         # setting EF rate value string to match in the tornado dataset's attribute table
-                        ef_content = "EF" +  str(f)
+                        ef_content = "EF" + str(f)
 
                         # compute the intersections between link line and ef polygon
                         # also figure out the length of the line that ovelapped with EF box
 
                         # compute the intersection between tornado polygon and line
-                        if (sim_fld_val == z) and ef_fld_val.lower() == ef_content.lower():
-                            if (poly != None and line != None):
+                        if (sim_fld_val is z) and ef_fld_val.lower() is ef_content.lower():
+                            if (poly is None and line is not None):
                                 if poly.intersects(line):
                                     intersection = poly.intersection(line)
                                     any_point = None
                                     intersection_length = intersection.length
                                     if intersection.length > 0:
-                                        #print(intersection.__class__.__name__)
+                                        # print(intersection.__class__.__name__)
                                         # calculate the length of intersected line
                                         # since this is a geographic, it has to be projected to meters to be calcuated
                                         inter_length_meter = GeoUtil.calc_geog_distance_from_linestring(intersection)
@@ -258,21 +258,25 @@ class TornadoEpnDamage(BaseAnalysis):
                                         elif (intersection.__class__.__name__) == "LineString":
                                             intersection_list.append(intersection)
                                             any_point = intersection.centroid
-                                            # also, random point can be possible by changing the following lines value 0.5
+                                            # also, random point can be possible
+                                            # by changing the following lines value 0.5
                                             # any_point = intersection.interpolate(0.5, normalized=True)
-                                    if (any_point != None):
+                                    if (any_point is not None):
                                         # check if any_point is in the polygon
-                                        if (poly.contains(any_point) == False) :
+                                        if (poly.contains(any_point) is False):
                                             # this is very hardly happen but should be needed just in case
                                             any_point = poly.centroid
 
-                                    windspeed = self.hazardsvc.get_tornado_hazard_value(tornado_id, "mph", any_point.coords[0][1], any_point.coords[0][0], z)
+                                    windspeed = self.hazardsvc.get_tornado_hazard_value(
+                                        tornado_id, "mph", any_point.coords[0][1], any_point.coords[0][0], z)
 
                                     # check if the line is tower or transmission
                                     if linetype_val.lower() == self.line_transmission:
-                                        resistivity_probability = AnalysisUtil.calculate_limit_state(fragility_set_tower, windspeed)
+                                        resistivity_probability = \
+                                            AnalysisUtil.calculate_limit_state(fragility_set_tower, windspeed)
                                     else:
-                                        resistivity_probability = AnalysisUtil.calculate_limit_state(fragility_set_pole, windspeed)
+                                        resistivity_probability = \
+                                            AnalysisUtil.calculate_limit_state(fragility_set_pole, windspeed)
 
                                     # randomly generated capacity of each poles ; 1 m/s is 2.23694 mph
                                     poleresist = resistivity_probability.get('failure') * 2.23694
@@ -306,7 +310,8 @@ class TornadoEpnDamage(BaseAnalysis):
                                     for k in range(ndamage):
                                         repaircost += numpy.random.lognormal(mu, sigma)
 
-                                    # max of the repair time among different poles is taken as the repair time for that line
+                                    # max of the repair time among different poles is taken
+                                    # as the repair time for that line
                                     if len(repairtime_list) > 0:
                                         repairtime = max(repairtime_list)
                 noderepair[to_node_val - 1] = repaircost
@@ -317,18 +322,19 @@ class TornadoEpnDamage(BaseAnalysis):
             for i in range(len(first_node_list)):
                 for j in range(len(connection_list[i])):
                     # print(connection_list[i][j], first_node_list[i])
-                    pathij = list(nx.all_simple_paths(graph,connection_list[i][j], first_node_list[i]))
+                    pathij = list(nx.all_simple_paths(graph, connection_list[i][j], first_node_list[i]))
                     poler = 0
                     coster = 0
                     timer = []
                     # print(pathij)
                     if len(pathij) > 0:
                         for k in range(len(pathij)):
-                            for l in range(len(pathij[k])):
-                                poler = poler + nodedam[pathij[k][l]]
-                                coster = coster + noderepair[pathij[k][l]]
-                                # max of the time for different lines is taken as the repair time for that path.-- path is constituted of different lines.
-                                timer.append(nodetimerep[pathij[k][l]])
+                            for var1 in range(len(pathij[k])):
+                                poler = poler + nodedam[pathij[k][var1]]
+                                coster = coster + noderepair[pathij[k][var1]]
+                                # max of the time for different lines is taken as the repair time for that path.
+                                # -- path is constituted of different lines.
+                                timer.append(nodetimerep[pathij[k][var1]])
                     poles2repair[connection_list[i][j]] = poler
                     cost2repairpath[connection_list[i][j]] = coster
                     if (len(timer)) > 0:
@@ -419,7 +425,6 @@ class TornadoEpnDamage(BaseAnalysis):
         self.nmcs = max(sim_num_list) + 1
         self.tornado_ef_rate = max(ef_rate_list) + 1
 
-
     def set_node_variables(self, node_dataset):
         i = 0
 
@@ -431,17 +436,17 @@ class TornadoEpnDamage(BaseAnalysis):
             elif self.nodenwid_fld_name in node_point['properties']:
                 node_id = int(node_point['properties'][self.nodenwid_fld_name])
 
-            if self.use_indpnode == True:
+            if self.use_indpnode is True:
                 if self.indpnode_fld_name.lower() in node_point['properties']:
                     indpnode_val = int(node_point['properties'][self.indpnode_fld_name.lower()])
                 elif self.indpnode_fld_name in node_point['properties']:
                     indpnode_val = int(node_point['properties'][self.indpnode_fld_name])
 
-            if (node_id == None and indpnode_val == None):
+            if (node_id is None and indpnode_val is None):
                 print("problem getting the value")
                 sys.exit(1)
 
-            if self.use_indpnode == True:
+            if self.use_indpnode is True:
                 if indpnode_val > 0:
                     self.indpnode.append(node_id)
                 else:
