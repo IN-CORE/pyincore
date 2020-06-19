@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added pycodestyle tests to ensure we follow PEP-8 style guide [INCORE1-650](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-650)
 
+### Changed
+- refactoring nonstructural building damage analyses to use local dfr3 classes and methods; adding corresponding test
+ folder and tests [INCORE1-664](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-664) 
+ 
 ## [0.6.3] - 2020-05-31
 
 ### Added
