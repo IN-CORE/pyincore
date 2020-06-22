@@ -5,7 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 from logging import config as logging_config
-from pathlib import Path
 
 import logging
 import os
