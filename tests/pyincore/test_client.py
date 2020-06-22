@@ -6,6 +6,7 @@
 
 import pytest
 import requests
+import os
 from jose import jwt
 
 from pyincore import Client, IncoreClient, InsecureIncoreClient, DataService
@@ -16,7 +17,7 @@ def test_client_success(monkeypatch):
     testing successful login
     """
     try:
-        with open(".incorepw", 'r') as f:
+        with open(os.path.join(os.path.dirname(__file__), ".incorepw"), 'r') as f:
             cred = f.read().splitlines()
     except EnvironmentError:
         assert False
