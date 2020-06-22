@@ -1,0 +1,16 @@
+{
+  "name": "pytest - Centerville Tornado - hazard service test",
+  "description": "Centerville mean width tornado hazard",
+  "tornadoType": "model",
+  "tornadoModel" : "MeanWidthTornado",
+  "tornadoParameters" : {
+    "efRating" : "EF5",
+    "startLatitude" : "35.218",
+    "startLongitude" : "-97.510",
+    "randomSeed" : "1234",
+    "endLatitude" : [35.246],
+    "endLongitude" : [-97.438],
+    "windSpeedMethod" : "1",
+    "numSimulations" : "1"
+  }
+}
