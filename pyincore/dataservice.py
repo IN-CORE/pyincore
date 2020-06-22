@@ -238,6 +238,7 @@ class DataService:
         # close files
         for tuple in listfiles:
             tuple[1].close()
+
         return r.json()
 
     def delete_dataset(self, dataset_id: str):

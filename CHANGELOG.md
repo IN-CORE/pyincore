@@ -10,11 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added pycodestyle tests to ensure we follow PEP-8 style guide [INCORE1-650](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-650)
 
-
 ### Changed
-- refactoring bridge damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
+- Refactoring bridge damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
  tests [INCORE1-652](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-652) 
- 
+- Updated folder structure [INCORE1-655](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-655)
+
 ## [0.6.3] - 2020-05-31
 
 ### Added
