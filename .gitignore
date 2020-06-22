@@ -33,7 +33,6 @@ hs_err_pid*
 tests/pyincore/.incorepw
 
 # incore download data or test data
-tests/data/
 cache_data/
 original/
 
