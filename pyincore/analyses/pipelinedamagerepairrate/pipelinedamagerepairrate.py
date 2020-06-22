@@ -118,8 +118,8 @@ class PipelineDamageRepairRate(BaseAnalysis):
             self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
-        fragility_sets = self.fragilitysvc.match_inventory(
-            self.get_parameter("mapping_id"), pipelines, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory_object(
+            self.get_input_dataset("dfr3_mapping_set"), pipelines, fragility_key)
 
         # Get Liquefaction Fragility Key
         liquefaction_fragility_key = self.get_parameter(
@@ -137,8 +137,8 @@ class PipelineDamageRepairRate(BaseAnalysis):
         geology_dataset_id = self.get_parameter(
             "liquefaction_geology_dataset_id")
         if geology_dataset_id is not None:
-            fragility_sets_liq = self.fragilitysvc.match_inventory(
-                self.get_parameter("mapping_id"), pipelines,
+            fragility_sets_liq = self.fragilitysvc.match_inventory_object(
+                self.get_input_dataset("dfr3_mapping_set"), pipelines,
                 liquefaction_fragility_key)
 
         for pipeline in pipelines:
@@ -189,8 +189,8 @@ class PipelineDamageRepairRate(BaseAnalysis):
         liquefaction_prob = 0.0
 
         if fragility_set is not None:
-            demand_type = fragility_set['demandType'].lower()
-            demand_units = fragility_set['demandUnits']
+            demand_type = fragility_set.demand_type.lower()
+            demand_units = fragility_set.demand_units
             location = GeoUtil.get_location(pipeline)
             point = str(location.y) + "," + str(location.x)
 
@@ -216,19 +216,17 @@ class PipelineDamageRepairRate(BaseAnalysis):
 
             diameter = PipelineUtil.get_pipe_diameter(pipeline)
             fragility_vars = {'x': hazard_val, 'y': diameter}
-            pgv_repairs = AnalysisUtil.compute_custom_limit_state_probability(
-                fragility_set, fragility_vars)
-            fragility_curve = fragility_set['fragilityCurves'][0]
+            pgv_repairs = fragility_set.compute_custom_limit_state_probability(fragility_vars)
+            fragility_curve = fragility_set.fragility_curves[0]
 
             # Convert PGV repairs to SI units
             pgv_repairs = PipelineUtil.convert_result_unit(
-                fragility_curve['description'], pgv_repairs)
+                fragility_curve.description, pgv_repairs)
 
             if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
-                liq_fragility_curve = fragility_set_liq['fragilityCurves'][
-                    0]
-                liq_hazard_type = fragility_set_liq['demandType']
-                pgd_demand_units = fragility_set_liq['demandUnits']
+                liq_fragility_curve = fragility_set_liq.fragility_curves[0]
+                liq_hazard_type = fragility_set_liq.demand_type
+                pgd_demand_units = fragility_set_liq.demand_units
 
                 # Get PGD hazard value from hazard service
                 location_str = str(location.y) + "," + str(location.x)
@@ -240,12 +238,10 @@ class PipelineDamageRepairRate(BaseAnalysis):
 
                 liq_fragility_vars = {'x': liq_hazard_val,
                                       'y': liquefaction_prob}
-                pgd_repairs = AnalysisUtil.compute_custom_limit_state_probability(
-                    fragility_set_liq,
-                    liq_fragility_vars)
+                pgd_repairs = fragility_set_liq.compute_custom_limit_state_probability(liq_fragility_vars)
                 # Convert PGD repairs to SI units
                 pgd_repairs = PipelineUtil.convert_result_unit(
-                    liq_fragility_curve['description'], pgd_repairs)
+                    liq_fragility_curve.description, pgd_repairs)
 
             total_repair_rate = pgd_repairs + pgv_repairs
             break_rate = 0.2 * pgv_repairs + 0.8 * pgd_repairs
@@ -304,12 +300,6 @@ class PipelineDamageRepairRate(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
-                    'type': str
-                },
-                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard Type (e.g. earthquake)',
@@ -358,6 +348,12 @@ class PipelineDamageRepairRate(BaseAnalysis):
                     'required': True,
                     'description': 'Pipeline Inventory',
                     'type': ['ergo:buriedPipelineTopology', 'ergo:pipeline'],
+                },
+                {
+                    'id': 'dfr3_mapping_set',
+                    'required': True,
+                    'description': 'DFR3 Mapping Set Object',
+                    'type': ['incore:dfr3MappingSet'],
                 }
             ],
             'output_datasets': [

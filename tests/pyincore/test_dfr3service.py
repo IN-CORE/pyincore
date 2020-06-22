@@ -12,7 +12,7 @@ import pytest
 from jose import jwt
 
 from pyincore import FragilityService, RepairService, IncoreClient
-from pyincore.mappingset import MappingSet
+from pyincore.models.mappingset import MappingSet
 from pyincore import globals as pyglobals
 from pyincore.globals import LOGGER
 
