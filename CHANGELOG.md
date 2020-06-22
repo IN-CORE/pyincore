@@ -12,8 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Refactoring pipeline damage with repair rate analyses to use local dfr3 classes and methods; adding corresponding
- test folder and
- tests [INCORE1-666](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-666) 
+ test folder and tests [INCORE1-666](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-666) 
 - Updated folder structure [INCORE1-655](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-655)
 
 ## [0.6.3] - 2020-05-31
