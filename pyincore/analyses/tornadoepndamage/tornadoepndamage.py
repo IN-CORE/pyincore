@@ -188,11 +188,6 @@ class TornadoEpnDamage(BaseAnalysis):
                 elif self.tonode_fld_name in line_feature['properties']:
                     to_node_val = line_feature['properties'][self.tonode_fld_name]
 
-                if self.fromnode_fld_name in line_feature['properties']:
-                    from_node_val = line_feature['properties'][self.fromnode_fld_name]
-                elif self.fromnode_fld_name.lower() in line_feature['properties']:
-                    from_node_val = line_feature['properties'][self.fromnode_fld_name.lower()]
-
                 if self.linetype_fld_name in line_feature['properties']:
                     linetype_val = line_feature['properties'][self.linetype_fld_name]
                 elif self.linetype_fld_name.lower() in line_feature['properties']:
