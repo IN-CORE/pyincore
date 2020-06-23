@@ -4,8 +4,6 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import csv
-
 
 class BridgeUtil:
     """Utility methods for the bridge damage analysis."""
