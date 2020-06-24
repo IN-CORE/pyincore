@@ -13,13 +13,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Refactoring pipeline damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
  tests [INCORE1-665](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-665) 
+- Refactoring tornado epn damage analyses to use local dfr3 classes and methods; adding corresponding test
+ folder and tests [INCORE1-667](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-667) 
 - Refactoring nonstructural building damage analyses to use local dfr3 classes and methods; adding corresponding
  test folder and tests [INCORE1-664](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-664) 
 - Refactoring bridge damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
  tests [INCORE1-652](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-652) 
 - Refactoring building damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
  tests [INCORE1-644](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-644) 
->>>>>>> develop
 - Updated folder structure [INCORE1-655](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-655)
 - Refactoring Tornado EPN damage format. [INCORE1-672](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-672)
 
