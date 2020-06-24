@@ -4,15 +4,17 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import pycodestyle
-import pytest
+import os
+from pyincore.globals import PYINCORE_ROOT_FOLDER
+
 
 paths = [
-    '../pyincore/analyses/buildingdamage/',
-    '../tests/pyincore/analyses/buildingdamage/',
-    '../pyincore/analyses/bridgedamage/',
-    '../tests/pyincore/analyses/bridgedamage/',
-    '../pyincore/analyses/tornadoepndamage/',
-    '../tests/pyincore/analyses/tornadoepndamage/'
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/buildingdamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/buildingdamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/bridgedamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/bridgedamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/tornadoepndamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/tornadoepndamage/')
 ]
 
 def test_conformance(paths=paths):
