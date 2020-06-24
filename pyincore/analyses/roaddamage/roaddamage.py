@@ -302,7 +302,7 @@ class RoadDamage(BaseAnalysis):
                     'id': 'roads',
                     'required': True,
                     'description': 'Road Inventory',
-                    'type': ['ergo:roadLinkTopo','incore:roads']
+                    'type': ['ergo:roadLinkTopo', 'incore:roads']
                 },
                 {
                     'id': 'dfr3_mapping_set',
