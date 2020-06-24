@@ -265,10 +265,11 @@ class WaterFacilityDamage(BaseAnalysis):
             facility (obj): A JSON mapping of a facility based on mapping attributes
             fragility (obj): A JSON description of fragility mapped to the building.
             liq_fragility (obj): A JSON description of liquefaction fragility mapped to the building.
+            hazard_type (str): A string that indicates the hazard type
             hazard_dataset_id (str): Hazard id from the hazard service
             liq_geology_dataset_id (str): Geology dataset id from data service to use for liquefaction calculation, if
-            applicable
-            uncertainty (bool): Whether to use hazard standard deviation values for uncertainity
+                applicable
+            uncertainty (bool): Whether to use hazard standard deviation values for uncertainty
 
         Returns:
             OrderedDict: A dictionary with water facility damage values and other data/metadata.
