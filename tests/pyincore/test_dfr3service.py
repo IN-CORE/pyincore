@@ -6,6 +6,7 @@
 
 import ast
 import json
+import os
 
 import pytest
 from jose import jwt
@@ -21,7 +22,7 @@ logger = LOGGER
 @pytest.fixture
 def fragilitysvc(monkeypatch):
     try:
-        with open(".incorepw", 'r') as f:
+        with open(os.path.join(os.path.dirname(__file__), ".incorepw"), 'r') as f:
             cred = f.read().splitlines()
     except EnvironmentError:
         assert False
@@ -35,7 +36,7 @@ def fragilitysvc(monkeypatch):
 @pytest.fixture
 def repairsvc(monkeypatch):
     try:
-        with open(".incorepw", 'r') as f:
+        with open(os.path.join(os.path.dirname(__file__), ".incorepw"), 'r') as f:
             cred = f.read().splitlines()
     except EnvironmentError:
         assert False
@@ -68,7 +69,7 @@ def test_search_fragility_sets(fragilitysvc):
 
 def test_match_fragilities_single_inventory(fragilitysvc):
     inventory = {}
-    with open("single_inventory.json", 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "single_inventory.json"), 'r') as file:
         inventory = ast.literal_eval(file.read())
     mapping_id = '5b47b2d9337d4a36187c7564'
     key = "High-Retrofit Drift-Sensitive Fragility ID Code"
@@ -79,7 +80,7 @@ def test_match_fragilities_single_inventory(fragilitysvc):
 
 def test_match_fragilities_object_single_inventory(fragilitysvc):
     inventory = {}
-    with open("single_inventory.json", 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "single_inventory.json"), 'r') as file:
         inventory = ast.literal_eval(file.read())
     mapping_id = '5b47b2d9337d4a36187c7564'
     key = "High-Retrofit Drift-Sensitive Fragility ID Code"
@@ -91,7 +92,7 @@ def test_match_fragilities_object_single_inventory(fragilitysvc):
 
 def test_match_fragilities_multiple_inventory(fragilitysvc):
     inventories = []
-    with open("multiple_inventory.json", 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "multiple_inventory.json"), 'r') as file:
         inventories = ast.literal_eval(file.read())
     mapping_id = '5b47b350337d4a3629076f2c'
     key = "Non-Retrofit Fragility ID Code"
@@ -102,7 +103,7 @@ def test_match_fragilities_multiple_inventory(fragilitysvc):
 
 def test_match_fragilities_object_multiple_inventory(fragilitysvc):
     inventories = []
-    with open("multiple_inventory.json", 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "multiple_inventory.json"), 'r') as file:
         inventories = ast.literal_eval(file.read())
     mapping_id = '5b47b350337d4a3629076f2c'
     key = "Non-Retrofit Fragility ID Code"
@@ -125,7 +126,7 @@ def test_get_fragility_mapping(fragilitysvc):
 
 
 def test_create_fragility_set(fragilitysvc):
-    with open("fragilityset.json", 'r') as f:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "fragilityset.json"), 'r') as f:
         fragility_set = json.load(f)
     created = fragilitysvc.create_dfr3_set(fragility_set)
 
@@ -133,7 +134,7 @@ def test_create_fragility_set(fragilitysvc):
 
 
 def test_create_fragility_mapping(fragilitysvc):
-    with open("fragility_mappingset.json", 'r') as f:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "fragility_mappingset.json"), 'r') as f:
         mapping_set = json.load(f)
     created = fragilitysvc.create_mapping(mapping_set)
 
@@ -141,7 +142,7 @@ def test_create_fragility_mapping(fragilitysvc):
 
 
 def test_create_repair_set(repairsvc):
-    with open("repairset.json", 'r') as f:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "repairset.json"), 'r') as f:
         repair_set = json.load(f)
     created = repairsvc.create_dfr3_set(repair_set)
 
@@ -149,7 +150,7 @@ def test_create_repair_set(repairsvc):
 
 
 def test_create_repair_mapping(repairsvc):
-    with open("repair_mappingset.json", 'r') as f:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "repair_mappingset.json"), 'r') as f:
         mapping_set = json.load(f)
     created = repairsvc.create_mapping(mapping_set)
 

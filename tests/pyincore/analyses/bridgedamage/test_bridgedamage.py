@@ -1,9 +1,10 @@
-from pyincore import IncoreClient
+from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.bridgedamage import BridgeDamage
+from pyincore.globals import INCORE_API_DEV_URL
 
 
 def run_with_base_class():
-    client = IncoreClient()
+    client = IncoreClient(INCORE_API_DEV_URL)
 
     # New madrid earthquake using Atkinson Boore 1995
     hazard_type = "earthquake"
@@ -26,9 +27,13 @@ def run_with_base_class():
     # Load input datasets
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
 
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
     # Set analysis parameters
     bridge_dmg.set_parameter("result_name", "bridge_result")
-    bridge_dmg.set_parameter("mapping_id", mapping_id)
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("num_cpu", 4)
@@ -41,10 +46,10 @@ def run_with_base_class():
 
     # south carolina eq damage
     hazard_type = "earthquake"
-    hazard_id = "5e7e4c8ad7fb0a0008519364"
+    hazard_id = "5ee9309bc9f1b70008fdbd26"
 
-    # south carolina bridge
-    bridge_dataset_id = "5e7e5a29fb9f440008c94cbf"
+    # south carolina bridges
+    bridge_dataset_id = "5ee92f884210b80008f9377e"
 
     # Default Bridge Fragility Mapping on incore-service
     mapping_id = "5b47bcce337d4a37755e0cb2"
@@ -60,9 +65,13 @@ def run_with_base_class():
     # Load input datasets
     bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
 
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
     # Set analysis parameters
     bridge_dmg.set_parameter("result_name", "bridge_result_w_liquefaction")
-    bridge_dmg.set_parameter("mapping_id", mapping_id)
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("use_liquefaction", use_liquefaction)

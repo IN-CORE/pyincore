@@ -3,6 +3,7 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
+import os
 
 import numpy as np
 import pytest
@@ -15,7 +16,7 @@ from pyincore import HazardService, IncoreClient
 @pytest.fixture
 def hazardsvc(monkeypatch):
     try:
-        with open(".incorepw", 'r') as f:
+        with open(os.path.join(os.path.dirname(__file__), ".incorepw"), 'r') as f:
             cred = f.read().splitlines()
     except EnvironmentError:
         assert False
@@ -114,16 +115,17 @@ def test_create_earthquake(hazardsvc):
     Test creating both model and dataset based earthquakes
     """
     # Dataset Based Earthquake
-    with open("eq-dataset.json", 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset.json"), 'r') as file:
         eq_dataset_json = file.read()
 
-    file_paths = ["eq-dataset1.tif", "eq-dataset2.tif"]
+    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset1.tif")),
+                  str(os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset2.tif"))]
 
     dataset_response = hazardsvc.create_earthquake(eq_dataset_json, file_paths)
     assert dataset_response["id"] is not None and dataset_response["hazardDatasets"][1]["datasetId"] is not None
 
     # Model Based Earthquake without files
-    with open("eq-model.json", 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "eq-model.json"), 'r') as file:
         eqmodel_json = file.read()
 
     model_response = hazardsvc.create_earthquake(eqmodel_json)
@@ -167,7 +169,7 @@ def test_get_tornado_hazard_metadata(hazardsvc):
 
 
 def test_create_tornado_scenario(hazardsvc):
-    with open("tornado.json", 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "tornado.json"), 'r') as file:
         scenario = file.read()
     response = hazardsvc.create_tornado_scenario(scenario)
     assert response["id"] is not None
@@ -223,11 +225,12 @@ def test_get_tsunami_hazard_values(hazardsvc):
 
 
 def test_create_tsunami_hazard(hazardsvc):
-    with open("tsunami.json", 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "tsunami.json"), 'r') as file:
         tsunami_json = file.read()
 
-    file_paths = ["Tsu_100yr_Vmax.tif", "Tsu_100yr_Mmax.tif",
-                  "Tsu_100yr_Hmax.tif"]
+    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Vmax.tif")),
+                  str(os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Mmax.tif")),
+                  str(os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Hmax.tif"))]
     response = hazardsvc.create_tsunami_hazard(tsunami_json, file_paths)
     assert response["id"] is not None and response["hazardDatasets"][1][
         "datasetId"] is not None
@@ -235,7 +238,7 @@ def test_create_tsunami_hazard(hazardsvc):
 
 @pytest.mark.skip(reason="performance issues")
 def test_create_hurricane_windfield(hazardsvc):
-    with open("hurricanewf.json", 'r') as file:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "hurricanewf.json"), 'r') as file:
         hurr_wf_inputs = file.read()
 
     response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
