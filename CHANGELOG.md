@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added pycodestyle tests to ensure we follow PEP-8 style guide [INCORE1-650](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-650)
 
 ### Changed
-- Refactoring bridge damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
- tests [INCORE1-668](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-668) 
+- Refactoring water facility damage analyses to use local dfr3 classes and methods; adding corresponding test folder
+ and tests [INCORE1-668](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-668) 
 - Refactoring pipeline damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
  tests [INCORE1-665](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-665) 
 - Refactoring tornado epn damage analyses to use local dfr3 classes and methods; adding corresponding test folder
