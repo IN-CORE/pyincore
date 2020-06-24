@@ -157,7 +157,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         # Acceleration-Sensitive Fragility ID Code
         if fragility_set_as is not None:
-            hazard_demand_type_as = AnalysisUtil.get_hazard_demand_type_object(building, fragility_set_as,
+            hazard_demand_type_as = AnalysisUtil.get_hazard_demand_type(building, fragility_set_as,
                                                                                'earthquake')
             demand_units_as = fragility_set_as.demand_units
             location = GeoUtil.get_location(building)
@@ -198,7 +198,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         # Drift-Sensitive Fragility ID Code
         if fragility_set_ds is not None:
-            hazard_demand_type_ds = AnalysisUtil.get_hazard_demand_type_object(building, fragility_set_ds,
+            hazard_demand_type_ds = AnalysisUtil.get_hazard_demand_type(building, fragility_set_ds,
                                                                                'earthquake')
             demand_units_ds = fragility_set_ds.demand_units
             location = GeoUtil.get_location(building)
