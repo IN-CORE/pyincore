@@ -117,16 +117,16 @@ class TornadoEpnDamage(BaseAnalysis):
             os.exit(0)
 
         # getting network graph and node coordinates
-        is_driected_graph = True
+        is_directed_graph = True
 
         graph, node_coords = NetworkUtil.create_network_graph_from_field(
-            link_dataset, self.fromnode_fld_name, self.tonode_fld_name, is_driected_graph)
+            link_dataset, self.fromnode_fld_name, self.tonode_fld_name, is_directed_graph)
         # reverse the graph to acculate the damage to next to node
         graph = nx.DiGraph.reverse(graph, copy=True)
 
         # check the connection as a list
         connection_sets = []
-        if is_driected_graph:
+        if is_directed_graph:
             connection_sets = list(nx.weakly_connected_components(graph))
         else:
             connection_sets = list(nx.connected_components(graph))
