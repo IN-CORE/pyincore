@@ -36,4 +36,7 @@ LOGGING_CONFIG = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__
 logging_config.fileConfig(LOGGING_CONFIG)
 LOGGER = logging.getLogger('pyincore')
 
+TEST_DATA_DIR = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data")
+
 MAX_LOGIN_ATTEMPTS = 3
+
