@@ -44,12 +44,6 @@ class WaterFacilityDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
-                    'type': str
-                },
-                {
                     'id': 'hazard_type',
                     'required': True,
                     'description': 'Hazard Type (e.g. earthquake)',
@@ -107,6 +101,12 @@ class WaterFacilityDamage(BaseAnalysis):
                     'description': 'Water Facility Inventory',
                     'type': ['ergo:waterFacilityTopo'],
                 },
+                {
+                    'id': 'dfr3_mapping_set',
+                    'required': True,
+                    'description': 'DFR3 Mapping Set Object',
+                    'type': ['incore:dfr3MappingSet'],
+                }
             ],
             'output_datasets': [
                 {
@@ -172,7 +172,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
             Args:
                 function_name (function): The function to be parallelized.
-                parallelism (int): Number of workers in parallelization.
+                parallel_processes (int): Number of workers in parallelization.
                 *args: All the arguments in order to pass into parameter function_name.
 
             Returns:
@@ -192,8 +192,8 @@ class WaterFacilityDamage(BaseAnalysis):
         """Gets applicable fragilities and calculates damage
 
         Args:
-            facilities(list): Multiple water facilities from input inventory set.
-            hazard_type(str): A hazard type of the hazard exposure.
+            facilities (list): Multiple water facilities from input inventory set.
+            hazard_type (str): A hazard type of the hazard exposure.
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
@@ -201,7 +201,6 @@ class WaterFacilityDamage(BaseAnalysis):
         """
         result = []
         liq_fragility = None
-        mapping_id = self.get_parameter("mapping_id")
         use_liquefaction = self.get_parameter("use_liquefaction")
         liq_geology_dataset_id = self.get_parameter(
             "liquefaction_geology_dataset_id")
@@ -212,9 +211,8 @@ class WaterFacilityDamage(BaseAnalysis):
             if fragility_key is None:
                 fragility_key = self.DEFAULT_EQ_FRAGILITY_KEY
 
-            pga_fragility_set = self.fragilitysvc.match_inventory(mapping_id,
-                                                                  facilities,
-                                                                  fragility_key)
+            pga_fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"),
+                                                                         facilities, fragility_key)
 
             liq_fragility_set = []
             if use_liquefaction and liq_geology_dataset_id is not None:
@@ -222,8 +220,8 @@ class WaterFacilityDamage(BaseAnalysis):
                     "liquefaction_fragility_key")
                 if liq_fragility_key is None:
                     liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-                liq_fragility_set = self.fragilitysvc.match_inventory(
-                    mapping_id, facilities, liq_fragility_key)
+                liq_fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset(
+                    "dfr3_mapping_set"), facilities, liq_fragility_key)
 
             for facility in facilities:
                 fragility = pga_fragility_set[facility["id"]]
@@ -242,8 +240,8 @@ class WaterFacilityDamage(BaseAnalysis):
             if fragility_key is None:
                 fragility_key = self.DEFAULT_TSU_FRAGILITY_KEY
 
-            inundation_fragility_set = self.fragilitysvc.match_inventory(
-                mapping_id, facilities, fragility_key)
+            inundation_fragility_set = self.fragilitysvc.match_inventory_object(
+                self.get_input_dataset("dfr3_mapping_set"), facilities, fragility_key)
 
             for facility in facilities:
                 fragility = inundation_fragility_set[facility["id"]]
@@ -264,12 +262,14 @@ class WaterFacilityDamage(BaseAnalysis):
         """Computes damage analysis for a single facility
 
         Args:
-            facility(obj): A JSON mapping of a facility based on mapping attributes
-            fragility(obj): A JSON description of fragility mapped to the building.
-            liq_fragility(obj): A JSON description of liquefaction fragility mapped to the building.
-            hazard_dataset_id(str): Hazard id from the hazard service
-            liq_geology_dataset_id(str): Geology dataset id from data service to use for liquefaction calculation, if applicable
-            uncertainty(bool): Whether to use hazard standard deviation values for uncertainity
+            facility (obj): A JSON mapping of a facility based on mapping attributes
+            fragility (obj): A JSON description of fragility mapped to the building.
+            liq_fragility (obj): A JSON description of liquefaction fragility mapped to the building.
+            hazard_type (str): A string that indicates the hazard type
+            hazard_dataset_id (str): Hazard id from the hazard service
+            liq_geology_dataset_id (str): Geology dataset id from data service to use for liquefaction calculation, if
+                applicable
+            uncertainty (bool): Whether to use hazard standard deviation values for uncertainty
 
         Returns:
             OrderedDict: A dictionary with water facility damage values and other data/metadata.
@@ -278,8 +278,8 @@ class WaterFacilityDamage(BaseAnalysis):
         if uncertainty:
             std_dev = random.random()
 
-        hazard_demand_type = fragility['demandType']
-        demand_units = fragility['demandUnits']
+        hazard_demand_type = fragility.demand_type
+        demand_units = fragility.demand_units
         liq_hazard_type = ""
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
@@ -301,12 +301,11 @@ class WaterFacilityDamage(BaseAnalysis):
         if hazard_val < 0:
             hazard_val = 0
 
-        limit_states = AnalysisUtil.calculate_limit_state(fragility,
-                                                          hazard_val, std_dev)
+        limit_states = fragility.calculate_limit_state(hazard_val, std_dev)
 
         if liq_fragility is not None and liq_geology_dataset_id:
-            liq_hazard_type = liq_fragility['demandType']
-            pgd_demand_units = liq_fragility['demandUnits']
+            liq_hazard_type = liq_fragility.demand_type
+            pgd_demand_units = liq_fragility.demand_units
             point = str(location.y) + "," + str(location.x)
 
             liquefaction = self.hazardsvc.get_liquefaction_values(
@@ -314,8 +313,7 @@ class WaterFacilityDamage(BaseAnalysis):
                 pgd_demand_units, [point])
             liq_hazard_val = liquefaction[0][liq_hazard_type]
             liquefaction_prob = liquefaction[0]['liqProbability']
-            pgd_limit_states = AnalysisUtil.calculate_limit_state(
-                liq_fragility, liq_hazard_val, std_dev)
+            pgd_limit_states = liq_fragility.calculate_limit_state(liq_hazard_val, std_dev)
 
             limit_states = AnalysisUtil.adjust_limit_states_for_pgd(
                 limit_states, pgd_limit_states)

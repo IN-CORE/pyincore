@@ -15,11 +15,9 @@ class PipelineUtil:
     @staticmethod
     def convert_result_unit(result_unit: str, result: float):
         """Convert values between different units.
-        
         Args:
             result_unit (str): Resulting unit.
             result (float): Input value.
-        
         Returns:
             float: Converted value.
 
@@ -30,8 +28,8 @@ class PipelineUtil:
         elif result_unit.lower() == "repairs/1000ft":
             return result / 0.3048
 
-        print("Result type was not found so we didn't change it.  For pipes, all results should convert from their unit \
-              type into Repairs per Kilometer for uniform results.  We found a result type of " + result_unit)
+        print("Result type was not found so we didn't change it.  For pipes, all results should convert from their "
+              "unit type into Repairs per Kilometer for uniform results.  We found a result type of " + result_unit)
         return result
 
     @staticmethod
