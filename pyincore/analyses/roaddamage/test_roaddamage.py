@@ -1,4 +1,4 @@
-from pyincore import IncoreClient
+from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.roaddamage import RoadDamage
 
 
@@ -38,8 +38,12 @@ def run_with_base_class():
     road_dmg = RoadDamage(client)
     road_dmg.load_remote_input_dataset("roads", road_dataset_id)
 
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    road_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
     road_dmg.set_parameter("result_name", "seaside_road_dmg_" + hazard_type)
-    road_dmg.set_parameter("mapping_id", mapping_id)
     road_dmg.set_parameter("hazard_type", hazard_type)
     road_dmg.set_parameter("hazard_id", hazard_id)
     if fragility_key is not None:
