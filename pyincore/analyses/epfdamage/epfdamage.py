@@ -106,7 +106,7 @@ class EpfDamage(BaseAnalysis):
 
         Args:
             epfs (list): Multiple epfs from input inventory set.
-            hazard_type (str): A tyoe of hazard exposure (earthquake etc.).
+            hazard_type (str): A type of hazard exposure (earthquake etc.).
             hazard_dataset_id (str): An id of the hazard exposure.
             use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty when computing damage,
                 False otherwise.
@@ -240,7 +240,7 @@ class EpfDamage(BaseAnalysis):
                                                                                         std_dev=std_dev)
 
                         # match id and add liqhaztype, liqhazval, liqprobability field as well as rewrite limit
-                        # statess and dmg_interval
+                        # states and dmg_interval
                         for epf_result in epf_results:
                             if epf_result['guid'] == epfs[liq_epf_id]['guid']:
                                 limit_states = {"ls-slight": epf_result['ls-slight'],
