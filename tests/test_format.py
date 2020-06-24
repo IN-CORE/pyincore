@@ -4,11 +4,29 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import pycodestyle
-import pytest
+import os
+from pyincore.globals import PYINCORE_ROOT_FOLDER
 
 
-@pytest.mark.skip(reason="Need to fix errors beforehand.")
-def test_conformance(paths=['../pyincore/', './']):
+paths = [
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/buildingdamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/buildingdamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/bridgedamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/bridgedamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/roaddamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/roaddamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/tornadoepndamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/tornadoepndamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/nonstructbuildingdamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/nonstructbuildingdamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/pipelinedamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/pipelinedamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/waterfacilitydamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/waterfacilitydamage/')
+]
+
+
+def test_conformance(paths=paths):
     """Test that pyIncore conforms to PEP-8."""
     style = pycodestyle.StyleGuide(quiet=False, max_line_length=120)
     result = style.check_files(paths)
