@@ -123,7 +123,7 @@ class RoadDamage(BaseAnalysis):
 
         """
         road_results = []
-        fragility_sets = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"), roads,
+        fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), roads,
                                                                   fragility_key)
 
         list_roads = roads
@@ -135,7 +135,7 @@ class RoadDamage(BaseAnalysis):
         del list_roads
 
         processed_roads = []
-        grouped_roads = AnalysisUtil.group_by_demand_type_object(roads, fragility_sets)
+        grouped_roads = AnalysisUtil.group_by_demand_type(roads, fragility_sets)
         for demand, grouped_road_items in grouped_roads.items():
             input_demand_type = demand[0]
             input_demand_units = demand[1]

@@ -105,10 +105,10 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         """
         result = []
-        fragility_sets_as = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"),
+        fragility_sets_as = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"),
                                                                      buildings,
                                                                      self.get_parameter("fragility_key_as"))
-        fragility_sets_ds = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"),
+        fragility_sets_ds = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"),
                                                                      buildings,
                                                                      self.get_parameter("fragility_key_ds"))
 
