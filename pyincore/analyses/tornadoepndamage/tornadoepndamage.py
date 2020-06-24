@@ -13,7 +13,7 @@ import numpy
 from shapely.geometry import shape
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, FragilityCurveSet
-from pyincore import GeoUtil, AnalysisUtil, NetworkUtil
+from pyincore import GeoUtil, NetworkUtil
 
 
 class TornadoEpnDamage(BaseAnalysis):
@@ -216,7 +216,7 @@ class TornadoEpnDamage(BaseAnalysis):
                     elif self.tornado_ef_field_name in tornado_feature['properties']:
                         ef_fld_val = tornado_feature['properties'][self.tornado_ef_field_name]
 
-                    if (sim_fld_val == "" or ef_fld_val == ""):
+                    if sim_fld_val == "" or ef_fld_val == "":
                         print("unable to convert tornado simulation field value to integer")
                         sys.exit(0)
 
