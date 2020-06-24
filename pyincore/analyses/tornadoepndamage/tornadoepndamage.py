@@ -181,7 +181,6 @@ class TornadoEpnDamage(BaseAnalysis):
                 repaircost = 0  # repair cost value
                 repairtime = 0  # repair time value
                 to_node_val = ""
-                from_node_val = ""
                 linetype_val = ""
                 windspeed = 0  # random wind speed in EF
 
@@ -236,8 +235,8 @@ class TornadoEpnDamage(BaseAnalysis):
                         # also figure out the length of the line that ovelapped with EF box
 
                         # compute the intersection between tornado polygon and line
-                        if (sim_fld_val == z) and ef_fld_val.lower() == ef_content.lower():
-                            if (poly is not None and line is not None):
+                        if sim_fld_val == z and ef_fld_val.lower() == ef_content.lower():
+                            if poly is not None and line is not None:
                                 if poly.intersects(line):
                                     intersection = poly.intersection(line)
                                     any_point = None
@@ -247,12 +246,12 @@ class TornadoEpnDamage(BaseAnalysis):
                                         # calculate the length of intersected line
                                         # since this is a geographic, it has to be projected to meters to be calcuated
                                         inter_length_meter = GeoUtil.calc_geog_distance_from_linestring(intersection)
-                                        if(intersection.__class__.__name__) == "MultiLineString":
+                                        if intersection.__class__.__name__ == "MultiLineString":
                                             intersection_list.append(intersection)
                                             for inter_line in intersection:
                                                 any_point = inter_line.centroid
                                                 break
-                                        elif (intersection.__class__.__name__) == "LineString":
+                                        elif intersection.__class__.__name__ == "LineString":
                                             intersection_list.append(intersection)
                                             any_point = intersection.centroid
 
@@ -260,9 +259,9 @@ class TornadoEpnDamage(BaseAnalysis):
                                             # by changing the following lines value 0.5
                                             # any_point = intersection.interpolate(0.5, normalized=True)
 
-                                    if (any_point is not None):
+                                    if any_point is not None:
                                         # check if any_point is in the polygon
-                                        if (poly.contains(any_point) is False):
+                                        if poly.contains(any_point) is False:
                                             # this is very hardly happen but should be needed just in case
                                             any_point = poly.centroid
 
@@ -336,7 +335,7 @@ class TornadoEpnDamage(BaseAnalysis):
                                 timer.append(nodetimerep[pathij[k][var1]])
                     poles2repair[connection_list[i][j]] = poler
                     cost2repairpath[connection_list[i][j]] = coster
-                    if (len(timer)) > 0:
+                    if len(timer) > 0:
                         time2repairpath[connection_list[i][j]] = max(timer)
                     else:
                         time2repairpath[connection_list[i][j]] = 0
@@ -417,7 +416,7 @@ class TornadoEpnDamage(BaseAnalysis):
             # parse the number in EF and the format should be "EF0", "EF1", or something like it
             ef_rate_list.append(int(ef_string.lower().split("ef", 1)[1]))
 
-        if (len(sim_num_list) == 0 or len(ef_string) == 0):
+        if len(sim_num_list) == 0 or len(ef_string) == 0:
             print("Could not convert tornado simulation value")
             sys.exit(0)
 
@@ -441,7 +440,7 @@ class TornadoEpnDamage(BaseAnalysis):
                 elif self.indpnode_fld_name in node_point['properties']:
                     indpnode_val = int(node_point['properties'][self.indpnode_fld_name])
 
-            if (node_id is None and indpnode_val is None):
+            if node_id is None and indpnode_val is None:
                 print("problem getting the value")
                 sys.exit(1)
 
