@@ -172,7 +172,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
             Args:
                 function_name (function): The function to be parallelized.
-                parallelism (int): Number of workers in parallelization.
+                parallel_processes (int): Number of workers in parallelization.
                 *args: All the arguments in order to pass into parameter function_name.
 
             Returns:
