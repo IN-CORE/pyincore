@@ -136,7 +136,6 @@ class PipelineDamage(BaseAnalysis):
             OrderedDict: A dictionary with pipeline damage values and other data/metadata.
         """
 
-        pipeline_results = collections.OrderedDict()
         hazard_val = 0.0
         demand_type = ""
         limit_states = {"ls-slight": 0.0, "ls-moderat": 0.0,
