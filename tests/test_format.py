@@ -6,9 +6,17 @@
 import pycodestyle
 import pytest
 
+paths = [
+    '../pyincore/analyses/buildingdamage/',
+    '../tests/pyincore/analyses/buildingdamage/',
+    '../pyincore/analyses/bridgedamage/',
+    '../tests/pyincore/analyses/bridgedamage/',
+    '../pyincore/analyses/nonstructbuildingdamage/',
+    '../tests/pyincore/analyses/nonstructbuildingdamage/'
+]
 
-@pytest.mark.skip(reason="Need to fix errors beforehand.")
-def test_conformance(paths=['../pyincore/', './']):
+
+def test_conformance(paths=paths):
     """Test that pyIncore conforms to PEP-8."""
     style = pycodestyle.StyleGuide(quiet=False, max_line_length=120)
     result = style.check_files(paths)
