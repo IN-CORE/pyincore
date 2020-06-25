@@ -118,7 +118,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
             self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
-        fragility_sets = self.fragilitysvc.match_inventory_object(
+        fragility_sets = self.fragilitysvc.match_inventory(
             self.get_input_dataset("dfr3_mapping_set"), pipelines, fragility_key)
 
         # Get Liquefaction Fragility Key
@@ -137,7 +137,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
         geology_dataset_id = self.get_parameter(
             "liquefaction_geology_dataset_id")
         if geology_dataset_id is not None:
-            fragility_sets_liq = self.fragilitysvc.match_inventory_object(
+            fragility_sets_liq = self.fragilitysvc.match_inventory(
                 self.get_input_dataset("dfr3_mapping_set"), pipelines,
                 liquefaction_fragility_key)
 

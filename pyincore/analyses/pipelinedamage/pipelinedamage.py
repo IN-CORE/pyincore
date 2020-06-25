@@ -112,7 +112,7 @@ class PipelineDamage(BaseAnalysis):
             self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
-        fragility_sets = self.fragilitysvc.match_inventory_object(
+        fragility_sets = self.fragilitysvc.match_inventory(
             self.get_input_dataset("dfr3_mapping_set"), pipelines, fragility_key)
 
         for pipeline in pipelines:

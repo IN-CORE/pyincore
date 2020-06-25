@@ -12,9 +12,9 @@ import pytest
 from jose import jwt
 
 from pyincore import FragilityService, RepairService, IncoreClient
-from pyincore.models.mappingset import MappingSet
 from pyincore import globals as pyglobals
 from pyincore.globals import LOGGER
+from pyincore.models.mappingset import MappingSet
 
 logger = LOGGER
 
@@ -73,19 +73,8 @@ def test_match_fragilities_single_inventory(fragilitysvc):
         inventory = ast.literal_eval(file.read())
     mapping_id = '5b47b2d9337d4a36187c7564'
     key = "High-Retrofit Drift-Sensitive Fragility ID Code"
-    frag_set = fragilitysvc.match_inventory(mapping_id, [inventory], key)
-
-    assert inventory['id'] in frag_set.keys()
-
-
-def test_match_fragilities_object_single_inventory(fragilitysvc):
-    inventory = {}
-    with open(os.path.join(pyglobals.TEST_DATA_DIR, "single_inventory.json"), 'r') as file:
-        inventory = ast.literal_eval(file.read())
-    mapping_id = '5b47b2d9337d4a36187c7564'
-    key = "High-Retrofit Drift-Sensitive Fragility ID Code"
     mapping = MappingSet(fragilitysvc.get_mapping(mapping_id))
-    frag_set = fragilitysvc.match_inventory_object(mapping, [inventory], key)
+    frag_set = fragilitysvc.match_inventory(mapping, [inventory], key)
 
     assert inventory['id'] in frag_set.keys()
 
@@ -96,21 +85,11 @@ def test_match_fragilities_multiple_inventory(fragilitysvc):
         inventories = ast.literal_eval(file.read())
     mapping_id = '5b47b350337d4a3629076f2c'
     key = "Non-Retrofit Fragility ID Code"
-    frag_set = fragilitysvc.match_inventory(mapping_id, inventories, key)
-
-    assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
-
-
-def test_match_fragilities_object_multiple_inventory(fragilitysvc):
-    inventories = []
-    with open(os.path.join(pyglobals.TEST_DATA_DIR, "multiple_inventory.json"), 'r') as file:
-        inventories = ast.literal_eval(file.read())
-    mapping_id = '5b47b350337d4a3629076f2c'
-    key = "Non-Retrofit Fragility ID Code"
     mapping = MappingSet(fragilitysvc.get_mapping(mapping_id))
-    frag_set = fragilitysvc.match_inventory_object(mapping, inventories, key)
+    frag_set = fragilitysvc.match_inventory(mapping, inventories, key)
 
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
+
 
 def test_get_fragility_mappings(fragilitysvc):
     mappings = fragilitysvc.get_mappings(hazard_type="earthquake", creator="cwang138")

@@ -120,8 +120,8 @@ class BridgeDamage(BaseAnalysis):
             use_liquefaction = self.get_parameter("use_liquefaction")
 
         fragility_set = dict()
-        fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"),
-                                                                 bridges, fragility_key)
+        fragility_set = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), bridges,
+                                                          fragility_key)
 
         bridge_results = []
         list_bridges = bridges
@@ -133,7 +133,7 @@ class BridgeDamage(BaseAnalysis):
         list_bridges = None  # Clear as it's not needed anymore
 
         processed_bridges = []
-        grouped_bridges = AnalysisUtil.group_by_demand_type_object(bridges, fragility_set)
+        grouped_bridges = AnalysisUtil.group_by_demand_type(bridges, fragility_set)
 
         for demand, grouped_brs in grouped_bridges.items():
 

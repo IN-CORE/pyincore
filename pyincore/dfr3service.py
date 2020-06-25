@@ -63,14 +63,8 @@ class Dfr3Service:
 
         return r.json()
 
+
     def batch_get_dfr3_set(self, dfr3_id_lists: list):
-        batch_dfr3_sets = {}
-        for id in dfr3_id_lists:
-            batch_dfr3_sets[id] = self.get_dfr3_set(id)
-
-        return batch_dfr3_sets
-
-    def batch_get_dfr3_set_object(self, dfr3_id_lists: list):
         """
         this method is intended to replace batch_get_dfr3_set in the future
         It retrieve dfr3 sets from services using id and instantiate DFR3Curveset objects in bulk
@@ -122,42 +116,7 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set)
         return r.json()
 
-    def match_inventory(self, mapping_id: str, inventories: dict, entry_key: str):
-
-        # 1. download mapping
-        mapping = self.get_mapping(mapping_id)
-        dfr3_sets = {}
-
-        # 2. loop through inventory to match the rules
-        matched_curve_ids = []
-        for inventory in inventories:
-            if "occ_type" in inventory["properties"] and \
-                    inventory["properties"]["occ_type"] is None:
-                inventory["properties"]["occ_type"] = ""
-            if "efacility" in inventory["properties"] and \
-                    inventory["properties"]["efacility"] is None:
-                inventory["properties"]["efacility"] = ""
-
-            for m in mapping['mappings']:
-
-                if self._property_match(rules=m['rules'], properties=inventory["properties"]):
-                    curve_id = m['entry'][entry_key]
-                    dfr3_sets[inventory['id']] = curve_id
-                    if curve_id not in matched_curve_ids:
-                        matched_curve_ids.append(curve_id)
-
-                    # use the first match
-                    break
-
-        batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
-
-        # 3. replace the curve id in dfr3_sets to the actual content
-        for key, value in dfr3_sets.items():
-            dfr3_sets[key] = batch_dfr3_sets[value]
-
-        return dfr3_sets
-
-    def match_inventory_object(self, mapping:MappingSet, inventories: dict, entry_key: str):
+    def match_inventory(self, mapping:MappingSet, inventories: dict, entry_key: str):
         """
         This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
@@ -195,7 +154,7 @@ class Dfr3Service:
                     # use the first match
                     break
 
-        batch_dfr3_sets = self.batch_get_dfr3_set_object(matched_curve_ids)
+        batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
 
         # 3. replace the curve id in dfr3_sets to the dfr3 curve
         for inventory_id, curve_item in dfr3_sets.items():
