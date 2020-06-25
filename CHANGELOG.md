@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
  in local file path [INCORe1-662](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-662)
 
 ### Changed
+- Refactoring EPF damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
+ tests [INCORE1-663](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-663) 
 - Refactoring pipeline damage with repair rate analyses to use local dfr3 classes and methods; adding corresponding
  test folder and tests [INCORE1-666](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-666) 
 - Refactoring water facility damage analyses to use local dfr3 classes and methods; adding corresponding test folder

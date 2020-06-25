@@ -21,4 +21,3 @@ class EpfUtil:
         "EDC1", "Distribution Circuit (Seismic Components)",
         "EDC2", "Distribution Circuit (Standard Components)"
     }
-

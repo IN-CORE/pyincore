@@ -106,7 +106,7 @@ class EpfDamage(BaseAnalysis):
 
         Args:
             epfs (list): Multiple epfs from input inventory set.
-            hazard_type (str): A tyoe of hazard exposure (earthquake etc.).
+            hazard_type (str): A type of hazard exposure (earthquake etc.).
             hazard_dataset_id (str): An id of the hazard exposure.
             use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty when computing damage,
                 False otherwise.
@@ -121,10 +121,10 @@ class EpfDamage(BaseAnalysis):
         result = []
 
         fragility_key = self.get_parameter("fragility_key")
-        mapping_id = self.get_parameter("mapping_id")
 
         fragility_set = dict()
-        fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, fragility_key)
+        fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"), epfs,
+                                                                 fragility_key)
         epf_results = []
 
         # Converting list of epfs into a dictionary for ease of reference
@@ -135,7 +135,7 @@ class EpfDamage(BaseAnalysis):
         del list_epfs  # Clear as it's not needed anymore
 
         processed_epf = []
-        grouped_epfs = AnalysisUtil.group_by_demand_type(epfs, fragility_set)
+        grouped_epfs = AnalysisUtil.group_by_demand_type_object(epfs, fragility_set)
         for demand, grouped_epf_items in grouped_epfs.items():
             input_demand_type = demand[0]
             input_demand_units = demand[1]
@@ -184,8 +184,7 @@ class EpfDamage(BaseAnalysis):
                         raise ValueError("Uncertainty Not Implemented!")
 
                     selected_fragility_set = fragility_set[epf_id]
-                    limit_states = AnalysisUtil.calculate_limit_state(selected_fragility_set, hazard_val,
-                                                                      std_dev=std_dev)
+                    limit_states = selected_fragility_set.calculate_limit_state(hazard_val, std_dev=std_dev)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(limit_states)
 
                     epf_result['guid'] = epf['properties']['guid']
@@ -205,8 +204,9 @@ class EpfDamage(BaseAnalysis):
             liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
             if liq_fragility_key is None:
                 liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-            liq_fragility_set = self.fragilitysvc.match_inventory(mapping_id, epfs, liq_fragility_key)
-            grouped_liq_epfs = AnalysisUtil.group_by_demand_type(epfs, liq_fragility_set)
+            liq_fragility_set = self.fragilitysvc.match_inventory_object(self.get_input_dataset("dfr3_mapping_set"),
+                                                                         epfs, liq_fragility_key)
+            grouped_liq_epfs = AnalysisUtil.group_by_demand_type_object(epfs, liq_fragility_set)
 
             for liq_demand, grouped_liq_epf_items in grouped_liq_epfs.items():
                 liq_input_demand_type = liq_demand[0]
@@ -236,11 +236,11 @@ class EpfDamage(BaseAnalysis):
                         liquefaction_prob = liquefaction_vals[i]['liqProbability']
 
                         selected_liq_fragility = liq_fragility_set[liq_epf_id]
-                        pgd_limit_states = AnalysisUtil.calculate_limit_state(selected_liq_fragility, liq_hazard_val,
-                                                                              std_dev=std_dev)
+                        pgd_limit_states = selected_liq_fragility.calculate_limit_state(liq_hazard_val,
+                                                                                        std_dev=std_dev)
 
                         # match id and add liqhaztype, liqhazval, liqprobability field as well as rewrite limit
-                        # statess and dmg_interval
+                        # states and dmg_interval
                         for epf_result in epf_results:
                             if epf_result['guid'] == epfs[liq_epf_id]['guid']:
                                 limit_states = {"ls-slight": epf_result['ls-slight'],
@@ -291,12 +291,6 @@ class EpfDamage(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'A name of the resulting dataset',
-                    'type': str
-                },
-                {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset applicable to the EPF.',
                     'type': str
                 },
                 {
@@ -351,7 +345,12 @@ class EpfDamage(BaseAnalysis):
                     'description': 'Electric Power Facility Inventory',
                     'type': ['incore:epf', 'ergo:epf'],
                 },
-
+                {
+                    'id': 'dfr3_mapping_set',
+                    'required': True,
+                    'description': 'DFR3 Mapping Set Object',
+                    'type': ['incore:dfr3MappingSet'],
+                }
             ],
             'output_datasets': [
                 {
