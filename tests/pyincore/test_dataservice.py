@@ -211,6 +211,5 @@ def test_create_dataset_from_json_str(datasvc):
     with pytest.raises(Exception):
         Dataset.from_json_str(metadata_json_str)
 
-    assert Dataset.from_json_str(metadata_json_str, datasvc).local_file_path is not None
-
-
+    assert Dataset.from_json_str(metadata_json_str, data_service=datasvc).local_file_path is not None
+    assert Dataset.from_json_str(metadata_json_str, file_path="some_local_file_path").local_file_path is not None
