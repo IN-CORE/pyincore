@@ -105,12 +105,10 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         """
         result = []
-        fragility_sets_as = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"),
-                                                                     buildings,
-                                                                     self.get_parameter("fragility_key_as"))
-        fragility_sets_ds = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"),
-                                                                     buildings,
-                                                                     self.get_parameter("fragility_key_ds"))
+        fragility_sets_as = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
+                                                              self.get_parameter("fragility_key_as"))
+        fragility_sets_ds = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
+                                                              self.get_parameter("fragility_key_ds"))
 
         for building in buildings:
             fragility_set_as = None
@@ -157,8 +155,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         # Acceleration-Sensitive Fragility ID Code
         if fragility_set_as is not None:
-            hazard_demand_type_as = AnalysisUtil.get_hazard_demand_type(building, fragility_set_as,
-                                                                               'earthquake')
+            hazard_demand_type_as = AnalysisUtil.get_hazard_demand_type(building, fragility_set_as, 'earthquake')
             demand_units_as = fragility_set_as.demand_units
             location = GeoUtil.get_location(building)
 
@@ -198,8 +195,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         # Drift-Sensitive Fragility ID Code
         if fragility_set_ds is not None:
-            hazard_demand_type_ds = AnalysisUtil.get_hazard_demand_type(building, fragility_set_ds,
-                                                                               'earthquake')
+            hazard_demand_type_ds = AnalysisUtil.get_hazard_demand_type(building, fragility_set_ds, 'earthquake')
             demand_units_ds = fragility_set_ds.demand_units
             location = GeoUtil.get_location(building)
 

@@ -124,7 +124,7 @@ class EpfDamage(BaseAnalysis):
 
         fragility_set = dict()
         fragility_set = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), epfs,
-                                                                 fragility_key)
+                                                          fragility_key)
         epf_results = []
 
         # Converting list of epfs into a dictionary for ease of reference
@@ -204,8 +204,8 @@ class EpfDamage(BaseAnalysis):
             liq_fragility_key = self.get_parameter("liquefaction_fragility_key")
             if liq_fragility_key is None:
                 liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-            liq_fragility_set = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"),
-                                                                         epfs, liq_fragility_key)
+            liq_fragility_set = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), epfs,
+                                                                  liq_fragility_key)
             grouped_liq_epfs = AnalysisUtil.group_by_demand_type(epfs, liq_fragility_set)
 
             for liq_demand, grouped_liq_epf_items in grouped_liq_epfs.items():

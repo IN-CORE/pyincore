@@ -212,7 +212,7 @@ class WaterFacilityDamage(BaseAnalysis):
                 fragility_key = self.DEFAULT_EQ_FRAGILITY_KEY
 
             pga_fragility_set = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"),
-                                                                         facilities, fragility_key)
+                                                                  facilities, fragility_key)
 
             liq_fragility_set = []
             if use_liquefaction and liq_geology_dataset_id is not None:

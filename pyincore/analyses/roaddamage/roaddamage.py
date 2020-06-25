@@ -124,7 +124,7 @@ class RoadDamage(BaseAnalysis):
         """
         road_results = []
         fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), roads,
-                                                                  fragility_key)
+                                                           fragility_key)
 
         list_roads = roads
 
