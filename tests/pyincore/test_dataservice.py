@@ -203,3 +203,14 @@ def test_create_network_data(datasvc):
     with pytest.raises(FileNotFoundError):
         NetworkData(network_type="test-type", file_path="test-file")
 
+
+def test_create_dataset_from_json_str(datasvc):
+    with open(os.path.join(pyglobals.PYINCORE_ROOT_FOLDER, "tests/data/dataset_metadata.json"), 'r') as f:
+        metadata_json_str = f.read()
+
+    with pytest.raises(Exception):
+        Dataset.from_json_str(metadata_json_str)
+
+    assert Dataset.from_json_str(metadata_json_str, datasvc).local_file_path is not None
+
+

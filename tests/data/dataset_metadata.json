@@ -1,0 +1,53 @@
+{
+    "id": "5d25118eb9219c0692cd7527",
+    "description": "Seaside roads in wgs84 coordinates.",
+    "dataType": "incore:roads",
+    "format": "shapefile",
+    "fileDescriptors": [
+        {
+            "id": "5d25f647b9219c0692cf0ce7",
+            "deleted": false,
+            "filename": "Seaside_roads_links_wgs84.CPG",
+            "mimeType": "application/octet-stream",
+            "size": 5,
+            "dataURL": "5d/25/5d25f647b9219c0692cf0ce7/Seaside_roads_links_wgs84.CPG",
+            "md5sum": "ae3b3df9970b49b6523e608759bc957d"
+        },
+        {
+            "id": "5d25f925b9219c0692d12225",
+            "deleted": false,
+            "filename": "Seaside_roads_links_wgs84.dbf",
+            "mimeType": "application/octet-stream",
+            "size": 198637,
+            "dataURL": "5d/25/5d25f925b9219c0692d12225/Seaside_roads_links_wgs84.dbf",
+            "md5sum": "a1794ca599d2c62965e3a200f692e29d"
+        },
+        {
+            "id": "5d25f925b9219c0692d12228",
+            "deleted": false,
+            "filename": "Seaside_roads_links_wgs84.prj",
+            "mimeType": "application/octet-stream",
+            "size": 145,
+            "dataURL": "5d/25/5d25f925b9219c0692d12228/Seaside_roads_links_wgs84.prj",
+            "md5sum": "c742bee3d4edfc2948a2ad08de1790a5"
+        },
+        {
+            "id": "5d25f925b9219c0692d1222b",
+            "deleted": false,
+            "filename": "Seaside_roads_links_wgs84.shx",
+            "mimeType": "application/octet-stream",
+            "size": 4780,
+            "dataURL": "5d/25/5d25f925b9219c0692d1222b/Seaside_roads_links_wgs84.shx",
+            "md5sum": "b9ae7474f369a2259f580e0c27fdcdd8"
+        },
+        {
+            "id": "5d25f925b9219c0692d1222e",
+            "deleted": false,
+            "filename": "Seaside_roads_links_wgs84.shp",
+            "mimeType": "application/octet-stream",
+            "size": 53548,
+            "dataURL": "5d/25/5d25f925b9219c0692d1222e/Seaside_roads_links_wgs84.shp",
+            "md5sum": "f2ca7cd992936e972baaaeeab80ffcd4"
+        }
+    ]
+}
