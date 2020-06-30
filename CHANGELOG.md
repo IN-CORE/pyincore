@@ -16,26 +16,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Replace old analyses util methods with new methods that use DFR3 Classes [INCORE1-685](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-685)
-- Refactoring EPF damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
- tests [INCORE1-663](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-663) 
-- Refactoring pipeline damage with repair rate analyses to use local dfr3 classes and methods; adding corresponding
- test folder and tests [INCORE1-666](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-666) 
-- Refactoring water facility damage analyses to use local dfr3 classes and methods; adding corresponding test folder
- and tests [INCORE1-668](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-668) 
-- Refactoring pipeline damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
- tests [INCORE1-665](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-665) 
-- Refactoring tornado epn damage analyses to use local dfr3 classes and methods; adding corresponding test folder
- and tests [INCORE1-667](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-667) 
-- Refactoring road damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
- tests [INCORE1-680](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-680) 
-- Refactoring tornado epn damage analyses to use local dfr3 classes and methods; adding corresponding test
- folder and tests [INCORE1-667](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-667) 
-- Refactoring nonstructural building damage analyses to use local dfr3 classes and methods; adding corresponding
- test folder and tests [INCORE1-664](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-664) 
-- Refactoring bridge damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
- tests [INCORE1-652](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-652) 
-- Refactoring building damage analyses to use local dfr3 classes and methods; adding corresponding test folder and
- tests [INCORE1-644](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-644) 
+- Refactored the following analyses to use local DFR3 classes and methods; added corresponding test folder and tests.
+    * Building Damage [INCORE1-644](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-644)
+    * Nonstructural Building Damage [INCORE1-664](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-664)
+    * Bridge Damage [INCORE1-652](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-652)
+    * EPF Damage [INCORE1-663](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-663)
+    * Pipeline Damage with repair rate [INCORE1-666](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-666)
+    * Pipeline Damage with limit states [INCORE1-665](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-665)
+    * Water Facility Damage [INCORE1-668](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-668)
+    * Tornado EPN Damage [INCORE1-667](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-667)
+    * Road Damage [INCORE1-680](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-680)
 - Updated folder structure [INCORE1-655](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-655)
 - Refactoring Tornado EPN damage format. [INCORE1-672](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-672)
 
