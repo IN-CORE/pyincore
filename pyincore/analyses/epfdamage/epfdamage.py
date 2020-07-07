@@ -356,7 +356,7 @@ class EpfDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'epfs',
-                    'type': 'incore:epfVer1'
+                    'type': 'incore:epfDamage'
                 }
             ]
         }

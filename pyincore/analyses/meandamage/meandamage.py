@@ -59,7 +59,7 @@ class MeanDamage(BaseAnalysis):
                              'ergo:bridgeDamage',
                              'ergo:waterFacilityDamageVer4',
                              'ergo:roadDamage',
-                             'incore:epfVer1',
+                             'incore:epfDamage',
                              'incore:pipelineDamage',
                              'ergo:waterFacilityDamageVer4'],
                 },
