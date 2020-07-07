@@ -27,6 +27,8 @@ paths = [
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/pipelinedamagerepairrate/'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/epfdamage/'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/epfdamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/montecarlofailureprobability/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/montecarlofailureprobability/'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/dataset.py'),
 ]
 

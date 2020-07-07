@@ -7,9 +7,9 @@
 
 import collections
 import concurrent.futures
+import random
 
 from pyincore import BaseAnalysis, AnalysisUtil
-import random
 
 
 class MonteCarloFailureProbability(BaseAnalysis):
