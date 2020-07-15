@@ -11,8 +11,7 @@ import numpy as np
 from scipy.spatial import KDTree
 import sys
 import pyproj
-import networkx as nx
-import matplotlib.pyplot as plt
+import json
 
 from rtree import index
 from shapely.geometry import shape, Point
