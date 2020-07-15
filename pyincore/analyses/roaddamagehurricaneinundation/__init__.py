@@ -6,4 +6,3 @@
 
 
 from pyincore.analyses.roaddamagehurricaneinundation.roaddamagehurricaneinundation import RoadDamageHurricaneInundation
-from pyincore.analyses.roaddamagehurricaneinundation.roadutil import RoadUtil

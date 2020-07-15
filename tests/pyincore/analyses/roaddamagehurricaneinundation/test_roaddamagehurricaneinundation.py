@@ -8,19 +8,19 @@ from pyincore.analyses.roaddamagehurricaneinundation import RoadDamageHurricaneI
 from pyincore.globals import INCORE_API_DEV_URL
 
 
-def test_pipeline_dmg_w_repair_rate():
+def test_road_dmg_hurricane_inundation():
     client = IncoreClient(INCORE_API_DEV_URL)
 
-    # This is the Memphis Water Buried Pipeline with Topology dataset the Ergo repository
+    # This is the Galvestion Road for Island
     road_dataset_id = "5f0dd5ecb922f96f4e962caf"
-    # pipeline mapping
+    # road damage by hurricane inundation mapping
     mapping_id = "5f0cb04fe392b24d4800f316"
 
-    # New madrid earthquake using Atkinson Boore 1995
+    # TODO this has to be changed to real hurricane
     hazard_type = "hurricane"
     hazard_id = "5b902cb273c3371e1236b36b"
 
-    # Create pipeline damage
+    # Create road damage
     test_roaddamagehurricaneinundation = RoadDamageHurricaneInundation(client)
     # Load input datasets
     test_roaddamagehurricaneinundation.load_remote_input_dataset("roads", road_dataset_id)
@@ -34,16 +34,13 @@ def test_pipeline_dmg_w_repair_rate():
     test_roaddamagehurricaneinundation.set_parameter("result_name", result_name)
     test_roaddamagehurricaneinundation.set_parameter("hazard_type", hazard_type)
     test_roaddamagehurricaneinundation.set_parameter("hazard_id", hazard_id)
-    # test_roaddamagehurricaneinundation.set_parameter("liquefaction_fragility_key", "pgd")
-    # test_roaddamagehurricaneinundation.set_parameter("use_liquefaction", False)
     test_roaddamagehurricaneinundation.set_parameter("num_cpu", 4)
-    # test_roaddamagehurricaneinundation.set_parameter("liquefaction_geology_dataset_id",
-    #                                      liq_geology_dataset_id)
-    # Run pipeline damage analysis
+
+    # Run road damage by hurricane inundation analysis
     result = test_roaddamagehurricaneinundation.run_analysis()
 
     assert result is True
 
 
 if __name__ == "__main__":
-    test_pipeline_dmg_w_repair_rate()
+    test_road_dmg_hurricane_inundation()
