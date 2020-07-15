@@ -50,19 +50,19 @@ class BuildingFunctionality(BaseAnalysis):
                     'id': 'building_damage_mcs_samples',
                     'required': True,
                     'description': 'building damage samples',
-                    'type': ['incore:buildingDamageMcSamples'],
+                    'type': ['incore:sampleFailureState'],
                 },
                 {
                     'id': 'substations_damage_mcs_samples',
                     'required': True,
                     'description': 'substations damage samples',
-                    'type': ['incore:substationsDamageMcSamples'],
+                    'type': ['incore:sampleFailureState'],
                 },
                 {
                     'id': 'poles_damage_mcs_samples',
                     'required': True,
                     'description': 'poles damage samples',
-                    'type': ['incore:polesDamageMcSamples'],
+                    'type': ['incore:sampleFailureState'],
                 },
                 {
                     'id': 'interdependency_dictionary',
@@ -114,19 +114,19 @@ class BuildingFunctionality(BaseAnalysis):
         substations_mc_samples = substations.loc[substations["guid"] == interdependency[building]["substations_guid"]]
         poles_mc_samples = poles.loc[poles["guid"] == interdependency[building]["poles_guid"]]
         try:
-            buildings_list = list(building_mc_samples.iloc[0])[1:]
+            buildings_list = list(building_mc_samples.iloc[0])[1].split(",")
         except IndexError:
             print("error with buildings")
             print(building_mc_samples)
             return {building: -1}
         try:
-            substations_list = list(substations_mc_samples.iloc[0])[1:]
+            substations_list = list(substations_mc_samples.iloc[0])[1].split(",")
         except IndexError:
             print("error with substations")
             print(interdependency[building]["substations_guid"])
             return {building: -1}
         try:
-            poles_list = list(poles_mc_samples.iloc[0])[1:]
+            poles_list = list(poles_mc_samples.iloc[0])[1].split(",")
         except IndexError:
             print("error with poles")
             print(interdependency[building]["poles_guid"])
@@ -152,7 +152,7 @@ class BuildingFunctionality(BaseAnalysis):
         Returns: 1 if building is functional, 0 otherwise
 
         """
-        if building_sample == 1 and substation_sample == 1 and pole_sample == 1:
+        if building_sample == "1" and substation_sample == "1" and pole_sample == "1":
             return 1
         else:
             return 0
