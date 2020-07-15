@@ -4,9 +4,10 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import BaseAnalysis
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from pyincore import BaseAnalysis
 
 
 class BuildingFunctionality(BaseAnalysis):
@@ -113,7 +114,8 @@ class BuildingFunctionality(BaseAnalysis):
         # if building is defined in the interdependency lookup table
         if building in interdependency.keys():
             building_mc_samples = buildings.loc[buildings["guid"] == building]
-            substations_mc_samples = substations.loc[substations["guid"] == interdependency[building]["substations_guid"]]
+            substations_mc_samples = \
+                substations.loc[substations["guid"] == interdependency[building]["substations_guid"]]
             poles_mc_samples = poles.loc[poles["guid"] == interdependency[building]["poles_guid"]]
             try:
                 buildings_list = list(building_mc_samples.iloc[0])[1].split(",")
