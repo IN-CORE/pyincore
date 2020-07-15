@@ -110,36 +110,41 @@ class BuildingFunctionality(BaseAnalysis):
         Returns: probability [0,1] of building being functional
 
         """
-        building_mc_samples = buildings.loc[buildings["guid"] == building]
-        substations_mc_samples = substations.loc[substations["guid"] == interdependency[building]["substations_guid"]]
-        poles_mc_samples = poles.loc[poles["guid"] == interdependency[building]["poles_guid"]]
-        try:
-            buildings_list = list(building_mc_samples.iloc[0])[1].split(",")
-        except IndexError:
-            print("error with buildings")
-            print(building_mc_samples)
-            return {building: -1}
-        try:
-            substations_list = list(substations_mc_samples.iloc[0])[1].split(",")
-        except IndexError:
-            print("error with substations")
-            print(interdependency[building]["substations_guid"])
-            return {building: -1}
-        try:
-            poles_list = list(poles_mc_samples.iloc[0])[1].split(",")
-        except IndexError:
-            print("error with poles")
-            print(interdependency[building]["poles_guid"])
-            return {building: -1}
+        # if building is defined in the interdependency lookup table
+        if building in interdependency.keys():
+            building_mc_samples = buildings.loc[buildings["guid"] == building]
+            substations_mc_samples = substations.loc[substations["guid"] == interdependency[building]["substations_guid"]]
+            poles_mc_samples = poles.loc[poles["guid"] == interdependency[building]["poles_guid"]]
+            try:
+                buildings_list = list(building_mc_samples.iloc[0])[1].split(",")
+            except IndexError:
+                print("error with buildings")
+                print(building_mc_samples)
+                return {building: -1}
+            try:
+                substations_list = list(substations_mc_samples.iloc[0])[1].split(",")
+            except IndexError:
+                print("error with substations")
+                print(interdependency[building]["substations_guid"])
+                return {building: -1}
+            try:
+                poles_list = list(poles_mc_samples.iloc[0])[1].split(",")
+            except IndexError:
+                print("error with poles")
+                print(interdependency[building]["poles_guid"])
+                return {building: -1}
 
-        functionality_samples = [self.functionality_probability(building_sample, substation_sample, pole_sample)
-                                 for building_sample, substation_sample, pole_sample in
-                                 zip(buildings_list, substations_list, poles_list)]
-        functionality_sum = np.sum(functionality_samples)
-        probability = 0.0
-        if functionality_sum > 0:
-            probability = (functionality_sum/self.get_parameter("num_samples"))
-        return building, probability
+            functionality_samples = [self.functionality_probability(building_sample, substation_sample, pole_sample)
+                                     for building_sample, substation_sample, pole_sample in
+                                     zip(buildings_list, substations_list, poles_list)]
+            functionality_sum = np.sum(functionality_samples)
+            probability = 0.0
+            if functionality_sum > 0:
+                probability = (functionality_sum/self.get_parameter("num_samples"))
+            return building, probability
+
+        else:
+            return building, "NA"
 
     def functionality_probability(self, building_sample, substation_sample, pole_sample):
         """ This function is subject to change. For now, buildings have a 1-to-1 relationship with
