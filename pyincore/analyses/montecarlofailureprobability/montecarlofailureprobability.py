@@ -239,7 +239,6 @@ class MonteCarloFailureProbability(BaseAnalysis):
         Args:
             ds_sample: dictionary of { sample_n: dmg_state }
             failure_state_keys: damage state keys that considered as failure
-            num_samples: num of samples
 
         Returns:
             failure state on each sample 0 (failed), 1 (not failed)
