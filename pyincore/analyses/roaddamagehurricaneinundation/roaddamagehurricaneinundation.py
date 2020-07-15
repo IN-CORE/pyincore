@@ -96,7 +96,7 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
 
     def road_damage_analysis_bulk_input(self, roads, hazard_type,
                                         hazard_dataset_id):
-        """Run pipeline damage analysis for multiple pipelines.
+        """Run road damage analysis by hurricane inundation.
 
         Args:
             roads (list): multiple roads from road dataset.
@@ -104,7 +104,7 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
-            list: A list of ordered dictionaries with pipeline damage values and other data/metadata.
+            list: A list of ordered dictionaries with failure probability of road and other data/metadata.
 
         """
         result = []
@@ -128,16 +128,16 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
         return result
 
     def road_damage_analysis(self, road, hazard_type, fragility_set, hazard_dataset_id):
-        """Run pipeline damage for a single pipeline.
+        """Run road damage for a single road segment.
 
         Args:
-            road (obj): a single pipeline.
+            road (obj): a single road feature.
             hazard_type (str): hazard type.
             fragility_set (obj): A JSON description of fragility assigned to the road.
             hazard_dataset_id (str): A hazard dataset to use.
 
         Returns:
-            OrderedDict: A dictionary with pipeline damage values and other data/metadata.
+            OrderedDict: A dictionary with probability of failure values and other data/metadata.
         """
 
         road_results = collections.OrderedDict()
@@ -182,10 +182,10 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
         return road_results
 
     def get_spec(self):
-        """Get specifications of the pipeline damage analysis.
+        """Get specifications of the road damage analysis.
 
         Returns:
-            obj: A JSON object of specifications of the pipeline damage analysis.
+            obj: A JSON object of specifications of the road damage analysis.
 
         """
         return {
