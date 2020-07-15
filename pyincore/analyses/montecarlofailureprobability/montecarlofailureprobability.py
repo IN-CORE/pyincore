@@ -120,9 +120,9 @@ class MonteCarloFailureProbability(BaseAnalysis):
             self.monte_carlo_failure_probability_bulk_input, num_workers,
             inventory_args)
         self.set_result_csv_data("sample_failure_state", fs_results, name=self.get_parameter("result_name") +
-                                                                          "_mc_failure_state")
+                                                                          "_failure_state")
         self.set_result_csv_data("failure_probability", fp_results, name=self.get_parameter("result_name") +
-                                                                         "_mc_failure_probability")
+                                                                         "_failure_probability")
         return True
 
     def monte_carlo_failure_probability_concurrent_future(self, function_name,
