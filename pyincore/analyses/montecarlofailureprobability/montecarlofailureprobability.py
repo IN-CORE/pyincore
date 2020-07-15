@@ -202,7 +202,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
                                                 num_samples)
         func, fp = self.calc_probability_failure_value(ds_sample, failure_state_keys)
 
-        fs_results.update(func)
+        fs_results['failure'] = ",".join(func.values())
         fp_results['failure_probability'] = fp
 
         return fs_results, fp_results
@@ -248,9 +248,9 @@ class MonteCarloFailureProbability(BaseAnalysis):
         func = {}
         for sample, state in ds_sample.items():
             if state in failure_state_keys:
-                func[sample] = 0
+                func[sample] = "0"
                 count += 1
             else:
-                func[sample] = 1
+                func[sample] = "1"
 
         return func, count / len(ds_sample)
