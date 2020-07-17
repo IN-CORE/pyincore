@@ -18,7 +18,7 @@ def test_road_dmg_hurricane_inundation():
 
     # TODO this has to be changed to real hurricane
     hazard_type = "hurricane"
-    hazard_id = "5b902cb273c3371e1236b36b"
+    hazard_id = "5f10837ab922f96f4e9ffb86"
 
     # Create road damage
     test_roaddamagehurricaneinundation = RoadDamageHurricaneInundation(client)

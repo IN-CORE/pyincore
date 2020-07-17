@@ -38,5 +38,3 @@ def test_conformance(paths=paths):
     style = pycodestyle.StyleGuide(quiet=False, max_line_length=120)
     result = style.check_files(paths)
     assert result.total_errors == 0
-
-test_conformance()

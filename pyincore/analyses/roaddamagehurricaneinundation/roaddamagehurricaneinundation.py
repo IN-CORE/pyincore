@@ -141,11 +141,6 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
         """
 
         road_results = collections.OrderedDict()
-        pgv_repairs = 0.0
-        pgd_repairs = 0.0
-        liq_hazard_type = ""
-        liq_hazard_val = 0.0
-        liquefaction_prob = 0.0
 
         if fragility_set is not None:
             demand_type = fragility_set.demand_type.lower()
@@ -153,21 +148,21 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
             location = GeoUtil.get_location(road)
             point = str(location.y) + "," + str(location.x)
 
-            # TODO this has to be implemented when hurricane endpoint get deveploed
+            # TODO this has to be changed to commneted out lines
+            #  when new pyincore hazard wrapper merged to develop
             # if hazard_type == 'hurricane':
-            #     hazard_resp = self.hazardsvc.get_hurricanewf_values(
-            #         hazard_dataset_id, demand_type, demand_units, [point])
+            #     hazard_resp = self.hazardsvc.get_hurricane_values("5f10837c01d3241d77729a4f",
+            #                                                       "inundationDuration", "hr", [point])
             # else:
             #     raise ValueError(
             #         "Hazard type are not currently supported.")
-
-            # hazard_val = hazard_resp[0]['hazardValue']
-            hazard_val = 1.5
-            if hazard_val <= 0.0:
-                hazard_val = 0.0
-
-            # TODO dur_q should come from hazard service
+            #
+            # dur_q = hazard_resp[0]['hazardValue']
             dur_q = 1
+
+            if dur_q <= 0.0:
+                dur_q = 0.0
+
             distance = road['properties']['R__dist']
             fragility_vars = {'x': dur_q, 'y': distance}
             fragility_curve = fragility_set.fragility_curves[0]
@@ -177,7 +172,7 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
             road_results['failprob'] = pf
             road_results['demandtype'] = demand_type
             road_results['hazardtype'] = hazard_type
-            road_results['hazardval'] = hazard_val
+            road_results['hazardval'] = dur_q
 
         return road_results
 
