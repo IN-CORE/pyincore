@@ -15,8 +15,7 @@ def test_road_dmg_hurricane_inundation():
     road_dataset_id = "5f0dd5ecb922f96f4e962caf"
     # road damage by hurricane inundation mapping
     mapping_id = "5f0cb04fe392b24d4800f316"
-
-    # TODO this has to be changed to real hurricane
+    # Galveston Deterministic Hurricane - Kriging inundationDuration
     hazard_type = "hurricane"
     hazard_id = "5f10837ab922f96f4e9ffb86"
 
