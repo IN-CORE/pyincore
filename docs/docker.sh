@@ -19,4 +19,4 @@ else
 fi
 
 # Build docker image
-$DEBUG docker build -t hub.ncsa.illinois.edu/incore/doc/pyincore$VERSION:latest .
+$DEBUG docker build -f docs/Dockerfile -t hub.ncsa.illinois.edu/incore/doc/pyincore$VERSION:latest .
