@@ -599,8 +599,7 @@ class HazardService:
 
         return response
 
-    def get_hurricane_metadata_list(self, skip: int = None,
-                                      limit: int = None, space: str = None):
+    def get_hurricane_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         """Retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
 
         Args:
@@ -699,7 +698,6 @@ class HazardService:
         r = self.client.get(url, params=payload)
 
         return r.json()
-
 
     def create_hurricane_windfield(self, hurr_wf_inputs):
         """Create wind fields on the server. POST API endpoint is called.

@@ -253,24 +253,27 @@ def test_create_and_delete_hurricane(hazardsvc):
     del_response = hazardsvc.delete_hurricane(post_response["id"])
     assert del_response["id"] is not None
 
+
 def test_get_hurricane_metadata(hazardsvc):
     response = hazardsvc.get_hurricane_metadata("5f10837c01d3241d77729a4f")
     assert response['id'] == "5f10837c01d3241d77729a4f"
+
 
 def test_get_hurricane_metadata_list(hazardsvc):
     response = hazardsvc.get_hurricane_metadata_list()
     assert len(response) > 0 and 'id' in response[0].keys()
 
+
 def test_get_hurricane_values(hazardsvc):
     response = hazardsvc.get_hurricane_values("5f10837c01d3241d77729a4f",
-                                                   "waveHeight", "m",
-                                                   ["29.22,-95.06",
-                                                    "29.20, -95.10"])
+                                              "waveHeight", "m", ["29.22,-95.06", "29.20, -95.10"])
     assert response[0]["hazardValue"] == 18.346923306935572 and response[1]["hazardValue"] == 14.580423799099865
+
 
 def test_search_hurricanes(hazardsvc):
     response = hazardsvc.search_hurricanes("Galveston")
     assert response[0]["id"] is not None
+
 
 @pytest.mark.skip(reason="performance issues")
 def test_create_hurricane_windfield(hazardsvc):

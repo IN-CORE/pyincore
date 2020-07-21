@@ -56,7 +56,7 @@ class Dataset:
         return instance
 
     @classmethod
-    def from_json_str(cls, json_str, data_service: DataService=None, file_path=None):
+    def from_json_str(cls, json_str, data_service: DataService = None, file_path=None):
         """Get Dataset from json string.
 
         Args:
