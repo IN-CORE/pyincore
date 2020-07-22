@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added road damage by hurricane inundation [INCORE1-697](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-697)
 
+## [Unreleased]
+
+### Added
+- Wrapper methods for hurricane endpoints and their pytests [INCORE1-698](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-698)
+
 ## [0.6.4] - 2020-06-30
 
 ### Added
@@ -16,7 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - in Dataset Class from_json_str() method, set local_file_path by either from dataservices json definition, or pass
- in local file path [INCORe1-662](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-662)
+ in local file path [INCORE1-662](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-662)
 
 ### Changed
 - Replace old analyses util methods with new methods that use DFR3 Classes [INCORE1-685](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-685)
