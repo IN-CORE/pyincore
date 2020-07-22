@@ -36,7 +36,11 @@ class MonteCarloFailureProbability(BaseAnalysis):
                 {
                     'id': 'result_name',
                     'required': True,
-                    'description': 'result dataset name',
+                    'description': 'basename of the result datasets. This analysis will create two outputs: failure '
+                                   'proability and failure state with the basename in the filename. '
+                                   'For example: "result_name = joplin_mcs_building" will result in '
+                                   '"joplin_mcs_building_failure_state.csv" and '
+                                   '"joplin_mcs_building_failure_probability.csv"',
                     'type': str
                 },
                 {
