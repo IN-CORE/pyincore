@@ -40,12 +40,10 @@ class RoadFailure(BaseAnalysis):
         # road dataset
         road_dataset = self.get_input_dataset("roads").get_inventory_reader()
 
-        # distance to shore table
-        distance_table = self.get_input_dataset("distance_table").get_inventory_reader()
+        # distance to shore table data frame
+        distance_df = self.get_input_dataset("distance_table").get_dataframe_from_csv()
 
-        # convert table to data frame
-        table_file = os.path.join(distance_table.path, distance_table.name) + "." + distance_table.driver
-        distance_dataframe = pd.read_csv(table_file, header="infer", low_memory=True)
+        # set distance field name in the table
         distance_field_name = self.get_parameter("distance_field_name")
 
         # Get hazard type
@@ -74,7 +72,7 @@ class RoadFailure(BaseAnalysis):
             count += avg_bulk_input_size
 
         results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers,
-                                                     inventory_args, repeat(distance_dataframe),
+                                                     inventory_args, repeat(distance_df),
                                                      repeat(distance_field_name), repeat(hazard_type),
                                                      repeat(hazard_dataset_id))
 
