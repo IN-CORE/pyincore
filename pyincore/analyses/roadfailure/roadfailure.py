@@ -10,14 +10,16 @@
 """
 
 import collections
+import os
 import concurrent.futures
+import pandas as pd
 from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, \
     AnalysisUtil, GeoUtil
 
 
-class RoadDamageHurricaneInundation(BaseAnalysis):
+class RoadFailure(BaseAnalysis):
     """Computes road damage by hurricane inundation.
 
     Args:
@@ -31,13 +33,20 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
 
-        super(RoadDamageHurricaneInundation, self).__init__(incore_client)
+        super(RoadFailure, self).__init__(incore_client)
 
     def run(self):
         """Execute road damage analysis """
         # road dataset
-        road_dataset = self.get_input_dataset(
-            "roads").get_inventory_reader()
+        road_dataset = self.get_input_dataset("roads").get_inventory_reader()
+
+        # distance to shore table
+        distance_table = self.get_input_dataset("distance_table").get_inventory_reader()
+
+        # convert table to data frame
+        table_file = os.path.join(distance_table.path, distance_table.name) + "." + distance_table.driver
+        distance_dataframe = pd.read_csv(table_file, header="infer", low_memory=True)
+        distance_field_name = self.get_parameter("distance_field_name")
 
         # Get hazard type
         hazard_type = self.get_parameter("hazard_type")
@@ -64,9 +73,10 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
                 inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.road_damage_concurrent_future(
-            self.road_damage_analysis_bulk_input, num_workers,
-            inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
+        results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers,
+                                                     inventory_args, repeat(distance_dataframe),
+                                                     repeat(distance_field_name), repeat(hazard_type),
+                                                     repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", results,
                                  name=self.get_parameter("result_name"))
@@ -94,12 +104,14 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
 
         return output
 
-    def road_damage_analysis_bulk_input(self, roads, hazard_type,
+    def road_damage_analysis_bulk_input(self, roads, distance_df, distance_field_name, hazard_type,
                                         hazard_dataset_id):
         """Run road damage analysis by hurricane inundation.
 
         Args:
             roads (list): multiple roads from road dataset.
+            distance_df (object): data frame for distance to shore table
+            distance_field_name (str): field name representing the distance to shore
             hazard_type (str): Hazard type
             hazard_dataset_id (str): An id of the hazard exposure.
 
@@ -121,17 +133,22 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
 
         for road in roads:
             if road["id"] in fragility_sets.keys():
-                result.append(self.road_damage_analysis(road, hazard_type,
+                # find out distance value
+                distance = float(distance_df.loc[distance_df['guid']
+                                                 == road['properties']["guid"]][distance_field_name])
+
+                result.append(self.road_damage_analysis(road, distance, hazard_type,
                                                         fragility_sets[road["id"]],
                                                         hazard_dataset_id))
 
         return result
 
-    def road_damage_analysis(self, road, hazard_type, fragility_set, hazard_dataset_id):
+    def road_damage_analysis(self, road, distance, hazard_type, fragility_set, hazard_dataset_id):
         """Run road damage for a single road segment.
 
         Args:
             road (obj): a single road feature.
+            distance (float): distance to shore from the road
             hazard_type (str): hazard type.
             fragility_set (obj): A JSON description of fragility assigned to the road.
             hazard_dataset_id (str): A hazard dataset to use.
@@ -148,22 +165,18 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
             location = GeoUtil.get_location(road)
             point = str(location.y) + "," + str(location.x)
 
-            # TODO this has to be changed to commneted out lines
-            #  when new pyincore hazard wrapper merged to develop
-            # if hazard_type == 'hurricane':
-            #     hazard_resp = self.hazardsvc.get_hurricane_values("5f10837c01d3241d77729a4f",
-            #                                                       "inundationDuration", "hr", [point])
-            # else:
-            #     raise ValueError(
-            #         "Hazard type are not currently supported.")
-            #
-            # dur_q = hazard_resp[0]['hazardValue']
-            dur_q = 1
+            if hazard_type == 'hurricane':
+                hazard_resp = self.hazardsvc.get_hurricane_values(hazard_dataset_id,
+                                                                  "inundationDuration", demand_units, [point])
+            else:
+                raise ValueError(
+                    "Hazard type are not currently supported.")
+
+            dur_q = hazard_resp[0]['hazardValue']
 
             if dur_q <= 0.0:
                 dur_q = 0.0
 
-            distance = road['properties']['R__dist']
             fragility_vars = {'x': dur_q, 'y': distance}
             fragility_curve = fragility_set.fragility_curves[0]
             pf = fragility_curve.compute_custom_limit_state_probability(fragility_vars)
@@ -191,6 +204,12 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
+                    'type': str
+                },
+                {
+                    'id': 'distance_field_name',
+                    'required': True,
+                    'description': 'field name representing the distance in the table',
                     'type': str
                 },
                 {
@@ -226,6 +245,12 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
                     'type': ['ergo:roadLinkTopo', 'ergo:roads'],
                 },
                 {
+                    'id': 'distance_table',
+                    'required': True,
+                    'description': 'Distance to Shore Table',
+                    'type': ['incore:distanceToShore'],
+                },
+                {
                     'id': 'dfr3_mapping_set',
                     'required': True,
                     'description': 'DFR3 Mapping Set Object',
@@ -236,7 +261,7 @@ class RoadDamageHurricaneInundation(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'roads',
-                    'type': 'ergo:roadDamage'
+                    'type': 'incore:roadFailure'
                 }
             ]
         }

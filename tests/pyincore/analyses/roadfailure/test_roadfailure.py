@@ -4,42 +4,48 @@
 
 
 from pyincore import IncoreClient, FragilityService, MappingSet
-from pyincore.analyses.roaddamagehurricaneinundation import RoadDamageHurricaneInundation
+from pyincore.analyses.roadfailure import RoadFailure
 from pyincore.globals import INCORE_API_DEV_URL
 
 
-def test_road_dmg_hurricane_inundation():
+def test_road_failure():
     client = IncoreClient(INCORE_API_DEV_URL)
 
-    # This is the Galvestion Road for Island
+    # road inventory for Galveston island
     road_dataset_id = "5f0dd5ecb922f96f4e962caf"
+    # distance table for Galveston island
+    distance_dataset_id = "5f1883abfeef2d758c4e857d"
+    # distance field name in distance table
+    distance_field_name = 'distance'
     # road damage by hurricane inundation mapping
     mapping_id = "5f0cb04fe392b24d4800f316"
     # Galveston Deterministic Hurricane - Kriging inundationDuration
     hazard_type = "hurricane"
-    hazard_id = "5f10837ab922f96f4e9ffb86"
+    hazard_id = "5f10837c01d3241d77729a4f"
 
     # Create road damage
-    test_roaddamagehurricaneinundation = RoadDamageHurricaneInundation(client)
+    road_failure = RoadFailure(client)
     # Load input datasets
-    test_roaddamagehurricaneinundation.load_remote_input_dataset("roads", road_dataset_id)
+    road_failure.load_remote_input_dataset("roads", road_dataset_id)
+    road_failure.load_remote_input_dataset("distance_table", distance_dataset_id)
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    test_roaddamagehurricaneinundation.set_input_dataset('dfr3_mapping_set', mapping_set)
+    road_failure.set_input_dataset('dfr3_mapping_set', mapping_set)
     # Specify the result name
     result_name = "road_result"
     # Set analysis parameters
-    test_roaddamagehurricaneinundation.set_parameter("result_name", result_name)
-    test_roaddamagehurricaneinundation.set_parameter("hazard_type", hazard_type)
-    test_roaddamagehurricaneinundation.set_parameter("hazard_id", hazard_id)
-    test_roaddamagehurricaneinundation.set_parameter("num_cpu", 4)
+    road_failure.set_parameter("result_name", result_name)
+    road_failure.set_parameter("distance_field_name", distance_field_name)
+    road_failure.set_parameter("hazard_type", hazard_type)
+    road_failure.set_parameter("hazard_id", hazard_id)
+    road_failure.set_parameter("num_cpu", 4)
 
     # Run road damage by hurricane inundation analysis
-    result = test_roaddamagehurricaneinundation.run_analysis()
+    result = road_failure.run_analysis()
 
     assert result is True
 
 
 if __name__ == "__main__":
-    test_road_dmg_hurricane_inundation()
+    test_road_failure()
