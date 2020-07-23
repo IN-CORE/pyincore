@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.6.5] - [Unreleased]
 
 ### Added
+- Wrapper methods for hurricane endpoints and their pytests [INCORE1-698](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-698)
 - Added Docker build and release scripts [INCORE1-709](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-709).  
 
 ### Changed
+- Allow more input data types for MC failure probability; Add a failure state output for each sample [INCORE1-695](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-695)
 - Dockerfile builds documentation using autodoc [INCORE1-648](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-648).
 
 ## [0.6.4] - 2020-06-30
@@ -20,7 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - in Dataset Class from_json_str() method, set local_file_path by either from dataservices json definition, or pass
- in local file path [INCORe1-662](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-662)
+ in local file path [INCORE1-662](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-662)
 
 ### Changed
 - Replace old analyses util methods with new methods that use DFR3 Classes [INCORE1-685](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-685)
