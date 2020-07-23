@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.6.5] - [Unreleased]
 
+### Added
+- Added Docker build and release scripts [INCORE1-709](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-709).  
+
 ### Changed
 - Docker file builds documentation using autodoc [INCORE1-648](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-648).
 
