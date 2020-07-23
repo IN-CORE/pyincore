@@ -38,12 +38,6 @@ class BuildingFunctionality(BaseAnalysis):
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
-                },
-                {
-                    'id': 'num_samples',
-                    'required': True,
-                    'description': 'Number of Monte Carlo samples',
-                    'type': int
                 }
             ],
             'input_datasets': [
@@ -118,19 +112,19 @@ class BuildingFunctionality(BaseAnalysis):
                 substations.loc[substations["guid"] == interdependency[building]["substations_guid"]]
             poles_mc_samples = poles.loc[poles["guid"] == interdependency[building]["poles_guid"]]
             try:
-                buildings_list = list(building_mc_samples.iloc[0])[1].split(",")
+                building_list = list(building_mc_samples.iloc[0])[1].split(",")
             except IndexError:
                 print("error with buildings")
                 print(building_mc_samples)
                 return {building: -1}
             try:
-                substations_list = list(substations_mc_samples.iloc[0])[1].split(",")
+                substation_list = list(substations_mc_samples.iloc[0])[1].split(",")
             except IndexError:
                 print("error with substations")
                 print(interdependency[building]["substations_guid"])
                 return {building: -1}
             try:
-                poles_list = list(poles_mc_samples.iloc[0])[1].split(",")
+                pole_list = list(poles_mc_samples.iloc[0])[1].split(",")
             except IndexError:
                 print("error with poles")
                 print(interdependency[building]["poles_guid"])
@@ -138,11 +132,12 @@ class BuildingFunctionality(BaseAnalysis):
 
             functionality_samples = [self.functionality_probability(building_sample, substation_sample, pole_sample)
                                      for building_sample, substation_sample, pole_sample in
-                                     zip(buildings_list, substations_list, poles_list)]
+                                     zip(building_list, substation_list, pole_list)]
             functionality_sum = np.sum(functionality_samples)
+            num_samples = len(functionality_samples)
             probability = 0.0
             if functionality_sum > 0:
-                probability = (functionality_sum/self.get_parameter("num_samples"))
+                probability = (functionality_sum/num_samples)
             return building, probability
 
         else:
