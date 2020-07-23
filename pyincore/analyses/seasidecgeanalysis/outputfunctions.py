@@ -1,15 +1,13 @@
-'''
+"""
 functions for output validation
 
 # NOTE:
 This is a hack to create dataframes that resemble matrix results
 returned in GAMS
-'''
+"""
 
-
-import seaside.Equationlib
 import pandas as pd
-import numpy as np
+
 
 # Return initial values function
 def baseValue(vars, soln, eqName):

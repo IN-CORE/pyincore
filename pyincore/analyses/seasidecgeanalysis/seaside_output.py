@@ -8,7 +8,7 @@
 # This swas only created to assist those unfamiliar with python objects
 """
 
-from seaside.OutputFunctions import baseValue, newValue, getDiff
+from pyincore.analyses.seasidecgeanalysis.outputfunctions import baseValue, newValue, getDiff
 
 #CG0
 cg0 = baseValue(vars, soln,  'CG')
@@ -238,7 +238,7 @@ def make_table():
                                   '{:.2f}%'.format(LOCTAX_percentage*100), '{:.2f}%'.format(PROPTX_percentage*100), '{:.2f}%'.format(ACCTAX_percentage*100), '{:.2f}%'.format(TAX_total_percentage*100)]
              })
 
-    table.to_csv(index=False, path_or_buf = 'output.csv')
+    table.to_csv(index=False, path_or_buf='output.csv')
 
 make_table()
 
