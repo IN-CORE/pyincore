@@ -75,7 +75,7 @@ class BuildingFunctionality(BaseAnalysis):
                 {
                     'id': 'result',
                     'description': 'CSV file of functionality probability',
-                    'type': 'incore:epfVer1'
+                    'type': 'incore:funcProbability'
                 }
             ]
         }

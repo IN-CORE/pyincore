@@ -9,10 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Added road damage by hurricane inundation [INCORE1-697](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-697)
 
-## [Unreleased]
+## [Unreleased] 
 
 ### Added
 - Wrapper methods for hurricane endpoints and their pytests [INCORE1-698](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-698)
+
+### Changed
+- Allow more input data types for MC failure probability; Add a failure state output for each sample [INCORE1-695](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-695)
+
 
 ## [0.6.4] - 2020-06-30
 
