@@ -3,7 +3,7 @@
 # Exit on error
 set -e
 
-# use DEBUG=echo ./docker_docs.sh to print all commands
+# use DEBUG=echo docker.sh to print all commands
 export DEBUG=${DEBUG:-""}
 
 # Find out what branch we are on
