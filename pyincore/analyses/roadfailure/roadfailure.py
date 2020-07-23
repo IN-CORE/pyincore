@@ -182,6 +182,7 @@ class RoadFailure(BaseAnalysis):
             road_results['guid'] = road['properties']['guid']
             road_results['failprob'] = pf
             road_results['demandtype'] = demand_type
+            road_results['demandunits'] = demand_units
             road_results['hazardtype'] = hazard_type
             road_results['hazardval'] = dur_q
 
