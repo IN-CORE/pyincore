@@ -24,7 +24,7 @@ def run_base_analysis():
     # pyIncore, and then type "which ipopt" in mac, or "where ipopt" in windows and paste
     # the path here
     # seaside_cge.set_parameter("solver_path", "/YOUR/IPOPT/PATH/GOES/HERE")
-    seaside_cge.set_parameter("solver_path", "/miniconda3/envs/cge/bin/ipopt")
+    seaside_cge.set_parameter("solver_path", "/miniconda3/envs/cgetest/bin/ipopt")
     seaside_cge.set_parameter("model_iterations", 1)
 
     seaside_cge.load_remote_input_dataset("SAM", sam)

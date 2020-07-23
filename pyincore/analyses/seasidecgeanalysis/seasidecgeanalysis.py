@@ -83,7 +83,7 @@ class SeasideCGEModel(BaseAnalysis):
                 {
                     'id': 'SIMS',
                     'required': True,
-                    'description': 'SIMS',
+                    'description': 'Random numbers for the change of capital stocks in the CGE model.',
                     'type': ['incore:SeasideCGEsim']
                 }
             ],
