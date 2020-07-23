@@ -32,12 +32,6 @@ class BuildingFunctionality(BaseAnalysis):
                     'required': False,
                     'description': 'result dataset name',
                     'type': str
-                },
-                {
-                    'id': 'num_cpu',
-                    'required': False,
-                    'description': 'If using parallel execution, the number of cpus to request',
-                    'type': int
                 }
             ],
             'input_datasets': [
