@@ -27,7 +27,7 @@ class RoadFailure(BaseAnalysis):
 
     """
 
-    DEFAULT_EQ_FRAGILITY_KEY = "inundationDuration"
+    DEFAULT_HURRICANE_FRAGILITY_KEY = "inundationDuration"
 
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
@@ -43,8 +43,9 @@ class RoadFailure(BaseAnalysis):
         # distance to shore table data frame
         distance_df = self.get_input_dataset("distance_table").get_dataframe_from_csv()
 
+        # TODO this has to be changed when semantic service lanuched based on it
         # set distance field name in the table
-        distance_field_name = self.get_parameter("distance_field_name")
+        distance_field_name = "distance"
 
         # Get hazard type
         hazard_type = self.get_parameter("hazard_type")
@@ -122,7 +123,7 @@ class RoadFailure(BaseAnalysis):
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            fragility_key = self.DEFAULT_EQ_FRAGILITY_KEY
+            fragility_key = self.DEFAULT_HURRICANE_FRAGILITY_KEY
             self.set_parameter("fragility_key", fragility_key)
 
         # get fragility set
@@ -203,12 +204,6 @@ class RoadFailure(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
-                    'type': str
-                },
-                {
-                    'id': 'distance_field_name',
-                    'required': True,
-                    'description': 'field name representing the distance in the table',
                     'type': str
                 },
                 {

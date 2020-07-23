@@ -15,8 +15,6 @@ def test_road_failure():
     road_dataset_id = "5f0dd5ecb922f96f4e962caf"
     # distance table for Galveston island
     distance_dataset_id = "5f1883abfeef2d758c4e857d"
-    # distance field name in distance table
-    distance_field_name = 'distance'
     # road damage by hurricane inundation mapping
     mapping_id = "5f0cb04fe392b24d4800f316"
     # Galveston Deterministic Hurricane - Kriging inundationDuration
@@ -36,7 +34,6 @@ def test_road_failure():
     result_name = "road_result"
     # Set analysis parameters
     road_failure.set_parameter("result_name", result_name)
-    road_failure.set_parameter("distance_field_name", distance_field_name)
     road_failure.set_parameter("hazard_type", hazard_type)
     road_failure.set_parameter("hazard_id", hazard_id)
     road_failure.set_parameter("num_cpu", 4)
