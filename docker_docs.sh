@@ -15,9 +15,8 @@ if [ "$BRANCH" = "master" ]; then
 elif [ "${BRANCH}" = "develop" ]; then
     VERSION="-dev"
 else
-    docker build -f docs/Dockerfile --no-cache -t pyincore_docs .
     exit 0
 fi
 
 # Build docker image
-# $DEBUG docker build -f docs/Dockerfile -t hub.ncsa.illinois.edu/incore/doc/pyincore$VERSION:latest .
+$DEBUG docker build -f docs/Dockerfile -t hub.ncsa.illinois.edu/incore/doc/pyincore$VERSION:latest .
