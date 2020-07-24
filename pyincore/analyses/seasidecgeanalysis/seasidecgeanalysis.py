@@ -1,10 +1,13 @@
 from pyincore import BaseAnalysis
 from pyincore.analyses.seasidecgeanalysis.equationlib import *
+from pyincore import globals as pyglobals
 
 import os
 import pandas as pd
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
+
+logger = pyglobals.LOGGER
 
 
 class SeasideCGEModel(BaseAnalysis):
@@ -89,23 +92,17 @@ class SeasideCGEModel(BaseAnalysis):
             ],
             'output_datasets': [
                 {
-                    'id': 'domestic-supply',
+                    'id': 'Seaside_Sims',
                     'parent_type': '',
-                    'description': 'CSV file of resulting domestic supply',
-                    'type': 'joplincgeanalysis'
+                    'description': 'CSV file of Seaside cge simulations',
+                    'type': 'seasidecgeanalysis'
                 },
                 {
-                    'id': 'employment',
+                    'id': 'Seaside_output',
                     'parent_type': '',
-                    'description': 'CSV file of resulting employment',
-                    'type': 'joplincgeanalysis'
-                },
-                {
-                    'id': 'household-income',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting household income',
-                    'type': 'joplincgeanalysis'
-                },
+                    'description': 'CSV file of output of Seaside cge, containing changes in employment and supply.',
+                    'type': 'seasidecgeanalysis'
+                }
             ]
         }
 
@@ -357,21 +354,12 @@ class SeasideCGEModel(BaseAnalysis):
         # IMPORT ADDITIONAL DATA FILES
         # ----------------------------------------------------------------
 
-        # # SAM
-        # SAM = pd.read_csv(os.path.join(filePath, 'SAM SeasideKC.csv'), index_col=0)
-        #
-        # # CAPITAL COMP
-        # BB = pd.read_csv(os.path.join(filePath, 'SEASIDE Capcom.csv'), index_col=0)
-
         SAM = pd.read_csv(self.get_input_dataset("SAM").get_file_path('csv'), index_col=0)
 
         # CAPITAL COMP
         BB = pd.read_csv(self.get_input_dataset("BB").get_file_path('csv'), index_col=0)
 
         # MISC TABLES
-        '''
-
-        '''
 
         TPC = pd.DataFrame(index=H, columns=G).fillna(0.0)
         IGTD = pd.DataFrame(index=G, columns=G1).fillna(0.0)
@@ -1172,7 +1160,7 @@ class SeasideCGEModel(BaseAnalysis):
         vars.lo('N', 0)
         vars.lo('CN', 0)
 
-        def set_variable(filname):
+        def set_variable(filename):
             # clear the file before write the variables
             with open(filename, 'w') as f:
                 f.write("")
@@ -1190,12 +1178,12 @@ class SeasideCGEModel(BaseAnalysis):
             #   CPI(H)=E=
             #   SUM(I, P(I) * ( 1 + SUM(GS, TAUC(GS,I) ) ) * CH(I,H) )
             #       / SUM(I, P0(I) * ( 1 + SUM(GS, TAUQ(GS,I) ) ) * CH(I,H) );
-            print('CPIEQ(H)')
+            logger.debug('CPIEQ(H)')
             line1 = (P.loc(I) * ExprM(vars, m=1 + TAUC.loc[GS, I].sum(0)) * CH.loc(I, H)).sum(I)
             line2 = (ExprM(vars, m=P0.loc[I] * (1 + TAUQ.loc[GS, I].sum(0))) * CH.loc(I, H)).sum(I)
 
             CPIEQ = (line1 / line2 - ~CPI.loc(H))
-            print(CPIEQ.test(vars.initialVals))
+            logger.debug(CPIEQ.test(vars.initialVals))
             CPIEQ.write(count, filename)
 
             # YEQ(H).. Y(H)            =E= SUM(L,  A(H,L) * HW(H) / SUM(H1, A(H1,L) * HW(H1) )
@@ -1203,7 +1191,7 @@ class SeasideCGEModel(BaseAnalysis):
             #                               + SUM(LA,  A(H,LA) * HW(H) / SUM(H1, A(H1,LA) * HW(H1)) * (Y(LA)+ LNFOR(LA))*( 1 - SUM(G, TAUFLA(G,LA) ) ) )
             #                              + SUM(K,  A(H,K) * HW(H) / SUM(H1, A(H1,K) * HW(H1)) * (Y(K) + KPFOR(K)) * ( 1 - SUM(G, TAUFK(G,K) ) ) );
 
-            print('YEQ(H)')
+            logger.debug('YEQ(H)')
             line1 = (ExprM(vars, m=A.loc[H, L]) * HW.loc(H) / (ExprM(vars, m=A.loc[H1, L]) * HW.loc(H1)).sum(
                 H1) * Y.loc(
                 L) * ExprM(vars, m=1 - TAUFL.loc[G, L].sum(0))).sum(L)
@@ -1214,15 +1202,15 @@ class SeasideCGEModel(BaseAnalysis):
                     Y.loc(K) + KPFOR.loc(K)) * ExprM(vars, m=1 - TAUFK.loc[G, K].sum(0))).sum(K)
 
             YEQ = ((line1 + line3 + line4) - Y.loc(H))
-            print(YEQ.test(vars.initialVals))
+            logger.debug(YEQ.test(vars.initialVals))
             YEQ.write(count, filename)
-            # print(YEQ)
+            # logger.debug(YEQ)
 
             #  YDEQ(H).. YD(H)          =E=   Y(H) + (PRIVRET(H) * HH(H))
             #                                         + SUM(G, TP(H,G) * HH(H))
             #                                         - SUM(GI, PIT(GI,H)  * Y(H))
             #                                         - SUM(G, TAUH(G,H)  * HH(H));
-            print('YDEQ(H)')
+            logger.debug('YDEQ(H)')
             line1 = Y.loc(H) + ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)
             line2 = (ExprM(vars, m=TP.loc[H, G]) * HH.loc(H)).sum(G)
             line3 = ~(ExprM(vars, m=PIT.loc[GI, H]) * Y.loc(H)).sum(GI)
@@ -1230,12 +1218,12 @@ class SeasideCGEModel(BaseAnalysis):
 
             YDEQ = ((line1 + line2 - line3 - line4) - YD.loc(H))
             YDEQ.write(count, filename)
-            print(YDEQ.test(vars.initialVals))
-            # print(YDEQ)
+            logger.debug(YDEQ.test(vars.initialVals))
+            # logger.debug(YDEQ)
 
             #  CHEQ(I,H).. CH(I,H)      =E= CH0(I,H)* ((YD(H) / YD0(H)) / ( CPI(H) / CPI0(H)))**(BETA(I,H))
             #                                 * PROD(J, ((P(J)*( 1 + SUM(GS, TAUC(GS,J))))/ (P0(J)*(1 + SUM(GS, TAUQ(GS,J)))))** (LAMBDA(J,I)));
-            print('CHEQ(I,H)')
+            logger.debug('CHEQ(I,H)')
             line1 = ExprM(vars, m=CH0.loc[I, H]) * (
                     (YD.loc(H) / ExprM(vars, m=YD0.loc[H])) / (CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** ExprM(vars,
                                                                                                                   m=
@@ -1247,39 +1235,39 @@ class SeasideCGEModel(BaseAnalysis):
 
             CHEQ = ((line1 * line2) - CH.loc(I, H))
             CHEQ.write(count, filename)
-            print(CHEQ.test(vars.initialVals))
-            # print(CHEQ)
+            logger.debug(CHEQ.test(vars.initialVals))
+            # logger.debug(CHEQ)
 
             #  SHEQ(H).. S(H)           =E= YD(H) - SUM(I, P(I) * CH(I,H) * ( 1 + SUM(GS, TAUC(GS,I))));
-            print('SHEQ(H)')
+            logger.debug('SHEQ(H)')
             line = YD.loc(H) - ~((P.loc(I) * CH.loc(I, H) * ExprM(vars, m=1 + TAUC.loc[GS, I].sum(0))).sum(I))
 
             SHEQ = (line - S.loc(H))
             SHEQ.write(count, filename)
-            print(SHEQ.test(vars.initialVals))
-            # print(SHEQ)
+            logger.debug(SHEQ.test(vars.initialVals))
+            # logger.debug(SHEQ)
 
             #  PVAEQ(I).. PVA(I)        =E= PD(I) - SUM(J, AD(J,I) * P(J) * (1 + SUM(GS, TAUQ(GS, J))));
-            print('PVAEQ(I)')
+            logger.debug('PVAEQ(I)')
             line = PD.loc(I) - ~(
                 (ExprM(vars, m=AD.loc[J, I]) * P.loc(J) * ExprM(vars, m=1 + TAUQ.loc[GS, J].sum(0))).sum(0))
 
             PVAEQ = (line - PVA.loc(I))
             PVAEQ.write(count, filename)
-            print(PVAEQ.test(vars.initialVals))
-            # print(PVAEQ)
+            logger.debug(PVAEQ.test(vars.initialVals))
+            # logger.debug(PVAEQ)
 
             #  PFEQ(I)..DS(I)           =E= DELTA(I)*PROD(F, (FD(F,I))**ALPHA(F,I));
-            print('PFEQ(I)')
+            logger.debug('PFEQ(I)')
             line = ExprM(vars, m=DELTA.loc[I]) * ((FD.loc(F, I)) ** ExprM(vars, m=ALPHA.loc[F, I])).prod(F)
 
             PFEQ = (line - DS.loc(I))
             PFEQ.write(count, filename)
-            # print(PFEQ)
+            # logger.debug(PFEQ)
 
             # FDEQ(F,I).. R(F,I) * RA(F) * (1 + SUM(GF,TAUFX(GF,F,I) ) )* (FD(F,I))
             #                         =E= PVA(I) * DS(I) * ALPHA(F,I);
-            print('FDEQ(F,I)')
+            logger.debug('FDEQ(F,I)')
             left = R.loc(F, I) * RA.loc(F) * ExprM(vars, m=1 + TAUFX_SUM.loc[F, I]) * (FD.loc(F, I))
             right = ~(PVA.loc(I) * DS.loc(I) * ExprM(vars, m=ALPHA.loc[F, I]))
 
@@ -1287,98 +1275,98 @@ class SeasideCGEModel(BaseAnalysis):
 
             # FDEQ.test(vars.initialVals)
             FDEQ.write(count, filename)
-            # print(FDEQ)
+            # logger.debug(FDEQ)
 
             #   VEQ(I).. V(I) =E= SUM(J, AD(I,J) * DS(J) );
-            print('VEQ(I)')
+            logger.debug('VEQ(I)')
             line = (ExprM(vars, m=AD.loc[I, J]) * ~DS.loc(J)).sum(1)
 
             VEQ = (line - V.loc(I))
             VEQ.write(count, filename)
-            print(VEQ.test(vars.initialVals))
-            # print(VEQ)
+            logger.debug(VEQ.test(vars.initialVals))
+            # logger.debug(VEQ)
 
             #   YFEQL(L).. Y(L) =E= SUM(IG, R(L,IG)* RA(L)*FD(L,IG));
-            print('YFEQL(L)')
+            logger.debug('YFEQL(L)')
             line = (R.loc(L, IG) * RA.loc(L) * FD.loc(L, IG)).sum(IG)
 
             YFEQL = (line - Y.loc(L))
             YFEQL.write(count, filename)
-            print(YFEQL.test(vars.initialVals))
-            # print(YFEQL)
+            logger.debug(YFEQL.test(vars.initialVals))
+            # logger.debug(YFEQL)
 
             # YFEQK(K).. Y('KAP') =E= SUM(IG, R('KAP',IG) * RA('KAP') * FD('KAP',IG));
-            print('YFEQK(K)')
+            logger.debug('YFEQK(K)')
             line = (R.loc(['KAP'], IG) * RA.loc(['KAP']) * FD.loc(['KAP'], IG)).sum(IG)
 
             YFEQK = (line - Y.loc(['KAP']))
             YFEQK.write(count, filename)
-            print(YFEQK.test(vars.initialVals))
-            # print(YFEQK)
+            logger.debug(YFEQK.test(vars.initialVals))
+            # logger.debug(YFEQK)
 
             #  YFEQLA(LA).. Y('LAND')   =E= SUM(IG, R('LAND',IG) * RA('LAND') * FD('LAND',IG));
-            print('YFEQLA(LA)')
+            logger.debug('YFEQLA(LA)')
             line = (R.loc(['LAND'], IG) * RA.loc(['LAND']) * FD.loc(['LAND'], IG)).sum(IG)
 
             YFEQLA = (line - Y.loc(['LAND']))
             YFEQLA.write(count, filename)
-            print(YFEQLA.test(vars.initialVals))
-            # print(YFEQLA)
+            logger.debug(YFEQLA.test(vars.initialVals))
+            # logger.debug(YFEQLA)
 
             #  LANFOR(LA).. LNFOR(LA)   =E= LFOR(LA) * Y(LA);
-            print('LANFOR(LA)')
+            logger.debug('LANFOR(LA)')
             line = ExprM(vars, m=LFOR.loc[LA]) * Y.loc(LA)
 
             LANFOR = (line - LNFOR.loc(LA))
             LANFOR.write(count, filename)
-            print(LANFOR.test(vars.initialVals))
-            # print(LANFOR)
+            logger.debug(LANFOR.test(vars.initialVals))
+            # logger.debug(LANFOR)
 
             #  KAPFOR(K).. KPFOR(K)     =E= KFOR(K) * Y(K);
-            print('KAPFOR(K)')
+            logger.debug('KAPFOR(K)')
             line = ExprM(vars, m=KFOR.loc[K]) * Y.loc(K)
 
             KAPFOR = (line - KPFOR.loc(K))
             KAPFOR.write(count, filename)
-            print(KAPFOR.test(vars.initialVals))
-            # print(KAPFOR)
+            logger.debug(KAPFOR.test(vars.initialVals))
+            # logger.debug(KAPFOR)
 
             #  XEQ(I).. CX(I)           =E= CX0(I)*((PD(I))/(PWM0(I)))**(ETAE(I));
-            print('XEQ(I)')
+            logger.debug('XEQ(I)')
             line = ExprM(vars, m=CX0.loc[I]) * ((PD.loc(I)) / ExprM(vars, m=PW0.loc[I])) ** ExprM(vars, m=ETAE.loc[I])
 
             XEQ = (line - CX.loc(I))
             XEQ.write(count, filename)
-            print(XEQ.test(vars.initialVals))
-            # print(XEQ)
+            logger.debug(XEQ.test(vars.initialVals))
+            # logger.debug(XEQ)
 
             #  DEQ(I)$PWM0(I).. D(I)    =E= D0(I) *(PD(I)/PWM0(I))**(ETAD(I));
-            print('DEQ(I)$PWM0(I)')
+            logger.debug('DEQ(I)$PWM0(I)')
             line = ExprM(vars, m=D0.loc[I]) * (PD.loc(I) / ExprM(vars, m=PWM0.loc[I])) ** ExprM(vars, m=ETAD.loc[I])
 
             DEQ = (line - D.loc(I))
             #  DEQ.setCondition(PWM0.loc[I])
             DEQ.write(count, filename)
-            print(DEQ.test(vars.initialVals))
-            # print(DEQ)
+            logger.debug(DEQ.test(vars.initialVals))
+            # logger.debug(DEQ)
 
             #  PEQ(I)..  P(I)           =E= D(I) * PD(I) + ( 1 - D(I) ) * PWM0(I);
-            print('PEQ(I)')
+            logger.debug('PEQ(I)')
             line = (D.loc(I) * PD.loc(I) + (1 - D.loc(I)) * ExprM(vars, m=PWM0.loc[I]))
 
             PEQ = (line - P.loc(I))
             PEQ.write(count, filename)
-            print(PEQ.test(vars.initialVals))
-            # print(PEQ)
+            logger.debug(PEQ.test(vars.initialVals))
+            # logger.debug(PEQ)
 
             #  MEQ(I).. M(I)            =E= ( 1 - D(I) ) * DD(I);
-            print('MEQ(I)')
+            logger.debug('MEQ(I)')
             line = (1 - D.loc(I)) * DD.loc(I)
 
             MEQ = (line - M.loc(I))
             MEQ.write(count, filename)
-            print(MEQ.test(vars.initialVals))
-            # print(MEQ)
+            logger.debug(MEQ.test(vars.initialVals))
+            # logger.debug(MEQ)
 
             #  NKIEQ.. NKI              =E= SUM(I, M(I) * PWM0(I) )
             #                                 - SUM(I, CX(I) * PD(I) )
@@ -1387,7 +1375,7 @@ class SeasideCGEModel(BaseAnalysis):
             #                                 - SUM(K, KPFOR(K))
             #                                 - SUM(G, GVFOR(G))
 
-            print('NKIEQ')
+            logger.debug('NKIEQ')
             line1 = (M.loc(I) * ExprM(vars, m=PWM0.loc[I])).sum(I)
             line2 = (CX.loc(I) * PD.loc(I)).sum(I)
             line3 = (ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)).sum(H)
@@ -1397,44 +1385,44 @@ class SeasideCGEModel(BaseAnalysis):
 
             NKIEQ = ((line1 - line2 - line3 - line4 - line5 - line6) - NKI)
             NKIEQ.write(count, filename)
-            print(NKIEQ.test(vars.initialVals))
-            # print(NKIEQ)
+            logger.debug(NKIEQ.test(vars.initialVals))
+            # logger.debug(NKIEQ)
 
             #  NEQ(K,I).. N(K,I)        =E= N0(K,I)*(R(K,I)/R0(K,I))**(ETAIX(K,I));
-            print('NEQ(K,I)')
+            logger.debug('NEQ(K,I)')
             line = ExprM(vars, m=N0.loc[K, I]) * (R.loc(K, I) / ExprM(vars, m=R0.loc[K, I])) ** ExprM(vars,
                                                                                                       m=ETAIX.loc[K, I])
 
             NEQ = (line - N.loc(K, I))
             NEQ.write(count, filename)
-            print(NEQ.test(vars.initialVals))
-            # print(NEQ)
+            logger.debug(NEQ.test(vars.initialVals))
+            # logger.debug(NEQ)
 
             #  CNEQ(I).. P(I)*(1 + SUM(GS, TAUN(GS,I)))*CN(I)
             #                         =E= SUM(IG, B(I,IG)*(SUM(K, N(K,IG))));
-            print('CNEQ(I)')
+            logger.debug('CNEQ(I)')
             left = P.loc(I) * ExprM(vars, m=1 + TAUN.loc[GS, I].sum(0)) * CN.loc(I)
             right = (ExprM(vars, m=B.loc[I, IG]) * N.loc(K, IG).sum(K)).sum(IG)
 
             CNEQ = (right - left)
             CNEQ.write(count, filename)
-            print(CNEQ.test(vars.initialVals))
-            # print(CNEQ)
+            logger.debug(CNEQ.test(vars.initialVals))
+            # logger.debug(CNEQ)
 
             #  KSEQ(K,IG).. KS(K,IG)    =E= KS0(K,IG) * ( 1 - DEPR) + N(K,IG) ;
-            print('KSEQ(K,IG)')
+            logger.debug('KSEQ(K,IG)')
             line = ExprM(vars, m=KS0.loc[K, IG] * (1 - DEPR)) + N.loc(K, IG)
 
             KSEQ = (line - KS.loc(K, IG))
             KSEQ.write(count, filename)
-            print(KSEQ.test(vars.initialVals))
-            # print(KSEQ)
+            logger.debug(KSEQ.test(vars.initialVals))
+            # logger.debug(KSEQ)
 
             # LSEQ1(H).. HW(H)/HH(H) =E= HW0(H)/HH0(H)
             #                   * ((SUM(L, RA(L) / RA0(L))/5)/ (CPI(H) / CPI0(H)))** (ETARA(H))
             #                  * ( SUM(G, TP(H,G) / CPI(H) )/ SUM(G, TP(H,G) / CPI0(H) )) ** ETAPT(H)
             #                  *  ((SUM(GI, PIT0(GI,H)* HH0(H))+ SUM(G, TAUH0(G,H)*HH0(H)))/(SUM(GI, PIT(GI,H)* HH(H))+ SUM(G, TAUH(G,H)*HH(H))))**(ETAPIT(H)*1) ;
-            print('LSEQ1(H)')
+            logger.debug('LSEQ1(H)')
             line1 = ExprM(vars, m=HW0.loc[H] / HH0.loc[H])
             LSEQ1line2pre = FD.loc(L, Z).sum(1)
             line2 = (((RA.loc(L) / ExprM(vars, m=RA0.loc[L])).sum(L) / 5) / (
@@ -1452,19 +1440,19 @@ class SeasideCGEModel(BaseAnalysis):
 
             LSEQ1 = ((line1 * line2 * line3 * line4) - HW.loc(H) / HH.loc(H))
             LSEQ1.write(count, filename)
-            print(LSEQ1.test(vars.initialVals))
-            # print(LSEQ1)
+            logger.debug(LSEQ1.test(vars.initialVals))
+            # logger.debug(LSEQ1)
 
             #  LASEQ1(LA,I).. LAS(LA,I) =E= LAS0(LA,I)*(R(LA, I)/R0(LA, I))**(ETAL(LA,I));
-            print('LASEQ1(LA,I)')
+            logger.debug('LASEQ1(LA,I)')
             line = ExprM(vars, m=LAS0.loc[LA, I]) * (R.loc(LA, I) / ExprM(vars, m=R0.loc[LA, I])) ** ExprM(vars,
                                                                                                            m=ETAL.loc[
                                                                                                                LA, I])
 
             LASEQ1 = (line - LAS.loc(LA, I))
             LASEQ1.write(count, filename)
-            print(LASEQ1.test(vars.initialVals))
-            # print(LASEQ1)
+            logger.debug(LASEQ1.test(vars.initialVals))
+            # logger.debug(LASEQ1)
 
             #  POPEQ(H).. HH(H)         =E= HH0(H) * NRPG(H)
             #                                + MI0(H) * ((YD(H)/HH(H))/(YD0(H)/HH0(H))/(CPI(H)/CPI0(H))) ** (ETAYDI(H))
@@ -1472,7 +1460,7 @@ class SeasideCGEModel(BaseAnalysis):
             #                              - MO0(H) *((YD0(H)/HH0(H))/(YD(H)/HH(H))/(CPI0(H)/CPI(H))) ** (ETAYDO(H))
             #                                         *((HN0(H)/HH0(H))/(HN(H)/HH(H))) ** (ETAUO(H));
 
-            print('POPEQ(H)')
+            logger.debug('POPEQ(H)')
             line1 = ExprM(vars, m=HH0.loc[H] * NRPG.loc[H])
             line2 = ExprM(vars, m=MI0.loc[H]) * ((YD.loc(H) / HH.loc(H)) / ExprM(vars, m=YD0.loc[H] / HH0.loc[H]) / (
                     CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** ExprM(vars, m=ETAYDI.loc[H])
@@ -1483,17 +1471,17 @@ class SeasideCGEModel(BaseAnalysis):
 
             POPEQ = (line1 + line2 * line3 - line4 * line5 - HH.loc(H))
             POPEQ.write(count, filename)
-            print(POPEQ.test(vars.initialVals))
-            # print(POPEQ)
+            logger.debug(POPEQ.test(vars.initialVals))
+            # logger.debug(POPEQ)
 
             #  ANEQ(H).. HN(H)          =E= HH(H) - HW(H);
-            print('ANEQ(H)')
+            logger.debug('ANEQ(H)')
             line = HH.loc(H) - HW.loc(H)
 
             ANEQ = (line - HN.loc(H))
             ANEQ.write(count, filename)
-            print(ANEQ.test(vars.initialVals))
-            # print(ANEQ)
+            logger.debug(ANEQ.test(vars.initialVals))
+            # logger.debug(ANEQ)
 
             #  YGEQ(GX).. Y(GX)         =E=   SUM(I, TAUV(GX,I) * V(I) * P(I) )
             #                                 + SUM(I, TAUX(GX,I)* CX(I) *PD(I))
@@ -1506,7 +1494,7 @@ class SeasideCGEModel(BaseAnalysis):
             #                                 + SUM(H, PIT(GX,H) * Y(H) )
             #                                 + SUM(H, TAUH(GX,H) * HH(H) )
             #                                 + SUM(GX1, IGT(GX,GX1));
-            print('YGEQ')
+            logger.debug('YGEQ')
             line1 = (ExprM(vars, m=TAUV.loc[GX, I]) * V.loc(I) * P.loc(I)).sum(I)
             line2 = (ExprM(vars, m=TAUX.loc[GX, I]) * CX.loc(I) * PD.loc(I)).sum(I)
 
@@ -1544,182 +1532,182 @@ class SeasideCGEModel(BaseAnalysis):
             YGEQ = ((line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8 + line9 + line10 + line11) - Y.loc(
                 GX))
             YGEQ.write(count, filename)
-            print(YGEQ.test(vars.initialVals))
-            # print(YGEQ)
+            logger.debug(YGEQ.test(vars.initialVals))
+            # logger.debug(YGEQ)
 
             #    YGEQ2(GT).. Y(cf)        =E= SUM(GX, IGT(cf,GX));
 
             line = IGT.loc(CF, GX).sum(GX)
-            print('YGEQ2')
+            logger.debug('YGEQ2')
             YGEQ2 = (line - Y.loc(CF))
             YGEQ2.write(count, filename)
-            print(YGEQ2.test(vars.initialVals))
-            # print(YGEQ2)
+            logger.debug(YGEQ2.test(vars.initialVals))
+            # logger.debug(YGEQ2)
 
             #  YGEQ1(GNL).. Y(GNL)      =E= TAXS1(GNL)*Y('CYGF');
-            print('YGEQ1(GNL)')
+            logger.debug('YGEQ1(GNL)')
             line = ExprM(vars, m=TAXS1.loc[GNL]) * Y.loc(['CYGF'])
             YGEQ1 = (line - Y.loc(GNL))
             YGEQ1.write(count, filename)
-            print(YGEQ1.test(vars.initialVals))
-            # print(YGEQ1)
+            logger.debug(YGEQ1.test(vars.initialVals))
+            # logger.debug(YGEQ1)
 
             #  GOVFOR(G).. GVFOR(G)     =E= GFOR(G)*Y(G);
-            print('GOVFOR(G)')
+            logger.debug('GOVFOR(G)')
             line = ExprM(vars, m=GFOR.loc[G]) * Y.loc(G)
 
             GOVFOR = (line - GVFOR.loc(G))
             GOVFOR.write(count, filename)
-            print(GOVFOR.test(vars.initialVals))
-            # print(GOVFOR)
+            logger.debug(GOVFOR.test(vars.initialVals))
+            # logger.debug(GOVFOR)
 
             #  CGEQ(I,GN).. P(I)*(1 + SUM(GS, TAUG(GS,I))) * CG(I,GN)
             #                         =E= AG(I,GN) * (Y(GN)+ GFOR(GN)*Y(GN));
-            print('CGEQ(I,GN)')
+            logger.debug('CGEQ(I,GN)')
             left = P.loc(I) * ExprM(vars, m=1 + TAUG.loc[GS, I].sum(0)) * CG.loc(I, GN)
             right = ExprM(vars, m=AG.loc[I, GN]) * (Y.loc(GN) + ExprM(vars, m=GFOR.loc[GN]) * Y.loc(GN))
 
             CGEQ = (right - left)
             CGEQ.write(count, filename)
-            print(CGEQ.test(vars.initialVals))
-            # print(CGEQ)
+            logger.debug(CGEQ.test(vars.initialVals))
+            # logger.debug(CGEQ)
 
             #  GFEQ(F,GN)..  FD(F,GN) * R(F,GN) * RA(F)*( 1 + SUM(GF, TAUFX(GF,F,GN)))
             #                         =E= AG(F,GN) * (Y(GN)+ GFOR(GN)*Y(GN));
-            print('GFEQ(F,GN)')
+            logger.debug('GFEQ(F,GN)')
             left = FD.loc(F, GN) * R.loc(F, GN) * RA.loc(F) * (1 + ExprM(vars, m=TAUFX_SUM.loc[F, GN]))
             right = ExprM(vars, m=AG.loc[F, GN]) * (Y.loc(GN) + ExprM(vars, m=GFOR.loc[GN]) * Y.loc(GN))
 
             GFEQ = left - right
             GFEQ.write(count, filename)
-            print(GFEQ.test(vars.initialVals))
-            # print(GFEQ)
+            logger.debug(GFEQ.test(vars.initialVals))
+            # logger.debug(GFEQ)
 
             #  GSEQL(GN).. S(GN)        =E= (Y(GN)+ GVFOR(GN))
             #                                 - SUM(I, CG(I,GN)*P(I)*(1 + SUM(GS, TAUG(GS,I))))
             #                                 - SUM(F, FD(F,GN)*R(F,GN)*RA(F)*(1 + SUM(GF, TAUFX(GF,F,GN))));
-            print('GSEQL(GN)')
+            logger.debug('GSEQL(GN)')
             line1 = Y.loc(GN) + GVFOR.loc(GN)
             line2 = (CG.loc(I, GN) * P.loc(I) * (1 + ExprM(vars, m=TAUG.loc[GS, I]).sum(GS))).sum(I)
             line3 = (FD.loc(F, GN) * R.loc(F, GN) * RA.loc(F) * (1 + ExprM(vars, m=TAUFX_SUM.loc[F, GN]))).sum(F)
 
             GSEQL = ((line1 - ~line2 - ~line3) - S.loc(GN))
             GSEQL.write(count, filename)
-            print(GSEQL.test(vars.initialVals))
-            # print(GSEQL)
+            logger.debug(GSEQL.test(vars.initialVals))
+            # logger.debug(GSEQL)
 
             #  GSEQ(GX).. S(GX)         =E= (Y(GX) + GFOR(GX)*Y(GX)) - SUM(H, (TP(H,GX)*HH(H))) - SUM(G,IGT(G,GX));
-            print('GSEQ(GX)')
+            logger.debug('GSEQ(GX)')
             line1 = (Y.loc(GX) + ExprM(vars, m=GFOR.loc[GX]) * Y.loc(GX))
             line2 = (ExprM(vars, m=TP.loc[H, GX]) * HH.loc(H)).sum(H)
             line3 = IGT.loc(G, GX).sum(G)
 
             GSEQ = ((line1 - ~line2 - ~line3) - S.loc(GX))
             GSEQ.write(count, filename)
-            print(GSEQ.test(vars.initialVals))
-            # print(GSEQ)
+            logger.debug(GSEQ.test(vars.initialVals))
+            # logger.debug(GSEQ)
 
             #  TDEQ(G,GX)$(IGTD(G,GX) EQ 1).. IGT(G,GX)
             #                         =E= TAXS(G,GX)*(Y(GX) + GVFOR(GX)- SUM(H, (TP(H,GX)*HH(H))));
-            print('TDEQ(G,GX)$(IGTD(G,GX) EQ 1)')
+            logger.debug('TDEQ(G,GX)$(IGTD(G,GX) EQ 1)')
             line = ExprM(vars, m=TAXS.loc[G, GX]) * (
                     Y.loc(GX) + GVFOR.loc(GX) - ~(ExprM(vars, m=TP.loc[H, GX]) * HH.loc(H)).sum(H))
 
             TDEQ = line - IGT.loc(G, GX)
             TDEQ.setCondition(IGTD.loc[G, GX], 'EQ', 1)
             TDEQ.write(count, filename)
-            print(TDEQ.test(vars.initialVals))
-            # print(TDEQ)
+            logger.debug(TDEQ.test(vars.initialVals))
+            # logger.debug(TDEQ)
 
             # GSEQJ1('CYGF').. S('CYGF')=E= Y('CYGF') -  Y('CYGF');
-            print('GSEQJ1(\'CYGF\')')
+            logger.debug('GSEQJ1(\'CYGF\')')
             GSEQJ1 = S.loc(['CYGF']) - Y.loc(['CYGF']) + Y.loc(['CYGF'])
             GSEQJ1.write(count, filename)
-            print(GSEQJ1.test(vars.initialVals))
+            logger.debug(GSEQJ1.test(vars.initialVals))
 
             #  SPIEQ.. SPI              =E= SUM(H, Y(H)) + SUM((H,G), TP(H,G)*HH(H)) + SUM(H, PRIVRET(H)*HH(H));
-            print('SPIEQ')
+            logger.debug('SPIEQ')
             line = Y.loc(H).sum(H) + (ExprM(vars, m=TP.loc[H, G]) * HH.loc(H)).sum() + (
                     ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)).sum(H)
 
             SPIEQ = (line - SPI)
             SPIEQ.write(count, filename)
-            print(SPIEQ.test(vars.initialVals))
-            # print(SPIEQ)
+            logger.debug(SPIEQ.test(vars.initialVals))
+            # logger.debug(SPIEQ)
 
             #  LMEQ1.. SUM(H, HW(H)* JOBCOR(H,'L1')) + CMI('L1') =E= SUM(Z, FD('L1',Z)) + SUM(CM1, SUM(H, HW(H)*OUTCR(H, CM1)));
             # LMEQ1(L)= SUM(H, HW(H)* JOBCOR(H, L)) - SUM(Z, FD(L ,Z) ) ;
-            print('LMEQ1')
+            logger.debug('LMEQ1')
             left = (ExprM(vars, m=JOBCOR.loc[H, L]) * HW.loc(H)).sum(H)
             right = FD.loc(L, Z).sum(Z)
             # right = FD.loc(['L1'], Z).sum(Z) + CMO.loc(CM1).sum(CM1)
 
             LMEQ1 = (right - left)
             LMEQ1.write(count, filename)
-            print(LMEQ1.test(vars.initialVals))
-            # print(LMEQ1)
+            logger.debug(LMEQ1.test(vars.initialVals))
+            # logger.debug(LMEQ1)
 
             #  KMEQ(K,IG).. KS(K,IG)    =E= FD(K,IG);
-            print('KMEQ(K,IG)')
+            logger.debug('KMEQ(K,IG)')
             KMEQ = (FD.loc(K, IG) - KS.loc(K, IG))
             KMEQ.write(count, filename)
-            print(KMEQ.test(vars.initialVals))
-            # print(KMEQ)
+            logger.debug(KMEQ.test(vars.initialVals))
+            # logger.debug(KMEQ)
 
             #  LAMEQ(LA,IG).. LAS(LA,IG)=E= FD(LA,IG);
-            print('LAMEQ(LA,IG)')
+            logger.debug('LAMEQ(LA,IG)')
             LAMEQ = (FD.loc(LA, IG) - LAS.loc(LA, IG))
             LAMEQ.write(count, filename)
-            print(LAMEQ.test(vars.initialVals))
-            # print(LAMEQ)
+            logger.debug(LAMEQ.test(vars.initialVals))
+            # logger.debug(LAMEQ)
 
             #  GMEQ(I).. DS(I)          =E= DD(I) + CX(I) - M(I);
-            print('GMEQ(I)')
+            logger.debug('GMEQ(I)')
             GMEQ = (DD.loc(I) + CX.loc(I) - M.loc(I) - DS.loc(I))
             GMEQ.write(count, filename)
-            print(GMEQ.test(vars.initialVals))
-            # print(GMEQ)
+            logger.debug(GMEQ.test(vars.initialVals))
+            # logger.debug(GMEQ)
 
             #  DDEQ(I).. DD(I)          =E= V(I) + SUM(H, CH(I,H) ) + SUM(G, CG(I,G) ) + CN(I);
-            print('DDEQ(I)')
+            logger.debug('DDEQ(I)')
             DDEQ = (V.loc(I) + CH.loc(I, H).sum(H) + CG.loc(I, G).sum(G) + CN.loc(I) - DD.loc(I))
             DDEQ.write(count, filename)
-            print(DDEQ.test(vars.initialVals))
-            # print(DDEQ)
+            logger.debug(DDEQ.test(vars.initialVals))
+            # logger.debug(DDEQ)
 
             # IGT.FX(G,GX)$(NOT IGT0(G,GX))=0;
-            print('IGT.FX(G,GX)$(NOT IGT0(G,GX))=0')
+            logger.debug('IGT.FX(G,GX)$(NOT IGT0(G,GX))=0')
             FX1 = IGT.loc(G, GX)
             FX1.setCondition(IGT0.loc[G, GX], 'EQ', 0)
             FX1.write(count, filename)
-            # print(FX1)
+            # logger.debug(FX1)
 
             # IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX);
-            print('IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX)')
+            logger.debug('IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX)')
             FX2 = IGT.loc(G, GX) - ExprM(vars, m=IGT0.loc[G, GX])
             FX2.setCondition(IGTD.loc[G, GX], 'EQ', 2)
             FX2.write(count, filename)
-            # print(FX2)
+            # logger.debug(FX2)
 
             # R.FX(L,Z)=R0(L,Z);
-            print('R.FX(L,Z)=R0(L,Z)')
+            logger.debug('R.FX(L,Z)=R0(L,Z)')
             FX3 = R.loc(L, Z) - ExprM(vars, m=R0.loc[L, Z])
             FX3.write(count, filename)
-            # print(FX3)
+            # logger.debug(FX3)
 
             # RA.FX(LA)=RA0(LA);
-            print('RA.FX(LA)=RA0(LA)')
+            logger.debug('RA.FX(LA)=RA0(LA)')
             FX4 = RA.loc(LA) - ExprM(vars, m=RA0.loc[LA])
             FX4.write(count, filename)
-            # print(FX4)
+            # logger.debug(FX4)
 
             # RA.FX(K)=RA0(K);
-            print('RA.FX(K)=RA0(K)')
+            logger.debug('RA.FX(K)=RA0(K)')
             FX5 = RA.loc(K) - ExprM(vars, m=RA0.loc[K])
             FX5.write(count, filename)
-            # print(FX5)
+            # logger.debug(FX5)
 
-            print("Objective")
+            logger.debug("Objective")
             obj = vars.getIndex('SPI')
 
             with open(filename, 'a') as f:
@@ -1733,10 +1721,8 @@ class SeasideCGEModel(BaseAnalysis):
             opt = SolverFactory(solver, solver_io=solver_io)
 
             if opt is None:
-                print("")
-                print("ERROR: Unable to create solver plugin for %s " 
-                      "using the %s interface" % (solver, solver_io))
-                print("")
+                logger.debug("ERROR: Unable to create solver plugin for %s " 
+                             "using the %s interface" % (solver, solver_io))
                 exit(1)
 
             ### Create the model
@@ -1745,7 +1731,7 @@ class SeasideCGEModel(BaseAnalysis):
             set_equation(cons_filename)
             ###
 
-            ### read the model
+            # read the model
             exec(open(cons_filename).read())
             ###
 
@@ -1809,7 +1795,7 @@ class SeasideCGEModel(BaseAnalysis):
 
             soln.append(x[:])
 
-            return None
+            return soln
 
         '''
         Calibrate the model 
@@ -1821,7 +1807,7 @@ class SeasideCGEModel(BaseAnalysis):
                                 "solverconstants/ipopt_cons.py")
         # tmp = os.path.join(filePath, "tmp.py")
         tmp = os.path.join(os.path.dirname(os.path.realpath(__file__)), "solverconstants/tmp.py")
-        print("Calibration: ")
+        logger.debug("Calibration: ")
         run_solver(filename, tmp)
 
         '''
@@ -1870,15 +1856,152 @@ class SeasideCGEModel(BaseAnalysis):
         # iNum = 1 # dynamic model itterations
 
         sims = pd.read_csv(self.get_input_dataset("SIMS").get_file_path('csv'), index_col=0)
-        # iNum = 10
-        iNum = len(sims.columns)
+        iNum = 1
+        # iNum = len(sims.columns)
         KS00 = KS0.copy()
 
         for num in range(iNum):
             KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
             run_solver(filename, tmp)
 
-        # exec(open(os.path.join(modelPath, "seaside_output_new.py")).read())
-        exec(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "seaside_output_new.py")).read())
+        # Prepare simulations output
+        CH0 = vars.get('CH', x=soln[0])
+        CPI0 = vars.get('CPI', x=soln[0])
+        CX0 = vars.get('CX', x=soln[0])
+        D0 = vars.get('D', x=soln[0])
+        DS0 = vars.get('DS', x=soln[0])
+        FD0 = vars.get('FD', x=soln[0])
+        IGT0 = vars.get('IGT', x=soln[0])
+        KS0 = vars.get('KS', x=soln[0])
+        LAS0 = vars.get('LAS', x=soln[0])
+        HH0 = vars.get('HH', x=soln[0])
+        HN0 = vars.get('HN', x=soln[0])
+        HW0 = vars.get('HW', x=soln[0])
+        N0 = vars.get('N', x=soln[0])
+        P0 = vars.get('P', x=soln[0])
+        RA0 = vars.get('RA', x=soln[0])
+        R0 = vars.get('R', x=soln[0])
+        Y0 = vars.get('Y', x=soln[0])
+        YD0 = vars.get('YD', x=soln[0])
+
+        emplist = []
+        dsrlist = []
+        dsclist = []
+        hhinclist = []
+        miglist = []
+        simlist = []
+
+        for i in range(iNum):
+            DSL = vars.get('DS', x=soln[i + 1])
+            FDL = vars.get('FD', x=soln[i + 1])
+            HHL = vars.get('HH', x=soln[i + 1])
+            YL = vars.get('Y', x=soln[i + 1])
+            DFFD = FDL - FD0
+            DY = YL - Y0
+            DDS = DSL - DS0
+
+            s_name = 'Simulation ' + str(i + 1)
+
+            emp = DFFD[DFFD.index.isin(['L1', 'L2', 'L3', 'L4', 'L5'])].sum().sum()
+            dsr = DDS[DDS.index.isin(['HS1', 'HS2', 'HS3'])].sum()
+            dsc = DDS[DDS.index.isin(['CONST1', 'RETAIL1', 'SERV1', 'HC1', 'ACCOM1',
+                                      'REST1', 'AG2', 'CONST2', 'MANUF2', 'RETAIL2', 'SERV2', 'HC2', 'ACCOM2',
+                                      'REST2', 'AG3', 'UTIL', 'CONST3', 'RETAIL3', 'SERV3', 'HC3'])].sum()
+            hhinc = DY[DY.index.isin(['HH1', 'HH2', 'HH3', 'HH4', 'HH5'])].sum()
+            hhdiff = HHL - HH0
+            mig = hhdiff.sum()
+
+            emplist.append(emp)
+            dsrlist.append(dsr)
+            dsclist.append(dsc)
+            hhinclist.append(hhinc)
+            miglist.append(mig)
+            simlist.append(s_name)
+
+        cols = {'dsc': dsclist,
+                'dsr': dsrlist,
+                'mig': miglist,
+                'emp': emplist,
+                'hhinc': hhinclist}
+
+        sims_result = pd.DataFrame.from_dict(cols)
+        self.set_result_csv_data("Seaside_Sims", sims_result, name="Seaside_Sims", source="dataframe")
+
+        # Prepare cge output
+        total_employment_original = FD0.loc[L, I].sum(0).sum(0)
+        total_employment_change = vars.get('FD', x=soln[-1]).loc[L, I].sum(0).sum(0) - total_employment_original
+        total_employment_percentage = total_employment_change / total_employment_original
+
+        domestic_supply_original = DS0.sum(0)
+        domestic_supply_change = vars.get('DS', x=soln[-1]).sum(0) - domestic_supply_original
+        domestic_supply_percentage = domestic_supply_change / domestic_supply_original
+
+        DY = vars.get('Y', x=soln[-1]) - Y0
+        DY.loc[H] = pd.Series(vars.get('Y', x=soln[-1]).loc[H] / vars.get('CPI', x=soln[-1]).loc[H] - Y0.loc[H])
+
+        HH1_change = DY['HH1']
+        HH1_percentage = HH1_change / Y0.loc['HH1']
+
+        HH2_change = DY['HH2']
+        HH2_percentage = HH2_change / Y0.loc['HH2']
+
+        HH3_change = DY.loc['HH3']
+        HH3_percentage = HH3_change / Y0.loc['HH3']
+
+        HH4_change = DY.loc['HH4']
+        HH4_percentage = HH4_change / Y0.loc['HH4']
+
+        HH5_change = DY.loc['HH5']
+        HH5_percentage = HH5_change / Y0.loc['HH5']
+
+        HH_total_change = HH1_change + HH2_change + HH3_change + HH4_change + HH5_change
+        HH_total_original = Y0.loc[H].sum(0)
+        HH_total_percentage = HH_total_change / HH_total_original
+
+        LOCTAX_original = Y0.loc['LOCTAX']
+        LOCTAX_change = DY.loc['LOCTAX']
+        LOCTAX_percentage = LOCTAX_change / LOCTAX_original
+
+        PROPTX_original = Y0.loc['PROPTX']
+        PROPTX_change = DY.loc['PROPTX']
+        PROPTX_percentage = PROPTX_change / PROPTX_original
+
+        ACCTAX_original = Y0.loc['ACCTAX']
+        ACCTAX_change = DY.loc['ACCTAX']
+        ACCTAX_percentage = ACCTAX_change / ACCTAX_original
+
+        TAX_total_change = LOCTAX_change + PROPTX_change + ACCTAX_change
+        TAX_total_original = LOCTAX_original + PROPTX_original + ACCTAX_original
+        TAX_total_percentage = TAX_total_change / TAX_total_original
+
+        cge_output = pd.DataFrame({'Seaside': ['Total Employment', 'Domestic Supply(mil of $)',
+                                               'Real Household Income(mil of $)', 'HH1', 'HH2', 'HH3', 'HH4', 'HH5',
+                                               'Total',
+                                               'Local Tax Revenue(mil of $)', 'LOCTAX', 'PROPTX', 'ACCTAX', 'Total'],
+                                   'Amount of Change': ['{:.2f}'.format(total_employment_change),
+                                                        '{:.2f}'.format(domestic_supply_change), '',
+                                                        '{:.2f}'.format(HH1_change), '{:.2f}'.format(HH2_change),
+                                                        '{:.2f}'.format(HH3_change), '{:.2f}'.format(HH4_change),
+                                                        '{:.2f}'.format(HH5_change), '{:.2f}'.format(HH_total_change),
+                                                        '',
+                                                        '{:.2f}'.format(LOCTAX_change), '{:.2f}'.format(PROPTX_change),
+                                                        '{:.2f}'.format(ACCTAX_change),
+                                                        '{:.2f}'.format(TAX_total_change)],
+                                   'Percent Change': ['{:.2f}%'.format(total_employment_percentage * 100),
+                                                      '{:.2f}%'.format(domestic_supply_percentage * 100), '',
+                                                      '{:.2f}%'.format(HH1_percentage * 100),
+                                                      '{:.2f}%'.format(HH2_percentage * 100),
+                                                      '{:.2f}%'.format(HH3_percentage * 100),
+                                                      '{:.2f}%'.format(HH4_percentage * 100),
+                                                      '{:.2f}%'.format(HH5_percentage * 100),
+                                                      '{:.2f}%'.format(HH_total_percentage * 100), '',
+                                                      '{:.2f}%'.format(LOCTAX_percentage * 100),
+                                                      '{:.2f}%'.format(PROPTX_percentage * 100),
+                                                      '{:.2f}%'.format(ACCTAX_percentage * 100),
+                                                      '{:.2f}%'.format(TAX_total_percentage * 100)]
+                              })
+
+        self.set_result_csv_data("Seaside_output", cge_output, name="Seaside_output", source="dataframe")
 
         return True
+
