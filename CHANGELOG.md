@@ -9,11 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Wrapper methods for hurricane endpoints and their pytests [INCORE1-698](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-698)
-- Added Docker build and release scripts [INCORE1-709](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-709).  
+- Added Docker build and release scripts [INCORE1-709](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-709), [INCORE1-640](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-640).  
 
 ### Changed
 - Allow more input data types for MC failure probability; Add a failure state output for each sample [INCORE1-695](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-695)
-- Dockerfile builds documentation using autodoc [INCORE1-648](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-648).
 
 ## [0.6.4] - 2020-06-30
 
