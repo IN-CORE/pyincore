@@ -1,11 +1,12 @@
-from pyincore import BaseAnalysis
-from pyincore.analyses.seasidecgeanalysis.equationlib import *
-from pyincore import globals as pyglobals
-
 import os
+
 import pandas as pd
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
+
+from pyincore import BaseAnalysis
+from pyincore import globals as pyglobals
+from pyincore.analyses.seasidecgeanalysis.equationlib import *
 
 logger = pyglobals.LOGGER
 
@@ -1767,15 +1768,6 @@ class SeasideCGEModel(BaseAnalysis):
             opt.options['warm_start_bound_push'] = 1e-6
             opt.options['warm_start_mult_bound_push'] = 1e-6
             opt.options['mu_init'] = 1e-6
-            # opt.options['acceptable_tol'] = 10
-            # opt.options['max_iter'] = 15
-            # opt.options['compl_inf_tol'] = 1e-3
-            # opt.options['bound_relax_factor'] = 0
-            # opt.options['start_with_resto'] = 'yes'
-            # opt.options['acceptable_iter'] = 15
-            # opt.options['halt_on_ampl_error'] = 'yes'
-            # opt.options['fixed_variable_treatment'] = 'relax_bounds'
-            # opt.options['print_options_documentation'] = 'yes'
 
             ###
 
@@ -1783,7 +1775,7 @@ class SeasideCGEModel(BaseAnalysis):
             # The solver plugin will scan the model for all active suffixes
             # valid for importing, which it will store into the results object
 
-            results = opt.solve(model, keepfiles=keepfiles, tee=stream_solver)
+            opt.solve(model, keepfiles=keepfiles, tee=stream_solver)
 
             x = [None for i in range(vars.nvars)]
 
@@ -1856,8 +1848,7 @@ class SeasideCGEModel(BaseAnalysis):
         # iNum = 1 # dynamic model itterations
 
         sims = pd.read_csv(self.get_input_dataset("SIMS").get_file_path('csv'), index_col=0)
-        iNum = 1
-        # iNum = len(sims.columns)
+        iNum = len(sims.columns)
         KS00 = KS0.copy()
 
         for num in range(iNum):
