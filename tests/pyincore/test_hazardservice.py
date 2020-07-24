@@ -236,6 +236,45 @@ def test_create_tsunami_hazard(hazardsvc):
         "datasetId"] is not None
 
 
+def test_create_and_delete_hurricane(hazardsvc):
+    """
+        Also deletes the created dataset
+    """
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "hurricane-dataset.json"), 'r') as file:
+        hurricane_json = file.read()
+
+    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")),
+                  str(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif")),
+                  str(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))]
+    post_response = hazardsvc.create_hurricane(hurricane_json, file_paths)
+    assert post_response["id"] is not None and post_response["hazardDatasets"][1][
+        "datasetId"] is not None
+
+    del_response = hazardsvc.delete_hurricane(post_response["id"])
+    assert del_response["id"] is not None
+
+
+def test_get_hurricane_metadata(hazardsvc):
+    response = hazardsvc.get_hurricane_metadata("5f10837c01d3241d77729a4f")
+    assert response['id'] == "5f10837c01d3241d77729a4f"
+
+
+def test_get_hurricane_metadata_list(hazardsvc):
+    response = hazardsvc.get_hurricane_metadata_list()
+    assert len(response) > 0 and 'id' in response[0].keys()
+
+
+def test_get_hurricane_values(hazardsvc):
+    response = hazardsvc.get_hurricane_values("5f10837c01d3241d77729a4f",
+                                              "waveHeight", "m", ["29.22,-95.06", "29.20, -95.10"])
+    assert response[0]["hazardValue"] == 18.346923306935572 and response[1]["hazardValue"] == 14.580423799099865
+
+
+def test_search_hurricanes(hazardsvc):
+    response = hazardsvc.search_hurricanes("Galveston")
+    assert response[0]["id"] is not None
+
+
 @pytest.mark.skip(reason="performance issues")
 def test_create_hurricane_windfield(hazardsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "hurricanewf.json"), 'r') as file:

@@ -5,17 +5,15 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import logging
-
-import fiona
 import numpy as np
 from scipy.spatial import KDTree
 import sys
 import pyproj
-import networkx as nx
-import matplotlib.pyplot as plt
 
 from rtree import index
 from shapely.geometry import shape, Point
+
+import fiona
 
 logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
