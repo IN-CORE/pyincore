@@ -24,7 +24,14 @@ class CapitalShocks(BaseAnalysis):
         return {
             'name': 'Capital Shocks',
             'description': 'Capital Shocks generation for Joplin cge model.',
-            'input_parameters': [],
+            'input_parameters': [
+                {
+                    'id': 'result_name',
+                    'required': False,
+                    'description': 'result dataset name',
+                    'type': str
+                },
+            ],
             'input_datasets': [
                 {
                     'id': 'buildings',
@@ -89,6 +96,8 @@ class CapitalShocks(BaseAnalysis):
             sector_shocks[sector] = sector_shock
 
         sector_shocks = pd.DataFrame(sector_shocks.items(), columns=['sector', 'shock'])
-        self.set_result_csv_data("sector_shocks", sector_shocks, name="sector_shocks.csv", source="dataframe")
+        result_name = self.get_parameter("result_name") \
+            if self.get_parameter("result_name") is not None else "sector_shocks.csv"
+        self.set_result_csv_data("sector_shocks", sector_shocks, name=result_name, source="dataframe")
 
         return True
