@@ -6,4 +6,3 @@
 
 
 from pyincore.analyses.joplincgeanalysis.joplincgeanalysis import JoplinCGEModel
-from pyincore.analyses.joplincgeanalysis.joplincapitalshocks import JoplinCapitalShocks
