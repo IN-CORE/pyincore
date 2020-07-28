@@ -4,9 +4,10 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import BaseAnalysis
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from pyincore import BaseAnalysis
 
 
 class BuildingFunctionality(BaseAnalysis):
@@ -31,18 +32,6 @@ class BuildingFunctionality(BaseAnalysis):
                     'required': False,
                     'description': 'result dataset name',
                     'type': str
-                },
-                {
-                    'id': 'num_cpu',
-                    'required': False,
-                    'description': 'If using parallel execution, the number of cpus to request',
-                    'type': int
-                },
-                {
-                    'id': 'num_samples',
-                    'required': True,
-                    'description': 'Number of Monte Carlo samples',
-                    'type': int
                 }
             ],
             'input_datasets': [
@@ -50,19 +39,19 @@ class BuildingFunctionality(BaseAnalysis):
                     'id': 'building_damage_mcs_samples',
                     'required': True,
                     'description': 'building damage samples',
-                    'type': ['incore:buildingDamageMcSamples'],
+                    'type': ['incore:sampleFailureState'],
                 },
                 {
                     'id': 'substations_damage_mcs_samples',
                     'required': True,
                     'description': 'substations damage samples',
-                    'type': ['incore:substationsDamageMcSamples'],
+                    'type': ['incore:sampleFailureState'],
                 },
                 {
                     'id': 'poles_damage_mcs_samples',
                     'required': True,
                     'description': 'poles damage samples',
-                    'type': ['incore:polesDamageMcSamples'],
+                    'type': ['incore:sampleFailureState'],
                 },
                 {
                     'id': 'interdependency_dictionary',
@@ -75,7 +64,7 @@ class BuildingFunctionality(BaseAnalysis):
                 {
                     'id': 'result',
                     'description': 'CSV file of functionality probability',
-                    'type': 'incore:epfVer1'
+                    'type': 'incore:funcProbability'
                 }
             ]
         }
@@ -110,36 +99,43 @@ class BuildingFunctionality(BaseAnalysis):
         Returns: probability [0,1] of building being functional
 
         """
-        building_mc_samples = buildings.loc[buildings["guid"] == building]
-        substations_mc_samples = substations.loc[substations["guid"] == interdependency[building]["substations_guid"]]
-        poles_mc_samples = poles.loc[poles["guid"] == interdependency[building]["poles_guid"]]
-        try:
-            buildings_list = list(building_mc_samples.iloc[0])[1:]
-        except IndexError:
-            print("error with buildings")
-            print(building_mc_samples)
-            return {building: -1}
-        try:
-            substations_list = list(substations_mc_samples.iloc[0])[1:]
-        except IndexError:
-            print("error with substations")
-            print(interdependency[building]["substations_guid"])
-            return {building: -1}
-        try:
-            poles_list = list(poles_mc_samples.iloc[0])[1:]
-        except IndexError:
-            print("error with poles")
-            print(interdependency[building]["poles_guid"])
-            return {building: -1}
+        # if building is defined in the interdependency lookup table
+        if building in interdependency.keys():
+            building_mc_samples = buildings.loc[buildings["guid"] == building]
+            substations_mc_samples = \
+                substations.loc[substations["guid"] == interdependency[building]["substations_guid"]]
+            poles_mc_samples = poles.loc[poles["guid"] == interdependency[building]["poles_guid"]]
+            try:
+                building_list = list(building_mc_samples.iloc[0])[1].split(",")
+            except IndexError:
+                print("error with buildings")
+                print(building_mc_samples)
+                return {building: -1}
+            try:
+                substation_list = list(substations_mc_samples.iloc[0])[1].split(",")
+            except IndexError:
+                print("error with substations")
+                print(interdependency[building]["substations_guid"])
+                return {building: -1}
+            try:
+                pole_list = list(poles_mc_samples.iloc[0])[1].split(",")
+            except IndexError:
+                print("error with poles")
+                print(interdependency[building]["poles_guid"])
+                return {building: -1}
 
-        functionality_samples = [self.functionality_probability(building_sample, substation_sample, pole_sample)
-                                 for building_sample, substation_sample, pole_sample in
-                                 zip(buildings_list, substations_list, poles_list)]
-        functionality_sum = np.sum(functionality_samples)
-        probability = 0.0
-        if functionality_sum > 0:
-            probability = (functionality_sum/self.get_parameter("num_samples"))
-        return building, probability
+            functionality_samples = [self.functionality_probability(building_sample, substation_sample, pole_sample)
+                                     for building_sample, substation_sample, pole_sample in
+                                     zip(building_list, substation_list, pole_list)]
+            functionality_sum = np.sum(functionality_samples)
+            num_samples = len(functionality_samples)
+            probability = 0.0
+            if functionality_sum > 0:
+                probability = (functionality_sum/num_samples)
+            return building, probability
+
+        else:
+            return building, "NA"
 
     def functionality_probability(self, building_sample, substation_sample, pole_sample):
         """ This function is subject to change. For now, buildings have a 1-to-1 relationship with
@@ -152,7 +148,7 @@ class BuildingFunctionality(BaseAnalysis):
         Returns: 1 if building is functional, 0 otherwise
 
         """
-        if building_sample == 1 and substation_sample == 1 and pole_sample == 1:
+        if building_sample == "1" and substation_sample == "1" and pole_sample == "1":
             return 1
         else:
             return 0
