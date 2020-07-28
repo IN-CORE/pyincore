@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Allow more input data types for MC failure probability; Add a failure state output for each sample [INCORE1-695](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-695)
 - Modify input dataset for building functionality analysis [INCORE1-700](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-700)
+- Updated Joplin cge for new capital shocks output [INCORE1-718](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-718)
 
 ## [0.6.4] - 2020-06-30
 
