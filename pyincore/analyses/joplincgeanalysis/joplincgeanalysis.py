@@ -131,7 +131,7 @@ class JoplinCGEModel(BaseAnalysis):
                     'id': 'sector_shocks',
                     'required': True,
                     'description': 'Aggregation of building functionality states to capital shocks per sector',
-                    'type': ['incore:CapitalShocks']
+                    'type': ['incore:capitalShocks']
                 }
             ],
             'output_datasets': [
