@@ -1,15 +1,16 @@
 from pyincore import IncoreClient
 from pyincore.analyses.capitalshocks import CapitalShocks
+import pyincore.globals as pyglobals
 
 
 def run_base_analysis():
-    client = IncoreClient()
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     capital_shocks = CapitalShocks(client)
 
     # Building inventory
-    building_inventory = "5dbc8478b9219c06dd242c0d"
-    building_to_sectors = "5f202d674620b643d787a5e7"
-    failure_probability = "5f20347933b2700c110a3dd2"
+    building_inventory = "5f218e36114b783cb0b01833"
+    building_to_sectors = "5f218fa47887544479c8629f"
+    failure_probability = "5f21909b7887544479c862c6"
 
     capital_shocks.set_parameter("result_name", "sector_shocks_result")
 

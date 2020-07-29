@@ -65,10 +65,8 @@ class CapitalShocks(BaseAnalysis):
     def run(self):
         buildings = self.get_input_dataset("buildings").get_inventory_reader()
         buildings_df = pd.DataFrame(list(buildings))
-        failure_probability = \
-            pd.read_csv(self.get_input_dataset("failure_probability").get_file_path('csv'), index_col=0)
-        buildings_to_sectors = \
-            pd.read_csv(self.get_input_dataset("buildings_to_sectors").get_file_path('csv'), index_col=0)
+        failure_probability = self.get_input_dataset("failure_probability").get_dataframe_from_csv()
+        buildings_to_sectors = self.get_input_dataset("buildings_to_sectors").get_dataframe_from_csv()
 
         # drop buildings with no sector
         buildings_to_sectors = buildings_to_sectors[pd.notnull(buildings_to_sectors['sector'])]
