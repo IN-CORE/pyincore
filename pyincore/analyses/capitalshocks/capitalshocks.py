@@ -23,7 +23,7 @@ class CapitalShocks(BaseAnalysis):
     def get_spec(self):
         return {
             'name': 'Capital Shocks',
-            'description': 'Capital Shocks generation for Joplin cge model.',
+            'description': 'Capital Shocks generation for cge models.',
             'input_parameters': [
                 {
                     'id': 'result_name',
@@ -57,7 +57,7 @@ class CapitalShocks(BaseAnalysis):
                     'id': 'sector_shocks',
                     'required': True,
                     'description': 'Aggregation of building functionality states to capital shocks per sector',
-                    'type': ['incore:CapitalShocks']
+                    'type': ['incore:capitalShocks']
                 }
             ]
         }
