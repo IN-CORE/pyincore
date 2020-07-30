@@ -27,8 +27,8 @@ class CapitalShocks(BaseAnalysis):
             'input_parameters': [
                 {
                     'id': 'result_name',
-                    'required': False,
-                    'description': 'result dataset name',
+                    'required': True,
+                    'description': 'Result dataset name.',
                     'type': str
                 },
             ],
@@ -94,8 +94,7 @@ class CapitalShocks(BaseAnalysis):
             sector_shocks[sector] = sector_shock
 
         sector_shocks = pd.DataFrame(sector_shocks.items(), columns=['sector', 'shock'])
-        result_name = self.get_parameter("result_name") \
-            if self.get_parameter("result_name") is not None else "sector_shocks.csv"
+        result_name = self.get_parameter("result_name")
         self.set_result_csv_data("sector_shocks", sector_shocks, name=result_name, source="dataframe")
 
         return True

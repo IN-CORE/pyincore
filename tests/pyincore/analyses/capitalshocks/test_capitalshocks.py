@@ -12,7 +12,7 @@ def run_base_analysis():
     building_to_sectors = "5f218fa47887544479c8629f"
     failure_probability = "5f21909b7887544479c862c6"
 
-    capital_shocks.set_parameter("result_name", "sector_shocks_result")
+    capital_shocks.set_parameter("result_name", "sector_shocks")
 
     capital_shocks.load_remote_input_dataset("buildings", building_inventory)
     capital_shocks.load_remote_input_dataset("buildings_to_sectors", building_to_sectors)
