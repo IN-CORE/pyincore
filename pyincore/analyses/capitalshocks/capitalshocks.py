@@ -57,7 +57,7 @@ class CapitalShocks(BaseAnalysis):
                     'id': 'sector_shocks',
                     'required': True,
                     'description': 'Aggregation of building functionality states to capital shocks per sector',
-                    'type': ['incore:capitalShocks']
+                    'type': 'incore:capitalShocks'
                 }
             ]
         }
