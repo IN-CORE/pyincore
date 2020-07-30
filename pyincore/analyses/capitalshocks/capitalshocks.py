@@ -42,7 +42,7 @@ class CapitalShocks(BaseAnalysis):
                 {
                     'id': 'buildings_to_sectors',
                     'required': True,
-                    'description': 'Failure probability of buildings.',
+                    'description': 'Mapping of buildings to economic sectors.',
                     'type': ['incore:buildingsToSectors']
                 },
                 {
