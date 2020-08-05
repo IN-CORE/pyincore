@@ -15,7 +15,7 @@ def run_with_base_class():
     bldg_func.load_remote_input_dataset("poles_damage_mcs_samples", "5f0f7231b922f96f4e9a7538")
     bldg_func.load_remote_input_dataset("interdependency_dictionary", "5f0f7311feef2d758c47cfab")
 
-    bldg_func.set_parameter("result_name", "Joplin_mcs_functionality_probability")
+    bldg_func.set_parameter("result_name", "Joplin_mcs")
 
     start_time = time.time()
     bldg_func.run_analysis()

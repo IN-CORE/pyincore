@@ -90,7 +90,7 @@ class BuildingFunctionality(BaseAnalysis):
             functionality_samples.append([building, sample])
 
         fp_results = pd.DataFrame(functionality_probabilities, columns=['building_guid', 'probability'])
-        fs_results = pd.DataFrame(functionality_probabilities, columns=['building_guid', 'samples'])
+        fs_results = pd.DataFrame(functionality_samples, columns=['building_guid', 'samples'])
 
         self.set_result_csv_data("functionality_probability",
                                  fp_results,
