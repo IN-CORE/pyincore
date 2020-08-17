@@ -122,3 +122,30 @@ class FragilityCurveSet:
             index += 1
 
         return output
+
+    def calculate_custom_limit_state(self, variables:dict):
+        """
+            Computes limit state probabilities.
+            Args:
+
+            Returns: limit state probabilities for custom expression fragilities
+
+        """
+        output = collections.OrderedDict()
+        index = 0
+
+        if len(self.fragility_curves) == 1:
+            limit_state = ['failure']
+        elif len(self.fragility_curves) == 3:
+            limit_state = ['immocc', 'lifesfty', 'collprev']
+        elif len(self.fragility_curves) == 4:
+            limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
+        else:
+            raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
+
+        for fragility_curve in self.fragility_curves:
+            probability = fragility_curve.compute_custom_limit_state_probability(variables)
+            output[limit_state[index]] = probability
+            index += 1
+
+        return output
