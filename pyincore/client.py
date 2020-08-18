@@ -154,8 +154,11 @@ class IncoreClient(Client):
         authorization = self.retrieve_token_from_file()
         if authorization is not None:
             self.session.headers["Authorization"] = authorization
+            print("Connection successful to IN-CORE services.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
+
         else:
-            self.login()
+            if self.login():
+                print("Connection successful to IN-CORE services.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
 
     def login(self):
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
