@@ -113,7 +113,7 @@ class PipelineDamage(BaseAnalysis):
 
         # get fragility set
         fragility_sets = self.fragilitysvc.match_inventory(
-            self.get_parameter("mapping_id"), pipelines, fragility_key)
+            self.get_input_dataset("dfr3_mapping_set"), pipelines, fragility_key)
 
         for pipeline in pipelines:
             if pipeline["id"] in fragility_sets.keys():
@@ -136,15 +136,14 @@ class PipelineDamage(BaseAnalysis):
             OrderedDict: A dictionary with pipeline damage values and other data/metadata.
         """
 
-        pipeline_results = collections.OrderedDict()
         hazard_val = 0.0
         demand_type = ""
         limit_states = {"ls-slight": 0.0, "ls-moderat": 0.0,
                         "ls-extensi": 0.0, "ls-complet": 0.0}
 
         if fragility_set is not None:
-            demand_type = fragility_set['demandType'].lower()
-            demand_units = fragility_set['demandUnits']
+            demand_type = fragility_set.demand_type.lower()
+            demand_units = fragility_set.demand_units
             location = GeoUtil.get_location(pipeline)
             point = str(location.y) + "," + str(location.x)
 
@@ -169,7 +168,7 @@ class PipelineDamage(BaseAnalysis):
             if hazard_val <= 0.0:
                 hazard_val = 0.0
 
-            limit_states = AnalysisUtil.calculate_limit_state(fragility_set, hazard_val)
+            limit_states = fragility_set.calculate_limit_state(hazard_val)
 
         dmg_intervals = AnalysisUtil.calculate_damage_interval(limit_states)
 
@@ -195,12 +194,6 @@ class PipelineDamage(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
-                    'type': str
-                },
-                {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
                     'type': str
                 },
                 {
@@ -240,6 +233,12 @@ class PipelineDamage(BaseAnalysis):
                     'required': True,
                     'description': 'Pipeline Inventory',
                     'type': ['ergo:buriedPipelineTopology', 'ergo:pipeline'],
+                },
+                {
+                    'id': 'dfr3_mapping_set',
+                    'required': True,
+                    'description': 'DFR3 Mapping Set Object',
+                    'type': ['incore:dfr3MappingSet'],
                 }
             ],
             'output_datasets': [

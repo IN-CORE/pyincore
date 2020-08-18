@@ -56,17 +56,31 @@ class Dataset:
         return instance
 
     @classmethod
-    def from_json_str(cls, json_str):
+    def from_json_str(cls, json_str, data_service: DataService = None, file_path=None):
         """Get Dataset from json string.
 
         Args:
             json_str (str): JSON of the Dataset.
-
+            data_service (obj): Data Service class.
+            file_path (str): File path.
         Returns:
             obj: Dataset from JSON.
 
         """
-        return cls(json.loads(json_str))
+        instance = cls(json.loads(json_str))
+
+        # download file and set local file path using metadata from services
+        if data_service is not None:
+            instance.cache_files(data_service)
+
+        # if there is local files associates with the dataset
+        elif file_path is not None:
+            instance.local_file_path = file_path
+
+        else:
+            raise ValueError("You have to either use data services, or given pass local file path.")
+
+        return instance
 
     @classmethod
     def from_file(cls, file_path, data_type):

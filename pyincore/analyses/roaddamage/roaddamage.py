@@ -123,7 +123,8 @@ class RoadDamage(BaseAnalysis):
 
         """
         road_results = []
-        fragility_sets = self.fragilitysvc.match_inventory(self.get_parameter("mapping_id"), roads, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), roads,
+                                                           fragility_key)
 
         list_roads = roads
 
@@ -183,7 +184,7 @@ class RoadDamage(BaseAnalysis):
                         raise ValueError("Uncertainty Not Implemented Yet.")
 
                     selected_fragility_set = fragility_sets[road_id]
-                    dmg_probability = AnalysisUtil.calculate_limit_state(selected_fragility_set, hazard_val, std_dev=std_dev)
+                    dmg_probability = selected_fragility_set.calculate_limit_state(hazard_val, std_dev=std_dev)
                     dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
                     road_result['guid'] = road['properties']['guid']
@@ -205,8 +206,8 @@ class RoadDamage(BaseAnalysis):
                             liquefaction_val = liquefaction[i][input_demand_type.upper]
                         else:
                             liquefaction_val = 0.0
-                        dmg_probability = AnalysisUtil.calculate_limit_state(selected_fragility_set, liquefaction_val,
-                                                                             std_dev=std_dev)
+                        dmg_probability = selected_fragility_set.calculate_limit_state(liquefaction_val,
+                                                                                       std_dev=std_dev)
                         dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
                         road_result['hazardval'] = liquefaction_val
@@ -250,12 +251,6 @@ class RoadDamage(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
-                    'type': str
-                },
-                {
-                    'id': 'mapping_id',
-                    'required': True,
-                    'description': 'Fragility mapping dataset',
                     'type': str
                 },
                 {
@@ -307,8 +302,14 @@ class RoadDamage(BaseAnalysis):
                     'id': 'roads',
                     'required': True,
                     'description': 'Road Inventory',
-                    'type': ['ergo:roadLinkTopo','incore:roads']
+                    'type': ['ergo:roadLinkTopo', 'incore:roads']
                 },
+                {
+                    'id': 'dfr3_mapping_set',
+                    'required': True,
+                    'description': 'DFR3 Mapping Set Object',
+                    'type': ['incore:dfr3MappingSet'],
+                }
             ],
             'output_datasets': [
                 {
