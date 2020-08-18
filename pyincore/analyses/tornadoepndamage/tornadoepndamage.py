@@ -17,6 +17,13 @@ from pyincore import GeoUtil, NetworkUtil
 
 
 class TornadoEpnDamage(BaseAnalysis):
+    """
+    computes electric power network (EPN) based on a particular hazard (currently only tornado is supported).
+    The process for computing the structural damage is similar to other parts of the built environment.
+    First, fragilities are obtained based on the hazard type and attributes of the network tower and network pole.
+    Based on the fragility, the hazard intensity at the location of the infrastructure is computed. Using this
+    information, the probability of exceeding each limit state is computed, along with the probability of damage.
+    """
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)

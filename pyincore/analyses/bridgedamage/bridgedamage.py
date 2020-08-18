@@ -16,7 +16,7 @@ from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
 
 
 class BridgeDamage(BaseAnalysis):
-    """Computes bridge structural damage for an earthquake hazard.
+    """Computes bridge structural damage for earthquake, tsunami, tornado, and hurricane hazards.
 
     Args:
         incore_client (IncoreClient): Service authentication.
@@ -92,7 +92,7 @@ class BridgeDamage(BaseAnalysis):
 
         Args:
             bridges (list): Multiple bridges from input inventory set.
-            hazard_type (str): Hazard type, either earthquake, tornadoes, tsunami, or hurricane
+            hazard_type (str): Hazard type, either earthquake, tornado, tsunami, or hurricane.
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:

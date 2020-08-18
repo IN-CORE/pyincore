@@ -16,7 +16,7 @@ from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 
 class BuildingDamage(BaseAnalysis):
     """Building Damage Analysis calculates the probability of building damage based on
-    different hazard type such as earthquake, tsunami and tornado by calling fragility
+    different hazard type such as earthquake, tsunami, tornado, and hurricane by calling fragility
     and hazard services.
 
     Args:
@@ -93,7 +93,7 @@ class BuildingDamage(BaseAnalysis):
 
         Args:
             buildings (list): Multiple buildings from input inventory set.
-            hazard_type (str): A hazard type of the hazard exposure.
+            hazard_type (str): Hazard type, either earthquake, tornado, tsunami, or hurricane.
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:

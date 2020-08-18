@@ -13,7 +13,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil
 
 class RoadDamage(BaseAnalysis):
     """Road Damage Analysis calculates the probability of road damage based on
-    hazard type such as earthquake by calling fragility
+    an earthquake or tsunami hazard by calling fragility
     and hazard services.
 
     Args:
@@ -110,7 +110,7 @@ class RoadDamage(BaseAnalysis):
 
         Args:
             roads (list): Multiple roads from input inventory set.
-            hazard_type (str): A hazard type of the hazard exposure.
+            hazard_type (str): A hazard type of the hazard exposure (earthquake or tsunami).
             hazard_dataset_id (str): An id of the hazard exposure.
             use_hazard_uncertainty(bool): Flag to indicate use uncertainty or not
             geology_dataset_id (str): An id of the geology for use in liquefaction.
