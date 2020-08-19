@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - \_\_version__ property to show pyincore version. IncoreClient will print the detected version [INCORE1-520](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-520)
-- Building Functionality analyses outputs functionality samples as an additional result [INCORE1-734](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-734)
+- Building Functionality analysis outputs functionality samples as an additional result [INCORE1-734](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-734)
 
 
 ## [0.7.0] - 2020-07-31
