@@ -62,7 +62,12 @@ class BuildingFunctionality(BaseAnalysis):
             ],
             'output_datasets': [
                 {
-                    'id': 'result',
+                    'id': 'functionality_samples',
+                    'description': 'CSV file of functionality samples',
+                    'type': 'incore:funcSample'
+                },
+                {
+                    'id': 'functionality_probability',
                     'description': 'CSV file of functionality probability',
                     'type': 'incore:funcProbability'
                 }
@@ -76,12 +81,25 @@ class BuildingFunctionality(BaseAnalysis):
         substations_df = self.get_input_dataset("substations_damage_mcs_samples").get_dataframe_from_csv()
         poles_df = self.get_input_dataset("poles_damage_mcs_samples").get_dataframe_from_csv()
 
-        functionality_probabilities = [self.functionality(building, buildings_df, substations_df, poles_df,
-                                                          interdependency_dict) for building in buildings_df['guid']]
+        functionality_probabilities = []
+        functionality_samples = []
+        for building in buildings_df['guid']:
+            building, sample, probability = self.functionality(building, buildings_df, substations_df, poles_df,
+                                                               interdependency_dict)
+            functionality_probabilities.append([building, probability])
+            functionality_samples.append([building, sample])
 
-        results = pd.DataFrame(functionality_probabilities, columns=['building_guid', 'probability'])
+        fp_results = pd.DataFrame(functionality_probabilities, columns=['building_guid', 'probability'])
+        fs_results = pd.DataFrame(functionality_samples, columns=['building_guid', 'samples'])
 
-        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"),
+        self.set_result_csv_data("functionality_probability",
+                                 fp_results,
+                                 name=self.get_parameter("result_name") + "_functionality_probability",
+                                 source='dataframe')
+
+        self.set_result_csv_data("functionality_samples",
+                                 fs_results,
+                                 name=self.get_parameter("result_name") + "_functionality_samples",
                                  source='dataframe')
 
         return True
@@ -96,7 +114,8 @@ class BuildingFunctionality(BaseAnalysis):
             poles: poles DataFrame
             interdependency: interdependency between buildings and substations and poles dictionary
 
-        Returns: probability [0,1] of building being functional
+        Returns: building, functionality sampe that is a string of "0,0,1...", probability [0,1] of building being
+        functional
 
         """
         # if building is defined in the interdependency lookup table
@@ -132,10 +151,10 @@ class BuildingFunctionality(BaseAnalysis):
             probability = 0.0
             if functionality_sum > 0:
                 probability = (functionality_sum/num_samples)
-            return building, probability
+            return building, ",".join([str(sample) for sample in functionality_samples]), probability
 
         else:
-            return building, "NA"
+            return building, "NA", "NA"
 
     def functionality_probability(self, building_sample, substation_sample, pole_sample):
         """ This function is subject to change. For now, buildings have a 1-to-1 relationship with
