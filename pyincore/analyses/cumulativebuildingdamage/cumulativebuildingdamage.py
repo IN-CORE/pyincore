@@ -14,9 +14,10 @@ from pyincore import BaseAnalysis, AnalysisUtil
 
 
 class CumulativeBuildingDamage(BaseAnalysis):
-    """This analysis computes building damage based on a particular hazard. The process for computing the structural
-     damage is done externally and the results for earthquake and tsunami are imported to the analysis.
-     The damage intervals are then calculated from combined limit states.
+    """This analysis computes the cumulative building damage for a combined earthquake and tsunami event.
+    The process for computing the structural damage is done externally and the results for earthquake and
+    tsunami are passed to this analysis. The damage intervals are then calculated from combined limit
+    state probabilities for the two hazards.
     """
 
     def run(self):

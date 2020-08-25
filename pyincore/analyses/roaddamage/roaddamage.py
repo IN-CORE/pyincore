@@ -12,9 +12,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil
 
 
 class RoadDamage(BaseAnalysis):
-    """Road Damage Analysis calculates the probability of road damage based on
-    an earthquake or tsunami hazard by calling fragility
-    and hazard services.
+    """Road Damage Analysis calculates the probability of road damage based on an earthquake or tsunami hazard.
 
     Args:
         incore_client (IncoreClient): Service authentication.
