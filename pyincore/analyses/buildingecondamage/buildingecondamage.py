@@ -10,7 +10,7 @@ import concurrent.futures
 import traceback
 from itertools import repeat
 
-from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
+from pyincore import BaseAnalysis, AnalysisUtil, GeoUtil
 from pyincore.analyses.buildingecondamage.buildingeconutil import BuildingEconUtil
 
 
@@ -24,54 +24,63 @@ class BuildingEconDamage(BaseAnalysis):
 
     """
     def __init__(self, incore_client):
-        self.hazardsvc = HazardService(incore_client)
-        self.fragilitysvc = FragilityService(incore_client)
+        self.occ_damage_multipliers = None
+        self.consumer_price_index = None
+        self.default_inflation_factor = None
 
+        self.bldg_nsdmg_set = None
+        self.nsdmg_map = None
+
+        self.loss = 0.0
+        self.loss_dev = 0.0
+        self.loss_acc = 0.0
+        self.loss_acc_dev = 0.0
+        self.loss_dri = 0.0
+        self.loss_dri_dev = 0.0
+        self.loss_con = 0.0
+        self.loss_con_dev = 0.0
+        self.loss_tot = 0.0
+        self.loss_tot_dev = 0.0
         super(BuildingEconDamage, self).__init__(incore_client)
 
     def run(self):
-        """Executes building damage analysis."""
-        # Building dataset
-        bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
+        """Executes building economic damage analysis."""
+        bldg_dmg_set = self.get_input_dataset("building_dmg").get_inventory_reader()
+        bldg_nsdmg_set = self.get_input_dataset("nsbuildings_dmg").get_inventory_reader()
+        # if bldg_nsdmg_set is not None:
+        #     if len(self.nsdmg_map) == 0:
+        #         self.populate_feature_map(self.nsdmg_map, bldg_nsdmg_set)
 
-        # Get hazard input
-        hazard_dataset_id = self.get_parameter("hazard_id")
-
-        # Hazard type of the exposure
-        hazard_type = self.get_parameter("hazard_type")
-
-        # Get Fragility key
-        fragility_key = self.get_parameter("fragility_key")
-        if fragility_key is None and not hazard_type == 'tsunami':
-            fragility_key = BuildingEconUtil.DEFAULT_FRAGILITY_KEY
-            self.set_parameter("fragility_key", fragility_key)
-        else:
-            fragility_key = BuildingEconUtil.DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY
-            self.set_parameter("fragility_key", fragility_key)
+        occ_damage_multipliers = self.get_input_dataset("building_occupancy").get_inventory_reader()
+        # inflation table
+        consumer_price_index = self.get_input_dataset("consumer_price_index").get_inventory_reader()
 
         user_defined_cpu = 1
 
         if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(bldg_set), user_defined_cpu)
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(bldg_dmg_set), user_defined_cpu)
 
-        avg_bulk_input_size = int(len(bldg_set) / num_workers)
+        avg_bulk_input_size = int(len(bldg_dmg_set) / num_workers)
         inventory_args = []
         count = 0
-        inventory_list = list(bldg_set)
+        inventory_list = list(bldg_dmg_set)
         while count < len(inventory_list):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input, num_workers,
+        hazard_type = None
+        hazard_dataset_id = ""
+
+        results = self.bldg_econ_dmg_concurrent_future(self.bldg_econ_dmg_bulk_input, num_workers,
                                                          inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
         return True
 
-    def building_damage_concurrent_future(self, function_name, parallelism, *args):
+    def bldg_econ_dmg_concurrent_future(self, function_name, parallelism, *args):
         """Utilizes concurrent.future module.
 
         Args:
@@ -90,7 +99,7 @@ class BuildingEconDamage(BaseAnalysis):
 
         return output
 
-    def building_damage_analysis_bulk_input(self, buildings, hazard_type, hazard_dataset_id):
+    def bldg_econ_dmg_bulk_input(self, buildings, hazard_type, hazard_dataset_id):
         """Run analysis for multiple buildings.
 
         Args:
@@ -103,24 +112,23 @@ class BuildingEconDamage(BaseAnalysis):
 
         """
         result = []
-        fragility_key = self.get_parameter("fragility_key")
-
-        fragility_sets = dict()
-        fragility_sets[fragility_key] = self.fragilitysvc.map_inventory(
-            self.get_parameter("mapping_id"), buildings, fragility_key)
+        # fragility_key = self.get_parameter("fragility_key")
+        #
+        # fragility_sets = dict()
+        # fragility_sets[fragility_key] = self.fragilitysvc.map_inventory(
+        #     self.get_parameter("mapping_id"), buildings, fragility_key)
 
         for building in buildings:
-            fragility_set = dict()
-            if building["id"] in fragility_sets[fragility_key]:
-                fragility_set[fragility_key] = fragility_sets[fragility_key][building["id"]]
+            # fragility_set = dict()
+            # if building["id"] in fragility_sets[fragility_key]:
+            #     fragility_set[fragility_key] = fragility_sets[fragility_key][building["id"]]
 
-            result.append(self.building_damage_analysis(building, fragility_set, hazard_dataset_id,
-                                                        hazard_type))
+            result.append(self.bldg_econ_dmg(building))
 
         return result
 
-    def building_damage_analysis(self, building, fragility_set, hazard_dataset_id, hazard_type):
-        """Calculates building damage results for a single building.
+    def bldg_econ_dmg(self, building):
+        """Calculates building economic damage results for a single building.
 
         Args:
             building (obj): A JSON mapping of a geometric object from the inventory: current building.
@@ -129,68 +137,100 @@ class BuildingEconDamage(BaseAnalysis):
             hazard_type (str): A hazard type of the hazard exposure.
 
         Returns:
-            OrderedDict: A dictionary with building damage values and other data/metadata.
+            OrderedDict: A dictionary with building economic damage values and other data/metadata.
 
         """
+        # 		occ_type_col = feature.getFeatureType().indexOf(Building.OCCUPANCY_TYPE)
+        # 		guid = ""
+        #
+        # 		bldgIdCol = feature.getFeatureType().indexOf(Building.BUILDING_ID_COL)
+        # 		if bldgIdCol != -1:
+        # 			guid = feature.getAttribute(bldgIdCol)
+        # 		else:
+        # 			guid = feature.getAttribute(FeatureDataset.FEATURE_GUID)
+        #
+        # 		inflationMultiplier = getInflationMultiplier()
+        # 		if appraised_val_col != -1 and occ_type_col != -1:
+        # 			occtype = feature.getAttribute(occ_type_col)
+        # 			appraisedValue = getAppraisedValue(occtype, appraised_val_col)
+        #
+        # 			mean_damage = feature.getAttribute(Building.MEAN_DAMAGE)
+        # 			mean_damage_dev = feature.getAttribute(Building.MEAN_DAMAGE_DEV
+
         try:
             bldg_results = collections.OrderedDict()
 
-            hazard_val = 0.0
-            demand_type = "None"
+            print(building)
+            print(building["properties"])
 
-            dmg_probability = collections.OrderedDict()
+            # print(building.OCCUPANCY_TYPE)
+            # print(building.BUILDING_ID_COL)
+            # print(building.FEATURE_GUID)
+            # print(building.MEAN_DAMAGE)
+            # print(building.MEAN_DAMAGE_DEV)
+            #
+            # hazard_val = 0.0
+            # demand_type = "None"
+            #
+            # dmg_probability = collections.OrderedDict()
+            #
+            # if bool(fragility_set):
+            #     location = GeoUtil.get_location(building)
+            #     fragility_key = self.get_parameter("fragility_key")
+            #     local_fragility_set = fragility_set[fragility_key]
+            #     building_period = 0.0
+            #     if hazard_type == 'earthquake':
+            #         num_stories = building['properties']['no_stories']
+            #         building_period = AnalysisUtil.get_building_period(num_stories, local_fragility_set)
+            #
+            #         # TODO include liquefaction and hazard uncertainty
+            #         hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
+            #         demand_units = local_fragility_set['demandUnits']
+            #         hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
+            #                                                                 demand_units, location.y, location.x)
+            #         demand_type = local_fragility_set['demandType']
+            #     elif hazard_type == 'tornado':
+            #         demand_type = local_fragility_set['demandType']
+            #         demand_units = local_fragility_set['demandUnits']
+            #         hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
+            #                                                              location.x, 0)
+            #     elif hazard_type == 'hurricane':
+            #         # TODO implement hurricane
+            #         demand_type = local_fragility_set['demandType']
+            #         print("hurricane not yet implemented")
+            #     elif hazard_type == 'tsunami':
+            #         hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
+            #
+            #         demand_units = local_fragility_set["demandUnits"]
+            #         point = str(location.y) + "," + str(location.x)
+            #         hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
+            #                                                               hazard_demand_type,
+            #                                                               demand_units,
+            #                                                               [point])[0]["hazardValue"]
+            #         demand_type = hazard_demand_type
+            #         # Sometimes the geotiffs give large negative values for out of bounds instead of 0
+            #         if hazard_val <= 0.0:
+            #             hazard_val = 0.0
+            #
+            #     dmg_probability = AnalysisUtil.calculate_limit_state(local_fragility_set, hazard_val, building_period)
+            # else:
+            #     dmg_probability['immocc'] = 0.0
+            #     dmg_probability['lifesfty'] = 0.0
+            #     dmg_probability['collprev'] = 0.0
+            #
+            # dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
-            if bool(fragility_set):
-                location = GeoUtil.get_location(building)
-                fragility_key = self.get_parameter("fragility_key")
-                local_fragility_set = fragility_set[fragility_key]
-                building_period = 0.0
-                if hazard_type == 'earthquake':
-                    num_stories = building['properties']['no_stories']
-                    building_period = AnalysisUtil.get_building_period(num_stories, local_fragility_set)
-
-                    # TODO include liquefaction and hazard uncertainty
-                    hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
-                    demand_units = local_fragility_set['demandUnits']
-                    hazard_val = self.hazardsvc.get_earthquake_hazard_value(hazard_dataset_id, hazard_demand_type,
-                                                                            demand_units, location.y, location.x)
-                    demand_type = local_fragility_set['demandType']
-                elif hazard_type == 'tornado':
-                    demand_type = local_fragility_set['demandType']
-                    demand_units = local_fragility_set['demandUnits']
-                    hazard_val = self.hazardsvc.get_tornado_hazard_value(hazard_dataset_id, demand_units, location.y,
-                                                                         location.x, 0)
-                elif hazard_type == 'hurricane':
-                    # TODO implement hurricane
-                    demand_type = local_fragility_set['demandType']
-                    print("hurricane not yet implemented")
-                elif hazard_type == 'tsunami':
-                    hazard_demand_type = BuildingUtil.get_hazard_demand_type(building, local_fragility_set, hazard_type)
-
-                    demand_units = local_fragility_set["demandUnits"]
-                    point = str(location.y) + "," + str(location.x)
-                    hazard_val = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id,
-                                                                          hazard_demand_type,
-                                                                          demand_units,
-                                                                          [point])[0]["hazardValue"]
-                    demand_type = hazard_demand_type
-                    # Sometimes the geotiffs give large negative values for out of bounds instead of 0
-                    if hazard_val <= 0.0:
-                        hazard_val = 0.0
-
-                dmg_probability = AnalysisUtil.calculate_limit_state(local_fragility_set, hazard_val, building_period)
-            else:
-                dmg_probability['immocc'] = 0.0
-                dmg_probability['lifesfty'] = 0.0
-                dmg_probability['collprev'] = 0.0
-
-            dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
-
-            bldg_results['guid'] = building['properties']['guid']
-            bldg_results.update(dmg_probability)
-            bldg_results.update(dmg_interval)
-            bldg_results['demandtype'] = demand_type
-            bldg_results['hazardval'] = hazard_val
+            bldg_results["guid"] = building["properties"]["guid"]
+            bldg_results["self.loss"] = self.loss
+            bldg_results["self.loss_dev"] = self.loss_dev
+            bldg_results["loss_acc"] = self.loss_acc
+            bldg_results["loss_acc_dev"] = self.loss_acc_dev
+            bldg_results["loss_dri"] = self.loss_dri
+            bldg_results["loss_dri_dev"] = self.loss_dri_dev
+            bldg_results["loss_con"] = self.loss_con
+            bldg_results["loss_con_dev"] = self.loss_con_dev
+            bldg_results["loss_tot"] = self.loss_tot
+            bldg_results["loss_tot_dev"] = self.loss_tot_dev
 
             return bldg_results
 
@@ -216,30 +256,6 @@ class BuildingEconDamage(BaseAnalysis):
                     'description': 'result dataset name',
                     'type': str
                 },
-                # {
-                #     'id': 'mapping_id',
-                #     'required': True,
-                #     'description': 'Fragility mapping dataset',
-                #     'type': str
-                # },
-                # {
-                #     'id': 'hazard_type',
-                #     'required': True,
-                #     'description': 'Hazard Type (e.g. earthquake)',
-                #     'type': str
-                # },
-                # {
-                #     'id': 'hazard_id',
-                #     'required': True,
-                #     'description': 'Hazard ID',
-                #     'type': str
-                # },
-                # {
-                #     'id': 'fragility_key',
-                #     'required': False,
-                #     'description': 'Fragility key to use in mapping dataset',
-                #     'type': str
-                # },
                 {
                     'id': 'num_cpu',
                     'required': False,
@@ -258,7 +274,7 @@ class BuildingEconDamage(BaseAnalysis):
                     'id': 'building_occupancy',
                     'required': True,
                     'description': 'Building occupancy, use, efacility and multipliers',
-                    'type': ['incore:buildingOccupancy']
+                    'type': ['incore:incore:buildingOccupancy']
                 },
                 {
                     'id': 'nsbuildings_dmg',
