@@ -281,9 +281,8 @@ def test_create_and_delete_flood(hazardsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "flood-dataset.json"), 'r') as file:
         flood_json = file.read()
 
-    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")),
-                  str(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif")),
-                  str(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))]
+    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "Depth_50ft.tif")),
+                  str(os.path.join(pyglobals.TEST_DATA_DIR, "WSE_50ft.tif"))]
     post_response = hazardsvc.create_flood(flood_json, file_paths)
     assert post_response["id"] is not None and post_response["hazardDatasets"][1][
         "datasetId"] is not None
@@ -294,8 +293,8 @@ def test_create_and_delete_flood(hazardsvc):
 
 def test_get_flood_metadata(hazardsvc):
     # TODO add id of published flood
-    response = hazardsvc.get_flood_metadata("")
-    assert response['id'] == ""
+    response = hazardsvc.get_flood_metadata("5f4d02e99f43ee0dde768406")
+    assert response['id'] == "5f4d02e99f43ee0dde768406"
 
 
 def test_get_flood_metadata_list(hazardsvc):
@@ -305,8 +304,8 @@ def test_get_flood_metadata_list(hazardsvc):
 
 def test_get_flood_values(hazardsvc):
     # TODO need to add id, lat, long and values
-    response = hazardsvc.get_flood_values("", "floodDepth", "m", [",", ","])
-    assert response[0]["hazardValue"] == 0.0 and response[1]["hazardValue"] == 0.0
+    response = hazardsvc.get_flood_values("5f4d02e99f43ee0dde768406", "waterSurfaceElevation", "m", ["34.60,-79.16", "34.62,-79.16"])
+    assert response[0]["hazardValue"] == 137.69830322265625 and response[1]["hazardValue"] == 141.17652893066406
 
 
 def test_search_floods(hazardsvc):

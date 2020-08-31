@@ -5,7 +5,7 @@
 	"hazardDatasets": [
         {
             "hazardType": "deterministic",
-            "demandType": "floodDepth",
+            "demandType": "inundationDepth",
             "demandUnits": "m",
             "floodParameters": {
                 "model": "riverine flooding"
