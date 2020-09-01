@@ -274,6 +274,7 @@ def test_search_hurricanes(hazardsvc):
     response = hazardsvc.search_hurricanes("Galveston")
     assert response[0]["id"] is not None
 
+
 def test_create_and_delete_flood(hazardsvc):
     """
         Also deletes the created dataset
@@ -303,8 +304,8 @@ def test_get_flood_metadata_list(hazardsvc):
 
 
 def test_get_flood_values(hazardsvc):
-    # TODO need to add id, lat, long and values
-    response = hazardsvc.get_flood_values("5f4d02e99f43ee0dde768406", "waterSurfaceElevation", "m", ["34.60,-79.16", "34.62,-79.16"])
+    response = hazardsvc.get_flood_values("5f4d02e99f43ee0dde768406", "waterSurfaceElevation", "m",
+                                          ["34.60,-79.16", "34.62,-79.16"])
     assert response[0]["hazardValue"] == 137.69830322265625 and response[1]["hazardValue"] == 141.17652893066406
 
 
