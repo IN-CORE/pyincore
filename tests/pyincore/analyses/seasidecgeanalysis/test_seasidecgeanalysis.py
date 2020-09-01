@@ -18,7 +18,7 @@ def run_base_analysis():
     jobcr = "5f173d262fab4d660a8e9f9c"
     hhtable = "5f173d6bc98cf43417c89561"
     sims = "5f174211c98cf43417c89565"
-    sector_shocks = "5f4e5f8d362ee40fb3a427b8"
+    sector_shocks = "5f4e78d0362ee40fb3a52ac2"
 
     seaside_cge.load_remote_input_dataset("SAM", sam)
     seaside_cge.load_remote_input_dataset("BB", bb)
