@@ -275,6 +275,45 @@ def test_search_hurricanes(hazardsvc):
     assert response[0]["id"] is not None
 
 
+def test_create_and_delete_flood(hazardsvc):
+    """
+        Also deletes the created dataset
+    """
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "flood-dataset.json"), 'r') as file:
+        flood_json = file.read()
+
+    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "flood-inundationDepth-50ft.tif")),
+                  str(os.path.join(pyglobals.TEST_DATA_DIR, "flood-WSE-50ft.tif"))]
+    post_response = hazardsvc.create_flood(flood_json, file_paths)
+    assert post_response["id"] is not None and post_response["hazardDatasets"][1][
+        "datasetId"] is not None
+
+    del_response = hazardsvc.delete_flood(post_response["id"])
+    assert del_response["id"] is not None
+
+
+def test_get_flood_metadata(hazardsvc):
+    # TODO add id of published flood
+    response = hazardsvc.get_flood_metadata("5f4d02e99f43ee0dde768406")
+    assert response['id'] == "5f4d02e99f43ee0dde768406"
+
+
+def test_get_flood_metadata_list(hazardsvc):
+    response = hazardsvc.get_flood_metadata_list()
+    assert len(response) > 0 and 'id' in response[0].keys()
+
+
+def test_get_flood_values(hazardsvc):
+    response = hazardsvc.get_flood_values("5f4d02e99f43ee0dde768406", "waterSurfaceElevation", "m",
+                                          ["34.60,-79.16", "34.62,-79.16"])
+    assert response[0]["hazardValue"] == 137.69830322265625 and response[1]["hazardValue"] == 141.17652893066406
+
+
+def test_search_floods(hazardsvc):
+    response = hazardsvc.search_floods("Lumberton")
+    assert response[0]["id"] is not None
+
+
 @pytest.mark.skip(reason="performance issues")
 def test_create_hurricane_windfield(hazardsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "hurricanewf.json"), 'r') as file:

@@ -1,0 +1,23 @@
+{
+	"name": "Lumberton Deterministic Flood - riverine flooding",
+	"description": "Lumberton dataset based deterministic hazard - 3 datasets",
+	"floodType": "dataset",
+	"hazardDatasets": [
+        {
+            "hazardType": "deterministic",
+            "demandType": "inundationDepth",
+            "demandUnits": "m",
+            "floodParameters": {
+                "model": "riverine flooding"
+            }
+        },
+       {
+            "hazardType": "deterministic",
+            "demandType": "waterSurfaceElevation",
+            "demandUnits": "m",
+            "floodParameters": {
+                "model": "riverine flooding"
+            }
+        }
+	]
+}
