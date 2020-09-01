@@ -33,21 +33,7 @@ class SeasideCGEModel(BaseAnalysis):
         return {
             'name': 'Joplin-small-calibrated',
             'description': 'CGE model for Joplin.',
-            'input_parameters': [
-                {
-                    'id': 'model_iterations',
-                    'required': True,
-                    'description': 'Number of dynamic model iterations.',
-                    'type': int
-                },
-                {
-                    'id': 'solver_path',
-                    'required': True,
-                    'description': 'Path to ipopt package.',
-                    'type': str
-                }
-
-            ],
+            'input_parameters': [],
             'input_datasets': [
                 {
                     'id': 'SAM',
@@ -89,6 +75,12 @@ class SeasideCGEModel(BaseAnalysis):
                     'required': True,
                     'description': 'Random numbers for the change of capital stocks in the CGE model.',
                     'type': ['incore:SeasideCGEsim']
+                },
+                {
+                    'id': 'sector_shocks',
+                    'required': True,
+                    'description': 'Aggregation of building functionality states to capital shocks per sector',
+                    'type': ['incore:SeasideCGEshocks']
                 }
             ],
             'output_datasets': [
@@ -118,6 +110,7 @@ class SeasideCGEModel(BaseAnalysis):
     def run(self):
         def _(x):
             return ExprM(vars, m=x)
+
         # ----------------------------------------------------------------
         # define sets
         # ----------------------------------------------------------------
@@ -1427,16 +1420,16 @@ class SeasideCGEModel(BaseAnalysis):
             line1 = ExprM(vars, m=HW0.loc[H] / HH0.loc[H])
             LSEQ1line2pre = FD.loc(L, Z).sum(1)
             line2 = (((RA.loc(L) / ExprM(vars, m=RA0.loc[L])).sum(L) / 5) / (
-                        CPI.loc(H) / ExprM(vars, m=CPI0[H]))) ** ExprM(
+                    CPI.loc(H) / ExprM(vars, m=CPI0[H]))) ** ExprM(
                 vars, m=ETARA.loc[H])
             line3 = ((ExprM(vars, m=TP.loc[H, G]) / CPI.loc(H)).sum(G) / (
                     ExprM(vars, m=TP.loc[H, G]) / ExprM(vars, m=CPI0.loc[H])).sum(G)) ** ExprM(vars, m=ETAPT.loc[H])
             # line4 =( ((ExprM(vars, m = PIT.loc[GI,H])* ExprM(vars, m = HH0.loc[H])).sum(GI)+ (ExprM(vars, m = TAUH0.loc[G,H])*ExprM(vars, m = HH0.loc[H])).sum(G))\
             #        / ((ExprM(vars, m = PIT.loc[GI,H])* HH.loc(H)).sum(GI)+ (ExprM(vars, m = TAUH.loc[G,H])*HH.loc(H)).sum(G)) )** ExprM(vars, m = ETAPIT.loc[H])
             line4 = (((ExprM(vars, m=PIT.loc[GI, H]) * HH.loc(H)).sum(GI) + (
-                        ExprM(vars, m=TAUH0.loc[G, H]) * HH.loc(H)).sum(G)) \
+                    ExprM(vars, m=TAUH0.loc[G, H]) * HH.loc(H)).sum(G)) \
                      / ((ExprM(vars, m=PIT.loc[GI, H]) * HH.loc(H)).sum(GI) + (
-                                ExprM(vars, m=TAUH.loc[G, H]) * HH.loc(H)).sum(
+                            ExprM(vars, m=TAUH.loc[G, H]) * HH.loc(H)).sum(
                         G))) ** ExprM(vars, m=ETAPIT.loc[H])
 
             LSEQ1 = ((line1 * line2 * line3 * line4) - HW.loc(H) / HH.loc(H))
@@ -1722,7 +1715,7 @@ class SeasideCGEModel(BaseAnalysis):
             opt = SolverFactory(solver, solver_io=solver_io)
 
             if opt is None:
-                logger.debug("ERROR: Unable to create solver plugin for %s " 
+                logger.debug("ERROR: Unable to create solver plugin for %s "
                              "using the %s interface" % (solver, solver_io))
                 exit(1)
 
@@ -1812,39 +1805,34 @@ class SeasideCGEModel(BaseAnalysis):
 
         '''
 
-        '''
-        ######## The following is for individual shocks. ######## 
+        # '''
+        # The following is for individual shocks.
 
-        iNum = 1 # dynamic model itterations
+        iNum = 1  # dynamic model itterations
 
+        sector_shocks = pd.read_csv(self.get_input_dataset("sector_shocks").get_file_path('csv'))
+
+        # The line below this can be used if we want to add the ability to do multiple simulations later, currently
+        # it changes nothing.
+        KS00 = KS0.copy()
         for ittr in range(iNum):
-          print("Simulation: ", ittr+1)
-          if ittr == 0: # if it is the first simulation, apply the shock
+            print("Simulation: ", ittr + 1)
+            if ittr == 0:  # if it is the first simulation, apply the shock
+                # The below line of code should take care of all of the multiplication necessary without having to name
+                # each sector individually.
+                KS0.loc[K, I] = KS00.loc[K, I].mul(sector_shocks.iloc[:, 1])
 
-              #DELTA.loc[I] = 1.02 * DELTA.loc[I]
+            else:  # other simulations
+                # KS0 = KSNEW*(1-DEPR)+vars.get('N', x=soln[-1])
+                KS0 = vars.get('KS', x=soln[-1])
 
-              KS0.loc[K, I] = KS0.loc[K, I]*0.7
+            run_solver(filename, tmp)
 
-              #KS0.loc[K, ['HS1']] = KS0.loc[K, ['HS1']] * 0.675
-              #KS0.loc[K, ['HS2']] = KS0.loc[K, ['HS2']] * 0.739
-              #KS0.loc[K, ['HS3']] = KS0.loc[K, ['HS3']] * 0.958
-              #KS0.loc[K, ['GOODS']] = KS0.loc[K, ['GOODS']] * 0.658
-              #KS0.loc[K, ['TRADE']] = KS0.loc[K, ['TRADE']] * 0.961
-              #KS0.loc[K, ['OTHER']] = KS0.loc[K, ['OTHER']] * 0.673
-
-
-          else: # other simulations
-
-              #KS0 = KSNEW*(1-DEPR)+vars.get('N', x=soln[-1])
-              KS0 = vars.get('KS', x=soln[-1])
-
-          run_solver(filename, tmp)
+        # '''
 
         '''
+         ######## The following is for running atleast one simulation (ie shock) ########  
 
-        '''
-         ######## The following is for random shocks. ########  
-        '''
         # iNum = 1 # dynamic model itterations
 
         sims = pd.read_csv(self.get_input_dataset("SIMS").get_file_path('csv'), index_col=0)
@@ -1993,6 +1981,7 @@ class SeasideCGEModel(BaseAnalysis):
                               })
 
         self.set_result_csv_data("Seaside_output", cge_output, name="Seaside_output", source="dataframe")
+        '''
 
         return True
 
