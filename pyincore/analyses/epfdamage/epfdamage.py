@@ -13,7 +13,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService
 
 
 class EpfDamage(BaseAnalysis):
-    """Computes electric power facility structural damage for an earthquake hazard.
+    """Computes electric power facility structural damage for an earthquake, tsunami, tornado, and hurricane hazards.
 
     Args:
         incore_client (IncoreClient): Service authentication.
@@ -106,7 +106,7 @@ class EpfDamage(BaseAnalysis):
 
         Args:
             epfs (list): Multiple epfs from input inventory set.
-            hazard_type (str): A type of hazard exposure (earthquake etc.).
+            hazard_type (str): A type of hazard exposure (earthquake, tsunami, tornado, or hurricane).
             hazard_dataset_id (str): An id of the hazard exposure.
             use_hazard_uncertainty (bool):  Hazard uncertainty. True for using uncertainty when computing damage,
                 False otherwise.
