@@ -282,8 +282,8 @@ def test_create_and_delete_flood(hazardsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "flood-dataset.json"), 'r') as file:
         flood_json = file.read()
 
-    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "flood-depth-50ft.tif")),
-                  str(os.path.join(pyglobals.TEST_DATA_DIR, "WSE-50ft.tif"))]
+    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "flood-inundationDepth-50ft.tif")),
+                  str(os.path.join(pyglobals.TEST_DATA_DIR, "flood-WSE-50ft.tif"))]
     post_response = hazardsvc.create_flood(flood_json, file_paths)
     assert post_response["id"] is not None and post_response["hazardDatasets"][1][
         "datasetId"] is not None
