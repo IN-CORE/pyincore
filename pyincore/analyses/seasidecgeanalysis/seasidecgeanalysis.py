@@ -1820,6 +1820,7 @@ class SeasideCGEModel(BaseAnalysis):
             if ittr == 0:  # if it is the first simulation, apply the shock
                 # The below line of code should take care of all of the multiplication necessary without having to name
                 # each sector individually.
+                # sector shocks need to be in the same order as K
                 KS0.loc[K, I] = KS00.loc[K, I].mul(sector_shocks.iloc[:, 1])
 
             else:  # other simulations
@@ -1827,22 +1828,6 @@ class SeasideCGEModel(BaseAnalysis):
                 KS0 = vars.get('KS', x=soln[-1])
 
             run_solver(filename, tmp)
-
-        # '''
-
-        '''
-         ######## The following is for running atleast one simulation (ie shock) ########  
-
-        # iNum = 1 # dynamic model itterations
-
-        sims = pd.read_csv(self.get_input_dataset("SIMS").get_file_path('csv'), index_col=0)
-        iNum = len(sims.columns)
-        KS00 = KS0.copy()
-
-        for num in range(iNum):
-            KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
-            run_solver(filename, tmp)
-
         # Prepare simulations output
         CH0 = vars.get('CH', x=soln[0])
         CPI0 = vars.get('CPI', x=soln[0])
@@ -1956,14 +1941,17 @@ class SeasideCGEModel(BaseAnalysis):
         cge_output = pd.DataFrame({'Seaside': ['Total Employment', 'Domestic Supply(mil of $)',
                                                'Real Household Income(mil of $)', 'HH1', 'HH2', 'HH3', 'HH4', 'HH5',
                                                'Total',
-                                               'Local Tax Revenue(mil of $)', 'LOCTAX', 'PROPTX', 'ACCTAX', 'Total'],
+                                               'Local Tax Revenue(mil of $)', 'LOCTAX', 'PROPTX', 'ACCTAX',
+                                               'Total'],
                                    'Amount of Change': ['{:.2f}'.format(total_employment_change),
                                                         '{:.2f}'.format(domestic_supply_change), '',
                                                         '{:.2f}'.format(HH1_change), '{:.2f}'.format(HH2_change),
                                                         '{:.2f}'.format(HH3_change), '{:.2f}'.format(HH4_change),
-                                                        '{:.2f}'.format(HH5_change), '{:.2f}'.format(HH_total_change),
+                                                        '{:.2f}'.format(HH5_change),
+                                                        '{:.2f}'.format(HH_total_change),
                                                         '',
-                                                        '{:.2f}'.format(LOCTAX_change), '{:.2f}'.format(PROPTX_change),
+                                                        '{:.2f}'.format(LOCTAX_change),
+                                                        '{:.2f}'.format(PROPTX_change),
                                                         '{:.2f}'.format(ACCTAX_change),
                                                         '{:.2f}'.format(TAX_total_change)],
                                    'Percent Change': ['{:.2f}%'.format(total_employment_percentage * 100),
@@ -1978,10 +1966,9 @@ class SeasideCGEModel(BaseAnalysis):
                                                       '{:.2f}%'.format(PROPTX_percentage * 100),
                                                       '{:.2f}%'.format(ACCTAX_percentage * 100),
                                                       '{:.2f}%'.format(TAX_total_percentage * 100)]
-                              })
+                                   })
 
         self.set_result_csv_data("Seaside_output", cge_output, name="Seaside_output", source="dataframe")
-        '''
 
         return True
 
