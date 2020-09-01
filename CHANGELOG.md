@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - \_\_version__ property to show pyincore version. IncoreClient will print the detected version [INCORE1-520](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-520)
 - Building Functionality analysis outputs functionality samples as an additional result [INCORE1-734](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-734)
-- python method to interact with flood endpoints in hazardservices.py [INCORE1-747](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-747)
+- Python method to interact with flood endpoints in hazard services [INCORE1-747](https://opensource.ncsa.illinois
+.edu/jira/browse/INCORE1-747)
 ### Changed
 - Calculate multiple limit states of custom expression fragility curves [INCORE1-682](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-682) 
 
