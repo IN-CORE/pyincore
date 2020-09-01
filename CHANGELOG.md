@@ -7,14 +7,34 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Removed
+- Clean up redundant method in analysisutil [INCORE1-732](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-732)
+
+### Added
+- \_\_version__ property to show pyincore version. IncoreClient will print the detected version [INCORE1-520](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-520)
+- Building Functionality analysis outputs functionality samples as an additional result [INCORE1-734](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-734)
+- Python method to interact with flood endpoints in hazard service [INCORE1-747](https://opensource.ncsa.illinois
+.edu/jira/browse/INCORE1-747)
+- Added Seaside cge [INCORE1-651](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-651).
+### Changed
+- Calculate multiple limit states of custom expression fragility curves [INCORE1-682](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-682) 
+
+
+### Changed
+- Updated docstrings to include all hazards that each support [INCORE1-708](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-708)
+
+## [0.7.0] - 2020-07-31
+
 ### Added
 - Wrapper methods for hurricane endpoints and their pytests [INCORE1-698](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-698)
-- Added road damage by hurricane inundation [INCORE1-697](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-697)
-- Added Docker build and release scripts [INCORE1-709](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-709).  
-- Added Seaside cge [INCORE1-651](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-651).
+- Road damage by hurricane inundation [INCORE1-697](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-697)
+- Docker build and release scripts [INCORE1-709](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-709).  
+- Capital shocks analysis [INCORE1-691](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-691).
+
 ### Changed
 - Allow more input data types for MC failure probability; Add a failure state output for each sample [INCORE1-695](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-695)
 - Modify input dataset for building functionality analysis [INCORE1-700](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-700)
+- Updated Joplin CGE for new capital shocks output [INCORE1-718](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-718)
 
 ## [0.6.4] - 2020-06-30
 

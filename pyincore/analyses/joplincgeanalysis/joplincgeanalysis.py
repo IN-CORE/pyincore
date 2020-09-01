@@ -131,7 +131,7 @@ class JoplinCGEModel(BaseAnalysis):
                     'id': 'sector_shocks',
                     'required': True,
                     'description': 'Aggregation of building functionality states to capital shocks per sector',
-                    'type': ['incore:JoplinCGEshocks']
+                    'type': ['incore:capitalShocks']
                 }
             ],
             'output_datasets': [
@@ -367,7 +367,7 @@ class JoplinCGEModel(BaseAnalysis):
         TAUFF = pd.read_csv(self.get_input_dataset("TAUFF").get_file_path('csv'), index_col=0)
         JOBCR = pd.read_csv(self.get_input_dataset("JOBCR").get_file_path('csv'), index_col=0)
         OUTCR = pd.read_csv(self.get_input_dataset("OUTCR").get_file_path('csv'), index_col=0)
-        sector_shocks = pd.read_csv(self.get_input_dataset("sector_shocks").get_file_path('csv'), index_col=False)
+        sector_shocks = pd.read_csv(self.get_input_dataset("sector_shocks").get_file_path('csv'))
 
         # ----------------------------------------------------------------
         # PARAMETER DECLARATION
@@ -1758,12 +1758,18 @@ class JoplinCGEModel(BaseAnalysis):
             if ittr == 0:  # if it is the first simulation, apply the shock
                 # DELTA.loc[I] = 1.02 * DELTA.loc[I]
                 # KS0.loc[K, I] = KS0.loc[K, I]*0.9
-                KS0.loc[K, ['HS1']] = KS0.loc[K, ['HS1']] * float(sector_shocks["HS1"])
-                KS0.loc[K, ['HS2']] = KS0.loc[K, ['HS2']] * float(sector_shocks["HS2"])
-                KS0.loc[K, ['HS3']] = KS0.loc[K, ['HS3']] * float(sector_shocks["HS3"])
-                KS0.loc[K, ['GOODS']] = KS0.loc[K, ['GOODS']] * float(sector_shocks["GOODS"])
-                KS0.loc[K, ['TRADE']] = KS0.loc[K, ['TRADE']] * float(sector_shocks["TRADE"])
-                KS0.loc[K, ['OTHER']] = KS0.loc[K, ['OTHER']] * float(sector_shocks["OTHER"])
+                KS0.loc[K, ['HS1']] = \
+                    KS0.loc[K, ['HS1']] * float((sector_shocks.loc[sector_shocks['sector'] == "HS1"])["shock"])
+                KS0.loc[K, ['HS2']] = \
+                    KS0.loc[K, ['HS2']] * float((sector_shocks.loc[sector_shocks['sector'] == "HS2"])["shock"])
+                KS0.loc[K, ['HS3']] = \
+                    KS0.loc[K, ['HS3']] * float((sector_shocks.loc[sector_shocks['sector'] == "HS3"])["shock"])
+                KS0.loc[K, ['GOODS']] = \
+                    KS0.loc[K, ['GOODS']] * float((sector_shocks.loc[sector_shocks['sector'] == "GOODS"])["shock"])
+                KS0.loc[K, ['TRADE']] = \
+                    KS0.loc[K, ['TRADE']] * float((sector_shocks.loc[sector_shocks['sector'] == "TRADE"])["shock"])
+                KS0.loc[K, ['OTHER']] = \
+                    KS0.loc[K, ['OTHER']] * float((sector_shocks.loc[sector_shocks['sector'] == "OTHER"])["shock"])
             else:  # other simulations
                 KS0 = KSNEW * (1 - DEPR) + vars.get('N', x=soln[-1])
             result = run_solver(filename, tmp)

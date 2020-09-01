@@ -17,7 +17,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, GeoUtil, \
 
 
 class WaterFacilityDamage(BaseAnalysis):
-    """Computes water facility damage for an earthquake exposure
+    """Computes water facility damage for an earthquake tsunami, tornado, or hurricane exposure.
 
     """
 
@@ -193,7 +193,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
         Args:
             facilities (list): Multiple water facilities from input inventory set.
-            hazard_type (str): A hazard type of the hazard exposure.
+            hazard_type (str): A hazard type of the hazard exposure (earthquake, tsunami, tornado, or hurricane).
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:

@@ -14,7 +14,7 @@ from pyincore.analyses.nonstructbuildingdamage.nonstructbuildingutil import \
 
 
 class NonStructBuildingDamage(BaseAnalysis):
-    """Computes non-structural structural building damage for a hazard.
+    """Computes non-structural structural building damage for an earthquake hazard.
 
     Args:
         incore_client (IncoreClient): Service authentication.

@@ -175,8 +175,7 @@ class RoadFailure(BaseAnalysis):
                 dur_q = 0.0
 
             fragility_vars = {'x': dur_q, 'y': distance}
-            fragility_curve = fragility_set.fragility_curves[0]
-            pf = fragility_curve.compute_custom_limit_state_probability(fragility_vars)
+            pf = fragility_set.calculate_custom_limit_state(fragility_vars)['failure']
 
             road_results['guid'] = road['properties']['guid']
             road_results['failprob'] = pf

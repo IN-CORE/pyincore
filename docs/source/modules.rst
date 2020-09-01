@@ -105,6 +105,16 @@ waterfacilitydamage
 ..  autoclass:: waterfacilitydamage.waterfacilitydamage.WaterFacilityDamage
     :members:
 
+capitalshocks
+=============
+..  autoclass:: capitalshocks.capitalshocks.CapitalShocks
+    :members:
+
+roadfailure
+===========
+..  autoclass:: roadfailure.roadfailure.RoadFailure
+    :members:
+
 services
 ^^^^^^^^
 

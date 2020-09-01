@@ -1,0 +1,1 @@
+from pyincore.analyses.capitalshocks.capitalshocks import CapitalShocks
