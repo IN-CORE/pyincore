@@ -110,11 +110,8 @@ class BuildingEconDamage(BaseAnalysis):
             OrderedDict: A dictionary with building economic damage values and other data/metadata.
 
         """
-        loss = 0.0
-        loss_dev = 0.0
-        inflation_mult_2019 = self.inflation_table[-2]["properties"]["Annual Avg"]
-        inflation_mult = 1.0
-
+        str_loss = 0.0
+        str_loss_dev = 0.0
         try:
             bldg_results = collections.OrderedDict()
             # print(building["properties"])
@@ -137,25 +134,24 @@ class BuildingEconDamage(BaseAnalysis):
             # print(mean_damage_dev)
 
             bldg = building["properties"]
-            if "occ_type" in bldg and "appr_bldg" in bldg and "year_built" in bldg:
-                occ_type = building["properties"]["occ_type"]
+            if "appr_bldg" in bldg and "year_built" in bldg:
                 appr_val = float(building["properties"]["appr_bldg"])
                 year_built = building["properties"]["year_built"]
 
                 inflation_mult = BuildingEconUtil.get_inflation_mult(self.default_inflation_factor,
                                                                      self.inflation_table)
                 print(inflation_mult)
-                loss_mult = BuildingEconUtil.get_multiplier(self.occ_damage_mult, occ_type, 0)
-                print(loss_mult)
                 # It was determined after some email exchange with Steve French that if the user does not supply
                 # non-structural damage we should compute str_loss from the entire appraised value
                 str_loss = BuildingEconUtil.get_econ_loss(1.0, mean_damage, appr_val, inflation_mult)
                 str_loss_dev = BuildingEconUtil.get_econ_std_loss(1.0, mean_damage_dev, appr_val, inflation_mult)
 
             bldg_results["guid"] = building["properties"]["guid"]
-            bldg_results["loss"] = str_loss
-            bldg_results["loss_dev"] = str_loss_dev
-            # 29328.10518, 18981.62155
+            bldg_results["loss"] = "{:.2f}".format(str_loss)
+            bldg_results["loss_dev"] = "{:.2f}".format(str_loss_dev)
+            # 43167.21428, 24144.25773
+            # 53226.58677435593, 29770.659295267684
+            # 43167.214282397734","24144.257729226276
 
             return bldg_results
 

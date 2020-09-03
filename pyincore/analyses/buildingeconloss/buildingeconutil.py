@@ -5,18 +5,18 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 class BuildingEconUtil:
-    """Utility methods for the building loss analysis."""\
+    """Utility methods for the building loss analysis."""
 
     @staticmethod
     def get_appraised_val(occ_type, appraised_val):
-        """ Get appraised value.
+        """ Get assessed or appraised value. We assume here that they are the same.
 
         Args:
             occ_type (str): Occ type.
             appraised_val (int): Appraised value.
 
         Returns:
-            float: Appraised value..
+            float: Appraised value.
 
         """
         assessed_val = float(appraised_val)
@@ -43,7 +43,9 @@ class BuildingEconUtil:
                 if row_year == tax_year:
                     old_cpi = float(inflation_table[i]["properties"]["Annual Avg"])
                     # 2019
-                    new_cpi = float(inflation_table[len(inflation_table)-2]["properties"]["Annual Avg"])
+                    new_cpi = float(inflation_table[-2]["properties"]["Annual Avg"])
+                    # debug, to get the Ergo values year=2007, new_cpi = 207.34
+                    new_cpi = 207.34
                     inflation = (new_cpi - old_cpi) / old_cpi
                     return inflation + 1.0
             return (inflation_factor / 100.0) + 1.0
@@ -86,23 +88,21 @@ class BuildingEconUtil:
             float: Economic loss.
 
         """
-        # print(multiplier, mean, appraised_val, inflation_mult)
-        # print(type(multiplier), type(mean), type(appraised_val), type(inflation_mult))
-        # print(multiplier * mean * appraised_val * inflation_mult)
         return multiplier * mean * appraised_val * inflation_mult
 
     @staticmethod
-    def get_econ_std_loss(multiplier, mean, appraised_val, inflation_mult):
+    def get_econ_std_loss(multiplier, mean_dev, appraised_val, inflation_mult):
         """Calculates standard deviation economic loss.
 
         Args:
             multiplier (float): A multiplier.
-            mean (float): A mean damage dev.
-            appraised_val (float): A building apraised value.
+            mean_dev (float): A mean damage deviation.
+            appraised_val (float): A building appraised value.
             inflation_mult (float): An inflation multiplier.
 
         Returns:
-            float: Economic loss.
+            float: Economic standard deviation loss.
 
         """
-        return multiplier * mean * appraised_val * inflation_mult
+        # print(multiplier * mean_dev * appraised_val * inflation_mult)
+        return multiplier * mean_dev * appraised_val * inflation_mult
