@@ -4,10 +4,11 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
+import pandas as pd
 import collections
 import concurrent.futures
 import traceback
+from itertools import repeat
 
 from pyincore import BaseAnalysis, AnalysisUtil
 from pyincore.analyses.buildingeconloss.buildingeconutil import BuildingEconUtil
@@ -30,7 +31,20 @@ class BuildingEconLoss(BaseAnalysis):
 
     def run(self):
         """Executes building economic damage analysis."""
-        bldg_dmg_set = self.get_input_dataset("building_dmg").get_inventory_reader()
+        bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
+
+        prop_select = []
+        for bldg_item in list(bldg_set):
+            guid = bldg_item["properties"]["guid"]
+            appr_bldg = bldg_item["properties"]["appr_bldg"]
+            prop_select.append([guid, appr_bldg])
+
+        bldg_set_df = pd.DataFrame(prop_select, columns=["guid", "appr_bldg"])
+        bldg_dmg_set = self.get_input_dataset("building_mean_dmg").get_csv_reader()
+        bldg_dmg_df = pd.DataFrame(list(bldg_dmg_set))
+
+        bldg_dmg_set_df = pd.merge(bldg_set_df, bldg_dmg_df, how='outer', left_on="guid", right_on="guid",
+                                   sort=True, copy=True)
 
         occ_damage_mult = self.get_input_dataset("building_occupancy").get_inventory_reader()
         self.occ_damage_mult = list(occ_damage_mult)
@@ -38,21 +52,21 @@ class BuildingEconLoss(BaseAnalysis):
         inflation_table = self.get_input_dataset("consumer_price_index").get_inventory_reader()
         self.inflation_table = list(inflation_table)
 
-        user_defined_cpu = 1
+        user_defined_cpu = 4
         if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(bldg_dmg_set), user_defined_cpu)
+        row_num = len(bldg_dmg_set_df.index)
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, row_num, user_defined_cpu)
 
-        avg_bulk_input_size = int(len(bldg_dmg_set) / num_workers)
-        inventory_args = []
+        avg_bulk_input_size = row_num / num_workers
+        inventory = []
         count = 0
-        inventory_list = list(bldg_dmg_set)
-        while count < len(inventory_list):
-            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
+        while count < row_num:
+            inventory.append(bldg_dmg_set_df.loc[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.bldg_econ_dmg_concurrent_future(self.bldg_econ_loss_bulk_input, num_workers, inventory_args)
+        results = self.bldg_econ_dmg_concurrent_future(self.bldg_econ_loss_bulk_input, num_workers, inventory)
 
         self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
 
@@ -77,27 +91,26 @@ class BuildingEconLoss(BaseAnalysis):
 
         return output
 
-    def bldg_econ_loss_bulk_input(self, buildings):
+    def bldg_econ_loss_bulk_input(self, bldg_dmg_set):
         """Run analysis for multiple buildings.
 
         Args:
-            buildings (list): Multiple buildings from input inventory set.
+            bldg_dmg_set (obj): A set of all building damage results.
 
         Returns:
             list: A list of ordered dictionaries with building damage values and other data/metadata.
 
         """
         result = []
-        for building in buildings:
-            result.append(self.bldg_econ_loss(building))
-
+        for index, bldg in bldg_dmg_set.iterrows():
+            result.append(self.bldg_econ_loss(bldg))
         return result
 
-    def bldg_econ_loss(self, building):
+    def bldg_econ_loss(self, bldg):
         """Calculates building economic damage results for a single building.
 
         Args:
-            building (obj): A JSON mapping of a geometric object from the inventory: current building.
+            bldg (obj): An inventory property: current building.
 
         Returns:
             OrderedDict: A dictionary with building economic damage values and other data/metadata.
@@ -107,48 +120,12 @@ class BuildingEconLoss(BaseAnalysis):
         str_loss_dev = 0.0
         try:
             bldg_results = collections.OrderedDict()
+            mean_damage = float(bldg.loc["meandamage"])
+            mean_damage_dev = float(bldg.loc["mdamagedev"])
 
-            mean_damage = float(building["properties"]["meandamage"])
-            mean_damage_dev = float(building["properties"]["mdamagedev"])
-
-            bldg = building["properties"]
-            bldg_results["guid"] = building["properties"]["guid"]
-            # bldg_results["parid"] = building["properties"]["parid"]
-            # bldg_results["struct_typ"] = building["properties"]["struct_typ"]
-            # bldg_results["year_built"] = building["properties"]["year_built"]
-            # bldg_results["no_stories"] = building["properties"]["no_stories"]
-            # bldg_results["occ_type"] = building["properties"]["occ_type"]
-            # bldg_results["cont_val"] = building["properties"]["cont_val"]
-            # bldg_results["efacility"] = building["properties"]["efacility"]
-            # bldg_results["dwell_unit"] = building["properties"]["dwell_unit"]
-            # bldg_results["sq_foot"] = building["properties"]["sq_foot"]
-            # bldg_results["str_typ2"] = building["properties"]["str_typ2"]
-            # bldg_results["par_id"] = building["properties"]["par_id"]
-            # bldg_results["lat"] = building["properties"]["lat"]
-            # bldg_results["long"] = building["properties"]["long"]
-            # bldg_results["occ_detail"] = building["properties"]["occ_detail"]
-            # bldg_results["tot_appr"] = building["properties"]["tot_appr"]
-            # bldg_results["tract"] = building["properties"]["tract"]
-            # bldg_results["ct_lat"] = building["properties"]["ct_lat"]
-            # bldg_results["ct_lon"] = building["properties"]["ct_lon"]
-            # bldg_results["immocc"] = building["properties"]["immocc"]
-            # bldg_results["lifesfty"] = building["properties"]["lifesfty"]
-            # bldg_results["collprev"] = building["properties"]["collprev"]
-            # bldg_results["insignific"] = building["properties"]["insignific"]
-            # bldg_results["moderate"] = building["properties"]["moderate"]
-            # bldg_results["heavy"] = building["properties"]["heavy"]
-            # bldg_results["complete"] = building["properties"]["complete"]
-            # bldg_results["meandamage"] = building["properties"]["meandamage"]
-            # bldg_results["mdamagedev"] = building["properties"]["mdamagedev"]
-            # bldg_results["oldcode"] = building["properties"]["oldcode"]
-            # bldg_results["newcode"] = building["properties"]["newcode"]
-            # bldg_results["hazardtype"] = building["properties"]["hazardtype"]
-            # bldg_results["hazardval"] = building["properties"]["hazardval"]
-            # bldg_results["cost"] = building["properties"]["cost"]
-            # bldg_results["period"] = building["properties"]["period"]
-
+            bldg_results["guid"] = bldg.loc["guid"]
             if "appr_bldg" in bldg:
-                appr_val = float(building["properties"]["appr_bldg"])
+                appr_val = float(bldg.loc["appr_bldg"])
                 bldg_results["appr_bldg"] = str(appr_val)
 
                 inflation_mult = BuildingEconUtil.get_inflation_mult(self.default_inflation_factor,
@@ -158,6 +135,7 @@ class BuildingEconLoss(BaseAnalysis):
                 str_loss = BuildingEconUtil.get_econ_loss(1.0, mean_damage, appr_val, inflation_mult)
                 str_loss_dev = BuildingEconUtil.get_econ_std_loss(1.0, mean_damage_dev, appr_val, inflation_mult)
 
+            # 72500, 43167.21428, 24144.25773
             bldg_results["strloss"] = "{:.2f}".format(str_loss)
             bldg_results["strlossdev"] = "{:.2f}".format(str_loss_dev)
 
@@ -194,10 +172,16 @@ class BuildingEconLoss(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'building_dmg',
+                    'id': 'buildings',
                     'required': True,
-                    'description': 'Building damage results CSV file',
-                    'type': ['ergo:buildingDamageVer4', 'ergo:buildingInventory', 'ergo:buildingDamage']
+                    'description': 'Building Inventory',
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
+                },
+                {
+                    'id': 'building_mean_dmg',
+                    'required': True,
+                    'description': 'Building mean damage results CSV file',
+                    'type': ['ergo:meanDamage', 'ergo:buildingDamage']
                 },
                 {
                     'id': 'building_occupancy',

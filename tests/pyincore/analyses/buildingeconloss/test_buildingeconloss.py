@@ -7,11 +7,14 @@ def run_with_base_class():
     # client = IncoreClient()
     client = IncoreClient(INCORE_API_DEV_URL)
 
-    # Ergo, Building structural damage, earthquake Seaside - kube
-    bldg_dmg_id = "5f50651252147a614c73ca83"
+    # Building inventory shapefile, Seaside, OR
+    bldg_dataset_id = "5bcf2fcbf242fe047ce79dad"
+    # Building structural damage, csv file, earthquake Seaside - kube
+    bldg_dmg_id = "5f514554bd2164309e79f67c"
 
     bldg_econ_dmg = BuildingEconLoss(client)
-    bldg_econ_dmg.load_remote_input_dataset("building_dmg", bldg_dmg_id)
+    bldg_econ_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
+    bldg_econ_dmg.load_remote_input_dataset("building_mean_dmg", bldg_dmg_id)
 
     # Ergo building occupancy - kube
     bldg_occupancy_id = "5f487e9f37e20751c11bfb6d"
