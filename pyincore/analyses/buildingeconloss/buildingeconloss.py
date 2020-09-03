@@ -13,7 +13,7 @@ from pyincore import BaseAnalysis, AnalysisUtil
 from pyincore.analyses.buildingeconloss.buildingeconutil import BuildingEconUtil
 
 
-class BuildingEconDamage(BaseAnalysis):
+class BuildingEconLoss(BaseAnalysis):
     """Building Economic Loss Analysis calculates the building loss based on
     mean damage and various multipliers such as inflation.
 
@@ -26,7 +26,7 @@ class BuildingEconDamage(BaseAnalysis):
         self.inflation_table = None
         self.default_inflation_factor = 0.0
 
-        super(BuildingEconDamage, self).__init__(incore_client)
+        super(BuildingEconLoss, self).__init__(incore_client)
 
     def run(self):
         """Executes building economic damage analysis."""
@@ -117,7 +117,6 @@ class BuildingEconDamage(BaseAnalysis):
 
                 inflation_mult = BuildingEconUtil.get_inflation_mult(self.default_inflation_factor,
                                                                      self.inflation_table)
-                print(inflation_mult)
                 # It was determined after some email exchange with Steve French that if the user does not supply
                 # non-structural damage we should compute str_loss from the entire appraised value
                 str_loss = BuildingEconUtil.get_econ_loss(1.0, mean_damage, appr_val, inflation_mult)

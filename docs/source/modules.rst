@@ -15,6 +15,13 @@ buildingdamage
 ..  autoclass:: buildingdamage.buildingutil.BuildingUtil
     :members:
 
+buildingeconloss
+================
+..  autoclass:: buildingeconloss.buildingeconloss.BuildingEconLoss
+    :members:
+..  autoclass:: buildingeconloss.buildingeconutil.BuildingEconUtil
+    :members:
+
 buildingfunctionality
 =====================
 ..  autoclass:: buildingfunctionality.buildingfunctionality.BuildingFunctionality

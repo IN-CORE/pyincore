@@ -6,4 +6,4 @@
 
 
 from pyincore.analyses.buildingeconloss.buildingeconutil import BuildingEconUtil
-from pyincore.analyses.buildingeconloss.buildingeconloss import BuildingEconDamage
+from pyincore.analyses.buildingeconloss.buildingeconloss import BuildingEconLoss

@@ -1,5 +1,5 @@
 from pyincore import IncoreClient
-from pyincore.analyses.buildingeconloss import BuildingEconDamage
+from pyincore.analyses.buildingeconloss.buildingeconloss import BuildingEconLoss
 from pyincore.globals import INCORE_API_DEV_URL
 
 
@@ -19,7 +19,7 @@ def run_with_base_class():
     # Ergo building damage - kube
     bldg_dmg_id = "5f50651252147a614c73ca83"
 
-    bldg_econ_dmg = BuildingEconDamage(client)
+    bldg_econ_dmg = BuildingEconLoss(client)
     # bldg_econ_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
     bldg_econ_dmg.load_remote_input_dataset("building_dmg", bldg_dmg_id)
 
