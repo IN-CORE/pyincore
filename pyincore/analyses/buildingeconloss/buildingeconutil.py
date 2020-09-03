@@ -44,8 +44,8 @@ class BuildingEconUtil:
                     old_cpi = float(inflation_table[i]["properties"]["Annual Avg"])
                     # 2019
                     new_cpi = float(inflation_table[-2]["properties"]["Annual Avg"])
-                    # debug, to get the Ergo values year=2007, new_cpi = 207.34
-                    new_cpi = 207.34
+                    # debug, to get the Ergo values: year=2007, new_cpi = 207.34
+                    # new_cpi = 207.34
                     inflation = (new_cpi - old_cpi) / old_cpi
                     return inflation + 1.0
             return (inflation_factor / 100.0) + 1.0
@@ -104,5 +104,4 @@ class BuildingEconUtil:
             float: Economic standard deviation loss.
 
         """
-        # print(multiplier * mean_dev * appraised_val * inflation_mult)
         return multiplier * mean_dev * appraised_val * inflation_mult
