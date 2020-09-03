@@ -7,28 +7,14 @@ def run_with_base_class():
     # client = IncoreClient()
     client = IncoreClient(INCORE_API_DEV_URL)
 
-    # Building datasets
-    # Ergo building damage - prod
-    # bldg_dataset_id = "5bcf2fcbf242fe047ce79dad"
-    # Ergo building damage - kube
-    bldg_dataset_id = "5bcf2fcbf242fe047ce79dad"
-    # Building structural damage, earthquake Seaside
-    # bldg_dmg_id = "5c5c9686c5c0e488fcf91903"
-    # Ergo building damage - prod
-    # bldg_dmg_id = "5f5062977b38705fff49c494"
-    # Ergo building damage - kube
+    # Ergo, Building structural damage, earthquake Seaside - kube
     bldg_dmg_id = "5f50651252147a614c73ca83"
 
     bldg_econ_dmg = BuildingEconLoss(client)
-    # bldg_econ_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
     bldg_econ_dmg.load_remote_input_dataset("building_dmg", bldg_dmg_id)
 
-    # Ergo building occupancy - prod
-    # bldg_occupancy_id = "5f47dba83998816e84c6d7ce"
     # Ergo building occupancy - kube
     bldg_occupancy_id = "5f487e9f37e20751c11bfb6d"
-    # Ergo consumer index - prod
-    # consumer_price_idx = "5f47daa5ef0df52132b766aa"
     # Ergo consumer index - kube
     consumer_price_idx = "5f487cc852147a614c708039"
 
