@@ -183,7 +183,7 @@ class BuildingEconLoss(BaseAnalysis):
                 },
                 {
                     'id': 'consumer_price_index',
-                    'required': False,
+                    'required': True,
                     'description': 'US Consumer Price Index 1913-2020, CSV file',
                     'type': ['incore:consumerPriceIndexUS']
                 }
