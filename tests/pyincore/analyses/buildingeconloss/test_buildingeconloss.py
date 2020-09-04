@@ -9,8 +9,12 @@ def run_with_base_class():
 
     # Building inventory shapefile, Seaside, OR
     bldg_dataset_id = "5bcf2fcbf242fe047ce79dad"
+    # original ERGO Building inventory shapefile
+    # bldg_dataset_id = "5f518b76301b3c1b569d7e9c"
     # Building structural damage, csv file, earthquake Seaside - kube
     bldg_dmg_id = "5f514554bd2164309e79f67c"
+    # original ERGO Building structural damage, csv file
+    # bldg_dmg_id = "5f5191763f9bbf5a2bbbb4a9"
 
     bldg_econ_dmg = BuildingEconLoss(client)
     bldg_econ_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)

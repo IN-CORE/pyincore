@@ -126,7 +126,7 @@ class BuildingEconLoss(BaseAnalysis):
             bldg_results["guid"] = bldg.loc["guid"]
             if "appr_bldg" in bldg:
                 appr_val = float(bldg.loc["appr_bldg"])
-                bldg_results["appr_bldg"] = str(appr_val)
+                # bldg_results["appr_bldg"] = str(appr_val)
 
                 inflation_mult = BuildingEconUtil.get_inflation_mult(self.default_inflation_factor,
                                                                      self.inflation_table)
@@ -135,7 +135,9 @@ class BuildingEconLoss(BaseAnalysis):
                 str_loss = BuildingEconUtil.get_econ_loss(1.0, mean_damage, appr_val, inflation_mult)
                 str_loss_dev = BuildingEconUtil.get_econ_std_loss(1.0, mean_damage_dev, appr_val, inflation_mult)
 
-            # 72500, 43167.21428, 24144.25773
+            # 7fd16f4d-b201-4c28-9d63-336fc006884f, 72500, 43167.21428, 24144.25773,
+            # parid, year_built, occ_type, appr_bldg, guid, lat, long
+            # 017053, 1910, RES3, 72500, 7fd16f4d-b201-4c28-9d63-336fc006884f, 35.1373, -89.99892
             bldg_results["strloss"] = "{:.2f}".format(str_loss)
             bldg_results["strlossdev"] = "{:.2f}".format(str_loss_dev)
 
@@ -175,7 +177,7 @@ class BuildingEconLoss(BaseAnalysis):
                     'id': 'buildings',
                     'required': True,
                     'description': 'Building Inventory',
-                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
+                    'type': ['ergo:buildingInventory','ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
                 },
                 {
                     'id': 'building_mean_dmg',
