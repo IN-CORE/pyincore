@@ -217,7 +217,9 @@ class PipelineDamageRepairRate(BaseAnalysis):
             diameter = PipelineUtil.get_pipe_diameter(pipeline)
             fragility_vars = {'x': hazard_val, 'y': diameter}
             fragility_curve = fragility_set.fragility_curves[0]
-            pgv_repairs = fragility_curve.compute_custom_limit_state_probability(fragility_vars)
+
+            # TODO: here assume that custom fragility set only has one limit state
+            pgv_repairs = fragility_set.calculate_custom_limit_state(fragility_vars)['failure']
 
             # Convert PGV repairs to SI units
             pgv_repairs = PipelineUtil.convert_result_unit(

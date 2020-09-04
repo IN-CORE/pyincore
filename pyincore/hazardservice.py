@@ -32,6 +32,7 @@ class HazardService:
         self.base_hurricane_url = urllib.parse.urljoin(client.service_url, 'hazard/api/hurricanes/')
         self.base_hurricanewf_url = urllib.parse.urljoin(client.service_url,
                                                          'hazard/api/hurricaneWindfields/')
+        self.base_flood_url = urllib.parse.urljoin(client.service_url, 'hazard/api/floods/')
 
     def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         """Retrieve earthquake metadata list from hazard service. Hazard API endpoint is called.
@@ -581,7 +582,7 @@ class HazardService:
         """Create hurricanes on the server. POST API endpoint is called.
 
         Args:
-            hurr_inputs (obj): JSON representing the hurricane.
+            hurricane_json (obj): JSON representing the hurricane.
 
         Returns:
             obj: HTTP POST Response. Json of the created hurricane.
@@ -595,7 +596,6 @@ class HazardService:
         kwargs = {"files": hurricane_data}
         r = self.client.post(url, **kwargs)
         response = r.json()
-        return response
 
         return response
 
@@ -689,6 +689,127 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_hurricane_url, "search")
+        payload = {"text": text}
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+
+        r = self.client.get(url, params=payload)
+
+        return r.json()
+
+    def create_flood(self, flood_json, file_paths: List):
+        """Create floods on the server. POST API endpoint is called.
+
+        Args:
+            flood_json (obj): JSON representing the flood.
+
+        Returns:
+            response (obj): HTTP POST Response. Json of the created flood.
+
+        """
+        url = self.base_flood_url
+        flood_data = {('flood', flood_json)}
+
+        for file_path in file_paths:
+            flood_data.add(('file', open(file_path, 'rb')))
+        kwargs = {"files": flood_data}
+        r = self.client.post(url, **kwargs)
+        response = r.json()
+
+        return response
+
+    def get_flood_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
+        """Retrieve flood metadata list from hazard service. Hazard API endpoint is called.
+
+        Args:
+            skip (int):  Skip the first n results, passed to the parameter "skip". Default None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit". Default None.
+            space (str): User's namespace on the server, passed to the parameter "space". Default None.
+
+        Returns:
+            obj: HTTP response containing the metadata.
+
+        """
+        url = self.base_flood_url
+        payload = {}
+
+        if skip is not None:
+            payload['skip'] = skip
+        if limit is not None:
+            payload['limit'] = limit
+        if space is not None:
+            payload['space'] = space
+
+        r = self.client.get(url, params=payload)
+        response = r.json()
+
+        return response
+
+    def get_flood_metadata(self, hazard_id):
+        """Retrieve flood metadata list from hazard service. Hazard API endpoint is called.
+
+        Args:
+            hazard_id (str): ID of the flood.
+
+        Returns:
+            obj: HTTP response containing the metadata.
+
+        """
+        url = urllib.parse.urljoin(self.base_flood_url, hazard_id)
+        r = self.client.get(url)
+        response = r.json()
+
+        return response
+
+    def get_flood_values(self, hazard_id: str, demand_type: str, demand_units: str, points: List):
+        """ Retrieve flood hazard values from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Flood.
+            demand_type (str): Flood demand type. Examples: floodDepth, waterSurfaceElevation
+            demand_units (str): Flood demand unit. Example: m
+            points (list): List of points provided as lat,long.
+
+        Returns:
+            obj: Hazard values.
+
+        """
+        url = urllib.parse.urljoin(self.base_flood_url,
+                                   hazard_id + "/values")
+        payload = {'demandType': demand_type, 'demandUnits': demand_units, 'point': points}
+        r = self.client.get(url, params=payload)
+        response = r.json()
+        return response
+
+    def delete_flood(self, hazard_id: str):
+        """Delete a flood by it's id, and it's associated datasets
+
+        Args:
+            hazard_id (str): ID of the Flood.
+
+        Returns:
+            obj: Json of deleted hazard
+
+        """
+        url = urllib.parse.urljoin(self.base_flood_url, hazard_id)
+        r = self.client.delete(url)
+        return r.json()
+
+    def search_floods(self, text: str, skip: int = None, limit: int = None):
+        """Search floods.
+
+        Args:
+            text (str): Text to search by, passed to the parameter "text".
+            skip (int):  Skip the first n results, passed to the parameter "skip", default None.
+            limit (int):  Limit number of results to return. Passed to the parameter "limit", default None.
+
+        Returns:
+            obj: HTTP response with search results.
+
+        """
+        url = urllib.parse.urljoin(self.base_flood_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip
