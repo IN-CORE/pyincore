@@ -8,9 +8,9 @@ def run_base_analysis():
     capital_shocks = CapitalShocks(client)
 
     # Building inventory
-    building_inventory = "5f218e36114b783cb0b01833"
-    building_to_sectors = "5f218fa47887544479c8629f"
-    failure_probability = "5f21909b7887544479c862c6"
+    building_inventory = "5df40388b9219c06cf8b0c80"
+    building_to_sectors = "5f4fec587b38705fff493dc6"
+    failure_probability = "5f4e6e85ef0df52132b9f5c9"
 
     capital_shocks.set_parameter("result_name", "sector_shocks")
 

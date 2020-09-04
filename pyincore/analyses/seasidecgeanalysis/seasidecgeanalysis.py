@@ -98,11 +98,6 @@ class SeasideCGEModel(BaseAnalysis):
                 }
             ]
         }
-
-    @staticmethod
-    def _(x):
-        return ExprM(vars, m=x)
-
     # ----------------------------------------------------------------
     # set file paths
     # ----------------------------------------------------------------
@@ -1780,7 +1775,7 @@ class SeasideCGEModel(BaseAnalysis):
 
             soln.append(x[:])
 
-            return soln
+            return None
 
         '''
         Calibrate the model 
@@ -1811,6 +1806,15 @@ class SeasideCGEModel(BaseAnalysis):
         iNum = 1  # dynamic model itterations
 
         sector_shocks = pd.read_csv(self.get_input_dataset("sector_shocks").get_file_path('csv'))
+        sector_shocks['sector'] = sector_shocks['sector'].str.upper()
+        sector_shocks.to_csv("before.csv")
+        sector_shocks = sector_shocks.set_index('sector')
+        headers = list((KS0.loc[K, I]).columns)
+        print("-------------------------------------------------------")
+        print(headers)
+        sector_shocks = sector_shocks.reindex(headers)
+        sector_shocks.loc[headers]
+        sector_shocks.to_csv("ss.csv")
 
         # The line below this can be used if we want to add the ability to do multiple simulations later, currently
         # it changes nothing.

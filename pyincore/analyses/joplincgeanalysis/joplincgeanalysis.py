@@ -41,7 +41,7 @@ class JoplinCGEModel(BaseAnalysis):
                 },
                 {
                     'id': 'solver_path',
-                    'required': True,
+                    'required': False,
                     'description': 'Path to ipopt package.',
                     'type': str
                 }
@@ -151,6 +151,18 @@ class JoplinCGEModel(BaseAnalysis):
                     'id': 'household-income',
                     'parent_type': '',
                     'description': 'CSV file of resulting household income',
+                    'type': 'joplincgeanalysis'
+                },
+                {
+                    'id': 'pre-disaster-factor-demand',
+                    'parent_type': '',
+                    'description': 'CSV file of factor demand before disaster',
+                    'type': 'joplincgeanalysis'
+                },
+                {
+                    'id': 'post-disaster-factor-demand',
+                    'parent_type': '',
+                    'description': 'CSV file of resulting factor-demand',
                     'type': 'joplincgeanalysis'
                 },
             ]
@@ -1730,7 +1742,7 @@ class JoplinCGEModel(BaseAnalysis):
             soln.append(x[:])
 
             return soln
-
+        FD0.to_csv("fd0.csv")
         '''
         Calibrate the model 
         '''
@@ -1775,6 +1787,34 @@ class JoplinCGEModel(BaseAnalysis):
             result = run_solver(filename, tmp)
         exec(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "jopoutput.py")).read())
 
+        # Prepare simulations output
+        CH0 = vars.get('CH', x=soln[0])
+        CPI0 = vars.get('CPI', x=soln[0])
+        CX0 = vars.get('CX', x=soln[0])
+        D0 = vars.get('D', x=soln[0])
+        DS0 = vars.get('DS', x=soln[0])
+        FD0 = vars.get('FD', x=soln[0])
+        IGT0 = vars.get('IGT', x=soln[0])
+        KS0 = vars.get('KS', x=soln[0])
+        LAS0 = vars.get('LAS', x=soln[0])
+        HH0 = vars.get('HH', x=soln[0])
+        HN0 = vars.get('HN', x=soln[0])
+        HW0 = vars.get('HW', x=soln[0])
+        N0 = vars.get('N', x=soln[0])
+        P0 = vars.get('P', x=soln[0])
+        RA0 = vars.get('RA', x=soln[0])
+        R0 = vars.get('R', x=soln[0])
+        Y0 = vars.get('Y', x=soln[0])
+        YD0 = vars.get('YD', x=soln[0])
+
+        FD0.to_csv("fd0.csv")
+        FDL = vars.get('FD', x=soln[1])
+        FDL.to_csv("fdl.csv")
+        self.set_result_csv_data("pre-disaster-factor-demand", FD0, name="pre-disaster-factor-demand",
+                                 source="dataframe")
+        self.set_result_csv_data("post-disaster-factor-demand", FDL, name="post-disaster-factor-demand",
+                                 source="dataframe")
+
         def generate_output(result_id, variable_name, base_frame: pd.DataFrame, level_frame: pd.DataFrame, output):
             base_name = variable_name + '0'
             level_name = variable_name + 'l'
@@ -1809,6 +1849,9 @@ class JoplinCGEModel(BaseAnalysis):
                         level_frame=vars.get('HW', x=result[-1]).loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}],
                         output=os.path.join(dir_path, "employment.csv"))
 
+        # generate_output(result_id="fd", variable_name='FD', base_frame=FD0.loc[{"GOODS", "TRADE", "OTHER"}],
+        #                 level_frame=vars.get('FD', x=result[-1]).loc[{"GOODS", "TRADE", "OTHER"}],
+        #                 output=os.path.join(dir_path, "fd.csv"))
         return True
 
     @staticmethod
