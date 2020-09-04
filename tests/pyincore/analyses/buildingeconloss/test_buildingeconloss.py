@@ -33,11 +33,5 @@ def run_with_base_class():
 
 
 if __name__ == '__main__':
-    import time
-    start_time = time.time()
-
     run_with_base_class()
 
-    end_time = time.time()
-    elapsed = end_time - start_time
-    print("Execution time: {:.2f}".format(elapsed) + "s")

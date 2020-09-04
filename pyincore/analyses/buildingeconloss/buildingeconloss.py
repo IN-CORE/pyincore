@@ -8,7 +8,6 @@ import pandas as pd
 import collections
 import concurrent.futures
 import traceback
-from itertools import repeat
 
 from pyincore import BaseAnalysis, AnalysisUtil
 from pyincore.analyses.buildingeconloss.buildingeconutil import BuildingEconUtil
@@ -126,14 +125,13 @@ class BuildingEconLoss(BaseAnalysis):
 
                 inflation_mult = BuildingEconUtil.get_inflation_mult(self.default_inflation_factor,
                                                                      self.inflation_table)
-                # It was determined after some email exchange with Steve French that if the user does not supply
-                # non-structural damage we should compute str_loss from the entire appraised value
+                # It was determined after some email exchange with Steve French that if the user
+                # does not supply non-structural damage we should compute str_loss from the entire
+                # appraised value
                 str_loss = BuildingEconUtil.get_econ_loss(1.0, mean_damage, appr_val, inflation_mult)
-                str_loss_dev = BuildingEconUtil.get_econ_std_loss(1.0, mean_damage_dev, appr_val, inflation_mult)
-
-            # 7fd16f4d-b201-4c28-9d63-336fc006884f, 72500, 43167.21428, 24144.25773,
-            # parid, year_built, occ_type, appr_bldg, guid, lat, long
-            # 017053, 1910, RES3, 72500, 7fd16f4d-b201-4c28-9d63-336fc006884f, 35.1373, -89.99892
+                str_loss_dev = BuildingEconUtil.get_econ_std_loss(1.0, mean_damage_dev,
+                                                                  appr_val,
+                                                                  inflation_mult)
             bldg_results["strloss"] = "{:.2f}".format(str_loss)
             bldg_results["strlossdev"] = "{:.2f}".format(str_loss_dev)
 
@@ -173,7 +171,8 @@ class BuildingEconLoss(BaseAnalysis):
                     'id': 'buildings',
                     'required': True,
                     'description': 'Building Inventory',
-                    'type': ['ergo:buildingInventory','ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
+                    'type': ['ergo:buildingInventory', 'ergo:buildingInventoryVer4',
+                             'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
                 },
                 {
                     'id': 'building_mean_dmg',
