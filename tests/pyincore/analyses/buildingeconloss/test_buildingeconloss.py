@@ -20,12 +20,8 @@ def run_with_base_class():
     bldg_econ_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
     bldg_econ_dmg.load_remote_input_dataset("building_mean_dmg", bldg_dmg_id)
 
-    # Ergo building occupancy - kube
-    bldg_occupancy_id = "5f487e9f37e20751c11bfb6d"
     # Ergo consumer index - kube
     consumer_price_idx = "5f487cc852147a614c708039"
-
-    bldg_econ_dmg.load_remote_input_dataset("building_occupancy", bldg_occupancy_id)
     bldg_econ_dmg.load_remote_input_dataset("consumer_price_index", consumer_price_idx)
 
     result_name = "seaside_bldg_econ_loss"

@@ -23,7 +23,6 @@ class BuildingEconLoss(BaseAnalysis):
 
     """
     def __init__(self, incore_client):
-        self.occ_damage_mult = None
         self.inflation_table = None
         self.default_inflation_factor = 0.0
 
@@ -45,9 +44,6 @@ class BuildingEconLoss(BaseAnalysis):
 
         bldg_dmg_set_df = pd.merge(bldg_set_df, bldg_dmg_df, how='outer', left_on="guid", right_on="guid",
                                    sort=True, copy=True)
-
-        occ_damage_mult = self.get_input_dataset("building_occupancy").get_inventory_reader()
-        self.occ_damage_mult = list(occ_damage_mult)
         # inflation table
         inflation_table = self.get_input_dataset("consumer_price_index").get_inventory_reader()
         self.inflation_table = list(inflation_table)
@@ -184,12 +180,6 @@ class BuildingEconLoss(BaseAnalysis):
                     'required': True,
                     'description': 'Building mean damage results CSV file',
                     'type': ['ergo:meanDamage', 'ergo:buildingDamage']
-                },
-                {
-                    'id': 'building_occupancy',
-                    'required': True,
-                    'description': 'Building occupancy, use, efacility and multipliers',
-                    'type': ['incore:buildingOccupancyMultiplier']
                 },
                 {
                     'id': 'consumer_price_index',
