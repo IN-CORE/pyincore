@@ -49,7 +49,7 @@ class BuildingEconLoss(BaseAnalysis):
         bldg_dmg_set_df = pd.merge(bldg_set_df, bldg_dmg_df, how='outer', left_on="guid", right_on="guid",
                                    sort=True, copy=True)
         # inflation table
-        if not self.get_input_dataset("consumer_price_index") is None:
+        if self.get_input_dataset("consumer_price_index") is not None:
             inflation_table = self.get_input_dataset("consumer_price_index").get_inventory_reader()
             self.inflation_table = list(inflation_table)
 
