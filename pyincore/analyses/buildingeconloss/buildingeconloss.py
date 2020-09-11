@@ -23,12 +23,17 @@ class BuildingEconLoss(BaseAnalysis):
     """
     def __init__(self, incore_client):
         self.inflation_table = None
-        self.default_inflation_factor = 0.0
+        self.inflation_factor = 0.0
 
         super(BuildingEconLoss, self).__init__(incore_client)
 
     def run(self):
         """Executes building economic damage analysis."""
+        # Get inflation input
+        if not self.get_parameter("inflation_factor") is None \
+                and self.get_parameter("inflation_factor") > 0:
+            self.inflation_factor = self.get_parameter("inflation_factor")
+
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
 
         prop_select = []
@@ -44,8 +49,9 @@ class BuildingEconLoss(BaseAnalysis):
         bldg_dmg_set_df = pd.merge(bldg_set_df, bldg_dmg_df, how='outer', left_on="guid", right_on="guid",
                                    sort=True, copy=True)
         # inflation table
-        inflation_table = self.get_input_dataset("consumer_price_index").get_inventory_reader()
-        self.inflation_table = list(inflation_table)
+        if not self.get_input_dataset("consumer_price_index") is None:
+            inflation_table = self.get_input_dataset("consumer_price_index").get_inventory_reader()
+            self.inflation_table = list(inflation_table)
 
         user_defined_cpu = 4
         if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
@@ -123,7 +129,7 @@ class BuildingEconLoss(BaseAnalysis):
                 appr_val = float(bldg.loc["appr_bldg"])
                 # bldg_results["appr_bldg"] = str(appr_val)
 
-                inflation_mult = BuildingEconUtil.get_inflation_mult(self.default_inflation_factor,
+                inflation_mult = BuildingEconUtil.get_inflation_mult(self.inflation_factor,
                                                                      self.inflation_table)
                 # It was determined after some email exchange with Steve French that if the user
                 # does not supply non-structural damage we should compute str_loss from the entire
@@ -160,6 +166,13 @@ class BuildingEconLoss(BaseAnalysis):
                     'type': str
                 },
                 {
+                    'id': 'inflation_factor',
+                    'required': False,
+                    'description': 'Inflation factor to adjust the appraisal values of buildings. '
+                                   'The Inflation factor is ignored if Consumer price index file is provided.',
+                    'type': float
+                },
+                {
                     'id': 'num_cpu',
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request',
@@ -182,7 +195,7 @@ class BuildingEconLoss(BaseAnalysis):
                 },
                 {
                     'id': 'consumer_price_index',
-                    'required': True,
+                    'required': False,
                     'description': 'US Consumer Price Index 1913-2020, CSV file',
                     'type': ['incore:consumerPriceIndexUS']
                 }

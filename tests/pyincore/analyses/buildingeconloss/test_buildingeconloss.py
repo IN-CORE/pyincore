@@ -26,6 +26,8 @@ def run_with_base_class():
 
     result_name = "seaside_bldg_econ_loss"
     bldg_econ_dmg.set_parameter("result_name", result_name)
+    # Inflation factor is used if consumer_price_idx is not provided
+    # bldg_econ_dmg.set_parameter("inflation_factor", 100.0)
     bldg_econ_dmg.set_parameter("num_cpu", 1)
 
     # Run Analysis
