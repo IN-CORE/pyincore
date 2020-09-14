@@ -6,7 +6,7 @@ from pyomo.opt import SolverFactory
 
 from pyincore import BaseAnalysis
 from pyincore import globals as pyglobals
-from pyincore.analyses.seasidecgeanalysis.equationlib import *
+from pyincore.analyses.seasidecge.equationlib import *
 
 logger = pyglobals.LOGGER
 
@@ -95,13 +95,13 @@ class SeasideCGEModel(BaseAnalysis):
                     'id': 'Seaside_Sims',
                     'parent_type': '',
                     'description': 'CSV file of Seaside cge simulations',
-                    'type': 'seasidecgeanalysis'
+                    'type': 'seasidecge'
                 },
                 {
                     'id': 'Seaside_output',
                     'parent_type': '',
                     'description': 'CSV file of output of Seaside cge, containing changes in employment and supply.',
-                    'type': 'seasidecgeanalysis'
+                    'type': 'seasidecge'
                 }
             ]
         }

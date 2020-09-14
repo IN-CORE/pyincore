@@ -1,5 +1,5 @@
 from pyincore import IncoreClient
-from pyincore.analyses.seasidecgeanalysis import SeasideCGEModel
+from pyincore.analyses.seasidecge import SeasideCGEModel
 import pyincore.globals as pyglobals
 
 
