@@ -192,8 +192,8 @@ spaceservice
 ..  autoclass:: spaceservice.SpaceService
     :members:
 
-utilitities
-^^^^^^^^^^^
+utilities
+^^^^^^^^^
 
 utils/analysisutil
 ==================
