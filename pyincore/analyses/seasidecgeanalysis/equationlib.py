@@ -1,7 +1,11 @@
 from copy import deepcopy
+from pyincore import globals as pyglobals
+
 import pandas as pd
 import operator as op
 import math
+
+logger = pyglobals.LOGGER
 
 
 class VarContainer:
@@ -168,11 +172,11 @@ class VarContainer:
         for i in range(len(output)):
             label = self.getLabel(i)
             if len(label) == 1:
-                print(label[0] + '=' + '{0:.7f}'.format(output[i]) + ';')
+                logger.debug(label[0] + '=' + '{0:.7f}'.format(output[i]) + ';')
             elif len(label) == 2:
-                print(label[0] + '(\'' + label[1] + '\')' + '=' + '{0:.7f}'.format(output[i]) + ';')
+                logger.debug(label[0] + '(\'' + label[1] + '\')' + '=' + '{0:.7f}'.format(output[i]) + ';')
             elif len(label) == 3:
-                print(
+                logger.debug(
                     label[0] + '(\'' + label[1] + '\',\'' + label[2] + '\')' + '=' + '{0:.7f}'.format(output[i]) + ';')
 
     def get(self, name, x=None):
@@ -267,7 +271,7 @@ class Variable:
         try:
             self.index = vars.getIndex(name, row, col)
         except Exception as e:
-            print(e)
+            logger.debug(e)
             # print("invalid name for a variable")
 
     def __str__(self):
@@ -300,7 +304,7 @@ class ExprItem:
             self.const = deepcopy(v.const)
             self.varList = deepcopy(v.varList)
         else:
-            print("invalid parameter to create a item")
+            logger.debug("invalid parameter to create a item")
 
     '''
       You could multiply it with a number, a variable, a ExprItem or Expression
@@ -389,7 +393,7 @@ class Expr:
             except Exception as e:
                 pass
         else:
-            print("invalid parameter for creating a Expr")
+            logger.debug("invalid parameter for creating a Expr")
 
         self.clear_empty()
 
@@ -570,7 +574,7 @@ class ExprM:
                 if self.vars.inList(name):
                     self.info = deepcopy(self.vars.getInfo(name))
                 else:
-                    print("Can't find this variable in the all variable list")
+                    logger.debug("Can't find this variable in the all variable list")
 
                 self.info['height'] = 1
                 self.info['width'] = 1
@@ -663,9 +667,9 @@ class ExprM:
                 return oper(self, ~rhs)
 
             else:
-                print(copy.info['rows'], copy.info['cols'], rhs.info['rows'], rhs.info['cols'])
-                print(copy.info['height'], copy.info['width'], rhs.info['height'], rhs.info['width'])
-                print("Invalid size for ", str(oper))
+                logger.debug(copy.info['rows'], copy.info['cols'], rhs.info['rows'], rhs.info['cols'])
+                logger.debug(copy.info['height'], copy.info['width'], rhs.info['height'], rhs.info['width'])
+                logger.debug("Invalid size for ", str(oper))
         return copy
 
     def __add__(self, rhs):
@@ -695,7 +699,7 @@ class ExprM:
         """
         # has to be 2 single lists
         if self.info['width'] != 1 or rhs.info['width'] != 1:
-            print("Invalid size for creating a 2-D matrix")
+            logger.debug("Invalid size for creating a 2-D matrix")
         else:
             copy = ExprM(self.vars, em=self)
             copy.m = [[copy.m[i][0] * rhs.m[j][0] for j in range(rhs.info['height'])] for i in
@@ -838,4 +842,4 @@ class ExprM:
             for j in range(self.info['width']):
                 if not self.hasCondition or self.hasCondition and self.mark[i][j]:
                     fun = lambda x: eval(self.m[i][j].debug_test_str())
-                    print(i, j, fun(x))
+                    logger.debug(i, j, fun(x))

@@ -33,7 +33,14 @@ class SeasideCGEModel(BaseAnalysis):
         return {
             'name': 'Joplin-small-calibrated',
             'description': 'CGE model for Joplin.',
-            'input_parameters': [],
+            'input_parameters': [
+                {
+                    'id': 'print_solver_output',
+                    'required': False,
+                    'description': 'Print solver output.',
+                    'type': bool
+                }
+            ],
             'input_datasets': [
                 {
                     'id': 'SAM',
@@ -1705,7 +1712,8 @@ class SeasideCGEModel(BaseAnalysis):
         def run_solver(cons_filename, temp_file_name="tmp.py"):
             solver = 'ipopt'
             solver_io = 'nl'
-            stream_solver = True  # True prints solver output to screen
+            stream_solver = self.get_parameter("print_solver_output") \
+                if self.get_parameter("print_solver_output") is not None else False  # print solver output if True
             keepfiles = False  # True prints intermediate file names (.nl,.sol,...)
             opt = SolverFactory(solver, solver_io=solver_io)
 

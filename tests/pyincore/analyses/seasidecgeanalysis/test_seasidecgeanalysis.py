@@ -20,6 +20,8 @@ def run_base_analysis():
     sims = "5f174211c98cf43417c89565"
     sector_shocks = "5f5fdbc1b7745919a9e2482d"
 
+    seaside_cge.set_parameter("print_solver_output", False)
+
     seaside_cge.load_remote_input_dataset("SAM", sam)
     seaside_cge.load_remote_input_dataset("BB", bb)
     seaside_cge.load_remote_input_dataset("EMPLOY", employ)
