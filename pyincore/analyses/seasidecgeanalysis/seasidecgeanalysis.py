@@ -1806,26 +1806,22 @@ class SeasideCGEModel(BaseAnalysis):
         iNum = 1  # dynamic model itterations
 
         sector_shocks = pd.read_csv(self.get_input_dataset("sector_shocks").get_file_path('csv'))
-        sector_shocks['sector'] = sector_shocks['sector'].str.upper()
-        sector_shocks.to_csv("before.csv")
+        # Order sector shocks by the variables set in KS0
         sector_shocks = sector_shocks.set_index('sector')
         headers = list((KS0.loc[K, I]).columns)
-        print("-------------------------------------------------------")
-        print(headers)
         sector_shocks = sector_shocks.reindex(headers)
         sector_shocks.loc[headers]
-        sector_shocks.to_csv("ss.csv")
 
         # The line below this can be used if we want to add the ability to do multiple simulations later, currently
         # it changes nothing.
         KS00 = KS0.copy()
         for ittr in range(iNum):
-            print("Simulation: ", ittr + 1)
+            logger.debug("Simulation: ", ittr + 1)
             if ittr == 0:  # if it is the first simulation, apply the shock
                 # The below line of code should take care of all of the multiplication necessary without having to name
                 # each sector individually.
                 # sector shocks need to be in the same order as K
-                KS0.loc[K, I] = KS00.loc[K, I].mul(sector_shocks.iloc[:, 1])
+                KS0.loc[K, I] = KS00.loc[K, I].mul(sector_shocks["shock"].iloc[0])
 
             else:  # other simulations
                 # KS0 = KSNEW*(1-DEPR)+vars.get('N', x=soln[-1])
