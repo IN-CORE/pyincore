@@ -5,12 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
-
-### Added
-
-- Seaside CGE analysis [INCORE1-651](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-651).
-
 ## [0.8.0] - 2020-09-04
 
 ### Removed
