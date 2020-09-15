@@ -4,21 +4,21 @@ import pyincore.globals as pyglobals
 
 
 def run_base_analysis():
-    client = IncoreClient()
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     seaside_cge = SeasideCGEModel(client)
 
     # SAM
-    sam = "5f17393633b2700c11feab38"
+    sam = "5f6127105060967d84ab0f99"
 
     # CAPITAL COMP
-    bb = "5f173a8ec98cf43417c8953b"
+    bb = "5f6132ad5060967d84abdfd3"
 
     # MISC TABLES
-    employ = "5f173c97c98cf43417c8955d"
-    jobcr = "5f173d262fab4d660a8e9f9c"
-    hhtable = "5f173d6bc98cf43417c89561"
-    sims = "5f174211c98cf43417c89565"
-    sector_shocks = "5f5fdbc1b7745919a9e2482d"
+    employ = "5f6127e85060967d84ab0feb"
+    jobcr = "5f61284d5060967d84ab1014"
+    hhtable = "5f6128b85060967d84ab103d"
+    sims = "5f6129035060967d84ab1066"
+    sector_shocks = "5f6123e35060967d84ab0f70"
 
     seaside_cge.set_parameter("print_solver_output", False)
 
