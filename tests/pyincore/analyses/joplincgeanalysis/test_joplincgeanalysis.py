@@ -28,7 +28,7 @@ def run_base_analysis():
     # for this variable, open a terminal window, activate your environment where you installed
     # pyIncore, and then type "which ipopt" in mac, or "where ipopt" in windows and paste
     # the path here
-    # joplin_cge.set_parameter("solver_path", "/PATH/TO/IPOPT")
+    joplin_cge.set_parameter("solver_path", "/PATH/TO/IPOPT")
     joplin_cge.set_parameter("model_iterations", 1)
 
     joplin_cge.load_remote_input_dataset("SAM", SAM)
