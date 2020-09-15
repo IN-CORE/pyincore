@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import pandas as pd
 from pyomo.environ import *
@@ -39,6 +40,12 @@ class SeasideCGEModel(BaseAnalysis):
                     'required': False,
                     'description': 'Print solver output.',
                     'type': bool
+                },
+                {
+                    'id': 'solver_path',
+                    'required': False,
+                    'description': 'Path to ipopt package.',
+                    'type': str
                 }
             ],
             'input_datasets': [
@@ -112,6 +119,8 @@ class SeasideCGEModel(BaseAnalysis):
     def run(self):
         def _(x):
             return ExprM(vars, m=x)
+
+
 
         # ----------------------------------------------------------------
         # define sets
@@ -1710,12 +1719,19 @@ class SeasideCGEModel(BaseAnalysis):
                 f.write('model.obj = Objective(expr=-1*model.x' + str(obj) + ')')
 
         def run_solver(cons_filename, temp_file_name="tmp.py"):
+
             solver = 'ipopt'
             solver_io = 'nl'
             stream_solver = self.get_parameter("print_solver_output") \
                 if self.get_parameter("print_solver_output") is not None else False  # print solver output if True
             keepfiles = False  # True prints intermediate file names (.nl,.sol,...)
-            opt = SolverFactory(solver, solver_io=solver_io)
+
+            executable_path = self.get_parameter("solver_path") \
+                if self.get_parameter("solver_path") is not None else shutil.which("ipopt")
+            if not os.path.exists(executable_path):
+                print("Invalid executable path, please make sure you have Pyomo installed.")
+
+            opt = SolverFactory(solver, solver_io=solver_io, executable=executable_path)
 
             if opt is None:
                 logger.debug("ERROR: Unable to create solver plugin for %s "
