@@ -49,5 +49,6 @@ original/
 *.csv
 
 # Seaside ipopt constants
-pyincore/analyses/seasidecge/solverconstants/*
+pyincore/analyses/seasidecge/solverconstants/ipopt_cons.py
+pyincore/analyses/seasidecge/solverconstants/tmp.py
 
