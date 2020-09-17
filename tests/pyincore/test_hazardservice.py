@@ -275,7 +275,7 @@ def test_get_hurricane_metadata_list(hazardsvc):
 
 def test_get_hurricane_values(hazardsvc):
     response = hazardsvc.get_hurricane_values("5f10837c01d3241d77729a4f",
-                                              "waveHeight", "m", ["29.22,-95.06", "29.20, -95.10"])
+                                              "inundationDuration", "hr", ["29.22,-95.06", "29.20, -95.10"])
     assert response[0]["hazardValue"] == 18.346923306935572 and response[1]["hazardValue"] == 14.580423799099865
 
 
@@ -313,7 +313,7 @@ def test_get_flood_metadata_list(hazardsvc):
 
 
 def test_get_flood_values(hazardsvc):
-    response = hazardsvc.get_flood_values("5f4d02e99f43ee0dde768406", "waterSurfaceElevation", "m",
+    response = hazardsvc.get_flood_values("5f4d02e99f43ee0dde768406", "waterSurfaceElevation", "ft",
                                           ["34.60,-79.16", "34.62,-79.16"])
     assert response[0]["hazardValue"] == 137.69830322265625 and response[1]["hazardValue"] == 141.17652893066406
 
