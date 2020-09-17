@@ -252,6 +252,20 @@ class HazardService:
         response = r.json()
         return response
 
+    def delete_earthquake(self, hazard_id: str):
+        """Delete an earthquake by it's id, and it's associated datasets
+
+        Args:
+            hazard_id (str): ID of the Earthquake.
+
+        Returns:
+            obj: Json of deleted hazard
+
+        """
+        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id)
+        r = self.client.delete(url)
+        return r.json()
+
     def search_earthquakes(self, text: str, skip: int = None, limit: int = None):
         """Search earthquakes.
 
@@ -422,6 +436,20 @@ class HazardService:
         response = r.json()
         return response
 
+    def delete_tornado(self, hazard_id: str):
+        """Delete a tornado by it's id, and it's associated datasets
+
+        Args:
+            hazard_id (str): ID of the Tornado.
+
+        Returns:
+            obj: Json of deleted hazard
+
+        """
+        url = urllib.parse.urljoin(self.base_tornado_url, hazard_id)
+        r = self.client.delete(url)
+        return r.json()
+
     def search_tornadoes(self, text: str, skip: int = None, limit: int = None):
         """Search tornadoes.
 
@@ -554,6 +582,20 @@ class HazardService:
         r = self.client.post(url, **kwargs)
         response = r.json()
         return response
+
+    def delete_tsunami(self, hazard_id: str):
+        """Delete a tsunami by it's id, and it's associated datasets
+
+        Args:
+            hazard_id (str): ID of the Tsunami.
+
+        Returns:
+            obj: Json of deleted hazard
+
+        """
+        url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id)
+        r = self.client.delete(url)
+        return r.json()
 
     def search_tsunamis(self, text: str, skip: int = None, limit: int = None):
         """Search tsunamis.
@@ -945,6 +987,20 @@ class HazardService:
         response = r.json()
 
         return response
+
+    def delete_hurricanewf(self, hazard_id: str):
+        """Delete a hurricane windfield by it's id, and it's associated datasets
+
+        Args:
+            hazard_id (str): ID of the Hurricane Windfield.
+
+        Returns:
+            obj: Json of deleted hazard
+
+        """
+        url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id)
+        r = self.client.delete(url)
+        return r.json()
 
     def search_hurricanewf(self, text: str, skip: int = None, limit: int = None):
         """Search hurricanes.
