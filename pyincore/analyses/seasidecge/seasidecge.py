@@ -41,7 +41,8 @@ class SeasideCGEModel(BaseAnalysis):
                 {
                     'id': 'solver_path',
                     'required': False,
-                    'description': 'Path to ipopt package.',
+                    'description': 'Path to ipopt package. If none is provided, it will default to your environment\'ts'
+                                   'path to the package.',
                     'type': str
                 }
             ],
