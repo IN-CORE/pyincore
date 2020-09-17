@@ -100,13 +100,13 @@ class SeasideCGEModel(BaseAnalysis):
                     'id': 'Seaside_Sims',
                     'parent_type': '',
                     'description': 'CSV file of Seaside cge simulations',
-                    'type': 'seasidecge'
+                    'type': 'incore:SeasideCGEsims'
                 },
                 {
                     'id': 'Seaside_output',
                     'parent_type': '',
                     'description': 'CSV file of output of Seaside cge, containing changes in employment and supply.',
-                    'type': 'seasidecge'
+                    'type': 'incore:SeasideCGEEmployDS'
                 }
             ]
         }
