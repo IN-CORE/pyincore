@@ -1,11 +1,9 @@
 import os
 
-import pandas as pd
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
 
 from pyincore import BaseAnalysis
-from pyincore import globals as pyglobals
 from pyincore.analyses.seasidecge.equationlib import *
 
 logger = pyglobals.LOGGER
