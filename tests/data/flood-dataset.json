@@ -6,7 +6,7 @@
         {
             "hazardType": "deterministic",
             "demandType": "inundationDepth",
-            "demandUnits": "m",
+            "demandUnits": "ft",
             "floodParameters": {
                 "model": "riverine flooding"
             }
@@ -14,7 +14,7 @@
        {
             "hazardType": "deterministic",
             "demandType": "waterSurfaceElevation",
-            "demandUnits": "m",
+            "demandUnits": "ft",
             "floodParameters": {
                 "model": "riverine flooding"
             }
