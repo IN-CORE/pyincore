@@ -8,6 +8,7 @@ from logging import config as logging_config
 
 import logging
 import os
+import shutil
 
 PACKAGE_VERSION = "0.8.0"
 
@@ -40,3 +41,4 @@ TEST_DATA_DIR = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data")
 
 MAX_LOGIN_ATTEMPTS = 3
 
+IPOPT_PATH = shutil.which("ipopt")
