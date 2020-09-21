@@ -50,7 +50,7 @@ class BuildingEconLoss(BaseAnalysis):
                                    sort=True, copy=True)
         # inflation table
         if self.get_input_dataset("consumer_price_index") is not None:
-            inflation_table = self.get_input_dataset("consumer_price_index").get_inventory_reader()
+            inflation_table = self.get_input_dataset("consumer_price_index").get_csv_reader()
             self.inflation_table = list(inflation_table)
 
         user_defined_cpu = 4
