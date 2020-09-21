@@ -27,9 +27,14 @@ class FragilityCurveSet:
 
     def __init__(self, metadata):
         self.id = metadata["id"]
+        self.description = metadata['description']
+        self.authors = metadata['authors'].join(", ")
+        self.paper_reference = str(metadata["paperReference"])
+        self.creator = metadata["creator"]
         self.demand_type = metadata["demandType"]
         self.demand_units = metadata["demandUnits"]
         self.result_type = metadata["resultType"]
+        self.result_unit = metadata["resultUnit"]
         self.hazard_type = metadata['hazardType']
         self.inventory_type = metadata['inventoryType']
 
