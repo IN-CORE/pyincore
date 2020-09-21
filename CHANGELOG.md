@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.8.0] - 2020-09-04
 
 ### Added 
 - Building direct, structural economic loss analysis.  [INCORE1-442](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-442).
@@ -18,11 +18,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Building Functionality analysis outputs functionality samples as an additional result [INCORE1-734](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-734)
 - Python method to interact with flood endpoints in hazard service [INCORE1-747](https://opensource.ncsa.illinois
 .edu/jira/browse/INCORE1-747)
+
 ### Changed
 - Calculate multiple limit states of custom expression fragility curves [INCORE1-682](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-682) 
-
-
-### Changed
 - Updated docstrings to include all hazards that each support [INCORE1-708](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-708)
 >>>>>>> develop
 
