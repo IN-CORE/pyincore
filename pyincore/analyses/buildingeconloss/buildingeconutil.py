@@ -39,11 +39,11 @@ class BuildingEconUtil:
         if inflation_table is not None:
             tax_year = 2005
             for i in range(len(inflation_table)):
-                row_year = int(inflation_table[i]["properties"]["Year"])
+                row_year = int(inflation_table[i]["Year"])
                 if row_year == tax_year:
-                    old_cpi = float(inflation_table[i]["properties"]["Annual Avg"])
+                    old_cpi = float(inflation_table[i]["Annual Avg"])
                     # 2019
-                    new_cpi = float(inflation_table[-2]["properties"]["Annual Avg"])
+                    new_cpi = float(inflation_table[-2]["Annual Avg"])
                     # debug, to get the Ergo values: year=2007, new_cpi = 207.34
                     # new_cpi = 207.34
                     inflation = (new_cpi - old_cpi) / old_cpi
