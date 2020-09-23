@@ -39,7 +39,7 @@ paths = [
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/capitalshocks/capitalshocks.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/capitalshocks/test_capitalshocks.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/test_hazardservice.py'),
-    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/joplincge/test_joplincgeanalysis.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/joplincge/test_joplincge.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/utils/analysisutil.py'),
 ]
 

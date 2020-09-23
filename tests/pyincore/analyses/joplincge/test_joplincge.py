@@ -25,10 +25,6 @@ def run_base_analysis():
     OUTCR = "5cdc7fde5648c4048fb53194"
     sector_shocks = "5f20653e7887544479c6b94a"
 
-    # for this variable, open a terminal window, activate your environment where you installed
-    # pyIncore, and then type "which ipopt" in mac, or "where ipopt" in windows and paste
-    # the path here
-    joplin_cge.set_parameter("solver_path", "/PATH/TO/IPOPT")
     joplin_cge.set_parameter("model_iterations", 1)
 
     joplin_cge.load_remote_input_dataset("SAM", SAM)
