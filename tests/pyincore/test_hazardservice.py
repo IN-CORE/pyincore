@@ -110,19 +110,22 @@ def test_get_supported_earthquake_models(hazardsvc):
     assert all(elem in supported_models for elem in models)
 
 
-def test_create_earthquake(hazardsvc):
+def test_create_and_delete_earthquake(hazardsvc):
     """
-    Test creating both model and dataset based earthquakes
+    Test creating both model and dataset based earthquakes. Also deletes the created earthquakes
     """
     # Dataset Based Earthquake
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset.json"), 'r') as file:
         eq_dataset_json = file.read()
 
-    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset1.tif")),
-                  str(os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset2.tif"))]
+    file_paths = [str(os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset-SA.tif")),
+                  str(os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset-PGA.tif"))]
 
     dataset_response = hazardsvc.create_earthquake(eq_dataset_json, file_paths)
     assert dataset_response["id"] is not None and dataset_response["hazardDatasets"][1]["datasetId"] is not None
+
+    del_response = hazardsvc.delete_earthquake(dataset_response["id"])
+    assert del_response["id"] is not None
 
     # Model Based Earthquake without files
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "eq-model.json"), 'r') as file:
@@ -168,11 +171,14 @@ def test_get_tornado_hazard_metadata(hazardsvc):
     assert response['id'] == "5c6726705648c40890ba03a7"
 
 
-def test_create_tornado_scenario(hazardsvc):
+def test_create_and_delete_tornado_scenario(hazardsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "tornado.json"), 'r') as file:
         scenario = file.read()
     response = hazardsvc.create_tornado_scenario(scenario)
     assert response["id"] is not None
+
+    del_response = hazardsvc.delete_tornado(response["id"])
+    assert del_response["id"] is not None
 
 
 def test_get_tornado_hazard_value(hazardsvc):
@@ -224,7 +230,7 @@ def test_get_tsunami_hazard_values(hazardsvc):
     assert response[0]["hazardValue"] == 5.900000095367432 and response[1]["hazardValue"] == 4.099999904632568
 
 
-def test_create_tsunami_hazard(hazardsvc):
+def test_create_and_delete_tsunami_hazard(hazardsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "tsunami.json"), 'r') as file:
         tsunami_json = file.read()
 
@@ -234,6 +240,9 @@ def test_create_tsunami_hazard(hazardsvc):
     response = hazardsvc.create_tsunami_hazard(tsunami_json, file_paths)
     assert response["id"] is not None and response["hazardDatasets"][1][
         "datasetId"] is not None
+
+    del_response = hazardsvc.delete_tsunami(response["id"])
+    assert del_response["id"] is not None
 
 
 def test_create_and_delete_hurricane(hazardsvc):
@@ -266,7 +275,7 @@ def test_get_hurricane_metadata_list(hazardsvc):
 
 def test_get_hurricane_values(hazardsvc):
     response = hazardsvc.get_hurricane_values("5f10837c01d3241d77729a4f",
-                                              "waveHeight", "m", ["29.22,-95.06", "29.20, -95.10"])
+                                              "inundationDuration", "hr", ["29.22,-95.06", "29.20, -95.10"])
     assert response[0]["hazardValue"] == 18.346923306935572 and response[1]["hazardValue"] == 14.580423799099865
 
 
@@ -304,7 +313,7 @@ def test_get_flood_metadata_list(hazardsvc):
 
 
 def test_get_flood_values(hazardsvc):
-    response = hazardsvc.get_flood_values("5f4d02e99f43ee0dde768406", "waterSurfaceElevation", "m",
+    response = hazardsvc.get_flood_values("5f4d02e99f43ee0dde768406", "waterSurfaceElevation", "ft",
                                           ["34.60,-79.16", "34.62,-79.16"])
     assert response[0]["hazardValue"] == 137.69830322265625 and response[1]["hazardValue"] == 141.17652893066406
 

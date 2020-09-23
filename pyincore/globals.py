@@ -8,8 +8,9 @@ from logging import config as logging_config
 
 import logging
 import os
+import shutil
 
-PACKAGE_VERSION = "0.7.0"
+PACKAGE_VERSION = "0.8.0"
 
 INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
 TEST_INCORE_API_PROD_URL = "http://incore.ncsa.illinois.edu:31888"
@@ -40,3 +41,4 @@ TEST_DATA_DIR = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data")
 
 MAX_LOGIN_ATTEMPTS = 3
 
+IPOPT_PATH = shutil.which("ipopt")
