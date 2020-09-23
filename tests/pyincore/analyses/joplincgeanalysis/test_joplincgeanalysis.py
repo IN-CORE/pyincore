@@ -1,5 +1,5 @@
 from pyincore import IncoreClient
-from pyincore.analyses.joplincgeanalysis import JoplinCGEModel
+from pyincore.analyses.joplincge import JoplinCGEModel
 import pyincore.globals as pyglobals
 
 

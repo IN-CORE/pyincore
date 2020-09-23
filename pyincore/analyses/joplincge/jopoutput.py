@@ -8,7 +8,7 @@
 # This swas only created to assist those unfamiliar with python objects
 """
 
-from pyincore.analyses.joplincgeanalysis.outputfunctions import base_value, new_value, get_diff
+from pyincore.analyses.joplincge.outputfunctions import base_value, new_value, get_diff
 
 #CG0
 cg0 = base_value(vars, soln, 'CG')
