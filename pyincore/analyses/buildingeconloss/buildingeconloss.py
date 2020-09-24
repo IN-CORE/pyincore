@@ -5,148 +5,75 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import pandas as pd
-import collections
-import concurrent.futures
 import traceback
 
-from pyincore import BaseAnalysis, AnalysisUtil
-from pyincore.analyses.buildingeconloss.buildingeconutil import BuildingEconUtil
+from pyincore import BaseAnalysis
 
 
 class BuildingEconLoss(BaseAnalysis):
-    """Building Economic Loss Analysis calculates the building loss based on
-    mean damage and various multipliers such as inflation.
+    """Direct Building Economic Loss analysis calculates the building loss based on
+    mean damage and an inflation multiplier from user's input. We are not implementing any
+    inflation calculation based on consumer price indices at the moment. A user must
+    supply the inflation percentage between a building appraisal year and year of interest
+    (current, date of hazard etc.)
 
     Args:
         incore_client (IncoreClient): Service authentication.
 
     """
     def __init__(self, incore_client):
-        self.inflation_table = None
-        self.inflation_factor = 0.0
+        # percentage
+        self.infl_factor = 0.0
 
         super(BuildingEconLoss, self).__init__(incore_client)
 
     def run(self):
         """Executes building economic damage analysis."""
-        # Get inflation input
-        if not self.get_parameter("inflation_factor") is None \
-                and self.get_parameter("inflation_factor") > 0:
-            self.inflation_factor = self.get_parameter("inflation_factor")
+        # Get inflation input in %
+        self.infl_factor = self.get_parameter("inflation_factor")
 
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
-
-        prop_select = []
-        for bldg_item in list(bldg_set):
-            guid = bldg_item["properties"]["guid"]
-            appr_bldg = bldg_item["properties"]["appr_bldg"]
-            prop_select.append([guid, appr_bldg])
-
-        bldg_set_df = pd.DataFrame(prop_select, columns=["guid", "appr_bldg"])
-        bldg_dmg_set = self.get_input_dataset("building_mean_dmg").get_csv_reader()
-        bldg_dmg_df = pd.DataFrame(list(bldg_dmg_set))
-
-        bldg_dmg_set_df = pd.merge(bldg_set_df, bldg_dmg_df, how='outer', left_on="guid", right_on="guid",
-                                   sort=True, copy=True)
-        # inflation table
-        if self.get_input_dataset("consumer_price_index") is not None:
-            inflation_table = self.get_input_dataset("consumer_price_index").get_csv_reader()
-            self.inflation_table = list(inflation_table)
-
-        user_defined_cpu = 4
-        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
-            user_defined_cpu = self.get_parameter("num_cpu")
-
-        row_num = len(bldg_dmg_set_df.index)
-        num_workers = AnalysisUtil.determine_parallelism_locally(self, row_num, user_defined_cpu)
-
-        avg_bulk_input_size = row_num / num_workers
-        inventory = []
-        count = 0
-        while count < row_num:
-            inventory.append(bldg_dmg_set_df.loc[count:count + avg_bulk_input_size])
-            count += avg_bulk_input_size
-
-        results = self.bldg_econ_dmg_concurrent_future(self.bldg_econ_loss_bulk_input, num_workers, inventory)
-
-        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
-
-        return True
-
-    def bldg_econ_dmg_concurrent_future(self, function_name, parallelism, *args):
-        """Utilizes concurrent.future module.
-
-        Args:
-            function_name (function): The function to be parallelized.
-            parallelism (int): Number of workers in parallelization.
-            *args: All the arguments in order to pass into parameter function_name.
-
-        Returns:
-            list: A list of ordered dictionaries with building damage values and other data/metadata.
-
-        """
-        output = []
-        with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
-            for ret in executor.map(function_name, *args):
-                output.extend(ret)
-
-        return output
-
-    def bldg_econ_loss_bulk_input(self, bldg_dmg_set):
-        """Run analysis for multiple buildings.
-
-        Args:
-            bldg_dmg_set (obj): A set of all building damage results.
-
-        Returns:
-            list: A list of ordered dictionaries with building damage values and other data/metadata.
-
-        """
-        result = []
-        for index, bldg in bldg_dmg_set.iterrows():
-            result.append(self.bldg_econ_loss(bldg))
-        return result
-
-    def bldg_econ_loss(self, bldg):
-        """Calculates building economic damage results for a single building.
-
-        Args:
-            bldg (obj): An inventory property: current building.
-
-        Returns:
-            OrderedDict: A dictionary with building economic damage values and other data/metadata.
-
-        """
-        str_loss = 0.0
-        str_loss_dev = 0.0
         try:
-            bldg_results = collections.OrderedDict()
-            mean_damage = float(bldg.loc["meandamage"])
-            mean_damage_dev = float(bldg.loc["mdamagedev"])
+            prop_select = []
+            for bldg_item in list(bldg_set):
+                guid = bldg_item["properties"]["guid"]
+                appr_bldg = bldg_item["properties"]["appr_bldg"]
+                prop_select.append([guid, appr_bldg])
 
-            bldg_results["guid"] = bldg.loc["guid"]
-            if "appr_bldg" in bldg:
-                appr_val = float(bldg.loc["appr_bldg"])
-                # bldg_results["appr_bldg"] = str(appr_val)
+            bldg_set_df = pd.DataFrame(prop_select, columns=["guid", "appr_bldg"])
+            bldg_dmg_set = self.get_input_dataset("building_mean_dmg").get_csv_reader()
+            bldg_dmg_df = pd.DataFrame(list(bldg_dmg_set))
 
-                inflation_mult = BuildingEconUtil.get_inflation_mult(self.inflation_factor,
-                                                                     self.inflation_table)
-                # It was determined after some email exchange with Steve French that if the user
-                # does not supply non-structural damage we should compute str_loss from the entire
-                # appraised value
-                str_loss = BuildingEconUtil.get_econ_loss(1.0, mean_damage, appr_val, inflation_mult)
-                str_loss_dev = BuildingEconUtil.get_econ_std_loss(1.0, mean_damage_dev,
-                                                                  appr_val,
-                                                                  inflation_mult)
-            bldg_results["strloss"] = "{:.2f}".format(str_loss)
-            bldg_results["strlossdev"] = "{:.2f}".format(str_loss_dev)
+            dmg_set_df = pd.merge(bldg_set_df, bldg_dmg_df, how="outer", left_on="guid", right_on="guid",
+                                  sort=True, copy=True)
+            infl_mult = self.get_inflation_mult()
 
-            return bldg_results
+            bldg_results = dmg_set_df[["guid"]].copy()
+            valloss = 0.0
+            vallossdev = 0.0
+            if "appr_bldg" in dmg_set_df:
+                valloss = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["meandamage"].astype(float) * infl_mult
+                vallossdev = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["mdamagedev"].astype(float) * infl_mult
 
+            bldg_results["strloss"] = valloss.round(2)
+            bldg_results["strlossdev"] = vallossdev.round(2)
+
+            result_name = self.get_parameter("result_name")
+            self.set_result_csv_data("result", bldg_results, result_name, "dataframe")
+            return True
         except Exception as e:
             # This prints the type, value and stacktrace of error being handled.
             traceback.print_exc()
             raise e
+
+    def get_inflation_mult(self):
+        """Get inflation multiplier from user's input.
+
+        Returns:
+            float: Inflation multiplier.
+
+        """
+        return (self.infl_factor / 100.0) + 1.0
 
     def get_spec(self):
         """Get specifications of the building damage analysis.
@@ -168,15 +95,8 @@ class BuildingEconLoss(BaseAnalysis):
                 {
                     'id': 'inflation_factor',
                     'required': False,
-                    'description': 'Inflation factor to adjust the appraisal values of buildings. '
-                                   'The Inflation factor is ignored if Consumer price index file is provided.',
+                    'description': 'Inflation factor to adjust the appraisal values of buildings. Default 0.0',
                     'type': float
-                },
-                {
-                    'id': 'num_cpu',
-                    'required': False,
-                    'description': 'If using parallel execution, the number of cpus to request',
-                    'type': int
                 },
             ],
             'input_datasets': [
@@ -192,12 +112,6 @@ class BuildingEconLoss(BaseAnalysis):
                     'required': True,
                     'description': 'Building mean damage results CSV file',
                     'type': ['ergo:meanDamage', 'ergo:buildingDamage']
-                },
-                {
-                    'id': 'consumer_price_index',
-                    'required': False,
-                    'description': 'US Consumer Price Index 1913-2020, CSV file',
-                    'type': ['incore:consumerPriceIndexUS']
                 }
             ],
             'output_datasets': [

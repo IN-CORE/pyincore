@@ -5,5 +5,4 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.buildingeconloss.buildingeconutil import BuildingEconUtil
 from pyincore.analyses.buildingeconloss.buildingeconloss import BuildingEconLoss
