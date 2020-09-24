@@ -1837,62 +1837,36 @@ class JoplinCGEModel(BaseAnalysis):
         RA0 = vars.get('RA', x=soln[0])
         R0 = vars.get('R', x=soln[0])
         Y0 = vars.get('Y', x=soln[0])
+        YL = vars.get('Y', x=soln[1])
         YD0 = vars.get('YD', x=soln[0])
         FD0 = vars.get('FD', x=soln[0])
         FDL = vars.get('FD', x=soln[1])
+
+        households = ["HH1", "HH2", "HH3", "HH4", "HH5", "HH6", "HH7", "HH8", "HH9", "HH10", "HH11", "HH12",
+                      "HH13", "HH14", "HH15", "HH16", "HH17", "HH18", "HH19", "HH20", "HH21", "HH22", "HH23",
+                      "HH24", "HH25", "HH26", "HH27", "HH28", "HH29", "HH30", "HH31", "HH32", "HH33", "HH34",
+                      "HH35", "HH36", "HH37", "HH38", "HH39", "HH40"]
+
+        pre_disaster_hh = {"Household Group": households[:5], "HH0": HH0}
+        post_disaster_hh = {"Household Group": households[:5], "HHL": HHL}
+        pre_disaster_y = {"Household Group": households, "Y0": Y0}
+        post_disaster_y = {"Household Group": households, "YL": YL}
 
         self.set_result_csv_data("pre-disaster-factor-demand", FD0, name="pre-disaster-factor-demand",
                                  source="dataframe")
         self.set_result_csv_data("post-disaster-factor-demand", FDL, name="post-disaster-factor-demand",
                                  source="dataframe")
 
-        self.set_result_csv_data("pre-disaster-gross-income", Y0, name="pre-disaster-gross-income",
-                                 source="dataframe")
-        self.set_result_csv_data("post-disaster-gross-income", YD0, name="post-disaster-gross-income",
-                                 source="dataframe")
+        self.set_result_csv_data("pre-disaster-gross-income", pd.DataFrame(pre_disaster_y),
+                                 name="pre-disaster-gross-income", source="dataframe")
+        self.set_result_csv_data("post-disaster-gross-income", pd.DataFrame(post_disaster_y),
+                                 name="post-disaster-gross-income", source="dataframe")
 
-        self.set_result_csv_data("pre-disaster-total-household-count", HH0, name="pre-disaster-total-household-count",
-                                 source="dataframe")
-        self.set_result_csv_data("post-disaster-total-household-count", HHL, name="post-disaster-total-household-count",
-                                 source="dataframe")
+        self.set_result_csv_data("pre-disaster-total-household-count", pd.DataFrame(pre_disaster_hh),
+                                 name="pre-disaster-total-household-count", source="dataframe")
+        self.set_result_csv_data("post-disaster-total-household-count", pd.DataFrame(post_disaster_hh),
+                                 name="post-disaster-total-household-count", source="dataframe")
 
-        # def generate_output(result_id, variable_name, base_frame: pd.DataFrame, level_frame: pd.DataFrame, output):
-        #     base_name = variable_name + '0'
-        #     level_name = variable_name + 'l'
-        #     delta_name = '\u0394' + variable_name
-        #     delta_frame = level_frame - base_frame
-        #     res = pd.DataFrame({base_name: base_frame,
-        #                         level_name: level_frame,
-        #                         delta_name: delta_frame
-        #                         })
-        #     self.set_result_csv_data(result_id, res, name=result_id, source="dataframe")
-        #     res.to_csv(output, index=True, header=True, encoding="utf-8-sig")
-
-        # dir_path = os.path.dirname(os.path.realpath(__file__))
-        # dir_path = os.path.join(dir_path, "report")
-        # if not os.path.exists(dir_path):
-        #     os.makedirs(dir_path)
-        #
-        # generate_output(result_id="domestic-supply", variable_name='DS', base_frame=DS0.loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}],
-        #                 level_frame=vars.get('DS', x=result[-1]).loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}],
-        #                 output=os.path.join(dir_path, "domestic-supply.csv"))
-        #
-        # generate_output(result_id="employment", variable_name='Y', base_frame=Y0.loc[
-        #     {"L1", "L2", "L3", "KAP", "LAND", "HH1", "HH2", "HH3", "HH4", "HH5", "USSOC1", "USSOC2", "USSOC3",
-        #      "PTAXJop", "STAXJop", "OTXJop", "MISSTAX", "MISITAX", "USPIT", "CYGF", "FED", "STATE", "CITY"}],
-        #                 level_frame=vars.get('Y', x=result[-1]).loc[
-        #                     {"L1", "L2", "L3", "KAP", "LAND", "HH1", "HH2", "HH3", "HH4", "HH5", "USSOC1", "USSOC2",
-        #                      "USSOC3", "PTAXJop", "STAXJop", "OTXJop", "MISSTAX", "MISITAX", "USPIT", "CYGF", "FED",
-        #                      "STATE", "CITY"}],
-        #                 output=os.path.join(dir_path, "household-income.csv"))
-        #
-        # generate_output(result_id="household-income", variable_name='HW', base_frame=HW0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}],
-        #                 level_frame=vars.get('HW', x=result[-1]).loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}],
-        #                 output=os.path.join(dir_path, "employment.csv"))
-        #
-        # # generate_output(result_id="fd", variable_name='FD', base_frame=FD0.loc[{"GOODS", "TRADE", "OTHER"}],
-        # #                 level_frame=vars.get('FD', x=result[-1]).loc[{"GOODS", "TRADE", "OTHER"}],
-        # #                 output=os.path.join(dir_path, "fd.csv"))
         return True
 
     @staticmethod
