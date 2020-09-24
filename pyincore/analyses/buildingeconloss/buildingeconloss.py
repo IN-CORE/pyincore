@@ -12,10 +12,10 @@ from pyincore import BaseAnalysis
 
 class BuildingEconLoss(BaseAnalysis):
     """Direct Building Economic Loss analysis calculates the building loss based on
-    mean damage and an inflation multiplier from user's input. We are not implementing any
-    inflation calculation based on consumer price indices at the moment. A user must
-    supply the inflation percentage between a building appraisal year and year of interest
-    (current, date of hazard etc.)
+    building appraisal value, mean damage and an inflation multiplier from user's input.
+    We are not implementing any inflation calculation based on consumer price indices
+    at the moment. A user must supply the inflation percentage between a building appraisal
+    year and year of interest (current, date of hazard etc.)
 
     Args:
         incore_client (IncoreClient): Service authentication.
