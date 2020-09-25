@@ -19,8 +19,6 @@ buildingeconloss
 ================
 ..  autoclass:: buildingeconloss.buildingeconloss.BuildingEconLoss
     :members:
-..  autoclass:: buildingeconloss.buildingeconutil.BuildingEconUtil
-    :members:
 
 buildingfunctionality
 =====================
