@@ -141,19 +141,13 @@ class JoplinCGEModel(BaseAnalysis):
                     'id': 'domestic-supply',
                     'parent_type': '',
                     'description': 'CSV file of resulting domestic supply',
-                    'type': 'incore:DomesticSupply'
-                },
-                {
-                    'id': 'employment',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting employment',
                     'type': 'incore:Employment'
                 },
                 {
-                    'id': 'household-income',
+                    'id': 'gross-income',
                     'parent_type': '',
-                    'description': 'CSV file of resulting household income',
-                    'type': 'incore:HouseholdIncome'
+                    'description': 'CSV file of resulting gross income',
+                    'type': 'incore:Employment'
                 },
                 {
                     'id': 'pre-disaster-factor-demand',
@@ -168,27 +162,9 @@ class JoplinCGEModel(BaseAnalysis):
                     'type': 'incore:FactorDemand'
                 },
                 {
-                    'id': 'pre-disaster-gross-income',
+                    'id': 'household-count',
                     'parent_type': '',
-                    'description': 'CSV file of gross income before disaster',
-                    'type': 'incore:GrossIncome'
-                },
-                {
-                    'id': 'post-disaster-gross-income',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting gross income',
-                    'type': 'incore:GrossIncome'
-                },
-                {
-                    'id': 'pre-disaster-total-household-count',
-                    'parent_type': '',
-                    'description': 'CSV file of household count before disaster',
-                    'type': 'incore:HouseholdCount'
-                },
-                {
-                    'id': 'post-disaster-total-household-count',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting household count',
+                    'description': 'CSV file of household count',
                     'type': 'incore:HouseholdCount'
                 }
             ]
@@ -1842,30 +1818,29 @@ class JoplinCGEModel(BaseAnalysis):
         FD0 = vars.get('FD', x=soln[0])
         FDL = vars.get('FD', x=soln[1])
 
-        households = ["HH1", "HH2", "HH3", "HH4", "HH5", "HH6", "HH7", "HH8", "HH9", "HH10", "HH11", "HH12",
-                      "HH13", "HH14", "HH15", "HH16", "HH17", "HH18", "HH19", "HH20", "HH21", "HH22", "HH23",
-                      "HH24", "HH25", "HH26", "HH27", "HH28", "HH29", "HH30", "HH31", "HH32", "HH33", "HH34",
-                      "HH35", "HH36", "HH37", "HH38", "HH39", "HH40"]
+        households = ["HH1", "HH2", "HH3", "HH4", "HH5"]
+        labor_groups = ["L1", "L2", "L3", "L4", "L5"]
+        sectors = ["Goods", "Trades", "Others", "HS1", "HS2", "HS3"]
 
-        pre_disaster_hh = {"Household Group": households[:5], "HH0": HH0}
-        post_disaster_hh = {"Household Group": households[:5], "HHL": HHL}
-        pre_disaster_y = {"Household Group": households, "Y0": Y0}
-        post_disaster_y = {"Household Group": households, "YL": YL}
+        FD0.insert(loc=0, column="Labor Group", value=labor_groups)
+        FDL.insert(loc=0, column="Labor Group", value=labor_groups)
+        gross_income = {"Household Group": households, "Y0": Y0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}],
+                        "YL": YL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}]}
+        hh = {"Household Group": households[:5], "HH0": HH0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}],
+              "HHL": HHL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}]}
+        ds = {"Sector": sectors, "DS0": DS0.loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}],
+              "DSL": vars.get('DS', result[-1]).loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}]}
 
-        self.set_result_csv_data("pre-disaster-factor-demand", FD0, name="pre-disaster-factor-demand",
+        self.set_result_csv_data("domestic-supply", pd.DataFrame(ds), name="domestic-supply",
                                  source="dataframe")
-        self.set_result_csv_data("post-disaster-factor-demand", FDL, name="post-disaster-factor-demand",
+        self.set_result_csv_data("pre-disaster-factor-demand", FD0.iloc[0:3, 0:4], name="pre-disaster-factor-demand",
                                  source="dataframe")
-
-        self.set_result_csv_data("pre-disaster-gross-income", pd.DataFrame(pre_disaster_y),
-                                 name="pre-disaster-gross-income", source="dataframe")
-        self.set_result_csv_data("post-disaster-gross-income", pd.DataFrame(post_disaster_y),
-                                 name="post-disaster-gross-income", source="dataframe")
-
-        self.set_result_csv_data("pre-disaster-total-household-count", pd.DataFrame(pre_disaster_hh),
-                                 name="pre-disaster-total-household-count", source="dataframe")
-        self.set_result_csv_data("post-disaster-total-household-count", pd.DataFrame(post_disaster_hh),
-                                 name="post-disaster-total-household-count", source="dataframe")
+        self.set_result_csv_data("post-disaster-factor-demand", FDL.iloc[0:3, 0:4], name="post-disaster-factor-demand",
+                                 source="dataframe")
+        self.set_result_csv_data("gross-income", pd.DataFrame(gross_income),
+                                 name="gross-income", source="dataframe")
+        self.set_result_csv_data("household-count", pd.DataFrame(hh),
+                                 name="household-count", source="dataframe")
 
         return True
 
