@@ -119,7 +119,7 @@ class BuildingEconLoss(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'buildings',
                     'description': 'CSV file of building economy damages',
-                    'type': 'ergo:buildingEconomicLoss'
+                    'type': 'incore:buildingEconomicLoss'
                 }
             ]
         }
