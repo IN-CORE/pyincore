@@ -111,7 +111,7 @@ class BuildingEconLoss(BaseAnalysis):
                     'id': 'building_mean_dmg',
                     'required': True,
                     'description': 'Building mean damage results CSV file',
-                    'type': ['ergo:meanDamage', 'ergo:buildingDamage']
+                    'type': ['ergo:meanDamage']
                 }
             ],
             'output_datasets': [
