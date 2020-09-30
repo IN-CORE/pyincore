@@ -22,5 +22,4 @@ fi
 cd ../
 
 # Build docker image
-
 $DEBUG docker build -t hub.ncsa.illinois.edu/incore/doc/pyincore$VERSION:latest -f Dockerfile.docs .
