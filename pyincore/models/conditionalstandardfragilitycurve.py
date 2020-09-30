@@ -40,7 +40,7 @@ class ConditionalStandardFragilityCurve(FragilityCurve):
         probability = float(0.0)
         if hazard > 0.0:
             index = ConditionalStandardFragilityCurve._fragility_curve_rules_match(self.rules, hazard)
-            if index:
+            if index is not None:
                 alpha = float(self.alpha[index])
                 beta = math.sqrt(math.pow(self.beta[index], 2) + math.pow(std_dev, 2))
 

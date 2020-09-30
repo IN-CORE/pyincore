@@ -64,7 +64,7 @@ class PeriodBuildingFragilityCurve(FragilityCurve):
         if period < cutoff_period:
             multiplier = cutoff_period - period
             surface_eq = (math.log(
-                hazard) - cutoff_period * a12_param + a11_param) / (
+                hazard) - (cutoff_period * a12_param + a11_param)) / (
                                  a13_param + a14_param * cutoff_period)
             probability = norm.cdf(surface_eq + multiplier * (
                     math.log(hazard) - a21_param) / a22_param)
