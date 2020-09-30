@@ -13,6 +13,8 @@ paths = [
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/buildingdamage/'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/bridgedamage/'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/bridgedamage/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/buildingeconloss/'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/buildingeconloss/'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/roaddamage/'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/roaddamage/'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/tornadoepndamage/'),
