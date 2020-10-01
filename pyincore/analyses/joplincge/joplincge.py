@@ -1779,7 +1779,6 @@ class JoplinCGEModel(BaseAnalysis):
             else:  # other simulations
                 KS0 = KSNEW * (1 - DEPR) + vars.get('N', x=soln[-1])
             result = run_solver(filename, tmp)
-        exec(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "jopoutput.py")).read())
 
         # Prepare simulations output
         CH0 = vars.get('CH', x=soln[0])
