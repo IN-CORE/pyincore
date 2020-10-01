@@ -1824,12 +1824,12 @@ class JoplinCGEModel(BaseAnalysis):
 
         FD0.insert(loc=0, column="Labor Group", value=labor_groups)
         FDL.insert(loc=0, column="Labor Group", value=labor_groups)
-        gross_income = {"Household Group": households, "Y0": Y0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}],
-                        "YL": YL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}]}
-        hh = {"Household Group": households[:5], "HH0": HH0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}],
-              "HHL": HHL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}]}
-        ds = {"Sector": sectors, "DS0": DS0.loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}],
-              "DSL": vars.get('DS', result[-1]).loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}]}
+        gross_income = {"Household Group": households, "Y0": Y0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index(),
+                        "YL": YL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index()}
+        hh = {"Household Group": households[:5], "HH0": HH0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index(),
+              "HHL": HHL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index()}
+        ds = {"Sectors": sectors, "DS0": DS0.loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}].sort_index(),
+              "DSL": vars.get('DS', result[-1]).loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}].sort_index()}
 
         self.set_result_csv_data("domestic-supply", pd.DataFrame(ds), name="domestic-supply",
                                  source="dataframe")
