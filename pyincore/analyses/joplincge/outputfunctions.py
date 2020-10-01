@@ -10,7 +10,7 @@ import pandas as pd
 
 
 # Return initial values function
-def base_value(vars, soln, eqName):
+def base_value(vars, eqName):
     if vars.get_info(eqName)['size'] == 1:
         basevalues = vars.initialVals[vars.get_index(eqName)]
 
