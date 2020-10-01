@@ -47,9 +47,9 @@ housingunitallocation
 ..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
     :members:
 
-joplincgeanalysis
+joplincge
 =================
-..  autoclass:: joplincgeanalysis.joplincgeanalysis.JoplinCGEModel
+..  autoclass:: joplincge.joplincge.JoplinCGEModel
     :members:
 
 meandamage

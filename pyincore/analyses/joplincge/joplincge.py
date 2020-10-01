@@ -652,7 +652,8 @@ class JoplinCGEModel(BaseAnalysis):
         TAUFK.loc[GF, K] = SAM.loc[GF, K] / SAM.loc[Z, K].sum(0)
 
         # NOTE:
-        # this conditional in GAMS currently does nothing, as SAM(G1,GX) only has entries where IGTD(G1,GX) is 1 anyways.
+        # this conditional in GAMS currently does nothing, as SAM(G1,GX) only has entries
+        # where IGTD(G1,GX) is 1 anyways.
         # This will need to be changed if this is not always the case
         TAXS.loc[G, GX] = SAM.loc[G, GX] / SAM.loc[G, GX].sum(0)
 
@@ -1106,13 +1107,6 @@ class JoplinCGEModel(BaseAnalysis):
             # print(CPIEQ)
             CPIEQ.write(count, filename)
 
-            #   YEQ(H)..
-            #   Y(H)            =E=
-            #    SUM(L,  A(H,L) * HW(H) / SUM(H1, A(H1,L) * HW(H1) )* (Y(L) - (CMIWAGE(L)*CMI(L))) * ( 1 - SUM(G, TAUFL(G,L))))
-            #                                 + SUM(CM, A(H,CM)*CMOWAGE(CM)*CMO(CM))
-            #                                 + SUM(LA,  A(H,LA) * HW(H) / SUM(H1, A(H1,LA) * HW(H1)) * (Y(LA)+ LNFOR(LA))*( 1 - SUM(G, TAUFLA(G,LA) ) ) )
-            #                                 + SUM(K,  A(H,K) * HW(H) / SUM(H1, A(H1,K) * HW(H1)) * (Y(K) + KPFOR(K)) * ( 1 - SUM(G, TAUFK(G,K) ) ) );
-
             # print('YEQ(H)')
             line1 = (ExprM(vars, m=A.loc[H, L]) * HW.loc(H) / (ExprM(vars, m=A.loc[H1, L]) * HW.loc(H1)).sum(H1) * (
                     Y.loc(L) - ExprM(vars, m=CMIWAGE.loc[L]) * CMI.loc(L)) * ExprM(vars, m=1 - TAUFL.loc[G, L].sum(
@@ -1321,11 +1315,6 @@ class JoplinCGEModel(BaseAnalysis):
             KSEQ = (line - KS.loc(K, IG))
             KSEQ.write(count, filename)
             # print(KSEQ)
-
-            # LSEQ1(H).. HW(H)/HH(H)   =E= HW0(H)/HH0(H)
-            #                                 *((SUM(L, RA(L) / RA0(L))/3)/ (CPI(H) / CPI0(H))* (SUM((Z,L), FD(L,Z))/ (SUM(H1, HW(H1)* SUM(L, JOBCOR(H1,L))) + SUM(L,CMI(L)))) + SUM((CM,L), EXWGEO(CM)/RA(L))/27 * (SUM(CM, CMO(CM))/(SUM(H1, HW(H1)* SUM(L,JOBCOR(H1,L))) + SUM(L,CMI(L)))))**(ETARA(H))
-            #                                 * (SUM(G, TP(H,G)/ CPI(H)) / SUM(G, TP(H,G) / CPI0(H) ))**(ETAPT(H))
-            #                                 * ((SUM(GI, PIT0(GI,H)* HH0(H))+ SUM(G, TAUH0(G,H)*HH0(H)))/ (SUM(GI, PIT(GI,H)* HH(H))+ SUM(G, TAUH(G,H)*HH(H))))**(ETAPIT(H));
 
             # print('LSEQ1(H)')
             line1 = ExprM(vars, m=HW0.loc[H] / HH0.loc[H])
@@ -1578,8 +1567,6 @@ class JoplinCGEModel(BaseAnalysis):
             SPIEQ = (line - SPI)
             SPIEQ.write(count, filename)
             # print(SPIEQ)
-
-            #  LMEQ1.. SUM(H, HW(H)* JOBCOR(H,'L1')) + CMI('L1') =E= SUM(Z, FD('L1',Z)) + SUM(CM1, SUM(H, HW(H)*OUTCR(H, CM1)));
             # print('LMEQ1')
             left = (ExprM(vars, m=JOBCOR.loc[H, 'L1']) * HW.loc(H)).sum(H) + CMI.loc(['L1'])
             right = FD.loc(['L1'], Z).sum(Z) + (HW.loc(H) * ExprM(vars, m=OUTCOR.loc[H, CM1])).sum()
@@ -1589,7 +1576,6 @@ class JoplinCGEModel(BaseAnalysis):
             LMEQ1.write(count, filename)
             # print(LMEQ1)
 
-            #  LMEQ2.. SUM(H, HW(H)* JOBCOR(H,'L2')) + CMI('L2') =E= SUM(Z, FD('L2',Z)) + SUM(CM2, SUM(H, HW(H)*OUTCR(H, CM2)));
             # print('LMEQ2')
             left = (ExprM(vars, m=JOBCOR.loc[H, "L2"]) * HW.loc(H)).sum(H) + CMI.loc(["L2"])
             right = FD.loc(['L2'], Z).sum(Z) + (HW.loc(H) * ExprM(vars, m=OUTCOR.loc[H, CM2])).sum()
@@ -1599,7 +1585,6 @@ class JoplinCGEModel(BaseAnalysis):
             LMEQ2.write(count, filename)
             # print(LMEQ2)
 
-            #  LMEQ3.. SUM(H, HW(H)* JOBCOR(H,'L3')) + CMI('L3') =E= SUM(Z, FD('L3',Z)) + SUM(CM3, SUM(H, HW(H)*OUTCR(H, CM3)));
             # print('LMEQ3')
             left = (ExprM(vars, m=JOBCOR.loc[H, "L3"]) * HW.loc(H)).sum(H) + CMI.loc(["L3"])
             right = FD.loc(['L3'], Z).sum(Z) + (HW.loc(H) * ExprM(vars, m=OUTCOR.loc[H, CM3])).sum()
@@ -1671,7 +1656,8 @@ class JoplinCGEModel(BaseAnalysis):
             with open(filename, 'a') as f:
                 f.write('model.obj = Objective(expr=-1*model.x' + str(obj) + ')')
 
-        def run_solver(cons_filename, temp_file_name=os.path.join(os.path.dirname(os.path.realpath(__file__)), "solverconstants/tmp.py")):
+        def run_solver(cons_filename, temp_file_name=os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                                  "solverconstants/tmp.py")):
             solver = 'ipopt'
             solver_io = 'nl'
             stream_solver = True  # True prints solver output to screen
