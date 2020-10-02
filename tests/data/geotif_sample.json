@@ -1,5 +1,5 @@
 {
-  "dataType": "edu.illinois.ncsa.ergo.eq.schemas.deterministicHazardRaster.v1.0",
+  "dataType": "ergo:deterministicEarthquakeRaster",
   "title": "pytest - geotif_test",
   "format": "geotif"
 }

@@ -500,7 +500,7 @@ class TornadoEpnDamage(BaseAnalysis):
                     'id': 'tornado',
                     'required': False,
                     'description': 'Tornado Dataset',
-                    'type': ['tornadowindfield'],
+                    'type': ['incore:tornadoWindfield'],
                 }
             ],
             'output_datasets': [
