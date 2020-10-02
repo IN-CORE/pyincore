@@ -7,7 +7,6 @@ import os
 
 import numpy as np
 import pytest
-from jose import jwt
 
 from pyincore import globals as pyglobals
 from pyincore import HazardService, IncoreClient

@@ -6,7 +6,6 @@
 import os
 
 import pytest
-from jose import jwt
 
 from pyincore import globals as pyglobals
 from pyincore import IncoreClient, SpaceService

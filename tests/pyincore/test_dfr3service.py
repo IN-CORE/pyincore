@@ -9,7 +9,6 @@ import json
 import os
 
 import pytest
-from jose import jwt
 
 from pyincore import FragilityService, RepairService, IncoreClient
 from pyincore import globals as pyglobals
