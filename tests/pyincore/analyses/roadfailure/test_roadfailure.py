@@ -9,7 +9,7 @@ from pyincore.globals import INCORE_API_DEV_URL
 
 
 def test_road_failure():
-    client = IncoreClient(INCORE_API_DEV_URL)
+    client = IncoreClient(INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
 
     # road inventory for Galveston island
     road_dataset_id = "5f0dd5ecb922f96f4e962caf"

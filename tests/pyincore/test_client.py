@@ -6,8 +6,6 @@
 
 import pytest
 import requests
-import os
-from jose import jwt
 
 from pyincore import Client, IncoreClient, InsecureIncoreClient, DataService
 
@@ -16,14 +14,6 @@ def test_client_success(monkeypatch):
     """
     testing successful login
     """
-    try:
-        with open(os.path.join(os.path.dirname(__file__), ".incorepw"), 'r') as f:
-            cred = f.read().splitlines()
-    except EnvironmentError:
-        assert False
-    credentials = jwt.decode(cred[0], cred[1])
-    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
-    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
     client = IncoreClient(token_file_name=".incrtesttoken")
     assert "bearer" in str(client.session.headers["Authorization"])
 

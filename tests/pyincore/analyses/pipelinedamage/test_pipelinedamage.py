@@ -9,7 +9,7 @@ from pyincore.globals import INCORE_API_DEV_URL
 
 
 def test_pipeline_dmg():
-    client = IncoreClient(INCORE_API_DEV_URL)
+    client = IncoreClient(service_url=INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
     pipeline_dmg = PipelineDamage(client)
 
     # test tsunami pipeline

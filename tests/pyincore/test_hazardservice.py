@@ -7,7 +7,6 @@ import os
 
 import numpy as np
 import pytest
-from jose import jwt
 
 from pyincore import globals as pyglobals
 from pyincore import HazardService, IncoreClient
@@ -15,14 +14,6 @@ from pyincore import HazardService, IncoreClient
 
 @pytest.fixture
 def hazardsvc(monkeypatch):
-    try:
-        with open(os.path.join(os.path.dirname(__file__), ".incorepw"), 'r') as f:
-            cred = f.read().splitlines()
-    except EnvironmentError:
-        assert False
-    credentials = jwt.decode(cred[0], cred[1])
-    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
-    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
     client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
     return HazardService(client)
 
