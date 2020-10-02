@@ -6,8 +6,6 @@
 
 import pytest
 import requests
-import os
-from jose import jwt
 
 from pyincore import Client, IncoreClient, InsecureIncoreClient, DataService
 
