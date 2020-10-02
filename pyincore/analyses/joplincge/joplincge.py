@@ -1,6 +1,7 @@
 """Joplin CGE model"""
 from pyincore import BaseAnalysis
-from pyincore.analyses.joplincgeanalysis.equationlib import *
+from pyincore import globals as pyglobals
+from pyincore.analyses.joplincge.equationlib import *
 
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
@@ -41,8 +42,9 @@ class JoplinCGEModel(BaseAnalysis):
                 },
                 {
                     'id': 'solver_path',
-                    'required': True,
-                    'description': 'Path to ipopt package.',
+                    'required': False,
+                    'description': 'Path to ipopt package. If none is provided, it will default to your environment\'ts'
+                                   'path to the package.',
                     'type': str
                 }
 
@@ -139,20 +141,32 @@ class JoplinCGEModel(BaseAnalysis):
                     'id': 'domestic-supply',
                     'parent_type': '',
                     'description': 'CSV file of resulting domestic supply',
-                    'type': 'joplincgeanalysis'
+                    'type': 'incore:Employment'
                 },
                 {
-                    'id': 'employment',
+                    'id': 'gross-income',
                     'parent_type': '',
-                    'description': 'CSV file of resulting employment',
-                    'type': 'joplincgeanalysis'
+                    'description': 'CSV file of resulting gross income',
+                    'type': 'incore:Employment'
                 },
                 {
-                    'id': 'household-income',
+                    'id': 'pre-disaster-factor-demand',
                     'parent_type': '',
-                    'description': 'CSV file of resulting household income',
-                    'type': 'joplincgeanalysis'
+                    'description': 'CSV file of factor demand before disaster',
+                    'type': 'incore:FactorDemand'
                 },
+                {
+                    'id': 'post-disaster-factor-demand',
+                    'parent_type': '',
+                    'description': 'CSV file of resulting factor-demand',
+                    'type': 'incore:FactorDemand'
+                },
+                {
+                    'id': 'household-count',
+                    'parent_type': '',
+                    'description': 'CSV file of household count',
+                    'type': 'incore:HouseholdCount'
+                }
             ]
         }
 
@@ -638,7 +652,8 @@ class JoplinCGEModel(BaseAnalysis):
         TAUFK.loc[GF, K] = SAM.loc[GF, K] / SAM.loc[Z, K].sum(0)
 
         # NOTE:
-        # this conditional in GAMS currently does nothing, as SAM(G1,GX) only has entries where IGTD(G1,GX) is 1 anyways.
+        # this conditional in GAMS currently does nothing, as SAM(G1,GX) only has entries
+        # where IGTD(G1,GX) is 1 anyways.
         # This will need to be changed if this is not always the case
         TAXS.loc[G, GX] = SAM.loc[G, GX] / SAM.loc[G, GX].sum(0)
 
@@ -1092,13 +1107,6 @@ class JoplinCGEModel(BaseAnalysis):
             # print(CPIEQ)
             CPIEQ.write(count, filename)
 
-            #   YEQ(H)..
-            #   Y(H)            =E=
-            #    SUM(L,  A(H,L) * HW(H) / SUM(H1, A(H1,L) * HW(H1) )* (Y(L) - (CMIWAGE(L)*CMI(L))) * ( 1 - SUM(G, TAUFL(G,L))))
-            #                                 + SUM(CM, A(H,CM)*CMOWAGE(CM)*CMO(CM))
-            #                                 + SUM(LA,  A(H,LA) * HW(H) / SUM(H1, A(H1,LA) * HW(H1)) * (Y(LA)+ LNFOR(LA))*( 1 - SUM(G, TAUFLA(G,LA) ) ) )
-            #                                 + SUM(K,  A(H,K) * HW(H) / SUM(H1, A(H1,K) * HW(H1)) * (Y(K) + KPFOR(K)) * ( 1 - SUM(G, TAUFK(G,K) ) ) );
-
             # print('YEQ(H)')
             line1 = (ExprM(vars, m=A.loc[H, L]) * HW.loc(H) / (ExprM(vars, m=A.loc[H1, L]) * HW.loc(H1)).sum(H1) * (
                     Y.loc(L) - ExprM(vars, m=CMIWAGE.loc[L]) * CMI.loc(L)) * ExprM(vars, m=1 - TAUFL.loc[G, L].sum(
@@ -1307,11 +1315,6 @@ class JoplinCGEModel(BaseAnalysis):
             KSEQ = (line - KS.loc(K, IG))
             KSEQ.write(count, filename)
             # print(KSEQ)
-
-            # LSEQ1(H).. HW(H)/HH(H)   =E= HW0(H)/HH0(H)
-            #                                 *((SUM(L, RA(L) / RA0(L))/3)/ (CPI(H) / CPI0(H))* (SUM((Z,L), FD(L,Z))/ (SUM(H1, HW(H1)* SUM(L, JOBCOR(H1,L))) + SUM(L,CMI(L)))) + SUM((CM,L), EXWGEO(CM)/RA(L))/27 * (SUM(CM, CMO(CM))/(SUM(H1, HW(H1)* SUM(L,JOBCOR(H1,L))) + SUM(L,CMI(L)))))**(ETARA(H))
-            #                                 * (SUM(G, TP(H,G)/ CPI(H)) / SUM(G, TP(H,G) / CPI0(H) ))**(ETAPT(H))
-            #                                 * ((SUM(GI, PIT0(GI,H)* HH0(H))+ SUM(G, TAUH0(G,H)*HH0(H)))/ (SUM(GI, PIT(GI,H)* HH(H))+ SUM(G, TAUH(G,H)*HH(H))))**(ETAPIT(H));
 
             # print('LSEQ1(H)')
             line1 = ExprM(vars, m=HW0.loc[H] / HH0.loc[H])
@@ -1564,8 +1567,6 @@ class JoplinCGEModel(BaseAnalysis):
             SPIEQ = (line - SPI)
             SPIEQ.write(count, filename)
             # print(SPIEQ)
-
-            #  LMEQ1.. SUM(H, HW(H)* JOBCOR(H,'L1')) + CMI('L1') =E= SUM(Z, FD('L1',Z)) + SUM(CM1, SUM(H, HW(H)*OUTCR(H, CM1)));
             # print('LMEQ1')
             left = (ExprM(vars, m=JOBCOR.loc[H, 'L1']) * HW.loc(H)).sum(H) + CMI.loc(['L1'])
             right = FD.loc(['L1'], Z).sum(Z) + (HW.loc(H) * ExprM(vars, m=OUTCOR.loc[H, CM1])).sum()
@@ -1575,7 +1576,6 @@ class JoplinCGEModel(BaseAnalysis):
             LMEQ1.write(count, filename)
             # print(LMEQ1)
 
-            #  LMEQ2.. SUM(H, HW(H)* JOBCOR(H,'L2')) + CMI('L2') =E= SUM(Z, FD('L2',Z)) + SUM(CM2, SUM(H, HW(H)*OUTCR(H, CM2)));
             # print('LMEQ2')
             left = (ExprM(vars, m=JOBCOR.loc[H, "L2"]) * HW.loc(H)).sum(H) + CMI.loc(["L2"])
             right = FD.loc(['L2'], Z).sum(Z) + (HW.loc(H) * ExprM(vars, m=OUTCOR.loc[H, CM2])).sum()
@@ -1585,7 +1585,6 @@ class JoplinCGEModel(BaseAnalysis):
             LMEQ2.write(count, filename)
             # print(LMEQ2)
 
-            #  LMEQ3.. SUM(H, HW(H)* JOBCOR(H,'L3')) + CMI('L3') =E= SUM(Z, FD('L3',Z)) + SUM(CM3, SUM(H, HW(H)*OUTCR(H, CM3)));
             # print('LMEQ3')
             left = (ExprM(vars, m=JOBCOR.loc[H, "L3"]) * HW.loc(H)).sum(H) + CMI.loc(["L3"])
             right = FD.loc(['L3'], Z).sum(Z) + (HW.loc(H) * ExprM(vars, m=OUTCOR.loc[H, CM3])).sum()
@@ -1657,16 +1656,23 @@ class JoplinCGEModel(BaseAnalysis):
             with open(filename, 'a') as f:
                 f.write('model.obj = Objective(expr=-1*model.x' + str(obj) + ')')
 
-        def run_solver(cons_filename, temp_file_name=os.path.join(os.path.dirname(os.path.realpath(__file__)), "solverconstants/tmp.py")):
+        def run_solver(cons_filename, temp_file_name=os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                                  "solverconstants/tmp.py")):
             solver = 'ipopt'
             solver_io = 'nl'
             stream_solver = True  # True prints solver output to screen
             keepfiles = False  # True prints intermediate file names (.nl,.sol,...)
-            opt = SolverFactory(solver, solver_io=solver_io, executable=self.get_parameter("solver_path"))
+
+            executable_path = self.get_parameter("solver_path") \
+                if self.get_parameter("solver_path") is not None else pyglobals.IPOPT_PATH
+            if not os.path.exists(executable_path):
+                print("Invalid executable path, please make sure you have Pyomo installed.")
+
+            opt = SolverFactory(solver, solver_io=solver_io, executable=executable_path)
 
             if opt is None:
                 print("")
-                print("ERROR: Unable to create solver plugin for %s " \
+                print("ERROR: Unable to create solver plugin for %s " 
                       "using the %s interface" % (solver, solver_io))
                 print("")
                 exit(1)
@@ -1773,41 +1779,53 @@ class JoplinCGEModel(BaseAnalysis):
             else:  # other simulations
                 KS0 = KSNEW * (1 - DEPR) + vars.get('N', x=soln[-1])
             result = run_solver(filename, tmp)
-        exec(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "jopoutput.py")).read())
 
-        def generate_output(result_id, variable_name, base_frame: pd.DataFrame, level_frame: pd.DataFrame, output):
-            base_name = variable_name + '0'
-            level_name = variable_name + 'l'
-            delta_name = '\u0394' + variable_name
-            delta_frame = level_frame - base_frame
-            res = pd.DataFrame({base_name: base_frame,
-                                level_name: level_frame,
-                                delta_name: delta_frame
-                                })
-            self.set_result_csv_data(result_id, res, name=result_id, source="dataframe")
-            res.to_csv(output, index=True, header=True, encoding="utf-8-sig")
+        # Prepare simulations output
+        CH0 = vars.get('CH', x=soln[0])
+        CPI0 = vars.get('CPI', x=soln[0])
+        CX0 = vars.get('CX', x=soln[0])
+        D0 = vars.get('D', x=soln[0])
+        DS0 = vars.get('DS', x=soln[0])
+        IGT0 = vars.get('IGT', x=soln[0])
+        KS0 = vars.get('KS', x=soln[0])
+        LAS0 = vars.get('LAS', x=soln[0])
+        HH0 = vars.get('HH', x=soln[0])
+        HHL = vars.get('HH', x=soln[1])
+        HN0 = vars.get('HN', x=soln[0])
+        HW0 = vars.get('HW', x=soln[0])
+        N0 = vars.get('N', x=soln[0])
+        P0 = vars.get('P', x=soln[0])
+        RA0 = vars.get('RA', x=soln[0])
+        R0 = vars.get('R', x=soln[0])
+        Y0 = vars.get('Y', x=soln[0])
+        YL = vars.get('Y', x=soln[1])
+        YD0 = vars.get('YD', x=soln[0])
+        FD0 = vars.get('FD', x=soln[0])
+        FDL = vars.get('FD', x=soln[1])
 
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        dir_path = os.path.join(dir_path, "report")
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+        households = ["HH1", "HH2", "HH3", "HH4", "HH5"]
+        labor_groups = ["L1", "L2", "L3", "L4", "L5"]
+        sectors = ["Goods", "Trades", "Others", "HS1", "HS2", "HS3"]
 
-        generate_output(result_id="domestic-supply", variable_name='DS', base_frame=DS0.loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}],
-                        level_frame=vars.get('DS', x=result[-1]).loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}],
-                        output=os.path.join(dir_path, "domestic-supply.csv"))
+        FD0.insert(loc=0, column="Labor Group", value=labor_groups)
+        FDL.insert(loc=0, column="Labor Group", value=labor_groups)
+        gross_income = {"Household Group": households, "Y0": Y0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index(),
+                        "YL": YL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index()}
+        hh = {"Household Group": households[:5], "HH0": HH0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index(),
+              "HHL": HHL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index()}
+        ds = {"Sectors": sectors, "DS0": DS0.loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}].sort_index(),
+              "DSL": vars.get('DS', result[-1]).loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}].sort_index()}
 
-        generate_output(result_id="employment", variable_name='Y', base_frame=Y0.loc[
-            {"L1", "L2", "L3", "KAP", "LAND", "HH1", "HH2", "HH3", "HH4", "HH5", "USSOC1", "USSOC2", "USSOC3",
-             "PTAXJop", "STAXJop", "OTXJop", "MISSTAX", "MISITAX", "USPIT", "CYGF", "FED", "STATE", "CITY"}],
-                        level_frame=vars.get('Y', x=result[-1]).loc[
-                            {"L1", "L2", "L3", "KAP", "LAND", "HH1", "HH2", "HH3", "HH4", "HH5", "USSOC1", "USSOC2",
-                             "USSOC3", "PTAXJop", "STAXJop", "OTXJop", "MISSTAX", "MISITAX", "USPIT", "CYGF", "FED",
-                             "STATE", "CITY"}],
-                        output=os.path.join(dir_path, "household-income.csv"))
-
-        generate_output(result_id="household-income", variable_name='HW', base_frame=HW0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}],
-                        level_frame=vars.get('HW', x=result[-1]).loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}],
-                        output=os.path.join(dir_path, "employment.csv"))
+        self.set_result_csv_data("domestic-supply", pd.DataFrame(ds), name="domestic-supply",
+                                 source="dataframe")
+        self.set_result_csv_data("pre-disaster-factor-demand", FD0.iloc[0:3, 0:4], name="pre-disaster-factor-demand",
+                                 source="dataframe")
+        self.set_result_csv_data("post-disaster-factor-demand", FDL.iloc[0:3, 0:4], name="post-disaster-factor-demand",
+                                 source="dataframe")
+        self.set_result_csv_data("gross-income", pd.DataFrame(gross_income),
+                                 name="gross-income", source="dataframe")
+        self.set_result_csv_data("household-count", pd.DataFrame(hh),
+                                 name="household-count", source="dataframe")
 
         return True
 
