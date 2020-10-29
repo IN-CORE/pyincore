@@ -29,8 +29,8 @@ class SeasideCGEModel(BaseAnalysis):
 
     def get_spec(self):
         return {
-            'name': 'Joplin-small-calibrated',
-            'description': 'CGE model for Joplin.',
+            'name': 'Seaside cge',
+            'description': 'CGE model for Seaside.',
             'input_parameters': [
                 {
                     'id': 'print_solver_output',

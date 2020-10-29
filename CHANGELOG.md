@@ -12,13 +12,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Seaside cge analysis [INCORE1-651](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-651)
 
 ### Changed
-- Updated Joplin cge analysis outputs and updated the assignment of ipopt path with shutil [INCORE1-731](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-731)
+- Updated Joplin CGE analysis outputs and updated the assignment of ipopt path with shutil [INCORE1-731](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-731)
 - Updated Pytests to delete created datasets[INCORE1-784](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-784)
 - Added missing fields in fragilitycurveset class [INCORE1-792](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-792)
 - Updated dataset types to match changes in mongo dev [INCORE1-806](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-806)
+
 ### Fixed
-- Fixed typos in damage probabily calculation [INCORE1-781](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-781)
-- FIxed pytest client initialization by adding a conftest.py file in the pytests root folder [INCORE1-789](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-789)
+- Typos in damage probabily calculation [INCORE1-781](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-781)
+- pytest client initialization by adding a conftest.py file in the pytests root folder [INCORE1-789](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-789)
 
 ## [0.8.0] - 2020-09-04
 

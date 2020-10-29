@@ -158,8 +158,8 @@ def test_get_tornado_hazard_metadata(hazardsvc):
     Testing get tornado/{id}
     """
     response = hazardsvc.get_tornado_hazard_metadata(
-        "5c6726705648c40890ba03a7")
-    assert response['id'] == "5c6726705648c40890ba03a7"
+        "5df913b83494fe000861a743")
+    assert response['id'] == "5df913b83494fe000861a743"
 
 
 def test_create_and_delete_tornado_scenario(hazardsvc):
@@ -173,7 +173,7 @@ def test_create_and_delete_tornado_scenario(hazardsvc):
 
 
 def test_get_tornado_hazard_value(hazardsvc):
-    hval = hazardsvc.get_tornado_hazard_value("5c6726705648c40890ba03a7",
+    hval = hazardsvc.get_tornado_hazard_value("5df913b83494fe000861a743",
                                               "mph", 35.228, -97.478, 0)
     assert ((hval > 85) and (hval < 165))
 
@@ -182,7 +182,7 @@ def test_get_tornado_hazard_values(hazardsvc):
     """
     Testing getting multiple hazard values
     """
-    hvals = hazardsvc.get_tornado_hazard_values("5c6726705648c40890ba03a7",
+    hvals = hazardsvc.get_tornado_hazard_values("5df913b83494fe000861a743",
                                                 "mph",
                                                 ["35.228, -97.478",
                                                  "35.229, -97.465"])

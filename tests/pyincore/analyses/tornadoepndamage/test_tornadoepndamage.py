@@ -11,7 +11,7 @@ def run_with_base_class():
 
     epn_node_id = '5b1fdb50b1cf3e336d7cecb1'
     epn_link_id = '5b1fdc2db1cf3e336d7cecc9'
-    tornado_id = '5c6323a0c11bb380daa9cbc1'
+    tornado_id = '5df913b83494fe000861a743'
 
     ted.load_remote_input_dataset("epn_node", epn_node_id)
     ted.load_remote_input_dataset("epn_link", epn_link_id)

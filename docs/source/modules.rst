@@ -93,6 +93,11 @@ roaddamage
 ..  autoclass:: roaddamage.roaddamage.RoadDamage
     :members:
 
+seasidecge
+=================
+..  autoclass:: seasidecge.seasidecge.SeasideCGEModel
+    :members:
+
 tornadoepndamage
 ================
 ..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
