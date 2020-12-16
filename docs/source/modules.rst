@@ -1,132 +1,242 @@
-analyses
-^^^^^^^^
-
-bridgedamage
-============
+analyses/bridgedamage
+=====================
 ..  autoclass:: bridgedamage.bridgedamage.BridgeDamage
     :members:
 ..  autoclass:: bridgedamage.bridgeutil.BridgeUtil
     :members:
 
-buildingdamage
-==============
+analyses/buildingdamage
+=======================
 ..  autoclass:: buildingdamage.buildingdamage.BuildingDamage
     :members:
 ..  autoclass:: buildingdamage.buildingutil.BuildingUtil
     :members:
 
-buildingeconloss
-================
+analyses/buildingeconloss
+=========================
 ..  autoclass:: buildingeconloss.buildingeconloss.BuildingEconLoss
     :members:
 
-buildingfunctionality
-=====================
+analyses/buildingfunctionality
+==============================
 ..  autoclass:: buildingfunctionality.buildingfunctionality.BuildingFunctionality
     :members:
 
-cumulativebuildingdamage
-========================
+analyses/buildingportfolio
+==========================
+
+..  autoclass:: pyincore.analyses.buildingportfolio.recovery.BuildingPortfolioRecoveryAnalysis
+    :members:
+..  autoclass:: pyincore.analyses.buildingportfolio.recovery.BuildingDamage
+    :members:
+..  autoclass:: pyincore.analyses.buildingportfolio.recovery.BuildingData
+    :members:
+
+analyses/capitalshocks
+======================
+
+..  autoclass:: pyincore.analyses.capitalshocks.CapitalShocks
+    :members:
+
+analyses/cumulativebuildingdamage
+=================================
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
     :members:
 
-epfdamage
-=========
+analyses/epfdamage
+==================
 ..  autoclass:: epfdamage.epfdamage.EpfDamage
     :members:
 ..  autoclass:: epfdamage.epfutil.EpfUtil
     :members:
 
-example
-=======
+analyses/example
+================
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
     :members:
 
-housingunitallocation
-=====================
+analyses/housingunitallocation
+==============================
 ..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
     :members:
 
-joplincge
-=================
+analyses/joplincge
+==================
 ..  autoclass:: joplincge.joplincge.JoplinCGEModel
     :members:
+..  autoclass:: joplincge.equationlib.VarContainer
+    :members:
+..  autoclass:: joplincge.equationlib.Variable
+    :members:
+..  autoclass:: joplincge.equationlib.ExprItem
+    :members:
+..  autoclass:: joplincge.equationlib.Expr
+    :members:
+..  autoclass:: joplincge.equationlib.ExprM
+    :members:
+..  autofunction:: joplincge.outputfunctions.base_value
+    :members:
+..  autofunction:: joplincge.outputfunctions.new_value
+    :members:
+..  autofunction:: joplincge.outputfunctions.get_diff
+    :members:
 
-meandamage
-==========
+analyses/meandamage
+===================
 ..  autoclass:: meandamage.meandamage.MeanDamage
     :members:
 
-montecarlofailureprobability
-============================
+analyses/montecarlofailureprobability
+=====================================
 ..  autoclass:: montecarlofailureprobability.montecarlofailureprobability.MonteCarloFailureProbability
     :members:
 
-nonstructbuildingdamage
-=======================
+analyses/nonstructbuildingdamage
+================================
 ..  autoclass:: nonstructbuildingdamage.nonstructbuildingdamage.NonStructBuildingDamage
     :members:
 ..  autoclass:: nonstructbuildingdamage.nonstructbuildingutil.NonStructBuildingUtil
     :members:
 
-pipelinedamage
-==============
+analyses/pipelinedamage
+=======================
 ..  autoclass:: pipelinedamage.pipelinedamage.PipelineDamage
     :members:
 
-pipelinedamagerepairrate
-========================
+analyses/pipelinedamagerepairrate
+=================================
 ..  autoclass:: pipelinedamagerepairrate.pipelinedamagerepairrate.PipelineDamageRepairRate
     :members:
 ..  autoclass:: pipelinedamagerepairrate.pipelineutil.PipelineUtil
     :members:
 
-populationdislocation
-=====================
+analyses/populationdislocation
+==============================
 ..  autoclass:: populationdislocation.populationdislocation.PopulationDislocation
     :members:
 ..  autoclass:: populationdislocation.populationdislocationutil.PopulationDislocationUtil
     :members:
 
-roaddamage
-==========
+analyses/roaddamage
+===================
 ..  autoclass:: roaddamage.roaddamage.RoadDamage
     :members:
 
-seasidecge
-=================
-..  autoclass:: seasidecge.seasidecge.SeasideCGEModel
+analyses/roadfailure
+====================
+..  autoclass:: roadfailure.roadfailure.RoadFailure
     :members:
 
-tornadoepndamage
-================
+analyses/seasidecge
+===================
+..  autoclass:: seasidecge.seasidecge.SeasideCGEModel
+    :members:
+..  autoclass:: seasidecge.solverconstants.equationlib.VarContainer
+    :members:
+..  autoclass:: seasidecge.solverconstants.equationlib.Variable
+    :members:
+..  autoclass:: seasidecge.solverconstants.equationlib.ExprItem
+    :members:
+..  autoclass:: seasidecge.solverconstants.equationlib.Expr
+    :members:
+..  autoclass:: seasidecge.solverconstants.equationlib.ExprM
+    :members:
+
+analyses/tornadoepndamage
+=========================
 ..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
     :members:
 
-transportationrecovery
-======================
+analyses/transportationrecovery
+===============================
 ..  autoclass:: transportationrecovery.transportationrecovery.TransportationRecovery
     :members:
 ..  autoclass:: transportationrecovery.transportationrecoveryutil.TransportationRecoveryUtil
     :members:
+..  autoclass:: transportationrecovery.post_disaster_long_term_solution.PostDisasterLongTermSolution
+    :members:
+..  autoclass:: transportationrecovery.nsga2.Solution
+    :members:
+..  autoclass:: transportationrecovery.nsga2.NSGAII
+    :members:
+..  autofunction:: transportationrecovery.WIPW.ipw_search
+    :members:
+..  autofunction:: transportationrecovery.WIPW.tipw_index
+    :members:
+..  autofunction:: transportationrecovery.WIPW.path_service_level_edges
+    :members:
+..  autofunction:: transportationrecovery.WIPW.path_adt_from_edges
+    :members:
 
-waterfacilitydamage
-===================
+analyses/waterfacilitydamage
+============================
 ..  autoclass:: waterfacilitydamage.waterfacilitydamage.WaterFacilityDamage
     :members:
 
-capitalshocks
+models/conditionalstandardfragilitycurve
+========================================
+..  autoclass:: utils.conditionalstandardfragilitycurve.ConditionalStandardFragilityCurve
+    :members:
+
+models/customexpressionfragilitycurve
+=====================================
+..  autoclass:: utils.customexpressionfragilitycurve.CustomExpressionFragilityCurve
+    :members:
+
+models/fragilitycurve
+=====================
+..  autoclass:: utils.fragilitycurve.FragilityCurve
+    :members:
+
+models/fragilitycurveset
+========================
+..  autoclass:: utils.fragilitycurveset.FragilityCurveSet
+    :members:
+
+models/mapping
+==============
+..  autoclass:: utils.mapping.Mapping
+    :members:
+
+models/mappingset
+=================
+..  autoclass:: utils.mappingset.MappingSet
+    :members:
+
+models/parametricfragilitycurve
+===============================
+..  autoclass:: utils.parametricfragilitycurve.ParametricFragilityCurve
+    :members:
+
+models/periodbuildingfragilitycurve
+===================================
+..  autoclass:: utils.periodbuildingfragilitycurve.PeriodBuildingFragilityCurve
+    :members:
+
+models/periodstandardfragilitycurve
+===================================
+..  autoclass:: utils.periodstandardfragilitycurve.PeriodStandardFragilityCurve
+    :members:
+
+models/standardfragilitycurve
+=============================
+..  autoclass:: utils.standardfragilitycurve.StandardFragilityCurve
+    :members:
+
+utils/analysisutil
+==================
+..  autoclass:: utils.analysisutil.AnalysisUtil
+    :members:
+
+utils/geoutil
 =============
-..  autoclass:: capitalshocks.capitalshocks.CapitalShocks
+..  autoclass:: utils.geoutil.GeoUtil
     :members:
 
-roadfailure
-===========
-..  autoclass:: roadfailure.roadfailure.RoadFailure
+utils/networkutil
+=================
+..  autoclass:: utils.networkutil.NetworkUtil
     :members:
-
-services
-^^^^^^^^
 
 baseanalysis
 ============
@@ -202,15 +312,3 @@ spaceservice
 ..  autoclass:: spaceservice.SpaceService
     :members:
 
-utilities
-^^^^^^^^^
-
-utils/analysisutil
-==================
-..  autoclass:: utils.analysisutil.AnalysisUtil
-    :members:
-
-utils/geoutil
-=============
-..  autoclass:: utils.geoutil.GeoUtil
-    :members:
