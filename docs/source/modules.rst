@@ -181,52 +181,52 @@ models
 
 models/conditionalstandardfragilitycurve
 ========================================
-..  autoclass:: utils.conditionalstandardfragilitycurve.ConditionalStandardFragilityCurve
+..  autoclass:: models.conditionalstandardfragilitycurve.ConditionalStandardFragilityCurve
     :members:
 
 models/customexpressionfragilitycurve
 =====================================
-..  autoclass:: utils.customexpressionfragilitycurve.CustomExpressionFragilityCurve
+..  autoclass:: models.customexpressionfragilitycurve.CustomExpressionFragilityCurve
     :members:
 
 models/fragilitycurve
 =====================
-..  autoclass:: utils.fragilitycurve.FragilityCurve
+..  autoclass:: models.fragilitycurve.FragilityCurve
     :members:
 
 models/fragilitycurveset
 ========================
-..  autoclass:: utils.fragilitycurveset.FragilityCurveSet
+..  autoclass:: models.fragilitycurveset.FragilityCurveSet
     :members:
 
 models/mapping
 ==============
-..  autoclass:: utils.mapping.Mapping
+..  autoclass:: models.mapping.Mapping
     :members:
 
 models/mappingset
 =================
-..  autoclass:: utils.mappingset.MappingSet
+..  autoclass:: models.mappingset.MappingSet
     :members:
 
 models/parametricfragilitycurve
 ===============================
-..  autoclass:: utils.parametricfragilitycurve.ParametricFragilityCurve
+..  autoclass:: models.parametricfragilitycurve.ParametricFragilityCurve
     :members:
 
 models/periodbuildingfragilitycurve
 ===================================
-..  autoclass:: utils.periodbuildingfragilitycurve.PeriodBuildingFragilityCurve
+..  autoclass:: models.periodbuildingfragilitycurve.PeriodBuildingFragilityCurve
     :members:
 
 models/periodstandardfragilitycurve
 ===================================
-..  autoclass:: utils.periodstandardfragilitycurve.PeriodStandardFragilityCurve
+..  autoclass:: models.periodstandardfragilitycurve.PeriodStandardFragilityCurve
     :members:
 
 models/standardfragilitycurve
 =============================
-..  autoclass:: utils.standardfragilitycurve.StandardFragilityCurve
+..  autoclass:: models.standardfragilitycurve.StandardFragilityCurve
     :members:
 
 utilities
