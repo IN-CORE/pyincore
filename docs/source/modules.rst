@@ -1,3 +1,6 @@
+analyses
+^^^^^^^^
+
 analyses/bridgedamage
 =====================
 ..  autoclass:: bridgedamage.bridgedamage.BridgeDamage
@@ -173,6 +176,9 @@ analyses/waterfacilitydamage
 ..  autoclass:: waterfacilitydamage.waterfacilitydamage.WaterFacilityDamage
     :members:
 
+models
+^^^^^^
+
 models/conditionalstandardfragilitycurve
 ========================================
 ..  autoclass:: utils.conditionalstandardfragilitycurve.ConditionalStandardFragilityCurve
@@ -222,6 +228,9 @@ models/standardfragilitycurve
 =============================
 ..  autoclass:: utils.standardfragilitycurve.StandardFragilityCurve
     :members:
+
+utilities
+^^^^^^^^^
 
 utils/analysisutil
 ==================
