@@ -247,6 +247,9 @@ utils/networkutil
 ..  autoclass:: utils.networkutil.NetworkUtil
     :members:
 
+services
+^^^^^^^^
+
 baseanalysis
 ============
 ..  autoclass:: baseanalysis.BaseAnalysis
