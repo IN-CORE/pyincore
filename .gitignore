@@ -52,3 +52,6 @@ original/
 pyincore/analyses/seasidecge/solverconstants/ipopt_cons.py
 pyincore/analyses/seasidecge/solverconstants/tmp.py
 
+# credential
+*.incorepw
+

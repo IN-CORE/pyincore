@@ -42,6 +42,8 @@ paths = [
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/capitalshocks/test_capitalshocks.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/test_hazardservice.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/joplincge/test_joplincge.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/utils/otherutil.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/test_otherutil.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/utils/analysisutil.py'),
 ]
 
