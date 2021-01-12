@@ -67,6 +67,7 @@ def test_get_earthquake_hazard_value_set(hazardsvc):
     assert isinstance(x, np.ndarray) and isinstance(y, np.ndarray) \
            and isinstance(hazard_val, np.ndarray)
 
+
 def test_post_earthquake_hazard_values(hazardsvc):
     payload = [
         {
@@ -90,6 +91,7 @@ def test_post_earthquake_hazard_values(hazardsvc):
     assert len(response) == len(payload) \
            and response[0]['units'] == payload[0]['units']
 
+
 def test_get_liquefaction_values(hazardsvc):
     liq_vals = hazardsvc.get_liquefaction_values("5b902cb273c3371e1236b36b",
                                                  "5a284f53c7d30d13bc08249c",
@@ -98,6 +100,19 @@ def test_get_liquefaction_values(hazardsvc):
                                                   "35.19,-90.0178"])
     assert liq_vals[0]['pgd'] == 94.28155130685825 and liq_vals[1][
         'pgd'] == 103.2176731165868
+
+
+def test_post_liquefaction_values(hazardsvc):
+    payload = []
+
+    # TODO replace actual id
+    response = hazardsvc.post_liquefaction_values(
+        "5b902cb273c3371e1236b36b",
+        payload
+    )
+
+    assert len(response) == len(payload) \
+           and response[0]['units'] == payload[0]['units']
 
 
 def test_get_soil_amplification_value(hazardsvc):
@@ -215,6 +230,19 @@ def test_get_tornado_hazard_values(hazardsvc):
                'hazardValue'] == 0
 
 
+def test_post_tornado_hazard_values(hazardsvc):
+    payload = []
+
+    # TODO replace actual id
+    response = hazardsvc.post_tornado_hazard_values(
+        "",
+        payload
+    )
+
+    assert len(response) == len(payload) \
+           and response[0]['units'] == payload[0]['units']
+
+
 def test_get_tsunami_hazard_metadata_list(hazardsvc):
     response = hazardsvc.get_tsunami_hazard_metadata_list()
     assert len(response) > 0 and 'id' in response[0].keys()
@@ -242,6 +270,20 @@ def test_get_tsunami_hazard_values(hazardsvc):
                                                    ["46.006,-123.935",
                                                     "46.007, -123.969"])
     assert response[0]["hazardValue"] == 5.900000095367432 and response[1]["hazardValue"] == 4.099999904632568
+
+
+
+def test_post_tsunami_hazard_values(hazardsvc):
+    payload = []
+
+    # TODO replace actual id
+    response = hazardsvc.post_tsunami_hazard_values(
+        "",
+        payload
+    )
+
+    assert len(response) == len(payload) \
+           and response[0]['units'] == payload[0]['units']
 
 
 def test_create_and_delete_tsunami_hazard(hazardsvc):
@@ -361,6 +403,19 @@ def test_get_flood_values(hazardsvc):
     assert response[0]["hazardValue"] == 137.69830322265625 and response[1]["hazardValue"] == 141.17652893066406
 
 
+def test_post_flood_hazard_values(hazardsvc):
+    payload = []
+
+    # TODO replace actual id
+    response = hazardsvc.post_flood_hazard_values(
+        "",
+        payload
+    )
+
+    assert len(response) == len(payload) \
+           and response[0]['units'] == payload[0]['units']
+
+
 def test_search_floods(hazardsvc):
     response = hazardsvc.search_floods("Lumberton")
     assert response[0]["id"] is not None
@@ -393,6 +448,20 @@ def test_get_hurricanewf_values(hazardsvc):
                                              "3s", "mph", ["28,-81"], 10.0, 0.03)
 
     assert (pytest.approx(hvals[0]['hazardValue'], 1e-6) == 81.57440785011988)
+
+
+@pytest.mark.skip(reason="performance issues")
+def test_post_hurricanewf_hazard_values(hazardsvc):
+    payload = []
+
+    # TODO replace actual id
+    response = hazardsvc.post_hurricanewf_hazard_values(
+        "",
+        payload
+    )
+
+    assert len(response) == len(payload) \
+           and response[0]['units'] == payload[0]['units']
 
 
 @pytest.mark.skip(reason="performance issues")

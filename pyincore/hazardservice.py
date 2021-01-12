@@ -218,6 +218,15 @@ class HazardService:
         response = r.json()
         return response
 
+    def post_liquefaction_values(self, hazard_id: str, payload: list):
+        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/liquefaction/values")
+        headers = {'Content-type': 'application/json'}
+        new_headers = {**self.client.session.headers, **headers}
+        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
+        response = r.json()
+
+        return response
+
     def get_soil_amplification_value(self, method: str, dataset_id: str,
                                      site_lat: float, site_long: float,
                                      demand_type: str, hazard: float,
