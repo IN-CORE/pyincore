@@ -9,13 +9,12 @@ import numpy as np
 import pytest
 
 from pyincore import globals as pyglobals
-from pyincore import HazardService, IncoreClient, InsecureIncoreClient
+from pyincore import HazardService, IncoreClient
 
 
 @pytest.fixture
 def hazardsvc(monkeypatch):
-    # client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
-    client = InsecureIncoreClient(service_url="http://localhost:8080", username="incrtest")
+    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
     return HazardService(client)
 
 
