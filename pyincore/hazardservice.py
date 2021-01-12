@@ -219,6 +219,15 @@ class HazardService:
         return response
 
     def post_liquefaction_values(self, hazard_id: str, payload: list):
+        """ Retrieve bulk earthquake liquefaction hazard values from the Hazard service.
+
+        Args:
+            hazard_id (str): ID of the Tornado.
+            payload (list):
+        Returns:
+            obj: Hazard values.
+
+        """
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/liquefaction/values")
         headers = {'Content-type': 'application/json'}
         new_headers = {**self.client.session.headers, **headers}
