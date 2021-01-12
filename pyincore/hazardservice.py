@@ -458,7 +458,10 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/values")
-        r = self.client.post(url, payload)
+        headers = {'Content-type': 'application/json'}
+        new_headers = {**self.client.session.headers, **headers}
+        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
+
         response = r.json()
 
         return response
@@ -621,7 +624,10 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id + "/values")
-        r = self.client.post(url, payload)
+        headers = {'Content-type': 'application/json'}
+        new_headers = {**self.client.session.headers, **headers}
+        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
+
         response = r.json()
 
         return response
@@ -780,7 +786,10 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_hurricane_url, hazard_id + "/values")
-        r = self.client.post(url, payload)
+        headers = {'Content-Type': 'application/json'}
+        new_headers = {**self.client.session.headers, **headers}
+        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
+
         response = r.json()
 
         return response
@@ -917,7 +926,9 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_flood_url, hazard_id + "/values")
-        r = self.client.post(url, payload)
+        headers = {'Content-type': 'application/json'}
+        new_headers = {**self.client.session.headers, **headers}
+        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
         response = r.json()
 
         return response
@@ -1064,7 +1075,9 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id + "/values")
-        r = self.client.post(url, payload)
+        headers = {'Content-type': 'application/json'}
+        new_headers = {**self.client.session.headers, **headers}
+        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
         response = r.json()
 
         return response

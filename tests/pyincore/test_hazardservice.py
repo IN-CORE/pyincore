@@ -81,7 +81,7 @@ def test_post_earthquake_hazard_values(hazardsvc):
             "loc": "35.15,-89.99"
         }
     ]
-
+    # TODO replace actual id
     response = hazardsvc.post_earthquake_hazard_values(
         "5b902cb273c3371e1236b36b",
         payload
@@ -291,6 +291,35 @@ def test_get_hurricane_values(hazardsvc):
     response = hazardsvc.get_hurricane_values("5f10837c01d3241d77729a4f",
                                               "inundationDuration", "hr", ["29.22,-95.06", "29.20, -95.10"])
     assert response[0]["hazardValue"] == 18.346923306935572 and response[1]["hazardValue"] == 14.580423799099865
+
+
+def test_post_hurricane_values(hazardsvc):
+    payload =[
+        {
+            "demands": ["waveHeight", "surgeLevel"],
+            "units": ["m", "m"],
+            "loc": "29.22,-95.06"
+        },
+        {
+            "demands": ["waveHeight", "surgeLevel"],
+            "units": ["cm", "cm"],
+            "loc": "29.23,-95.05"
+        },
+        {
+            "demands": ["waveHeight", "inundationDuration"],
+            "units": ["in", "hr"],
+            "loc": "29.22,-95.06"
+        }
+    ]
+
+    # TODO replace actual id
+    response = hazardsvc.post_hurricane_hazard_values(
+        "5ffe1d9a94b73c65a55a93a6",
+        payload
+    )
+
+    assert len(response) == len(payload) \
+           and response[0]['units'] == payload[0]['units']
 
 
 def test_search_hurricanes(hazardsvc):
