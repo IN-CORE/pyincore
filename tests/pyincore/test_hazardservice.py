@@ -9,12 +9,13 @@ import numpy as np
 import pytest
 
 from pyincore import globals as pyglobals
-from pyincore import HazardService, IncoreClient
+from pyincore import HazardService, IncoreClient, InsecureIncoreClient
 
 
 @pytest.fixture
 def hazardsvc(monkeypatch):
-    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
+    # client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
+    client = InsecureIncoreClient(service_url="http://localhost:8080", username="incrtest")
     return HazardService(client)
 
 
@@ -66,6 +67,28 @@ def test_get_earthquake_hazard_value_set(hazardsvc):
     assert isinstance(x, np.ndarray) and isinstance(y, np.ndarray) \
            and isinstance(hazard_val, np.ndarray)
 
+def test_post_earthquake_hazard_values(hazardsvc):
+    payload = [
+        {
+            "demands": ["PGA", "0.2 SD", "1.0 SA"],
+            "units": ["g", "cm", "g"],
+            "amplifyHazards": [False, False, False],
+            "loc": "35.152,-89.9793"
+        },
+        {
+            "demands": ["PGA", "0.2 SD", "0.2 SA", "1.0 SA"],
+            "units": ["g", "in", "g", "g"],
+            "loc": "35.15,-89.99"
+        }
+    ]
+
+    response = hazardsvc.post_earthquake_hazard_values(
+        "5b902cb273c3371e1236b36b",
+        payload
+    )
+
+    assert len(response) == len(payload) \
+           and response[0]['units'] == payload[0]['units']
 
 def test_get_liquefaction_values(hazardsvc):
     liq_vals = hazardsvc.get_liquefaction_values("5b902cb273c3371e1236b36b",

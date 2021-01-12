@@ -12,6 +12,8 @@ from typing import List
 
 from pyincore import IncoreClient
 
+import json
+
 
 class HazardService:
     """Hazard service client
@@ -187,7 +189,9 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/values")
-        r = self.client.post(url, payload)
+        headers = {'Content-type': 'application/json'}
+        new_headers = {**self.client.session.headers, **headers}
+        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
         response = r.json()
 
         return response
