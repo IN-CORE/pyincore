@@ -5,14 +5,13 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
+import json
 import urllib
-
-import numpy
 from typing import List
 
-from pyincore import IncoreClient
+import numpy
 
-import json
+from pyincore import IncoreClient
 
 
 class HazardService:
@@ -165,7 +164,7 @@ class HazardService:
 
         return x, y, hazard_val
 
-    def post_earthquake_hazard_values(self, hazard_id: str, payload):
+    def post_earthquake_hazard_values(self, hazard_id: str, payload, amplify_hazard=False):
         """ Retrieve bulk hurricane hazard values from the Hazard service.
 
         Args:
@@ -189,9 +188,8 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/values")
-        headers = {'Content-type': 'application/json'}
-        new_headers = {**self.client.session.headers, **headers}
-        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
+        kwargs = {"files": {('points', json.dumps(payload)), ('amplifyHazard', json.dumps(amplify_hazard))}}
+        r = self.client.post(url, **kwargs)
         response = r.json()
 
         return response
@@ -218,7 +216,7 @@ class HazardService:
         response = r.json()
         return response
 
-    def post_liquefaction_values(self, hazard_id: str, payload: list):
+    def post_liquefaction_values(self, hazard_id: str, geology_dataset_id: str, payload: list):
         """ Retrieve bulk earthquake liquefaction hazard values from the Hazard service.
 
         Args:
@@ -229,9 +227,8 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/liquefaction/values")
-        headers = {'Content-type': 'application/json'}
-        new_headers = {**self.client.session.headers, **headers}
-        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
+        kwargs = {"files": {('points', json.dumps(payload)), ('geologyDataset', geology_dataset_id)}}
+        r = self.client.post(url, **kwargs)
         response = r.json()
 
         return response

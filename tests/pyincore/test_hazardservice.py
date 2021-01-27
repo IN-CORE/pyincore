@@ -8,8 +8,8 @@ import os
 import numpy as np
 import pytest
 
-from pyincore import globals as pyglobals
 from pyincore import HazardService, IncoreClient
+from pyincore import globals as pyglobals
 
 
 @pytest.fixture
@@ -70,25 +70,26 @@ def test_get_earthquake_hazard_value_set(hazardsvc):
 def test_post_earthquake_hazard_values(hazardsvc):
     payload = [
         {
-            "demands": ["PGA", "0.2 SD", "1.0 SA"],
-            "units": ["g", "cm", "g"],
-            "amplifyHazards": [False, False, False],
-            "loc": "35.152,-89.9793"
+            "demands": ["PGA", "0.2 SD", "0.9 SA", "0.2 SA", "PGV"],
+            "units": ["g", "cm", "g", "g", "in/s"],
+            "loc": "35.84,-89.90"
         },
         {
-            "demands": ["PGA", "0.2 SD", "0.2 SA", "1.0 SA"],
-            "units": ["g", "in", "g", "g"],
-            "loc": "35.15,-89.99"
+            "demands": ["PGA", "1.0 SD", "0.2 SA"],
+            "units": ["blah", "cm", "g"],
+            "loc": "35.84,-89.90"
         }
     ]
-    # TODO replace actual id
     response = hazardsvc.post_earthquake_hazard_values(
-        "5b902cb273c3371e1236b36b",
+        "5ba92505ec23090435209071",
         payload
     )
 
     assert len(response) == len(payload) \
-           and response[0]['units'] == payload[0]['units']
+           and len(response[0]['demands']) == len(payload[0]['demands']) \
+           and response[0]['units'] == payload[0]['units'] \
+           and len(response[0]['hazardValues']) == len(response[0]['demands']) \
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
 
 
 def test_get_liquefaction_values(hazardsvc):
@@ -102,17 +103,25 @@ def test_get_liquefaction_values(hazardsvc):
 
 
 def test_post_liquefaction_values(hazardsvc):
-    payload = []
+    payload = [
+        {
+            "demands": ["pgda", "pgda"],
+            "units": ["cm", "in"],
+            "loc": "35.19,-90.0178"
+        }
+    ]
 
-    # TODO replace actual id
     response = hazardsvc.post_liquefaction_values(
         "5b902cb273c3371e1236b36b",
+        "5a284f53c7d30d13bc08249c",
         payload
     )
 
     assert len(response) == len(payload) \
-           and response[0]['units'] == payload[0]['units']
-
+           and len(response[0]['demands']) == len(payload[0]['demands']) \
+           and response[0]['units'] == payload[0]['units'] \
+           and len(response[0]['pgdValues']) == len(response[0]['demands']) \
+           and all(isinstance(hazardval, float) for hazardval in response[0]['pgdValues'])
 
 def test_get_soil_amplification_value(hazardsvc):
     """
@@ -228,7 +237,6 @@ def test_get_tornado_hazard_values(hazardsvc):
                 hvals[0]['hazardValue'] < 165)) and hvals[1][
                'hazardValue'] == 0
 
-
 def test_post_tornado_hazard_values(hazardsvc):
     payload = []
 
@@ -269,7 +277,6 @@ def test_get_tsunami_hazard_values(hazardsvc):
                                                    ["46.006,-123.935",
                                                     "46.007, -123.969"])
     assert response[0]["hazardValue"] == 5.900000095367432 and response[1]["hazardValue"] == 4.099999904632568
-
 
 
 def test_post_tsunami_hazard_values(hazardsvc):
