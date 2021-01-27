@@ -377,14 +377,16 @@ def test_post_hurricane_values(hazardsvc):
         }
     ]
 
-    # TODO replace actual id
     response = hazardsvc.post_hurricane_hazard_values(
-        "5ffe1d9a94b73c65a55a93a6",
+        "5f10837c01d3241d77729a4f",
         payload
     )
 
     assert len(response) == len(payload) \
-           and response[0]['units'] == payload[0]['units']
+           and len(response[0]['demands']) == len(payload[0]['demands']) \
+           and response[0]['units'] == payload[0]['units'] \
+           and len(response[0]['hazardValues']) == len(response[0]['demands']) \
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
 
 
 def test_search_hurricanes(hazardsvc):
