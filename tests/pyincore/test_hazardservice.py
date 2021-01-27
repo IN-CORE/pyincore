@@ -123,6 +123,7 @@ def test_post_liquefaction_values(hazardsvc):
            and len(response[0]['pgdValues']) == len(response[0]['demands']) \
            and all(isinstance(hazardval, float) for hazardval in response[0]['pgdValues'])
 
+
 def test_get_soil_amplification_value(hazardsvc):
     """
     test /earthquakes/soil/amplification endpoint
@@ -237,17 +238,25 @@ def test_get_tornado_hazard_values(hazardsvc):
                 hvals[0]['hazardValue'] < 165)) and hvals[1][
                'hazardValue'] == 0
 
-def test_post_tornado_hazard_values(hazardsvc):
-    payload = []
 
-    # TODO replace actual id
+def test_post_tornado_hazard_values(hazardsvc):
+    payload = [
+        {
+            "demands": ["wind"],
+            "units": ["m"],
+            "loc": "37.07,-94.50"
+        }
+    ]
     response = hazardsvc.post_tornado_hazard_values(
-        "",
+        "5df913b83494fe000861a743",
         payload
     )
 
     assert len(response) == len(payload) \
-           and response[0]['units'] == payload[0]['units']
+           and len(response[0]['demands']) == len(payload[0]['demands']) \
+           and response[0]['units'] == payload[0]['units'] \
+           and len(response[0]['hazardValues']) == len(response[0]['demands']) \
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
 
 
 def test_get_tsunami_hazard_metadata_list(hazardsvc):
