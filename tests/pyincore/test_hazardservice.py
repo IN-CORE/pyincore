@@ -429,16 +429,24 @@ def test_get_flood_values(hazardsvc):
 
 
 def test_post_flood_hazard_values(hazardsvc):
-    payload = []
+    payload = [
+        {
+            "demands": ["waterSurfaceElevation"],
+            "units": ["m"],
+            "loc": "34.60,-79.16"
+        }
+    ]
 
-    # TODO replace actual id
     response = hazardsvc.post_flood_hazard_values(
-        "",
+        "5f4d02e99f43ee0dde768406",
         payload
     )
 
     assert len(response) == len(payload) \
-           and response[0]['units'] == payload[0]['units']
+           and len(response[0]['demands']) == len(payload[0]['demands']) \
+           and response[0]['units'] == payload[0]['units'] \
+           and len(response[0]['hazardValues']) == len(response[0]['demands']) \
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
 
 
 def test_search_floods(hazardsvc):
