@@ -638,10 +638,8 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id + "/values")
-        headers = {'Content-type': 'application/json'}
-        new_headers = {**self.client.session.headers, **headers}
-        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
-
+        kwargs = {"files": {('points', json.dumps(payload))}}
+        r = self.client.post(url, **kwargs)
         response = r.json()
 
         return response

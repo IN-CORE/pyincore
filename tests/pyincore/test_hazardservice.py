@@ -289,16 +289,24 @@ def test_get_tsunami_hazard_values(hazardsvc):
 
 
 def test_post_tsunami_hazard_values(hazardsvc):
-    payload = []
+    payload = [
+        {
+            "demands": ["hmax"],
+            "units": ["m"],
+            "loc": "46.006,-123.935"
+        }
+    ]
 
-    # TODO replace actual id
     response = hazardsvc.post_tsunami_hazard_values(
-        "",
+        "5bc9ead7f7b08533c7e610e0",
         payload
     )
 
     assert len(response) == len(payload) \
-           and response[0]['units'] == payload[0]['units']
+           and len(response[0]['demands']) == len(payload[0]['demands']) \
+           and response[0]['units'] == payload[0]['units'] \
+           and len(response[0]['hazardValues']) == len(response[0]['demands']) \
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
 
 
 def test_create_and_delete_tsunami_hazard(hazardsvc):
