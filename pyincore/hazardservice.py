@@ -1073,7 +1073,7 @@ class HazardService:
 
         return response
 
-    def post_hurricanewf_hazard_values(self, hazard_id: str, payload):
+    def post_hurricanewf_hazard_values(self, hazard_id: str, payload, elevation: int, roughness: float):
         """ Retrieve bulk hurricane windfield hazard values from the Hazard service.
 
         Args:
@@ -1084,9 +1084,10 @@ class HazardService:
 
         """
         url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id + "/values")
-        headers = {'Content-type': 'application/json'}
-        new_headers = {**self.client.session.headers, **headers}
-        r = self.client.post(url, data=json.dumps(payload), headers=new_headers)
+        kwargs = {"files": {('points', json.dumps(payload)),
+                            ('elevation', json.dumps(elevation)),
+                            ('roughness',json.dumps(roughness))}}
+        r = self.client.post(url, **kwargs)
         response = r.json()
 
         return response

@@ -483,18 +483,29 @@ def test_get_hurricanewf_values(hazardsvc):
     assert (pytest.approx(hvals[0]['hazardValue'], 1e-6) == 81.57440785011988)
 
 
-@pytest.mark.skip(reason="performance issues")
 def test_post_hurricanewf_hazard_values(hazardsvc):
-    payload = []
+    payload = [
+        {
+            "demands": ["3s", "60s"],
+            "units": ["mph", "mph"],
+            "loc": "28,-81"
+        }
+    ]
+    elevation = 10
+    roughness = 0.03
 
-    # TODO replace actual id
     response = hazardsvc.post_hurricanewf_hazard_values(
-        "",
-        payload
+        "5cffdcf35648c404a6414f7e",
+        payload,
+        elevation,
+        roughness
     )
 
     assert len(response) == len(payload) \
-           and response[0]['units'] == payload[0]['units']
+           and len(response[0]['demands']) == len(payload[0]['demands']) \
+           and response[0]['units'] == payload[0]['units'] \
+           and len(response[0]['hazardValues']) == len(response[0]['demands']) \
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
 
 
 @pytest.mark.skip(reason="performance issues")
