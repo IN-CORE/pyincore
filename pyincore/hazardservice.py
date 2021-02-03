@@ -164,7 +164,7 @@ class HazardService:
 
         return x, y, hazard_val
 
-    def post_earthquake_hazard_values(self, hazard_id: str, payload, amplify_hazard=False):
+    def post_earthquake_hazard_values(self, hazard_id: str, payload: list, amplify_hazard=False):
         """ Retrieve bulk hurricane hazard values from the Hazard service.
 
         Args:
@@ -462,7 +462,7 @@ class HazardService:
 
         return response
 
-    def post_tornado_hazard_values(self, hazard_id: str, payload):
+    def post_tornado_hazard_values(self, hazard_id: str, payload: list):
         """ Retrieve bulk tornado hazard values from the Hazard service.
 
         Args:
@@ -627,7 +627,7 @@ class HazardService:
 
         return response
 
-    def post_tsunami_hazard_values(self, hazard_id: str, payload):
+    def post_tsunami_hazard_values(self, hazard_id: str, payload: list):
         """ Retrieve bulk tsunami hazard values from the Hazard service.
 
         Args:
@@ -787,7 +787,7 @@ class HazardService:
         response = r.json()
         return response
 
-    def post_hurricane_hazard_values(self, hazard_id: str, payload):
+    def post_hurricane_hazard_values(self, hazard_id: str, payload: list):
         """ Retrieve bulk hurricane hazard values from the Hazard service.
 
         Args:
@@ -925,7 +925,7 @@ class HazardService:
         response = r.json()
         return response
 
-    def post_flood_hazard_values(self, hazard_id: str, payload):
+    def post_flood_hazard_values(self, hazard_id: str, payload: list):
         """ Retrieve bulk flood hazard values from the Hazard service.
 
         Args:
@@ -1073,7 +1073,7 @@ class HazardService:
 
         return response
 
-    def post_hurricanewf_hazard_values(self, hazard_id: str, payload, elevation: int, roughness: float):
+    def post_hurricanewf_hazard_values(self, hazard_id: str, payload: list, elevation: int, roughness: float):
         """ Retrieve bulk hurricane windfield hazard values from the Hazard service.
 
         Args:
