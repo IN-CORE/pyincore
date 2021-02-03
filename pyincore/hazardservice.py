@@ -177,8 +177,8 @@ class HazardService:
                     "loc": "35.84,-89.90"
                 },
                 {
-                    "demands": ["PGA", "1.0 SD", "1.0 SA"],
-                    "units": ["blah", "cm", "g"],
+                    "demands": ["1.0 SD", "1.0 SA"],
+                    "units": ["cm", "g"],
                     "amplifyHazards": [false, false, false],
                     "loc": "35.84,-89.90"
                 }

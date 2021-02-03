@@ -75,8 +75,8 @@ def test_post_earthquake_hazard_values(hazardsvc):
             "loc": "35.84,-89.90"
         },
         {
-            "demands": ["PGA", "1.0 SD", "0.2 SA"],
-            "units": ["blah", "cm", "g"],
+            "demands": ["1.0 SD", "0.2 SA"],
+            "units": ["cm", "g"],
             "loc": "35.84,-89.90"
         }
     ]
@@ -105,7 +105,7 @@ def test_get_liquefaction_values(hazardsvc):
 def test_post_liquefaction_values(hazardsvc):
     payload = [
         {
-            "demands": ["pgda", "pgda"],
+            "demands": ["pgd", "pgd"],
             "units": ["cm", "in"],
             "loc": "35.19,-90.0178"
         }
