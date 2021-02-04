@@ -139,11 +139,11 @@ def test_get_earthquake_variance(hazardsvc):
     hazard_id = "5c535f57c5c0e4ccead71a1a"
     variance_type = "total"
     demand_type = "PGA"
-    demand_units = "g"
+    demand_unit = "g"
     points = ["35.927, -89.919"]
 
     model_response = hazardsvc.get_earthquake_variance(
-        hazard_id, variance_type, demand_type, demand_units, points)
+        hazard_id, variance_type, demand_type, demand_unit, points)
     assert model_response[0] is not None and \
            (0 < model_response[0]["variance"] <= 1)
 

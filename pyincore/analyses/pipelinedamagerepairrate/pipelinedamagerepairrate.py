@@ -189,23 +189,23 @@ class PipelineDamageRepairRate(BaseAnalysis):
         liquefaction_prob = 0.0
 
         if fragility_set is not None:
-            demand_type = fragility_set.demand_type.lower()
-            demand_units = fragility_set.demand_units
+            demand_type = fragility_set.demand_types[0].lower()
+            demand_unit = fragility_set.demand_units[0]
             location = GeoUtil.get_location(pipeline)
             point = str(location.y) + "," + str(location.x)
 
             if hazard_type == 'earthquake':
                 hazard_resp = self.hazardsvc.get_earthquake_hazard_values(
-                    hazard_dataset_id, demand_type, demand_units, [point])
+                    hazard_dataset_id, demand_type, demand_unit, [point])
             elif hazard_type == 'tsunami':
                 hazard_resp = self.hazardsvc.get_tsunami_hazard_values(
-                    hazard_dataset_id, demand_type, demand_units, [point])
+                    hazard_dataset_id, demand_type, demand_unit, [point])
             elif hazard_type == 'tornado':
                 hazard_resp = self.hazardsvc.get_tornado_hazard_values(
-                    hazard_dataset_id, demand_units, [point])
+                    hazard_dataset_id, demand_unit, [point])
             elif hazard_type == 'hurricane':
                 hazard_resp = self.hazardsvc.get_hurricanewf_values(
-                    hazard_dataset_id, demand_type, demand_units, [point])
+                    hazard_dataset_id, demand_type, demand_unit, [point])
             else:
                 raise ValueError(
                     "Hazard type are not currently supported.")
@@ -227,14 +227,14 @@ class PipelineDamageRepairRate(BaseAnalysis):
 
             if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
                 liq_fragility_curve = fragility_set_liq.fragility_curves[0]
-                liq_hazard_type = fragility_set_liq.demand_type
-                pgd_demand_units = fragility_set_liq.demand_units
+                liq_hazard_type = fragility_set_liq.demand_types[0]
+                pgd_demand_unit = fragility_set_liq.demand_units[0]
 
                 # Get PGD hazard value from hazard service
                 location_str = str(location.y) + "," + str(location.x)
                 liquefaction = self.hazardsvc.get_liquefaction_values(
                     hazard_dataset_id, geology_dataset_id,
-                    pgd_demand_units, [location_str])
+                    pgd_demand_unit, [location_str])
                 liq_hazard_val = liquefaction[0]['pgd']
                 liquefaction_prob = liquefaction[0]['liqProbability']
 

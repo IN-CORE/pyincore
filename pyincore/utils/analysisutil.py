@@ -341,7 +341,7 @@ class AnalysisUtil:
         PROPERTIES = "properties"
         BLDG_PERIOD = "period"
 
-        fragility_hazard_type = fragility_set.demand_type.lower()
+        fragility_hazard_type = fragility_set.demand_types[0].lower()
         hazard_demand_type = fragility_hazard_type
 
         if hazard_type.lower() == "earthquake":
@@ -390,14 +390,15 @@ class AnalysisUtil:
         grouped_inventory = dict()
         for fragility_id, frag in fragility_sets.items():
 
-            demand_type = frag.demand_type
-            demand_units = frag.demand_units
+            # TODO this method will be deprecated so this is temporary fix
+            demand_type = frag.demand_types[0]
+            demand_unit = frag.demand_units[0]
 
             if is_building:
                 inventory = inventories[fragility_id]
                 demand_type = AnalysisUtil.get_hazard_demand_type(inventory, frag, hazard_type)
 
-            tpl = (demand_type, demand_units)
+            tpl = (demand_type, demand_unit)
             grouped_inventory.setdefault(tpl, []).append(fragility_id)
 
         return grouped_inventory

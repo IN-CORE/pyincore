@@ -278,8 +278,8 @@ class WaterFacilityDamage(BaseAnalysis):
         if uncertainty:
             std_dev = random.random()
 
-        hazard_demand_type = fragility.demand_type
-        demand_units = fragility.demand_units
+        hazard_demand_type = fragility.demand_types[0]
+        demand_units = fragility.demand_units[0]
         liq_hazard_type = ""
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
@@ -304,8 +304,8 @@ class WaterFacilityDamage(BaseAnalysis):
         limit_states = fragility.calculate_limit_state(hazard_val, std_dev)
 
         if liq_fragility is not None and liq_geology_dataset_id:
-            liq_hazard_type = liq_fragility.demand_type
-            pgd_demand_units = liq_fragility.demand_units
+            liq_hazard_type = liq_fragility.demand_types[0]
+            pgd_demand_units = liq_fragility.demand_units[0]
             point = str(location.y) + "," + str(location.x)
 
             liquefaction = self.hazardsvc.get_liquefaction_values(
