@@ -279,7 +279,7 @@ class WaterFacilityDamage(BaseAnalysis):
             std_dev = random.random()
 
         hazard_demand_type = fragility.demand_types[0]
-        demand_units = fragility.demand_units[0]
+        demand_unit = fragility.demand_units[0]
         liq_hazard_type = ""
         liq_hazard_val = 0.0
         liquefaction_prob = 0.0
@@ -290,10 +290,10 @@ class WaterFacilityDamage(BaseAnalysis):
         if hazard_type == "earthquake":
             hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_dataset_id, hazard_demand_type,
-                demand_units, [point])
+                demand_unit, [point])
         elif hazard_type == "tsunami":
             hazard_val_set = self.hazardsvc.get_tsunami_hazard_values(
-                hazard_dataset_id, hazard_demand_type, demand_units, [point])
+                hazard_dataset_id, hazard_demand_type, demand_unit, [point])
         else:
             raise ValueError(
                 "Hazard type other than Earthquake and Tsunami are not currently supported.")
@@ -305,12 +305,12 @@ class WaterFacilityDamage(BaseAnalysis):
 
         if liq_fragility is not None and liq_geology_dataset_id:
             liq_hazard_type = liq_fragility.demand_types[0]
-            pgd_demand_units = liq_fragility.demand_units[0]
+            pgd_demand_unit = liq_fragility.demand_units[0]
             point = str(location.y) + "," + str(location.x)
 
             liquefaction = self.hazardsvc.get_liquefaction_values(
                 hazard_dataset_id, liq_geology_dataset_id,
-                pgd_demand_units, [point])
+                pgd_demand_unit, [point])
             liq_hazard_val = liquefaction[0][liq_hazard_type]
             liquefaction_prob = liquefaction[0]['liqProbability']
             pgd_limit_states = liq_fragility.calculate_limit_state(liq_hazard_val, std_dev)
