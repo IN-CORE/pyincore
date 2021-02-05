@@ -1,0 +1,65 @@
+{
+  "className": "FragilitySet",
+  "legacyId": "SF_C1_10",
+  "hazardType": "earthquake",
+  "inventoryType": "building",
+  "authors": [
+    "J.M.Bracci",
+    "A.M.Reinhorn",
+    "J.B.Mander"
+  ],
+  "paperReference": {
+    "name": "NCEER-92-0027",
+    "yearPublished": "1992"
+  },
+  "description": "Gravity Load Designed Concrete Frames",
+  "resultType": "Limit State",
+  "demandType": "Sa",
+  "demandUnits": "g",
+  "fragilityCurves": [
+    {
+      "className": "PeriodBuildingFragilityCurve",
+      "periodEqnType": 3,
+      "periodParam1": 0.097,
+      "periodParam2": 0.624,
+      "periodParam0": 13.0,
+      "fsParam0": -1.4297,
+      "fsParam1": -0.5882,
+      "fsParam2": 0.4863,
+      "fsParam3": 0.0237,
+      "fsParam4": 33.6713,
+      "fsParam5": 11.7658,
+      "description": "Immediate Occupancy"
+    },
+    {
+      "className": "PeriodBuildingFragilityCurve",
+      "periodEqnType": 3,
+      "periodParam1": 0.097,
+      "periodParam2": 0.624,
+      "periodParam0": 13.0,
+      "fsParam0": -1.0435,
+      "fsParam1": -0.5021,
+      "fsParam2": 0.3111,
+      "fsParam3": 0.0851,
+      "fsParam4": 12.533,
+      "fsParam5": 3.892,
+      "description": "Life Safety"
+    },
+    {
+      "className": "PeriodBuildingFragilityCurve",
+      "periodEqnType": 3,
+      "periodParam1": 0.097,
+      "periodParam2": 0.624,
+      "periodParam0": 13.0,
+      "fsParam0": -0.8408,
+      "fsParam1": -0.35,
+      "fsParam2": 0.3651,
+      "fsParam3": 0.0631,
+      "fsParam4": 6.4062,
+      "fsParam5": 2.6323,
+      "description": "Collapse Prevention"
+    }
+  ],
+  "creator": "incore",
+  "id": "5b47b2d8337d4a36187c6c05"
+}

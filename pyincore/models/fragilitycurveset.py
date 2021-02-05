@@ -15,6 +15,7 @@ from pyincore.models.periodstandardfragilitycurve import PeriodStandardFragility
 from pyincore.models.standardfragilitycurve import StandardFragilityCurve
 from pyincore.models.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
 from pyincore.models.parametricfragilitycurve import ParametricFragilityCurve
+from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
 
 
 class FragilityCurveSet:
@@ -23,22 +24,29 @@ class FragilityCurveSet:
     Args:
         metadata (dict): fragility curve metadata.
 
+    Raises:
+        ValueError: Raised if there are unsupported number of fragility curves
+        or if missing a key curve field.
     """
 
     def __init__(self, metadata):
-        self.id = metadata["id"]
-        self.description = metadata['description']
-        self.authors = ", ".join(metadata['authors'])
-        self.paper_reference = str(metadata["paperReference"])
-        self.creator = metadata["creator"]
+        self.id = metadata["id"] if "id" in metadata else ""
+        self.description = metadata['description'] if "description" in metadata else ""
+        self.authors = ", ".join(metadata['authors']) if "authors" in metadata else ""
+        self.paper_reference = str(metadata["paperReference"]) if "paperReference" in metadata else ""
+        self.creator = metadata["creator"] if "creator" in metadata else ""
         self.demand_type = metadata["demandType"]
         self.demand_units = metadata["demandUnits"]
         self.result_type = metadata["resultType"]
-        self.result_unit = metadata["resultUnit"]
+        self.result_unit = metadata["resultUnit"] if "resultUnit" in metadata else ""
         self.hazard_type = metadata['hazardType']
         self.inventory_type = metadata['inventoryType']
-
+        self.fragility_curve_parameters = {}
         self.fragility_curves = []
+
+        if 'fragilityCurveParameters' in metadata.keys():
+            self.fragility_curve_parameters = metadata["fragilityCurveParameters"]
+
         if 'fragilityCurves' in metadata.keys():
             for fragility_curve in metadata["fragilityCurves"]:
 
@@ -59,9 +67,19 @@ class FragilityCurveSet:
                         self.fragility_curves.append(ConditionalStandardFragilityCurve(fragility_curve))
                     elif fragility_curve['className'] == 'ParametricFragilityCurve':
                         self.fragility_curves.append(ParametricFragilityCurve(fragility_curve))
+                    elif fragility_curve['className'] == 'FragilityCurveRefactored':
+                        self.fragility_curves.append(FragilityCurveRefactored(fragility_curve))
                     else:
                         # TODO make a custom fragility curve class that accept whatever
                         self.fragility_curves.append(fragility_curve)
+            if len(self.fragility_curves) == 1:
+                self.limit_state = ['failure']
+            elif len(self.fragility_curves) == 3:
+                self.limit_state = ['immocc', 'lifesfty', 'collprev']
+            elif len(self.fragility_curves) == 4:
+                self.limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
+            else:
+                raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
         elif 'repairCurves' in metadata.keys():
             self.repairCurves = metadata['repairCurves']
         elif 'restorationCurves' in metadata.keys():
@@ -128,7 +146,27 @@ class FragilityCurveSet:
 
         return output
 
-    def calculate_custom_limit_state(self, variables:dict):
+    def calculate_limit_state_refactored(self, hazard_values: dict = {}, std_dev: float = 0.0, **kwargs):
+        """
+        WIP computation of limit state probabilities accounting for custom expressions.
+        :param std_dev: standard deviation
+        :param hazard_values: dictionary with hazard values to compute probability
+
+        Returns: limit state probabilities
+        """
+        output = collections.OrderedDict()
+        index = 0
+
+        for fragility_curve in self.fragility_curves:
+            probability = fragility_curve.calculate_limit_state_probability(hazard_values,
+                                                                            self.fragility_curve_parameters,
+                                                                            **kwargs)
+            output[self.limit_state[index]] = probability
+            index += 1
+
+        return output
+
+    def calculate_custom_limit_state(self, variables: dict):
         """
             Computes limit state probabilities.
             Args:

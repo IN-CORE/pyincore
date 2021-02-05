@@ -1,4 +1,27 @@
 from pyincore import Parser
+from pyincore.utils import evaluateexpression
+import pytest
+
+
+def test_evaluator():
+    invalid_expression = "__import__('subprocess').getoutput('mkdir invalid')"
+
+    with pytest.raises(NameError):
+        evaluateexpression.evaluate(invalid_expression)
+
+
+def test_loop():
+    loop_string = 'for x in range(10):\n  print("haha!")'
+    invalid_expression = "exec(x)"
+
+    with pytest.raises(NameError):
+        evaluateexpression.evaluate(invalid_expression, {"x": loop_string})
+
+
+def test_exec_evaluator():
+    program = 'a = 5\nb=10\nprint("Sum =", a+b)'
+    with pytest.raises(NameError):
+        evaluateexpression.evaluate("exec(program)", {"program": program})
 
 
 def test_parser():
