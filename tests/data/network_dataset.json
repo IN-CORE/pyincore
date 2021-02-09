@@ -1,0 +1,16 @@
+{
+	"title": "Test epn network",
+	"dataType": "incore:network",
+	"format": "shp-network",
+	"networkDataset": {
+		"link": {
+			"linkType": "pipeline"
+		},
+		"node": {
+			"nodeType": "water facility"
+		},
+		"graph": {
+			"graphType": "table"
+		}
+	}
+}

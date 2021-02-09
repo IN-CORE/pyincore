@@ -1,0 +1,65 @@
+{
+  "className": "FragilitySet",
+  "demandType": ["momentumFlux"],
+  "demandUnits": "ft^3/s^2",
+  "fragilityCurves": [
+    {
+      "description": "legacy - StandardFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Moderate"
+      },
+      "rules": [
+        {
+          "expression": "scipy.stats.norm.cdf((math.log(momentumFlux) - math.log(1170.0))/(0.79))"
+        }
+      ]
+    },
+    {
+      "description": "legacy - StandardFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Extensive"
+      },
+      "rules": [
+        {
+          "expression": "scipy.stats.norm.cdf((math.log(momentumFlux) - math.log(3259.0))/(0.79))"
+        }
+      ]
+    },
+    {
+      "description": "legacy - StandardFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Complete"
+      },
+      "rules": [
+        {
+          "expression": "scipy.stats.norm.cdf((math.log(momentumFlux) - math.log(5347.0))/(0.79))"
+        }
+      ]
+    }
+  ],
+  "description": "Concrete Moment frame 4 to 7",
+  "authors": [
+    "FEMA"
+  ],
+  "resultType": "Limit State",
+  "hazardType": "tsunami",
+  "inventoryType": "building",
+  "creator": "incrtest",
+  "fragilityCurveParameters": [
+    {
+      "name": "momentumFlux",
+      "unit": "ft^3/s^2",
+      "description": "momentumFlux value from hazard services"
+    }
+  ],
+  "id": "5fb5984e96513b1f4bd7a0a3"
+}

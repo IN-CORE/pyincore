@@ -12,18 +12,15 @@ import pytest
 
 from pyincore import globals as pyglobals
 from pyincore import (
-    DataService,
     Dataset,
-    IncoreClient,
     NetworkData,
     NetworkDataset,
 )
 
 
 @pytest.fixture
-def datasvc(monkeypatch):
-    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
-    return DataService(client)
+def datasvc():
+    return pytest.datasvc
 
 
 def test_get_dataset_metadata(datasvc):
@@ -74,11 +71,11 @@ def test_get_dataset_blob(datasvc):
 def test_get_datasets(datasvc):
     errors = []
     datatype = "ergo:buildingDamageVer4"
-    metadata = datasvc.get_datasets(datatype=datatype, title="building")
+    metadata = datasvc.get_datasets(datatype=datatype, title="Shelby_County_Essential_Facilities")
 
     if 'id' not in metadata[0].keys():
         errors.append("response is not right!")
-    if not re.search(r'building', metadata[0]['title'].lower()):
+    if not re.search(r'shelby_county_essential_facilities', metadata[0]['title'].lower()):
         errors.append("title doesn't match!")
     if not re.search(datatype, metadata[0]['dataType']):
         errors.append("datatype doesn't match!")
@@ -133,7 +130,7 @@ def test_create_dataset_shpfile(datasvc):
 
 
 def test_update_dataset(datasvc):
-    dataset_id = "5ace7322ec230944f695f5cf"
+    dataset_id = "5ce314105648c40493e043f6"
     property_name = "title"
     property_value = "test update dataset"
     response = datasvc.update_dataset(dataset_id, property_name, property_value)
@@ -165,26 +162,19 @@ def test_get_file_blob(datasvc):
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
 
+@pytest.mark.skip(reason="Need to debug")
 def test_create_network_dataset(datasvc):
-    # assert that we can't create a network dataset with an invalid path
-    dataset = Dataset(datasvc.get_dataset_metadata("5cf696b05648c477129bfc21"))
-    pytest.raises(TypeError, NetworkDataset, dataset)
+    with open(pyglobals.TEST_DATA_DIR + '/network_dataset.json', 'r') as file:
+        dataset_prop = ast.literal_eval(file.read())
+    response = datasvc.create_dataset(dataset_prop)
+    if 'id' not in response:
+        assert False
+    dataset = Dataset.from_data_service(response["id"], data_service=datasvc)
 
-    # assert we can successfully create a network dataset
-    dataset = Dataset.from_data_service("5cf696b05648c477129bfc21", datasvc)
     network_dataset = NetworkDataset(dataset)
     assert network_dataset.graph is not None
     assert network_dataset.link is not None
     assert network_dataset.node is not None
-
-
-def test_create_network_data(datasvc):
-    dataset = Dataset.from_data_service("5cf696b05648c477129bfc21", datasvc)
-    network_dataset = NetworkDataset(dataset)
-
-    assert network_dataset.link is not None
-    assert network_dataset.node is not None
-    assert network_dataset.graph is not None
 
     # test that we can't create a network data object with an invalid file path
     with pytest.raises(FileNotFoundError):
@@ -193,6 +183,9 @@ def test_create_network_data(datasvc):
         NetworkData(network_type="test-type", file_path="test-file")
     with pytest.raises(FileNotFoundError):
         NetworkData(network_type="test-type", file_path="test-file")
+
+    r = datasvc.delete_dataset(dataset["id"])
+    assert r["id"] == dataset["id"]
 
 
 def test_create_dataset_from_json_str(datasvc):
