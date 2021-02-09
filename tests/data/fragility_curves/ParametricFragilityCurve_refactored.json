@@ -1,0 +1,193 @@
+{
+  "className": "FragilitySet",
+  "demandType": ["PGA"],
+  "demandUnits": "g",
+  "fragilityCurves": [
+    {
+      "description": "legacy - ParametricFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Slight"
+      },
+      "rules": [
+        {
+          "expression": "math.exp((-7.779087306) + math.log(PGA) * (2.744724342) + fc * (-0.02438759) + fy * (-0.00180294) + EBL * (0.0) + EBT * (0.242332657) + FBL * (0.0) + FBT * (-0.242469282) + pass_stf * (0.0) + act_stf * (-4.8e-06) + rot_stf * (0.0) + trns_stf * (0.0) + damp * (-0.423772472) + abt_gp_L1 * (0.014277084) + abt_gp_L2 * (-0.00512963) + hng_gp_L1 * (-0.013161096) + hng_gp_L2 * (0.0) + spn_ln * (0.000278567) + col_ht * (0.001902897) + width * (2.45e-06)) / (1 + math.exp((-7.779087306) + math.log(PGA) * (2.744724342) + fc * (-0.02438759) + fy * (-0.00180294) + EBL * (0.0) + EBT * (0.242332657) + FBL * (0.0) + FBT * (-0.242469282) + pass_stf * (0.0) + act_stf * (-4.8e-06) + rot_stf * (0.0) + trns_stf * (0.0) + damp * (-0.423772472) + abt_gp_L1 * (0.014277084) + abt_gp_L2 * (-0.00512963) + hng_gp_L1 * (-0.013161096) + hng_gp_L2 * (0.0) + spn_ln * (0.000278567) + col_ht * (0.001902897) + width * (2.45e-06)))"
+        }
+      ]
+    },
+    {
+      "description": "legacy - ParametricFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Moderate"
+      },
+      "rules": [
+        {
+          "expression": "math.exp((-7.755722087) + math.log(PGA) * (2.401040162) + fc * (-0.00515359) + fy * (-0.000574063) + EBL * (0.000701378) + EBT * (0.096521252) + FBL * (0.0) + FBT * (-0.106471211) + pass_stf * (0.0) + act_stf * (-7.52e-06) + rot_stf * (0.0) + trns_stf * (0.0) + damp * (0.0) + abt_gp_L1 * (0.011928621) + abt_gp_L2 * (0.0) + hng_gp_L1 * (0.0) + hng_gp_L2 * (0.0) + spn_ln * (0.00023725) + col_ht * (0.001395892) + width * (1.48e-05)) / (1 + math.exp((-7.755722087) + math.log(PGA) * (2.401040162) + fc * (-0.00515359) + fy * (-0.000574063) + EBL * (0.000701378) + EBT * (0.096521252) + FBL * (0.0) + FBT * (-0.106471211) + pass_stf * (0.0) + act_stf * (-7.52e-06) + rot_stf * (0.0) + trns_stf * (0.0) + damp * (0.0) + abt_gp_L1 * (0.011928621) + abt_gp_L2 * (0.0) + hng_gp_L1 * (0.0) + hng_gp_L2 * (0.0) + spn_ln * (0.00023725) + col_ht * (0.001395892) + width * (1.48e-05)))"
+        }
+      ]
+    },
+    {
+      "description": "legacy - ParametricFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Extensive"
+      },
+      "rules": [
+        {
+          "expression": "math.exp((-10.04589897) + math.log(PGA) * (2.739809257) + fc * (0.0) + fy * (0.0) + EBL * (0.030960656) + EBT * (0.0) + FBL * (0.0) + FBT * (-0.124315732) + pass_stf * (0.0) + act_stf * (-7.93e-06) + rot_stf * (0.0) + trns_stf * (0.0) + damp * (0.0) + abt_gp_L1 * (0.008521309) + abt_gp_L2 * (0.0) + hng_gp_L1 * (0.0) + hng_gp_L2 * (0.0) + spn_ln * (0.000273989) + col_ht * (0.001510439) + width * (4.27e-05)) / (1 + math.exp((-10.04589897) + math.log(PGA) * (2.739809257) + fc * (0.0) + fy * (0.0) + EBL * (0.030960656) + EBT * (0.0) + FBL * (0.0) + FBT * (-0.124315732) + pass_stf * (0.0) + act_stf * (-7.93e-06) + rot_stf * (0.0) + trns_stf * (0.0) + damp * (0.0) + abt_gp_L1 * (0.008521309) + abt_gp_L2 * (0.0) + hng_gp_L1 * (0.0) + hng_gp_L2 * (0.0) + spn_ln * (0.000273989) + col_ht * (0.001510439) + width * (4.27e-05)))"
+        }
+      ]
+    },
+    {
+      "description": "legacy - ParametricFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Complete"
+      },
+      "rules": [
+        {
+          "expression": "math.exp((-10.04589897) + math.log(PGA) * (2.739809257) + fc * (0.0) + fy * (0.0) + EBL * (0.030960656) + EBT * (0.0) + FBL * (0.0) + FBT * (-0.124315732) + pass_stf * (0.0) + act_stf * (-7.93e-06) + rot_stf * (0.0) + trns_stf * (0.0) + damp * (0.0) + abt_gp_L1 * (0.008521309) + abt_gp_L2 * (0.0) + hng_gp_L1 * (0.0) + hng_gp_L2 * (0.0) + spn_ln * (0.000273989) + col_ht * (0.001510439) + width * (4.27e-05)) / (1 + math.exp((-10.04589897) + math.log(PGA) * (2.739809257) + fc * (0.0) + fy * (0.0) + EBL * (0.030960656) + EBT * (0.0) + FBL * (0.0) + FBT * (-0.124315732) + pass_stf * (0.0) + act_stf * (-7.93e-06) + rot_stf * (0.0) + trns_stf * (0.0) + damp * (0.0) + abt_gp_L1 * (0.008521309) + abt_gp_L2 * (0.0) + hng_gp_L1 * (0.0) + hng_gp_L2 * (0.0) + spn_ln * (0.000273989) + col_ht * (0.001510439) + width * (4.27e-05)))"
+        }
+      ]
+    }
+  ],
+  "description": "MSSS_Steel_Bridge-aba",
+  "paperReference": {
+    "name": "Seismic Fragility of Railway Bridge Classes:Methods, Models, and Comparison with the State of the Art",
+    "doi": "10.1061/(ASCE)BE.1943-5592.0001485.",
+    "yearPublished": "2019"
+  },
+  "authors": [
+    "Sushreyo Misra",
+    "Jamie Ellen Padgett"
+  ],
+  "resultType": "Limit State",
+  "hazardType": "earthquake",
+  "inventoryType": "bridge",
+  "creator": "cwang138",
+  "fragilityCurveParameters": [
+    {
+      "name": "PGA",
+      "unit": "g",
+      "description": "Demand"
+    },
+    {
+      "name": "fc",
+      "unit": "MPa",
+      "description": "fc",
+      "expression": "33.78"
+    },
+    {
+      "name": "fy",
+      "unit": "MPa",
+      "description": "fy",
+      "expression": "459.436160679934"
+    },
+    {
+      "name": "EBL",
+      "unit": "",
+      "description": "EBL",
+      "expression": "-3.22"
+    },
+    {
+      "name": "EBT",
+      "unit": "",
+      "description": "EBT",
+      "expression": "-2.3"
+    },
+    {
+      "name": "FBL",
+      "unit": "",
+      "description": "FBL",
+      "expression": "-1.56"
+    },
+    {
+      "name": "FBT",
+      "unit": "",
+      "description": "FBT",
+      "expression": "0.99"
+    },
+    {
+      "name": "pass_stf",
+      "unit": "N/mm/mm",
+      "description": "pass_stf",
+      "expression": "21.545"
+    },
+    {
+      "name": "act_stf",
+      "unit": "N/pile",
+      "description": "act_stf",
+      "expression": "177795.0"
+    },
+    {
+      "name": "rot_stf",
+      "unit": "N/mm/pile",
+      "description": "rot_stf",
+      "expression": "175000.0"
+    },
+    {
+      "name": "trns_stf",
+      "unit": "N/pile",
+      "description": "trns_stf",
+      "expression": "222245.0"
+    },
+    {
+      "name": "damp",
+      "unit": "",
+      "description": "damp",
+      "expression": "0.045"
+    },
+    {
+      "name": "abt_gp_L1",
+      "unit": "mm",
+      "description": "abt_gp_L1",
+      "expression": "38.1"
+    },
+    {
+      "name": "abt_gp_L2",
+      "unit": "mm",
+      "description": "abt_gp_L2",
+      "expression": "38.1"
+    },
+    {
+      "name": "hng_gp_L1",
+      "unit": "mm",
+      "description": "hng_gp_L1",
+      "expression": "25.4"
+    },
+    {
+      "name": "hng_gp_L2",
+      "unit": "mm",
+      "description": "hng_gp_L2",
+      "expression": "25.4"
+    },
+    {
+      "name": "spn_ln",
+      "unit": "mm",
+      "description": "spn_ln",
+      "expression": "13950.0"
+    },
+    {
+      "name": "col_ht",
+      "unit": "mm",
+      "description": "col_ht",
+      "expression": "4070.0"
+    },
+    {
+      "name": "width",
+      "unit": "ft",
+      "description": "width",
+      "expression": "6350.0"
+    }
+  ],
+  "id": "5ed6bfc35b6166000155d0d9"
+}

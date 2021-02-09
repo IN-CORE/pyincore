@@ -47,7 +47,7 @@ class ParametricFragilityCurve(FragilityCurve):
                     cumulate_term += math.log(hazard) * coefficient
                 else:
                     if name not in kwargs.keys():
-                        cumulate_term += default *coefficient
+                        cumulate_term += default * coefficient
                     else:
                         cumulate_term += kwargs[name] * coefficient
 
