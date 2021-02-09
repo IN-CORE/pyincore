@@ -7,7 +7,7 @@ from jose import jwt
 
 from pyincore import (
     globals as pyglobals,
-    IncoreClient
+    IncoreClient, DataService, FragilityService, RepairService, HazardService, SpaceService
 )
 
 
@@ -27,5 +27,11 @@ def pytest_sessionstart(session):
     monkeypatch = MonkeyPatch()
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
-    print("Successfully initialized Incore Client.")
+    client = IncoreClient(service_url=pyglobals.INCORE_TEST_URL, token_file_name=".incrtesttoken")
+    pytest.datasvc = DataService(client)
+    pytest.fragilitysvc = FragilityService(client)
+    pytest.repairsvc = RepairService(client)
+    pytest.hazardsvc = HazardService(client)
+    pytest.spacesvc = SpaceService(client)
+    print(f"Successfully initialized Incore client and services. Using {pyglobals.INCORE_TEST_URL}")
+
