@@ -89,7 +89,9 @@ def test_post_earthquake_hazard_values(hazardsvc):
            and len(response[0]['demands']) == len(payload[0]['demands']) \
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
-           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
+           and response[0]['hazardValues'] == [4.0315843742708567e-07, 0.0002948961966134383, 0.0009970625458294708,
+                                               0.0002967813517598166, 0.03716171152178692]
 
 
 def test_get_liquefaction_values(hazardsvc):
@@ -121,7 +123,9 @@ def test_post_liquefaction_values(hazardsvc):
            and len(response[0]['demands']) == len(payload[0]['demands']) \
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['pgdValues']) == len(response[0]['demands']) \
-           and all(isinstance(hazardval, float) for hazardval in response[0]['pgdValues'])
+           and all(isinstance(hazardval, float) for hazardval in response[0]['pgdValues']) \
+           and response[0]['pgdValues'] == [262.17288971613044, 103.2176731165868]
+
 
 
 def test_get_soil_amplification_value(hazardsvc):
@@ -256,7 +260,8 @@ def test_post_tornado_hazard_values(hazardsvc):
            and len(response[0]['demands']) == len(payload[0]['demands']) \
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
-           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
+           and response[0]['hazardValues'] == [0.0]
 
 
 def test_get_tsunami_hazard_metadata_list(hazardsvc):
@@ -306,7 +311,8 @@ def test_post_tsunami_hazard_values(hazardsvc):
            and len(response[0]['demands']) == len(payload[0]['demands']) \
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
-           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
+           and response[0]['hazardValues'] == [5.900000095367432]
 
 
 def test_create_and_delete_tsunami_hazard(hazardsvc):
@@ -386,7 +392,8 @@ def test_post_hurricane_values(hazardsvc):
            and len(response[0]['demands']) == len(payload[0]['demands']) \
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
-           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
+           and response[0]['hazardValues'] == [1.54217780024576, 3.663398872786693]
 
 
 def test_search_hurricanes(hazardsvc):
@@ -446,7 +453,8 @@ def test_post_flood_hazard_values(hazardsvc):
            and len(response[0]['demands']) == len(payload[0]['demands']) \
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
-           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
+           and response[0]['hazardValues'] == [41.970442822265625]
 
 
 def test_search_floods(hazardsvc):
@@ -505,7 +513,8 @@ def test_post_hurricanewf_hazard_values(hazardsvc):
            and len(response[0]['demands']) == len(payload[0]['demands']) \
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
-           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues'])
+           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
+           and response[0]['hazardValues'] == [81.57440785011988, 66.83292578974765]
 
 
 @pytest.mark.skip(reason="performance issues")
