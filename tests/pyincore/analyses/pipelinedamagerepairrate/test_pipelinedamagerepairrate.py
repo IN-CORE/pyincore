@@ -5,11 +5,11 @@
 
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
-from pyincore.globals import INCORE_API_DEV_URL
+from pyincore.globals import INCORE_TEST_URL
 
 
 def test_pipeline_dmg_w_repair_rate():
-    client = IncoreClient(INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
+    client = IncoreClient(INCORE_TEST_URL, token_file_name=".incrtesttoken")
 
     # This is the Memphis Water Buried Pipeline with Topology dataset the Ergo repository
     pipeline_dataset_id = "5a284f28c7d30d13bc081d14"
