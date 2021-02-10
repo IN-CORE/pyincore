@@ -11,8 +11,8 @@
     "hazardType": "tsunami",
     "inventoryType": "electric_facility",
     "creator": "cwang138",
-    "demandType": "Vmax",
-    "demandUnits": "ft/s",
+    "demandTypes": ["Vmax"],
+    "demandUnits": ["ft/s"],
     "fragilityCurves": [
       {
         "className": "ConditionalStandardFragilityCurve",
