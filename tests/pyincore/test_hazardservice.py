@@ -14,8 +14,7 @@ from pyincore import HazardService, IncoreClient
 
 @pytest.fixture
 def hazardsvc(monkeypatch):
-    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
-    return HazardService(client)
+    return pytest.hazardsvc
 
 
 def test_get_earthquake_hazard_metadata_list(hazardsvc):
