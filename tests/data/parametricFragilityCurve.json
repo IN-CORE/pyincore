@@ -7,8 +7,8 @@
     ],
     "description": "MSSS_Steel_Bridge",
     "resultType": "Limit State",
-    "demandType": "PGA",
-    "demandUnits": "g",
+    "demandTypes": ["PGA"],
+    "demandUnits": ["g"],
     "fragilityCurves": [
       {
         "className": "ParametricFragilityCurve",

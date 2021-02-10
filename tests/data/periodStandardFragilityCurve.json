@@ -13,8 +13,8 @@
     "hazardType": "earthquake",
     "inventoryType": "building",
     "creator": "incore",
-    "demandType": "PGA",
-    "demandUnits": "g",
+    "demandTypes": ["PGA"],
+    "demandUnits": ["g"],
     "fragilityCurves": [
         {
             "className": "PeriodStandardFragilityCurve",

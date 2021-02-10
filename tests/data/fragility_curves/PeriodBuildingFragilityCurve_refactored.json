@@ -14,7 +14,7 @@
   },
   "description": "Gravity Load Designed Concrete Frames",
   "resultType": "Limit State",
-  "demandType": ["Sa"],
+  "demandTypes": ["Sa"],
   "demandUnits": "g",
   "fragilityCurves": [
     {
