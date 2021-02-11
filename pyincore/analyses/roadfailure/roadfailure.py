@@ -157,8 +157,8 @@ class RoadFailure(BaseAnalysis):
         road_results = collections.OrderedDict()
 
         if fragility_set is not None:
-            demand_type = fragility_set.demand_type.lower()
-            demand_units = fragility_set.demand_units
+            demand_type = fragility_set.demand_types[0].lower()
+            demand_units = fragility_set.demand_units[0]
             location = GeoUtil.get_location(road)
             point = str(location.y) + "," + str(location.x)
 

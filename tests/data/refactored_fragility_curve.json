@@ -10,8 +10,8 @@
     "hazardType": "hurricane",
     "inventoryType": "building",
     "creator": "cwang138",
-    "demandType": "surgeLevel,waveHeight",
-    "demandUnits": "m,m",
+    "demandTypes": ["surgeLevel","waveHeight"],
+    "demandUnits": ["m","m"],
     "fragilityCurves": [
         {
             "className": "FragilityCurveRefactored",

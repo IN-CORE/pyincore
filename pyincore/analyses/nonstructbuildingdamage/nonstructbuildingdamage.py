@@ -156,14 +156,14 @@ class NonStructBuildingDamage(BaseAnalysis):
         # Acceleration-Sensitive Fragility ID Code
         if fragility_set_as is not None:
             hazard_demand_type_as = AnalysisUtil.get_hazard_demand_type(building, fragility_set_as, 'earthquake')
-            demand_units_as = fragility_set_as.demand_units
+            demand_unit_as = fragility_set_as.demand_units[0]
             location = GeoUtil.get_location(building)
 
             point = str(location.y) + "," + str(location.x)
 
             hazard_val_as = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_dataset_id, hazard_demand_type_as,
-                demand_units_as,
+                demand_unit_as,
                 points=[point])[0]['hazardValue']
 
             dmg_probability_as = fragility_set_as.calculate_limit_state(hazard_val_as)
@@ -196,14 +196,14 @@ class NonStructBuildingDamage(BaseAnalysis):
         # Drift-Sensitive Fragility ID Code
         if fragility_set_ds is not None:
             hazard_demand_type_ds = AnalysisUtil.get_hazard_demand_type(building, fragility_set_ds, 'earthquake')
-            demand_units_ds = fragility_set_ds.demand_units
+            demand_unit_ds = fragility_set_ds.demand_units[0]
             location = GeoUtil.get_location(building)
 
             point = str(location.y) + "," + str(location.x)
 
             hazard_val_ds = self.hazardsvc.get_earthquake_hazard_values(
                 hazard_dataset_id, hazard_demand_type_ds,
-                demand_units_ds, points=[point])[0]['hazardValue']
+                demand_unit_ds, points=[point])[0]['hazardValue']
 
             dmg_probability_ds = fragility_set_ds.calculate_limit_state(hazard_val_ds)
 

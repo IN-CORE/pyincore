@@ -1,10 +1,10 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.epfdamage import EpfDamage
-from pyincore.globals import INCORE_API_DEV_URL
+from pyincore.globals import INCORE_TEST_URL
 
 
 def run_with_base_class():
-    client = IncoreClient(INCORE_API_DEV_URL)
+    client = IncoreClient(INCORE_TEST_URL)
 
     hazard_type = "earthquake"
 

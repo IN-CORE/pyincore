@@ -35,7 +35,7 @@ class FragilityCurveSet:
         self.authors = ", ".join(metadata['authors']) if "authors" in metadata else ""
         self.paper_reference = str(metadata["paperReference"]) if "paperReference" in metadata else ""
         self.creator = metadata["creator"] if "creator" in metadata else ""
-        self.demand_type = metadata["demandType"]
+        self.demand_types = metadata["demandTypes"]
         self.demand_units = metadata["demandUnits"]
         self.result_type = metadata["resultType"]
         self.result_unit = metadata["resultUnit"] if "resultUnit" in metadata else ""

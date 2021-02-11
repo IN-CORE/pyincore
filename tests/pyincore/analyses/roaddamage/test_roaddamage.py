@@ -1,10 +1,10 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.roaddamage import RoadDamage
-from pyincore.globals import INCORE_API_DEV_URL
+from pyincore.globals import INCORE_TEST_URL
 
 
 def run_with_base_class():
-    client = IncoreClient(INCORE_API_DEV_URL)
+    client = IncoreClient(INCORE_TEST_URL)
 
     # EQ Road Dataset - Seaside roads
     road_dataset_id = "5ee7af50772cf80008577ae3"
