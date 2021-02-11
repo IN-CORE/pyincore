@@ -179,7 +179,7 @@ class HazardService:
                 {
                     "demands": ["1.0 SD", "1.0 SA"],
                     "units": ["cm", "g"],
-                    "amplifyHazards": [false, false, false],
+                    "amplifyHazards": [false, false],
                     "loc": "35.84,-89.90"
                 }
             ]
