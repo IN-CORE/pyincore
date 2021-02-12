@@ -55,6 +55,7 @@ class MeanDamage(BaseAnalysis):
                     'required': True,
                     'description': 'damage result that has damage intervals in it',
                     'type': ['ergo:buildingDamageVer4',
+                             'ergo:buildingDamagerVer5',
                              'ergo:nsBuildingInventoryDamage',
                              'ergo:bridgeDamage',
                              'ergo:waterFacilityDamageVer4',

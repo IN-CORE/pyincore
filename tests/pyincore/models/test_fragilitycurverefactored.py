@@ -1,6 +1,6 @@
+import json
 import os
 
-import json
 import pytest
 
 from pyincore import globals as pyglobals, FragilityCurveSet
@@ -26,7 +26,7 @@ def test_create_fragility_set():
 ])
 def test_calculate_limit_state_probability(hazard_values, expected):
     fragility_set = get_fragility_set("refactored_fragility_curve.json")
-    result = fragility_set.calculate_limit_state_refactored(hazard_values)
+    result = fragility_set.calculate_limit_state_refactored_w_conversion(hazard_values)
     assert result["failure"] == expected
 
 
@@ -49,7 +49,17 @@ def test_curves_results(curve, hazard_val, refactored_curve, hazard_val_refactor
     # add period if applicable
     num_stories = 1
     building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
-    result = fragility_set.calculate_limit_state(hazard_val, period=building_period)
-    refactored_result = refactored_fragility_set.calculate_limit_state_refactored(hazard_val_refactored, num_stories=1)
+    if len(fragility_set.fragility_curves) <= 3:
+        result = fragility_set.calculate_limit_state_w_conversion(hazard_val, period=building_period)
+        refactored_result = refactored_fragility_set.calculate_limit_state_refactored_w_conversion(
+            hazard_val_refactored,
+            num_stories=1)
 
-    assert result == refactored_result
+        assert result == refactored_result
+
+    # no longer handle fragility curves > 3, test if can catch this error
+    else:
+        with pytest.raises(ValueError):
+            refactored_result = refactored_fragility_set.calculate_limit_state_refactored_w_conversion(
+                hazard_val_refactored,
+                num_stories=1)

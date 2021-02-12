@@ -3,14 +3,14 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
-
 import collections
 import csv
 import math
 import os
 import re
 from typing import List, Dict
+
+from deprecated.sphinx import deprecated
 
 from pyincore import DataService
 
@@ -27,6 +27,7 @@ class AnalysisUtil:
                     "$RETS$ "
 
     @staticmethod
+    @deprecated(version="0.9.0", reason="Use calculate_damage_interval in fragilitycurveset class instead.")
     def calculate_damage_interval(damage):
         output = collections.OrderedDict()
         if len(damage) == 4:

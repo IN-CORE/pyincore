@@ -159,8 +159,9 @@ class BuildingDamage(BaseAnalysis):
                     num_stories = building['properties']['no_stories']
                     selected_fragility_set = fragility_sets[bldg_id]
                     building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
-                    dmg_probability = selected_fragility_set.calculate_limit_state(hazard_val, building_period)
-                    dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
+                    dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(hazard_val,
+                                                                                                building_period)
+                    dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability)
 
                     bldg_result['guid'] = building['properties']['guid']
                     bldg_result.update(dmg_probability)
@@ -245,7 +246,8 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'buildings',
                     'required': True,
                     'description': 'Building Inventory',
-                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5',
+                             'ergo:buildingInventoryVer6', 'ergo:buildingInventoryVer7'],
                 },
                 {
                     'id': 'dfr3_mapping_set',
@@ -259,7 +261,7 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'buildings',
                     'description': 'CSV file of building structural damage',
-                    'type': 'ergo:buildingDamageVer4'
+                    'type': 'ergo:buildingDamageVer5'
                 }
             ]
         }

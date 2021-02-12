@@ -10,7 +10,7 @@ import collections
 import concurrent.futures
 from itertools import repeat
 
-from pyincore import BaseAnalysis, AnalysisUtil
+from pyincore import BaseAnalysis, AnalysisUtil, FragilityCurveSet
 
 
 class CumulativeBuildingDamage(BaseAnalysis):
@@ -114,42 +114,38 @@ class CumulativeBuildingDamage(BaseAnalysis):
 
         for idy, tsunami_building in tsunami_building.iterrows():
             eq_limit_states = collections.OrderedDict()
-            eq_limit_states['immocc'] = float(eq_building_damage["immocc"])
-            eq_limit_states['lifesfty'] = float(eq_building_damage["lifesfty"])
-            eq_limit_states['collprev'] = float(eq_building_damage["collprev"])
 
-            tsunami_limit_states = collections.OrderedDict()
-            tsunami_limit_states['immocc'] = float(tsunami_building["immocc"])
-            tsunami_limit_states['lifesfty'] = float(
-                tsunami_building["lifesfty"])
-            tsunami_limit_states['collprev'] = float(
-                tsunami_building["collprev"])
+            try:
+                eq_limit_states['LS_0'] = float(eq_building_damage["LS_0"])
+                eq_limit_states['LS_1'] = float(eq_building_damage["LS_1"])
+                eq_limit_states['LS_2'] = float(eq_building_damage["LS_2"])
 
-            limit_states = collections.OrderedDict()
+                tsunami_limit_states = collections.OrderedDict()
+                tsunami_limit_states['LS_0'] = float(tsunami_building["LS_0"])
+                tsunami_limit_states['LS_1'] = float(tsunami_building["LS_1"])
+                tsunami_limit_states['LS_2'] = float(tsunami_building["LS_2"])
 
-            limit_states["immocc"] = \
-                eq_limit_states["immocc"] + tsunami_limit_states["immocc"] - \
-                eq_limit_states["immocc"] * tsunami_limit_states["immocc"]
+                limit_states = collections.OrderedDict()
 
-            limit_states["lifesfty"] = \
-                eq_limit_states["lifesfty"] + tsunami_limit_states[
-                    "lifesfty"] - \
-                eq_limit_states["lifesfty"] * tsunami_limit_states[
-                    "lifesfty"] + \
-                ((eq_limit_states["immocc"] - eq_limit_states["lifesfty"]) *
-                 (tsunami_limit_states["immocc"] - tsunami_limit_states[
-                     "lifesfty"]))
+                limit_states["LS_0"] = eq_limit_states["LS_0"] + tsunami_limit_states["LS_0"] \
+                    - eq_limit_states["LS_0"] * tsunami_limit_states["LS_0"]
 
-            limit_states["collprev"] = \
-                eq_limit_states["collprev"] + tsunami_limit_states[
-                    "collprev"] - \
-                eq_limit_states["collprev"] * tsunami_limit_states[
-                    "collprev"] + \
-                ((eq_limit_states["lifesfty"] - eq_limit_states["collprev"]) *
-                 (tsunami_limit_states["lifesfty"] - tsunami_limit_states[
-                     "collprev"]))
+                limit_states["LS_1"] = eq_limit_states["LS_1"] + tsunami_limit_states["LS_1"] \
+                    - eq_limit_states["LS_1"] * tsunami_limit_states["LS_1"] \
+                    + ((eq_limit_states["LS_0"] - eq_limit_states["LS_1"]) * (tsunami_limit_states["LS_0"] -
+                                                                              tsunami_limit_states["LS_1"]))
 
-            damage_state = AnalysisUtil.calculate_damage_interval(limit_states)
+                limit_states["LS_2"] = eq_limit_states["LS_2"] + tsunami_limit_states["LS_2"] \
+                    - eq_limit_states["LS_2"] * tsunami_limit_states["LS_2"] \
+                    + ((eq_limit_states["LS_1"] - eq_limit_states["LS_2"]) * (tsunami_limit_states["LS_1"] -
+                                                                              tsunami_limit_states["LS_2"]))
+
+                damage_state = FragilityCurveSet._3ls_to_4ds(limit_states)
+
+            # if no fragility, LS/DS will be empty string
+            except ValueError:
+                limit_states = {}
+                damage_state = {}
 
             bldg_results = collections.OrderedDict()
 
@@ -202,13 +198,13 @@ class CumulativeBuildingDamage(BaseAnalysis):
                     'id': 'eq_bldg_dmg',
                     'required': True,
                     'description': 'Earthquake Building Damage Results',
-                    'type': ['ergo:buildingDamageVer4'],
+                    'type': ['ergo:buildingDamageVer5'],
                 },
                 {
                     'id': 'tsunami_bldg_dmg',
                     'required': True,
                     'description': 'Tsunami Building Damage Results',
-                    'type': ['ergo:buildingDamageVer4'],
+                    'type': ['ergo:buildingDamageVer5'],
                 }
             ],
             'output_datasets': [
@@ -216,7 +212,7 @@ class CumulativeBuildingDamage(BaseAnalysis):
                     'id': 'combined-result',
                     'parent_type': 'buildings',
                     'description': 'CSV file of building cumulative damage',
-                    'type': 'ergo:buildingDamageVer4'
+                    'type': 'ergo:buildingDamageVer5'
                 }
 
             ]

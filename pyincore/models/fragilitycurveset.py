@@ -4,12 +4,13 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
 import collections
 import json
 
-from pyincore.models.fragilitycurve import FragilityCurve
+from deprecated.sphinx import deprecated
+
 from pyincore.models.customexpressionfragilitycurve import CustomExpressionFragilityCurve
+from pyincore.models.fragilitycurve import FragilityCurve
 from pyincore.models.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
 from pyincore.models.periodstandardfragilitycurve import PeriodStandardFragilityCurve
 from pyincore.models.standardfragilitycurve import StandardFragilityCurve
@@ -72,14 +73,6 @@ class FragilityCurveSet:
                     else:
                         # TODO make a custom fragility curve class that accept whatever
                         self.fragility_curves.append(fragility_curve)
-            if len(self.fragility_curves) == 1:
-                self.limit_state = ['failure']
-            elif len(self.fragility_curves) == 3:
-                self.limit_state = ['immocc', 'lifesfty', 'collprev']
-            elif len(self.fragility_curves) == 4:
-                self.limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
-            else:
-                raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
         elif 'repairCurves' in metadata.keys():
             self.repairCurves = metadata['repairCurves']
         elif 'restorationCurves' in metadata.keys():
@@ -116,6 +109,7 @@ class FragilityCurveSet:
 
         return instance
 
+    @deprecated(version="0.9.0", reason="calculate_limit_state_w_conversion instead")
     def calculate_limit_state(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         """
             Computes limit state probabilities.
@@ -146,7 +140,7 @@ class FragilityCurveSet:
 
         return output
 
-    def calculate_limit_state_refactored(self, hazard_values: dict = {}, std_dev: float = 0.0, **kwargs):
+    def calculate_limit_state_refactored_w_conversion(self, hazard_values: dict = {}, **kwargs):
         """
         WIP computation of limit state probabilities accounting for custom expressions.
         :param std_dev: standard deviation
@@ -154,18 +148,24 @@ class FragilityCurveSet:
 
         Returns: limit state probabilities
         """
-        output = collections.OrderedDict()
+
+        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        limit_state = list(output.keys())
         index = 0
 
-        for fragility_curve in self.fragility_curves:
-            probability = fragility_curve.calculate_limit_state_probability(hazard_values,
-                                                                            self.fragility_curve_parameters,
-                                                                            **kwargs)
-            output[self.limit_state[index]] = probability
-            index += 1
+        if len(self.fragility_curves) <= 3:
+            for fragility_curve in self.fragility_curves:
+                probability = fragility_curve.calculate_limit_state_probability(hazard_values,
+                                                                                self.fragility_curve_parameters,
+                                                                                **kwargs)
+                output[limit_state[index]] = probability
+                index += 1
+        else:
+            raise ValueError("We can only handle fragility curves with more than 3 limit states!")
 
         return output
 
+    @deprecated(version="0.9.0", reason="calculate_custom_limit_state_w_conversion instead")
     def calculate_custom_limit_state(self, variables: dict):
         """
             Computes limit state probabilities.
@@ -190,5 +190,104 @@ class FragilityCurveSet:
             probability = fragility_curve.compute_custom_limit_state_probability(variables)
             output[limit_state[index]] = probability
             index += 1
+
+        return output
+
+    def calculate_limit_state_w_conversion(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
+        """
+            Computes limit state probabilities.
+            Args:
+                hazard: hazard value to compute probability for
+                period: period of the structure, if applicable
+                std_dev: standard deviation
+
+            Returns: limit state probabilities
+
+        """
+        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        limit_state = list(output.keys())
+        index = 0
+
+        if len(self.fragility_curves) <= 3:
+            for fragility_curve in self.fragility_curves:
+                probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
+                output[limit_state[index]] = probability
+                index += 1
+        else:
+            raise ValueError("We can only handle fragility curves with more than 3 limit states!")
+
+        return output
+
+    def calculate_custom_limit_state_w_conversion(self, variables: dict):
+        """
+            Computes limit state probabilities.
+            Args:
+
+            Returns: limit state probabilities for custom expression fragilities
+
+        """
+        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        limit_state = list(output.keys())
+        index = 0
+
+        if len(self.fragility_curves) <= 3:
+            for fragility_curve in self.fragility_curves:
+                probability = fragility_curve.compute_custom_limit_state_probability(variables)
+                output[limit_state[index]] = probability
+                index += 1
+        else:
+            raise ValueError("We can only handle fragility curves with more than 3 limit states!")
+
+        return output
+
+    def calculate_damage_interval(self, damage, hazard_type="earthquake", inventory_type="building"):
+        """
+        Args:
+            damage:
+            hazard_type:
+            inventory_type:
+
+        Returns:
+
+        """
+        # default to 3 limit states -- > 4 damage states
+        output = FragilityCurveSet._3ls_to_4ds(damage)
+
+        if hazard_type == "earthquake":
+            pass
+        elif hazard_type == "tornado":
+            pass
+        elif hazard_type == "flood":
+            pass
+        elif hazard_type == "tsunami":
+            pass
+        elif hazard_type == "hurricane":
+            # 1-For two DS buildings, probabilities of zero for DS 1 and DS2 need to be placed in IN-CORE.
+            # So, damage state possibilities will be either DS0 or DS3.
+            if inventory_type == "building":
+                if len(self.fragility_curves) == 1:
+                    output = FragilityCurveSet._1ls_to_4ds(damage)
+        else:
+            pass
+
+        return output
+
+    @staticmethod
+    def _3ls_to_4ds(damage):
+        output = collections.OrderedDict([("DS_0", 0.0), ("DS_1", 0.0), ("DS_2", 0.0), ("DS_3", 0.0)])
+        output['DS_0'] = 1 - damage["LS_0"]
+        output['DS_1'] = damage["LS_0"] - damage["LS_1"]
+        output['DS_2'] = damage["LS_1"] - damage["LS_2"]
+        output['DS_3'] = damage["LS_2"]
+
+        return output
+
+    @staticmethod
+    def _1ls_to_4ds(damage):
+        output = collections.OrderedDict([("DS_0", 0.0), ("DS_1", 0.0), ("DS_2", 0.0), ("DS_3", 0.0)])
+        output['DS_0'] = 1 - damage["LS_0"]
+        output['DS_1'] = 0
+        output['DS_2'] = 0
+        output['DS_3'] = damage["LS_0"]
 
         return output

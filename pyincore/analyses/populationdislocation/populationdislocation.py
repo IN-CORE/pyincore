@@ -53,7 +53,7 @@ class PopulationDislocation(BaseAnalysis):
                     'id': 'building_dmg',
                     'required': True,
                     'description': 'Building damage results CSV file',
-                    'type': ['ergo:buildingDamageVer4', 'ergo:buildingInventory' ]
+                    'type': ['ergo:buildingDamageVer5', 'ergo:buildingInventory']
                 },
                 {
                     'id': 'housing_unit_allocation',
@@ -167,16 +167,16 @@ class PopulationDislocation(BaseAnalysis):
         pbd = inventory["pblackbg"].values
         phd = inventory["phispbg"].values
 
-        prob_ins = inventory["insignific"].values
-        prob_mod = inventory["moderate"].values
-        prob_hvy = inventory["heavy"].values
-        prob_cmp = inventory["complete"].values
+        prob_ins = inventory["DS_0"].values
+        prob_mod = inventory["DS_1"].values
+        prob_hvy = inventory["DS_2"].values
+        prob_cmp = inventory["DS_3"].values
 
         # include random value loss by damage state
-        rploss_ins = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "insignific", dsf.size)
-        rploss_mod = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "moderate", dsf.size)
-        rploss_hvy = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "heavy", dsf.size)
-        rploss_cmp = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "complete", dsf.size)
+        rploss_ins = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "DS_0", dsf.size)
+        rploss_mod = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "DS_1", dsf.size)
+        rploss_hvy = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "DS_2", dsf.size)
+        rploss_cmp = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "DS_3", dsf.size)
 
         inventory["rploss_ins"] = rploss_ins
         inventory["rploss_med"] = rploss_mod

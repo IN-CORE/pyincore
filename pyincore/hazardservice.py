@@ -1086,7 +1086,7 @@ class HazardService:
         url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload)),
                             ('elevation', json.dumps(elevation)),
-                            ('roughness',json.dumps(roughness))}}
+                            ('roughness', json.dumps(roughness))}}
         r = self.client.post(url, **kwargs)
         response = r.json()
 

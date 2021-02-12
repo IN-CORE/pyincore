@@ -33,7 +33,7 @@ class PopulationDislocationUtil:
                       how="right", on="guid", validate="1:m")
 
         # drop columns in building damage that is not used
-        col_drops = ["immocc", "lifesfty", "collprev", "hazardtype", "hazardval", "meandamage", "mdamagedev"]
+        col_drops = ["LS_0", "LS_1", "LS_2", "hazardtype", "hazardval", "meandamage", "mdamagedev"]
         for col_drop in col_drops:
             if col_drop in df.columns:
                 df = df.drop(columns=[col_drop])
@@ -101,7 +101,6 @@ class PopulationDislocationUtil:
 
         return disl_prob
 
-
     @staticmethod
     def get_random_valueloss(seed_i: int, df: pd.DataFrame, damagestate: str, size: int):
         """
@@ -132,7 +131,6 @@ class PopulationDislocationUtil:
         rploss = np.random.beta(alpha, beta, size) * (ub - lb) + lb
 
         return rploss
-
 
     @staticmethod
     def compare_merges(table1_cols, table2_cols, table_merged):

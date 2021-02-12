@@ -24,6 +24,7 @@ setup(
                       "Python framework acceses underlying data through local or remote services "
                       "and facilitates moving and synthesizing results."),
     install_requires=[
+        "deprecated>=1.2.11",
         "fiona>=1.8.4",
         "jsonpickle>=1.1",
         "networkx>=2.2",

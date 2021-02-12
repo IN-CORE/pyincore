@@ -126,7 +126,6 @@ def test_post_liquefaction_values(hazardsvc):
            and response[0]['pgdValues'] == [262.17288971613044, 103.2176731165868]
 
 
-
 def test_get_soil_amplification_value(hazardsvc):
     """
     test /earthquakes/soil/amplification endpoint
@@ -364,7 +363,7 @@ def test_get_hurricane_values(hazardsvc):
 
 
 def test_post_hurricane_values(hazardsvc):
-    payload =[
+    payload = [
         {
             "demands": ["waveHeight", "surgeLevel"],
             "units": ["m", "m"],
