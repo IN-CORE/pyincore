@@ -14,6 +14,8 @@ from rtree import index
 from shapely.geometry import shape, Point
 
 import fiona
+import uuid
+import copy
 
 logging.basicConfig(stream = sys.stderr, level = logging.INFO)
 
@@ -219,3 +221,44 @@ class GeoUtil:
             idx.insert(i, feature_list[i].bounds)
 
         return idx
+
+    @staticmethod
+    def add_guid(inshp_filename, outshp_filename):
+        """Add guid to shapefile
+
+        Args:
+            inshp_filename (str):  Input Shapefile filename
+            outshp_filename (str): Ouptut shapefile filename
+
+        Returns:
+            Boolean: sucess or fail to add guid
+        """
+
+        infile = fiona.open(inshp_filename)
+
+        # create list of each shapefile entry
+        shape_property_list = []
+        schema = None
+        try:
+            schema = infile.schema.copy()
+            schema['properties']['guid'] = 'str:30'
+            for in_feature in infile:
+                # build shape feature
+                tmp_feature = copy.deepcopy(in_feature)
+                tmp_feature['properties']['guid'] = str(uuid.uuid4())
+                shape_property_list.append(tmp_feature)
+        except:
+            logging.exception("Error reading/processing feature %s:", inshp_filename)
+            return False
+
+        try:
+            with fiona.open(outshp_filename, 'w', 'ESRI Shapefile', schema) as output:
+                for i in range(len(shape_property_list)):
+                    new_feature = shape_property_list[i]
+                    output.write(new_feature);
+        except: 
+            logging.exception("Error writing features %s:", outshp_filename)
+            return False
+
+        return True
+
