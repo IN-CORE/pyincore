@@ -227,8 +227,8 @@ class GeoUtil:
         """Add guid to shapefile
 
         Args:
-            inshp_filename (str):  Input Shapefile filename
-            outshp_filename (str): Ouptut shapefile filename
+            inshp_filename (str):  Full path and filename of Input Shapefile 
+            outshp_filename (str): Full path and filename of Ouptut shapefile
 
         Returns:
             Boolean: sucess or fail to add guid
