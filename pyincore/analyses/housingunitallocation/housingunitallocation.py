@@ -219,18 +219,18 @@ class HousingUnitAllocation(BaseAnalysis):
             pd.DataFrame: Final merge of all four inventories
 
         """
-        housing_unit_address_point_inventory = pd.merge(sorted_infrastructure, sorted_housing_unit,
-                                                        how='outer', left_on=["blockid", "randommergeorder"],
-                                                        right_on=["blockid", "randommergeorder"],
-                                                        sort=True, suffixes=("_x", "_y"),
-                                                        copy=True, indicator="aphumerge", validate="1:1")
-
+        huap_inventory = pd.merge(sorted_infrastructure, sorted_housing_unit,
+                                  how='outer', left_on=["blockid", "randommergeorder"],
+                                  right_on=["blockid", "randommergeorder"],
+                                  sort=True, suffixes=("_x", "_y"),
+                                  copy=True, indicator=True, validate="1:1")
+        huap_inventory = huap_inventory.rename(columns={"_merge": "aphumerge"})
         # check for duplicate columns from merge
-        housing_unit_address_point_inventory = self.compare_merges(sorted_housing_unit.columns,
-                                                                   sorted_infrastructure.columns,
-                                                                   housing_unit_address_point_inventory)
+        huap_inventory = self.compare_merges(sorted_housing_unit.columns,
+                                             sorted_infrastructure.columns,
+                                             huap_inventory)
 
-        output = housing_unit_address_point_inventory.sort_values(by=["aphumerge", "blockid"], ascending=[False, True])
+        output = huap_inventory.sort_values(by=["aphumerge", "blockid"], ascending=[False, True])
 
         return output
 
