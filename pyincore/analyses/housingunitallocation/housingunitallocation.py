@@ -4,6 +4,7 @@
 
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 from pyincore import BaseAnalysis
 
 
@@ -37,6 +38,13 @@ class HousingUnitAllocation(BaseAnalysis):
             ],
             'input_datasets': [
                 {
+                    'id': 'buildings',
+                    'required': True,
+                    'description': 'Building Inventory',
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5',
+                             'ergo:buildingInventoryVer6', 'ergo:buildingInventoryVer7'],
+                },
+                {
                     'id': 'housing_unit_inventory',
                     'required': True,
                     'description': 'Housing Unit Inventory CSV data, aka Census Block data. Corresponds to a possible '
@@ -49,13 +57,6 @@ class HousingUnitAllocation(BaseAnalysis):
                     'description': 'CSV dataset of address locations available in a block. Corresponds to a '
                                    'specific address where a housing unit or group quarters could be assigned',
                     'type': ['incore:addressPoints']
-                },
-                {
-                    'id': 'building_inventory',
-                    'required': True,
-                    'description': 'Building Inventory CSV dataset for each building/structure. A structure '
-                                   'can have multiple addresses',
-                    'type': ['ergo:buildingInventory']
                 }
             ],
             'output_datasets': [
@@ -81,28 +82,33 @@ class HousingUnitAllocation(BaseAnalysis):
         # Get seed
         seed = self.get_parameter("seed")
 
-        # Get Iterations
+        # Get iterations
         iterations = self.get_parameter("iterations")
 
         # Get desired result name
         result_name = self.get_parameter("result_name")
 
         # Datasets
+        building_inv = self.get_input_dataset("buildings").get_inventory_reader()
         pop_inv = self.get_input_dataset("housing_unit_inventory").get_dataframe_from_csv(low_memory=False)
         addr_point_inv = self.get_input_dataset("address_point_inventory").get_dataframe_from_csv(low_memory=False)
-        bg_inv = self.get_input_dataset("building_inventory").get_dataframe_from_csv(low_memory=False)
 
-        csv_source = "dataframe"
+        # Build the GeoDataFrame from Fiona's collection
+        bg_inv = gpd.GeoDataFrame.from_features([feature for feature in building_inv])
 
         for i in range(iterations):
             seed_i = seed + i
-            sorted_housing_unit_address_inventory = self.get_iteration_probabilistic_allocation(
+            hua_inventory = self.get_iteration_probabilistic_allocation(
                 pop_inv, addr_point_inv, bg_inv, seed_i)
             temp_output_file = result_name + "_" + str(seed_i) + ".csv"
 
+            # first column guid
+            hua_inventory = hua_inventory[["addrptid"] + [col for col in hua_inventory.columns if col != "addrptid"]]
+            # last column geometry
+            hua_inventory = hua_inventory[[col for col in hua_inventory.columns if col != "geometry"] + ["geometry"]]
             self.set_result_csv_data("result",
-                                     sorted_housing_unit_address_inventory,
-                                     temp_output_file, csv_source)
+                                     hua_inventory,
+                                     temp_output_file, "dataframe")
         return True
 
     def prepare_housing_unit_inventory(self, housing_unit_inventory, seed):
