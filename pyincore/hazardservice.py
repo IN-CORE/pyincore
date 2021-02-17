@@ -164,7 +164,7 @@ class HazardService:
 
         return x, y, hazard_val
 
-    def post_earthquake_hazard_values(self, hazard_id: str, payload: list, amplify_hazard=False):
+    def post_earthquake_hazard_values(self, hazard_id: str, payload: list, amplify_hazard=True):
         """ Retrieve bulk hurricane hazard values from the Hazard service.
 
         Args:

@@ -12,7 +12,7 @@ from itertools import repeat
 from pyincore import BaseAnalysis, HazardService, \
     FragilityService, AnalysisUtil, GeoUtil
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
-
+import json
 
 class BuildingDamage(BaseAnalysis):
     """Building Damage Analysis calculates the probability of building damage based on
@@ -99,15 +99,12 @@ class BuildingDamage(BaseAnalysis):
             list: A list of ordered dictionaries with building damage values and other data/metadata.
 
         """
-        fragility_key = self.get_parameter("fragility_key")
 
-        fragility_sets = dict()
+        fragility_key = self.get_parameter("fragility_key")
         fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
                                                            fragility_key)
-
-        bldg_result = []
+        # print(fragility_sets)
         values_payload = []
-        # Converting list of buildings into a dictionary for ease of reference
         for b in buildings:
             bldg_id = b["id"]
             location = GeoUtil.get_location(b)
@@ -121,8 +118,9 @@ class BuildingDamage(BaseAnalysis):
                     }
             values_payload.append(value)
 
+        # print(json.dumps(values_payload))
+
         if hazard_type == 'earthquake':
-            print(values_payload)
             hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
         elif hazard_type == 'tornado':
             hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
