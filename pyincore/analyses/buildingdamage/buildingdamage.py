@@ -109,8 +109,8 @@ class BuildingDamage(BaseAnalysis):
             bldg_id = b["id"]
             location = GeoUtil.get_location(b)
             loc = str(location.y) + "," + str(location.x)
-            demands = [AnalysisUtil.get_hazard_demand_type(b, fragility_sets[bldg_id], hazard_type)]
-            units = fragility_sets[bldg_id].demand_units  # TODO: this assumes single unit everytime
+            demands = AnalysisUtil.get_hazard_demand_types(b, fragility_sets[bldg_id], hazard_type)
+            units = fragility_sets[bldg_id].demand_units
             value = {
                         "demands": demands,
                         "units": units,
@@ -127,24 +127,46 @@ class BuildingDamage(BaseAnalysis):
         elif hazard_type == 'tsunami':
             hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
         elif hazard_type == 'hurricane':
-            # TODO implement hurricane
-            print("hurricane not yet implemented")
+            hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
 
         bldg_results = []
         i = 0
+        # TODO: Deal with buildings that are not mapped to any fragilities
         for b in buildings:
             bldg_result = dict()
             b_id = b["id"]
-            # TODO: remove 0 index
-            b_haz_vals = hazard_vals[i]["hazardValues"][0]
-            b_demands = hazard_vals[i]["demands"][0]
-            b_units = hazard_vals[i]["units"][0]
             num_stories = b['properties']['no_stories']
             selected_fragility_set = fragility_sets[b_id]
-            building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
-            dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(b_haz_vals,
-                                                                                        building_period)
-            dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability)
+
+            if hazard_type.lower() == "hurricane":
+
+                hval_dict = dict()
+                j = 0
+                for d in hazard_vals[i]["demands"]:
+                    hval_dict[d] = hazard_vals[i]["hazardValues"][j]
+                    j += 1
+
+                b_haz_vals = str(hazard_vals[i]["hazardValues"][0]) + "," + str(hazard_vals[i]["hazardValues"][1])  # TODO: dummy - remove it
+                b_demands = ",".join(hazard_vals[i]["demands"])
+                b_units = ",".join(hazard_vals[i]["units"])
+
+                # TODO: Do not use hardcoded column names.
+                # TODO: Also check for curvetype name, currently assumes this will always be FragilityCurveRefactored
+
+                dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
+                    hval_dict, lhsm_elev=b['properties']['lhsm_elev'], g_elev=b['properties']['g_elev'])
+                dmg_interval = selected_fragility_set.calculate_damage_interval(
+                    dmg_probability, hazard_type="hurricane", inventory_type="building")
+            else:
+                # TODO: remove 0 index to generalize this
+                b_haz_vals = hazard_vals[i]["hazardValues"][0]
+                b_demands = hazard_vals[i]["demands"][0]
+                b_units = hazard_vals[i]["units"][0]
+
+                building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
+                dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(b_haz_vals,
+                                                                                            building_period)
+                dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability)
 
             bldg_result['guid'] = b['properties']['guid']
             bldg_result.update(dmg_probability)
@@ -156,7 +178,7 @@ class BuildingDamage(BaseAnalysis):
             bldg_results.append(bldg_result)
             i += 1
 
-            # TODO: Deal with unmapped buildings
+
 
         return bldg_results
 
