@@ -234,12 +234,19 @@ class GeoUtil:
             Boolean: sucess or fail to add guid
         """
 
-        infile = fiona.open(inshp_filename)
+        #TODO: 
+        # - need to handle when there is existing GUID
+        # - need to handle when there is existing GUID and some missing guid for some rows
+        # - need to handle when input and output are same
 
-        # create list of each shapefile entry
         shape_property_list = []
         schema = None
+        incrs = None
+
         try:
+            infile = fiona.open(inshp_filename)
+            incrs = infile.crs
+            # create list of each shapefile entry
             schema = infile.schema.copy()
             schema['properties']['guid'] = 'str:30'
             for in_feature in infile:
@@ -252,13 +259,15 @@ class GeoUtil:
             return False
 
         try:
-            with fiona.open(outshp_filename, 'w', 'ESRI Shapefile', schema) as output:
+            with fiona.open(outshp_filename, 'w', crs=incrs, driver='ESRI Shapefile', schema=schema) as output:
                 for i in range(len(shape_property_list)):
                     new_feature = shape_property_list[i]
-                    output.write(new_feature);
+                    output.write(new_feature)
         except: 
             logging.exception("Error writing features %s:", outshp_filename)
             return False
 
         return True
+
+
 
