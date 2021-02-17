@@ -17,7 +17,7 @@ def run_with_base_class():
 
     result_name = "IN-CORE_1bv6_HUA"
     seed = 1238
-    iterations = 5
+    iterations = 2
 
     spa = HousingUnitAllocation(client)
     spa.load_remote_input_dataset("buildings", building_inv)
