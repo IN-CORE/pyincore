@@ -105,85 +105,60 @@ class BuildingDamage(BaseAnalysis):
         fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
                                                            fragility_key)
 
-        bldg_results = []
-        list_buildings = buildings
-
-        buildings = dict()
+        bldg_result = []
+        values_payload = []
         # Converting list of buildings into a dictionary for ease of reference
-        for b in list_buildings:
-            buildings[b["id"]] = b
+        for b in buildings:
+            bldg_id = b["id"]
+            location = GeoUtil.get_location(b)
+            loc = str(location.y) + "," + str(location.x)
+            demands = [AnalysisUtil.get_hazard_demand_type(b, fragility_sets[bldg_id], hazard_type)]
+            units = fragility_sets[bldg_id].demand_units  # TODO: this assumes single unit everytime
+            value = {
+                        "demands": demands,
+                        "units": units,
+                        "loc": loc
+                    }
+            values_payload.append(value)
 
-        list_buildings = None  # Clear as it's not needed anymore
+        if hazard_type == 'earthquake':
+            print(values_payload)
+            hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'tornado':
+            hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'tsunami':
+            hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'hurricane':
+            # TODO implement hurricane
+            print("hurricane not yet implemented")
 
-        grouped_buildings = AnalysisUtil.group_by_demand_type(buildings, fragility_sets, hazard_type, is_building=True)
+        bldg_results = []
+        i = 0
+        for b in buildings:
+            bldg_result = dict()
+            b_id = b["id"]
+            # TODO: remove 0 index
+            b_haz_vals = hazard_vals[i]["hazardValues"][0]
+            b_demands = hazard_vals[i]["demands"][0]
+            b_units = hazard_vals[i]["units"][0]
+            num_stories = b['properties']['no_stories']
+            selected_fragility_set = fragility_sets[b_id]
+            building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
+            dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(b_haz_vals,
+                                                                                        building_period)
+            dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability)
 
-        for demand, grouped_bldgs in grouped_buildings.items():
+            bldg_result['guid'] = b['properties']['guid']
+            bldg_result.update(dmg_probability)
+            bldg_result.update(dmg_interval)
+            bldg_result['demandtype'] = b_demands
+            bldg_result['demandunits'] = b_units
+            bldg_result['hazardval'] = b_haz_vals
 
-            input_demand_type = demand[0]
-            input_demand_units = demand[1]
+            bldg_results.append(bldg_result)
+            i += 1
 
-            # For every group of unique demand and demand unit, call the end-point once
-            bldg_chunks = list(AnalysisUtil.chunks(grouped_bldgs, 50))  # TODO: Move to globals?
-            for bldgs in bldg_chunks:
-                points = []
-                for bldg_id in bldgs:
-                    location = GeoUtil.get_location(buildings[bldg_id])
-                    points.append(str(location.y) + "," + str(location.x))
-
-                if hazard_type == 'earthquake':
-                    hazard_vals = self.hazardsvc.get_earthquake_hazard_values(hazard_dataset_id, input_demand_type,
-                                                                              input_demand_units, points)
-                elif hazard_type == 'tornado':
-                    hazard_vals = self.hazardsvc.get_tornado_hazard_values(hazard_dataset_id, input_demand_units,
-                                                                           points)
-                elif hazard_type == 'tsunami':
-                    hazard_vals = self.hazardsvc.get_tsunami_hazard_values(hazard_dataset_id, input_demand_type,
-                                                                           input_demand_units, points)
-                elif hazard_type == 'hurricane':
-                    # TODO implement hurricane
-                    print("hurricane not yet implemented")
-
-                # Parse the batch hazard value results and map them back to the building and fragility.
-                # This is a potential pitfall as we are relying on the order of the returned results
-                i = 0
-                for bldg_id in bldgs:
-                    bldg_result = collections.OrderedDict()
-                    building = buildings[bldg_id]
-                    hazard_val = hazard_vals[i]['hazardValue']
-                    output_demand_type = hazard_vals[i]['demand']
-                    if hazard_type == 'earthquake':
-                        period = float(hazard_vals[i]['period'])
-                        if period > 0:
-                            output_demand_type = str(hazard_vals[i]['period']) + " " + output_demand_type
-
-                    num_stories = building['properties']['no_stories']
-                    selected_fragility_set = fragility_sets[bldg_id]
-                    building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
-                    dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(hazard_val,
-                                                                                                building_period)
-                    dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability)
-
-                    bldg_result['guid'] = building['properties']['guid']
-                    bldg_result.update(dmg_probability)
-                    bldg_result.update(dmg_interval)
-                    bldg_result['demandtype'] = output_demand_type
-                    bldg_result['demandunits'] = input_demand_units
-                    bldg_result['hazardval'] = hazard_val
-
-                    bldg_results.append(bldg_result)
-                    del buildings[bldg_id]
-                    i = i + 1
-
-        unmapped_hazard_val = 0.0
-        unmapped_output_demand_type = "None"
-        unmapped_output_demand_unit = "None"
-        for unmapped_bldg_id, unmapped_bldg in buildings.items():
-            unmapped_bldg_result = collections.OrderedDict()
-            unmapped_bldg_result['guid'] = unmapped_bldg['properties']['guid']
-            unmapped_bldg_result['demandtype'] = unmapped_output_demand_type
-            unmapped_bldg_result['demandunits'] = unmapped_output_demand_unit
-            unmapped_bldg_result['hazardval'] = unmapped_hazard_val
-            bldg_results.append(unmapped_bldg_result)
+            # TODO: Deal with unmapped buildings
 
         return bldg_results
 
