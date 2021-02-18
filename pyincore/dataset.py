@@ -13,8 +13,11 @@ import os
 import fiona
 import numpy
 import pandas as pd
+import geopandas as gpd
 import rasterio
 import wntr
+import warnings
+warnings.filterwarnings("ignore", "", UserWarning)
 
 from pyincore import DataService
 
@@ -279,6 +282,22 @@ class Dataset:
         if os.path.isfile(filename):
             df = pd.read_csv(filename, header="infer", low_memory=low_memory)
         return df
+
+    def get_dataframe_from_shapefile(self):
+        """Utility method for reading different standard file formats: GeoDataFrame from shapefile.
+
+        Args:
+
+        Returns:
+            obj: Geopanda's GeoDataFrame.
+
+        """
+        inv = self.get_inventory_reader()
+        # Build the GeoDataFrame from Fiona's collection, sometimes raises
+        # UserWarning: Geometry column does not contain geometry.
+        gdf = gpd.GeoDataFrame.from_features([feature for feature in inv])
+
+        return gdf
 
     def close(self):
         for key in self.readers:

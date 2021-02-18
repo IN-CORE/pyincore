@@ -26,6 +26,7 @@ setup(
     install_requires=[
         "deprecated>=1.2.11",
         "fiona>=1.8.4",
+        "geopandas>=0.6.1"
         "jsonpickle>=1.1",
         "networkx>=2.2",
         "numpy>=1.16.1",
