@@ -272,6 +272,14 @@ class FragilityCurveSet:
 
         return output
 
+    def construct_expression_args(self, building: dict):
+        kwargs_dict = {}
+        # TODO: Add a condition to handle age_group - to be derived from year_built
+        for parameters in self.fragility_curve_parameters:
+            if parameters["name"] in building['properties']:
+                kwargs_dict[parameters["name"]] = building['properties'][parameters['name']]
+        return kwargs_dict
+
     @staticmethod
     def _3ls_to_4ds(damage):
         output = collections.OrderedDict([("DS_0", 0.0), ("DS_1", 0.0), ("DS_2", 0.0), ("DS_3", 0.0)])

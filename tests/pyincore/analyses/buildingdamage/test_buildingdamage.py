@@ -33,7 +33,7 @@ def run_with_base_class():
     bldg_dmg.set_parameter("num_cpu", 1)
 
     # Run Analysis
-    # bldg_dmg.run_analysis()
+    bldg_dmg.run_analysis()
 
     # TSUNAMI
 
@@ -58,7 +58,7 @@ def run_with_base_class():
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
-    # bldg_dmg.run_analysis()
+    bldg_dmg.run_analysis()
 
 
     # Hurricane
@@ -67,8 +67,8 @@ def run_with_base_class():
     hazard_id = "5f11e50cc6491311a814584c"
 
     # Galveston building dataset
-    bldg_dataset_id = "6024e935b70815363b8cdd1b"  # 19k buildings
-    # bldg_dataset_id = "602d61d0b1db9c28aeedea03"  # 40 buildings
+    # bldg_dataset_id = "6024e935b70815363b8cdd1b"  # 19k buildings
+    bldg_dataset_id = "602d61d0b1db9c28aeedea03"  # 40 buildings
 
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
