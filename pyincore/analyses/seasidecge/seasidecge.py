@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
@@ -1807,7 +1808,8 @@ class SeasideCGEModel(BaseAnalysis):
 
         # create CGE tmp folder, solverconstatns
         cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
-        os.mkdir(cge_tmp_folder)
+        if not os.path.isdir(cge_tmp_folder): # create the folder if there is no folder
+            os.mkdir(cge_tmp_folder)
         logger.debug(cge_tmp_folder)
 
         filename = os.path.join(cge_tmp_folder, "ipopt_cons.py")
