@@ -138,6 +138,10 @@ class BuildingDamage(BaseAnalysis):
             hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
         elif hazard_type == 'hurricane':
             hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'flood':
+            hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
+        else:
+            raise ValueError("The provided hazard type is not supported yet by this analysis")
 
         ds_results = []
         damage_results = []
