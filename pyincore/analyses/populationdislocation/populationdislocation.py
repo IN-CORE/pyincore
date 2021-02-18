@@ -100,11 +100,6 @@ class PopulationDislocation(BaseAnalysis):
 
         # Building damage dataset
         building_dmg = self.get_input_dataset("building_dmg").get_dataframe_from_csv(low_memory=False)
-        # print(building_dmg)
-        # print(building_dmg.mask(building_dmg["hazardval"] > 50))
-        # building_dmg["hazardval"].mask(building_dmg["hazardval"] > 50, "", inplace=True)
-        building_dmg["hazardval"] = building_dmg["hazardval"].mask(building_dmg["hazardval"] > 50, None)
-        print(building_dmg)
 
         # Housing unit allocation dataset
         housing_unit_alloc = self.get_input_dataset("housing_unit_allocation"). \
@@ -174,27 +169,12 @@ class PopulationDislocation(BaseAnalysis):
         prob1 = inventory["DS_1"].values
         prob2 = inventory["DS_2"].values
         prob3 = inventory["DS_3"].values
-        # print(prob0, prob1, prob2, prob3)
-        print(prob0)
 
-        # outside = inventory["hazardval"].values
-        # print(outside)
-        # # outside = outside[~np.isnan(outside)]
-        # # outside = outside = np.array(None)
-        # # print(outside)
-        # prob0 = np.where(outside == np.array(None), 1, prob0)
-        # print(prob0)
-
-        print(dsf)
-        print(pbd)
-        print(phd)
         # include random value loss by damage state
         rploss0 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_0", dsf.size)
         rploss1 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_1", dsf.size)
         rploss2 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_2", dsf.size)
         rploss3 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_3", dsf.size)
-        # print(rploss0, rploss1, rploss2, rploss3)
-        print(rploss0)
 
         inventory["rploss_0"] = rploss0
         inventory["rploss_1"] = rploss1
@@ -206,9 +186,8 @@ class PopulationDislocation(BaseAnalysis):
         prob2_disl = PopulationDislocationUtil.get_disl_probability(rploss2, dsf, pbd, phd)
         prob3_disl = PopulationDislocationUtil.get_disl_probability(rploss3, dsf, pbd, phd)
 
-        print(prob0_disl)
+        #  dislocation probability is 0 if the damage is set to 100% probability (insignificant, DS_0 = 1).
         prob0_disl = np.where(prob0 == 1, 0, prob0_disl)
-        print(prob0_disl)
 
         # total_prob_disl is the sum of the probability of dislocation at four damage states
         # times the probability of being in that damage state.
