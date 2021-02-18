@@ -64,8 +64,8 @@ class BuildingDamage(BaseAnalysis):
         (ds_results, damage_results) = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input, num_workers,
                                                          inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
 
-        self.set_result_csv_data("ds_result", ds_results, name=self.get_parameter("result_name")+"_ds")
-        self.set_result_json_data("damage_result", damage_results, name=self.get_parameter("result_name")+"_damage")
+        self.set_result_csv_data("ds_result", ds_results, name=self.get_parameter("result_name"))
+        self.set_result_json_data("damage_result", damage_results, name=self.get_parameter("result_name") + "_additional_info")
 
         return True
 
@@ -156,6 +156,7 @@ class BuildingDamage(BaseAnalysis):
 
             building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
 
+            # TODO: Once all fragilities are migrated to new format, we can remove this condition
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
                 # Supports multiple demand types in same fragility
                 b_haz_vals = hazard_vals[i]["hazardValues"]
@@ -168,10 +169,10 @@ class BuildingDamage(BaseAnalysis):
                     hval_dict[d] = hazard_vals[i]["hazardValues"][j]
                     j += 1
 
-                building_args = selected_fragility_set.construct_expression_args(b)
+                building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
 
                 dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
-                    hval_dict, **building_args)
+                    hval_dict, **building_args, period=building_period)
             else:
                 # Non Refactored Fragility curves that always only have a single demand type
                 b_haz_vals = hazard_vals[i]["hazardValues"][0]

@@ -272,7 +272,7 @@ class FragilityCurveSet:
 
         return output
 
-    def construct_expression_args(self, building: dict):
+    def construct_expression_args_from_inventory(self, building: dict):
         kwargs_dict = {}
         # TODO: Add a condition to handle age_group - to be derived from year_built
         for parameters in self.fragility_curve_parameters:
