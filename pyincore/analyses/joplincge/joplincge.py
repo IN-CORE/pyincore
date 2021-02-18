@@ -1746,6 +1746,7 @@ class JoplinCGEModel(BaseAnalysis):
         # create CGE tmp folder, solverconstatns
         cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
         os.mkdir(cge_tmp_folder)
+        print(cge_tmp_folder)
         filename = os.path.join(cge_tmp_folder, "ipopt_cons.py")
         tmp = os.path.join(cge_tmp_folder, "tmp.py")
         # print("Calibration: ")
