@@ -172,8 +172,6 @@ class BuildingDamage(BaseAnalysis):
 
                 dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
                     hval_dict, **building_args)
-                dmg_interval = selected_fragility_set.calculate_damage_interval(
-                    dmg_probability, hazard_type=hazard_type, inventory_type="building")
             else:
                 # Non Refactored Fragility curves that always only have a single demand type
                 b_haz_vals = hazard_vals[i]["hazardValues"][0]
@@ -181,7 +179,9 @@ class BuildingDamage(BaseAnalysis):
                 b_units = hazard_vals[i]["units"][0]
                 dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(b_haz_vals,
                                                                                             building_period)
-                dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability)
+
+            dmg_interval = selected_fragility_set.calculate_damage_interval(
+                dmg_probability, hazard_type=hazard_type, inventory_type="building")
 
             ds_result['guid'] = b['properties']['guid']
             damage_result['guid'] = b['properties']['guid']
@@ -202,10 +202,10 @@ class BuildingDamage(BaseAnalysis):
             damage_result = dict()
             ds_result['guid'] = b['properties']['guid']
             damage_result['guid'] = b['properties']['guid']
-            damage_result['fragility_id'] = "none"
-            damage_result['demandtype'] = "none"
-            damage_result['demandunits'] = "none"
-            damage_result['hazardval'] = "none"
+            damage_result['fragility_id'] = "None"
+            damage_result['demandtype'] = "None"
+            damage_result['demandunits'] = "None"
+            damage_result['hazardval'] = "None"
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)
