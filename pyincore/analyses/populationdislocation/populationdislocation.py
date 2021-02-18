@@ -36,7 +36,7 @@ class PopulationDislocation(BaseAnalysis):
             'input_parameters': [
                 {
                     'id': 'result_name',
-                    'required': False,
+                    'required': True,
                     'description': 'Result CSV dataset name',
                     'type': str
                 },
@@ -96,7 +96,6 @@ class PopulationDislocation(BaseAnalysis):
         # Get seed
         seed_i = self.get_parameter("seed")
 
-        # Get desired result name
         result_name = self.get_parameter("result_name")
 
         # Building damage dataset
@@ -119,9 +118,8 @@ class PopulationDislocation(BaseAnalysis):
 
         # Returns dataframe
         merged_final_inv = self.get_dislocation(seed_i, merged_block_inv, value_loss)
-
         csv_source = "dataframe"
-        self.set_result_csv_data("result", merged_final_inv, result_name, csv_source)
+        self.set_result_csv_data("result", merged_final_inv, result_name, "dataframe")
 
         return True
 
@@ -167,31 +165,38 @@ class PopulationDislocation(BaseAnalysis):
         pbd = inventory["pblackbg"].values
         phd = inventory["phispbg"].values
 
-        prob_ins = inventory["DS_0"].values
-        prob_mod = inventory["DS_1"].values
-        prob_hvy = inventory["DS_2"].values
-        prob_cmp = inventory["DS_3"].values
+        prob0 = inventory["DS_0"].values
+        prob1 = inventory["DS_1"].values
+        prob2 = inventory["DS_2"].values
+        prob3 = inventory["DS_3"].values
 
         # include random value loss by damage state
-        rploss_ins = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "DS_0", dsf.size)
-        rploss_mod = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "DS_1", dsf.size)
-        rploss_hvy = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "DS_2", dsf.size)
-        rploss_cmp = PopulationDislocationUtil.get_random_valueloss(seed_i, value_loss, "DS_3", dsf.size)
+        rploss0 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_0", dsf.size)
+        rploss1 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_1", dsf.size)
+        rploss2 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_2", dsf.size)
+        rploss3 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_3", dsf.size)
 
-        inventory["rploss_ins"] = rploss_ins
-        inventory["rploss_med"] = rploss_mod
-        inventory["rploss_hwy"] = rploss_hvy
-        inventory["rploss_cmp"] = rploss_cmp
+        inventory["rploss_0"] = rploss0
+        inventory["rploss_1"] = rploss1
+        inventory["rploss_2"] = rploss2
+        inventory["rploss_3"] = rploss3
 
-        prob_disl_ins = PopulationDislocationUtil.get_disl_probability(rploss_ins, dsf, pbd, phd)
-        prob_disl_mod = PopulationDislocationUtil.get_disl_probability(rploss_mod, dsf, pbd, phd)
-        prob_disl_hvy = PopulationDislocationUtil.get_disl_probability(rploss_hvy, dsf, pbd, phd)
-        prob_disl_cmp = PopulationDislocationUtil.get_disl_probability(rploss_cmp, dsf, pbd, phd)
+        prob0_disl = PopulationDislocationUtil.get_disl_probability(rploss0, dsf, pbd, phd)
+        prob1_disl = PopulationDislocationUtil.get_disl_probability(rploss1, dsf, pbd, phd)
+        prob2_disl = PopulationDislocationUtil.get_disl_probability(rploss2, dsf, pbd, phd)
+        prob3_disl = PopulationDislocationUtil.get_disl_probability(rploss3, dsf, pbd, phd)
+
+        # hazard_mask = inventory["hazardval"](inventory["hazardval"] is None or inventory["hazardval"] == "")
+        # print(hazard_mask)
+        # prob0_disl[hazard_mask] = 1
+        # prob0_disl[hazard_mask] = 0
+        # prob0_disl[hazard_mask] = 0
+        # prob0_disl[hazard_mask] = 0
 
         # total_prob_disl is the sum of the probability of dislocation at four damage states
         # times the probability of being in that damage state.
-        total_prob_disl = prob_disl_ins * prob_ins + prob_disl_mod * prob_mod + prob_disl_hvy * prob_hvy + \
-            prob_disl_cmp * prob_cmp
+        total_prob_disl = prob0_disl * prob0 + prob1_disl * prob1 + prob2_disl * prob2 + \
+            prob3_disl * prob3
 
         inventory["prdis"] = total_prob_disl
 
