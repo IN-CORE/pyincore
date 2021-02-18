@@ -137,6 +137,24 @@ class Dataset:
                 writer.writerows(result_data)
         return Dataset.from_file(name, "csv")
 
+    @classmethod
+    def from_json_data(cls, result_data, name):
+        """Get Dataset from JSON data.
+
+        Args:
+            result_data (obj): Result data and metadata.
+            name (str): A JSON filename.
+
+        Returns:
+            obj: Dataset from file.
+
+        """
+        if len(result_data) > 0:
+            with open(name, 'w') as json_file:
+                json_dumps_str = json.dumps(result_data, indent=4)
+                json_file.write(json_dumps_str)
+        return Dataset.from_file(name, "json")
+
     def cache_files(self, data_service: DataService):
         """Get the set of fragility data, curves.
 

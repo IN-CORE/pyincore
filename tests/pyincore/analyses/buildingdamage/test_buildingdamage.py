@@ -30,7 +30,7 @@ def run_with_base_class():
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
-    bldg_dmg.set_parameter("num_cpu", 1)
+    bldg_dmg.set_parameter("num_cpu", 4)
 
     # Run Analysis
     bldg_dmg.run_analysis()
@@ -84,7 +84,7 @@ def run_with_base_class():
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
-    bldg_dmg.set_parameter("num_cpu", 1)
+    bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
 
 

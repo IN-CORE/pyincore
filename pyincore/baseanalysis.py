@@ -231,6 +231,19 @@ class BaseAnalysis:
         dataset.data_type = self.output_datasets[result_id]["spec"]["type"]
         self.set_output_dataset(result_id, dataset)
 
+    def set_result_json_data(self, result_id, result_data, name, source='file'):
+        if name is None:
+            name = self.spec["name"] + "-result"
+
+        if not name.endswith(".json"):
+            name = name + ".json"
+
+        if source == 'file':
+            dataset = Dataset.from_json_data(result_data, name)
+
+        dataset.data_type = self.output_datasets[result_id]["spec"]["type"]
+        self.set_output_dataset(result_id, dataset)
+
     def run_analysis(self):
         """ Validates and runs the analysis."""
         for dataset_spec in self.spec['input_datasets']:

@@ -61,10 +61,11 @@ class BuildingDamage(BaseAnalysis):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input, num_workers,
+        (ds_results, damage_results) = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input, num_workers,
                                                          inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
 
-        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
+        self.set_result_csv_data("ds_result", ds_results, name=self.get_parameter("result_name")+"_ds")
+        self.set_result_json_data("damage_result", damage_results, name=self.get_parameter("result_name")+"_damage")
 
         return True
 
@@ -80,12 +81,14 @@ class BuildingDamage(BaseAnalysis):
             list: A list of ordered dictionaries with building damage values and other data/metadata.
 
         """
-        output = []
+        output_ds = []
+        output_dmg = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
-            for ret in executor.map(function_name, *args):
-                output.extend(ret)
+            for ret1, ret2 in executor.map(function_name, *args):
+                output_ds.extend(ret1)
+                output_dmg.extend(ret2)
 
-        return output
+        return output_ds, output_dmg
 
     def building_damage_analysis_bulk_input(self, buildings, hazard_type, hazard_dataset_id):
         """Run analysis for multiple buildings.
@@ -136,28 +139,25 @@ class BuildingDamage(BaseAnalysis):
         elif hazard_type == 'hurricane':
             hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
 
-        bldg_results = []
+        ds_results = []
+        damage_results = []
+
         i = 0
         for b in mapped_buildings:
-            bldg_result = dict()
+            ds_result = dict()
+            damage_result = dict()
             b_id = b["id"]
             num_stories = b['properties']['no_stories']
             selected_fragility_set = fragility_sets[b_id]
 
-            if hazard_type.lower() == "hurricane":
-                # TODO: dummy - remove it
-                b_haz_vals = str(hazard_vals[i]["hazardValues"][0]) + "," + str(hazard_vals[i]["hazardValues"][1])
-                b_demands = ",".join(hazard_vals[i]["demands"])
-                b_units = ",".join(hazard_vals[i]["units"])
-            else:
-                # TODO: remove 0 index to generalize this
-                b_haz_vals = hazard_vals[i]["hazardValues"][0]
-                b_demands = hazard_vals[i]["demands"][0]
-                b_units = hazard_vals[i]["units"][0]
-
             building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
 
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
+                # Supports multiple demand types in same fragility
+                b_haz_vals = hazard_vals[i]["hazardValues"]
+                b_demands = hazard_vals[i]["demands"]
+                b_units = hazard_vals[i]["units"]
+
                 hval_dict = dict()
                 j = 0
                 for d in hazard_vals[i]["demands"]:
@@ -171,30 +171,42 @@ class BuildingDamage(BaseAnalysis):
                 dmg_interval = selected_fragility_set.calculate_damage_interval(
                     dmg_probability, hazard_type=hazard_type, inventory_type="building")
             else:
+                # Non Refactored Fragility curves that always only have a single demand type
+                b_haz_vals = hazard_vals[i]["hazardValues"][0]
+                b_demands = hazard_vals[i]["demands"][0]
+                b_units = hazard_vals[i]["units"][0]
                 dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(b_haz_vals,
                                                                                             building_period)
                 dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability)
 
-            bldg_result['guid'] = b['properties']['guid']
-            bldg_result.update(dmg_probability)
-            bldg_result.update(dmg_interval)
-            bldg_result['demandtype'] = b_demands
-            bldg_result['demandunits'] = b_units
-            bldg_result['hazardval'] = b_haz_vals
+            ds_result['guid'] = b['properties']['guid']
+            damage_result['guid'] = b['properties']['guid']
+            ds_result.update(dmg_probability)
+            ds_result.update(dmg_interval)
 
-            bldg_results.append(bldg_result)
+            damage_result['fragility_id'] = selected_fragility_set.id
+            damage_result['demandtype'] = b_demands
+            damage_result['demandunits'] = b_units
+            damage_result['hazardval'] = b_haz_vals
+
+            ds_results.append(ds_result)
+            damage_results.append(damage_result)
             i += 1
 
         for b in unmapped_buildings:
-            bldg_result = dict()
-            bldg_result['guid'] = b['properties']['guid']
-            bldg_result['demandtype'] = "none"
-            bldg_result['demandunits'] = "none"
-            bldg_result['hazardval'] = "none"
+            ds_result = dict()
+            damage_result = dict()
+            ds_result['guid'] = b['properties']['guid']
+            damage_result['guid'] = b['properties']['guid']
+            damage_result['fragility_id'] = "none"
+            damage_result['demandtype'] = "none"
+            damage_result['demandunits'] = "none"
+            damage_result['hazardval'] = "none"
 
-            bldg_results.append(bldg_result)
+            ds_results.append(ds_result)
+            damage_results.append(damage_result)
 
-        return bldg_results
+        return ds_results, damage_results
 
     def get_spec(self):
         """Get specifications of the building damage analysis.
@@ -267,10 +279,16 @@ class BuildingDamage(BaseAnalysis):
             ],
             'output_datasets': [
                 {
-                    'id': 'result',
+                    'id': 'ds_result',
                     'parent_type': 'buildings',
-                    'description': 'CSV file of building structural damage',
-                    'type': 'ergo:buildingDamageVer5'
+                    'description': 'CSV file of damage states for building structural damage',
+                    'type': 'ergo:buildingDamageVer6'
+                },
+                {
+                    'id': 'damage_result',
+                    'parent_type': 'buildings',
+                    'description': 'Json file with information about applied hazard value and fragility',
+                    'type': 'ergo:buildingDamageInfoVer6'
                 }
             ]
         }
