@@ -4,7 +4,6 @@
 
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 from pyincore import BaseAnalysis
 
 
@@ -19,7 +18,7 @@ class HousingUnitAllocation(BaseAnalysis):
             'input_parameters': [
                 {
                     'id': 'result_name',
-                    'required': False,
+                    'required': True,
                     'description': 'Result CSV dataset name',
                     'type': str
                 },
@@ -89,12 +88,9 @@ class HousingUnitAllocation(BaseAnalysis):
         result_name = self.get_parameter("result_name")
 
         # Datasets
-        building_inv = self.get_input_dataset("buildings").get_inventory_reader()
+        bg_inv = self.get_input_dataset("buildings").get_dataframe_from_shapefile()
         pop_inv = self.get_input_dataset("housing_unit_inventory").get_dataframe_from_csv(low_memory=False)
         addr_point_inv = self.get_input_dataset("address_point_inventory").get_dataframe_from_csv(low_memory=False)
-
-        # Build the GeoDataFrame from Fiona's collection
-        bg_inv = gpd.GeoDataFrame.from_features([feature for feature in building_inv])
 
         for i in range(iterations):
             seed_i = seed + i
