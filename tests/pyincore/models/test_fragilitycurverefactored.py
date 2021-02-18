@@ -27,7 +27,7 @@ def test_create_fragility_set():
 def test_calculate_limit_state_probability(hazard_values, expected):
     fragility_set = get_fragility_set("refactored_fragility_curve.json")
     result = fragility_set.calculate_limit_state_refactored_w_conversion(hazard_values)
-    assert result["failure"] == expected
+    assert result["LS_0"] == expected
 
 
 @pytest.mark.parametrize("curve, hazard_val, refactored_curve, hazard_val_refactored, num_stories", [
