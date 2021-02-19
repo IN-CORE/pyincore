@@ -159,7 +159,7 @@ class BuildingDamage(BaseAnalysis):
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
                 # Supports multiple demand types in same fragility
-                b_haz_vals = AnalysisUtil.update_precision_of_hazards(hazard_vals[i]["hazardValues"])
+                b_haz_vals = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
                 b_demands = hazard_vals[i]["demands"]
                 b_units = hazard_vals[i]["units"]
 
@@ -187,8 +187,8 @@ class BuildingDamage(BaseAnalysis):
             ds_result['guid'] = b['properties']['guid']
             damage_result['guid'] = b['properties']['guid']
 
-            ds_result.update(AnalysisUtil.update_precision_of_states(dmg_probability))
-            ds_result.update(AnalysisUtil.update_precision_of_states(dmg_interval))
+            ds_result.update(AnalysisUtil.update_precision_of_dicts(dmg_probability))
+            ds_result.update(AnalysisUtil.update_precision_of_dicts(dmg_interval))
 
             damage_result['fragility_id'] = selected_fragility_set.id
             damage_result['demandtype'] = b_demands

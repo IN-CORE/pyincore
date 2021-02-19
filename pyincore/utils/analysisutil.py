@@ -37,12 +37,12 @@ class AnalysisUtil:
             raise
 
     @staticmethod
-    def update_precision_of_states(states: dict) -> dict:
+    def update_precision_of_dicts(states: dict) -> dict:
         updated_states = {key: AnalysisUtil.update_precision(states[key]) for key in states}
         return updated_states
 
     @staticmethod
-    def update_precision_of_hazards(hazard_vals: List) -> List:
+    def update_precision_of_lists(hazard_vals: List) -> List:
         updated_hazard_vals = [AnalysisUtil.update_precision(val) for val in hazard_vals]
         return updated_hazard_vals
 
