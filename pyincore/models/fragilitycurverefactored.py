@@ -51,7 +51,7 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
                     parameters[parameter["name"]] = None
             elif parameter["name"] in kwargs.keys():
                 parameters[parameter["name"]] = kwargs[parameter["name"]]
-            elif "expression" in parameter:
+            elif "expression" in parameter and parameter["expression"] is not None:
                 parameters[parameter["name"]] = evaluateexpression.evaluate(parameter["expression"], parameters)
             else:
                 parameters[parameter["name"]] = None
@@ -65,7 +65,7 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
                     parameters[parameter_key] = value
         probability = 0.0
         for rule in self.rules:
-            if "condition" not in rule:
+            if "condition" not in rule or rule["condition"] is None:
                 probability = evaluateexpression.evaluate(rule["expression"], parameters)
             else:
                 conditions_met = []

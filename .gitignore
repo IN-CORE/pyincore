@@ -47,6 +47,7 @@ original/
 
 # possible output file
 *.csv
+*.json
 
 # Seaside ipopt constants
 pyincore/analyses/seasidecge/solverconstants/ipopt_cons.py
