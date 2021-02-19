@@ -14,7 +14,6 @@ from deprecated.sphinx import deprecated
 
 from pyincore import DataService
 
-
 class AnalysisUtil:
     """
     Utility methods for analysis
@@ -25,6 +24,27 @@ class AnalysisUtil:
                     "\n" \
                     "Returns: \n\t" \
                     "$RETS$ "
+
+    DAMAGE_PRECISION = 5  # To be applied to values of damage state, limit state and hazard
+
+    @staticmethod
+    def update_precision(num, precision: int = DAMAGE_PRECISION):
+        try:
+            r = round(num, precision)
+            return r
+        except TypeError:
+            print("Error trying to round non numeric value")
+            raise
+
+    @staticmethod
+    def update_precision_of_states(states: dict) -> dict:
+        updated_states = {key: AnalysisUtil.update_precision(states[key]) for key in states}
+        return updated_states
+
+    @staticmethod
+    def update_precision_of_hazards(hazard_vals: List) -> List:
+        updated_hazard_vals = [AnalysisUtil.update_precision(val) for val in hazard_vals]
+        return updated_hazard_vals
 
     @staticmethod
     @deprecated(version="0.9.0", reason="Use calculate_damage_interval in fragilitycurveset class instead.")
