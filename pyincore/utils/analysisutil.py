@@ -30,7 +30,7 @@ class AnalysisUtil:
     @staticmethod
     def update_precision(num, precision: int = DAMAGE_PRECISION):
         try:
-            r = round(num, precision)
+            r = round(float(num), precision)
             return r
         except TypeError:
             print("Error trying to round non numeric value")
