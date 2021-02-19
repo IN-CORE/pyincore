@@ -43,7 +43,7 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
         # 2. Fetch all parameters listed in the curve from kwargs and if there are not in kwargs, use default values
         # from the curve.
         for parameter in fragility_curve_parameters:
-            if "key" in parameter:
+            if "key" in parameter and parameter["key"] is not None:
                 mapped_demand_types[parameter["key"]] = parameter["name"]
                 if parameter["key"] in kwargs.keys():
                     parameters[parameter["name"]] = kwargs[parameter["key"]]
