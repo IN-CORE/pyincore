@@ -203,10 +203,10 @@ class BuildingDamage(BaseAnalysis):
             damage_result = dict()
             ds_result['guid'] = b['properties']['guid']
             damage_result['guid'] = b['properties']['guid']
-            damage_result['fragility_id'] = "None"
-            damage_result['demandtype'] = "None"
-            damage_result['demandunits'] = "None"
-            damage_result['hazardval'] = "None"
+            damage_result['fragility_id'] = None
+            damage_result['demandtype'] = None
+            damage_result['demandunits'] = None
+            damage_result['hazardval'] = None
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)
