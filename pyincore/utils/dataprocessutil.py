@@ -11,7 +11,7 @@ import pandas as pd
 from pyincore import IncoreClient, Dataset, FragilityService, MappingSet, DataService, AnalysisUtil
 
 
-class OtherUtil:
+class DataProcessUtil:
     @staticmethod
     def get_mapped_result_from_analysis(client, inventory_id: str, dmg_result_dataset, archetype_mapping_id: str):
         """
@@ -33,7 +33,7 @@ class OtherUtil:
         archtype_mapping_dataset = Dataset.from_data_service(archetype_mapping_id, DataService(client))
         arch_mapping = pd.DataFrame(archtype_mapping_dataset.get_csv_reader())
 
-        ret_json, mapped_df = OtherUtil.create_mapped_result(buildings, dmg_result, arch_mapping)
+        ret_json, mapped_df = DataProcessUtil.create_mapped_result(buildings, dmg_result, arch_mapping)
 
         return ret_json, mapped_df
 
@@ -59,7 +59,7 @@ class OtherUtil:
         archtype_mapping_dataset = Dataset.from_data_service(archetype_mapping_id, DataService(client))
         arch_mapping = archtype_mapping_dataset.get_dataframe_from_csv()
 
-        ret_json, mapped_df = OtherUtil.create_mapped_result(buildings, dmg_result, arch_mapping)
+        ret_json, mapped_df = DataProcessUtil.create_mapped_result(buildings, dmg_result, arch_mapping)
 
         return ret_json, mapped_df
 
@@ -82,7 +82,7 @@ class OtherUtil:
         dmg_result = pd.read_csv(dmg_result_path)
         arch_mapping = pd.read_csv(archetype_mapping_path)
 
-        ret_json, mapped_df = OtherUtil.create_mapped_result(buildings, dmg_result, arch_mapping)
+        ret_json, mapped_df = DataProcessUtil.create_mapped_result(buildings, dmg_result, arch_mapping)
 
         return ret_json, mapped_df
 

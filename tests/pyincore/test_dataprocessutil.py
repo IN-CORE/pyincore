@@ -4,7 +4,7 @@ import jwt
 
 from pyincore import IncoreClient
 from pyincore.globals import INCORE_API_DEV_URL
-from pyincore_viz.otherutil import OtherUtil as util
+from pyincore.utils.dataprocessutil import DataProcessUtil as util
 
 
 @pytest.fixture
