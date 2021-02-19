@@ -187,6 +187,8 @@ class PopulationDislocation(BaseAnalysis):
         prob3_disl = PopulationDislocationUtil.get_disl_probability(rploss3, dsf, pbd, phd)
 
         #  dislocation probability is 0 if the damage is set to 100% probability (insignificant, DS_0 = 1).
+        #  DS_0 bulding does not distinguish between in and out hazard boundaries. All DS_0 = 1 are set to
+        #  zero dislocation probability.
         prob0_disl = np.where(prob0 == 1, 0, prob0_disl)
 
         # total_prob_disl is the sum of the probability of dislocation at four damage states
