@@ -276,8 +276,8 @@ class FragilityCurveSet:
         kwargs_dict = {}
         for parameters in self.fragility_curve_parameters:
 
-            if parameters['name'] == "age_group" and (inventory_unit['properties']['age_group'] is None or \
-                    inventory_unit['properties'][parameters['name']] == ""):
+            if parameters['name'] == "age_group" and ('age_group' not in inventory_unit['properties'] or \
+                    inventory_unit['properties']['age_group'] == ""):
                 if inventory_unit['properties']['year_built'] is not None:
                     try:
                         yr_built = int(inventory_unit['properties']['year_built'])
