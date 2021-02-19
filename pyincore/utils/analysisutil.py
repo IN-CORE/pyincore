@@ -375,6 +375,62 @@ class AnalysisUtil:
         return hazard_demand_type
 
     @staticmethod
+    def get_hazard_demand_types(building, fragility_set, hazard_type):
+        """
+        Get hazard demand type. This method is intended to replace get_hazard_demand_type. Fragility_set is not a
+        json but a fragilityCurveSet object now.
+
+        Args:
+            building (obj): A JSON mapping of a geometric object from the inventory: current building.
+            fragility_set (obj): FragilityCurveSet object
+            hazard_type (str): A hazard type such as earthquake, tsunami etc.
+
+        Returns:
+            str: A hazard demand type.
+
+        """
+        BLDG_STORIES = "no_stories"
+        PROPERTIES = "properties"
+        BLDG_PERIOD = "period"
+
+        fragility_demand_types = fragility_set.demand_types
+        adjusted_demand_types = []
+
+        for demand_type in fragility_demand_types:
+            adjusted_demand_type = demand_type
+            # TODO: Due to the mismatch in demand types names on DFR3 vs hazard service, we should refactor this before
+            # TODO: using expression based fragilities for tsunami & earthquake
+            if hazard_type.lower() == "tsunami":
+                demand_type = demand_type.lower()
+                if demand_type == "momentumflux":
+                    adjusted_demand_type = "mmax"
+                elif demand_type == "inundationdepth":
+                    adjusted_demand_type = "hmax"
+            elif hazard_type.lower() == "earthquake":
+                demand_type = demand_type.lower()
+                num_stories = building[PROPERTIES][BLDG_STORIES]
+                # Get building period from the fragility if possible
+                building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
+
+                # TODO: There might be a bug here as this is not handling SD
+                if demand_type.endswith('sa'):
+                    # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
+                    if demand_type != 'sa':
+                        if len(demand_type.split()) > 2:
+                            building_period = demand_type.split()[0]
+                            adjusted_demand_type = str(building_period) + " " + "SA"
+                    else:
+                        if building_period == 0.0 and BLDG_PERIOD in building[PROPERTIES]:
+                            if building[PROPERTIES][BLDG_PERIOD] > 0.0:
+                                building_period = building[PROPERTIES][BLDG_PERIOD]
+
+                        adjusted_demand_type = str(building_period) + " " + "SA"
+
+            adjusted_demand_types.append(adjusted_demand_type)
+        return adjusted_demand_types
+
+
+    @staticmethod
     def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):
         """
         This method should replace group_by_demand_type in the future. Fragility_sets is not list of dictionary (

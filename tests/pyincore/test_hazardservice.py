@@ -89,8 +89,8 @@ def test_post_earthquake_hazard_values(hazardsvc):
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
            and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
-           and response[0]['hazardValues'] == [4.0315843742708567e-07, 0.0002948961966134383, 0.0009970625458294708,
-                                               0.0002967813517598166, 0.03716171152178692]
+           and response[0]['hazardValues'] == [6.450534998833372e-07, 0.0004718339145815013, 0.0023929501099907297,
+                                               0.00047485016281570663, 0.0891881076522886]
 
 
 def test_get_liquefaction_values(hazardsvc):

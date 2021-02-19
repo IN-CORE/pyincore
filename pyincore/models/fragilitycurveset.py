@@ -272,6 +272,37 @@ class FragilityCurveSet:
 
         return output
 
+    def construct_expression_args_from_inventory(self, inventory_unit: dict):
+        kwargs_dict = {}
+        for parameters in self.fragility_curve_parameters:
+
+            if parameters['name'] == "age_group" and ('age_group' not in inventory_unit['properties'] or \
+                    inventory_unit['properties']['age_group'] == ""):
+                if inventory_unit['properties']['year_built'] is not None:
+                    try:
+                        yr_built = int(inventory_unit['properties']['year_built'])
+                    except ValueError:
+                        print("Non integer value found in year_built")
+                        raise
+                    age_group = 4  # for yr_built >= 2008
+                    if yr_built < 1974:
+                        age_group = 1
+                    elif 1974 <= yr_built < 1987:
+                        age_group = 2
+                    elif 1987 <= yr_built < 1995:
+                        age_group = 3
+                    elif 1995 <= yr_built < 2008:
+                        age_group = 4
+
+                    kwargs_dict['age_group'] = age_group
+
+            if parameters['name'] in inventory_unit['properties'] and \
+                    inventory_unit['properties'][parameters['name']] is not None and \
+                    inventory_unit['properties'][parameters['name']] != "":
+
+                kwargs_dict[parameters['name']] = inventory_unit['properties'][parameters['name']]
+        return kwargs_dict
+
     @staticmethod
     def _3ls_to_4ds(damage):
         output = collections.OrderedDict([("DS_0", 0.0), ("DS_1", 0.0), ("DS_2", 0.0), ("DS_3", 0.0)])
