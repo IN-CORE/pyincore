@@ -22,5 +22,5 @@ def evaluate(expression: str, parameters: dict = {}):
     safe_globals = {"__builtins__": {}, "scipy": globals()["scipy"], "math": globals()["math"]}
     try:
         return eval(code, safe_globals, parameters)
-    except ValueError:
+    except:
         return math.nan
