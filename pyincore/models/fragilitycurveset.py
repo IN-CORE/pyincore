@@ -274,13 +274,16 @@ class FragilityCurveSet:
 
     def construct_expression_args_from_inventory(self, inventory_unit: dict):
         kwargs_dict = {}
-        # TODO: Add a condition to handle age_group - to be derived from year_built
         for parameters in self.fragility_curve_parameters:
 
             if parameters['name'] == "age_group" and (inventory_unit['properties']['age_group'] is None or \
                     inventory_unit['properties'][parameters['name']] == ""):
                 if inventory_unit['properties']['year_built'] is not None:
-                    yr_built = inventory_unit['properties']['year_built']
+                    try:
+                        yr_built = int(inventory_unit['properties']['year_built'])
+                    except ValueError:
+                        print("Non integer value found in year_built")
+                        raise
                     age_group = 4  # for yr_built >= 2008
                     if yr_built < 1974:
                         age_group = 1
