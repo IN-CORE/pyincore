@@ -288,13 +288,13 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'ds_result',
                     'parent_type': 'buildings',
                     'description': 'CSV file of damage states for building structural damage',
-                    'type': 'ergo:buildingDamageVer6'
+                    'type': 'ergo:buildingDamageVer5'
                 },
                 {
                     'id': 'damage_result',
                     'parent_type': 'buildings',
                     'description': 'Json file with information about applied hazard value and fragility',
-                    'type': 'ergo:buildingDamageInfoVer6'
+                    'type': 'ergo:buildingDamageVer5'
                 }
             ]
         }
