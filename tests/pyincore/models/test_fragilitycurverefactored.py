@@ -7,7 +7,7 @@ from pyincore import globals as pyglobals, FragilityCurveSet
 
 
 def get_fragility_set(fragility_dir: str):
-    with open(os.path.join(pyglobals.INCORE_API_DEV_URL, fragility_dir), 'r') as f:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, fragility_dir), 'r') as f:
         fragility_curve = json.load(f)
     fragility_set = FragilityCurveSet(fragility_curve)
     return fragility_set
