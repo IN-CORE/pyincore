@@ -33,5 +33,4 @@ def pytest_sessionstart(session):
     pytest.repairsvc = RepairService(client)
     pytest.hazardsvc = HazardService(client)
     pytest.spacesvc = SpaceService(client)
-    print(f"Successfully initialized Incore client and services. Using {pyglobals.INCORE_TEST_URL}")
-
+    print(f"Successfully initialized Incore client and services. Using {pyglobals.INCORE_API_DEV_URL}")
