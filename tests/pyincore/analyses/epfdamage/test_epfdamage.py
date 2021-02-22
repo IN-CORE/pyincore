@@ -1,10 +1,10 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.epfdamage import EpfDamage
-from pyincore.globals import INCORE_TEST_URL
+import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
-    client = IncoreClient(INCORE_TEST_URL)
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     hazard_type = "earthquake"
 
@@ -34,11 +34,9 @@ def run_with_base_class():
     epf_dmg.run_analysis()
 
     hazard_type = "tsunami"
-
     hazard_id = "5bc9eaf7f7b08533c7e610e1"
 
     epf_dataset_id = "5eebcaa17a00803abc85ec11"
-
     # Tsunami mapping
     mapping_id = "5eebce11e7226233ce4ef305"
 

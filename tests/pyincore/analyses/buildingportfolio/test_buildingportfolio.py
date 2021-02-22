@@ -5,11 +5,12 @@
 
 from pyincore.analyses.buildingportfolio.recovery import BuildingPortfolioRecoveryAnalysis
 from pyincore import IncoreClient
+import pyincore.globals as pyglobals
 
 if __name__ == "__main__":
     cred = None
     try:
-        client = IncoreClient()
+        client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
         bldg_data_dataset = "5c756966c11bb369a33a0b0a"
         occupancy_dataset = "5c7569f9c11bb369a33a0b16"
         bldg_damage_dataset = "5c756a2fc11bb369a33a0b22"

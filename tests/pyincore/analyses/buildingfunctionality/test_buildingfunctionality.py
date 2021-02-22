@@ -2,11 +2,11 @@ import time
 
 from pyincore import IncoreClient
 from pyincore.analyses.buildingfunctionality.buildingfunctionality import BuildingFunctionality
-from pyincore.globals import INCORE_TEST_URL
+import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
-    client = IncoreClient(INCORE_TEST_URL)
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     bldg_func = BuildingFunctionality(client)
 
     # load datasets remotely

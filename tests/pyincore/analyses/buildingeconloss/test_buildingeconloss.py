@@ -1,11 +1,11 @@
 from pyincore import IncoreClient
 from pyincore.analyses.buildingeconloss.buildingeconloss import BuildingEconLoss
-from pyincore.globals import INCORE_TEST_URL
+import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
     # client = IncoreClient()
-    client = IncoreClient(INCORE_TEST_URL)
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     # Building inventory shapefile, Seaside, OR
     # bldg_dataset_id = "5bcf2fcbf242fe047ce79dad"

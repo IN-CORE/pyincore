@@ -4,7 +4,7 @@ import pyincore.globals as pyglobals
 
 
 def run_base_analysis():
-    client = IncoreClient(pyglobals.INCORE_TEST_URL)
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     capital_shocks = CapitalShocks(client)
 
     # Building inventory

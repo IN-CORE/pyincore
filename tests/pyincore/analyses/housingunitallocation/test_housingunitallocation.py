@@ -11,16 +11,10 @@ def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     # Joplin
-    # building_inv = "5f218e36114b783cb0b01833"
-    # housing_unit_inv = "5df7ce61425e0b00092d0013" # 2ev3
-    # address_point_inv = "5df7ce0d425e0b00092cffee" # 2ev2
-    # result_name = "IN-CORE_2ev3_HUA"
-
-    # Galveston
-    building_inv = "6024e935b70815363b8cdd1b"
-    housing_unit_inv = "5fc6a757eba0eb743dc7739f"
-    address_point_inv = "5fc6a4ddeba0eb743dc77301"
-    result_name = "IN-CORE_1bv6_HUA_1238"
+    building_inv = "5f218e36114b783cb0b01833"
+    housing_unit_inv = "5df7ce61425e0b00092d0013" # 2ev3
+    address_point_inv = "5df7ce0d425e0b00092cffee" # 2ev2
+    result_name = "IN-CORE_2ev3_HUA"
 
     seed = 1238
     iterations = 2

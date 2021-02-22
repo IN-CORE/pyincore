@@ -1,11 +1,11 @@
 from pyincore.analyses.tornadoepndamage.tornadoepndamage import \
     TornadoEpnDamage
 from pyincore import IncoreClient
-from pyincore.globals import INCORE_TEST_URL
+import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
-    client = IncoreClient(INCORE_TEST_URL)
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     ted = TornadoEpnDamage(client)
 

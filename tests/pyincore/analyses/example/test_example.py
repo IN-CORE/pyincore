@@ -4,7 +4,7 @@ from pathlib import Path
 from pyincore import IncoreClient
 from pyincore.analyses.example.exampleanalysis import ExampleAnalysis
 import traceback
-from pyincore.globals import INCORE_API_PROD_URL
+import pyincore.globals as pyglobals
 
 if __name__ == '__main__':
     cred = None
@@ -29,7 +29,7 @@ if __name__ == '__main__':
         # You should not need to uncomment the above if pyIncore created a .incorepw as described above and you put
         # your credentials in there because the IncoreClient by default automatically looks in your home folder for
         # .incorepw
-        client = IncoreClient(INCORE_API_PROD_URL)
+        client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
         # EQ Building Dataset - Memphis Hospitals
         bldg_dataset_id = "5a284f0bc7d30d13bc081a28"

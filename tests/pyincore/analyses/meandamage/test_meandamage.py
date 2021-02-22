@@ -1,9 +1,10 @@
 from pyincore import IncoreClient
 from pyincore.analyses.meandamage import MeanDamage
+import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
-    client = IncoreClient()
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     md = MeanDamage(client)
 

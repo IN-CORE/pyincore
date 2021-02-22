@@ -1,12 +1,12 @@
 from pyincore import IncoreClient, MappingSet, FragilityService
-from pyincore.globals import INCORE_TEST_URL
+import pyincore.globals as pyglobals
 from pyincore import Dataset
 from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore.analyses.cumulativebuildingdamage.cumulativebuildingdamage import CumulativeBuildingDamage
 
 
 def run_with_base_class():
-    client = IncoreClient(INCORE_TEST_URL)
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     fragility_service = FragilityService(client)
 
     # Seaside building dataset

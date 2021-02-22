@@ -5,11 +5,11 @@
 
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.pipelinedamage import PipelineDamage
-from pyincore.globals import INCORE_TEST_URL
+import pyincore.globals as pyglobals
 
 
 def test_pipeline_dmg():
-    client = IncoreClient(service_url=INCORE_TEST_URL, token_file_name=".incrtesttoken")
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     pipeline_dmg = PipelineDamage(client)
 
     # test tsunami pipeline
