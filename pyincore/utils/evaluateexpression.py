@@ -20,4 +20,7 @@ def evaluate(expression: str, parameters: dict = {}):
 
     # TODO figure out a better way of doing this. Can we import the packages here directly?
     safe_globals = {"__builtins__": {}, "scipy": globals()["scipy"], "math": globals()["math"]}
-    return eval(code, safe_globals, parameters)
+    try:
+        return eval(code, safe_globals, parameters)
+    except:
+        return math.nan
