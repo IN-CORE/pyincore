@@ -17,9 +17,8 @@ import geopandas as gpd
 import rasterio
 import wntr
 import warnings
-warnings.filterwarnings("ignore", "", UserWarning)
-
 from pyincore import DataService
+warnings.filterwarnings("ignore", "", UserWarning)
 
 
 class Dataset:

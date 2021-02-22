@@ -36,5 +36,6 @@ def run_with_base_class():
 
     return True
 
+
 if __name__ == '__main__':
     run_with_base_class()

@@ -61,11 +61,16 @@ class BuildingDamage(BaseAnalysis):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        (ds_results, damage_results) = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input, num_workers,
-                                                         inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
+        (ds_results, damage_results) = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
+                                                                              num_workers,
+                                                                              inventory_args,
+                                                                              repeat(hazard_type),
+                                                                              repeat(hazard_dataset_id))
 
         self.set_result_csv_data("ds_result", ds_results, name=self.get_parameter("result_name"))
-        self.set_result_json_data("damage_result", damage_results, name=self.get_parameter("result_name") + "_additional_info")
+        self.set_result_json_data("damage_result",
+                                  damage_results,
+                                  name=self.get_parameter("result_name") + "_additional_info")
 
         return True
 

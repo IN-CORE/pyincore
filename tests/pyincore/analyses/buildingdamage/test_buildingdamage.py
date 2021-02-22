@@ -91,8 +91,8 @@ def run_with_base_class():
     hazard_id = "5f4d02e99f43ee0dde768406"
 
     # lumberton building inventory v7
-    # bldg_dataset_id = "603010f7b1db9c28aef53214" # 40 building subset
-    bldg_dataset_id = "603010a4b1db9c28aef5319f" # 21k full building
+    # bldg_dataset_id = "603010f7b1db9c28aef53214"  # 40 building subset
+    bldg_dataset_id = "603010a4b1db9c28aef5319f"  # 21k full building
 
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
@@ -110,6 +110,7 @@ def run_with_base_class():
     bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
+
 
 if __name__ == '__main__':
     run_with_base_class()

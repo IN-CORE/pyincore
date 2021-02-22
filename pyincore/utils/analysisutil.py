@@ -14,6 +14,7 @@ from deprecated.sphinx import deprecated
 
 from pyincore import DataService
 
+
 class AnalysisUtil:
     """
     Utility methods for analysis
@@ -448,7 +449,6 @@ class AnalysisUtil:
 
             adjusted_demand_types.append(adjusted_demand_type)
         return adjusted_demand_types
-
 
     @staticmethod
     def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):
