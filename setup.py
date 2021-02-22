@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyincore',
-    version='0.8.1',
+    version='0.9.0',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     package_data={
