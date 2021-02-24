@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Support hurricane in Building Damage analysis [INCORE1-696] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-696)
 - Support flood in Building Damage analysis [INCORE1-982] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-982)
 - Convert building damage output to have 3 limit state and 4 damage state [INCORE1-871] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-871)
-- Split building damage output two files: a csv table with damage results,  and a json formatted file with supplemental information  [INCORE1-969] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-969)
+- Split building damage output two files: a csv table with damage results, and a json formatted file with supplemental information [INCORE1-969] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-969)
 - A utility method to add GUID (Global Unique ID) to inventory dataset in ESRI Shapefile format [INCORE1-978] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-978)
 - Utility method to do archetype mapping [INCORE1-913] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-913)
 - Update precision of damage states, limit states and hazard values to a max of 5 digits [INCORE1-985] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-985)
