@@ -37,7 +37,8 @@ class CapitalShocks(BaseAnalysis):
                     'id': 'buildings',
                     'required': True,
                     'description': 'Building Inventory',
-                    'type': ['ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
+                    'type': ['ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6',
+                             'ergo:buildingInventoryVer7']
                 },
                 {
                     'id': 'buildings_to_sectors',

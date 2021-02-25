@@ -105,7 +105,8 @@ class BuildingEconLoss(BaseAnalysis):
                     'required': True,
                     'description': 'Building Inventory',
                     'type': ['ergo:buildingInventory', 'ergo:buildingInventoryVer4',
-                             'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6'],
+                             'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6',
+                             'ergo:buildingInventoryVer7']
                 },
                 {
                     'id': 'building_mean_dmg',
