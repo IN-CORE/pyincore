@@ -161,7 +161,7 @@ class FragilityCurveSet:
                 output[limit_state[index]] = probability
                 index += 1
         else:
-            raise ValueError("We can only handle fragility curves with more than 3 limit states!")
+            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
 
         return output
 
@@ -214,7 +214,7 @@ class FragilityCurveSet:
                 output[limit_state[index]] = probability
                 index += 1
         else:
-            raise ValueError("We can only handle fragility curves with more than 3 limit states!")
+            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
 
         return output
 
@@ -236,7 +236,7 @@ class FragilityCurveSet:
                 output[limit_state[index]] = probability
                 index += 1
         else:
-            raise ValueError("We can only handle fragility curves with more than 3 limit states!")
+            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
 
         return output
 
