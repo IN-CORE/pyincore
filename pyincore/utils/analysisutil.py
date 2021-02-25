@@ -26,7 +26,7 @@ class AnalysisUtil:
                     "Returns: \n\t" \
                     "$RETS$ "
 
-    DAMAGE_PRECISION = 5  # To be applied to values of damage state, limit state and hazard
+    DAMAGE_PRECISION = 10  # To be applied to values of damage state, limit state and hazard
 
     @staticmethod
     def update_precision(num, precision: int = DAMAGE_PRECISION):
