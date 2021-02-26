@@ -22,7 +22,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Replace building inventory csv with shape file in Housing Unit Allocation [INCORE1-977] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE-977)
 - Move test scripts from analyses to test analyses [INCORE1-987] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE-987)
 - Update precision of damage states, limit states and hazard values to a max of 5 digits [INCORE1-985] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-985)
-- Use tempfile library to create temporary directory for writing in CGE [INCORE1-984] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-984)
 
 ### Fixed
 - CGE analysis for Joplin and Seaside uses the system temp folder for temporary file instead of the installation folder [INCORE1-980] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-980)
