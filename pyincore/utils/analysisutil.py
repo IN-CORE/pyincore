@@ -13,6 +13,7 @@ from typing import List, Dict
 from deprecated.sphinx import deprecated
 
 from pyincore import DataService
+from pyincore.globals import DAMAGE_PRECISION
 
 
 class AnalysisUtil:
@@ -25,8 +26,6 @@ class AnalysisUtil:
                     "\n" \
                     "Returns: \n\t" \
                     "$RETS$ "
-
-    DAMAGE_PRECISION = 10  # To be applied to values of damage state, limit state and hazard
 
     @staticmethod
     def update_precision(num, precision: int = DAMAGE_PRECISION):

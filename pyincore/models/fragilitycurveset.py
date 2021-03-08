@@ -5,6 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import collections
+from decimal import getcontext, Decimal
 import json
 
 from deprecated.sphinx import deprecated
@@ -17,7 +18,7 @@ from pyincore.models.standardfragilitycurve import StandardFragilityCurve
 from pyincore.models.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
 from pyincore.models.parametricfragilitycurve import ParametricFragilityCurve
 from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
-
+from pyincore.globals import DAMAGE_PRECISION
 
 class FragilityCurveSet:
     """class for fragility curves.
@@ -29,6 +30,8 @@ class FragilityCurveSet:
         ValueError: Raised if there are unsupported number of fragility curves
         or if missing a key curve field.
     """
+
+    getcontext().prec = DAMAGE_PRECISION
 
     def __init__(self, metadata):
         self.id = metadata["id"] if "id" in metadata else ""
@@ -149,7 +152,7 @@ class FragilityCurveSet:
         Returns: limit state probabilities
         """
 
-        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        output = collections.OrderedDict([("LS_0", Decimal(0.0)), ("LS_1", Decimal(0.0)), ("LS_2", Decimal(0.0))])
         limit_state = list(output.keys())
         index = 0
 
@@ -158,7 +161,7 @@ class FragilityCurveSet:
                 probability = fragility_curve.calculate_limit_state_probability(hazard_values,
                                                                                 self.fragility_curve_parameters,
                                                                                 **kwargs)
-                output[limit_state[index]] = probability
+                output[limit_state[index]] = Decimal(probability)
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 3 limit states.")
@@ -204,14 +207,14 @@ class FragilityCurveSet:
             Returns: limit state probabilities
 
         """
-        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        output = collections.OrderedDict([("LS_0", Decimal(0.0)), ("LS_1", Decimal(0.0)), ("LS_2", Decimal(0.0))])
         limit_state = list(output.keys())
         index = 0
 
         if len(self.fragility_curves) <= 3:
             for fragility_curve in self.fragility_curves:
                 probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
-                output[limit_state[index]] = probability
+                output[limit_state[index]] = Decimal(probability)
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 3 limit states.")
@@ -305,20 +308,22 @@ class FragilityCurveSet:
 
     @staticmethod
     def _3ls_to_4ds(damage):
-        output = collections.OrderedDict([("DS_0", 0.0), ("DS_1", 0.0), ("DS_2", 0.0), ("DS_3", 0.0)])
-        output['DS_0'] = 1 - damage["LS_0"]
+        output = collections.OrderedDict([("DS_0", Decimal(0.0)), ("DS_1", Decimal(0.0)), ("DS_2", Decimal(0.0)),
+                                          ("DS_3", Decimal(0.0))])
+        output['DS_0'] = Decimal(1) - damage["LS_0"]
         output['DS_1'] = damage["LS_0"] - damage["LS_1"]
         output['DS_2'] = damage["LS_1"] - damage["LS_2"]
-        output['DS_3'] = damage["LS_2"]
+        output['DS_3'] = damage["LS_2"] - Decimal(0)
 
         return output
 
     @staticmethod
     def _1ls_to_4ds(damage):
-        output = collections.OrderedDict([("DS_0", 0.0), ("DS_1", 0.0), ("DS_2", 0.0), ("DS_3", 0.0)])
-        output['DS_0'] = 1 - damage["LS_0"]
+        output = collections.OrderedDict([("DS_0", Decimal(0.0)), ("DS_1", Decimal(0.0)), ("DS_2", Decimal(0.0)),
+                                          ("DS_3", Decimal(0.0))])
+        output['DS_0'] = Decimal(1) - damage["LS_0"]
         output['DS_1'] = 0
         output['DS_2'] = 0
-        output['DS_3'] = damage["LS_0"]
+        output['DS_3'] = damage["LS_0"] - Decimal(0)
 
         return output
