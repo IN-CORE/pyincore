@@ -152,7 +152,7 @@ class FragilityCurveSet:
         Returns: limit state probabilities
         """
 
-        output = collections.OrderedDict([("LS_0", Decimal(0.0)), ("LS_1", Decimal(0.0)), ("LS_2", Decimal(0.0))])
+        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0),("LS_2", 0.0)])
         limit_state = list(output.keys())
         index = 0
 
@@ -161,7 +161,7 @@ class FragilityCurveSet:
                 probability = fragility_curve.calculate_limit_state_probability(hazard_values,
                                                                                 self.fragility_curve_parameters,
                                                                                 **kwargs)
-                output[limit_state[index]] = Decimal(probability)
+                output[limit_state[index]] = probability
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 3 limit states.")
@@ -207,14 +207,14 @@ class FragilityCurveSet:
             Returns: limit state probabilities
 
         """
-        output = collections.OrderedDict([("LS_0", Decimal(0.0)), ("LS_1", Decimal(0.0)), ("LS_2", Decimal(0.0))])
+        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
         limit_state = list(output.keys())
         index = 0
 
         if len(self.fragility_curves) <= 3:
             for fragility_curve in self.fragility_curves:
                 probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
-                output[limit_state[index]] = Decimal(probability)
+                output[limit_state[index]] = probability
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 3 limit states.")
@@ -308,22 +308,20 @@ class FragilityCurveSet:
 
     @staticmethod
     def _3ls_to_4ds(damage):
-        output = collections.OrderedDict([("DS_0", Decimal(0.0)), ("DS_1", Decimal(0.0)), ("DS_2", Decimal(0.0)),
-                                          ("DS_3", Decimal(0.0))])
-        output['DS_0'] = Decimal(1) - damage["LS_0"]
-        output['DS_1'] = damage["LS_0"] - damage["LS_1"]
-        output['DS_2'] = damage["LS_1"] - damage["LS_2"]
-        output['DS_3'] = damage["LS_2"] - Decimal(0)
+        output = dict()
+        output['DS_0'] = 1 - Decimal(damage["LS_0"])
+        output['DS_1'] = Decimal(damage["LS_0"]) - Decimal(damage["LS_1"])
+        output['DS_2'] = Decimal(damage["LS_1"]) - Decimal(damage["LS_2"])
+        output['DS_3'] = Decimal(damage["LS_2"])
 
         return output
 
     @staticmethod
     def _1ls_to_4ds(damage):
-        output = collections.OrderedDict([("DS_0", Decimal(0.0)), ("DS_1", Decimal(0.0)), ("DS_2", Decimal(0.0)),
-                                          ("DS_3", Decimal(0.0))])
-        output['DS_0'] = Decimal(1) - damage["LS_0"]
-        output['DS_1'] = 0
-        output['DS_2'] = 0
-        output['DS_3'] = damage["LS_0"] - Decimal(0)
+        output = dict()
+        output['DS_0'] = 1 - Decimal(damage["LS_0"])
+        output['DS_1'] = 0.0
+        output['DS_2'] = 0.0
+        output['DS_3'] = Decimal(damage["LS_0"])
 
         return output
