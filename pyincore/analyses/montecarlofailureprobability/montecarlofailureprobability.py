@@ -226,7 +226,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
         """
         ds = {}
         for i in range(num_samples):
-            rnd_num = random.uniform(0, 0.99999)
+            rnd_num = random.uniform(0, 1)
             prob_val = 0
             flag = True
             for ds_name in damage_interval_keys:

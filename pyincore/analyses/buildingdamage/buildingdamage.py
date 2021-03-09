@@ -186,8 +186,6 @@ class BuildingDamage(BaseAnalysis):
                 dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(b_haz_vals,
                                                                                             building_period)
 
-            # round to 10 digits before passing to LS calculation
-            dmg_probability = AnalysisUtil.update_precision_of_dicts(dmg_probability)
             dmg_interval = selected_fragility_set.calculate_damage_interval(
                 dmg_probability, hazard_type=hazard_type, inventory_type="building")
 
@@ -195,7 +193,6 @@ class BuildingDamage(BaseAnalysis):
             damage_result['guid'] = b['properties']['guid']
 
             ds_result.update(dmg_probability)
-            # ds_result.update(AnalysisUtil.update_precision_of_dicts(dmg_interval))
             ds_result.update(dmg_interval)
 
             damage_result['fragility_id'] = selected_fragility_set.id

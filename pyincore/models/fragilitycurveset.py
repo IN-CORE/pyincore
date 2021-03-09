@@ -5,7 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import collections
-from decimal import getcontext, Decimal
 import json
 
 from deprecated.sphinx import deprecated
@@ -18,7 +17,8 @@ from pyincore.models.standardfragilitycurve import StandardFragilityCurve
 from pyincore.models.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
 from pyincore.models.parametricfragilitycurve import ParametricFragilityCurve
 from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
-from pyincore.globals import DAMAGE_PRECISION
+from pyincore.utils.analysisutil import AnalysisUtil
+
 
 class FragilityCurveSet:
     """class for fragility curves.
@@ -30,9 +30,6 @@ class FragilityCurveSet:
         ValueError: Raised if there are unsupported number of fragility curves
         or if missing a key curve field.
     """
-
-    getcontext().prec = DAMAGE_PRECISION
-
     def __init__(self, metadata):
         self.id = metadata["id"] if "id" in metadata else ""
         self.description = metadata['description'] if "description" in metadata else ""
@@ -138,7 +135,7 @@ class FragilityCurveSet:
 
         for fragility_curve in self.fragility_curves:
             probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
-            output[limit_state[index]] = probability
+            output[limit_state[index]] = AnalysisUtil.update_precision(probability) # round to default digits
             index += 1
 
         return output
@@ -161,7 +158,7 @@ class FragilityCurveSet:
                 probability = fragility_curve.calculate_limit_state_probability(hazard_values,
                                                                                 self.fragility_curve_parameters,
                                                                                 **kwargs)
-                output[limit_state[index]] = probability
+                output[limit_state[index]] = AnalysisUtil.update_precision(probability) # round to default digits
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 3 limit states.")
@@ -191,7 +188,7 @@ class FragilityCurveSet:
 
         for fragility_curve in self.fragility_curves:
             probability = fragility_curve.compute_custom_limit_state_probability(variables)
-            output[limit_state[index]] = probability
+            output[limit_state[index]] = AnalysisUtil.update_precision(probability) # round to default digits
             index += 1
 
         return output
@@ -214,7 +211,7 @@ class FragilityCurveSet:
         if len(self.fragility_curves) <= 3:
             for fragility_curve in self.fragility_curves:
                 probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
-                output[limit_state[index]] = probability
+                output[limit_state[index]] = AnalysisUtil.update_precision(probability) # round to default digits
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 3 limit states.")
@@ -236,7 +233,7 @@ class FragilityCurveSet:
         if len(self.fragility_curves) <= 3:
             for fragility_curve in self.fragility_curves:
                 probability = fragility_curve.compute_custom_limit_state_probability(variables)
-                output[limit_state[index]] = probability
+                output[limit_state[index]] = AnalysisUtil.update_precision(probability) # round to default digits
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 3 limit states.")
@@ -308,20 +305,22 @@ class FragilityCurveSet:
 
     @staticmethod
     def _3ls_to_4ds(damage):
+        damage = AnalysisUtil.float_dict_to_decimal(damage)
         output = dict()
-        output['DS_0'] = 1 - Decimal(str(damage["LS_0"]))
-        output['DS_1'] = Decimal(str(damage["LS_0"])) - Decimal(str(damage["LS_1"]))
-        output['DS_2'] = Decimal(str(damage["LS_1"])) - Decimal(str(damage["LS_2"]))
-        output['DS_3'] = Decimal(str(damage["LS_2"]))
+        output['DS_0'] = 1 - damage["LS_0"]
+        output['DS_1'] = damage["LS_0"] - damage["LS_1"]
+        output['DS_2'] = damage["LS_1"] - damage["LS_2"]
+        output['DS_3'] = damage["LS_2"]
 
         return output
 
     @staticmethod
     def _1ls_to_4ds(damage):
+        damage = AnalysisUtil.float_dict_to_decimal(damage)
         output = dict()
-        output['DS_0'] = 1 - Decimal(str(damage["LS_0"]))
+        output['DS_0'] = 1 - damage["LS_0"]
         output['DS_1'] = 0.0
         output['DS_2'] = 0.0
-        output['DS_3'] = Decimal(str(damage["LS_0"]))
+        output['DS_3'] = damage["LS_0"]
 
         return output

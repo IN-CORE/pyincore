@@ -11,6 +11,7 @@ import re
 from typing import List, Dict
 
 from deprecated.sphinx import deprecated
+from decimal import getcontext, Decimal
 
 from pyincore import DataService
 from pyincore.globals import DAMAGE_PRECISION
@@ -26,6 +27,8 @@ class AnalysisUtil:
                     "\n" \
                     "Returns: \n\t" \
                     "$RETS$ "
+
+    getcontext().prec = DAMAGE_PRECISION
 
     @staticmethod
     def update_precision(num, precision: int = DAMAGE_PRECISION):
@@ -47,9 +50,25 @@ class AnalysisUtil:
         return updated_hazard_vals
 
     @staticmethod
+    def float_to_decimal(num: float):
+        return Decimal(str(num))
+
+    @staticmethod
+    def float_list_to_decimal(num_list: list):
+        return [Decimal(str(num)) for num in num_list]
+
+    @staticmethod
+    def float_dict_to_decimal(num_dict:list):
+        return {key: Decimal(str(num_dict[key])) for key in num_dict}
+
+    @staticmethod
     @deprecated(version="0.9.0", reason="Use calculate_damage_interval in fragilitycurveset class instead.")
     def calculate_damage_interval(damage):
         output = collections.OrderedDict()
+
+        # convert damage to decimal dictionary
+        damage = AnalysisUtil.float_dict_to_decimal(damage)
+
         if len(damage) == 4:
             output['ds-none'] = 1 - damage['ls-slight']
             output['ds-slight'] = damage['ls-slight'] - damage['ls-moderat']
@@ -271,7 +290,7 @@ class AnalysisUtil:
                 isOpt = ", " + "optional"
 
             args = args + dataset['id'] + "(str" + isOpt + ") : " + dataset['description'] + ". " \
-                + AnalysisUtil.get_custom_types_str(dataset['type']) + "\n\t"
+                   + AnalysisUtil.get_custom_types_str(dataset['type']) + "\n\t"
 
         for param in specs['input_parameters']:
             isOpt = ""
@@ -279,7 +298,7 @@ class AnalysisUtil:
                 isOpt = ", " + "optional"
 
             args = args + param['id'] + "(" \
-                + AnalysisUtil.get_type_str(param['type']) + isOpt + ") : " + param['description'] + "\n\t"
+                   + AnalysisUtil.get_type_str(param['type']) + isOpt + ") : " + param['description'] + "\n\t"
 
         for dataset in specs['output_datasets']:
             rets = rets + dataset['id'] + ": " \
