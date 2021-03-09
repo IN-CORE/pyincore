@@ -309,19 +309,19 @@ class FragilityCurveSet:
     @staticmethod
     def _3ls_to_4ds(damage):
         output = dict()
-        output['DS_0'] = 1 - Decimal(damage["LS_0"])
-        output['DS_1'] = Decimal(damage["LS_0"]) - Decimal(damage["LS_1"])
-        output['DS_2'] = Decimal(damage["LS_1"]) - Decimal(damage["LS_2"])
-        output['DS_3'] = Decimal(damage["LS_2"])
+        output['DS_0'] = 1 - Decimal(str(damage["LS_0"]))
+        output['DS_1'] = Decimal(str(damage["LS_0"])) - Decimal(str(damage["LS_1"]))
+        output['DS_2'] = Decimal(str(damage["LS_1"])) - Decimal(str(damage["LS_2"]))
+        output['DS_3'] = Decimal(str(damage["LS_2"]))
 
         return output
 
     @staticmethod
     def _1ls_to_4ds(damage):
         output = dict()
-        output['DS_0'] = 1 - Decimal(damage["LS_0"])
+        output['DS_0'] = 1 - Decimal(str(damage["LS_0"]))
         output['DS_1'] = 0.0
         output['DS_2'] = 0.0
-        output['DS_3'] = Decimal(damage["LS_0"])
+        output['DS_3'] = Decimal(str(damage["LS_0"]))
 
         return output
