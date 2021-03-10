@@ -124,8 +124,8 @@ class PopulationDislocationUtil:
         lb = df.loc[damage_state, 'lb']
 
         # Generate array of random values that follow beta distribution for damage state
-        np.random.seed(seed_i)
-        rploss = np.random.beta(alpha, beta, size) * (ub - lb) + lb
+        random_generator = np.random.RandomState(seed_i)
+        rploss = random_generator.beta(alpha, beta, size) * (ub - lb) + lb
 
         return rploss
 

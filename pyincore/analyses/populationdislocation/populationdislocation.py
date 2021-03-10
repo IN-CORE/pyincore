@@ -200,8 +200,8 @@ class PopulationDislocation(BaseAnalysis):
         inventory["prdis"] = total_prob_disl
 
         # Randomly assign dislocation based on probability of dislocation
-        np.random.seed(seed_i)
-        randomdis = np.random.uniform(0, 1, total_prob_disl.size)
+        random_generator = np.random.RandomState(seed_i)
+        randomdis = random_generator.uniform(0, 1, total_prob_disl.size)
 
         # Probability of dislocation, a binary variable based on the logistic probability of dislocation.
         warnings.filterwarnings("ignore", category=RuntimeWarning)
