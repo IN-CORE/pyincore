@@ -80,6 +80,43 @@ def run_with_base_class():
     # Run bridge damage analysis
     bridge_dmg.run_analysis()
 
+    ###################################################################
+    # test refactored
+    # New madrid earthquake using Atkinson Boore 1995
+    hazard_type = "earthquake"
+    hazard_id = "5b902cb273c3371e1236b36b"
+
+    # NBSR bridges
+    bridge_dataset_id = "5a284f2dc7d30d13bc082040"
+
+    # Refactored Default Bridge Fragility Mapping on incore-service
+    refactored_mapping_id = "60513c91618178207f5f5dce"
+
+    # Use hazard uncertainty for computing damage
+    use_hazard_uncertainty = False
+    # Use liquefaction (LIQ) column of bridges to modify fragility curve
+    use_liquefaction = False
+
+    # Create bridge damage
+    bridge_dmg = BridgeDamage(client)
+
+    # Load input datasets
+    bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
+
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    refactored_mapping_set = MappingSet(fragility_service.get_mapping(refactored_mapping_id))
+    bridge_dmg.set_input_dataset('dfr3_mapping_set', refactored_mapping_set)
+
+    # Set analysis parameters
+    bridge_dmg.set_parameter("result_name", "refactored_dfr3_bridge_result")
+    bridge_dmg.set_parameter("hazard_type", hazard_type)
+    bridge_dmg.set_parameter("hazard_id", hazard_id)
+    bridge_dmg.set_parameter("num_cpu", 4)
+
+    # Run bridge damage analysis
+    bridge_dmg.run_analysis()
+
 
 if __name__ == '__main__':
     run_with_base_class()

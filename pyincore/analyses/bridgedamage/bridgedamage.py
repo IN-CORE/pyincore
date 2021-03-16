@@ -191,8 +191,9 @@ class BridgeDamage(BaseAnalysis):
                     j += 1
 
                 bridge_args = adjusted_fragility_set.construct_expression_args_from_inventory(bridge)
-                dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
-                    hval_dict, **bridge_args)
+                # dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
+                #     hval_dict, **bridge_args)
+                dmg_probability = selected_fragility_set.calculate_limit_state_refactored(hval_dict, **bridge_args)
             else:
                 hazard_val = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
                 hazard_std_dev = 0.0
