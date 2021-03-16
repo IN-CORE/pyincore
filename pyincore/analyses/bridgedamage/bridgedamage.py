@@ -308,7 +308,14 @@ class BridgeDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'bridges',
                     'description': 'CSV file of bridge structural damage',
-                    'type': 'ergo:bridgeDamage'
+                    'type': 'ergo:bridgeDamageVer2'
+                },
+                {
+                    'id': 'metadata',
+                    'parent_type': 'bridges',
+                    'description': 'additional metadata in json file about applied hazard value and '
+                                   'fragility',
+                    'type': 'ergo:bridgeDamageVer2'
                 }
             ]
         }
