@@ -109,7 +109,7 @@ class FragilityCurveSet:
 
         return instance
 
-    @deprecated(version="0.9.0", reason="calculate_limit_state_w_conversion instead")
+    @deprecated(version="1.0.0", reason="use calculate_limit_state_w_conversion instead")
     def calculate_limit_state(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         """
             Computes limit state probabilities.
@@ -140,6 +140,62 @@ class FragilityCurveSet:
 
         return output
 
+    def calculate_limit_state_w_conversion(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
+        """
+            Computes limit state probabilities.
+            Args:
+                hazard: hazard value to compute probability for
+                period: period of the structure, if applicable
+                std_dev: standard deviation
+
+            Returns: limit state probabilities
+
+        """
+        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        limit_state = list(output.keys())
+        index = 0
+
+        if len(self.fragility_curves) <= 3:
+            for fragility_curve in self.fragility_curves:
+                probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
+                output[limit_state[index]] = probability
+                index += 1
+        else:
+            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
+
+        return output
+
+    @deprecated(version="1.0.0", reason="use calculate_limit_state_refactored_w_conversion instead")
+    def calculate_limit_state_refactored(self, hazard_values: dict = {}, **kwargs):
+        """
+                WIP computation of limit state probabilities accounting for custom expressions.
+                :param std_dev: standard deviation
+                :param hazard_values: dictionary with hazard values to compute probability
+
+                Returns: limit state probabilities
+                """
+
+        output = collections.OrderedDict()
+        index = 0
+
+        if len(self.fragility_curves) == 1:
+            limit_state = ['failure']
+        elif len(self.fragility_curves) == 3:
+            limit_state = ['immocc', 'lifesfty', 'collprev']
+        elif len(self.fragility_curves) == 4:
+            limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
+        else:
+            raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
+
+        for fragility_curve in self.fragility_curves:
+            probability = fragility_curve.calculate_limit_state_probability(hazard_values,
+                                                                            self.fragility_curve_parameters,
+                                                                            **kwargs)
+            output[limit_state[index]] = probability
+            index += 1
+
+        return output
+
     def calculate_limit_state_refactored_w_conversion(self, hazard_values: dict = {}, **kwargs):
         """
         WIP computation of limit state probabilities accounting for custom expressions.
@@ -165,7 +221,7 @@ class FragilityCurveSet:
 
         return output
 
-    @deprecated(version="0.9.0", reason="calculate_custom_limit_state_w_conversion instead")
+    @deprecated(version="1.0.0", reason="use calculate_custom_limit_state_w_conversion instead")
     def calculate_custom_limit_state(self, variables: dict):
         """
             Computes limit state probabilities.
@@ -190,31 +246,6 @@ class FragilityCurveSet:
             probability = fragility_curve.compute_custom_limit_state_probability(variables)
             output[limit_state[index]] = probability
             index += 1
-
-        return output
-
-    def calculate_limit_state_w_conversion(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
-        """
-            Computes limit state probabilities.
-            Args:
-                hazard: hazard value to compute probability for
-                period: period of the structure, if applicable
-                std_dev: standard deviation
-
-            Returns: limit state probabilities
-
-        """
-        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
-        limit_state = list(output.keys())
-        index = 0
-
-        if len(self.fragility_curves) <= 3:
-            for fragility_curve in self.fragility_curves:
-                probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
-                output[limit_state[index]] = probability
-                index += 1
-        else:
-            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
 
         return output
 
@@ -277,7 +308,7 @@ class FragilityCurveSet:
         for parameters in self.fragility_curve_parameters:
 
             if parameters['name'] == "age_group" and ('age_group' not in inventory_unit['properties'] or \
-                    inventory_unit['properties']['age_group'] == ""):
+                                                      inventory_unit['properties']['age_group'] == ""):
                 if inventory_unit['properties']['year_built'] is not None:
                     try:
                         yr_built = int(inventory_unit['properties']['year_built'])
@@ -299,7 +330,6 @@ class FragilityCurveSet:
             if parameters['name'] in inventory_unit['properties'] and \
                     inventory_unit['properties'][parameters['name']] is not None and \
                     inventory_unit['properties'][parameters['name']] != "":
-
                 kwargs_dict[parameters['name']] = inventory_unit['properties'][parameters['name']]
         return kwargs_dict
 
