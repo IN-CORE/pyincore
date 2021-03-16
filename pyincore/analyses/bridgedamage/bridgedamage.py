@@ -133,7 +133,8 @@ class BridgeDamage(BaseAnalysis):
             if bridge_id in fragility_set:
                 location = GeoUtil.get_location(b)
                 loc = str(location.y) + "," + str(location.x)
-                demands = AnalysisUtil.get_hazard_demand_types(b, fragility_set[bridge_id], hazard_type)
+
+                demands = fragility_set[bridge_id].demand_types
                 units = fragility_set[bridge_id].demand_units
                 value = {
                             "demands": demands,
