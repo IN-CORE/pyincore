@@ -306,10 +306,49 @@ class FragilityCurveSet:
     @staticmethod
     def _3ls_to_4ds(damage):
         output = collections.OrderedDict([("DS_0", 0.0), ("DS_1", 0.0), ("DS_2", 0.0), ("DS_3", 0.0)])
-        output['DS_0'] = 1 - damage["LS_0"]
-        output['DS_1'] = damage["LS_0"] - damage["LS_1"]
-        output['DS_2'] = damage["LS_1"] - damage["LS_2"]
-        output['DS_3'] = damage["LS_2"]
+        small_overlap = []
+        keys = list(damage)
+        for ls_index in range(len(damage)):
+            for tmp_index in range(ls_index+1, len(damage)):
+                if damage[keys[ls_index]] < damage[keys[tmp_index]]:
+                    # if previous limit state is less than the next, there's an overlap
+                    small_overlap.append(ls_index)
+                    break
+
+        if small_overlap:
+            limit_states = [damage["LS_0"], damage["LS_1"], damage["LS_2"]]
+            update_output = [0.0, 0.0, 0.0, 0.0]
+            for index in range(len(output)):
+                ds_index = index
+                # If the limit state is overlapped, find the next non-overlapping limit state
+                if index in small_overlap:
+                    for tmp_index in range(index+1, len(limit_states)):
+                        if tmp_index not in small_overlap:
+                            ds_index = tmp_index
+
+                if index == 0:
+                    # Compute DS_0
+                    update_output[index] = 1 - limit_states[ds_index]
+                elif index == 3:
+                    # Compute DS_3
+                    update_output[index] = limit_states[index - 1]
+                else:
+                    # If one of the limit state curves between the first and last are overlapped, they've been
+                    # eliminated and will be 0. If not, then compute the interval
+                    current_ls = index - 1
+                    if current_ls not in small_overlap:
+                        update_output[index] = limit_states[index - 1] - limit_states[ds_index]
+
+            output['DS_0'] = update_output[0]
+            output['DS_1'] = update_output[1]
+            output['DS_2'] = update_output[2]
+            output['DS_3'] = update_output[3]
+
+        else:
+            output['DS_0'] = 1 - damage["LS_0"]
+            output['DS_1'] = damage["LS_0"] - damage["LS_1"]
+            output['DS_2'] = damage["LS_1"] - damage["LS_2"]
+            output['DS_3'] = damage["LS_2"]
 
         return output
 

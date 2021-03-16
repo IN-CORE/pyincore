@@ -1,9 +1,25 @@
 import json
 import os
+import collections
 
 import pytest
 
 from pyincore import globals as pyglobals, FragilityCurveSet
+
+
+def test_fragility_set_small_overlap():
+    fragility_set = get_fragility_set("refactored_fragility_curve.json")
+
+    # Test Case 1 - single overlap
+    output = collections.OrderedDict([("LS_0", 0.9692754643), ("LS_1", 0.0001444974), ("LS_2", 0.0004277083)])
+    damage = fragility_set._3ls_to_4ds(output)
+    assert damage['DS_0'] == 0.0307245357 and damage['DS_1'] == 0.968847756 and damage['DS_2'] == 0.0 and \
+           damage['DS_3'] == 0.0004277083
+
+    # Test Case 1 - double overlap
+    output = collections.OrderedDict([("LS_0", 0.98), ("LS_1", 0.99), ("LS_2", 1.0)])
+    damage = fragility_set._3ls_to_4ds(output)
+    assert damage['DS_0'] == 0.0 and damage['DS_1'] == 0.0 and damage['DS_2'] == 0.0 and damage['DS_3'] == 1.0
 
 
 def get_fragility_set(fragility_dir: str):
