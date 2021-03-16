@@ -13,6 +13,7 @@ import copy
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
+from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
 
 
 class BridgeDamage(BaseAnalysis):
@@ -172,21 +173,37 @@ class BridgeDamage(BaseAnalysis):
             damage_result = dict()
             selected_fragility_set = fragility_set[bridge["id"]]
 
-            hazard_val = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
-            hazard_std_dev = 0.0
-            if use_hazard_uncertainty:
-                # TODO Get this from API once implemented
-                raise ValueError("Uncertainty Not Implemented!")
-
-            input_demand_type = hazard_vals[i]["demands"][0]
-            input_demand_units = hazard_vals[i]["units"][0]
-
             adjusted_fragility_set = copy.deepcopy(selected_fragility_set)
             if use_liquefaction and 'liq' in bridge['properties']:
                 for fragility in adjusted_fragility_set.fragility_curves:
                     fragility.adjust_fragility_for_liquefaction(bridge['properties']['liq'])
 
-            dmg_probability = adjusted_fragility_set.calculate_limit_state(hazard_val, std_dev=hazard_std_dev)
+            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
+                # Supports multiple demand types in same fragility
+                hazard_val = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
+                input_demand_type = hazard_vals[i]["demands"]
+                input_demand_units = hazard_vals[i]["units"]
+
+                hval_dict = dict()
+                j = 0
+                for d in hazard_vals[i]["demands"]:
+                    hval_dict[d] = hazard_vals[i]["hazardValues"][j]
+                    j += 1
+
+                bridge_args = adjusted_fragility_set.construct_expression_args_from_inventory(bridge)
+                dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
+                    hval_dict, **bridge_args)
+            else:
+                hazard_val = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
+                hazard_std_dev = 0.0
+                if use_hazard_uncertainty:
+                    # TODO Get this from API once implemented
+                    raise ValueError("Uncertainty Not Implemented!")
+
+                input_demand_type = hazard_vals[i]["demands"][0]
+                input_demand_units = hazard_vals[i]["units"][0]
+                dmg_probability = adjusted_fragility_set.calculate_limit_state(hazard_val, std_dev=hazard_std_dev)
+
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 
