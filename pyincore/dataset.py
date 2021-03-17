@@ -309,10 +309,10 @@ class Dataset:
             obj: Geopanda's GeoDataFrame.
 
         """
-
-        # read shapefile directly by Geopandas.read_file()
-        # It will preserve CRS information also
-        gdf = gpd.read_file(self.local_file_path)
+        inv = self.get_inventory_reader()
+        # Build the GeoDataFrame from Fiona's collection, sometimes raises
+        # UserWarning: Geometry column does not contain geometry.
+        gdf = gpd.GeoDataFrame.from_features([feature for feature in inv])
 
         return gdf
 
