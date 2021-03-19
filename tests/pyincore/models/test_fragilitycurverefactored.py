@@ -11,15 +11,16 @@ def test_fragility_set_small_overlap():
     fragility_set = get_fragility_set("refactored_fragility_curve.json")
 
     # Test Case 1 - single overlap
-    output = collections.OrderedDict([("LS_0", 0.9692754643), ("LS_1", 0.0001444974), ("LS_2", 0.0004277083)])
-    damage = fragility_set._3ls_to_4ds(output)
-    assert damage['DS_0'] == 0.0307245357 and damage['DS_1'] == 0.968847756 and damage['DS_2'] == 0.0 and \
-           damage['DS_3'] == 0.0004277083
+    limit_states = collections.OrderedDict([("LS_0", 0.9692754643), ("LS_1", 0.0001444974), ("LS_2", 0.0004277083)])
+    damage_states = fragility_set._3ls_to_4ds(limit_states)
+    assert damage_states['DS_0'] == 0.0307245357 and damage_states['DS_1'] == 0.968847756 and damage_states['DS_2'] == 0.0 and \
+           damage_states['DS_3'] == 0.0004277083
 
-    # Test Case 1 - double overlap
-    output = collections.OrderedDict([("LS_0", 0.98), ("LS_1", 0.99), ("LS_2", 1.0)])
-    damage = fragility_set._3ls_to_4ds(output)
-    assert damage['DS_0'] == 0.0 and damage['DS_1'] == 0.0 and damage['DS_2'] == 0.0 and damage['DS_3'] == 1.0
+    # Test Case 2 - double overlap
+    limit_states = collections.OrderedDict([("LS_0", 0.12), ("LS_1", 0.64), ("LS_2", 0.8)])
+    damage_states = fragility_set._3ls_to_4ds(limit_states)
+    assert damage_states['DS_0'] == 0.19999999999999996 and damage_states['DS_1'] == 0.0 and \
+           damage_states['DS_2'] == 0.0 and damage_states['DS_3'] == 0.8
 
 
 def get_fragility_set(fragility_dir: str):
