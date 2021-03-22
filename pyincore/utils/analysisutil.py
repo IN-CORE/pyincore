@@ -58,7 +58,7 @@ class AnalysisUtil:
         return [Decimal(str(num)) for num in num_list]
 
     @staticmethod
-    def float_dict_to_decimal(num_dict:list):
+    def float_dict_to_decimal(num_dict: dict):
         return {key: Decimal(str(num_dict[key])) for key in num_dict}
 
     @staticmethod
