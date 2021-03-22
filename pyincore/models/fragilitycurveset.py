@@ -345,6 +345,12 @@ class FragilityCurveSet:
             damage_states['DS_2'] = ds_overlap[2]
             damage_states['DS_3'] = ds_overlap[3]
 
+        else:
+            damage_states['DS_0'] = 1 - limit_states["LS_0"]
+            damage_states['DS_1'] = limit_states["LS_0"] - limit_states["LS_1"]
+            damage_states['DS_2'] = limit_states["LS_1"] - limit_states["LS_2"]
+            damage_states['DS_3'] = limit_states["LS_2"]
+
         return damage_states
 
     @staticmethod
