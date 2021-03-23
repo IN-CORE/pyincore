@@ -28,7 +28,6 @@ def pytest_sessionstart(session):
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
     client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
-    pytest.client = client
     pytest.datasvc = DataService(client)
     pytest.fragilitysvc = FragilityService(client)
     pytest.repairsvc = RepairService(client)
