@@ -8,7 +8,7 @@ import geopandas as gpd
 import json
 import pandas as pd
 
-from pyincore import IncoreClient, Dataset, FragilityService, MappingSet, DataService, AnalysisUtil
+from pyincore import Dataset, DataService
 
 
 class DataProcessUtil:
@@ -31,8 +31,7 @@ class DataProcessUtil:
         buildings = pd.DataFrame(gpd.read_file(bldg_inv.local_file_path))
         dmg_result = dmg_result_dataset.get_dataframe_from_csv()
         archtype_mapping_dataset = Dataset.from_data_service(archetype_mapping_id, DataService(client))
-        arch_mapping = pd.DataFrame(archtype_mapping_dataset.get_csv_reader())
-
+        arch_mapping = archtype_mapping_dataset.get_dataframe_from_csv()
         ret_json, mapped_df = DataProcessUtil.create_mapped_result(buildings, dmg_result, arch_mapping)
 
         return ret_json, mapped_df
@@ -103,7 +102,16 @@ class DataProcessUtil:
 
         """
         # TODO: Do not hardcode this and fetch them from the damage result columns, if it's possible
-        dmg_states = ['insignific', 'moderate', 'heavy', 'complete']
+        # check dmg_states in dmg_result columns or not
+        if all(column in dmg_result.columns for column in ['DS_0', 'DS_1', 'DS_2', 'DS_3']):
+            dmg_states = ['DS_0', 'DS_1', 'DS_2', 'DS_3']
+        elif all(column in dmg_result.columns for column in ['insignific', 'moderate', 'heavy', 'complete']):
+            dmg_states = ['insignific', 'moderate', 'heavy', 'complete']
+        elif all(column in dmg_result.columns for column in ["ds-none", "ds-slight", "ds-moderat", "ds-extensi",
+                                                             "ds-complet"]):
+            dmg_states = ["ds-none", "ds-slight", "ds-moderat", "ds-extensi", "ds-complet"]
+        else:
+            raise ValueError("Invalid damage state names. Cannot create mapped max damage state.")
 
         unique_categories = arch_mapping.groupby(by=['cluster', 'category'], sort=False).count().reset_index()
 
@@ -112,8 +120,7 @@ class DataProcessUtil:
         max_key = dmg_result[dmg_states].idxmax(axis=1)
         dmg_concat = pd.concat([guids, max_val, max_key], axis=1)
         dmg_concat.rename(columns={0: 'max_prob', 1: 'max_state'}, inplace=True)
-        dmg_merged = pd.merge(buildings, dmg_concat, on='guid')
-        [['guid', 'geometry', 'archetype', 'max_prob', 'max_state']]
+        dmg_merged = pd.merge(buildings, dmg_concat, on='guid')[['guid', 'geometry', 'archetype', 'max_prob', 'max_state']]
         mapped_df = pd.merge(dmg_merged, arch_mapping, on='archetype')
 
         # mapped.to_csv("bldDmgMaxDamageState.csv", columns=['guid', 'max_state'], index=False)
