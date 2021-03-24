@@ -2,7 +2,7 @@ import pytest
 import os
 import jwt
 
-from pyincore import IncoreClient
+from pyincore import IncoreClient, Dataset, DataService
 from pyincore.globals import INCORE_API_DEV_URL
 from pyincore.utils.dataprocessutil import DataProcessUtil as util
 
@@ -33,3 +33,23 @@ def test_get_mapped_result(client):
     assert "by_cluster" in ret_json and "category" in ret_json
 
     assert "archetype" in mapped_df._info_axis.values and "category" in mapped_df._info_axis.values
+
+
+def test_join_table_dataset_with_source_dataset(client):
+    building_damage_id = '5a296b53c7d30d4af5378cd5'
+    dataset = Dataset.from_data_service(building_damage_id, DataService(client))
+    joined_gdf = util.join_table_dataset_with_source_dataset(dataset, client)
+
+    # assert if the fields from each dataset exist
+    assert 'year_built' in joined_gdf.keys() and 'meandamage' in joined_gdf.keys()
+
+
+def test_join_datasets(client):
+    building_id = '5a284f0bc7d30d13bc081a28'
+    building_damage_id = '5a296b53c7d30d4af5378cd5'
+    bldg_dataset = Dataset.from_data_service(building_id, DataService(client))
+    bldg_dmg_dataset = Dataset.from_data_service(building_damage_id, DataService(client))
+    joined_gdf = util.join_datasets(bldg_dataset, bldg_dmg_dataset)
+
+    # assert if the fields from each dataset exist
+    assert 'year_built' in joined_gdf.keys() and 'meandamage' in joined_gdf.keys()
