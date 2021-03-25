@@ -110,7 +110,7 @@ class FragilityCurveSet:
 
         return instance
 
-    @deprecated(version="0.9.0", reason="calculate_limit_state_w_conversion instead")
+    @deprecated(version="1.0.0", reason="use calculate_limit_state_w_conversion instead")
     def calculate_limit_state(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         """
             Computes limit state probabilities.
@@ -141,6 +141,37 @@ class FragilityCurveSet:
 
         return output
 
+    @deprecated(version="1.0.0", reason="use calculate_limit_state_refactored_w_conversion instead")
+    def calculate_limit_state_refactored(self, hazard_values: dict = {}, **kwargs):
+        """
+                WIP computation of limit state probabilities accounting for custom expressions.
+                :param std_dev: standard deviation
+                :param hazard_values: dictionary with hazard values to compute probability
+
+                Returns: limit state probabilities
+                """
+
+        output = collections.OrderedDict()
+        index = 0
+
+        if len(self.fragility_curves) == 1:
+            limit_state = ['failure']
+        elif len(self.fragility_curves) == 3:
+            limit_state = ['immocc', 'lifesfty', 'collprev']
+        elif len(self.fragility_curves) == 4:
+            limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
+        else:
+            raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
+
+        for fragility_curve in self.fragility_curves:
+            probability = fragility_curve.calculate_limit_state_probability(hazard_values,
+                                                                            self.fragility_curve_parameters,
+                                                                            **kwargs)
+            output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
+            index += 1
+
+        return output
+
     def calculate_limit_state_refactored_w_conversion(self, hazard_values: dict = {}, **kwargs):
         """
         WIP computation of limit state probabilities accounting for custom expressions.
@@ -166,7 +197,7 @@ class FragilityCurveSet:
 
         return output
 
-    @deprecated(version="0.9.0", reason="calculate_custom_limit_state_w_conversion instead")
+    @deprecated(version="1.0.0", reason="use calculate_custom_limit_state_w_conversion instead")
     def calculate_custom_limit_state(self, variables: dict):
         """
             Computes limit state probabilities.

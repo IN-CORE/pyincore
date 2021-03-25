@@ -173,8 +173,18 @@ class EpfDamage(BaseAnalysis):
             selected_fragility_set = fragility_set[epf["id"]]
 
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
-                # TODO
-                pass
+                hazard_val = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
+                input_demand_types = hazard_vals[i]["demands"]
+                input_demand_units = hazard_vals[i]["units"]
+
+                hval_dict = dict()
+                j = 0
+                for d in hazard_vals[i]["demands"]:
+                    hval_dict[d] = hazard_vals[i]["hazardValues"][j]
+                    j += 1
+
+                epf_args = selected_fragility_set.construct_expression_args_from_inventory(epf)
+                limit_states = selected_fragility_set.calculate_limit_state_refactored(hval_dict, **epf_args)
             else:
                 hazard_val = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
                 # Sometimes the geotiffs give large negative values for out of bounds instead of 0
@@ -188,7 +198,8 @@ class EpfDamage(BaseAnalysis):
                 input_demand_types = hazard_vals[i]["demands"][0]
                 input_demand_units = hazard_vals[i]["units"][0]
                 limit_states = selected_fragility_set.calculate_limit_state(hazard_val, std_dev=std_dev)
-                dmg_interval = AnalysisUtil.calculate_damage_interval(limit_states)
+
+            dmg_interval = AnalysisUtil.calculate_damage_interval(limit_states)
 
             ds_result["guid"] = epf["properties"]["guid"]
             ds_result.update(limit_states)
@@ -251,7 +262,7 @@ class EpfDamage(BaseAnalysis):
                 # match id and add liqhaztype, liqhazval, liqprobability field as well as rewrite limit
                 # states and dmg_interval
                 for ds_result in ds_results:
-                    if ds_result['guid'] == epfs[liq_epf_id]['guid']:
+                    if ds_result['guid'] == liq_epf["properties"]['guid']:
                         if ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet'] in ds_result.keys():
                             limit_states = {"ls-slight": ds_result['ls-slight'],
                                             "ls-moderat": ds_result['ls-moderat'],
@@ -273,7 +284,7 @@ class EpfDamage(BaseAnalysis):
                         ds_result.update(liq_dmg_interval)
 
                 for damage_result in damage_results:
-                    if damage_result['guid'] == epfs[liq_epf_id]['guid']:
+                    if damage_result['guid'] == liq_epf["properties"]['guid']:
                         damage_result['liqhaztype'] = liq_input_demand_types
                         damage_result['liqhazval'] = liq_hazard_val
                         damage_result['liqprobability'] = liquefaction_prob
