@@ -137,7 +137,7 @@ class EpfDamage(BaseAnalysis):
         for epf in epfs:
             epf_id = epf["id"]
             if epf_id in fragility_set:
-                location = GeoUtil.get_location(epfs[epf_id])
+                location = GeoUtil.get_location(epf)
                 loc = str(location.y) + "," + str(location.x)
                 demands = fragility_set[epf_id].demand_types
                 units = fragility_set[epf_id].demand_units
@@ -219,7 +219,7 @@ class EpfDamage(BaseAnalysis):
             for epf in epfs:
                 epf_id = epf["id"]
                 if epf_id in liq_fragility_set:
-                    location = GeoUtil.get_location(epfs[epf_id])
+                    location = GeoUtil.get_location(epf)
                     liq_loc = str(location.y) + "," + str(location.x)
                     liq_demands = liq_fragility_set[epf_id].demand_types
                     liq_units = liq_fragility_set[epf_id].demand_units
@@ -379,7 +379,14 @@ class EpfDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'epfs',
-                    'type': 'incore:epfDamage'
+                    'type': 'incore:epfDamageVer2'
+                },
+                {
+                    'id': 'metadata',
+                    'parent_type': 'bridges',
+                    'description': 'additional metadata in json file about applied hazard value and '
+                                   'fragility',
+                    'type': 'incore:epfDamageVer2'
                 }
             ]
         }
