@@ -119,11 +119,12 @@ class HousingUnitAllocation(BaseAnalysis):
 
         """
         size_row, size_col = housing_unit_inventory.shape
-        np.random.seed(seed)
+        
+        random_generator = np.random.RandomState(seed)
         sorted_housing_unit0 = housing_unit_inventory.sort_values(by=["huid"])
 
         # Create Random merge order for housing unit inventory
-        random_order_housing_unit = np.random.uniform(0, 1, size_row)
+        random_order_housing_unit = random_generator.uniform(0, 1, size_row)
 
         sorted_housing_unit0["randomhu"] = random_order_housing_unit
 
@@ -189,9 +190,9 @@ class HousingUnitAllocation(BaseAnalysis):
         sort_critical_bld_0 = critical_bld_inv.sort_values(by=["addrptid"])
 
         seed_i2: int = seed_i + 1
-        np.random.seed(seed_i2)
+        random_generator = np.random.RandomState(seed_i2)
 
-        randomap = np.random.uniform(0, 1, size_row)
+        randomap = random_generator.uniform(0, 1, size_row)
         sort_critical_bld_0["randomap"] = randomap
         sort_critical_bld_1 = sort_critical_bld_0.sort_values(by=["blockid", "residential", "huestimate", "randomap"],
                                                               ascending=[True, False, True, True])

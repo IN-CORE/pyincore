@@ -17,6 +17,7 @@ from pyincore.models.standardfragilitycurve import StandardFragilityCurve
 from pyincore.models.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
 from pyincore.models.parametricfragilitycurve import ParametricFragilityCurve
 from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
+from pyincore.utils.analysisutil import AnalysisUtil
 
 
 class FragilityCurveSet:
@@ -135,33 +136,8 @@ class FragilityCurveSet:
 
         for fragility_curve in self.fragility_curves:
             probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
-            output[limit_state[index]] = probability
+            output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
             index += 1
-
-        return output
-
-    def calculate_limit_state_w_conversion(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
-        """
-            Computes limit state probabilities.
-            Args:
-                hazard: hazard value to compute probability for
-                period: period of the structure, if applicable
-                std_dev: standard deviation
-
-            Returns: limit state probabilities
-
-        """
-        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
-        limit_state = list(output.keys())
-        index = 0
-
-        if len(self.fragility_curves) <= 3:
-            for fragility_curve in self.fragility_curves:
-                probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
-                output[limit_state[index]] = probability
-                index += 1
-        else:
-            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
 
         return output
 
@@ -191,7 +167,7 @@ class FragilityCurveSet:
             probability = fragility_curve.calculate_limit_state_probability(hazard_values,
                                                                             self.fragility_curve_parameters,
                                                                             **kwargs)
-            output[limit_state[index]] = probability
+            output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
             index += 1
 
         return output
@@ -214,7 +190,7 @@ class FragilityCurveSet:
                 probability = fragility_curve.calculate_limit_state_probability(hazard_values,
                                                                                 self.fragility_curve_parameters,
                                                                                 **kwargs)
-                output[limit_state[index]] = probability
+                output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 3 limit states.")
@@ -244,8 +220,33 @@ class FragilityCurveSet:
 
         for fragility_curve in self.fragility_curves:
             probability = fragility_curve.compute_custom_limit_state_probability(variables)
-            output[limit_state[index]] = probability
+            output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
             index += 1
+
+        return output
+
+    def calculate_limit_state_w_conversion(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
+        """
+            Computes limit state probabilities.
+            Args:
+                hazard: hazard value to compute probability for
+                period: period of the structure, if applicable
+                std_dev: standard deviation
+
+            Returns: limit state probabilities
+
+        """
+        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        limit_state = list(output.keys())
+        index = 0
+
+        if len(self.fragility_curves) <= 3:
+            for fragility_curve in self.fragility_curves:
+                probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
+                output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
+                index += 1
+        else:
+            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
 
         return output
 
@@ -264,7 +265,7 @@ class FragilityCurveSet:
         if len(self.fragility_curves) <= 3:
             for fragility_curve in self.fragility_curves:
                 probability = fragility_curve.compute_custom_limit_state_probability(variables)
-                output[limit_state[index]] = probability
+                output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 3 limit states.")
@@ -334,21 +335,62 @@ class FragilityCurveSet:
         return kwargs_dict
 
     @staticmethod
-    def _3ls_to_4ds(damage):
-        output = collections.OrderedDict([("DS_0", 0.0), ("DS_1", 0.0), ("DS_2", 0.0), ("DS_3", 0.0)])
-        output['DS_0'] = 1 - damage["LS_0"]
-        output['DS_1'] = damage["LS_0"] - damage["LS_1"]
-        output['DS_2'] = damage["LS_1"] - damage["LS_2"]
-        output['DS_3'] = damage["LS_2"]
+    def _3ls_to_4ds(limit_states):
+        limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
+        damage_states = AnalysisUtil.float_dict_to_decimal({"DS_0": 0.0, "DS_1": 0.0, "DS_2": 0.0, "DS_3": 0.0})
+        small_overlap = []
+        keys = list(limit_states)
+        for ls_index in range(len(limit_states)):
+            for tmp_index in range(ls_index + 1, len(limit_states)):
+                if limit_states[keys[ls_index]] < limit_states[keys[tmp_index]]:
+                    # if previous limit state is less than the next, there's an overlap
+                    small_overlap.append(ls_index)
+                    break
 
-        return output
+        if small_overlap:
+            ls_overlap = [limit_states["LS_0"], limit_states["LS_1"], limit_states["LS_2"]]
+            ds_overlap = [0.0, 0.0, 0.0, 0.0]
+            for index in range(len(damage_states)):
+                ds_index = index
+                # If the limit state is overlapped, find the next non-overlapping limit state
+                if index in small_overlap:
+                    for tmp_index in range(index + 1, len(ls_overlap)):
+                        if tmp_index not in small_overlap:
+                            ds_index = tmp_index
+
+                if index == 0:
+                    # Compute DS_0
+                    ds_overlap[index] = 1 - ls_overlap[ds_index]
+                elif index == 3:
+                    # Compute DS_3
+                    ds_overlap[index] = ls_overlap[index - 1]
+                else:
+                    # If one of the limit state curves between the first and last are overlapped, they've been
+                    # eliminated and will be 0. If not, then compute the interval
+                    current_ls = index - 1
+                    if current_ls not in small_overlap:
+                        ds_overlap[index] = ls_overlap[index - 1] - ls_overlap[ds_index]
+
+            damage_states['DS_0'] = ds_overlap[0]
+            damage_states['DS_1'] = ds_overlap[1]
+            damage_states['DS_2'] = ds_overlap[2]
+            damage_states['DS_3'] = ds_overlap[3]
+
+        else:
+            damage_states['DS_0'] = 1 - limit_states["LS_0"]
+            damage_states['DS_1'] = limit_states["LS_0"] - limit_states["LS_1"]
+            damage_states['DS_2'] = limit_states["LS_1"] - limit_states["LS_2"]
+            damage_states['DS_3'] = limit_states["LS_2"]
+
+        return damage_states
 
     @staticmethod
-    def _1ls_to_4ds(damage):
-        output = collections.OrderedDict([("DS_0", 0.0), ("DS_1", 0.0), ("DS_2", 0.0), ("DS_3", 0.0)])
-        output['DS_0'] = 1 - damage["LS_0"]
-        output['DS_1'] = 0
-        output['DS_2'] = 0
-        output['DS_3'] = damage["LS_0"]
+    def _1ls_to_4ds(limit_states):
+        limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
+        damage_states = dict()
+        damage_states['DS_0'] = 1 - limit_states["LS_0"]
+        damage_states['DS_1'] = 0
+        damage_states['DS_2'] = 0
+        damage_states['DS_3'] = limit_states["LS_0"]
 
-        return output
+        return damage_states
