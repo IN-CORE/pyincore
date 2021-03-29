@@ -310,7 +310,8 @@ class FragilityCurveSet:
 
             if parameters['name'] == "age_group" and ('age_group' not in inventory_unit['properties'] or \
                                                       inventory_unit['properties']['age_group'] == ""):
-                if inventory_unit['properties']['year_built'] is not None:
+                if 'year_built' in inventory_unit['properties'].keys() and inventory_unit['properties']['year_built'] \
+                        is not None:
                     try:
                         yr_built = int(inventory_unit['properties']['year_built'])
                     except ValueError:

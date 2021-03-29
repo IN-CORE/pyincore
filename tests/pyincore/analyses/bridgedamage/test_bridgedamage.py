@@ -81,21 +81,15 @@ def run_with_base_class():
     bridge_dmg.run_analysis()
 
     ###################################################################
-    # test refactored
-    # New madrid earthquake using Atkinson Boore 1995
-    hazard_type = "earthquake"
-    hazard_id = "5b902cb273c3371e1236b36b"
+    # test Galveston Bridge Damage
+    hazard_type = "hurricane"
+    hazard_id = "5f11e50cc6491311a814584c"
 
-    # NBSR bridges
-    bridge_dataset_id = "5a284f2dc7d30d13bc082040"
+    # Galveston bridge
+    bridge_dataset_id = "6062058ac57ada48e48c31e3"
 
-    # Refactored Default Bridge Fragility Mapping on incore-service
-    refactored_mapping_id = "60513c91618178207f5f5dce"
-
-    # Use hazard uncertainty for computing damage
-    use_hazard_uncertainty = False
-    # Use liquefaction (LIQ) column of bridges to modify fragility curve
-    use_liquefaction = False
+    # Galveston hurricane bridge mapping
+    refactored_mapping_id = "6062254b618178207f66226c"
 
     # Create bridge damage
     bridge_dmg = BridgeDamage(client)
@@ -109,7 +103,8 @@ def run_with_base_class():
     bridge_dmg.set_input_dataset('dfr3_mapping_set', refactored_mapping_set)
 
     # Set analysis parameters
-    bridge_dmg.set_parameter("result_name", "refactored_dfr3_bridge_result")
+    bridge_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
+    bridge_dmg.set_parameter("result_name", "galveston_bridge")
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("num_cpu", 4)

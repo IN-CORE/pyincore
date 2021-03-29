@@ -192,6 +192,9 @@ class BridgeDamage(BaseAnalysis):
 
                 bridge_args = adjusted_fragility_set.construct_expression_args_from_inventory(bridge)
                 dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict, **bridge_args)
+                dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
+                                                                                 hazard_type=hazard_type,
+                                                                                 inventory_type="bridge")
             else:
                 hazard_val = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
                 hazard_std_dev = 0.0
@@ -202,11 +205,10 @@ class BridgeDamage(BaseAnalysis):
                 input_demand_types = hazard_vals[i]["demands"][0]
                 input_demand_units = hazard_vals[i]["units"][0]
                 dmg_probability = adjusted_fragility_set.calculate_limit_state(hazard_val, std_dev=hazard_std_dev)
+                dmg_intervals = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
-
-            dmg_intervals = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
             ds_result['guid'] = bridge['properties']['guid']
             ds_result.update(dmg_probability)
@@ -314,7 +316,7 @@ class BridgeDamage(BaseAnalysis):
                     'id': 'bridges',
                     'required': True,
                     'description': 'Bridge Inventory',
-                    'type': ['ergo:bridges'],
+                    'type': ['ergo:bridges', 'ergo:bridgesVer2'],
                 },
                 {
                     'id': 'dfr3_mapping_set',
