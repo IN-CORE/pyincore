@@ -254,7 +254,7 @@ class TransportationRecovery(BaseAnalysis):
                     'id': 'bridges',
                     'required': True,
                     'description': 'bridges',
-                    'type': ['ergo:bridges'],
+                    'type': ['ergo:bridges', 'ergo:bridgesVer2'],
                 },
                 {
                     'id': 'bridge_damage_value',

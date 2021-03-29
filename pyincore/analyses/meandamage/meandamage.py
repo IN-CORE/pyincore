@@ -58,6 +58,7 @@ class MeanDamage(BaseAnalysis):
                              'ergo:buildingDamageVer5',
                              'ergo:nsBuildingInventoryDamage',
                              'ergo:bridgeDamage',
+                             'ergo:bridgeDamageVer2',
                              'ergo:waterFacilityDamageVer4',
                              'ergo:roadDamage',
                              'incore:epfDamage',
@@ -155,7 +156,8 @@ class MeanDamage(BaseAnalysis):
         """
         damage_interval_keys = self.get_parameter("damage_interval_keys")
 
-        if self.get_input_dataset("damage").data_type == "ergo:bridgeDamage":
+        if self.get_input_dataset("damage").data_type == "ergo:bridgeDamage" or self.get_input_dataset(
+                "damage").data_type == "ergo:bridgeDamageVer2":
             is_bridge = True
         else:
             is_bridge = False
