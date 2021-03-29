@@ -181,7 +181,7 @@ class BridgeDamage(BaseAnalysis):
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
                 # Supports multiple demand types in same fragility
                 hazard_val = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
-                input_demand_type = hazard_vals[i]["demands"]
+                input_demand_types = hazard_vals[i]["demands"]
                 input_demand_units = hazard_vals[i]["units"]
 
                 hval_dict = dict()
@@ -191,9 +191,7 @@ class BridgeDamage(BaseAnalysis):
                     j += 1
 
                 bridge_args = adjusted_fragility_set.construct_expression_args_from_inventory(bridge)
-                # dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
-                #     hval_dict, **bridge_args)
-                dmg_probability = selected_fragility_set.calculate_limit_state_refactored(hval_dict, **bridge_args)
+                dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict, **bridge_args)
             else:
                 hazard_val = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
                 hazard_std_dev = 0.0
@@ -201,7 +199,7 @@ class BridgeDamage(BaseAnalysis):
                     # TODO Get this from API once implemented
                     raise ValueError("Uncertainty Not Implemented!")
 
-                input_demand_type = hazard_vals[i]["demands"][0]
+                input_demand_types = hazard_vals[i]["demands"][0]
                 input_demand_units = hazard_vals[i]["units"][0]
                 dmg_probability = adjusted_fragility_set.calculate_limit_state(hazard_val, std_dev=hazard_std_dev)
 
@@ -214,10 +212,11 @@ class BridgeDamage(BaseAnalysis):
             ds_result.update(dmg_probability)
             ds_result.update(dmg_intervals)
 
+            damage_result['guid'] = bridge['properties']['guid']
             damage_result['fragility_id'] = selected_fragility_set.id
             damage_result["retrofit"] = retrofit_type
             damage_result["retrocost"] = retrofit_cost
-            damage_result["demandtype"] = input_demand_type
+            damage_result["demandtypes"] = input_demand_types
             damage_result["demandunits"] = input_demand_units
             damage_result["hazardtype"] = hazard_type
             damage_result["hazardval"] = hazard_val
@@ -241,13 +240,15 @@ class BridgeDamage(BaseAnalysis):
             damage_result = dict()
 
             ds_result['guid'] = bridge['properties']['guid']
+
             damage_result['guid'] = bridge['properties']['guid']
             damage_result["retrofit"] = None
             damage_result["retrocost"] = None
-            damage_result["demandtype"] = None
+            damage_result["demandtypes"] = None
             damage_result['demandunits'] = None
             damage_result["hazardtype"] = None
             damage_result['hazardval'] = None
+            damage_result['spans'] = None
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)
