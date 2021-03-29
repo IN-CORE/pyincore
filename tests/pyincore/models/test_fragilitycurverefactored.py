@@ -4,7 +4,8 @@ import collections
 
 import pytest
 
-from pyincore import globals as pyglobals, FragilityCurveSet
+from pyincore import globals as pyglobals, FragilityCurveSet, AnalysisUtil
+import numpy as np
 
 
 def test_fragility_set_small_overlap():
@@ -12,15 +13,21 @@ def test_fragility_set_small_overlap():
 
     # Test Case 1 - single overlap
     limit_states = collections.OrderedDict([("LS_0", 0.9692754643), ("LS_1", 0.0001444974), ("LS_2", 0.0004277083)])
+    limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
     damage_states = fragility_set._3ls_to_4ds(limit_states)
-    assert damage_states['DS_0'] == 0.0307245357 and damage_states['DS_1'] == 0.968847756 and damage_states['DS_2'] == 0.0 and \
-           damage_states['DS_3'] == 0.0004277083
+    assert damage_states['DS_0'] == AnalysisUtil.float_to_decimal(0.0307245357) and \
+           damage_states['DS_1'] == AnalysisUtil.float_to_decimal(0.968847756) and \
+           damage_states['DS_2'] == AnalysisUtil.float_to_decimal(0.0) and \
+           damage_states['DS_3'] == AnalysisUtil.float_to_decimal(0.0004277083)
 
     # Test Case 2 - double overlap
     limit_states = collections.OrderedDict([("LS_0", 0.12), ("LS_1", 0.64), ("LS_2", 0.8)])
+    limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
     damage_states = fragility_set._3ls_to_4ds(limit_states)
-    assert damage_states['DS_0'] == 0.19999999999999996 and damage_states['DS_1'] == 0.0 and \
-           damage_states['DS_2'] == 0.0 and damage_states['DS_3'] == 0.8
+    assert damage_states['DS_0'] == AnalysisUtil.float_to_decimal(0.2) and \
+           damage_states['DS_1'] == AnalysisUtil.float_to_decimal(0.0) and \
+           damage_states['DS_2'] == AnalysisUtil.float_to_decimal(0.0) and \
+           damage_states['DS_3'] == AnalysisUtil.float_to_decimal(0.8)
 
 
 def get_fragility_set(fragility_dir: str):
@@ -30,21 +37,30 @@ def get_fragility_set(fragility_dir: str):
     return fragility_set
 
 
+def get_remote_fragility_set(fragility_id: str):
+    dfr3svc = pytest.fragilitysvc
+    fragility_set = FragilityCurveSet(dfr3svc.get_dfr3_set(fragility_id))
+    return fragility_set
+
+
 def test_create_fragility_set():
     fragility_set = get_fragility_set("refactored_fragility_curve.json")
     assert fragility_set.id == "5f6ccf67de7b566bb71b202d" and len(fragility_set.fragility_curves) != 0
 
 
-@pytest.mark.parametrize("hazard_values,expected", [
-    ({}, 0.2619967240482869),
-    ({"surgeLevel": 6, "waveHeight": 4}, 1.0),
-    ({"waveHeight": 4}, 1.0),
-    ({"surgeLevel": 6}, 0.9999999950124077),
+@pytest.mark.parametrize("fragility_set,hazard_values,args,expected", [
+    (get_fragility_set("refactored_fragility_curve.json"), {}, {}, 0.2619967240482869),
+    (get_fragility_set("refactored_fragility_curve.json"), {"surgeLevel": 6, "waveHeight": 4}, {}, 1.0),
+    (get_fragility_set("refactored_fragility_curve.json"), {"waveHeight": 4}, {}, 1.0),
+    (get_fragility_set("refactored_fragility_curve.json"), {"surgeLevel": 6}, {}, 0.9999999950124077),
+    (get_remote_fragility_set("606221fe618178207f6608a1"),
+     {"waveHeight": 1.1111, "surgeLevel": 3},
+     {"clearance": 4, "span_mass": 12, "g_elev": 0.2},
+     0.142618908)
 ])
-def test_calculate_limit_state_probability(hazard_values, expected):
-    fragility_set = get_fragility_set("refactored_fragility_curve.json")
-    result = fragility_set.calculate_limit_state_refactored_w_conversion(hazard_values)
-    assert result["LS_0"] == expected
+def test_calculate_limit_state_probability(fragility_set, hazard_values, args, expected):
+    result = fragility_set.calculate_limit_state_refactored_w_conversion(hazard_values, **args)
+    assert np.isclose(result["LS_0"], expected)
 
 
 @pytest.mark.parametrize("curve, hazard_val, refactored_curve, hazard_val_refactored, num_stories", [

@@ -104,7 +104,7 @@ def run_with_base_class():
 
     # Set analysis parameters
     bridge_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
-    bridge_dmg.set_parameter("result_name", "galveston_bridge")
+    bridge_dmg.set_parameter("result_name", "galveston_bridge_dmg_result")
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("num_cpu", 4)
