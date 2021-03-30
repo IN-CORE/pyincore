@@ -8,18 +8,8 @@ from pyincore.utils.dataprocessutil import DataProcessUtil as util
 
 
 @pytest.fixture
-def client(monkeypatch):
-    try:
-        with open(os.path.join(os.path.dirname(__file__), ".incorepw"), 'r') as f:
-            cred = f.read().splitlines()
-    except EnvironmentError:
-        assert False
-    credentials = jwt.decode(cred[0], cred[1])
-    monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
-    monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient(service_url=INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
-
-    return client
+def client():
+    return pytest.client
 
 
 def test_get_mapped_result(client):
