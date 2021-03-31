@@ -1,10 +1,8 @@
 import pytest
-import os
-import jwt
 
-from pyincore import IncoreClient, Dataset, DataService
-from pyincore.globals import INCORE_API_DEV_URL
+from pyincore import Dataset, DataService
 from pyincore.utils.datasetutil import DatasetUtil as util
+
 
 @pytest.fixture
 def client():
