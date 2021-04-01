@@ -164,37 +164,3 @@ class DataProcessUtil:
         dmg_concat.rename(columns={0: 'max_prob', 1: 'max_state'}, inplace=True)
 
         return dmg_concat
-
-
-if __name__ == "__main__":
-    from pyincore import IncoreClient
-    from pyincore.globals import INCORE_API_DEV_URL
-
-    client = IncoreClient(INCORE_API_DEV_URL)
-
-    # get maximum damage state
-    bldg_dmg_dataset_id = "602d96e4b1db9c28aeeebdce"  # legacy DS_name
-    dmg_result_dataset = Dataset.from_data_service(bldg_dmg_dataset_id, DataService(client))
-    dmg_result = dmg_result_dataset.get_dataframe_from_csv()
-    max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
-    max_state_df.to_csv("bldgMaxDamageState.csv", columns=['guid', 'max_state'], index=False)
-
-    # map and group any table
-    # group building damage output
-    bldg_dataset_id = "5f9091df3e86721ed82f701d"
-    bldg_inv = Dataset.from_data_service(bldg_dataset_id, DataService(client))
-    inventory = pd.DataFrame(gpd.read_file(bldg_inv.local_file_path))
-
-    archetype_mapping_id = "5fca915fb34b193f7a44059b"
-    archtype_mapping_dataset = Dataset.from_data_service(archetype_mapping_id, DataService(client))
-    arch_mapping = archtype_mapping_dataset.get_dataframe_from_csv()
-
-    ret_json = DataProcessUtil.create_mapped_result(inventory, max_state_df, arch_mapping,
-                                                    groupby_col_name="max_state")
-    with open("bldgCluster.json", "w") as f:
-        json.dump(ret_json, f, indent=2)
-
-    # group building functionality output
-    bldg_func_df = pd.read_csv()
-    ret_json = DataProcessUtil.create_mapped_result(inventory, max_state_df, arch_mapping,
-                                                    groupby_col_name="max_state")
