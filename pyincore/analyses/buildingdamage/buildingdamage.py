@@ -192,8 +192,8 @@ class BuildingDamage(BaseAnalysis):
             ds_result['guid'] = b['properties']['guid']
             damage_result['guid'] = b['properties']['guid']
 
-            ds_result.update(AnalysisUtil.update_precision_of_dicts(dmg_probability))
-            ds_result.update(AnalysisUtil.update_precision_of_dicts(dmg_interval))
+            ds_result.update(dmg_probability)
+            ds_result.update(dmg_interval)
 
             damage_result['fragility_id'] = selected_fragility_set.id
             damage_result['demandtype'] = b_demands
