@@ -14,12 +14,12 @@ def test_get_mapped_result(client):
     bldg_dmg_dataset_id = "5f9868c00ace240b22a7f2a5"
     archetype_id = "5fca915fb34b193f7a44059b"
 
-    ret_json, mapped_df = util.get_mapped_result_from_dataset_id(
+    ret_json, max_state_df = util.get_mapped_result_from_dataset_id(
         client, bldg_dataset_id, bldg_dmg_dataset_id, archetype_id)
 
-    assert "by_cluster" in ret_json and "category" in ret_json
+    assert "by_cluster" in ret_json.keys() and "by_category" in ret_json.keys()
 
-    assert "archetype" in mapped_df._info_axis.values and "category" in mapped_df._info_axis.values
+    assert "max_state" in max_state_df._info_axis.values
 
 
 def test_get_mapped_result_from_analysis(client):
@@ -31,9 +31,9 @@ def test_get_mapped_result_from_analysis(client):
 
     archetype_id = "5fca915fb34b193f7a44059b"
 
-    ret_json, mapped_df = util.get_mapped_result_from_analysis(
+    ret_json, max_state_df = util.get_mapped_result_from_analysis(
         client, bldg_dataset_id, dmg_result_dataset, archetype_id)
 
-    assert "by_cluster" in ret_json and "category" in ret_json
+    assert "by_cluster" in ret_json.keys() and "by_category" in ret_json.keys()
 
-    assert "archetype" in mapped_df._info_axis.values and "category" in mapped_df._info_axis.values
+    assert "max_state" in max_state_df._info_axis.values
