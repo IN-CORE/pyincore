@@ -110,7 +110,7 @@ class FragilityCurveSet:
 
         return instance
 
-    @deprecated(version="1.0.0", reason="use calculate_limit_state_w_conversion instead")
+    @deprecated(version="0.9.0", reason="use calculate_limit_state_w_conversion instead")
     def calculate_limit_state(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         """
             Computes limit state probabilities.
@@ -141,7 +141,7 @@ class FragilityCurveSet:
 
         return output
 
-    @deprecated(version="1.0.0", reason="use calculate_limit_state_refactored_w_conversion instead")
+    @deprecated(version="0.9.0", reason="use calculate_limit_state_refactored_w_conversion instead")
     def calculate_limit_state_refactored(self, hazard_values: dict = {}, **kwargs):
         """
                 WIP computation of limit state probabilities accounting for custom expressions.
@@ -197,7 +197,7 @@ class FragilityCurveSet:
 
         return output
 
-    @deprecated(version="1.0.0", reason="use calculate_custom_limit_state_w_conversion instead")
+    @deprecated(version="0.9.0", reason="use calculate_custom_limit_state_w_conversion instead")
     def calculate_custom_limit_state(self, variables: dict):
         """
             Computes limit state probabilities.
