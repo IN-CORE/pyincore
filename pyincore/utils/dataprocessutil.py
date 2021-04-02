@@ -14,7 +14,8 @@ from pyincore import Dataset, DataService
 class DataProcessUtil:
 
     @staticmethod
-    def get_mapped_result_from_analysis(client, inventory_id: str, dmg_result_dataset, archetype_mapping_id: str,
+    def get_mapped_result_from_analysis(client, inventory_id: str, dmg_result_dataset,
+                                        bldg_func_dataset, archetype_mapping_id: str,
                                         groupby_col_name: str = "max_state"):
         """
 
@@ -22,25 +23,36 @@ class DataProcessUtil:
             client: Service client with authentication info
             inventory_id: Inventory dataset id
             dmg_result_dataset: Incore dataset for damage result
+            bldg_func_dataset: Incore dataset for building func dataset
             archetype_mapping_id: Mapping id dataset for archetype
 
         Returns:
-            ret_json: JSON of the results ordered by cluster and category. Also creates a csv file with max damage state
+            dmg_ret_json: JSON of the damage state results ordered by cluster and category. Also creates a csv file
+            with max damage state
+            func_ret_json: JSON of the building functionality results ordered by cluster and category. Also creates a
+            csv file with max damage state
             mapped_df: Dataframe of max damage state
 
         """
         bldg_inv = Dataset.from_data_service(inventory_id, DataService(client))
         inventory = pd.DataFrame(gpd.read_file(bldg_inv.local_file_path))
+
         dmg_result = dmg_result_dataset.get_dataframe_from_csv()
+
+        bldg_func_df = bldg_func_dataset.get_dataframe_from_csv()
+        bldg_func_df.rename(columns={'building_guid': 'guid'}, inplace=True)
+
         arch_mapping = Dataset.from_data_service(archetype_mapping_id, DataService(client))
 
         max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
         ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping, groupby_col_name)
+        func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping)
 
-        return ret_json, max_state_df
+        return ret_json, func_ret_json, max_state_df
 
     @staticmethod
-    def get_mapped_result_from_dataset_id(client, inventory_id: str, dmg_result_id: str, archetype_mapping_id: str,
+    def get_mapped_result_from_dataset_id(client, inventory_id: str, dmg_result_id: str, bldg_func_id,
+                                          archetype_mapping_id: str,
                                           groupby_col_name: str = "max_state"):
         """
 
@@ -48,28 +60,42 @@ class DataProcessUtil:
             client: Service client with authentication info
             inventory_id: Inventory dataset id
             dmg_result_id: Damage result dataset id
+            bldg_func_id: Incore dataset for building func id
             archetype_mapping_id: Mapping id dataset for archetype
             groupby_col_name: column name to group by, default to max_state
 
         Returns:
-            ret_json: JSON of the results ordered by cluster and category. Also creates a csv file with max damage state
+            dmg_ret_json: JSON of the damage state results ordered by cluster and category. Also creates a csv file
+            with max damage state
+            func_ret_json: JSON of the building functionality results ordered by cluster and category. Also creates a
+            csv file with max damage state
             max_state_df: Dataframe of max damage state
 
         """
         bldg_inv = Dataset.from_data_service(inventory_id, DataService(client))
         inventory = pd.DataFrame(gpd.read_file(bldg_inv.local_file_path))
+
         dmg_result_dataset = Dataset.from_data_service(dmg_result_id, DataService(client))
         dmg_result = dmg_result_dataset.get_dataframe_from_csv()
+
+        bldg_func_dataset = Dataset.from_data_service(bldg_func_id, DataService(client))
+        bldg_func_df = bldg_func_dataset.get_dataframe_from_csv()
+        bldg_func_df.rename(columns={'building_guid': 'guid'}, inplace=True)
+
         archtype_mapping_dataset = Dataset.from_data_service(archetype_mapping_id, DataService(client))
         arch_mapping = archtype_mapping_dataset.get_dataframe_from_csv()
 
         max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
-        ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping, groupby_col_name)
+        dmg_ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping,
+                                                                groupby_col_name)
+        func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping)
 
-        return ret_json, max_state_df
+        return dmg_ret_json, func_ret_json, max_state_df
 
     @staticmethod
-    def get_mapped_result_from_path(inventory_path: str, dmg_result_path: str, archetype_mapping_path: str,
+    def get_mapped_result_from_path(inventory_path: str, dmg_result_path: str,
+                                    func_result_path: str,
+                                    archetype_mapping_path: str,
                                     groupby_col_name: str):
         """
 
@@ -77,22 +103,31 @@ class DataProcessUtil:
             inventory_path: Path to the zip file containing the inventory
                     example: /Users/myuser/5f9091df3e86721ed82f701d.zip
             dmg_result_path: Path to the damage result output file
+            func_result_path: Path to the bldg functionality result output file
             archetype_mapping_path: Path to the arechetype mappings
             groupby_col_name: column name to group by, default to max_state
 
         Returns:
-            ret_json: JSON of the results ordered by cluster and category. Also creates a csv file with max damage state
-            max_state_df: Dataframe of max damage state
+            dmg_ret_json: JSON of the damage state results ordered by cluster and category. Also creates a csv file
+            with max damage state
+            func_ret_json: JSON of the building functionality results ordered by cluster and category. Also creates a
+            csv file with max damage state
+            mapped_df: Dataframe of max damage state
 
         """
         inventory = pd.DataFrame(gpd.read_file("zip://" + inventory_path))
         dmg_result = pd.read_csv(dmg_result_path)
+        bldg_func_df = pd.read_csv(func_result_path)
+        bldg_func_df.rename(columns={'building_guid': 'guid'}, inplace=True)
         arch_mapping = pd.read_csv(archetype_mapping_path)
 
         max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
-        ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping, groupby_col_name)
+        dmg_ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping,
+                                                                groupby_col_name)
 
-        return ret_json, max_state_df
+        func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping)
+
+        return dmg_ret_json, func_ret_json, max_state_df
 
     @staticmethod
     def create_mapped_dmg_result(inventory, dmg_result, arch_mapping, groupby_col_name="max_state"):
@@ -160,7 +195,7 @@ class DataProcessUtil:
 
         # group by cluster
         result_by_cluster = mapped_df.groupby(by=['cluster'], sort=False, as_index=False).agg({'guid': 'count',
-                                                                                                'probability': 'mean'})
+                                                                                               'probability': 'mean'})
         result_by_cluster.rename(columns={'guid': 'tot_count', 'probability': 'percent_Functional'}, inplace=True)
         result_by_cluster["percent_Non-Functional"] = 1 - result_by_cluster["percent_Functional"]
         result_by_cluster["num_Functional"] = (result_by_cluster["tot_count"] * result_by_cluster[
@@ -177,13 +212,13 @@ class DataProcessUtil:
 
         # group by category
         result_by_category = mapped_df.groupby(by=['category'], sort=False, as_index=False).agg({'guid': 'count',
-                                                                                               'probability': 'mean'})
+                                                                                                 'probability': 'mean'})
         result_by_category.rename(columns={'guid': 'tot_count', 'probability': 'percent_Functional'}, inplace=True)
         result_by_category["percent_Non-Functional"] = 1 - result_by_category["percent_Functional"]
         result_by_category["num_Functional"] = (
-                    result_by_category["tot_count"] * result_by_category["percent_Functional"]).round(0)
+                result_by_category["tot_count"] * result_by_category["percent_Functional"]).round(0)
         result_by_category["num_Non-Functional"] = (
-                    result_by_category["tot_count"] * result_by_category["percent_Non-Functional"]).round(0)
+                result_by_category["tot_count"] * result_by_category["percent_Non-Functional"]).round(0)
         result_by_category = result_by_category.drop('tot_count', 1)
         result_by_category = pd.merge(unique_categories, result_by_category, how='left', on=['category'])
         # replace NaN
@@ -259,7 +294,7 @@ if __name__ == "__main__":
     arch_mapping = archtype_mapping_dataset.get_dataframe_from_csv()
 
     ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, bldg_max_state_df, arch_mapping,
-                                                    groupby_col_name="max_state")
+                                                        groupby_col_name="max_state")
     with open("bldgDmgCluster.json", "w") as f:
         json.dump(ret_json, f, indent=2)
 
