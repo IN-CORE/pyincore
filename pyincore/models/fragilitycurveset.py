@@ -283,6 +283,7 @@ class FragilityCurveSet:
 
         """
         # default to 3 limit states -- > 4 damage states
+        # TODO: in the future set default based on different inventory types
         output = FragilityCurveSet._3ls_to_4ds(damage)
 
         if hazard_type == "earthquake":
@@ -299,6 +300,11 @@ class FragilityCurveSet:
             if inventory_type == "building":
                 if len(self.fragility_curves) == 1:
                     output = FragilityCurveSet._1ls_to_4ds(damage)
+            elif inventory_type == "bridge":
+                if len(self.fragility_curves) == 1:
+                    output = FragilityCurveSet._1ls_to_5ds(damage)
+                elif len(self.fragility_curves) == 4:
+                    output = FragilityCurveSet._4ls_to_5ds(damage)
         else:
             pass
 
@@ -339,38 +345,11 @@ class FragilityCurveSet:
     def _3ls_to_4ds(limit_states):
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
         damage_states = AnalysisUtil.float_dict_to_decimal({"DS_0": 0.0, "DS_1": 0.0, "DS_2": 0.0, "DS_3": 0.0})
-        small_overlap = []
-        keys = list(limit_states)
-        for ls_index in range(len(limit_states)):
-            for tmp_index in range(ls_index + 1, len(limit_states)):
-                if limit_states[keys[ls_index]] < limit_states[keys[tmp_index]]:
-                    # if previous limit state is less than the next, there's an overlap
-                    small_overlap.append(ls_index)
-                    break
+
+        small_overlap = FragilityCurveSet.is_there_small_overlap(limit_states)
 
         if small_overlap:
-            ls_overlap = [limit_states["LS_0"], limit_states["LS_1"], limit_states["LS_2"]]
-            ds_overlap = [0.0, 0.0, 0.0, 0.0]
-            for index in range(len(damage_states)):
-                ds_index = index
-                # If the limit state is overlapped, find the next non-overlapping limit state
-                if index in small_overlap:
-                    for tmp_index in range(index + 1, len(ls_overlap)):
-                        if tmp_index not in small_overlap:
-                            ds_index = tmp_index
-
-                if index == 0:
-                    # Compute DS_0
-                    ds_overlap[index] = 1 - ls_overlap[ds_index]
-                elif index == 3:
-                    # Compute DS_3
-                    ds_overlap[index] = ls_overlap[index - 1]
-                else:
-                    # If one of the limit state curves between the first and last are overlapped, they've been
-                    # eliminated and will be 0. If not, then compute the interval
-                    current_ls = index - 1
-                    if current_ls not in small_overlap:
-                        ds_overlap[index] = ls_overlap[index - 1] - ls_overlap[ds_index]
+            ds_overlap = FragilityCurveSet.adjust_for_small_overlap(small_overlap, limit_states, damage_states)
 
             damage_states['DS_0'] = ds_overlap[0]
             damage_states['DS_1'] = ds_overlap[1]
@@ -386,6 +365,32 @@ class FragilityCurveSet:
         return damage_states
 
     @staticmethod
+    def _4ls_to_5ds(limit_states):
+        limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
+        damage_states = AnalysisUtil.float_dict_to_decimal({"DS_0": 0.0, "DS_1": 0.0, "DS_2": 0.0, "DS_3": 0.0,
+                                                            "DS_4": 0.0})
+
+        small_overlap = FragilityCurveSet.is_there_small_overlap(limit_states)
+
+        if small_overlap:
+            ds_overlap = FragilityCurveSet.adjust_for_small_overlap(small_overlap, limit_states, damage_states)
+
+            damage_states['DS_0'] = ds_overlap[0]
+            damage_states['DS_1'] = ds_overlap[1]
+            damage_states['DS_2'] = ds_overlap[2]
+            damage_states['DS_3'] = ds_overlap[3]
+            damage_states['DS_4'] = ds_overlap[4]
+
+        else:
+            damage_states['DS_0'] = 1 - limit_states["LS_0"]
+            damage_states['DS_1'] = limit_states["LS_0"] - limit_states["LS_1"]
+            damage_states['DS_2'] = limit_states["LS_1"] - limit_states["LS_2"]
+            damage_states['DS_3'] = limit_states["LS_2"]
+            damage_states['DS_4'] = limit_states["LS_3"]
+
+        return damage_states
+
+    @staticmethod
     def _1ls_to_4ds(limit_states):
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
         damage_states = dict()
@@ -395,3 +400,56 @@ class FragilityCurveSet:
         damage_states['DS_3'] = limit_states["LS_0"]
 
         return damage_states
+
+    @staticmethod
+    def _1ls_to_5ds(limit_states):
+        limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
+        damage_states = dict()
+        damage_states['DS_0'] = 1 - limit_states["LS_0"]
+        damage_states['DS_1'] = 0
+        damage_states['DS_2'] = 0
+        damage_states['DS_3'] = 0
+        damage_states['DS_4'] = limit_states["LS_0"]
+
+        return damage_states
+
+
+    @staticmethod
+    def is_there_small_overlap(limit_states):
+        small_overlap = []
+        keys = list(limit_states)
+        for ls_index in range(len(limit_states)):
+            for tmp_index in range(ls_index + 1, len(limit_states)):
+                if limit_states[keys[ls_index]] < limit_states[keys[tmp_index]]:
+                    # if previous limit state is less than the next, there's an overlap
+                    small_overlap.append(ls_index)
+                    break
+
+        return small_overlap
+
+    @staticmethod
+    def adjust_for_small_overlap(small_overlap, limit_states, damage_states):
+        ls_overlap = list(limit_states.values())
+        ds_overlap = [0.0] * len(limit_states)
+        for index in range(len(damage_states)):
+            ds_index = index
+            # If the limit state is overlapped, find the next non-overlapping limit state
+            if index in small_overlap:
+                for tmp_index in range(index + 1, len(ls_overlap)):
+                    if tmp_index not in small_overlap:
+                        ds_index = tmp_index
+
+            if index == 0:
+                # Compute DS_0
+                ds_overlap[index] = 1 - ls_overlap[ds_index]
+            elif index == len(damage_states) - 1:
+                # Compute last DS
+                ds_overlap[index] = ls_overlap[index - 1]
+            else:
+                # If one of the limit state curves between the first and last are overlapped, they've been
+                # eliminated and will be 0. If not, then compute the interval
+                current_ls = index - 1
+                if current_ls not in small_overlap:
+                    ds_overlap[index] = ls_overlap[index - 1] - ls_overlap[ds_index]
+
+        return ds_overlap
