@@ -205,7 +205,11 @@ class BridgeDamage(BaseAnalysis):
                 input_demand_types = hazard_vals[i]["demands"][0]
                 input_demand_units = hazard_vals[i]["units"][0]
                 dmg_probability = adjusted_fragility_set.calculate_limit_state(hazard_val, std_dev=hazard_std_dev)
-                dmg_intervals = AnalysisUtil.calculate_damage_interval(dmg_probability)
+                # dmg_intervals = AnalysisUtil.calculate_damage_interval(dmg_probability)
+                dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
+                                                                                 hazard_type=hazard_type,
+                                                                                 inventory_type="bridge")
+
 
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)

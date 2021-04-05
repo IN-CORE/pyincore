@@ -430,7 +430,7 @@ class FragilityCurveSet:
     @staticmethod
     def adjust_for_small_overlap(small_overlap, limit_states, damage_states):
         ls_overlap = list(limit_states.values())
-        ds_overlap = [0.0] * len(limit_states)
+        ds_overlap = [0.0] * len(damage_states)
         for index in range(len(damage_states)):
             ds_index = index
             # If the limit state is overlapped, find the next non-overlapping limit state
