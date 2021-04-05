@@ -116,7 +116,7 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set)
         return r.json()
 
-    def match_inventory(self, mapping:MappingSet, inventories: dict, entry_key: str):
+    def match_inventory(self, mapping:MappingSet, inventories: list, entry_key: str):
         """
         This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
