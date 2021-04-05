@@ -162,13 +162,28 @@ def test_get_file_blob(datasvc):
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
 
-@pytest.mark.skip(reason="Need to debug")
 def test_create_network_dataset(datasvc):
     with open(pyglobals.TEST_DATA_DIR + '/network_dataset.json', 'r') as file:
         dataset_prop = ast.literal_eval(file.read())
     response = datasvc.create_dataset(dataset_prop)
     if 'id' not in response:
         assert False
+
+    dataset_id = response['id']
+    print('network dataset is created with id ' + dataset_id)
+    files = [str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/network_links.shp')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/network_links.dbf')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/network_links.shx')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/network_links.prj')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/network_node.shp')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/network_node.dbf')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/network_node.shx')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/network_node.prj')),
+             str(os.path.join(pyglobals.TEST_DATA_DIR, 'shp_sample/network_graph.csv'))]
+    linkname = dataset_prop["networkDataset"]["link"]["fileName"]
+    nodename = dataset_prop["networkDataset"]["node"]["fileName"]
+    graphname = dataset_prop["networkDataset"]["graph"]["fileName"]
+    response = datasvc.add_files_to_network_dataset(dataset_id, files, nodename, linkname, graphname)
     dataset = Dataset.from_data_service(response["id"], data_service=datasvc)
 
     network_dataset = NetworkDataset(dataset)
@@ -184,8 +199,8 @@ def test_create_network_dataset(datasvc):
     with pytest.raises(FileNotFoundError):
         NetworkData(network_type="test-type", file_path="test-file")
 
-    r = datasvc.delete_dataset(dataset["id"])
-    assert r["id"] == dataset["id"]
+    r = datasvc.delete_dataset(dataset.id)
+    assert r["id"] == dataset.id
 
 
 def test_create_dataset_from_json_str(datasvc):

@@ -11,6 +11,7 @@ import os
 import re
 import urllib
 import zipfile
+import ntpath
 
 import pyincore.globals as pyglobals
 from pyincore import IncoreClient
@@ -241,6 +242,47 @@ class DataService:
 
         return r.json()
 
+    def add_files_to_network_dataset(self, dataset_id: str, filepaths: list,
+                                     nodename: str, linkname: str, graphname:str):
+        """Add files to the network dataset. Post API endpoint is called.
+
+        Args:
+            dataset_id (str): ID of the Dataset.
+            filepath (list): Path to the files.
+            nodename (str): node shapefile name.
+            linkname (str): link shapefile name.
+            graphname (str): graph file name.
+
+        Returns:
+            obj: HTTP POST Response. Json of the files added to the dataset.
+
+        """
+        url = urllib.parse.urljoin(self.base_url, dataset_id + "/files")
+        listfiles = []
+        linkname = os.path.splitext(linkname)[0]
+        nodename = os.path.splitext(nodename)[0]
+        graphname = os.path.splitext(graphname)[0]
+        for filepath in filepaths:
+            filename = os.path.splitext(ntpath.basename(filepath))[0]
+            file = open(filepath, 'rb')
+            bodyname = ''
+            if filename == linkname:
+                bodyname = 'link-file'
+            if filename == nodename:
+                bodyname = 'node-file'
+            if filename == graphname:
+                bodyname = 'graph-file'
+            tuple = (bodyname, file)
+            listfiles.append(tuple)
+        kwargs = {"files": listfiles}
+        r = self.client.post(url, **kwargs)
+
+        # close files
+        for tuple in listfiles:
+            tuple[1].close()
+
+        return r.json()
+
     def delete_dataset(self, dataset_id: str):
         """Delete dataset. Delete API endpoint is called.
 
@@ -248,7 +290,7 @@ class DataService:
             dataset_id (str): ID of the Dataset to be deleted.
 
         Returns:
-            obj: HTTP DELETE Response. Json model of the delet action.
+            obj: HTTP DELETE Response. Json model of the delete action.
 
         """
         url = urllib.parse.urljoin(self.base_url, dataset_id)
