@@ -27,10 +27,8 @@ class DataProcessUtil:
             archetype_mapping_id: Mapping id dataset for archetype
 
         Returns:
-            dmg_ret_json: JSON of the damage state results ordered by cluster and category. Also creates a csv file
-            with max damage state
-            func_ret_json: JSON of the building functionality results ordered by cluster and category. Also creates a
-            csv file with max damage state
+            dmg_ret_json: JSON of the damage state results ordered by cluster and category.
+            func_ret_json: JSON of the building functionality results ordered by cluster and category.
             mapped_df: Dataframe of max damage state
 
         """
@@ -45,10 +43,11 @@ class DataProcessUtil:
         arch_mapping = Dataset.from_data_service(archetype_mapping_id, DataService(client)).get_dataframe_from_csv()
 
         max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
-        ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping, groupby_col_name)
+        dmg_ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping,
+                                                                groupby_col_name)
         func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping)
 
-        return ret_json, func_ret_json, max_state_df
+        return dmg_ret_json, func_ret_json, max_state_df
 
     @staticmethod
     def get_mapped_result_from_dataset_id(client, inventory_id: str, dmg_result_id: str, bldg_func_id,
@@ -65,10 +64,8 @@ class DataProcessUtil:
             groupby_col_name: column name to group by, default to max_state
 
         Returns:
-            dmg_ret_json: JSON of the damage state results ordered by cluster and category. Also creates a csv file
-            with max damage state
-            func_ret_json: JSON of the building functionality results ordered by cluster and category. Also creates a
-            csv file with max damage state
+            dmg_ret_json: JSON of the damage state results ordered by cluster and category.
+            func_ret_json: JSON of the building functionality results ordered by cluster and category.
             max_state_df: Dataframe of max damage state
 
         """
@@ -108,10 +105,8 @@ class DataProcessUtil:
             groupby_col_name: column name to group by, default to max_state
 
         Returns:
-            dmg_ret_json: JSON of the damage state results ordered by cluster and category. Also creates a csv file
-            with max damage state
-            func_ret_json: JSON of the building functionality results ordered by cluster and category. Also creates a
-            csv file with max damage state
+            dmg_ret_json: JSON of the damage state results ordered by cluster and category.
+            func_ret_json: JSON of the building functionality results ordered by cluster and category.
             mapped_df: Dataframe of max damage state
 
         """
@@ -187,7 +182,7 @@ class DataProcessUtil:
             ret_json: JSON of the results ordered by cluster and category.
 
         """
-        func_state = ["percent_Functional", "percent_Non-Functional", "num_Functional", "num_Non-Functional"]
+        func_state = ["percent_functional", "percent_non_functional", "num_functional", "num_non_functional"]
         func_merged = pd.merge(inventory, bldg_func, on='guid')
         mapped_df = pd.merge(func_merged, arch_mapping, on='archetype')
         unique_categories = arch_mapping.groupby(by=['category'], sort=False, as_index=False).count()['category']
@@ -196,12 +191,12 @@ class DataProcessUtil:
         # group by cluster
         result_by_cluster = mapped_df.groupby(by=['cluster'], sort=False, as_index=False).agg({'guid': 'count',
                                                                                                'probability': 'mean'})
-        result_by_cluster.rename(columns={'guid': 'tot_count', 'probability': 'percent_Functional'}, inplace=True)
-        result_by_cluster["percent_Non-Functional"] = 1 - result_by_cluster["percent_Functional"]
-        result_by_cluster["num_Functional"] = (result_by_cluster["tot_count"] * result_by_cluster[
-            "percent_Functional"]).round(0)
-        result_by_cluster["num_Non-Functional"] = (result_by_cluster["tot_count"] * result_by_cluster[
-            "percent_Non-Functional"]).round(0)
+        result_by_cluster.rename(columns={'guid': 'tot_count', 'probability': 'percent_functional'}, inplace=True)
+        result_by_cluster["percent_non_functional"] = 1 - result_by_cluster["percent_functional"]
+        result_by_cluster["num_functional"] = (result_by_cluster["tot_count"] * result_by_cluster[
+            "percent_functional"]).round(0)
+        result_by_cluster["num_non_functional"] = (result_by_cluster["tot_count"] * result_by_cluster[
+            "percent_non_functional"]).round(0)
         result_by_cluster = result_by_cluster.drop('tot_count', 1)
         result_by_cluster = pd.merge(unique_cluster, result_by_cluster, how='left', on=['cluster'])
         # Add missing max damage states. Handles case when no inventory fall under some damage states.
@@ -213,12 +208,12 @@ class DataProcessUtil:
         # group by category
         result_by_category = mapped_df.groupby(by=['category'], sort=False, as_index=False).agg({'guid': 'count',
                                                                                                  'probability': 'mean'})
-        result_by_category.rename(columns={'guid': 'tot_count', 'probability': 'percent_Functional'}, inplace=True)
-        result_by_category["percent_Non-Functional"] = 1 - result_by_category["percent_Functional"]
-        result_by_category["num_Functional"] = (
-                result_by_category["tot_count"] * result_by_category["percent_Functional"]).round(0)
-        result_by_category["num_Non-Functional"] = (
-                result_by_category["tot_count"] * result_by_category["percent_Non-Functional"]).round(0)
+        result_by_category.rename(columns={'guid': 'tot_count', 'probability': 'percent_functional'}, inplace=True)
+        result_by_category["percent_non_functional"] = 1 - result_by_category["percent_functional"]
+        result_by_category["num_functional"] = (
+                result_by_category["tot_count"] * result_by_category["percent_functional"]).round(0)
+        result_by_category["num_non_functional"] = (
+                result_by_category["tot_count"] * result_by_category["percent_non_functional"]).round(0)
         result_by_category = result_by_category.drop('tot_count', 1)
         result_by_category = pd.merge(unique_categories, result_by_category, how='left', on=['category'])
         # replace NaN
