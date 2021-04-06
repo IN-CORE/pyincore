@@ -139,7 +139,7 @@ class DataProcessUtil:
             archetype_mapping_path: Path to the arechetype mappings
 
         Returns:
-            ret_json: JSON of the results ordered by cluster and category. Also creates a csv file with max damage state
+            ret_json: JSON of the results ordered by cluster and category.
 
         """
         dmg_states = dmg_result[groupby_col_name].unique().tolist()  # get unique damage states
@@ -184,7 +184,7 @@ class DataProcessUtil:
             archetype_mapping_path: Path to the arechetype mappings
 
         Returns:
-            ret_json: JSON of the results ordered by cluster and category. Also creates a csv file with max damage state
+            ret_json: JSON of the results ordered by cluster and category.
 
         """
         func_state = ["percent_Functional", "percent_Non-Functional", "num_Functional", "num_Non-Functional"]
