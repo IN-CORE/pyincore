@@ -191,7 +191,10 @@ class BridgeDamage(BaseAnalysis):
                     j += 1
 
                 bridge_args = adjusted_fragility_set.construct_expression_args_from_inventory(bridge)
-                dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict, **bridge_args)
+                dmg_probability = \
+                    selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
+                                                                                         inventory_type="bridge",
+                                                                                         **bridge_args)
                 dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
                                                                                  hazard_type=hazard_type,
                                                                                  inventory_type="bridge")
@@ -204,8 +207,9 @@ class BridgeDamage(BaseAnalysis):
 
                 input_demand_types = hazard_vals[i]["demands"][0]
                 input_demand_units = hazard_vals[i]["units"][0]
-                dmg_probability = adjusted_fragility_set.calculate_limit_state(hazard_val, std_dev=hazard_std_dev)
-                # dmg_intervals = AnalysisUtil.calculate_damage_interval(dmg_probability)
+                dmg_probability = adjusted_fragility_set.calculate_limit_state_w_conversion(hazard_val,
+                                                                                            std_dev=hazard_std_dev,
+                                                                                            inventory_type="bridge")
                 dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
                                                                                  hazard_type=hazard_type,
                                                                                  inventory_type="bridge")

@@ -172,20 +172,22 @@ class FragilityCurveSet:
 
         return output
 
-    def calculate_limit_state_refactored_w_conversion(self, hazard_values: dict = {}, **kwargs):
+    def calculate_limit_state_refactored_w_conversion(self, hazard_values: dict = {},
+                                                      inventory_type: str = "building",
+                                                      **kwargs):
         """
         WIP computation of limit state probabilities accounting for custom expressions.
         :param std_dev: standard deviation
         :param hazard_values: dictionary with hazard values to compute probability
+        :param inventory_type: type of inventory
 
         Returns: limit state probabilities
         """
-
-        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        output = FragilityCurveSet._initialize_limit_states(inventory_type)
         limit_state = list(output.keys())
         index = 0
 
-        if len(self.fragility_curves) <= 3:
+        if len(self.fragility_curves) <= 4:
             for fragility_curve in self.fragility_curves:
                 probability = fragility_curve.calculate_limit_state_probability(hazard_values,
                                                                                 self.fragility_curve_parameters,
@@ -193,7 +195,7 @@ class FragilityCurveSet:
                 output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
                 index += 1
         else:
-            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
+            raise ValueError("We can only handle fragility curves with less than 4 limit states.")
 
         return output
 
@@ -225,32 +227,34 @@ class FragilityCurveSet:
 
         return output
 
-    def calculate_limit_state_w_conversion(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
+    def calculate_limit_state_w_conversion(self, hazard, period: float = 0.0, std_dev: float = 0.0,
+                                           inventory_type: str = "building", **kwargs):
         """
             Computes limit state probabilities.
             Args:
                 hazard: hazard value to compute probability for
                 period: period of the structure, if applicable
                 std_dev: standard deviation
+                inventory_type: type of inventory
 
             Returns: limit state probabilities
 
         """
-        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        output = FragilityCurveSet._initialize_limit_states(inventory_type)
         limit_state = list(output.keys())
         index = 0
 
-        if len(self.fragility_curves) <= 3:
+        if len(self.fragility_curves) <= 4:
             for fragility_curve in self.fragility_curves:
                 probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
                 output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
                 index += 1
         else:
-            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
+            raise ValueError("We can only handle fragility curves with less than 4 limit states.")
 
         return output
 
-    def calculate_custom_limit_state_w_conversion(self, variables: dict):
+    def calculate_custom_limit_state_w_conversion(self, variables: dict, inventory_type: str = "building"):
         """
             Computes limit state probabilities.
             Args:
@@ -258,21 +262,21 @@ class FragilityCurveSet:
             Returns: limit state probabilities for custom expression fragilities
 
         """
-        output = collections.OrderedDict([("LS_0", 0.0), ("LS_1", 0.0), ("LS_2", 0.0)])
+        output = FragilityCurveSet._initialize_limit_states(inventory_type)
         limit_state = list(output.keys())
         index = 0
 
-        if len(self.fragility_curves) <= 3:
+        if len(self.fragility_curves) <= 4:
             for fragility_curve in self.fragility_curves:
                 probability = fragility_curve.compute_custom_limit_state_probability(variables)
                 output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
                 index += 1
         else:
-            raise ValueError("We can only handle fragility curves with less than 3 limit states.")
+            raise ValueError("We can only handle fragility curves with less than 4 limit states.")
 
         return output
 
-    def calculate_damage_interval(self, damage, hazard_type="earthquake", inventory_type="building"):
+    def calculate_damage_interval(self, damage, hazard_type="earthquake", inventory_type: str = "building"):
         """
         Args:
             damage:
@@ -282,24 +286,42 @@ class FragilityCurveSet:
         Returns:
 
         """
-        # default to 3 limit states -- > 4 damage states
-        # TODO: in the future set default based on different inventory types
-        output = FragilityCurveSet._3ls_to_4ds(damage)
+        output = None
 
         if hazard_type == "earthquake":
-            pass
+            if inventory_type == "building":
+                if len(self.fragility_curves) == 3:
+                    output = FragilityCurveSet._3ls_to_4ds(damage)
+            elif inventory_type == "bridge":
+                if len(self.fragility_curves) == 4:
+                    output = FragilityCurveSet._4ls_to_5ds(damage)
         elif hazard_type == "tornado":
-            pass
+            if inventory_type == "building":
+                if len(self.fragility_curves) == 3:
+                    output = FragilityCurveSet._3ls_to_4ds(damage)
+            elif inventory_type == "bridge":
+                if len(self.fragility_curves) == 4:
+                    output = FragilityCurveSet._4ls_to_5ds(damage)
         elif hazard_type == "flood":
-            pass
+            if inventory_type == "building":
+                if len(self.fragility_curves) == 3:
+                    output = FragilityCurveSet._3ls_to_4ds(damage)
+            elif inventory_type == "bridge":
+                if len(self.fragility_curves) == 4:
+                    output = FragilityCurveSet._4ls_to_5ds(damage)
         elif hazard_type == "tsunami":
-            pass
+            if inventory_type == "building":
+                if len(self.fragility_curves) == 3:
+                    output = FragilityCurveSet._3ls_to_4ds(damage)
+            elif inventory_type == "bridge":
+                if len(self.fragility_curves) == 4:
+                    output = FragilityCurveSet._4ls_to_5ds(damage)
         elif hazard_type == "hurricane":
-            # 1-For two DS buildings, probabilities of zero for DS 1 and DS2 need to be placed in IN-CORE.
-            # So, damage state possibilities will be either DS0 or DS3.
             if inventory_type == "building":
                 if len(self.fragility_curves) == 1:
                     output = FragilityCurveSet._1ls_to_4ds(damage)
+                elif len(self.fragility_curves) == 3:
+                    output = FragilityCurveSet._3ls_to_4ds(damage)
             elif inventory_type == "bridge":
                 if len(self.fragility_curves) == 1:
                     output = FragilityCurveSet._1ls_to_5ds(damage)
@@ -307,6 +329,10 @@ class FragilityCurveSet:
                     output = FragilityCurveSet._4ls_to_5ds(damage)
         else:
             pass
+
+        if output is None:
+            raise ValueError(inventory_type + " " + hazard_type + " damage analysis do not support " +
+                             str(len(self.fragility_curves)) + " limit state")
 
         return output
 
@@ -385,7 +411,7 @@ class FragilityCurveSet:
             damage_states['DS_0'] = 1 - limit_states["LS_0"]
             damage_states['DS_1'] = limit_states["LS_0"] - limit_states["LS_1"]
             damage_states['DS_2'] = limit_states["LS_1"] - limit_states["LS_2"]
-            damage_states['DS_3'] = limit_states["LS_2"]
+            damage_states['DS_3'] = limit_states["LS_2"] - limit_states["LS_3"]
             damage_states['DS_4'] = limit_states["LS_3"]
 
         return damage_states
@@ -412,7 +438,6 @@ class FragilityCurveSet:
         damage_states['DS_4'] = limit_states["LS_0"]
 
         return damage_states
-
 
     @staticmethod
     def is_there_small_overlap(limit_states):
@@ -453,3 +478,14 @@ class FragilityCurveSet:
                     ds_overlap[index] = ls_overlap[index - 1] - ls_overlap[ds_index]
 
         return ds_overlap
+
+    @staticmethod
+    def _initialize_limit_states(inventory_type):
+        if inventory_type == "building":
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
+        elif inventory_type == "bridge":
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0, "LS_3": 0.0}
+        else:
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
+
+        return output
