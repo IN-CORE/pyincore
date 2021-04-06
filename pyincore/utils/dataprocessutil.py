@@ -42,7 +42,7 @@ class DataProcessUtil:
         bldg_func_df = bldg_func_dataset.get_dataframe_from_csv()
         bldg_func_df.rename(columns={'building_guid': 'guid'}, inplace=True)
 
-        arch_mapping = Dataset.from_data_service(archetype_mapping_id, DataService(client))
+        arch_mapping = Dataset.from_data_service(archetype_mapping_id, DataService(client)).get_dataframe_from_csv()
 
         max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
         ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping, groupby_col_name)
