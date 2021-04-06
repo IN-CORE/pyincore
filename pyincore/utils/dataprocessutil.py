@@ -204,6 +204,8 @@ class DataProcessUtil:
             func_state, sort=False), axis=1, fill_value=0)
         # replace NaN
         result_by_cluster[func_state] = result_by_cluster[func_state].fillna(-1)
+        result_by_cluster[["num_functional", "num_non_functional"]] = result_by_cluster[["num_functional",
+                                                                                       "num_non_functional"]].astype(int)
 
         # group by category
         result_by_category = mapped_df.groupby(by=['category'], sort=False, as_index=False).agg({'guid': 'count',
@@ -218,6 +220,8 @@ class DataProcessUtil:
         result_by_category = pd.merge(unique_categories, result_by_category, how='left', on=['category'])
         # replace NaN
         result_by_category[func_state] = result_by_category[func_state].fillna(-1)
+        result_by_category[["num_functional", "num_non_functional"]] = result_by_category[
+            ["num_functional", "num_non_functional"]].astype(int)
 
         cluster_records = result_by_cluster.to_json(orient="records")
         category_records = result_by_category.to_json(orient="records")
