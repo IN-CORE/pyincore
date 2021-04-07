@@ -31,6 +31,29 @@ class PeriodBuildingFragilityCurve(FragilityCurve):
 
         super(PeriodBuildingFragilityCurve, self).__init__(curve_parameters)
 
+    def get_building_period(self, num_stories):
+        """Get building period from the fragility curve.
+
+        Args:
+            num_stories (int): Number of building stories.
+
+        Returns:
+            float: Building period.
+
+        """
+        period = 0.0
+        period_equation_type = self.period_eqn_type
+        if period_equation_type == 1:
+            period = self.period_param0
+        elif period_equation_type == 2:
+            period = self.period_param0 * num_stories
+        elif period_equation_type == 3:
+            period = self.period_param1 * math.pow(
+                self.period_param0 * num_stories,
+                self.period_param2)
+
+        return period
+
     def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         """
             Computes limit state probabilities.
@@ -72,5 +95,7 @@ class PeriodBuildingFragilityCurve(FragilityCurve):
             probability = norm.cdf(
                 (math.log(hazard) - (a11_param + a12_param * period)) / (
                         a13_param + a14_param * period))
+
+        return probability
 
         return probability

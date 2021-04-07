@@ -1,0 +1,40 @@
+{
+  "className": "FragilitySet",
+  "demandTypes": ["momentumFlux"],
+  "demandUnits": ["ft^3/s^2"],
+  "fragilityCurves": [
+    {
+      "className": "StandardFragilityCurve",
+      "alpha": 1170.0,
+      "beta": 0.79,
+      "alphaType": "median",
+      "curveType": "LogNormal",
+      "description": "Moderate"
+    },
+    {
+      "className": "StandardFragilityCurve",
+      "alpha": 3259.0,
+      "beta": 0.79,
+      "alphaType": "median",
+      "curveType": "LogNormal",
+      "description": "Extensive"
+    },
+    {
+      "className": "StandardFragilityCurve",
+      "alpha": 5347.0,
+      "beta": 0.79,
+      "alphaType": "median",
+      "curveType": "LogNormal",
+      "description": "Complete"
+    }
+  ],
+  "description": "Concrete Moment frame 4 to 7",
+  "authors": [
+    "FEMA"
+  ],
+  "resultType": "Limit State",
+  "hazardType": "tsunami",
+  "inventoryType": "building",
+  "creator": "incrtest",
+  "id": "5fb5984e96513b1f4bd7a0a3"
+}

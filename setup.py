@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyincore',
-    version='0.8.1',
+    version='0.9.0',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     package_data={
@@ -24,7 +24,9 @@ setup(
                       "Python framework acceses underlying data through local or remote services "
                       "and facilitates moving and synthesizing results."),
     install_requires=[
+        "deprecated>=1.2.11",
         "fiona>=1.8.4",
+        "geopandas>=0.6.1"
         "jsonpickle>=1.1",
         "networkx>=2.2",
         "numpy>=1.16.1",

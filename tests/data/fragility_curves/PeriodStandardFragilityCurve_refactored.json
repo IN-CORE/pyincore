@@ -1,0 +1,79 @@
+{
+  "className": "FragilitySet",
+  "legacyId": "SF_S1_212",
+  "hazardType": "earthquake",
+  "inventoryType": "building",
+  "authors": [
+    "Elnashai and Jeong"
+  ],
+  "description": "Mid-Rise Steel Moment Frame",
+  "resultType": "Limit State",
+  "demandTypes": ["0.2 sec Sa"],
+  "demandUnits": ["g"],
+  "fragilityCurves": [
+    {
+      "description": "legacy - PeriodStandardFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Moderate"
+      },
+      "rules": [
+        {
+          "expression": "scipy.stats.norm.cdf((math.log(point_two_sec_SA) - (-0.576))/(0.836))"
+        }
+      ]
+    },
+    {
+      "description": "legacy - PeriodStandardFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Extensive"
+      },
+      "rules": [
+        {
+          "expression": "scipy.stats.norm.cdf((math.log(point_two_sec_SA) - (0.23))/(0.911))"
+        }
+      ]
+    },
+    {
+      "description": "legacy - PeriodStandardFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Complete"
+      },
+      "rules": [
+        {
+          "expression": "scipy.stats.norm.cdf((math.log(point_two_sec_SA) - (1.197))/(1.05))"
+        }
+      ]
+    }
+  ],
+  "creator": "incore",
+  "fragilityCurveParameters": [
+    {
+      "name": "point_two_sec_SA",
+      "key": "0.2 sec Sa",
+      "unit": "g",
+      "description": "0.2 sec Sa value from hazard services"
+    },
+    {
+      "name": "num_stories",
+      "unit": "",
+      "description": "number of stories in building inventory",
+      "expression": "1"
+    },
+    {
+      "name": "period",
+      "unit": "",
+      "description": "default building period",
+      "expression": "1.08"
+    }
+  ],
+  "id": "5b47b2d7337d4a36187c61c9"
+}

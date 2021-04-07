@@ -1,10 +1,10 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.bridgedamage import BridgeDamage
-from pyincore.globals import INCORE_API_DEV_URL
+import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
-    client = IncoreClient(INCORE_API_DEV_URL)
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     # New madrid earthquake using Atkinson Boore 1995
     hazard_type = "earthquake"

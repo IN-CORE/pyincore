@@ -47,8 +47,15 @@ original/
 
 # possible output file
 *.csv
+# a pair of negation pattern; everything else except below will be ignored by git
+*.json
+!tests/data/*/*.json
+!tests/data/*.json
 
 # Seaside ipopt constants
 pyincore/analyses/seasidecge/solverconstants/ipopt_cons.py
 pyincore/analyses/seasidecge/solverconstants/tmp.py
+
+# credential
+*.incorepw
 

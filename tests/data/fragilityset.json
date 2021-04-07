@@ -7,8 +7,8 @@
   "paperReference": null,
   "resultUnit": null,
   "resultType": "Limit State",
-  "demandType": "momentumFlux",
-  "demandUnits": "ft^3/s^2",
+  "demandTypes": ["momentumFlux"],
+  "demandUnits": ["ft^3/s^2"],
   "hazardType": "tsunami",
   "inventoryType": "building",
   "fragilityCurves": [

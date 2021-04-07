@@ -3,8 +3,6 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
-
 import collections
 import csv
 import math
@@ -12,7 +10,11 @@ import os
 import re
 from typing import List, Dict
 
+from deprecated.sphinx import deprecated
+from decimal import getcontext, Decimal
+
 from pyincore import DataService
+from pyincore.globals import DAMAGE_PRECISION
 
 
 class AnalysisUtil:
@@ -26,9 +28,47 @@ class AnalysisUtil:
                     "Returns: \n\t" \
                     "$RETS$ "
 
+    getcontext().prec = DAMAGE_PRECISION
+
     @staticmethod
+    def update_precision(num, precision: int = DAMAGE_PRECISION):
+        try:
+            r = round(float(num), precision)
+            return r
+        except TypeError:
+            print("Error trying to round non numeric value")
+            raise
+
+    @staticmethod
+    def update_precision_of_dicts(states: dict) -> dict:
+        updated_states = {key: AnalysisUtil.update_precision(states[key]) for key in states}
+        return updated_states
+
+    @staticmethod
+    def update_precision_of_lists(hazard_vals: List) -> List:
+        updated_hazard_vals = [AnalysisUtil.update_precision(val) for val in hazard_vals]
+        return updated_hazard_vals
+
+    @staticmethod
+    def float_to_decimal(num: float):
+        return Decimal(str(num))
+
+    @staticmethod
+    def float_list_to_decimal(num_list: list):
+        return [Decimal(str(num)) for num in num_list]
+
+    @staticmethod
+    def float_dict_to_decimal(num_dict: dict):
+        return {key: Decimal(str(num_dict[key])) for key in num_dict}
+
+    @staticmethod
+    @deprecated(version="0.9.0", reason="Use calculate_damage_interval in fragilitycurveset class instead.")
     def calculate_damage_interval(damage):
         output = collections.OrderedDict()
+
+        # convert damage to decimal dictionary
+        damage = AnalysisUtil.float_dict_to_decimal(damage)
+
         if len(damage) == 4:
             output['ds-none'] = 1 - damage['ls-slight']
             output['ds-slight'] = damage['ls-slight'] - damage['ls-moderat']
@@ -250,7 +290,7 @@ class AnalysisUtil:
                 isOpt = ", " + "optional"
 
             args = args + dataset['id'] + "(str" + isOpt + ") : " + dataset['description'] + ". " \
-                + AnalysisUtil.get_custom_types_str(dataset['type']) + "\n\t"
+                   + AnalysisUtil.get_custom_types_str(dataset['type']) + "\n\t"
 
         for param in specs['input_parameters']:
             isOpt = ""
@@ -258,7 +298,7 @@ class AnalysisUtil:
                 isOpt = ", " + "optional"
 
             args = args + param['id'] + "(" \
-                + AnalysisUtil.get_type_str(param['type']) + isOpt + ") : " + param['description'] + "\n\t"
+                   + AnalysisUtil.get_type_str(param['type']) + isOpt + ") : " + param['description'] + "\n\t"
 
         for dataset in specs['output_datasets']:
             rets = rets + dataset['id'] + ": " \
@@ -341,7 +381,7 @@ class AnalysisUtil:
         PROPERTIES = "properties"
         BLDG_PERIOD = "period"
 
-        fragility_hazard_type = fragility_set.demand_type.lower()
+        fragility_hazard_type = fragility_set.demand_types[0].lower()
         hazard_demand_type = fragility_hazard_type
 
         if hazard_type.lower() == "earthquake":
@@ -374,6 +414,61 @@ class AnalysisUtil:
         return hazard_demand_type
 
     @staticmethod
+    def get_hazard_demand_types(building, fragility_set, hazard_type):
+        """
+        Get hazard demand type. This method is intended to replace get_hazard_demand_type. Fragility_set is not a
+        json but a fragilityCurveSet object now.
+
+        Args:
+            building (obj): A JSON mapping of a geometric object from the inventory: current building.
+            fragility_set (obj): FragilityCurveSet object
+            hazard_type (str): A hazard type such as earthquake, tsunami etc.
+
+        Returns:
+            str: A hazard demand type.
+
+        """
+        BLDG_STORIES = "no_stories"
+        PROPERTIES = "properties"
+        BLDG_PERIOD = "period"
+
+        fragility_demand_types = fragility_set.demand_types
+        adjusted_demand_types = []
+
+        for demand_type in fragility_demand_types:
+            adjusted_demand_type = demand_type
+            # TODO: Due to the mismatch in demand types names on DFR3 vs hazard service, we should refactor this before
+            # TODO: using expression based fragilities for tsunami & earthquake
+            if hazard_type.lower() == "tsunami":
+                demand_type = demand_type.lower()
+                if demand_type == "momentumflux":
+                    adjusted_demand_type = "mmax"
+                elif demand_type == "inundationdepth":
+                    adjusted_demand_type = "hmax"
+            elif hazard_type.lower() == "earthquake":
+                demand_type = demand_type.lower()
+                num_stories = building[PROPERTIES][BLDG_STORIES]
+                # Get building period from the fragility if possible
+                building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
+
+                # TODO: There might be a bug here as this is not handling SD
+                if demand_type.endswith('sa'):
+                    # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
+                    if demand_type != 'sa':
+                        if len(demand_type.split()) > 2:
+                            building_period = demand_type.split()[0]
+                            adjusted_demand_type = str(building_period) + " " + "SA"
+                    else:
+                        if building_period == 0.0 and BLDG_PERIOD in building[PROPERTIES]:
+                            if building[PROPERTIES][BLDG_PERIOD] > 0.0:
+                                building_period = building[PROPERTIES][BLDG_PERIOD]
+
+                        adjusted_demand_type = str(building_period) + " " + "SA"
+
+            adjusted_demand_types.append(adjusted_demand_type)
+        return adjusted_demand_types
+
+    @staticmethod
     def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):
         """
         This method should replace group_by_demand_type in the future. Fragility_sets is not list of dictionary (
@@ -390,14 +485,15 @@ class AnalysisUtil:
         grouped_inventory = dict()
         for fragility_id, frag in fragility_sets.items():
 
-            demand_type = frag.demand_type
-            demand_units = frag.demand_units
+            # TODO this method will be deprecated so this is temporary fix
+            demand_type = frag.demand_types[0]
+            demand_unit = frag.demand_units[0]
 
             if is_building:
                 inventory = inventories[fragility_id]
                 demand_type = AnalysisUtil.get_hazard_demand_type(inventory, frag, hazard_type)
 
-            tpl = (demand_type, demand_units)
+            tpl = (demand_type, demand_unit)
             grouped_inventory.setdefault(tpl, []).append(fragility_id)
 
         return grouped_inventory

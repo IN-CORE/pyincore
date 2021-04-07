@@ -10,7 +10,6 @@ import os
 
 import pytest
 
-from pyincore import FragilityService, RepairService, IncoreClient
 from pyincore import globals as pyglobals
 from pyincore.globals import LOGGER
 from pyincore.models.mappingset import MappingSet
@@ -20,14 +19,12 @@ logger = LOGGER
 
 @pytest.fixture
 def fragilitysvc(monkeypatch):
-    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
-    return FragilityService(client)
+    return pytest.fragilitysvc
 
 
 @pytest.fixture
 def repairsvc(monkeypatch):
-    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
-    return RepairService(client)
+    return pytest.repairsvc
 
 
 def test_get_fragility_sets(fragilitysvc):

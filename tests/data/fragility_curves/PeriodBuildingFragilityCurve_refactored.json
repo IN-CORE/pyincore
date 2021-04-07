@@ -1,0 +1,117 @@
+{
+  "className": "FragilitySet",
+  "legacyId": "SF_C1_10",
+  "hazardType": "earthquake",
+  "inventoryType": "building",
+  "authors": [
+    "J.M.Bracci",
+    "A.M.Reinhorn",
+    "J.B.Mander"
+  ],
+  "paperReference": {
+    "name": "NCEER-92-0027",
+    "yearPublished": "1992"
+  },
+  "description": "Gravity Load Designed Concrete Frames",
+  "resultType": "Limit State",
+  "demandTypes": ["Sa"],
+  "demandUnits": "g",
+  "fragilityCurves": [
+    {
+      "description": "legacy - PeriodBuildingFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Immediate Occupancy"
+      },
+      "rules": [
+        {
+          "condition": [
+            "period < cutoff_period"
+          ],
+          "expression": "scipy.stats.norm.cdf((math.log(Sa)-(cutoff_period * (-0.5882) + (-1.4297))) / ((0.4863) + (0.0237) * cutoff_period) + (cutoff_period - period) * (math.log(Sa) - (33.6713))/(11.7658))"
+        },
+        {
+          "condition": [
+            "period >= cutoff_period"
+          ],
+          "expression": "scipy.stats.norm.cdf((math.log(Sa) - ((-1.4297) + (-0.5882) * period)) / ((0.4863) + (0.0237) * period))"
+        }
+      ]
+    },
+    {
+      "description": "legacy - PeriodBuildingFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Life Safety"
+      },
+      "rules": [
+        {
+          "condition": [
+            "period < cutoff_period"
+          ],
+          "expression": "scipy.stats.norm.cdf((math.log(Sa)-(cutoff_period * (-0.5021) + (-1.0435))) / ((0.3111) + (0.0851) * cutoff_period) + (cutoff_period - period) * (math.log(Sa) - (12.533))/(3.892))"
+        },
+        {
+          "condition": [
+            "period >= cutoff_period"
+          ],
+          "expression": "scipy.stats.norm.cdf((math.log(Sa) - ((-1.0435) + (-0.5021) * period)) / ((0.3111) + (0.0851) * period))"
+        }
+      ]
+    },
+    {
+      "description": "legacy - PeriodBuildingFragilityCurve",
+      "className": "FragilityCurveRefactored",
+      "returnType": {
+        "type": "Limit State",
+        "unit": "",
+        "description": "Collapse Prevention"
+      },
+      "rules": [
+        {
+          "condition": [
+            "period < cutoff_period"
+          ],
+          "expression": "scipy.stats.norm.cdf((math.log(Sa)-(cutoff_period * (-0.35) + (-0.8408))) / ((0.3651) + (0.0631) * cutoff_period) + (cutoff_period - period) * (math.log(Sa) - (6.4062))/(2.6323))"
+        },
+        {
+          "condition": [
+            "period >= cutoff_period"
+          ],
+          "expression": "scipy.stats.norm.cdf((math.log(Sa) - ((-0.8408) + (-0.35) * period)) / ((0.3651) + (0.0631) * period))"
+        }
+      ]
+    }
+  ],
+  "creator": "incore",
+  "fragilityCurveParameters": [
+    {
+      "name": "Sa",
+      "unit": "g",
+      "description": "Sa value from hazard services"
+    },
+    {
+      "name": "num_stories",
+      "unit": "",
+      "description": "number of stories in building inventory",
+      "expression": "1"
+    },
+    {
+      "name": "cutoff_period",
+      "unit": "",
+      "description": "constant",
+      "expression": "0.87"
+    },
+    {
+      "name": "period",
+      "unit": "",
+      "description": "default building period",
+      "expression": "(0.097) * math.pow(num_stories * (13.0), 0.624)"
+    }
+  ],
+  "id": "5b47b2d8337d4a36187c6c05"
+}

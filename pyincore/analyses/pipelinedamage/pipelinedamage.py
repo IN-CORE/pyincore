@@ -142,24 +142,24 @@ class PipelineDamage(BaseAnalysis):
                         "ls-extensi": 0.0, "ls-complet": 0.0}
 
         if fragility_set is not None:
-            demand_type = fragility_set.demand_type.lower()
-            demand_units = fragility_set.demand_units
+            demand_type = fragility_set.demand_types[0].lower()
+            demand_unit = fragility_set.demand_units[0]
             location = GeoUtil.get_location(pipeline)
             point = str(location.y) + "," + str(location.x)
 
             # tsunami pipeline damage produce limit states instead of repair rates
             if hazard_type == 'earthquake':
                 hazard_resp = self.hazardsvc.get_earthquake_hazard_values(
-                    hazard_dataset_id, demand_type, demand_units, [point])
+                    hazard_dataset_id, demand_type, demand_unit, [point])
             elif hazard_type == 'tsunami':
                 hazard_resp = self.hazardsvc.get_tsunami_hazard_values(
-                    hazard_dataset_id, demand_type, demand_units, [point])
+                    hazard_dataset_id, demand_type, demand_unit, [point])
             elif hazard_type == 'tornado':
                 hazard_resp = self.hazardsvc.get_tornado_hazard_values(
-                    hazard_dataset_id, demand_units, [point])
+                    hazard_dataset_id, demand_unit, [point])
             elif hazard_type == 'hurricane':
                 hazard_resp = self.hazardsvc.get_hurricanewf_values(
-                    hazard_dataset_id, demand_type, demand_units, [point])
+                    hazard_dataset_id, demand_type, demand_unit, [point])
             else:
                 raise ValueError(
                     "Hazard type are not currently supported.")

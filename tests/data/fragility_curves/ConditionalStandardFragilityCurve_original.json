@@ -1,0 +1,104 @@
+{
+  "className": "FragilitySet",
+  "demandTypes":["Vmax"],
+  "demandUnits": ["ft/s"],
+  "fragilityCurves": [
+    {
+      "className": "ConditionalStandardFragilityCurve",
+      "alpha": [
+        2.6,
+        2.6
+      ],
+      "beta": [
+        0.4,
+        0.5
+      ],
+      "alphaType": "median",
+      "curveType": "LogNormal",
+      "rules": {
+        "0": [
+          "demand LT 3.2"
+        ],
+        "1": [
+          "demand GE 3.2"
+        ]
+      },
+      "description": "Slight"
+    },
+    {
+      "className": "ConditionalStandardFragilityCurve",
+      "alpha": [
+        4.8,
+        4.8
+      ],
+      "beta": [
+        0.4,
+        0.5
+      ],
+      "alphaType": "median",
+      "curveType": "LogNormal",
+      "rules": {
+        "0": [
+          "demand LT 3.2"
+        ],
+        "1": [
+          "demand GE 3.2"
+        ]
+      },
+      "description": "Moderate"
+    },
+    {
+      "className": "ConditionalStandardFragilityCurve",
+      "alpha": [
+        8.4,
+        8.4
+      ],
+      "beta": [
+        0.4,
+        0.5
+      ],
+      "alphaType": "median",
+      "curveType": "LogNormal",
+      "rules": {
+        "0": [
+          "demand LT 3.2"
+        ],
+        "1": [
+          "demand GE 3.2"
+        ]
+      },
+      "description": "Extensive"
+    },
+    {
+      "className": "ConditionalStandardFragilityCurve",
+      "alpha": [
+        13.1,
+        13.1
+      ],
+      "beta": [
+        0.4,
+        0.5
+      ],
+      "alphaType": "median",
+      "curveType": "LogNormal",
+      "rules": {
+        "0": [
+          "demand LT 3.2"
+        ],
+        "1": [
+          "demand GE 3.2"
+        ]
+      },
+      "description": "Complete"
+    }
+  ],
+  "description": "seaside epf substation conditional fragility",
+  "authors": [
+    "Dylan Sanderson"
+  ],
+  "resultType": "Limit State",
+  "hazardType": "tsunami",
+  "inventoryType": "electric_facility",
+  "creator": "cwang138",
+  "id": "5ebb0db727e5d0c756a7575f"
+}

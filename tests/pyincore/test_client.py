@@ -32,16 +32,3 @@ def test_client_fail(monkeypatch):
 def test_delete_cache():
     r = Client.clear_cache()
     assert r is None
-
-
-def test_insecure_client():
-    """
-    test insecure client
-    """
-    client = InsecureIncoreClient(username="incrtest")
-    data_svc = DataService(client)
-    try:
-        r = data_svc.get_datasets()
-        assert len(r) != 0
-    except requests.HTTPError:
-        assert False

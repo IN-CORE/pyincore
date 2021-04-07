@@ -7,8 +7,10 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory
 
 import os
+import tempfile
 import pandas as pd
 
+logger = pyglobals.LOGGER
 
 class JoplinCGEModel(BaseAnalysis):
     """A computable general equilibrium (CGE) model is based on fundamental economic principles.
@@ -1656,8 +1658,7 @@ class JoplinCGEModel(BaseAnalysis):
             with open(filename, 'a') as f:
                 f.write('model.obj = Objective(expr=-1*model.x' + str(obj) + ')')
 
-        def run_solver(cons_filename, temp_file_name=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                                  "solverconstants/tmp.py")):
+        def run_solver(cons_filename, temp_file_name):
             solver = 'ipopt'
             solver_io = 'nl'
             stream_solver = True  # True prints solver output to screen
@@ -1742,8 +1743,19 @@ class JoplinCGEModel(BaseAnalysis):
         '''
 
         soln = []
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "solverconstants/ipopt_cons.py")
-        tmp = os.path.join(os.path.dirname(os.path.realpath(__file__)), "solverconstants/tmp.py")
+
+        # create CGE tmp folder, solverconstatns
+        # TODO: we need to generate the "solverconstatnt" folder with username since it uses system tmp
+        # TODO: there is a situation that multiple users on system can run this together
+        
+        cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
+        if not os.path.isdir(cge_tmp_folder): # create the folder if there is no folder
+            os.mkdir(cge_tmp_folder)
+        logger.debug(cge_tmp_folder)
+
+        filename = os.path.join(cge_tmp_folder, "ipopt_cons.py")
+        tmp = os.path.join(cge_tmp_folder, "tmp.py")
+
         # print("Calibration: ")
         run_solver(filename, tmp)
 

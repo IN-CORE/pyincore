@@ -10,12 +10,10 @@ import logging
 import os
 import shutil
 
-PACKAGE_VERSION = "0.8.1"
+PACKAGE_VERSION = "0.9.0"
 
 INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
-TEST_INCORE_API_PROD_URL = "http://incore.ncsa.illinois.edu:31888"
-INCORE_API_DEV_URL = "https://incore-dev-kube.ncsa.illinois.edu"
-TEST_INCORE_API_DEV_URL = "http://incore-dev-kube.ncsa.illinois.edu:31888"
+INCORE_API_DEV_URL = "https://incore-dev.ncsa.illinois.edu"
 
 KEYCLOAK_AUTH_PATH = "/auth/realms/In-core/protocol/openid-connect/token"
 KEYCLOAK_USERINFO_PATH = "/auth/realms/In-core/protocol/openid-connect/userinfo"
@@ -42,3 +40,5 @@ TEST_DATA_DIR = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data")
 MAX_LOGIN_ATTEMPTS = 3
 
 IPOPT_PATH = shutil.which("ipopt")
+
+DAMAGE_PRECISION = 10

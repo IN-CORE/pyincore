@@ -73,9 +73,10 @@ class MonteCarloFailureProbability(BaseAnalysis):
                     'id': 'damage',
                     'required': True,
                     'description': 'damage result that has damage intervals in it',
-                    'type': ['ergo:bridgeDamage', 'ergo:buildingDamageVer4', 'incore:epfDamage',
-                             'ergo:nsBuildingInventoryDamage', 'incore:pipelineDamage', 'ergo:roadDamage',
-                             'ergo:waterFacilityDamageVer4'],
+                    'type': ['ergo:bridgeDamage', 'ergo:buildingDamageVer4', 'ergo:buildingDamageVer5',
+                             'incore:epfDamage', 'incore:epfDamageVer2',
+                             'ergo:nsBuildingInventoryDamage', 'incore:pipelineDamage',
+                             'ergo:roadDamage', 'ergo:waterFacilityDamageVer4'],
                 },
 
             ],
@@ -228,12 +229,17 @@ class MonteCarloFailureProbability(BaseAnalysis):
         for i in range(num_samples):
             rnd_num = random.uniform(0, 1)
             prob_val = 0
+            flag = True
             for ds_name in damage_interval_keys:
-                if rnd_num < prob_val + float(dmg[ds_name]):
+
+                if rnd_num < prob_val + AnalysisUtil.float_to_decimal(dmg[ds_name]):
                     ds['sample_{}'.format(i)] = ds_name
+                    flag = False
                     break
                 else:
-                    prob_val += float(dmg[ds_name])
+                    prob_val += AnalysisUtil.float_to_decimal(dmg[ds_name])
+            if flag:
+                print("cannot determine MC damage state!")
 
         return ds
 

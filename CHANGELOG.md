@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.0] - 2021-02-28
+### Added
+- Class and methods to handle equation based fragilities [INCORE1-805] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-805)
+- Methods to get bulk hazard values from hazard endpoints [INCORE1-923] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-923)
+- Support hurricane in Building Damage analysis [INCORE1-696] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-696)
+- Support flood in Building Damage analysis [INCORE1-982] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-982)
+- Convert building damage output to have 3 limit state and 4 damage state [INCORE1-871] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-871)
+- Split building damage output two files: a csv table with damage results, and a json formatted file with supplemental information [INCORE1-969] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-969)
+- A utility method to add GUID (Global Unique ID) to inventory dataset in ESRI Shapefile format [INCORE1-978] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-978)
+- Utility method to do archetype mapping [INCORE1-913] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-913)
+
+### Changed
+- Demand types and units on fragility model changed from string to list [INCORE1-946] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-946)
+- Change insignificant damage probability in population dislocation [INCORE1-907] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE-907)
+- Replace building inventory csv with shape file in Housing Unit Allocation [INCORE1-977] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE-977)
+- Move test scripts from analyses to test analyses [INCORE1-987] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE-987)
+- Update precision of damage states, limit states and hazard values to a max of 5 digits [INCORE1-985] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-985)
+
+### Fixed
+- CGE analysis for Joplin and Seaside uses the system temp folder for temporary file instead of the installation folder [INCORE1-980] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-980)
+
 ## [0.8.1] - 2020-10-21
 
 ### Added

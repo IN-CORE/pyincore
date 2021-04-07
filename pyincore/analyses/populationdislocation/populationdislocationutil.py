@@ -9,31 +9,30 @@ import numpy as np
 class PopulationDislocationUtil:
 
     @staticmethod
-    def merge_damage_housing_block(building_dmg: pd.DataFrame, housing_allocation_inventory: pd.DataFrame,
+    def merge_damage_housing_block(building_dmg: pd.DataFrame, hua_inventory: pd.DataFrame,
                                    block_data: pd.DataFrame):
         """Load CSV files to pandas Dataframes, merge them and drop unused columns.
 
         Args:
             building_dmg (pd.DataFrame): A building damage file in csv format.
-            housing_allocation_inventory (pd.DataFrame): A housing unit allocation inventory file in csv format.
+            hua_inventory (pd.DataFrame): A housing unit allocation inventory file in csv format.
             block_data (pd.DataFrame): A block data file in csv format.
 
         Returns:
             pd.DataFrame: A merged table of all three inputs.
 
         """
-        damage_states = ["insignific", "moderate", "heavy", "complete"]
-
-        if set(damage_states).issubset(housing_allocation_inventory.columns):
-            housing_allocation_inventory = housing_allocation_inventory.drop(columns=damage_states)
+        # sometimes HUA inventory has (empty) damage state columns, drop them
+        damage_states = ["DS_0", "DS_1", "DS_2", "DS_3"]
+        if set(damage_states).issubset(hua_inventory.columns):
+            hua_inventory = hua_inventory.drop(columns=damage_states)
 
         # first merge hazard with house unit allocation inventory on "guid"
         # note guid can be duplicated in housing unit allocation inventory
-        df = pd.merge(building_dmg, housing_allocation_inventory,
-                      how="right", on="guid", validate="1:m")
+        df = pd.merge(building_dmg, hua_inventory, how="right", on="guid", validate="1:m")
 
-        # drop columns in building damage that is not used
-        col_drops = ["immocc", "lifesfty", "collprev", "hazardtype", "hazardval", "meandamage", "mdamagedev"]
+        # drop columns in building damage that are not used
+        col_drops = ["LS_0", "LS_1", "LS_2", "hazardtype", "meandamage", "mdamagedev"]
         for col_drop in col_drops:
             if col_drop in df.columns:
                 df = df.drop(columns=[col_drop])
@@ -53,8 +52,7 @@ class PopulationDislocationUtil:
         block_data["bgid"] = block_data["bgid"].astype("Int64")
 
         # outer merge on bgid
-        final_df = pd.merge(df, block_data, how="left", on="bgid",
-                            validate="m:1")
+        final_df = pd.merge(df, block_data, how="left", on="bgid", validate="m:1")
 
         return final_df
 
@@ -78,7 +76,7 @@ class PopulationDislocationUtil:
             percent_hisp_bg (np.array): Block group data, percentage of hispanic minority.
 
         Returns:
-            numpy.array: Dislocation probability for the household and population.
+            np.array: Dislocation probability for the household and population.
 
         """
         # coefficients for the Logistic regression model
@@ -101,42 +99,39 @@ class PopulationDislocationUtil:
 
         return disl_prob
 
-
     @staticmethod
-    def get_random_valueloss(seed_i: int, df: pd.DataFrame, damagestate: str, size: int):
+    def get_random_loss(seed_i: int, df: pd.DataFrame, damage_state: str, size: int):
         """
-        Calucalates value loss for each structure based on random beta distrbution
-        Value loss based on damage state is an input to the population dislocation model
+        Calculates value loss for each structure based on random beta distribution
+        Value loss based on damage state is an input to the population dislocation model.
 
         Args:
             seed_i (int): Seed for random normal to ensure replication if run as part of a stochastic analysis,
                 for example in connection with housing unit allocation analysis.
             df (pd.DataFrame): Sata frame that includes the alpha, beta, lower bound, upper bound
                 for each required damage state
-            damagestate (str): Damage state to calculate value loss for.
+            damage_state (str): Damage state to calculate value loss for.
             size (int): Size of array to be generated.
 
         Returns:
-            numpy.array: random distribution of value loss for each structure
+            np.array: random distribution of value loss for each structure
 
         """
         # select upper bound and lower bound from input table
+        alpha = df.loc[damage_state, 'alpha']
+        beta = df.loc[damage_state, 'beta']
+        ub = df.loc[damage_state, 'ub']
+        lb = df.loc[damage_state, 'lb']
 
-        alpha = df.loc[damagestate, 'alpha']
-        beta = df.loc[damagestate, 'beta']
-        ub = df.loc[damagestate, 'ub']
-        lb = df.loc[damagestate, 'lb']
-
-        # Generate array of random values that follow beta distrubtion for damage state
-        np.random.seed(seed_i)
-        rploss = np.random.beta(alpha, beta, size) * (ub - lb) + lb
+        # Generate array of random values that follow beta distribution for damage state
+        random_generator = np.random.RandomState(seed_i)
+        rploss = random_generator.beta(alpha, beta, size) * (ub - lb) + lb
 
         return rploss
 
-
     @staticmethod
     def compare_merges(table1_cols, table2_cols, table_merged):
-        """Compare two lists of columns and run compare columns on columns in both lists.
+        """ Compare two lists of columns and run compare columns on columns in both lists.
         It assumes that suffixes are _x and _y
 
         Args:
@@ -164,8 +159,8 @@ class PopulationDislocationUtil:
 
         Args:
             table (pd.DataFrame): Data Frame table
-            col1 (pd.Series): Column 1
-            col2 (pd.Series): Column 2
+            col1 (str): name of column 1
+            col2 (str): name of column 2
             drop (bool): rename and drop column
 
         Returns:

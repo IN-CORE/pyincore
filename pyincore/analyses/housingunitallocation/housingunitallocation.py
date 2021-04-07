@@ -18,7 +18,7 @@ class HousingUnitAllocation(BaseAnalysis):
             'input_parameters': [
                 {
                     'id': 'result_name',
-                    'required': False,
+                    'required': True,
                     'description': 'Result CSV dataset name',
                     'type': str
                 },
@@ -37,6 +37,13 @@ class HousingUnitAllocation(BaseAnalysis):
             ],
             'input_datasets': [
                 {
+                    'id': 'buildings',
+                    'required': True,
+                    'description': 'Building Inventory',
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5',
+                             'ergo:buildingInventoryVer6', 'ergo:buildingInventoryVer7'],
+                },
+                {
                     'id': 'housing_unit_inventory',
                     'required': True,
                     'description': 'Housing Unit Inventory CSV data, aka Census Block data. Corresponds to a possible '
@@ -49,13 +56,6 @@ class HousingUnitAllocation(BaseAnalysis):
                     'description': 'CSV dataset of address locations available in a block. Corresponds to a '
                                    'specific address where a housing unit or group quarters could be assigned',
                     'type': ['incore:addressPoints']
-                },
-                {
-                    'id': 'building_inventory',
-                    'required': True,
-                    'description': 'Building Inventory CSV dataset for each building/structure. A structure '
-                                   'can have multiple addresses',
-                    'type': ['ergo:buildingInventory']
                 }
             ],
             'output_datasets': [
@@ -81,28 +81,30 @@ class HousingUnitAllocation(BaseAnalysis):
         # Get seed
         seed = self.get_parameter("seed")
 
-        # Get Iterations
+        # Get iterations
         iterations = self.get_parameter("iterations")
 
         # Get desired result name
         result_name = self.get_parameter("result_name")
 
         # Datasets
+        bg_inv = self.get_input_dataset("buildings").get_dataframe_from_shapefile()
         pop_inv = self.get_input_dataset("housing_unit_inventory").get_dataframe_from_csv(low_memory=False)
         addr_point_inv = self.get_input_dataset("address_point_inventory").get_dataframe_from_csv(low_memory=False)
-        bg_inv = self.get_input_dataset("building_inventory").get_dataframe_from_csv(low_memory=False)
-
-        csv_source = "dataframe"
 
         for i in range(iterations):
             seed_i = seed + i
-            sorted_housing_unit_address_inventory = self.get_iteration_probabilistic_allocation(
+            hua_inventory = self.get_iteration_probabilistic_allocation(
                 pop_inv, addr_point_inv, bg_inv, seed_i)
             temp_output_file = result_name + "_" + str(seed_i) + ".csv"
 
+            # first column guid
+            hua_inventory = hua_inventory[["addrptid"] + [col for col in hua_inventory.columns if col != "addrptid"]]
+            # last column geometry
+            hua_inventory = hua_inventory[[col for col in hua_inventory.columns if col != "geometry"] + ["geometry"]]
             self.set_result_csv_data("result",
-                                     sorted_housing_unit_address_inventory,
-                                     temp_output_file, csv_source)
+                                     hua_inventory,
+                                     temp_output_file, "dataframe")
         return True
 
     def prepare_housing_unit_inventory(self, housing_unit_inventory, seed):
@@ -117,11 +119,12 @@ class HousingUnitAllocation(BaseAnalysis):
 
         """
         size_row, size_col = housing_unit_inventory.shape
-        np.random.seed(seed)
+        
+        random_generator = np.random.RandomState(seed)
         sorted_housing_unit0 = housing_unit_inventory.sort_values(by=["huid"])
 
         # Create Random merge order for housing unit inventory
-        random_order_housing_unit = np.random.uniform(0, 1, size_row)
+        random_order_housing_unit = random_generator.uniform(0, 1, size_row)
 
         sorted_housing_unit0["randomhu"] = random_order_housing_unit
 
@@ -187,9 +190,9 @@ class HousingUnitAllocation(BaseAnalysis):
         sort_critical_bld_0 = critical_bld_inv.sort_values(by=["addrptid"])
 
         seed_i2: int = seed_i + 1
-        np.random.seed(seed_i2)
+        random_generator = np.random.RandomState(seed_i2)
 
-        randomap = np.random.uniform(0, 1, size_row)
+        randomap = random_generator.uniform(0, 1, size_row)
         sort_critical_bld_0["randomap"] = randomap
         sort_critical_bld_1 = sort_critical_bld_0.sort_values(by=["blockid", "residential", "huestimate", "randomap"],
                                                               ascending=[True, False, True, True])
@@ -213,18 +216,18 @@ class HousingUnitAllocation(BaseAnalysis):
             pd.DataFrame: Final merge of all four inventories
 
         """
-        housing_unit_address_point_inventory = pd.merge(sorted_infrastructure, sorted_housing_unit,
-                                                        how='outer', left_on=["blockid", "randommergeorder"],
-                                                        right_on=["blockid", "randommergeorder"],
-                                                        sort=True, suffixes=("_x", "_y"),
-                                                        copy=True, indicator="aphumerge", validate="1:1")
-
+        huap_inventory = pd.merge(sorted_infrastructure, sorted_housing_unit,
+                                  how='outer', left_on=["blockid", "randommergeorder"],
+                                  right_on=["blockid", "randommergeorder"],
+                                  sort=True, suffixes=("_x", "_y"),
+                                  copy=True, indicator=True, validate="1:1")
+        huap_inventory = huap_inventory.rename(columns={"_merge": "aphumerge"})
         # check for duplicate columns from merge
-        housing_unit_address_point_inventory = self.compare_merges(sorted_housing_unit.columns,
-                                                                   sorted_infrastructure.columns,
-                                                                   housing_unit_address_point_inventory)
+        huap_inventory = self.compare_merges(sorted_housing_unit.columns,
+                                             sorted_infrastructure.columns,
+                                             huap_inventory)
 
-        output = housing_unit_address_point_inventory.sort_values(by=["aphumerge", "blockid"], ascending=[False, True])
+        output = huap_inventory.sort_values(by=["aphumerge", "blockid"], ascending=[False, True])
 
         return output
 

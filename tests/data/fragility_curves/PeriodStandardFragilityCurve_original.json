@@ -1,0 +1,53 @@
+{
+  "className": "FragilitySet",
+  "legacyId": "SF_S1_212",
+  "hazardType": "earthquake",
+  "inventoryType": "building",
+  "authors": [
+    "Elnashai and Jeong"
+  ],
+  "description": "Mid-Rise Steel Moment Frame",
+  "resultType": "Limit State",
+  "demandTypes": ["0.2 sec Sa"],
+  "demandUnits": ["g"],
+  "fragilityCurves": [
+    {
+      "className": "PeriodStandardFragilityCurve",
+      "periodParam2": 0.0,
+      "periodParam1": 0.0,
+      "periodParam0": 1.08,
+      "periodEqnType": 1,
+      "beta": 0.836,
+      "curveType": "LogNormal",
+      "description": "Moderate",
+      "alpha": -0.576,
+      "alphaType": "lambda"
+    },
+    {
+      "className": "PeriodStandardFragilityCurve",
+      "periodParam2": 0.0,
+      "periodParam1": 0.0,
+      "periodParam0": 1.08,
+      "periodEqnType": 1,
+      "beta": 0.911,
+      "curveType": "LogNormal",
+      "description": "Extensive",
+      "alpha": 0.23,
+      "alphaType": "lambda"
+    },
+    {
+      "className": "PeriodStandardFragilityCurve",
+      "periodParam2": 0.0,
+      "periodParam1": 0.0,
+      "periodParam0": 1.08,
+      "periodEqnType": 1,
+      "beta": 1.05,
+      "curveType": "LogNormal",
+      "description": "Complete",
+      "alpha": 1.197,
+      "alphaType": "lambda"
+    }
+  ],
+  "creator": "incore",
+  "id": "5b47b2d7337d4a36187c61c9"
+}

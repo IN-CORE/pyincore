@@ -13,10 +13,12 @@ import os
 import fiona
 import numpy
 import pandas as pd
+import geopandas as gpd
 import rasterio
 import wntr
-
+import warnings
 from pyincore import DataService
+warnings.filterwarnings("ignore", "", UserWarning)
 
 
 class Dataset:
@@ -136,6 +138,24 @@ class Dataset:
                 writer.writeheader()
                 writer.writerows(result_data)
         return Dataset.from_file(name, "csv")
+
+    @classmethod
+    def from_json_data(cls, result_data, name):
+        """Get Dataset from JSON data.
+
+        Args:
+            result_data (obj): Result data and metadata.
+            name (str): A JSON filename.
+
+        Returns:
+            obj: Dataset from file.
+
+        """
+        if len(result_data) > 0:
+            with open(name, 'w') as json_file:
+                json_dumps_str = json.dumps(result_data, indent=4)
+                json_file.write(json_dumps_str)
+        return Dataset.from_file(name, "json")
 
     def cache_files(self, data_service: DataService):
         """Get the set of fragility data, curves.
@@ -279,6 +299,22 @@ class Dataset:
         if os.path.isfile(filename):
             df = pd.read_csv(filename, header="infer", low_memory=low_memory)
         return df
+
+    def get_dataframe_from_shapefile(self):
+        """Utility method for reading different standard file formats: GeoDataFrame from shapefile.
+
+        Args:
+
+        Returns:
+            obj: Geopanda's GeoDataFrame.
+
+        """
+
+        # read shapefile directly by Geopandas.read_file()
+        # It will preserve CRS information also
+        gdf = gpd.read_file(self.local_file_path)
+
+        return gdf
 
     def close(self):
         for key in self.readers:
