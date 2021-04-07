@@ -1,11 +1,11 @@
 
 from pyincore import IncoreClient
 from pyincore.analyses.transportationrecovery import TransportationRecovery
-
+import pyincore.globals as pyglobals
 
 def run_with_base_class():
 
-    client = IncoreClient()
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     transportation_recovery = TransportationRecovery(client)
 
     nodes = "5c5de1dec5c0e488fc0355f7"

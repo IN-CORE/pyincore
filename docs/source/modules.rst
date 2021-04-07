@@ -194,6 +194,11 @@ models/fragilitycurve
 ..  autoclass:: models.fragilitycurve.FragilityCurve
     :members:
 
+models/fragilitycurverefactored
+===============================
+..  autoclass:: models.fragilitycurve.FragilityCurveRefactored
+    :members:
+
 models/fragilitycurveset
 ========================
 ..  autoclass:: models.fragilitycurveset.FragilityCurveSet
@@ -237,6 +242,21 @@ utils/analysisutil
 ..  autoclass:: utils.analysisutil.AnalysisUtil
     :members:
 
+utils/dataprocessutil
+=====================
+..  autoclass:: utils.dataprocessutil.DataProcessUtil
+    :members:
+
+utils/datasetutil
+=================
+..  autoclass:: utils.datasetutil.DatasetUtil
+    :members:
+
+utils/evaluateexpression
+========================
+..  autofunction:: utils.evaluateexpression.evaluate
+    :members:
+
 utils/geoutil
 =============
 ..  autoclass:: utils.geoutil.GeoUtil
@@ -246,6 +266,7 @@ utils/networkutil
 =================
 ..  autoclass:: utils.networkutil.NetworkUtil
     :members:
+
 
 services
 ^^^^^^^^
