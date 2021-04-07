@@ -17,7 +17,10 @@ class DataProcessUtil:
     def get_mapped_result_from_analysis(client, inventory_id: str, dmg_result_dataset,
                                         bldg_func_dataset, archetype_mapping_id: str,
                                         groupby_col_name: str = "max_state"):
-        """
+        """Use this if you want to load results directly from the output files of the analysis, than storing the results
+        to data service and loading from there using ids.
+        It takes the static inputs: inventory & archetypes as dataset ids. The result inputs are taken as
+        Dataset class objects, which are created by reading the output result files.
 
         Args:
             client: Service client with authentication info
@@ -53,7 +56,8 @@ class DataProcessUtil:
     def get_mapped_result_from_dataset_id(client, inventory_id: str, dmg_result_id: str, bldg_func_id,
                                           archetype_mapping_id: str,
                                           groupby_col_name: str = "max_state"):
-        """
+        """Use this if your damage results are already stored in the data service and you have their dataset ids.
+        All the inputs (except groupby_col_name) are dataset ids.
 
         Args:
             client: Service client with authentication info
