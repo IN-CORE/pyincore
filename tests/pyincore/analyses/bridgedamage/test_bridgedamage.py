@@ -80,6 +80,38 @@ def run_with_base_class():
     # Run bridge damage analysis
     bridge_dmg.run_analysis()
 
+    ###################################################################
+    # test Galveston Bridge Damage
+    hazard_type = "hurricane"
+    hazard_id = "5f11e50cc6491311a814584c"
+
+    # Galveston bridge
+    bridge_dataset_id = "6062058ac57ada48e48c31e3"
+
+    # Galveston hurricane bridge mapping
+    refactored_mapping_id = "6062254b618178207f66226c"
+
+    # Create bridge damage
+    bridge_dmg = BridgeDamage(client)
+
+    # Load input datasets
+    bridge_dmg.load_remote_input_dataset("bridges", bridge_dataset_id)
+
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    refactored_mapping_set = MappingSet(fragility_service.get_mapping(refactored_mapping_id))
+    bridge_dmg.set_input_dataset('dfr3_mapping_set', refactored_mapping_set)
+
+    # Set analysis parameters
+    bridge_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
+    bridge_dmg.set_parameter("result_name", "galveston_bridge_dmg_result")
+    bridge_dmg.set_parameter("hazard_type", hazard_type)
+    bridge_dmg.set_parameter("hazard_id", hazard_id)
+    bridge_dmg.set_parameter("num_cpu", 4)
+
+    # Run bridge damage analysis
+    bridge_dmg.run_analysis()
+
 
 if __name__ == '__main__':
     run_with_base_class()
