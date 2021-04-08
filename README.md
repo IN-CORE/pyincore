@@ -47,5 +47,17 @@ Please read the [Testing and Running](https://incore.ncsa.illinois.edu/doc/incor
 **pyIncore** technical reference (API) can be found at https://incore.ncsa.illinois.edu/doc/pyincore/.
 
 
+## Documentation Containter
+
+To build the container with the documentation you can use:
+
+```
+docker build -t incore/pyincore -f Dockerfile.docs .
+docker run -ti -p 8000:80 incore/pyincore
+```
+
+Then check the documentation at [http://localhost:8000/doc/pyincore/](http://localhost:8000/doc/pyincore/)
+
+
 ## Acknowledgement
 This work herein was supported by the National Institute of Standards and Technology (NIST) (Award No. 70NANB15H044). This support is gratefully acknowledged. The views expressed in this work are those of the authors and do not necessarily reflect the views of NIST.
