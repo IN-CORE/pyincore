@@ -52,8 +52,8 @@ Please read the [Testing and Running](https://incore.ncsa.illinois.edu/doc/incor
 To build the container with the documentation you can use:
 
 ```
-docker build -t incore/pyincore -f Dockerfile.docs .
-docker run -ti -p 8000:80 incore/pyincore
+docker build -t doc/pyincore -f Dockerfile.docs .
+docker run -ti -p 8000:80 doc/pyincore
 ```
 
 Then check the documentation at [http://localhost:8000/doc/pyincore/](http://localhost:8000/doc/pyincore/)
