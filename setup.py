@@ -23,28 +23,9 @@ setup(
                       "pyIncore allows users to apply hazards on infrastructure in selected areas. "
                       "Python framework acceses underlying data through local or remote services "
                       "and facilitates moving and synthesizing results."),
-    install_requires=[
-        "deprecated>=1.2.11",
-        "fiona>=1.8.4",
-        "geopandas>=0.6.1"
-        "jsonpickle>=1.1",
-        "networkx>=2.2",
-        "numpy>=1.16.1",
-        "owslib>=0.17.1",
-        "pandas>=0.24.1",
-        "pyproj>=1.9.6",
-        "pyyaml>=3.13",
-        "rasterio>=1.0.18",
-        "requests>=2.21.0",
-        "rtree>=0.8.3",
-        "scipy>=1.2.0",
-        "shapely>=1.6.4.post1",
-        "wntr>=0.1.6",
-        "pyomo>=5.6",
-        "pytest>=3.9.0",
-        "python-jose>=3.0",
-        "pycodestyle>=2.6.0"
-    ],
+    # TODO need to figure out what are the dependency requirements
+    # TODO this is a hack, really should only be packages needed to run
+    install_requires=[line.strip() for line in open("requirements.txt").readlines()],
     python_requires=">=3.5",
     classifiers=[
         "Development Status :: 4 - Beta",
