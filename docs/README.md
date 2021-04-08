@@ -13,19 +13,19 @@ Install [Docker Desktop](https://www.docker.com/) for your OS and change directo
 
 1. Build container
     ```
-    docker build -f Dockerfile.docs --no-cache -t pyincore_docs .
+    docker build -f Dockerfile.docs -t doc/pyincore .
     ```
     The container's name is **pyincore_docs** in this example.
     
 2. Run docker
     ```
-    docker run --rm -p 80:80 --name doctest pyincore_docs:latest
+    docker run -ti --rm -p 8000:80 doc/pyincore
     ```
     Optional flag, `--name` sets container's name to **doctest** under which it appears in Docker Desktop.
    
 3. Run html pages in your local browser (you might see the nginx main page first)
     ```
-    http://localhost/doc/pyincore/
+    http://localhost:8000/doc/pyincore/
     ``` 
 
 
