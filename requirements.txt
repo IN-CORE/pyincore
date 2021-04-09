@@ -1,5 +1,5 @@
 boto3
-deprecated>=1.2.11
+deprecated
 fiona>=1.8.4
 geopandas>=0.6.1
 ipopt>=3.11
