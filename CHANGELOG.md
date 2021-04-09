@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Support bridge hurricane damage and calculation from refactored fragility curves [INCORE1-1058](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1058)
 - Publish pyincore package to PyPI [INCORE1-1030](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1030)
 - Create utility method to join table and shapefile [INCORE1-1080](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1080)
+- Dependencies in requirement.txt [INCORE1-1108](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1108)
 
 ### Changed
 - EPF damage using bulk hazard values methods and support refactored fragility curves [INCORE1-1059](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1059)
@@ -17,7 +18,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Random number generator method in social analyses [INCORE1-1040](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1040)
 - Data processing utility methods to handle max damage state extraction and clustering [INCORE1-1079](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1079)
 - Building Functionality Code using pandas index for performance improvement [INCORE1-1083](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1083)
-- Dependencies in requirement.txt [INCORE1-1108](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1108)
 
 ### Fixed
 - Use Decimal package when calculating DS from LS to avoid rounding issue [INCORE1-1033](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1003)
