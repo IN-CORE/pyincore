@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.1] - 2021-04-09
+### Added
+- Support bridge hurricane damage and calculation from refactored fragility curves [INCORE1-1058](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1058)
+- Publish pyincore package to PyPI [INCORE1-1030](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1030)
+- Create utility method to join table and shapefile [INCORE1-1080](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1080)
+
+### Changed
+- EPF damage using bulk hazard values methods and support refactored fragility curves [INCORE1-1059](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1059)
+- Modules in pyincore documentation [INCORE1-867](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-867)
+- Random number generator method in social analyses [INCORE1-1040](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1040)
+- Data processing utility methods to handle max damage state extraction and clustering [INCORE1-1079](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1079)
+- Building Functionality Code using pandas index for performance improvement [INCORE1-1083](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1083)
+- Dependencies in requirement.txt [INCORE1-1108](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1108)
+
+### Fixed
+- Use Decimal package when calculating DS from LS to avoid rounding issue [INCORE1-1033](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1003)
+- Overlapping limit state probability curves [INCORE1-1006](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1006)
+- Dataset Object get_dataframe_from_shapefile method returns GeoDataframe without CRS [INCORE1-1069](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1069)
+- Pytest for network dataset [INCORE1-1078](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1078)
+
+
 ## [0.9.0] - 2021-02-28
 ### Added
 - Class and methods to handle equation based fragilities [INCORE1-805] (https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-805)
