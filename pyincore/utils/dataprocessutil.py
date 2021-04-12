@@ -190,10 +190,10 @@ class DataProcessUtil:
         func_merged = pd.merge(inventory, bldg_func, on='guid')
         mapped_df = pd.merge(func_merged, arch_mapping, on='archetype')
         unique_categories = arch_mapping.groupby(by=['category'], sort=False, as_index=False).count()['category']
-        unique_cluster = arch_mapping.groupby(by=['cluster'], sort=False, as_index=False).count()['cluster']
+        unique_cluster = arch_mapping.groupby(by=['cluster', 'category'], sort=False, as_index=False).count()['cluster']
 
         # group by cluster
-        result_by_cluster = mapped_df.groupby(by=['cluster'], sort=False, as_index=False).agg({'guid': 'count',
+        result_by_cluster = mapped_df.groupby(by=['cluster', 'category'], sort=False, as_index=False).agg({'guid': 'count',
                                                                                                'probability': 'mean'})
         result_by_cluster.rename(columns={'guid': 'tot_count', 'probability': 'percent_functional'}, inplace=True)
         result_by_cluster["percent_non_functional"] = 1 - result_by_cluster["percent_functional"]
@@ -261,3 +261,48 @@ class DataProcessUtil:
         dmg_concat.rename(columns={0: 'max_prob', 1: 'max_state'}, inplace=True)
 
         return dmg_concat
+
+if __name__ == "__main__":
+    from pyincore import IncoreClient
+    from pyincore.globals import INCORE_API_DEV_URL
+
+    client = IncoreClient(INCORE_API_DEV_URL)
+
+    # get maximum damage state
+    # get max building damage state
+    bldg_dmg_dataset_id = "602d96e4b1db9c28aeeebdce"  # legacy DS_name
+    bldg_dmg_result_dataset = Dataset.from_data_service(bldg_dmg_dataset_id, DataService(client))
+    bldg_dmg_result = bldg_dmg_result_dataset.get_dataframe_from_csv()
+    bldg_max_state_df = DataProcessUtil.get_max_damage_state(bldg_dmg_result)
+    bldg_max_state_df.to_csv("bldgMaxDamageState.csv", columns=['guid', 'max_state'], index=False)
+
+    # get max pole damage state
+    pole_dmg_result = pd.read_csv("data/Joplin_epf_poles_dmg_result.csv")
+    pole_max_state_df = DataProcessUtil.get_max_damage_state(pole_dmg_result)
+    pole_max_state_df.to_csv("poleMaxDamageState.csv", columns=['guid', 'max_state'], index=False)
+
+    # get max substation damage state
+    substation_dmg_result = pd.read_csv("data/Joplin_epf_substations_dmg_result.csv")
+    substation_max_state_df = DataProcessUtil.get_max_damage_state(substation_dmg_result)
+    substation_max_state_df.to_csv("substationMaxDamageState.csv", columns=['guid', 'max_state'], index=False)
+
+    # map and group building damage output
+    bldg_dataset_id = "5f9091df3e86721ed82f701d"
+    bldg_inv = Dataset.from_data_service(bldg_dataset_id, DataService(client))
+    inventory = pd.DataFrame(gpd.read_file(bldg_inv.local_file_path))
+
+    archetype_mapping_id = "5fca915fb34b193f7a44059b"
+    archtype_mapping_dataset = Dataset.from_data_service(archetype_mapping_id, DataService(client))
+    arch_mapping = archtype_mapping_dataset.get_dataframe_from_csv()
+
+    ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, bldg_max_state_df, arch_mapping,
+                                                        groupby_col_name="max_state")
+    with open("bldgDmgCluster.json", "w") as f:
+        json.dump(ret_json, f, indent=2)
+
+    # group building functionality output
+    bldg_func_df = pd.read_csv("data/Joplin_mcs_functionality_probability_functionality_probability.csv")
+    bldg_func_df.rename(columns={'building_guid': 'guid'}, inplace=True)
+    ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping)
+    with open("bldgFuncCluster.json", "w") as f:
+        json.dump(ret_json, f, indent=2)
