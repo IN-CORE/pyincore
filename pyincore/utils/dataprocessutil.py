@@ -190,7 +190,8 @@ class DataProcessUtil:
         func_merged = pd.merge(inventory, bldg_func, on='guid')
         mapped_df = pd.merge(func_merged, arch_mapping, on='archetype')
         unique_categories = arch_mapping.groupby(by=['category'], sort=False, as_index=False).count()['category']
-        unique_cluster = arch_mapping.groupby(by=['cluster', 'category'], sort=False, as_index=False).count()['cluster']
+        unique_cluster = arch_mapping.groupby(by=['cluster', 'category'], sort=False, as_index=False).count()[[
+            'cluster', 'category']]
 
         # group by cluster
         result_by_cluster = mapped_df.groupby(by=['cluster', 'category'], sort=False, as_index=False).agg({'guid': 'count',
@@ -202,7 +203,7 @@ class DataProcessUtil:
         result_by_cluster["num_non_functional"] = (result_by_cluster["tot_count"] * result_by_cluster[
             "percent_non_functional"]).round(0)
         result_by_cluster = result_by_cluster.drop('tot_count', 1)
-        result_by_cluster = pd.merge(unique_cluster, result_by_cluster, how='left', on=['cluster'])
+        result_by_cluster = pd.merge(unique_cluster, result_by_cluster, how='left', on=['cluster', 'category'])
         # Add missing max damage states. Handles case when no inventory fall under some damage states.
         result_by_cluster = result_by_cluster.reindex(result_by_cluster.columns.union(
             func_state, sort=False), axis=1, fill_value=0)
