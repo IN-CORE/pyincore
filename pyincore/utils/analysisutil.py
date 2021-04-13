@@ -76,7 +76,7 @@ class AnalysisUtil:
             output['ds-extensi'] = damage['ls-extensi'] - damage['ls-complet']
             output['ds-complet'] = damage['ls-complet']
         elif len(damage) == 3:
-            output['insignific'] = 1.0 - damage['immocc']
+            output['insignific'] = 1 - damage['immocc']
             output['moderate'] = damage['immocc'] - damage['lifesfty']
             output['heavy'] = damage['lifesfty'] - damage['collprev']
             output['complete'] = damage['collprev']
