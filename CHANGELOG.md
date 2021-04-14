@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.9.1] - 2021-04-09
 ### Added
 - Support bridge hurricane damage and calculation from refactored fragility curves [INCORE1-1058](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1058)
-- Publish pyincore package to PyPI [INCORE1-1030](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1030)
 - Create utility method to join table and shapefile [INCORE1-1080](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1080)
 - Dependencies in requirement.txt [INCORE1-1108](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1108)
 
