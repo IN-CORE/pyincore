@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.9.2] - 2021-04-22
 
 ### Fixed
-- Manual and pyincore-viz linkes in documentation [INCORE1-1122](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1122)
+- Manual and pyincore-viz links in documentation [INCORE1-1122](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1122)
 - Relationship between dsf and huestimate variables in Population dislocation analysis [INCORE1-1123](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1123)
 
 ## [0.9.1] - 2021-04-09
