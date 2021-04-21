@@ -147,7 +147,7 @@ class PopulationDislocation(BaseAnalysis):
         # pd.Series to np.array
         # creats d_sf column it if it does not exist, overwrites d_sf values if it does
         if "huestimate" in inventory.columns:
-            inventory["d_sf"] = (inventory["huestimate"] > 1).astype(int)
+            inventory["d_sf"] = (inventory["huestimate"] == 1).astype(int)
         elif "huestimate_x" in inventory.columns:
             inventory = PopulationDislocationUtil.compare_columns(inventory,
                                                                   "huestimate_x",
@@ -155,7 +155,7 @@ class PopulationDislocation(BaseAnalysis):
             if "huestimate_x-huestimate_y" in inventory.columns:
                 exit("Column huestimate is ambiguous, check the input datasets!")
             else:
-                inventory["d_sf"] = (inventory["huestimate"] > 1).astype(int)
+                inventory["d_sf"] = (inventory["huestimate"] == 1).astype(int)
 
         # drop d_sf_x, d_sf_y if they exist
         if "d_sf_x" in inventory.columns:
