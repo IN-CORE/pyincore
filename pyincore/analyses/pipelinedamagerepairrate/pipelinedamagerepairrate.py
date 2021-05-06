@@ -189,9 +189,9 @@ class PipelineDamageRepairRate(BaseAnalysis):
 
         pgv_repairs = 0.0
         pgd_repairs = 0.0
-        liq_hazard_type = ""
-        liq_hazard_val = 0.0
-        liquefaction_prob = 0.0
+        liq_hazard_type = None
+        liq_hazard_val = None
+        liquefaction_prob = None
 
         if fragility_set is not None:
             demand_type = fragility_set.demand_types[0].lower()
@@ -282,14 +282,16 @@ class PipelineDamageRepairRate(BaseAnalysis):
             ds_result['liqprobability'] = liquefaction_prob
 
             damage_result['fragility_id'] = fragility_set.id
-            if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
-                damage_result['liq_fragility_id'] = fragility_set_liq.id
-            else:
-                damage_result['liq_fragility_id'] = None
             damage_result['demandtypes'] = demand_type
             damage_result['demandunits'] = demand_unit
             damage_result['hazardtype'] = hazard_type
             damage_result['hazardval'] = hazard_val
+
+            # if there is liquefaction presented
+            if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
+                damage_result['liq_fragility_id'] = fragility_set_liq.id
+            else:
+                damage_result['liq_fragility_id'] = None
             damage_result['liqhaztype'] = liq_hazard_type
             damage_result['liqhazval'] = liq_hazard_val
 
