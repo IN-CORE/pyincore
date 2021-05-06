@@ -277,64 +277,47 @@ class FragilityCurveSet:
         return output
 
     def calculate_damage_interval(self, damage, hazard_type="earthquake", inventory_type: str = "building"):
-        """
+        """"
         Args:
-            damage:
-            hazard_type:
-            inventory_type:
+            damage: list of limit states
+            hazard_type: string describing the hazard being evaluated
+            inventory_type: string describing the type of element being evaluated
 
         Returns:
-
+            list: LS-to-DS mapping
         """
-        output = None
 
-        if hazard_type == "earthquake":
-            if inventory_type == "building":
-                if len(self.fragility_curves) == 3:
-                    output = FragilityCurveSet._3ls_to_4ds(damage)
-            elif inventory_type == "bridge":
-                if len(self.fragility_curves) == 4:
-                    output = FragilityCurveSet._4ls_to_5ds(damage)
-        elif hazard_type == "tornado":
-            if inventory_type == "building":
-                if len(self.fragility_curves) == 3:
-                    output = FragilityCurveSet._3ls_to_4ds(damage)
-            elif inventory_type == "bridge":
-                if len(self.fragility_curves) == 4:
-                    output = FragilityCurveSet._4ls_to_5ds(damage)
-        elif hazard_type == "flood":
-            if inventory_type == "building":
-                if len(self.fragility_curves) == 3:
-                    output = FragilityCurveSet._3ls_to_4ds(damage)
-            elif inventory_type == "bridge":
-                if len(self.fragility_curves) == 4:
-                    output = FragilityCurveSet._4ls_to_5ds(damage)
-        elif hazard_type == "tsunami":
-            if inventory_type == "building":
-                if len(self.fragility_curves) == 3:
-                    output = FragilityCurveSet._3ls_to_4ds(damage)
-            elif inventory_type == "bridge":
-                if len(self.fragility_curves) == 4:
-                    output = FragilityCurveSet._4ls_to_5ds(damage)
-        elif hazard_type == "hurricane":
-            if inventory_type == "building":
-                if len(self.fragility_curves) == 1:
-                    output = FragilityCurveSet._1ls_to_4ds(damage)
-                elif len(self.fragility_curves) == 3:
-                    output = FragilityCurveSet._3ls_to_4ds(damage)
-            elif inventory_type == "bridge":
-                if len(self.fragility_curves) == 1:
-                    output = FragilityCurveSet._1ls_to_5ds(damage)
-                elif len(self.fragility_curves) == 4:
-                    output = FragilityCurveSet._4ls_to_5ds(damage)
-        else:
-            pass
+        # Organize conceptually per LS-to-DS mapping , then by event, then by structure and by count
+        # This may help keep track of scientific requirements also.
 
-        if output is None:
+        damage_dispatcher = {
+            # 1 LS to 4 DS
+            ("hurricane",   "building",         1): FragilityCurveSet._1ls_to_4ds,
+            # 1 LS to 5 DS
+            ("hurricane",   "bridge",           1): FragilityCurveSet._1ls_to_5ds,
+            # 3 LS to 4 DS
+            ("earthquake",  "building",         3): FragilityCurveSet._3ls_to_4ds,
+            ("tornado",     "building",         3): FragilityCurveSet._3ls_to_4ds,
+            ("hurricane",   "building",         3): FragilityCurveSet._3ls_to_4ds,
+            ("flood",       "building",         3): FragilityCurveSet._3ls_to_4ds,
+            ("tsunami",     "building",         3): FragilityCurveSet._3ls_to_4ds,
+            # 4 LS to 5 DS
+            ("earthquake",  "bridge",           4): FragilityCurveSet._4ls_to_5ds,
+            ("earthquake",  "road",             4): FragilityCurveSet._4ls_to_5ds,
+            ("earthquake",  "water_facility",   4): FragilityCurveSet._4ls_to_5ds,
+            ("tornado",     "bridge",           4): FragilityCurveSet._4ls_to_5ds,
+            ("flood",       "bridge",           4): FragilityCurveSet._4ls_to_5ds,
+            ("tsunami",     "bridge",           4): FragilityCurveSet._4ls_to_5ds,
+            ("tsunami",     "road",             4): FragilityCurveSet._4ls_to_5ds,
+            ("tsunami",     "water_facility",   4): FragilityCurveSet._4ls_to_5ds,
+            ("hurricane",   "bridge",           4): FragilityCurveSet._4ls_to_5ds
+        }
+
+        if not (hazard_type, inventory_type, len(self.fragility_curves)) in damage_dispatcher.keys():
             raise ValueError(inventory_type + " " + hazard_type + " damage analysis do not support " +
                              str(len(self.fragility_curves)) + " limit state")
 
-        return output
+        return damage_dispatcher[hazard_type, inventory_type, len(self.fragility_curves)](damage)
 
     def construct_expression_args_from_inventory(self, inventory_unit: dict):
         kwargs_dict = {}
