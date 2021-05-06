@@ -65,12 +65,14 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.pipeline_damage_concurrent_future(
+        (ds_results, damage_results) = self.pipeline_damage_concurrent_future(
             self.pipeline_damage_analysis_bulk_input, num_workers,
             inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
 
-        self.set_result_csv_data("result", results,
-                                 name=self.get_parameter("result_name"))
+        self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
+        self.set_result_json_data("metadata",
+                                  damage_results,
+                                  name=self.get_parameter("result_name") + "_additional_info")
 
         return True
 
@@ -87,13 +89,14 @@ class PipelineDamageRepairRate(BaseAnalysis):
             list: A list of ordered dictionaries with building damage values and other data/metadata.
 
         """
-        output = []
-        with concurrent.futures.ProcessPoolExecutor(
-                max_workers=num_workers) as executor:
-            for ret in executor.map(function_name, *args):
-                output.extend(ret)
+        output_ds = []
+        output_dmg = []
+        with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+            for ret1, ret2 in executor.map(function_name, *args):
+                output_ds.extend(ret1)
+                output_dmg.extend(ret2)
 
-        return output
+        return output_ds, output_dmg
 
     def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_type,
                                             hazard_dataset_id):
@@ -105,10 +108,12 @@ class PipelineDamageRepairRate(BaseAnalysis):
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
-            list: A list of ordered dictionaries with pipeline damage values and other data/metadata.
-
+            ds_results (list): A list of ordered dictionaries with pipeline damage values and other data/metadata.
+            damage_results (list): A list of ordered dictionaries with pipeline damage metadata.
         """
-        result = []
+
+        ds_results = []
+        damage_results = []
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -150,17 +155,14 @@ class PipelineDamageRepairRate(BaseAnalysis):
                         pipeline["id"] in fragility_sets_liq:
                     liq_fragility_set = fragility_sets_liq[pipeline["id"]]
 
-                result.append(self.pipeline_damage_analysis(pipeline,
-                                                            hazard_type,
-                                                            fragility_sets[
-                                                                pipeline[
-                                                                    "id"]],
-                                                            liq_fragility_set,
-                                                            hazard_dataset_id,
-                                                            geology_dataset_id,
-                                                            use_liquefaction))
+                (ds_result, damage_result) = self.pipeline_damage_analysis(pipeline, hazard_type,
+                                                                           fragility_sets[pipeline["id"]],
+                                                                           liq_fragility_set, hazard_dataset_id,
+                                                                           geology_dataset_id, use_liquefaction)
+                ds_results.append(ds_result)
+                damage_results.append(damage_result)
 
-        return result
+        return ds_results, damage_results
 
     def pipeline_damage_analysis(self, pipeline, hazard_type, fragility_set,
                                  fragility_set_liq, hazard_dataset_id,
@@ -180,8 +182,11 @@ class PipelineDamageRepairRate(BaseAnalysis):
         Returns:
             OrderedDict: A dictionary with pipeline damage values and other data/metadata.
         """
+        ds_result = {}
+        damage_result = {}
+        ds_result['guid'] = pipeline['properties']['guid']
+        damage_result['guid'] = pipeline['properties']['guid']
 
-        pipeline_results = collections.OrderedDict()
         pgv_repairs = 0.0
         pgd_repairs = 0.0
         liq_hazard_type = ""
@@ -256,33 +261,49 @@ class PipelineDamageRepairRate(BaseAnalysis):
             num_pgv_repairs = pgv_repairs * length
             num_repairs = num_pgd_repairs + num_pgv_repairs
 
-            pipeline_results['guid'] = pipeline['properties']['guid']
             if 'pipetype' in pipeline['properties']:
-                pipeline_results['pipeclass'] = pipeline['properties'][
+                damage_result['pipeclass'] = pipeline['properties'][
                     'pipetype']
             elif 'pipelinesc' in pipeline['properties']:
-                pipeline_results['pipeclass'] = pipeline['properties'][
+                damage_result['pipeclass'] = pipeline['properties'][
                     'pipelinesc']
             else:
-                pipeline_results['pipeclass'] = ""
+                damage_result['pipeclass'] = ""
 
-            pipeline_results['pgvrepairs'] = pgv_repairs
-            pipeline_results['pgdrepairs'] = pgd_repairs
-            pipeline_results['repairspkm'] = total_repair_rate
-            pipeline_results['breakrate'] = break_rate
-            pipeline_results['leakrate'] = leak_rate
-            pipeline_results['failprob'] = failure_probability
-            pipeline_results['demandtype'] = demand_type
-            pipeline_results['hazardtype'] = hazard_type
-            pipeline_results['hazardval'] = hazard_val
-            pipeline_results['liqhaztype'] = liq_hazard_type
-            pipeline_results['liqhazval'] = liq_hazard_val
-            pipeline_results['liqprobability'] = liquefaction_prob
-            pipeline_results['numpgvrpr'] = num_pgv_repairs
-            pipeline_results['numpgdrpr'] = num_pgd_repairs
-            pipeline_results['numrepairs'] = num_repairs
+            ds_result['pgvrepairs'] = pgv_repairs
+            ds_result['pgdrepairs'] = pgd_repairs
+            ds_result['repairspkm'] = total_repair_rate
+            ds_result['breakrate'] = break_rate
+            ds_result['leakrate'] = leak_rate
+            ds_result['failprob'] = failure_probability
+            ds_result['numpgvrpr'] = num_pgv_repairs
+            ds_result['numpgdrpr'] = num_pgd_repairs
+            ds_result['numrepairs'] = num_repairs
+            ds_result['liqprobability'] = liquefaction_prob
 
-        return pipeline_results
+            damage_result['fragility_id'] = fragility_set.id
+            if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
+                damage_result['liq_fragility_id'] = fragility_set_liq.id
+            else:
+                damage_result['liq_fragility_id'] = None
+            damage_result['demandtypes'] = demand_type
+            damage_result['demandunits'] = demand_unit
+            damage_result['hazardtype'] = hazard_type
+            damage_result['hazardval'] = hazard_val
+            damage_result['liqhaztype'] = liq_hazard_type
+            damage_result['liqhazval'] = liq_hazard_val
+
+        else:
+            damage_result['fragility_id'] = None
+            damage_result['liq_fragility_id'] = None
+            damage_result['demandtypes'] = None
+            damage_result['demandunits'] = None
+            damage_result['hazardtype'] = None
+            damage_result['hazardval'] = None
+            damage_result['liqhaztype'] = None
+            damage_result['liqhazval'] = None
+
+        return ds_result, damage_result
 
     def get_spec(self):
         """Get specifications of the pipeline damage analysis.
@@ -362,7 +383,14 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'pipeline',
-                    'type': 'ergo:pipelineDamage'
+                    'type': 'ergo:pipelineDamageVer2'
+                },
+                {
+                    'id': 'metadata',
+                    'parent_type': 'pipeline',
+                    'description': 'additional metadata in json file about applied hazard value and '
+                                   'fragility',
+                    'type': 'incore:pipelineDamageMetadata'
                 }
             ]
         }
