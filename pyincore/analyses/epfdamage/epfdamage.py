@@ -184,7 +184,9 @@ class EpfDamage(BaseAnalysis):
                     j += 1
 
                 epf_args = selected_fragility_set.construct_expression_args_from_inventory(epf)
-                limit_states = selected_fragility_set.calculate_limit_state_refactored(hval_dict, **epf_args)
+                limit_states = selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
+                                                                                                    inventory_type='electric_facility',
+                                                                                                    **epf_args)
             else:
                 hazard_val = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
                 # Sometimes the geotiffs give large negative values for out of bounds instead of 0
@@ -197,9 +199,13 @@ class EpfDamage(BaseAnalysis):
 
                 input_demand_types = hazard_vals[i]["demands"][0]
                 input_demand_units = hazard_vals[i]["units"][0]
-                limit_states = selected_fragility_set.calculate_limit_state(hazard_val, std_dev=std_dev)
+                limit_states = selected_fragility_set.calculate_limit_state_w_conversion(hazard_val,
+                                                                                         std_dev=std_dev,
+                                                                                         inventory_type='electric_facility')
 
-            dmg_interval = AnalysisUtil.calculate_damage_interval(limit_states)
+            dmg_interval = selected_fragility_set.calculate_damage_interval(limit_states,
+                                                                            hazard_type=hazard_type,
+                                                                            inventory_type="electric_facility")
 
             ds_result["guid"] = epf["properties"]["guid"]
             ds_result.update(limit_states)
@@ -211,6 +217,10 @@ class EpfDamage(BaseAnalysis):
             damage_result["demandunits"] = input_demand_units
             damage_result["hazardtype"] = hazard_type
             damage_result["hazardval"] = hazard_val
+            damage_result['liq_fragility_id'] = None
+            damage_result['liqhaztype'] = None
+            damage_result['liqhazval'] = None
+            damage_result['liqprobability'] = None
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)
@@ -263,17 +273,12 @@ class EpfDamage(BaseAnalysis):
                 # states and dmg_interval
                 for ds_result in ds_results:
                     if ds_result['guid'] == liq_epf["properties"]['guid']:
-                        if ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet'] in ds_result.keys():
-                            limit_states = {"ls-slight": ds_result['ls-slight'],
-                                            "ls-moderat": ds_result['ls-moderat'],
-                                            "ls-extensi": ds_result['ls-extensi'],
-                                            "ls-complet": ds_result['ls-complet']}
-                        elif ['LS_0', 'LS_1', 'LS_2'] in ds_result.keys():
-                            limit_states = {
-                                "LS_0": ds_result["DS_0"],
-                                "LS_1": ds_result["DS_1"],
-                                "LS_2": ds_result["DS_2"]
-                            }
+                        # default EPF to be 4 ls and 5 ds
+                        if ['LS_0', 'LS_1', 'LS_2', 'LS_3'] in ds_result.keys():
+                            limit_states = {"LS_0": ds_result['LS_0'],
+                                            "LS_1": ds_result['LS_1'],
+                                            "LS_2": ds_result['LS_2'],
+                                            "LS_3": ds_result['LS_3']}
                         else:
                             raise ValueError("Do not support the limit state name")
 
@@ -285,6 +290,7 @@ class EpfDamage(BaseAnalysis):
 
                 for damage_result in damage_results:
                     if damage_result['guid'] == liq_epf["properties"]['guid']:
+                        damage_result['liq_fragility_id'] = liq_fragility_set.id
                         damage_result['liqhaztype'] = liq_input_demand_types
                         damage_result['liqhazval'] = liq_hazard_val
                         damage_result['liqprobability'] = liquefaction_prob
@@ -297,10 +303,12 @@ class EpfDamage(BaseAnalysis):
             damage_result = dict()
             ds_result['guid'] = epf['properties']['guid']
             damage_result['guid'] = epf['properties']['guid']
+            damage_result['fragility_id'] = None
             damage_result["demandtypes"] = None
             damage_result['demandunits'] = None
             damage_result["hazardtype"] = None
-            damage_result['hazardval'] = 0.0
+            damage_result['hazardval'] = None
+            damage_result['liq_fragility_id'] = None
             damage_result['liqhaztype'] = None
             damage_result['liqhazval'] = None
             damage_result['liqprobability'] = None
@@ -394,10 +402,10 @@ class EpfDamage(BaseAnalysis):
                 },
                 {
                     'id': 'metadata',
-                    'parent_type': 'bridges',
+                    'parent_type': 'epfs',
                     'description': 'additional metadata in json file about applied hazard value and '
                                    'fragility',
-                    'type': 'incore:epfDamageVer2'
+                    'type': 'incore:epfDamageMetadata'
                 }
             ]
         }

@@ -286,7 +286,6 @@ class FragilityCurveSet:
         Returns:
             list: LS-to-DS mapping
         """
-
         # Organize conceptually per LS-to-DS mapping , then by event, then by structure and by count
         # This may help keep track of scientific requirements also.
 
@@ -305,12 +304,15 @@ class FragilityCurveSet:
             ("earthquake", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
             ("earthquake", "road", 4): FragilityCurveSet._4ls_to_5ds,
             ("earthquake", "water_facility", 4): FragilityCurveSet._4ls_to_5ds,
+            ("earthquake", "electric_facility", 4): FragilityCurveSet._4ls_to_5ds,
             ("tornado", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
+            ("tornado", "electric_facility", 4): FragilityCurveSet._4ls_to_5ds,
             ("flood", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
             ("tsunami", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
             ("tsunami", "road", 4): FragilityCurveSet._4ls_to_5ds,
             ("tsunami", "water_facility", 4): FragilityCurveSet._4ls_to_5ds,
-            ("hurricane", "bridge", 4): FragilityCurveSet._4ls_to_5ds
+            ("tsunami", "electric_facility", 4): FragilityCurveSet._4ls_to_5ds,
+            ("hurricane", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
         }
 
         if not (hazard_type, inventory_type, len(self.fragility_curves)) in ls_ds_dspatcher.keys():
