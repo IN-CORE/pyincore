@@ -198,7 +198,6 @@ class BuildingDamage(BaseAnalysis):
             damage_result['fragility_id'] = selected_fragility_set.id
             damage_result['demandtype'] = b_demands
             damage_result['demandunits'] = b_units
-            damage_result['hazardtype'] = hazard_type
             damage_result['hazardval'] = b_haz_vals
 
             ds_results.append(ds_result)
@@ -301,7 +300,7 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'damage_result',
                     'parent_type': 'buildings',
                     'description': 'Json file with information about applied hazard value and fragility',
-                    'type': 'incore:buildingDamageMetadata'
+                    'type': 'ergo:buildingDamageVer5'
                 }
             ]
         }

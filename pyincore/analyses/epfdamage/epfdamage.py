@@ -297,7 +297,6 @@ class EpfDamage(BaseAnalysis):
             damage_result = dict()
             ds_result['guid'] = epf['properties']['guid']
             damage_result['guid'] = epf['properties']['guid']
-            damage_result['fragility_id'] = None
             damage_result["demandtypes"] = None
             damage_result['demandunits'] = None
             damage_result["hazardtype"] = None
@@ -395,10 +394,10 @@ class EpfDamage(BaseAnalysis):
                 },
                 {
                     'id': 'metadata',
-                    'parent_type': 'epfs',
+                    'parent_type': 'bridges',
                     'description': 'additional metadata in json file about applied hazard value and '
                                    'fragility',
-                    'type': 'incore:epfDamageMetadata'
+                    'type': 'incore:epfDamageVer2'
                 }
             ]
         }
