@@ -212,7 +212,6 @@ class BuildingDamage(BaseAnalysis):
             damage_result['fragility_id'] = None
             damage_result['demandtype'] = None
             damage_result['demandunits'] = None
-            damage_result['hazardtype'] = None
             damage_result['hazardval'] = None
 
             ds_results.append(ds_result)
