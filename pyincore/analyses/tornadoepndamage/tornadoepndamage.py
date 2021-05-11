@@ -95,9 +95,11 @@ class TornadoEpnDamage(BaseAnalysis):
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
         self.load_remote_input_dataset("tornado", tornado_metadata["datasetId"])
         tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
-        results = self.get_damage(node_dataset, link_dataset, tornado_dataset, tornado_id)
+        ds_results, damage_results = self.get_damage(node_dataset, link_dataset, tornado_dataset, tornado_id)
 
-        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
+        self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
+        self.set_result_json_data(
+            "metadata", damage_results, name=self.get_parameter("result_name") + "_additional_info")
 
         return True
 
@@ -181,6 +183,7 @@ class TornadoEpnDamage(BaseAnalysis):
             cost2repairpath = [0] * self.nnode  # placeholder for recording total repair cost for the network
             time2repairpath = [0] * self.nnode  # placeholder for recording total repair time for the network
             nodetimerep = [0] * self.nnode
+            hazardval = [0] * self.nnode  # placeholder for recording hazard value that is wind speed
 
             # iterate link
             for line_feature in link_dataset:
@@ -322,6 +325,7 @@ class TornadoEpnDamage(BaseAnalysis):
                 noderepair[to_node_val - 1] = repaircost
                 nodedam[to_node_val - 1] = ndamage
                 nodetimerep[to_node_val - 1] = repairtime
+                hazardval[to_node_val - 1] = windspeed
 
             # Calculate damage and repair cost based on network
             for i in range(len(first_node_list)):
@@ -361,36 +365,31 @@ class TornadoEpnDamage(BaseAnalysis):
         stdtime = numpy.std(numpy.asarray(totaltime2repair), axis=0)
 
         # create result
-        results = []
+        ds_results = []
+        damage_results = []
 
         for i in range(len(meanpoles)):
-            epn_results = collections.OrderedDict()
-            guid_dict = collections.OrderedDict()
-            meanpole_dict = collections.OrderedDict()
-            stdpole_dict = collections.OrderedDict()
-            meancost_dict = collections.OrderedDict()
-            stdcost_dict = collections.OrderedDict()
-            meantime_dict = collections.OrderedDict()
-            stdtime_dict = collections.OrderedDict()
+            ds_result = dict()
+            damage_result = dict()
 
-            guid_dict["guid"] = guid_list[i]
-            meanpole_dict["meanpoles"] = meanpoles[i]
-            stdpole_dict["stdpoles"] = stdpoles[i]
-            meancost_dict["meancost"] = meancost[i]
-            stdcost_dict["stdcost"] = stdcost[i]
-            meantime_dict["meantime"] = meantime[i]
-            stdtime_dict["stdtime"] = stdtime[i]
+            ds_result['guid'] = guid_list[i]
+            ds_result["meanpoles"] = meanpoles[i]
+            ds_result["stdpoles"] = stdpoles[i]
+            ds_result["meancost"] = meancost[i]
+            ds_result["stdcost"] = stdcost[i]
+            ds_result["meantime"] = meantime[i]
+            ds_result["stdtime"] = stdtime[i]
 
-            epn_results.update(guid_dict)
-            epn_results.update(meanpole_dict)
-            epn_results.update(stdpole_dict)
-            epn_results.update(meancost_dict)
-            epn_results.update(stdcost_dict)
-            epn_results.update(meantime_dict)
-            epn_results.update(stdtime_dict)
-            results.append(epn_results)
+            damage_result['guid'] = guid_list[i]
+            damage_result["fragility_tower_id"] = self.fragility_tower_id
+            damage_result["fragility_pole_id"] = self.fragility_pole_id
+            damage_result["hazardtype"] = "Tornado"
+            damage_result["hazardval"] = hazardval[i]
 
-        return results
+            ds_results.append(ds_result)
+            damage_results.append(damage_result)
+
+        return ds_results, damage_results
 
     """
     align coordinate values in a list as a single pair in order
@@ -507,7 +506,14 @@ class TornadoEpnDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'epn_node',
-                    'type': 'incore:tornadoEPNDamageVer1'
+                    'description': 'CSV file of damages for electric power network by tornado',
+                    'type': 'incore:tornadoEPNDamageVer2'
+                },
+                {
+                    'id': 'metadata',
+                    'parent_type': 'epn_node',
+                    'description': 'Json file with information about applied hazard value and fragility',
+                    'type': 'incore:tornadoEPNDamageMetadata'
                 }
             ]
         }
