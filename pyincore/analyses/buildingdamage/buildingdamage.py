@@ -33,6 +33,13 @@ class BuildingDamage(BaseAnalysis):
         # Building dataset
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
 
+        # building retrofit strategy
+        retrofit_strategy_dataset = self.get_input_dataset("retrofit_strategy")
+        if retrofit_strategy_dataset is not None:
+            retrofit_strategy = list(retrofit_strategy_dataset.get_csv_reader())
+        else:
+            retrofit_strategy = None
+
         # Get hazard input
         hazard_dataset_id = self.get_parameter("hazard_id")
 
@@ -64,6 +71,7 @@ class BuildingDamage(BaseAnalysis):
         (ds_results, damage_results) = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
                                                                               num_workers,
                                                                               inventory_args,
+                                                                              repeat(retrofit_strategy),
                                                                               repeat(hazard_type),
                                                                               repeat(hazard_dataset_id))
 
@@ -95,11 +103,12 @@ class BuildingDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def building_damage_analysis_bulk_input(self, buildings, hazard_type, hazard_dataset_id):
+    def building_damage_analysis_bulk_input(self, buildings, retrofit_strategy, hazard_type, hazard_dataset_id):
         """Run analysis for multiple buildings.
 
         Args:
             buildings (list): Multiple buildings from input inventory set.
+            retrofit_strategy (list): building guid and its retrofit level 0, 1, 2, etc. This is Optional
             hazard_type (str): Hazard type, either earthquake, tornado, or tsunami.
             hazard_dataset_id (str): An id of the hazard exposure.
 
@@ -110,7 +119,7 @@ class BuildingDamage(BaseAnalysis):
 
         fragility_key = self.get_parameter("fragility_key")
         fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
-                                                           fragility_key)
+                                                           fragility_key, retrofit_strategy)
         values_payload = []
         unmapped_buildings = []
         mapped_buildings = []
@@ -286,6 +295,12 @@ class BuildingDamage(BaseAnalysis):
                     'required': True,
                     'description': 'DFR3 Mapping Set Object',
                     'type': ['incore:dfr3MappingSet'],
+                },
+                {
+                    'id':'retrofit_strategy',
+                    'required': False,
+                    'description': 'Building retrofit strategy that contains guid and retrofit method',
+                    'type': ['incore:retrofitStrategy']
                 }
             ],
             'output_datasets': [

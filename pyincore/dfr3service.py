@@ -137,7 +137,7 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set)
         return r.json()
 
-    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str):
+    def match_inventory(self, mapping:MappingSet, inventories: list, entry_key: str, add_info:list=None):
         """
         This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
@@ -146,6 +146,7 @@ class Dfr3Service:
             mapping: MappingSet Object that has the rules and entries
             inventories: inventories
             entry_key: keys such as PGA, pgd, and etc
+            add_info: additional information that used to match rules, e.g. retrofit strategy per building
 
         Returns: a dictionary of {"inventory id": FragilityCurveSet object}
 
@@ -161,6 +162,15 @@ class Dfr3Service:
             if "efacility" in inventory["properties"] and \
                     inventory["properties"]["efacility"] is None:
                 inventory["properties"]["efacility"] = ""
+
+            # if additional information presented, merge inventory properties with that additional information
+            if add_info is not None:
+                for add_info_row in add_info:
+                    if inventory["properties"].get("guid") is not None and \
+                        add_info_row.get("guid") is not None and \
+                            inventory["properties"].get("guid") == add_info_row.get("guid"):
+                        inventory["properties"].update(add_info_row)
+                        break # assume no duplicated guid
 
             for m in mapping.mappings:
                 # for old format rule matching [[]]
