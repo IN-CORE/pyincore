@@ -71,36 +71,42 @@ class RoadDamage(BaseAnalysis):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers,
+        (ds_results, damage_results) = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers,
                                                      inventory_args,
                                                      repeat(hazard_type), repeat(hazard_dataset_id),
                                                      repeat(use_hazard_uncertainty),
                                                      repeat(geology_dataset_id), repeat(fragility_key),
                                                      repeat(use_liquefaction))
 
-        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
+        self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
+        self.set_result_json_data("metadata",
+                                  damage_results,
+                                  name=self.get_parameter("result_name") + "_additional_info")
 
         return True
 
-    def road_damage_concurrent_future(self, function_name, parallelism, *args):
+    def road_damage_concurrent_future(self, function_name, num_workers, *args):
         """Utilizes concurrent.future module.
 
         Args:
             function_name (function): The function to be parallelized.
-            parallelism (int): Number of workers in parallelization.
+            num_workers (int): Number of workers in parallelization.
             *args: All the arguments in order to pass into parameter function_name.
 
         Returns:
-            list: A list of ordered dictionaries with road damage values and other data/metadata.
+            output_ds: A list of ordered dictionaries with road damage values
+            output_dmg: A list of ordered dictionaries with other road data/metadata.
 
         """
 
-        output = []
-        with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
-            for ret in executor.map(function_name, *args):
-                output.extend(ret)
+        output_ds = []
+        output_dmg = []
+        with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+            for ret1, ret2 in executor.map(function_name, *args):
+                output_ds.extend(ret1)
+                output_dmg.extend(ret2)
 
-        return output
+        return output_ds, output_dmg
 
     def road_damage_analysis_bulk_input(self, roads, hazard_type, hazard_dataset_id, use_hazard_uncertainty,
                                         geology_dataset_id, fragility_key, use_liquefaction):
@@ -118,9 +124,10 @@ class RoadDamage(BaseAnalysis):
 
         Returns:
             list: A list of ordered dictionaries with road damage values and other data/metadata.
+            list: A list of ordered dictionaries with other road data/metadata.
 
         """
-        road_results = []
+
         fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), roads,
                                                            fragility_key)
 
@@ -131,6 +138,9 @@ class RoadDamage(BaseAnalysis):
         for rd in list_roads:
             roads[rd["id"]] = rd
         del list_roads
+
+        ds_results = []
+        damage_results = []
 
         processed_roads = []
         grouped_roads = AnalysisUtil.group_by_demand_type(roads, fragility_sets)
@@ -169,7 +179,9 @@ class RoadDamage(BaseAnalysis):
                 # This is a potential pitfall as we are relying on the order of the returned results
                 i = 0
                 for road_id in road_chunk:
-                    road_result = collections.OrderedDict()
+                    ds_result = collections.OrderedDict()
+                    damage_result = collections.OrderedDict()
+
                     road = roads[road_id]
                     hazard_val = hazard_vals[i]['hazardValue']
 
@@ -177,21 +189,29 @@ class RoadDamage(BaseAnalysis):
                     if hazard_val <= 0.0:
                         hazard_val = 0.0
 
-                    std_dev = 0.0
+                    hazard_std_dev = 0.0
                     if use_hazard_uncertainty:
                         raise ValueError("Uncertainty Not Implemented Yet.")
 
                     selected_fragility_set = fragility_sets[road_id]
-                    dmg_probability = selected_fragility_set.calculate_limit_state(hazard_val, std_dev=std_dev)
-                    dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
+                    dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(hazard_val,
+                                                                                                std_dev=hazard_std_dev,
+                                                                                                inventory_type="road")
+                    dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability,
+                                                                                     hazard_type=hazard_type,
+                                                                                     inventory_type="road")
 
-                    road_result['guid'] = road['properties']['guid']
-                    road_result.update(dmg_probability)
-                    road_result.update(dmg_interval)
-                    road_result['demandtype'] = input_demand_type
-                    road_result['demandunits'] = input_demand_units
-                    road_result['hazardtype'] = hazard_type
-                    road_result['hazardval'] = hazard_val
+                    ds_result['guid'] = road['properties']['guid']
+                    ds_result.update(dmg_probability)
+                    ds_result.update(dmg_interval)
+
+                    damage_result['guid'] = road['properties']['guid']
+                    damage_result['fragility_id'] = selected_fragility_set.id
+                    damage_result['demandtypes'] = input_demand_type
+                    damage_result['demandunits'] = input_demand_units
+                    damage_result['hazardtype'] = hazard_type
+                    damage_result['hazardval'] = hazard_val
+
 
                     # if there is liquefaction, overwrite the hazardval with liquefaction value
                     # recalculate dmg_probability and dmg_interval
@@ -204,34 +224,43 @@ class RoadDamage(BaseAnalysis):
                             liquefaction_val = liquefaction[i][input_demand_type.upper]
                         else:
                             liquefaction_val = 0.0
-                        dmg_probability = selected_fragility_set.calculate_limit_state(liquefaction_val,
-                                                                                       std_dev=std_dev)
-                        dmg_interval = AnalysisUtil.calculate_damage_interval(dmg_probability)
 
-                        road_result['hazardval'] = liquefaction_val
-                        road_result.update(dmg_probability)
-                        road_result.update(dmg_interval)
+                        dmg_probability = \
+                            selected_fragility_set.calculate_limit_state_w_conversion(hazard_val,
+                                                                                      std_dev=hazard_std_dev,
+                                                                                      inventory_type="road")
+                        dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability,
+                                                                                        hazard_type=hazard_type,
+                                                                                        inventory_type="road")
 
-                    road_results.append(road_result)
+                        damage_result['hazardval'] = liquefaction_val
+                        damage_result['liqhazardval'] = liquefaction_val
+                        ds_result.update(dmg_probability)
+                        ds_result.update(dmg_interval)
+
+                    ds_results.append(ds_result)
+                    damage_results.append(damage_result)
                     processed_roads.append(road_id)
                     i = i + 1
 
-        unmapped_dmg_probability = {"ls-slight": 0.0, "ls-moderat": 0.0,
-                                    "ls-extensi": 0.0, "ls-complet": 0.0}
-        unmapped_dmg_intervals = AnalysisUtil.calculate_damage_interval(unmapped_dmg_probability)
         for road_id, rd in roads.items():
             if road_id not in processed_roads:
-                unmapped_rd_result = collections.OrderedDict()
-                unmapped_rd_result['guid'] = rd['properties']['guid']
-                unmapped_rd_result.update(unmapped_dmg_probability)
-                unmapped_rd_result.update(unmapped_dmg_intervals)
-                unmapped_rd_result['demandtype'] = "None"
-                unmapped_rd_result['demandunits'] = "None"
-                unmapped_rd_result['hazardtype'] = "None"
-                unmapped_rd_result['hazardval'] = 0.0
-                road_results.append(unmapped_rd_result)
+                ds_result = collections.OrderedDict()
+                damage_result = collections.OrderedDict()
 
-        return road_results
+                ds_result['guid'] = rd['properties']['guid']
+
+                damage_result['guid'] = rd['properties']['guid']
+                damage_result['fragility_id'] = selected_fragility_set.id
+                damage_result['demandtype'] = None
+                damage_result['demandunits'] = None
+                damage_result['hazardtype'] = None
+                damage_result['hazardval'] = None
+
+                ds_results.append(ds_result)
+                damage_results.append(damage_result)
+
+        return ds_results, damage_results
 
     def get_spec(self):
         """Get specifications of the road damage analysis.
@@ -314,7 +343,14 @@ class RoadDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'roads',
                     'description': 'CSV file of road structural damage',
-                    'type': 'ergo:roadDamage'
+                    'type': 'ergo:roadDamageVer2'
+                },
+                {
+                    'id': 'metadata',
+                    'parent_type': 'roads',
+                    'description': 'additional metadata in json file about applied hazard value and '
+                                   'fragility',
+                    'type': 'incore:roadDamageMetadata'
                 }
             ]
         }
