@@ -70,14 +70,16 @@ class RoadFailure(BaseAnalysis):
                 inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers,
-                                                     inventory_args, repeat(distance_df),
-                                                     repeat(distance_field_name), repeat(hazard_type),
-                                                     repeat(hazard_dataset_id))
+        (results, hazard_results) = self.road_damage_concurrent_future(
+            self.road_damage_analysis_bulk_input, num_workers,
+            inventory_args,
+            repeat(distance_df), repeat(distance_field_name),
+            repeat(hazard_type), repeat(hazard_dataset_id))
 
-        self.set_result_csv_data("result", results,
-                                 name=self.get_parameter("result_name"))
-
+        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
+        self.set_result_json_data("metadata",
+                                  hazard_results,
+                                  name=self.get_parameter("result_name") + "_additional_info")
         return True
 
     def road_damage_concurrent_future(self, function_name, num_workers,
@@ -90,16 +92,19 @@ class RoadFailure(BaseAnalysis):
             *args: All the arguments in order to pass into parameter function_name.
 
         Returns:
-            list: A list of ordered dictionaries with road damage values and other data/metadata.
+            dict: An ordered dictionaries with road failure values.
+            dict: An ordered dictionaries with other road data/metadata.
 
         """
-        output = []
+        output_ds = []
+        output_dmg = []
         with concurrent.futures.ProcessPoolExecutor(
                 max_workers=num_workers) as executor:
-            for ret in executor.map(function_name, *args):
-                output.extend(ret)
+            for ret1, ret2 in executor.map(function_name, *args):
+                output_ds.extend(ret1)
+                output_dmg.extend(ret2)
 
-        return output
+        return output_ds, output_dmg
 
     def road_damage_analysis_bulk_input(self, roads, distance_df, distance_field_name, hazard_type,
                                         hazard_dataset_id):
@@ -113,10 +118,12 @@ class RoadFailure(BaseAnalysis):
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
-            list: A list of ordered dictionaries with failure probability of road and other data/metadata.
+            dict: An ordered dictionaries with road failure values.
+            dict: An ordered dictionaries with other road data/metadata.
 
         """
-        result = []
+        failure_results = []
+        hazard_results = []
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -129,62 +136,76 @@ class RoadFailure(BaseAnalysis):
             self.get_input_dataset("dfr3_mapping_set"), roads, fragility_key)
 
         for road in roads:
+            fragility_set = None
+            distance = 0.0
             if road["id"] in fragility_sets.keys():
+                fragility_set = fragility_sets[road["id"]]
+
                 # find out distance value
                 distance = float(distance_df.loc[distance_df['guid']
                                                  == road['properties']["guid"]][distance_field_name])
 
-                result.append(self.road_damage_analysis(road, distance, hazard_type,
-                                                        fragility_sets[road["id"]],
-                                                        hazard_dataset_id))
+            (failure_result, hazard_result) = self.road_damage_analysis(road, distance, hazard_type,
+                                                                            fragility_set, hazard_dataset_id)
+            failure_results.append(failure_result)
+            hazard_results.append(hazard_result)
 
-        return result
+        return failure_results, hazard_results
 
     def road_damage_analysis(self, road, distance, hazard_type, fragility_set, hazard_dataset_id):
         """Run road damage for a single road segment.
 
         Args:
-            road (obj): a single road feature.
-            distance (float): distance to shore from the road
-            hazard_type (str): hazard type.
+            road (obj): A single road feature.
+            distance (float): Distance to shore from the road.
+            hazard_type (str): Hazard type (e.g. hurricane).
             fragility_set (obj): A JSON description of fragility assigned to the road.
             hazard_dataset_id (str): A hazard dataset to use.
 
         Returns:
-            OrderedDict: A dictionary with probability of failure values and other data/metadata.
-        """
+            dict: An ordered dictionaries with road failure values.
+            dict: An ordered dictionaries with other road data/metadata.
 
-        road_results = collections.OrderedDict()
+        """
+        dur_q = 0.0
+        demand_type = None
+        demand_unit = None
+        fragility_id = None
+        failure_results = collections.OrderedDict()
+        hazard_results = collections.OrderedDict()
 
         if fragility_set is not None:
+            fragility_id = fragility_set.id
             demand_type = fragility_set.demand_types[0].lower()
-            demand_units = fragility_set.demand_units[0]
+            demand_unit = fragility_set.demand_units[0]
             location = GeoUtil.get_location(road)
             point = str(location.y) + "," + str(location.x)
 
             if hazard_type == 'hurricane':
                 hazard_resp = self.hazardsvc.get_hurricane_values(hazard_dataset_id,
-                                                                  "inundationDuration", demand_units, [point])
+                                                                  "inundationDuration", demand_unit, [point])
             else:
                 raise ValueError(
                     "Hazard type are not currently supported.")
 
             dur_q = hazard_resp[0]['hazardValue']
-
             if dur_q <= 0.0:
                 dur_q = 0.0
 
             fragility_vars = {'x': dur_q, 'y': distance}
-            pf = fragility_set.calculate_custom_limit_state(fragility_vars)['failure']
+            pf = fragility_set.calculate_custom_limit_state(fragility_vars)
 
-            road_results['guid'] = road['properties']['guid']
-            road_results['failprob'] = pf
-            road_results['demandtype'] = demand_type
-            road_results['demandunits'] = demand_units
-            road_results['hazardtype'] = hazard_type
-            road_results['hazardval'] = dur_q
+            failure_results['guid'] = road['properties']['guid']
+            failure_results['failprob'] = pf['failure']
 
-        return road_results
+        hazard_results['guid'] = road['properties']['guid']
+        hazard_results['hazardtype'] = hazard_type
+        hazard_results['fragility_id'] = fragility_id
+        hazard_results['demandtypes'] = demand_type
+        hazard_results['demandunits'] = demand_unit
+        hazard_results['hazardval'] = dur_q
+
+        return failure_results, hazard_results
 
     def get_spec(self):
         """Get specifications of the road damage analysis.
@@ -252,7 +273,14 @@ class RoadFailure(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'roads',
-                    'type': 'incore:roadFailure'
+                    'description': 'CSV file of damage states for road failure',
+                    'type': 'incore:roadFailureVer2'
+                },
+                {
+                    'id': 'metadata',
+                    'parent_type': 'roads',
+                    'description': 'Json file with information about applied hazard value and fragility',
+                    'type': 'incore:roadFailureMetadata'
                 }
             ]
         }
