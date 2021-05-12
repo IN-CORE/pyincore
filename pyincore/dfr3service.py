@@ -13,6 +13,27 @@ from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.mappingset import MappingSet
 
+# add more types if needed
+known_types = {
+    "java.lang.String": "str",
+    "double": "float",
+    "int": "int",
+    "str": "str"
+}
+
+# add more operators if needed
+known_operators = {
+    "EQ": "==",
+    "EQUALS": "==",
+    "NEQUALS": "!=",
+    "GT": ">",
+    "GE": ">=",
+    "LT": "<",
+    "LE": "<=",
+    "NMATCHES": "",
+    "MATCHES": ""
+}
+
 
 class MappingSubject(object):
     def __init__(self):
@@ -43,6 +64,7 @@ class Dfr3Service:
         client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_mapping_url = urllib.parse.urljoin(client.service_url,
@@ -62,7 +84,6 @@ class Dfr3Service:
         r = self.client.get(url)
 
         return r.json()
-
 
     def batch_get_dfr3_set(self, dfr3_id_lists: list):
         """
@@ -116,7 +137,7 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set)
         return r.json()
 
-    def match_inventory(self, mapping:MappingSet, inventories: list, entry_key: str):
+    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str):
         """
         This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
@@ -131,7 +152,7 @@ class Dfr3Service:
         """
         dfr3_sets = {}
 
-        # 2. loop through inventory to match the rules
+        # loop through inventory to match the rules
         matched_curve_ids = []
         for inventory in inventories:
             if "occ_type" in inventory["properties"] and \
@@ -142,102 +163,166 @@ class Dfr3Service:
                 inventory["properties"]["efacility"] = ""
 
             for m in mapping.mappings:
+                # for old format rule matching [[]]
+                if isinstance(m.rules, list):
+                    if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
+                        curve = m.entry[entry_key]
+                        dfr3_sets[inventory['id']] = curve
 
-                if self._property_match(rules=m.rules, properties=inventory["properties"]):
-                    curve = m.entry[entry_key]
-                    dfr3_sets[inventory['id']] = curve
+                        # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
+                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                            matched_curve_ids.append(curve)
 
-                    # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
-                    if isinstance(curve, str) and curve not in matched_curve_ids:
-                        matched_curve_ids.append(curve)
+                        # use the first match
+                        break
 
-                    # use the first match
-                    break
+                # for new format rule matching {"AND/OR":[]}
+                elif isinstance(m.rules, dict):
+                    if self._property_match(rules=m.rules, properties=inventory["properties"]):
+                        curve = m.entry[entry_key]
+                        dfr3_sets[inventory['id']] = curve
+
+                        # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
+                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                            matched_curve_ids.append(curve)
+
+                        # use the first match
+                        break
 
         batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
 
-        # 3. replace the curve id in dfr3_sets to the dfr3 curve
+        # replace the curve id in dfr3_sets to the dfr3 curve
         for inventory_id, curve_item in dfr3_sets.items():
             if isinstance(curve_item, FragilityCurveSet):
                 pass
             elif isinstance(curve_item, str):
                 dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]
             else:
-                raise ValueError("Cannot realize dfr3_set entry. The entry has to be either remote id string; or dfr3curve object!")
+                raise ValueError(
+                    "Cannot realize dfr3_set entry. The entry has to be either remote id string; or dfr3curve object!")
 
         return dfr3_sets
 
-    def _property_match(self, rules, properties):
+    @staticmethod
+    def _property_match_legacy(rules, properties):
+        """
+        method to determine whether current set of rules rules applied to the inventory row (legacy rule format)
+        Args:
+            rules: [[A and B] or [C and D]]
+            properties: dictionary that contains properties of the inventory row
 
-        # add more types if needed
-        known_types = {
-            "java.lang.String": "str",
-            "double": "float",
-            "int": "int",
-            "str": "str"
-        }
+        Returns: True or False
+        """
 
-        # add more operators if needed
-        known_operators = {
-            "EQ": "==",
-            "EQUALS": "==",
-            "NEQUALS": "!=",
-            "GT": ">",
-            "GE": ">=",
-            "LT": "<",
-            "LE": "<=",
-            "NMATCHES": "",
-            "MATCHES": ""
-        }
-
-        # if rules match without any condition
+        # if there's no condition, it indicates a match
         if rules == [[]] or rules == [] or rules == [None]:
             return True
 
         else:
-            matched = False
-            for rule in rules[0]:
-                elements = rule.split(" ", 3)
-                # the format of a rule is always: rule_type + rule_key + rule_operator + rule_value
-                # e.g. "int no_stories EQ 1",
-                # e.g. "int year_built GE 1992",
-                # e.g. "java.lang.String Soil EQUALS Upland",
-                # e.g. "java.lang.String struct_typ EQUALS W2"
+            # rules = [[A and B], OR [C and D], OR [E and F]]
+            or_matched = [False for i in range(len(rules))] # initiate all false state outer list
+            for i, and_rules in enumerate(rules):
+                and_matched = [False for j in range(len(and_rules))] # initialte all false state for inner list
+                for j, rule in enumerate(and_rules):
+                    # evaluate, return True or False. And place it in the corresponding place
+                    and_matched[j] = Dfr3Service._eval_criterion(rule, properties)
 
-                rule_type = elements[0]
-                if rule_type not in known_types.keys():
-                    raise ValueError(rule_type + " Unknown. Cannot parse the rules of this mapping!")
+                # for inner list, AND boolean applied
+                if all(and_matched):
+                    or_matched[i] = True
 
-                rule_key = elements[1]
+        # for outer list, OR boolean is appied
+        return any(or_matched)
 
-                rule_operator = elements[2]
-                if rule_operator not in known_operators.keys():
-                    raise ValueError(rule_operator + " Unknown. Cannot parse the rules of this mapping!")
+    @staticmethod
+    def _property_match(rules, properties):
+        """
+        method to determine whether current set of rules applied to the inventory row (legacy rule format)
+        Args:
+            rules:  e.g. {"AND": ["int archetype EQUALS 1", "int retrofit_level EQUALS 0”, {“OR": ["int archetype
+            EQUALS 1", "int archetype EQUALS 1"]}]
+            properties: dictionary that contains properties of the inventory row
 
-                rule_value = elements[3].strip('\'').strip('\"')
+        Returns: True or False
+        """
+        # if without any condition, consider it as a match
+        if rules == {}:
+            return True
+        else:
+            boolean = list(rules.keys())[0] # AND or OR
+            criteria = rules[boolean]
 
-                if rule_key in properties.keys():
-                    if isinstance(properties[rule_key], eval(known_types[rule_type])):
-                        if rule_type == 'java.lang.String':
-                            if rule_operator == "MATCHES":
-                                matched = bool(re.search(rule_value, properties[rule_key]))
-                            elif rule_operator == "NMATCHES":
-                                matched = not bool(re.search(rule_value, properties[rule_key]))
-                            else:
-                                matched = eval(
-                                    '"{0}"'.format(properties[rule_key]) + known_operators[rule_operator] + '"{0}"'.format(
-                                        rule_value))
-                        else:
-                            matched = eval(str(properties[rule_key]) + known_operators[rule_operator] + rule_value)
+            matches = []
+            for criterion in criteria:
+                # Recursively parse and evaluate the rules with boolean
+                if isinstance(criterion, dict):
+                    matches.append(Dfr3Service._property_match(criterion, properties))
+                # Base case: evaluate the rule and return match=true/false
+                elif isinstance(criterion, str):
+                    matches.append(Dfr3Service._eval_criterion(criterion, properties))
+                else:
+                    raise ValueError("Cannot evaluate criterion, unsupported format!")
+
+            if boolean.lower() == "and":
+                return all(matches)
+            elif boolean.lower() == "or":
+                return any(matches)
+            else:
+                raise ValueError("boolean " + boolean + " not supported!")
+
+    @staticmethod
+    def _eval_criterion(rule, properties):
+        """
+        method to evaluate individual rule and see if it appies to a certain inventory row.
+        Args:
+            rule: # e.g. "int no_stories EQ 1",
+            properties: dictionary of properties of an invnetory item. e.g. {"guid":xxx, "num_stories":xxx, ...}
+
+        Returns: True/False indicates matched or not
+
+        """
+        matched = False
+        elements = rule.split(" ", 3)
+        # the format of a rule is always: rule_type + rule_key + rule_operator + rule_value
+        # e.g. "int no_stories EQ 1",
+        # e.g. "int year_built GE 1992",
+        # e.g. "java.lang.String Soil EQUALS Upland",
+        # e.g. "java.lang.String struct_typ EQUALS W2"
+
+        rule_type = elements[0] # e.g. int, str, double, java.lang.String, etc...
+        if rule_type not in known_types.keys():
+            raise ValueError(rule_type + " Unknown. Cannot parse the rules of this mapping!")
+
+        rule_key = elements[1] # e.g. no_storeis, year_built, etc...
+
+        rule_operator = elements[2] # e.g. EQ, GE, LE, EQUALS
+        if rule_operator not in known_operators.keys():
+            raise ValueError(rule_operator + " Unknown. Cannot parse the rules of this mapping!")
+
+        rule_value = elements[3].strip('\'').strip('\"')
+
+        if rule_key in properties.keys():
+            # validate if the rule is written correctly by comparing variable type, e.g. no_stories properties
+            # should be integer
+            if isinstance(properties[rule_key], eval(known_types[rule_type])):
+                # additional steps to strip "'" for string matches
+                if rule_type == 'java.lang.String':
+                    if rule_operator == "MATCHES":
+                        matched = bool(re.search(rule_value, properties[rule_key]))
+                    elif rule_operator == "NMATCHES":
+                        matched = not bool(re.search(rule_value, properties[rule_key]))
                     else:
-                        raise ValueError("Mismatched datatype found in the mapping rule: " + rule +
-                                         ". Datatype found in the dataset for " + rule_key + " : "
-                                         + str(type(properties[rule_key])) + ". Please review the mapping being used.")
+                        matched = eval(
+                            '"{0}"'.format(properties[rule_key]) + known_operators[rule_operator] + '"{0}"'.format(
+                                rule_value))
+                else:
+                    matched = eval(str(properties[rule_key]) + known_operators[rule_operator] + rule_value)
+            else:
+                raise ValueError("Mismatched datatype found in the mapping rule: " + rule +
+                                 ". Datatype found in the dataset for " + rule_key + " : "
+                                 + str(type(properties[rule_key])) + ". Please review the mapping being used.")
 
-                if not matched:
-                    break
-
-            return matched
+        return matched
 
     def create_mapping(self, mapping_set: dict):
         """Create DFR3 mapping on the server. POST API endpoint call.
@@ -309,4 +394,3 @@ class Dfr3Service:
         r = self.client.get(url)
 
         return r.json()
-

@@ -71,6 +71,16 @@ def test_match_fragilities_multiple_inventory(fragilitysvc):
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
 
 
+def test_match_fragilities_multiple_inventories_new_format(fragilitysvc):
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "multiple_inventory.json"), 'r') as file:
+        inventories = ast.literal_eval(file.read())
+    key = "Non-Retrofit Fragility ID Code"
+    mapping = MappingSet.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "local_mapping_new_format.json"),
+                                            "fragility")
+    frag_set = fragilitysvc.match_inventory(mapping, inventories, key)
+    assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
+
+
 def test_get_fragility_mappings(fragilitysvc):
     mappings = fragilitysvc.get_mappings(hazard_type="earthquake", creator="cwang138")
 

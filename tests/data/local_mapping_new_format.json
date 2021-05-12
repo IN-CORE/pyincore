@@ -1,0 +1,22 @@
+{
+  "id": "test",
+  "name": "test new mapping rule format",
+  "hazardType": "earthquake",
+  "inventoryType": "building",
+  "mappings": [
+    {
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b47b350337d4a36290769c7"
+      },
+      "rules": {
+        "AND": [
+          {"OR": ["int no_stories GE 1", "int no_stories LE 3"] },
+          {"OR": [ "int year_built EQUALS 1978", "int year_built EQUALS 1925"]},
+          "java.lang.String struct_typ EQUALS C1"
+        ]
+      }
+    }
+  ],
+  "creator": "ergo",
+  "mappingType": "fragility"
+}
