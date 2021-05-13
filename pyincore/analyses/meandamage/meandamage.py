@@ -57,11 +57,10 @@ class MeanDamage(BaseAnalysis):
                     'type': ['ergo:buildingDamageVer4', 'ergo:buildingDamageVer5',
                              'ergo:nsBuildingInventoryDamage', 'ergo:nsBuildingInventoryDamageVer2',
                              'ergo:bridgeDamage', 'ergo:bridgeDamageVer2',
-                             'ergo:waterFacilityDamageVer4',
+                             'ergo:waterFacilityDamageVer4', 'ergo:waterFacilityDamageVer5'
                              'ergo:roadDamage', 'ergo:roadDamageVer2',
                              'incore:epfDamage', 'incore:epfDamageVer2'
-                             'incore:pipelineDamage', 'incore:pipelineDamageVer2',
-                             'ergo:waterFacilityDamageVer4'],
+                             'incore:pipelineDamage', 'incore:pipelineDamageVer2'],
                 },
                 {
                     'id': 'dmg_ratios',
