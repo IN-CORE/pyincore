@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.3] - 2021-05-21
+### Changed
+- Split epf damage output to json and csv, rename LS/DS [INCORE1-1136](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1136)
+- Split non-structural damage output to json and csv, rename LS/DS [INCORE1-1137](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1137)
+- Split pipeline damage output to json and csv, rename LS/DS [INCORE1-1138](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1138)
+- Split pipeline repair rate analysis output to json and csv, rename LS/DS [INCORE1-1139](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1139)
+- Split road damage output to json and csv, rename LS/DS [INCORE1-1140](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1140)
+- Split road failure analysis output to json and csv, rename LS/DS [INCORE1-1141](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1141)
+- Split tornado EPN damage output to json and csv, rename LS/DS [INCORE1-1142](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1142)
+- Split water facility damage output to json and csv, rename LS/DS [INCORE1-1143](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1143)
+- Optimize damage interval calculation method code [INCORE1-1165](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1165)
+- Renaming the json format damage output to new dataType [INCORE-1190](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1190)
+
+### Added
+- seed number in Monte Carlo simulation [INCORE1-1086](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1086)
+- support retrofit strategy in building damage [INCORE1-1149](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1149)
+- enable parsing new format of fragility mapping rules with explicity booleans [INCORE1-1178](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1178)
+
+### Fixed
+- Fix broken unit test in test_dataservice [INCORE1-1147](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1147)
+
+
 ## [0.9.2] - 2021-04-22
 
 ### Fixed
