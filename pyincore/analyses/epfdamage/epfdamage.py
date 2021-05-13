@@ -405,7 +405,7 @@ class EpfDamage(BaseAnalysis):
                     'parent_type': 'epfs',
                     'description': 'additional metadata in json file about applied hazard value and '
                                    'fragility',
-                    'type': 'incore:epfDamageMetadata'
+                    'type': 'incore:epfDamageSupplement'
                 }
             ]
         }

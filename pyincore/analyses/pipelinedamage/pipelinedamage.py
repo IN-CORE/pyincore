@@ -260,7 +260,7 @@ class PipelineDamage(BaseAnalysis):
                     'id': 'metadata',
                     'parent_type': 'pipeline',
                     'description': 'Json file with information about applied hazard value and fragility',
-                    'type': 'incore:pipelineDamageMetadata'
+                    'type': 'incore:pipelineDamageSupplement'
                 }
             ]
         }

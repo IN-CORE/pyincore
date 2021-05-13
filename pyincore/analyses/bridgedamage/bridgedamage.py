@@ -345,7 +345,7 @@ class BridgeDamage(BaseAnalysis):
                     'parent_type': 'bridges',
                     'description': 'additional metadata in json file about applied hazard value and '
                                    'fragility',
-                    'type': 'ergo:bridgeDamageVer2'
+                    'type': 'incore:bridgeDamageSupplement'
                 }
             ]
         }

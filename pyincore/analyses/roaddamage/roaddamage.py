@@ -350,7 +350,7 @@ class RoadDamage(BaseAnalysis):
                     'parent_type': 'roads',
                     'description': 'additional metadata in json file about applied hazard value and '
                                    'fragility',
-                    'type': 'incore:roadDamageMetadata'
+                    'type': 'incore:roadDamageSupplement'
                 }
             ]
         }

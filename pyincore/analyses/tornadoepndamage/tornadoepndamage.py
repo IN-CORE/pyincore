@@ -513,7 +513,7 @@ class TornadoEpnDamage(BaseAnalysis):
                     'id': 'metadata',
                     'parent_type': 'epn_node',
                     'description': 'Json file with information about applied hazard value and fragility',
-                    'type': 'incore:tornadoEPNDamageMetadata'
+                    'type': 'incore:tornadoEPNDamageSupplement'
                 }
             ]
         }

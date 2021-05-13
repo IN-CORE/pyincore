@@ -392,7 +392,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                     'parent_type': 'pipeline',
                     'description': 'additional metadata in json file about applied hazard value and '
                                    'fragility',
-                    'type': 'incore:pipelineDamageMetadata'
+                    'type': 'incore:pipelineDamageSupplement'
                 }
             ]
         }

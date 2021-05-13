@@ -314,7 +314,7 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'damage_result',
                     'parent_type': 'buildings',
                     'description': 'Json file with information about applied hazard value and fragility',
-                    'type': 'ergo:buildingDamageVer5'
+                    'type': 'incore:buildingDamageSupplement'
                 }
             ]
         }

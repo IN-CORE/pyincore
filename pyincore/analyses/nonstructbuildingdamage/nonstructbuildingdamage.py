@@ -376,7 +376,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'damage_result',
                     'parent_type': 'buildings',
                     'description': 'Json file with information about applied hazard value and fragility',
-                    'type': 'incore:nsBuildingInventoryDamageMetadata'
+                    'type': 'incore:nsBuildingInventoryDamageSupplement'
                 }
             ]
         }

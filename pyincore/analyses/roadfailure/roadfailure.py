@@ -280,7 +280,7 @@ class RoadFailure(BaseAnalysis):
                     'id': 'metadata',
                     'parent_type': 'roads',
                     'description': 'Json file with information about applied hazard value and fragility',
-                    'type': 'incore:roadFailureMetadata'
+                    'type': 'incore:roadFailureSupplement'
                 }
             ]
         }

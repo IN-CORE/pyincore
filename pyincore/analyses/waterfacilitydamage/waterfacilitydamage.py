@@ -361,7 +361,7 @@ class WaterFacilityDamage(BaseAnalysis):
                     'parent_type': 'water_facilities',
                     'description': 'additional metadata in json file about applied hazard value and '
                                    'fragility',
-                    'type': 'incore:waterFacilityDamageMetadata'
+                    'type': 'incore:waterFacilityDamageSupplement'
                 }
             ]
         }
