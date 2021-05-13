@@ -20,6 +20,9 @@ def run_with_base_class():
                      ["insignific", "moderate", "heavy", "complete"])
     mc.set_parameter("failure_state_keys", ["moderate", "heavy", "complete"])
 
+    # optional parameter
+    mc.set_parameter("seed", 2)
+
     mc.run_analysis()
 
 
