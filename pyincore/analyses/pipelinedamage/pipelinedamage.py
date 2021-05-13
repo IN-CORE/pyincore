@@ -5,23 +5,20 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-"""Buried Pipeline Damage Analysis with limit state calculation
+""" Buried Pipeline Damage Analysis with limit state calculation """
 
-"""
-
-import collections
 import concurrent.futures
 from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, \
-    AnalysisUtil, GeoUtil
+    FragilityCurveSet, AnalysisUtil, GeoUtil
 
 
 class PipelineDamage(BaseAnalysis):
-    """Computes pipeline damage for a hazard.
+    """Computes pipeline damage for an earthquake or a tsunami).
 
     Args:
-        incore_client: Service client with authentication info
+        incore_client: Service client with authentication info.
 
     """
 
@@ -33,9 +30,8 @@ class PipelineDamage(BaseAnalysis):
 
     def run(self):
         """Execute pipeline damage analysis """
-        # Pipeline dataset
-        pipeline_dataset = self.get_input_dataset(
-            "pipeline").get_inventory_reader()
+
+        pipeline_dataset = self.get_input_dataset("pipeline").get_inventory_reader()
 
         # Get hazard input
         hazard_type = self.get_parameter("hazard_type")
@@ -50,7 +46,6 @@ class PipelineDamage(BaseAnalysis):
         num_workers = AnalysisUtil.determine_parallelism_locally(self,
                                                                  dataset_size,
                                                                  user_defined_cpu)
-
         avg_bulk_input_size = int(dataset_size / num_workers)
         inventory_args = []
         count = 0
@@ -60,13 +55,14 @@ class PipelineDamage(BaseAnalysis):
                 inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        results = self.pipeline_damage_concurrent_future(
+        (results, damage_results) = self.pipeline_damage_concurrent_future(
             self.pipeline_damage_analysis_bulk_input, num_workers,
             inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
 
-        self.set_result_csv_data("result", results,
-                                 name=self.get_parameter("result_name"))
-
+        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
+        self.set_result_json_data("metadata",
+                                  damage_results,
+                                  name=self.get_parameter("result_name") + "_additional_info")
         return True
 
     def pipeline_damage_concurrent_future(self, function_name, num_workers,
@@ -79,31 +75,36 @@ class PipelineDamage(BaseAnalysis):
             *args: All the arguments in order to pass into parameter function_name.
 
         Returns:
-            list: A list of ordered dictionaries with building damage values and other data/metadata.
+            dict: An ordered dictionaries with pipeline damage values.
+            dict: An ordered dictionaries with other pipeline data/metadata.
 
         """
-        output = []
+        output_ds = []
+        output_dmg = []
         with concurrent.futures.ProcessPoolExecutor(
                 max_workers=num_workers) as executor:
-            for ret in executor.map(function_name, *args):
-                output.extend(ret)
+            for ret1, ret2 in executor.map(function_name, *args):
+                output_ds.extend(ret1)
+                output_dmg.extend(ret2)
 
-        return output
+        return output_ds, output_dmg
 
     def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_type,
                                             hazard_dataset_id):
         """Run pipeline damage analysis for multiple pipelines.
 
         Args:
-            pipelines (list): multiple pipelines from pieline dataset.
-            hazard_type (str): Hazard Type
+            pipelines (list): Multiple pipelines from pipeline dataset.
+            hazard_type (str): Hazard type (earthquake or tsunami).
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
-            list: A list of ordered dictionaries with pipeline damage values and other data/metadata.
+            dict: An ordered dictionaries with pipeline damage values.
+            dict: An ordered dictionaries with other pipeline data/metadata.
 
         """
-        result = []
+        pipeline_results = []
+        damage_results = []
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -116,49 +117,51 @@ class PipelineDamage(BaseAnalysis):
             self.get_input_dataset("dfr3_mapping_set"), pipelines, fragility_key)
 
         for pipeline in pipelines:
+            fragility_set = None
             if pipeline["id"] in fragility_sets.keys():
-                result.append(self.pipeline_damage_analysis(pipeline, hazard_type,
-                                                            fragility_sets[pipeline["id"]],
-                                                            hazard_dataset_id))
+                fragility_set = fragility_sets[pipeline["id"]]
 
-        return result
+            (pipeline_result, damage_result) = self.pipeline_damage_analysis(pipeline, hazard_type,
+                                                        fragility_set, hazard_dataset_id)
+            pipeline_results.append(pipeline_result)
+            damage_results.append(damage_result)
+
+        return pipeline_results, damage_results
 
     def pipeline_damage_analysis(self, pipeline, hazard_type, fragility_set, hazard_dataset_id):
         """Run pipeline damage for a single pipeline.
 
         Args:
             pipeline (obj): a single pipeline.
-            hazard_type (str): hazard type
-            fragility_set (obj): A JSON description of fragility assigned to the building.
+            hazard_type (str): hazard type (earthquake or tsunami)
+            fragility_set (obj): A JSON description of fragility assigned to the pipeline.
             hazard_dataset_id (str): A hazard dataset to use.
 
         Returns:
-            OrderedDict: A dictionary with pipeline damage values and other data/metadata.
+            dict: An ordered dictionaries with pipeline damage values.
+            dict: An ordered dictionaries with other pipeline data/metadata.
         """
-
         hazard_val = 0.0
-        demand_type = ""
-        limit_states = {"ls-slight": 0.0, "ls-moderat": 0.0,
-                        "ls-extensi": 0.0, "ls-complet": 0.0}
+        demand_type = None
+        demand_unit = None
+        fragility_id = None
+        limit_states = FragilityCurveSet._initialize_limit_states("pipeline")
+        dmg_intervals = dict()
+        damage_result = dict()
 
         if fragility_set is not None:
+            fragility_id = fragility_set.id
             demand_type = fragility_set.demand_types[0].lower()
             demand_unit = fragility_set.demand_units[0]
             location = GeoUtil.get_location(pipeline)
             point = str(location.y) + "," + str(location.x)
 
-            # tsunami pipeline damage produce limit states instead of repair rates
+            # tsunami pipeline damage produce limit states
             if hazard_type == 'earthquake':
                 hazard_resp = self.hazardsvc.get_earthquake_hazard_values(
                     hazard_dataset_id, demand_type, demand_unit, [point])
             elif hazard_type == 'tsunami':
                 hazard_resp = self.hazardsvc.get_tsunami_hazard_values(
-                    hazard_dataset_id, demand_type, demand_unit, [point])
-            elif hazard_type == 'tornado':
-                hazard_resp = self.hazardsvc.get_tornado_hazard_values(
-                    hazard_dataset_id, demand_unit, [point])
-            elif hazard_type == 'hurricane':
-                hazard_resp = self.hazardsvc.get_hurricanewf_values(
                     hazard_dataset_id, demand_type, demand_unit, [point])
             else:
                 raise ValueError(
@@ -168,16 +171,21 @@ class PipelineDamage(BaseAnalysis):
             if hazard_val <= 0.0:
                 hazard_val = 0.0
 
-            limit_states = fragility_set.calculate_limit_state(hazard_val)
+            limit_states = fragility_set.calculate_limit_state_w_conversion(hazard_val,
+                                                                            inventory_type="pipeline")
+            dmg_intervals = fragility_set.calculate_damage_interval(limit_states,
+                                                                    hazard_type="earthquake",
+                                                                    inventory_type="pipeline")
 
-        dmg_intervals = AnalysisUtil.calculate_damage_interval(limit_states)
+        result = {'guid': pipeline['properties']['guid'], **limit_states, **dmg_intervals}
+        damage_result['guid'] = pipeline['properties']['guid']
+        damage_result['fragility_id'] = fragility_id
+        damage_result['demandtypes'] = demand_type
+        damage_result['demandunits'] = demand_unit
+        damage_result['hazardtype'] = hazard_type
+        damage_result['hazardval'] = hazard_val
 
-        pipeline_results = {**limit_states, **dmg_intervals}
-        pipeline_results['guid'] = pipeline['properties']['guid']
-        pipeline_results['hazardval'] = hazard_val
-        pipeline_results['demandtype'] = demand_type
-
-        return pipeline_results
+        return result, damage_result
 
     def get_spec(self):
         """Get specifications of the pipeline damage analysis.
@@ -188,12 +196,12 @@ class PipelineDamage(BaseAnalysis):
         """
         return {
             'name': 'pipeline-damage',
-            'description': 'buried pipeline damage analysis',
+            'description': 'Buried pipeline damage analysis',
             'input_parameters': [
                 {
                     'id': 'result_name',
                     'required': True,
-                    'description': 'result dataset name',
+                    'description': 'Result dataset name',
                     'type': str
                 },
                 {
@@ -245,7 +253,15 @@ class PipelineDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'pipeline',
-                    'type': 'incore:pipelineDamage'
+                    'description': 'CSV file of damage states for pipeline damage',
+                    'type': 'incore:pipelineDamageVer2'
+                },
+                {
+                    'id': 'metadata',
+                    'parent_type': 'pipeline',
+                    'description': 'Json file with information about applied hazard value and fragility',
+                    'type': 'incore:pipelineDamageMetadata'
                 }
             ]
         }
+

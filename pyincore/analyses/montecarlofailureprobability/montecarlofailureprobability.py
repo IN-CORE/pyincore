@@ -77,7 +77,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
                              'ergo:buildingDamageVer4', 'ergo:buildingDamageVer5',
                              'incore:epfDamage', 'incore:epfDamageVer2',
                              'ergo:nsBuildingInventoryDamage', 'ergo:nsBuildingInventoryDamageVer2',
-                             'incore:pipelineDamage',
+                             'incore:pipelineDamage', 'incore:pipelineDamageVer2',
                              'ergo:roadDamage',
                              'ergo:waterFacilityDamageVer4']
                 },

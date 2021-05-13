@@ -232,12 +232,13 @@ class FragilityCurveSet:
         """
             Computes limit state probabilities.
             Args:
-                hazard: hazard value to compute probability for
-                period: period of the structure, if applicable
-                std_dev: standard deviation
-                inventory_type: type of inventory
+                hazard (float): hazard value to compute probability for
+                period (float): period of the structure, if applicable
+                std_dev (float): standard deviation
+                inventory_type (str): type of inventory
 
-            Returns: limit state probabilities
+            Returns:
+                dict: limit state probabilities
 
         """
         output = FragilityCurveSet._initialize_limit_states(inventory_type)
@@ -302,6 +303,7 @@ class FragilityCurveSet:
             ("tsunami", "building", 3): FragilityCurveSet._3ls_to_4ds,
             # 4 LS to 5 DS
             ("earthquake", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
+            ("earthquake", "pipeline", 4): FragilityCurveSet._4ls_to_5ds,
             ("earthquake", "road", 4): FragilityCurveSet._4ls_to_5ds,
             ("earthquake", "water_facility", 4): FragilityCurveSet._4ls_to_5ds,
             ("earthquake", "electric_facility", 4): FragilityCurveSet._4ls_to_5ds,
@@ -309,6 +311,7 @@ class FragilityCurveSet:
             ("tornado", "electric_facility", 4): FragilityCurveSet._4ls_to_5ds,
             ("flood", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
             ("tsunami", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
+            ("tsunami", "pipeline", 4): FragilityCurveSet._4ls_to_5ds,
             ("tsunami", "road", 4): FragilityCurveSet._4ls_to_5ds,
             ("tsunami", "water_facility", 4): FragilityCurveSet._4ls_to_5ds,
             ("tsunami", "electric_facility", 4): FragilityCurveSet._4ls_to_5ds,
@@ -468,6 +471,8 @@ class FragilityCurveSet:
     def _initialize_limit_states(inventory_type):
         if inventory_type == "building":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
+        elif inventory_type == "pipeline":
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0, "LS_3": 0.0}
         elif inventory_type == "bridge":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0, "LS_3": 0.0}
         elif inventory_type == "electric_facility":
