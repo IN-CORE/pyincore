@@ -79,12 +79,12 @@ class MonteCarloFailureProbability(BaseAnalysis):
                     'id': 'damage',
                     'required': True,
                     'description': 'damage result that has damage intervals in it',
-                    'type': ['ergo:bridgeDamage',
+                    'type': ['ergo:bridgeDamage', 'ergo:bridgeDamageVer2',
                              'ergo:buildingDamageVer4', 'ergo:buildingDamageVer5',
                              'incore:epfDamage', 'incore:epfDamageVer2',
                              'ergo:nsBuildingInventoryDamage', 'ergo:nsBuildingInventoryDamageVer2',
                              'incore:pipelineDamage', 'incore:pipelineDamageVer2',
-                             'ergo:roadDamage',
+                             'ergo:roadDamage', 'ergo:roadDamageVer2',
                              'ergo:waterFacilityDamageVer4','ergo:waterFacilityDamageVer5']
                 },
 
