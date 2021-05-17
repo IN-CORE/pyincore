@@ -256,7 +256,8 @@ class WaterFacilityDamage(BaseAnalysis):
 
         result = collections.OrderedDict()
         result['guid'] = facility['properties']['guid']
-        result = {**limit_states, **dmg_intervals}  # Needs py 3.5+
+        result.update(limit_states)
+        result.update(dmg_intervals)  # Needs py 3.5+
         metadata = collections.OrderedDict()
         metadata['guid'] = facility['properties']['guid']
         metadata['hazardtype'] = hazard_type
