@@ -169,11 +169,8 @@ class WaterFacilityDamage(BaseAnalysis):
             for facility in facilities:
                 fragility = inundation_fragility_set[facility["id"]]
 
-                ds_result, damage_result = self.waterfacility_damage_analysis(facility, fragility, [],
-                                                       facility["id"],
-                                                       hazard_type,
-                                                       hazard_dataset_id, "",
-                                                       False)
+                ds_result, damage_result = self.waterfacility_damage_analysis(facility, fragility, [], hazard_type,
+                                                                              hazard_dataset_id, "", False)
 
                 ds_results.append(ds_result)
                 damage_results.append(damage_result)
