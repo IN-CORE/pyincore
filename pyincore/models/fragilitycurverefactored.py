@@ -56,6 +56,9 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
             else:
                 parameters[parameter["name"]] = None
 
+        mapped_demand_types = dict((k.lower(), v.lower()) for k, v in mapped_demand_types.items())
+        hazard_values = dict((k.lower(), v) for k, v in hazard_values.items())
+
         # use hazard values if present
         for key, value in hazard_values.items():
             if key in mapped_demand_types:
