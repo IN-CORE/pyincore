@@ -58,7 +58,7 @@
   "fragilityCurveParameters": [
     {
       "name": "point_two_sec_SA",
-      "key": "0.2 sec Sa",
+      "fullName": "0.2 sec Sa",
       "unit": "g",
       "description": "0.2 sec Sa value from hazard services"
     },
