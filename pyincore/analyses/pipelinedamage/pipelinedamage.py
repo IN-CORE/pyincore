@@ -12,6 +12,7 @@ from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, \
     FragilityCurveSet, AnalysisUtil, GeoUtil
+from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
 
 
 class PipelineDamage(BaseAnalysis):
@@ -116,76 +117,104 @@ class PipelineDamage(BaseAnalysis):
         fragility_sets = self.fragilitysvc.match_inventory(
             self.get_input_dataset("dfr3_mapping_set"), pipelines, fragility_key)
 
+        values_payload = []
+        unmapped_pipelines = []
+        mapped_pipelines = []
         for pipeline in pipelines:
-            fragility_set = None
+            # if find a match fragility for that pipeline
             if pipeline["id"] in fragility_sets.keys():
                 fragility_set = fragility_sets[pipeline["id"]]
+                location = GeoUtil.get_location(pipeline)
+                loc = str(location.y) + "," + str(location.x)
+                demands = AnalysisUtil.get_hazard_demand_types(pipeline, fragility_set, hazard_type)
+                units = fragility_sets[pipeline["id"]].demand_units
+                value = {
+                    "demands": demands,
+                    "units": units,
+                    "loc": loc
+                }
+                values_payload.append(value)
+                mapped_pipelines.append(pipeline)
 
-            (pipeline_result, damage_result) = self.pipeline_damage_analysis(pipeline, hazard_type,
-                                                        fragility_set, hazard_dataset_id)
+            else:
+                unmapped_pipelines.append(pipeline)
+
+        # not needed anymore as they are already split into mapped and unmapped
+        del pipelines
+
+        if hazard_type == 'earthquake':
+            hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'tornado':
+            raise ValueError("The provided hazard type is not supported yet by this analysis")
+        elif hazard_type == 'tsunami':
+            hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'hurricane':
+            raise ValueError("The provided hazard type is not supported yet by this analysis")
+        elif hazard_type == 'flood':
+            raise ValueError("The provided hazard type is not supported yet by this analysis")
+        else:
+            raise ValueError("The provided hazard type is not supported yet by this analysis")
+
+        pipeline_results = []
+        damage_results = []
+        for i, pipeline in enumerate(mapped_pipelines):
+            fragility_set = fragility_sets[pipeline["id"]]
+
+            # TODO: Once all fragilities are migrated to new format, we can remove this condition
+            if isinstance(fragility_set.fragility_curves[0], FragilityCurveRefactored):
+                # Supports multiple demand types in same fragility
+                haz_vals = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
+                demand_types = hazard_vals[i]["demands"]
+                demand_units = hazard_vals[i]["units"]
+
+                # construct hazard_value dictionary {"demand_type":"hazard_value", ...}
+                hval_dict = dict()
+                for j, d in enumerate(hazard_vals[i]["demands"]):
+                    hval_dict[d] = haz_vals[j]
+
+                pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
+                limit_states = fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
+                                                                                           inventory_type="pipeline",
+                                                                                           **pipeline_args)
+
+            else:
+                # Non Refactored Fragility curves that always only have a single demand type
+                haz_vals = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
+                demand_types = hazard_vals[i]["demands"][0]
+                demand_units = hazard_vals[i]["units"][0]
+                limit_states = fragility_set.calculate_limit_state_w_conversion(haz_vals, inventory_type="pipeline")
+
+            dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
+                                                                    inventory_type="pipeline")
+
+            pipeline_result = {'guid': pipeline['properties']['guid'], **limit_states, **dmg_intervals}
+            damage_result = dict()
+            damage_result['guid'] = pipeline['properties']['guid']
+            damage_result['fragility_id'] = fragility_set.id
+            damage_result['demandtypes'] = demand_types
+            damage_result['demandunits'] = demand_units
+            damage_result['hazardtype'] = hazard_type
+            damage_result['hazardval'] = haz_vals
+
+            pipeline_results.append(pipeline_result)
+            damage_results.append(damage_result)
+
+        # for pipeline does not have matching fragility curves, default to None
+        for pipeline in unmapped_pipelines:
+            pipeline_result = dict()
+            damage_result = dict()
+            pipeline_result['guid'] = pipeline['properties']['guid']
+            damage_result['guid'] = pipeline['properties']['guid']
+            damage_result['fragility_id'] = None
+            damage_result['demandtypes'] = None
+            damage_result['demandunits'] = None
+            damage_result['hazardtype'] = None
+            damage_result['hazardvals'] = None
+
             pipeline_results.append(pipeline_result)
             damage_results.append(damage_result)
 
         return pipeline_results, damage_results
-
-    def pipeline_damage_analysis(self, pipeline, hazard_type, fragility_set, hazard_dataset_id):
-        """Run pipeline damage for a single pipeline.
-
-        Args:
-            pipeline (obj): a single pipeline.
-            hazard_type (str): hazard type (earthquake or tsunami)
-            fragility_set (obj): A JSON description of fragility assigned to the pipeline.
-            hazard_dataset_id (str): A hazard dataset to use.
-
-        Returns:
-            dict: An ordered dictionaries with pipeline damage values.
-            dict: An ordered dictionaries with other pipeline data/metadata.
-        """
-        hazard_val = 0.0
-        demand_type = None
-        demand_unit = None
-        fragility_id = None
-        limit_states = FragilityCurveSet._initialize_limit_states("pipeline")
-        dmg_intervals = dict()
-        damage_result = dict()
-
-        if fragility_set is not None:
-            fragility_id = fragility_set.id
-            demand_type = fragility_set.demand_types[0].lower()
-            demand_unit = fragility_set.demand_units[0]
-            location = GeoUtil.get_location(pipeline)
-            point = str(location.y) + "," + str(location.x)
-
-            # tsunami pipeline damage produce limit states
-            if hazard_type == 'earthquake':
-                hazard_resp = self.hazardsvc.get_earthquake_hazard_values(
-                    hazard_dataset_id, demand_type, demand_unit, [point])
-            elif hazard_type == 'tsunami':
-                hazard_resp = self.hazardsvc.get_tsunami_hazard_values(
-                    hazard_dataset_id, demand_type, demand_unit, [point])
-            else:
-                raise ValueError(
-                    "Hazard type are not currently supported.")
-
-            hazard_val = hazard_resp[0]['hazardValue']
-            if hazard_val <= 0.0:
-                hazard_val = 0.0
-
-            limit_states = fragility_set.calculate_limit_state_w_conversion(hazard_val,
-                                                                            inventory_type="pipeline")
-            dmg_intervals = fragility_set.calculate_damage_interval(limit_states,
-                                                                    hazard_type="earthquake",
-                                                                    inventory_type="pipeline")
-
-        result = {'guid': pipeline['properties']['guid'], **limit_states, **dmg_intervals}
-        damage_result['guid'] = pipeline['properties']['guid']
-        damage_result['fragility_id'] = fragility_id
-        damage_result['demandtypes'] = demand_type
-        damage_result['demandunits'] = demand_unit
-        damage_result['hazardtype'] = hazard_type
-        damage_result['hazardval'] = hazard_val
-
-        return result, damage_result
 
     def get_spec(self):
         """Get specifications of the pipeline damage analysis.

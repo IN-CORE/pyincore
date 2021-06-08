@@ -8,7 +8,7 @@ from pyincore.analyses.pipelinedamage import PipelineDamage
 import pyincore.globals as pyglobals
 
 
-def test_pipeline_dmg():
+def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     pipeline_dmg = PipelineDamage(client)
 
@@ -18,7 +18,8 @@ def test_pipeline_dmg():
 
     # Load fragility mapping
     fragility_service = FragilityService(client)
-    mapping_set = MappingSet(fragility_service.get_mapping("5ef11888da15730b13b84353"))
+    mapping_set = MappingSet(fragility_service.get_mapping("60b124e01f2b7d4a916ba456")) # new format fragility curves
+    # mapping_set = MappingSet(fragility_service.get_mapping("5ef11888da15730b13b84353")) # legacy fragility curves
     pipeline_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
     pipeline_dmg.set_parameter("result_name",
@@ -32,8 +33,6 @@ def test_pipeline_dmg():
     # Run pipeline damage analysis
     result = pipeline_dmg.run_analysis()
 
-    assert result is True
-
 
 if __name__ == "__main__":
-    test_pipeline_dmg()
+    run_with_base_class()
