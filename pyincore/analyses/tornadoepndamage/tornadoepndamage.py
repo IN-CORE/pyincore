@@ -195,7 +195,9 @@ class TornadoEpnDamage(BaseAnalysis):
                 repairtime = 0  # repair time value
                 to_node_val = ""
                 linetype_val = ""
-                windspeed = 0  # random wind speed in EF
+                tor_hazard_values = [0]  # random wind speed in EF
+                demand_types = [""]
+                demand_units = [""]
 
                 if self.tonode_fld_name.lower() in line_feature['properties']:
                     to_node_val = line_feature['properties'][self.tonode_fld_name.lower()]
@@ -243,7 +245,6 @@ class TornadoEpnDamage(BaseAnalysis):
                         poleresist = 0  # pole's resistance value
                         # setting EF rate value string to match in the tornado dataset's attribute table
                         ef_content = "EF" + str(f)
-                        fragility_set_used = None
 
                         # compute the intersections between link line and ef polygon
                         # also figure out the length of the line that ovelapped with EF box
@@ -282,44 +283,35 @@ class TornadoEpnDamage(BaseAnalysis):
                                     # check if the line is tower or transmission
                                     if linetype_val.lower() == self.line_transmission:
                                         fragility_set_used = fragility_set_tower
-                                        values_payload = [{
-                                            "demands": [x.lower() for x in fragility_set_used.demand_types],
-                                            "units": [x.lower() for x in fragility_set_used.demand_units],
-                                            "loc": str(any_point.coords[0][1]) + "," + str(any_point.coords[0][0])
-                                        }]
-                                        windspeed = self.hazardsvc.post_tornado_hazard_values(
-                                            tornado_id, values_payload)[0]["hazardValues"][0]
-                                        if isinstance(fragility_set_tower.fragility_curves[0],
-                                                      FragilityCurveRefactored):
-                                            road_args = fragility_set_tower.construct_expression_args_from_inventory(
-                                                tornado_feature)
-                                            resistivity_probability = \
-                                                fragility_set_tower.calculate_limit_state_refactored_w_conversion(
-                                                    {fragility_set_pole.demand_types[0]: windspeed},
-                                                    inventory_type=fragility_set_tower.inventory_type, **road_args)
-                                        else:
-                                            resistivity_probability = \
-                                                fragility_set_tower.calculate_limit_state_w_conversion(windspeed)
                                     else:
                                         fragility_set_used = fragility_set_pole
-                                        values_payload = [{
-                                            "demands": [x.lower() for x in fragility_set_used.demand_types],
-                                            "units": [x.lower() for x in fragility_set_used.demand_units],
-                                            "loc": str(any_point.coords[0][1]) + "," + str(any_point.coords[0][0])
-                                        }]
-                                        windspeed = self.hazardsvc.post_tornado_hazard_values(
-                                            tornado_id, values_payload)[0]["hazardValues"][0]
-                                        if isinstance(fragility_set_pole.fragility_curves[0],
-                                                      FragilityCurveRefactored):
-                                            road_args = fragility_set_pole.construct_expression_args_from_inventory(
-                                                tornado_feature)
-                                            resistivity_probability = \
-                                                fragility_set_pole.calculate_limit_state_refactored_w_conversion(
-                                                    {fragility_set_pole.demand_types[0]: windspeed},
-                                                    inventory_type=fragility_set_pole.inventory_type, **road_args)
-                                        else:
-                                            resistivity_probability = \
-                                                fragility_set_pole.calculate_limit_state_w_conversion(windspeed)
+
+                                    values_payload = [{
+                                        "demands": [x.lower() for x in fragility_set_used.demand_types],
+                                        "units": [x.lower() for x in fragility_set_used.demand_units],
+                                        "loc": str(any_point.coords[0][1]) + "," + str(any_point.coords[0][0])
+                                    }]
+                                    h_vals = self.hazardsvc.post_tornado_hazard_values(
+                                        tornado_id, values_payload)
+                                    tor_hazard_values = h_vals[0]["hazardValues"]
+                                    demand_types = h_vals[0]["demands"]
+                                    demand_units = h_vals[0]["units"]
+                                    hval_dict = dict()
+                                    j = 0
+                                    for d in h_vals[0]["demands"]:
+                                        hval_dict[d] = h_vals[0]["hazardValues"][j]
+                                        j += 1
+                                    if isinstance(fragility_set_used.fragility_curves[0],
+                                                  FragilityCurveRefactored):
+                                        inventory_args = fragility_set_used.construct_expression_args_from_inventory(
+                                            tornado_feature)
+                                        resistivity_probability = \
+                                            fragility_set_used.calculate_limit_state_refactored_w_conversion(
+                                                hval_dict,
+                                                inventory_type=fragility_set_used.inventory_type, **inventory_args)
+                                    else:
+                                        resistivity_probability = \
+                                            fragility_set_used.calculate_limit_state_w_conversion(tor_hazard_values[0])
 
                                     # randomly generated capacity of each poles ; 1 m/s is 2.23694 mph
                                     poleresist = resistivity_probability.get('LS_0') * 2.23694
@@ -360,14 +352,9 @@ class TornadoEpnDamage(BaseAnalysis):
                 noderepair[to_node_val - 1] = repaircost
                 nodedam[to_node_val - 1] = ndamage
                 nodetimerep[to_node_val - 1] = repairtime
-                hazardval[to_node_val - 1] = [windspeed]
-                # TODO: this must change when this is refactored to use bulk endpoint and hazard values are calculated
-                #  for every point, not just the ones with condition:
-                #  sim_fld_val == z and ef_fld_val.lower() == ef_content.lower()
-                demandtypes[to_node_val - 1] = fragility_set_used.demand_types if fragility_set_used is not None \
-                    else [""]
-                demandunits[to_node_val - 1] = fragility_set_used.demand_units if fragility_set_used is not None \
-                    else [""]
+                hazardval[to_node_val - 1] = tor_hazard_values
+                demandtypes[to_node_val - 1] = demand_types
+                demandunits[to_node_val - 1] = demand_units
 
             # Calculate damage and repair cost based on network
             for i in range(len(first_node_list)):
@@ -426,9 +413,10 @@ class TornadoEpnDamage(BaseAnalysis):
             damage_result["fragility_tower_id"] = self.fragility_tower_id
             damage_result["fragility_pole_id"] = self.fragility_pole_id
             damage_result["hazardtype"] = "Tornado"
-            # damage_result['demandtype'] = demandtypes[i]
-            # damage_result['demandunits'] = demandunits[i]
             damage_result['hazardval'] = hazardval[i]
+            damage_result['demandtype'] = demandtypes[i]
+            damage_result['demandunits'] = demandunits[i]
+
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)
