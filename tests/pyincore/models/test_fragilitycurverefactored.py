@@ -31,7 +31,7 @@ def test_fragility_set_small_overlap():
 
 
 def get_fragility_set(fragility_dir: str):
-    with open(os.path.join(pyglobals.TEST_DATA_DIR, fragility_dir), 'r') as f:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, fragility_dir), 'r', encoding='utf-8') as f:
         fragility_curve = json.load(f)
     fragility_set = FragilityCurveSet(fragility_curve)
     return fragility_set
@@ -56,7 +56,14 @@ def test_create_fragility_set():
     (get_remote_fragility_set("606221fe618178207f6608a1"),
      {"waveHeight": 1.1111, "surgeLevel": 3},
      {"clearance": 4, "span_mass": 12, "g_elev": 0.2},
-     0.142618908)
+     0.142618908),
+    # test case sensitivity
+    (get_remote_fragility_set("606221fe618178207f6608a1"),
+     {"WAVEheight": 1.1111, "sURgeLEVEL": 3},
+     {"CLEARANCE": 4, "span_maSS": 12, "g_ELEV": 0.2},
+     0.142618908),
+    (get_fragility_set("fragility_curves/PeriodStandardFragilityCurve_refactored.json"), {"0.2 sec Sa": 4}, {},
+     0.9905435183)
 ])
 def test_calculate_limit_state_probability(fragility_set, hazard_values, args, expected):
     result = fragility_set.calculate_limit_state_refactored_w_conversion(hazard_values, **args)

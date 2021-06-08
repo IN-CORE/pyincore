@@ -43,25 +43,31 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
         # 2. Fetch all parameters listed in the curve from kwargs and if there are not in kwargs, use default values
         # from the curve.
         for parameter in fragility_curve_parameters:
-            if "key" in parameter and parameter["key"] is not None:
-                mapped_demand_types[parameter["key"]] = parameter["name"]
-                if parameter["key"] in kwargs.keys():
-                    parameters[parameter["name"]] = kwargs[parameter["key"]]
-                else:
-                    parameters[parameter["name"]] = None
-            elif parameter["name"] in kwargs.keys():
-                parameters[parameter["name"]] = kwargs[parameter["name"]]
-            elif "expression" in parameter and parameter["expression"] is not None:
+            # if default exists, use default
+            if "expression" in parameter and parameter["expression"] is not None:
                 parameters[parameter["name"]] = evaluateexpression.evaluate(parameter["expression"], parameters)
             else:
                 parameters[parameter["name"]] = None
 
+            # e.g. map point_two_sec_sa to its full name (0.2 Sec Sa)
+            if "fullName" in parameter and parameter["fullName"] is not None:
+                mapped_demand_types[parameter["fullName"]] = parameter["name"]
+
+            # else overwrite with real values; make sure it handles case sensitivity
+            for kwargs_key, kwargs_value in kwargs.items():
+                if "fullName" in parameter and parameter["fullName"] is not None:
+                    if parameter["fullName"].lower() == kwargs_key.lower():
+                        parameters[parameter["name"]] = kwargs_value
+                elif parameter["name"].lower() == kwargs_key.lower():
+                    parameters[parameter["name"]] = kwargs_value
+
         # use hazard values if present
+        # consider case insensitive situation
         for key, value in hazard_values.items():
             if key in mapped_demand_types:
                 key = mapped_demand_types[key]
             for parameter_key in parameters.keys():
-                if parameter_key in key:
+                if parameter_key.lower() == key.lower():
                     parameters[parameter_key] = value
         probability = 0.0
         for rule in self.rules:
