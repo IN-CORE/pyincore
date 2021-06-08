@@ -413,7 +413,7 @@ class TornadoEpnDamage(BaseAnalysis):
             damage_result["fragility_pole_id"] = self.fragility_pole_id
             damage_result["hazardtype"] = "Tornado"
             damage_result['hazardval'] = hazardval[i]
-            damage_result['demandtype'] = demandtypes[i]
+            damage_result['demandtypes'] = demandtypes[i]
             damage_result['demandunits'] = demandunits[i]
 
 
