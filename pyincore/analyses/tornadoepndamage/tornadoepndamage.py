@@ -10,6 +10,7 @@ import sys
 
 import networkx as nx
 import numpy
+from pyincore.utils.analysisutil import AnalysisUtil
 from shapely.geometry import shape
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, FragilityCurveSet
@@ -292,13 +293,13 @@ class TornadoEpnDamage(BaseAnalysis):
                                     }]
                                     h_vals = self.hazardsvc.post_tornado_hazard_values(
                                         tornado_id, values_payload)
-                                    tor_hazard_values = h_vals[0]["hazardValues"]
+                                    tor_hazard_values = AnalysisUtil.update_precision_of_lists(h_vals[0]["hazardValues"])
                                     demand_types = h_vals[0]["demands"]
                                     demand_units = h_vals[0]["units"]
                                     hval_dict = dict()
                                     j = 0
                                     for d in h_vals[0]["demands"]:
-                                        hval_dict[d] = h_vals[0]["hazardValues"][j]
+                                        hval_dict[d] = tor_hazard_values[j]
                                         j += 1
                                     if isinstance(fragility_set_used.fragility_curves[0],
                                                   FragilityCurveRefactored):
@@ -412,7 +413,7 @@ class TornadoEpnDamage(BaseAnalysis):
             damage_result["fragility_tower_id"] = self.fragility_tower_id
             damage_result["fragility_pole_id"] = self.fragility_pole_id
             damage_result["hazardtype"] = "Tornado"
-            damage_result['hazardval'] = hazardval[i]
+            damage_result['hazardvals'] = hazardval[i]
             damage_result['demandtypes'] = demandtypes[i]
             damage_result['demandunits'] = demandunits[i]
 
