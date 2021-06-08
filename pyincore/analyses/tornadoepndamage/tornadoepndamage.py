@@ -33,7 +33,6 @@ class TornadoEpnDamage(BaseAnalysis):
         self.fragility_tower_id = '60beb0be1f2b7d4a9171926f'  # equation based refactored format
         # self.fragility_pole_id = '5b201d91b1cf3e336de8fa68'  # legacy format
         self.fragility_pole_id = '60beb0f31f2b7d4a91719290'  # equation based refactored format
-        self.fragility_mapping_id = '5b2bddcbd56d215b9b7471d8'
 
         # this is for deciding to use indpnode field. Not using this could be safer for general dataset
         self.use_indpnode = False
