@@ -28,6 +28,7 @@ from pyincore.models.periodstandardfragilitycurve import PeriodStandardFragility
 from pyincore.models.customexpressionfragilitycurve import CustomExpressionFragilityCurve
 from pyincore.models.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
 from pyincore.models.parametricfragilitycurve import ParametricFragilityCurve
+from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
 from pyincore.models.mappingset import MappingSet
 from pyincore.models.mapping import Mapping
 from pyincore.networkdata import NetworkData

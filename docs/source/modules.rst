@@ -125,11 +125,6 @@ analyses/roaddamage
 ..  autoclass:: roaddamage.roaddamage.RoadDamage
     :members:
 
-analyses/roadfailure
-====================
-..  autoclass:: roadfailure.roadfailure.RoadFailure
-    :members:
-
 analyses/seasidecge
 ===================
 ..  autoclass:: seasidecge.seasidecge.SeasideCGEModel

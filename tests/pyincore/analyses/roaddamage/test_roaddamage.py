@@ -10,6 +10,7 @@ def run_with_base_class():
     road_dataset_id = "5ee7af50772cf80008577ae3"
 
     hazard_type = "tsunami"
+    # hazard_type = "earthquake"
     liq_geology_dataset_id = None
 
     if hazard_type == 'earthquake':
@@ -17,7 +18,7 @@ def run_with_base_class():
         hazard_id = "5ba8f379ec2309043520906f"
 
         # Earthquake mapping
-        mapping_id = "5ee7b145c54361000148dcc5"
+        mapping_id = "5d545b0bb9219c0689f1f3f4"
 
         fragility_key = "pgd"
         liquefaction = False
@@ -35,7 +36,7 @@ def run_with_base_class():
 
     uncertainty = False
 
-    # Run Seaside earthquake road damage
+    # Run road damage
     road_dmg = RoadDamage(client)
     road_dmg.load_remote_input_dataset("roads", road_dataset_id)
 
@@ -57,6 +58,37 @@ def run_with_base_class():
 
     # Run Analysis
     road_dmg.run_analysis()
+
+    ######################################################################
+    # test galveston hurricane road failure
+
+    # road inventory for Galveston island
+    road_dataset_id = "60ba5ee94219ee25a56b6999"
+    # road damage by hurricane inundation mapping
+    mapping_id = "60ba583b1f2b7d4a916faf03"
+    # Galveston Deterministic Hurricane - Kriging inundationDuration
+    hazard_type = "hurricane"
+    hazard_id = "5f10837c01d3241d77729a4f"
+
+    # Create road damage
+    hurr_road_dmg = RoadDamage(client)
+    # Load input datasets
+    hurr_road_dmg.load_remote_input_dataset("roads", road_dataset_id)
+    # Load fragility mapping
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    hurr_road_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    # Specify the result name
+    result_name = "galveston_hurricane_road_result"
+    # Set analysis parameters
+    hurr_road_dmg.set_parameter("result_name", result_name)
+    hurr_road_dmg.set_parameter("hazard_type", hazard_type)
+    hurr_road_dmg.set_parameter("fragility_key", "Non-Retrofit inundationDepth Fragility ID Code")
+    hurr_road_dmg.set_parameter("hazard_id", hazard_id)
+    hurr_road_dmg.set_parameter("num_cpu", 4)
+
+    # Run road damage by hurricane inundation analysis
+    hurr_road_dmg.run_analysis()
 
 
 if __name__ == '__main__':
