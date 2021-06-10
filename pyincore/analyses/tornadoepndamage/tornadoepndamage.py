@@ -10,10 +10,12 @@ import sys
 
 import networkx as nx
 import numpy
+from pyincore.utils.analysisutil import AnalysisUtil
 from shapely.geometry import shape
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, FragilityCurveSet
 from pyincore import GeoUtil, NetworkUtil
+from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
 
 
 class TornadoEpnDamage(BaseAnalysis):
@@ -27,12 +29,11 @@ class TornadoEpnDamage(BaseAnalysis):
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
-        self.hazardsvc = HazardService(incore_client)
-        self.fragilitysvc = FragilityService(incore_client)
         self.datasetsvc = DataService(incore_client)
-        self.fragility_tower_id = '5b201b41b1cf3e336de8fa67'
-        self.fragility_pole_id = '5b201d91b1cf3e336de8fa68'
-        self.fragility_mapping_id = '5b2bddcbd56d215b9b7471d8'
+        # self.fragility_tower_id = '5b201b41b1cf3e336de8fa67'  # legacy format
+        self.fragility_tower_id = '60beb0be1f2b7d4a9171926f'  # equation based refactored format
+        # self.fragility_pole_id = '5b201d91b1cf3e336de8fa68'  # legacy format
+        self.fragility_pole_id = '60beb0f31f2b7d4a91719290'  # equation based refactored format
 
         # this is for deciding to use indpnode field. Not using this could be safer for general dataset
         self.use_indpnode = False
@@ -183,7 +184,9 @@ class TornadoEpnDamage(BaseAnalysis):
             cost2repairpath = [0] * self.nnode  # placeholder for recording total repair cost for the network
             time2repairpath = [0] * self.nnode  # placeholder for recording total repair time for the network
             nodetimerep = [0] * self.nnode
-            hazardval = [0] * self.nnode  # placeholder for recording hazard value that is wind speed
+            hazardval = [[0]] * self.nnode  # placeholder for recording hazard values
+            demandtypes = [[""]] * self.nnode  # placeholder for recording demand types
+            demandunits = [[""]] * self.nnode  # placeholder for recording demand units
 
             # iterate link
             for line_feature in link_dataset:
@@ -192,7 +195,9 @@ class TornadoEpnDamage(BaseAnalysis):
                 repairtime = 0  # repair time value
                 to_node_val = ""
                 linetype_val = ""
-                windspeed = 0  # random wind speed in EF
+                tor_hazard_values = [0]  # random wind speed in EF
+                demand_types = [""]
+                demand_units = [""]
 
                 if self.tonode_fld_name.lower() in line_feature['properties']:
                     to_node_val = line_feature['properties'][self.tonode_fld_name.lower()]
@@ -275,19 +280,41 @@ class TornadoEpnDamage(BaseAnalysis):
                                             # this is very hardly happen but should be needed just in case
                                             any_point = poly.centroid
 
-                                    windspeed = self.hazardsvc.get_tornado_hazard_value(
-                                        tornado_id, "mph", any_point.coords[0][1], any_point.coords[0][0], z)
-
                                     # check if the line is tower or transmission
                                     if linetype_val.lower() == self.line_transmission:
+                                        fragility_set_used = fragility_set_tower
+                                    else:
+                                        fragility_set_used = fragility_set_pole
+
+                                    values_payload = [{
+                                        "demands": [x.lower() for x in fragility_set_used.demand_types],
+                                        "units": [x.lower() for x in fragility_set_used.demand_units],
+                                        "loc": str(any_point.coords[0][1]) + "," + str(any_point.coords[0][0])
+                                    }]
+                                    h_vals = self.hazardsvc.post_tornado_hazard_values(
+                                        tornado_id, values_payload)
+                                    tor_hazard_values = AnalysisUtil.update_precision_of_lists(h_vals[0]["hazardValues"])
+                                    demand_types = h_vals[0]["demands"]
+                                    demand_units = h_vals[0]["units"]
+                                    hval_dict = dict()
+                                    j = 0
+                                    for d in h_vals[0]["demands"]:
+                                        hval_dict[d] = tor_hazard_values[j]
+                                        j += 1
+                                    if isinstance(fragility_set_used.fragility_curves[0],
+                                                  FragilityCurveRefactored):
+                                        inventory_args = fragility_set_used.construct_expression_args_from_inventory(
+                                            tornado_feature)
                                         resistivity_probability = \
-                                            fragility_set_tower.calculate_limit_state(windspeed)
+                                            fragility_set_used.calculate_limit_state_refactored_w_conversion(
+                                                hval_dict,
+                                                inventory_type=fragility_set_used.inventory_type, **inventory_args)
                                     else:
                                         resistivity_probability = \
-                                            fragility_set_pole.calculate_limit_state(windspeed)
+                                            fragility_set_used.calculate_limit_state_w_conversion(tor_hazard_values[0])
 
                                     # randomly generated capacity of each poles ; 1 m/s is 2.23694 mph
-                                    poleresist = resistivity_probability.get('failure') * 2.23694
+                                    poleresist = resistivity_probability.get('LS_0') * 2.23694
                                     npoles = int(round(inter_length_meter / self.pole_distance))
                                     repairtime_list = []
 
@@ -325,7 +352,9 @@ class TornadoEpnDamage(BaseAnalysis):
                 noderepair[to_node_val - 1] = repaircost
                 nodedam[to_node_val - 1] = ndamage
                 nodetimerep[to_node_val - 1] = repairtime
-                hazardval[to_node_val - 1] = windspeed
+                hazardval[to_node_val - 1] = tor_hazard_values
+                demandtypes[to_node_val - 1] = demand_types
+                demandunits[to_node_val - 1] = demand_units
 
             # Calculate damage and repair cost based on network
             for i in range(len(first_node_list)):
@@ -384,7 +413,10 @@ class TornadoEpnDamage(BaseAnalysis):
             damage_result["fragility_tower_id"] = self.fragility_tower_id
             damage_result["fragility_pole_id"] = self.fragility_pole_id
             damage_result["hazardtype"] = "Tornado"
-            damage_result["hazardval"] = hazardval[i]
+            damage_result['hazardvals'] = hazardval[i]
+            damage_result['demandtypes'] = demandtypes[i]
+            damage_result['demandunits'] = demandunits[i]
+
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)

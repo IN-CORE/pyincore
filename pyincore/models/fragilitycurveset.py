@@ -481,6 +481,10 @@ class FragilityCurveSet:
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0, "LS_3": 0.0}
         elif inventory_type == "water_facility":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0, "LS_3": 0.0}
+        elif inventory_type == "Transmission Towers":
+            output = {"LS_0": 0.0}
+        elif inventory_type == "Distribution Poles":
+            output = {"LS_0": 0.0}
         else:
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
 
