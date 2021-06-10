@@ -18,6 +18,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, \
     AnalysisUtil, GeoUtil
 from pyincore.analyses.pipelinedamagerepairrate.pipelineutil import \
     PipelineUtil
+from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
 
 
 class PipelineDamageRepairRate(BaseAnalysis):
@@ -111,10 +112,6 @@ class PipelineDamageRepairRate(BaseAnalysis):
             ds_results (list): A list of ordered dictionaries with pipeline damage values and other data/metadata.
             damage_results (list): A list of ordered dictionaries with pipeline damage metadata.
         """
-
-        ds_results = []
-        damage_results = []
-
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
@@ -141,114 +138,151 @@ class PipelineDamageRepairRate(BaseAnalysis):
         # Get geology dataset id
         geology_dataset_id = self.get_parameter(
             "liquefaction_geology_dataset_id")
+        fragility_sets_liq = None
         if geology_dataset_id is not None:
             fragility_sets_liq = self.fragilitysvc.match_inventory(
                 self.get_input_dataset("dfr3_mapping_set"), pipelines,
                 liquefaction_fragility_key)
 
+        values_payload = []
+        values_payload_liq = [] # for liquefaction if used
+        unmapped_pipelines = []
+        mapped_pipelines = []
         for pipeline in pipelines:
+            # if find a match fragility for that pipeline
             if pipeline["id"] in fragility_sets.keys():
-                liq_fragility_set = None
-                # Check if mapping contains liquefaction fragility
-                if geology_dataset_id is not None and \
+                fragility_set = fragility_sets[pipeline["id"]]
+                location = GeoUtil.get_location(pipeline)
+                loc = str(location.y) + "," + str(location.x)
+                demands = fragility_set.demand_types
+                units = fragility_set.demand_units
+                value = {
+                    "demands": demands,
+                    "units": units,
+                    "loc": loc
+                }
+                values_payload.append(value)
+                mapped_pipelines.append(pipeline)
+
+                # Check if liquefaction is applicable
+                if use_liquefaction and \
+                        geology_dataset_id is not None and \
                         fragility_sets_liq is not None and \
                         pipeline["id"] in fragility_sets_liq:
-                    liq_fragility_set = fragility_sets_liq[pipeline["id"]]
-
-                (ds_result, damage_result) = self.pipeline_damage_analysis(pipeline, hazard_type,
-                                                                           fragility_sets[pipeline["id"]],
-                                                                           liq_fragility_set, hazard_dataset_id,
-                                                                           geology_dataset_id, use_liquefaction)
-                ds_results.append(ds_result)
-                damage_results.append(damage_result)
-
-        return ds_results, damage_results
-
-    def pipeline_damage_analysis(self, pipeline, hazard_type, fragility_set,
-                                 fragility_set_liq, hazard_dataset_id,
-                                 geology_dataset_id, use_liquefaction):
-        """Run pipeline damage for a single pipeline.
-
-        Args:
-            pipeline (obj): a single pipeline.
-            hazard_type (str): hazard type.
-            fragility_set (obj): A JSON description of fragility assigned to the building.
-            fragility_set_liq (obj): A JSON description of fragility assigned to the building with liqufaction.
-            hazard_dataset_id (str): A hazard dataset to use.
-            geology_dataset_id (str): A dataset id for geology dataset for liqufaction.
-            use_liquefaction (bool): Liquefaction. True for using liquefaction information to modify the damage,
-                False otherwise.
-
-        Returns:
-            OrderedDict: A dictionary with pipeline damage values and other data/metadata.
-        """
-        ds_result = {}
-        damage_result = {}
-        ds_result['guid'] = pipeline['properties']['guid']
-        damage_result['guid'] = pipeline['properties']['guid']
-
-        pgv_repairs = 0.0
-        pgd_repairs = 0.0
-        liq_hazard_type = None
-        liq_hazard_val = None
-        liquefaction_prob = None
-
-        if fragility_set is not None:
-            demand_type = fragility_set.demand_types[0].lower()
-            demand_unit = fragility_set.demand_units[0]
-            location = GeoUtil.get_location(pipeline)
-            point = str(location.y) + "," + str(location.x)
-
-            if hazard_type == 'earthquake':
-                hazard_resp = self.hazardsvc.get_earthquake_hazard_values(
-                    hazard_dataset_id, demand_type, demand_unit, [point])
-            elif hazard_type == 'tsunami':
-                hazard_resp = self.hazardsvc.get_tsunami_hazard_values(
-                    hazard_dataset_id, demand_type, demand_unit, [point])
-            elif hazard_type == 'tornado':
-                hazard_resp = self.hazardsvc.get_tornado_hazard_values(
-                    hazard_dataset_id, demand_unit, [point])
-            elif hazard_type == 'hurricane':
-                hazard_resp = self.hazardsvc.get_hurricanewf_values(
-                    hazard_dataset_id, demand_type, demand_unit, [point])
+                    fragility_set_liq = fragility_sets_liq[pipeline["id"]]
+                    demands_liq = fragility_set_liq.demand_types
+                    units_liq = fragility_set_liq.demand_units
+                    value_liq = {
+                        "demands": demands_liq,
+                        "units": units_liq,
+                        "loc": loc
+                    }
+                    values_payload_liq.append(value_liq)
             else:
-                raise ValueError(
-                    "Hazard type are not currently supported.")
+                unmapped_pipelines.append(pipeline)
+        del pipelines
 
-            hazard_val = hazard_resp[0]['hazardValue']
-            if hazard_val <= 0.0:
-                hazard_val = 0.0
+        if hazard_type == 'earthquake':
+            hazard_resp = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'tsunami':
+            hazard_resp = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
+        else:
+            raise ValueError("The provided hazard type is not supported yet by this analysis")
 
-            diameter = PipelineUtil.get_pipe_diameter(pipeline)
-            fragility_vars = {'x': hazard_val, 'y': diameter}
+        # Check if liquefaction is applicable
+        if use_liquefaction is True and \
+                fragility_sets_liq is not None and \
+                geology_dataset_id is not None:
+            liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
+                                                                        values_payload_liq)
+
+        # calculate LS and DS
+        ds_results = []
+        damage_results = []
+        for i, pipeline in enumerate(mapped_pipelines):
+            # default
+            pgv_repairs = 0.0
+            pgd_repairs = 0.0
+
+            fragility_set = fragility_sets[pipeline["id"]]
+            # TODO assume there is only one curve
             fragility_curve = fragility_set.fragility_curves[0]
 
-            # TODO: here assume that custom fragility set only has one limit state
-            pgv_repairs = fragility_set.calculate_custom_limit_state(fragility_vars)['failure']
+            # TODO: Once all fragilities are migrated to new format, we can remove this condition
+            if isinstance(fragility_set.fragility_curves[0], FragilityCurveRefactored):
+                hazard_vals = AnalysisUtil.update_precision_of_lists(hazard_resp[i]["hazardValues"])
+                demand_types = hazard_resp[i]["demands"]
+                demand_units = hazard_resp[i]["units"]
 
-            # Convert PGV repairs to SI units
-            pgv_repairs = PipelineUtil.convert_result_unit(
-                fragility_curve.description, pgv_repairs)
+                hval_dict = dict()
+                for j, d in enumerate(hazard_resp[i]["demands"]):
+                    hval_dict[d] = hazard_vals[j]
 
-            if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
+                pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
+                pgv_repairs = fragility_curve.calculate_limit_state_probability(hval_dict,
+                                                                                fragility_set.fragility_curve_parameters,
+                                                                                **pipeline_args)
+                # Convert PGV repairs to SI units
+                pgv_repairs = PipelineUtil.convert_result_unit(fragility_curve.return_type["unit"], pgv_repairs)
+
+            else:
+                # Non Refactored Fragility curves that always only have a single demand type
+                hazard_vals = AnalysisUtil.update_precision(hazard_resp[i]["hazardValues"][0])
+                demand_types = hazard_resp[i]["demands"][0]
+                demand_units = hazard_resp[i]["units"][0]
+                diameter = PipelineUtil.get_pipe_diameter(pipeline)
+                fragility_vars = {'x': hazard_vals, 'y': diameter}
+                pgv_repairs = fragility_curve.compute_custom_limit_state_probability(fragility_vars)
+
+                # Convert PGV repairs to SI units
+                # TODO in legacy fragility curve there is no good place to store the unit info of return type
+                pgv_repairs = PipelineUtil.convert_result_unit(fragility_curve.description, pgv_repairs)
+
+            # Check if liquefaction is applicable
+            if use_liquefaction is True \
+                    and fragility_sets_liq is not None \
+                    and geology_dataset_id is not None \
+                    and liquefaction_resp is not None:
+                fragility_set_liq = fragility_sets_liq[pipeline["id"]]
+
+                # TODO assume there is only one curve
                 liq_fragility_curve = fragility_set_liq.fragility_curves[0]
-                liq_hazard_type = fragility_set_liq.demand_types[0]
-                pgd_demand_unit = fragility_set_liq.demand_units[0]
 
-                # Get PGD hazard value from hazard service
-                location_str = str(location.y) + "," + str(location.x)
-                liquefaction = self.hazardsvc.get_liquefaction_values(
-                    hazard_dataset_id, geology_dataset_id,
-                    pgd_demand_unit, [location_str])
-                liq_hazard_val = liquefaction[0]['pgd']
-                liquefaction_prob = liquefaction[0]['liqProbability']
+                # TODO: Once all fragilities are migrated to new format, we can remove this condition
+                if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurveRefactored):
+                    liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
+                    liq_demand_types = liquefaction_resp[i]["demands"]
+                    liq_demand_units = liquefaction_resp[i]["units"]
+                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
+                    liq_hval_dict = dict()
+                    for j, d in enumerate(liquefaction_resp[i]["demands"]):
+                        liq_hval_dict[d] = liq_hazard_vals[j]
 
-                liq_fragility_vars = {'x': liq_hazard_val,
-                                      'y': liquefaction_prob}
-                pgd_repairs = liq_fragility_curve.compute_custom_limit_state_probability(liq_fragility_vars)
-                # Convert PGD repairs to SI units
-                pgd_repairs = PipelineUtil.convert_result_unit(
-                    liq_fragility_curve.description, pgd_repairs)
+                    # !important! removing the liqProbability and passing in the "diameter"
+                    # no fragility is actually using liqProbability
+                    pipeline_args = fragility_set_liq.construct_expression_args_from_inventory(pipeline)
+                    pgd_repairs = liq_fragility_curve.calculate_limit_state_probability(liq_hval_dict,
+                                                                                        fragility_set_liq.fragility_curve_parameters,
+                                                                                        **pipeline_args)
+                    # Convert PGD repairs to SI units
+                    pgd_repairs = PipelineUtil.convert_result_unit(liq_fragility_curve.return_type["unit"],
+                                                                   pgd_repairs)
+
+                else:
+                    liq_demand_types = fragility_set_liq.demand_types[0]
+                    liq_demand_units = fragility_set_liq.demand_units[0]
+                    liq_hazard_vals = AnalysisUtil.update_precision(liquefaction_resp[i]['pgdValues'][0])
+                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
+
+                    # !important! removing the liqProbability and passing in the "diameter"
+                    # no fragility is actually using liqProbability
+                    diameter = PipelineUtil.get_pipe_diameter(pipeline)
+                    liq_fragility_vars = {'x': liq_hazard_vals, 'y': diameter}
+                    pgd_repairs = liq_fragility_curve.compute_custom_limit_state_probability(liq_fragility_vars)
+
+                    # Convert PGD repairs to SI units
+                    # TODO in legacy fragility curve there is no good place to store the unit info of return type
+                    pgd_repairs = PipelineUtil.convert_result_unit(liq_fragility_curve.description, pgd_repairs)
 
             total_repair_rate = pgd_repairs + pgv_repairs
             break_rate = 0.2 * pgv_repairs + 0.8 * pgd_repairs
@@ -261,12 +295,15 @@ class PipelineDamageRepairRate(BaseAnalysis):
             num_pgv_repairs = pgv_repairs * length
             num_repairs = num_pgd_repairs + num_pgv_repairs
 
+            # record results
+            ds_result = dict()
+            damage_result = dict()
+            ds_result['guid'] = pipeline['properties']['guid']
+            damage_result['guid'] = pipeline['properties']['guid']
             if 'pipetype' in pipeline['properties']:
-                damage_result['pipeclass'] = pipeline['properties'][
-                    'pipetype']
+                damage_result['pipeclass'] = pipeline['properties']['pipetype']
             elif 'pipelinesc' in pipeline['properties']:
-                damage_result['pipeclass'] = pipeline['properties'][
-                    'pipelinesc']
+                damage_result['pipeclass'] = pipeline['properties']['pipelinesc']
             else:
                 damage_result['pipeclass'] = ""
 
@@ -279,33 +316,61 @@ class PipelineDamageRepairRate(BaseAnalysis):
             ds_result['numpgvrpr'] = num_pgv_repairs
             ds_result['numpgdrpr'] = num_pgd_repairs
             ds_result['numrepairs'] = num_repairs
-            ds_result['liqprobability'] = liquefaction_prob
 
             damage_result['fragility_id'] = fragility_set.id
-            damage_result['demandtypes'] = demand_type
-            damage_result['demandunits'] = demand_unit
+            damage_result['demandtypes'] = demand_types
+            damage_result['demandunits'] = demand_units
             damage_result['hazardtype'] = hazard_type
-            damage_result['hazardval'] = hazard_val
+            damage_result['hazardval'] = hazard_vals
 
-            # if there is liquefaction presented
-            if use_liquefaction is True and fragility_set_liq is not None and geology_dataset_id is not None:
-                damage_result['liq_fragility_id'] = fragility_set_liq.id
+            # Check if liquefaction is applicable
+            if use_liquefaction is True \
+                    and fragility_sets_liq is not None \
+                    and geology_dataset_id is not None:
+                damage_result['liq_fragility_id'] = fragility_sets_liq[pipeline["id"]].id
+                damage_result['liqdemandtypes'] = liq_demand_types
+                damage_result['liqdemandunits'] = liq_demand_units
+                damage_result['liqhazval'] = liq_hazard_vals
+                damage_result['liqprobability'] = liquefaction_prob
             else:
                 damage_result['liq_fragility_id'] = None
-            damage_result['liqhaztype'] = liq_hazard_type
-            damage_result['liqhazval'] = liq_hazard_val
+                damage_result['liqdemandtypes'] = None
+                damage_result['liqdemandunits'] = None
+                damage_result['liqhazval'] = None
+                damage_result['liqprobability'] = None
 
-        else:
+            ds_results.append(ds_result)
+            damage_results.append(damage_result)
+
+        # pipelines do not have matched mappings
+        for pipeline in unmapped_pipelines:
+            ds_result = dict()
+            ds_result['guid'] = pipeline['properties']['guid']
+
+            damage_result = dict()
+            damage_result['guid'] = pipeline['properties']['guid']
+            if 'pipetype' in pipeline['properties']:
+                damage_result['pipeclass'] = pipeline['properties']['pipetype']
+            elif 'pipelinesc' in pipeline['properties']:
+                damage_result['pipeclass'] = pipeline['properties']['pipelinesc']
+            else:
+                damage_result['pipeclass'] = ""
+
             damage_result['fragility_id'] = None
-            damage_result['liq_fragility_id'] = None
             damage_result['demandtypes'] = None
             damage_result['demandunits'] = None
             damage_result['hazardtype'] = None
             damage_result['hazardval'] = None
-            damage_result['liqhaztype'] = None
+            damage_result['liq_fragility_id'] = None
+            damage_result['liqdemandtypes'] = None
+            damage_result['liqdemandunits'] = None
+            damage_result['liqhazval'] = None
             damage_result['liqhazval'] = None
 
-        return ds_result, damage_result
+            ds_results.append(ds_result)
+            damage_results.append(damage_result)
+
+        return ds_results, damage_results
 
     def get_spec(self):
         """Get specifications of the pipeline damage analysis.

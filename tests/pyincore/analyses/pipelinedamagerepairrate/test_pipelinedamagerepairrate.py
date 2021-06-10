@@ -38,11 +38,23 @@ def test_pipeline_dmg_w_repair_rate():
     test_pipeline_dmg_w_rr.set_parameter("hazard_type", hazard_type)
     test_pipeline_dmg_w_rr.set_parameter("hazard_id", hazard_id)
     test_pipeline_dmg_w_rr.set_parameter("liquefaction_fragility_key", "pgd")
-    test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", False)
+    # test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", False)
+    test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", True) # toggle on and off to see liquefaction
     test_pipeline_dmg_w_rr.set_parameter("num_cpu", 4)
     test_pipeline_dmg_w_rr.set_parameter("liquefaction_geology_dataset_id",
                                          liq_geology_dataset_id)
     # Run pipeline damage analysis
+    result = test_pipeline_dmg_w_rr.run_analysis()
+
+    ##################################
+    # test with refactored fragility curves
+    mapping_id = "60b801231f2b7d4a916da689"
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    test_pipeline_dmg_w_rr.set_input_dataset('dfr3_mapping_set', mapping_set)
+
+    result_name = "pipeline_result_refactored"
+    test_pipeline_dmg_w_rr.set_parameter("result_name", result_name)
+
     result = test_pipeline_dmg_w_rr.run_analysis()
 
     assert result is True
