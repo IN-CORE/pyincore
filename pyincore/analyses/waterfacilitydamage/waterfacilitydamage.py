@@ -14,7 +14,7 @@ from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, GeoUtil, \
     AnalysisUtil
-
+from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
 
 class WaterFacilityDamage(BaseAnalysis):
     """Computes water facility damage for an earthquake tsunami, tornado, or hurricane exposure.
@@ -68,8 +68,8 @@ class WaterFacilityDamage(BaseAnalysis):
                 inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        (ds_results, damage_results) = self.waterfacility_damage_concurrent_execution(
-            self.waterfacilityset_damage_analysis, num_workers,
+        (ds_results, damage_results) = self.waterfacility_damage_concurrent_futures(
+            self.waterfacilityset_damage_analysis_bulk_input, num_workers,
             inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
@@ -79,7 +79,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
         return True
 
-    def waterfacility_damage_concurrent_execution(self, function_name,
+    def waterfacility_damage_concurrent_futures(self, function_name,
                                                   parallel_processes,
                                                   *args):
         """Utilizes concurrent.future module.
@@ -105,7 +105,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def waterfacilityset_damage_analysis(self, facilities, hazard_type,
+    def waterfacilityset_damage_analysis_bulk_input(self, facilities, hazard_type,
                                          hazard_dataset_id):
         """Gets applicable fragilities and calculates damage
 
@@ -118,157 +118,223 @@ class WaterFacilityDamage(BaseAnalysis):
             list: A list of ordered dictionaries with water facility damage values
             list: A list of ordered dictionaries with other water facility data/metadata
         """
-        ds_results = []
-        damage_results = []
 
-        liq_fragility = None
-        use_liquefaction = self.get_parameter("use_liquefaction")
-        liq_geology_dataset_id = self.get_parameter(
-            "liquefaction_geology_dataset_id")
-        uncertainty = self.get_parameter("use_hazard_uncertainty")
+        # Liquefaction related variables
+        use_liquefaction = False
+        liquefaction_available = False
+        fragility_sets_liq = None
+        liquefaction_resp = None
+        geology_dataset_id = None
+        liq_hazard_vals = None
+        liq_demand_types = None
+        liq_demand_units = None
+        liquefaction_prob = None
+        loc = None
+
+
+        # Obtain the fragility key
         fragility_key = self.get_parameter("fragility_key")
 
-        if hazard_type == 'earthquake':
-            if fragility_key is None:
-                fragility_key = self.DEFAULT_EQ_FRAGILITY_KEY
-
-            pga_fragility_set = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"),
-                                                                  facilities, fragility_key)
-
-            liq_fragility_set = []
-
-            if use_liquefaction and liq_geology_dataset_id is not None:
-                liq_fragility_key = self.get_parameter(
-                    "liquefaction_fragility_key")
-                if liq_fragility_key is None:
-                    liq_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
-                liq_fragility_set = self.fragilitysvc.match_inventory(self.get_input_dataset(
-                    "dfr3_mapping_set"), facilities, liq_fragility_key)
-
-            for facility in facilities:
-                fragility = pga_fragility_set[facility["id"]]
-                if facility["id"] in liq_fragility_set:
-                    liq_fragility = liq_fragility_set[facility["id"]]
-
-                ds_result, damage_result = self.waterfacility_damage_analysis(facility, fragility,
-                                                                              liq_fragility,
-                                                                              hazard_type,
-                                                                              hazard_dataset_id,
-                                                                              liq_geology_dataset_id,
-                                                                              uncertainty)
-                ds_results.append(ds_result)
-                damage_results.append(damage_result)
-
-        elif hazard_type == 'tsunami':
-            if fragility_key is None:
+        if fragility_key is None:
+            if hazard_type == 'tsunami':
                 fragility_key = self.DEFAULT_TSU_FRAGILITY_KEY
+            elif hazard_type == 'earthquake':
+                fragility_key = self.DEFAULT_EQ_FRAGILITY_KEY
+            else:
+                raise ValueError(
+                    "Hazard type other than Earthquake and Tsunami are not currently supported.")
 
-            inundation_fragility_set = self.fragilitysvc.match_inventory(
-                self.get_input_dataset("dfr3_mapping_set"), facilities, fragility_key)
+            self.set_parameter("fragility_key", fragility_key)
 
-            for facility in facilities:
-                fragility = inundation_fragility_set[facility["id"]]
+        # Obtain the fragility set
+        fragility_sets = self.fragilitysvc.match_inventory(
+            self.get_input_dataset("dfr3_mapping_set"), facilities, fragility_key)
 
-                ds_result, damage_result = self.waterfacility_damage_analysis(facility, fragility, [], hazard_type,
-                                                                              hazard_dataset_id, "", False)
-
-                ds_results.append(ds_result)
-                damage_results.append(damage_result)
-
-        else:
-            raise ValueError(
-                "Hazard type other than Earthquake and Tsunami are not currently supported.")
-
-        return ds_results, damage_results
-
-    def waterfacility_damage_analysis(self, facility, fragility, liq_fragility,
-                                      hazard_type, hazard_dataset_id,
-                                      liq_geology_dataset_id, uncertainty):
-        """Computes damage analysis for a single facility
-
-        Args:
-            facility (obj): A JSON mapping of a facility based on mapping attributes
-            fragility (obj): A JSON description of fragility mapped to the building.
-            liq_fragility (obj): A JSON description of liquefaction fragility mapped to the building.
-            hazard_type (str): A string that indicates the hazard type
-            hazard_dataset_id (str): Hazard id from the hazard service
-            liq_geology_dataset_id (str): Geology dataset id from data service to use for liquefaction calculation, if
-                applicable
-            uncertainty (bool): Whether to use hazard standard deviation values for uncertainty
-
-        Returns:
-            OrderedDict: ordered dictionary with water facility damage values
-            OrderedDict: ordered dictionary with other water facility data/metadata.
-        """
-        hazard_std_dev = 0
-        if uncertainty:
-            hazard_std_dev = random.random()
-
-        hazard_demand_type = fragility.demand_types[0]
-        demand_unit = fragility.demand_units[0]
-        liq_hazard_type = None
-        liq_hazard_val = None
-        liquefaction_prob = None
-        location = GeoUtil.get_location(facility)
-
-        point = str(location.y) + "," + str(location.x)
+        # Obtain the liquefaction fragility Key
+        liquefaction_fragility_key = self.get_parameter(
+            "liquefaction_fragility_key")
 
         if hazard_type == "earthquake":
-            hazard_val_set = self.hazardsvc.get_earthquake_hazard_values(
-                hazard_dataset_id, hazard_demand_type,
-                demand_unit, [point])
-        elif hazard_type == "tsunami":
-            hazard_val_set = self.hazardsvc.get_tsunami_hazard_values(
-                hazard_dataset_id, hazard_demand_type, demand_unit, [point])
+            if self.get_parameter("use_liquefaction") is True:
+                if liquefaction_fragility_key is None:
+                    liquefaction_fragility_key = self.DEFAULT_LIQ_FRAGILITY_KEY
+
+                use_liquefaction = self.get_parameter("use_liquefaction")
+
+                # Obtain the geology dataset
+                geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
+
+                if geology_dataset_id is not None:
+                    fragility_sets_liq = self.fragilitysvc.match_inventory(
+                        self.get_input_dataset("dfr3_mapping_set"), facilities,
+                        liquefaction_fragility_key)
+
+                    if fragility_sets_liq is not None:
+                        liquefaction_available = True
+
+        # Determine whether to use hazard uncertainty
+        uncertainty = self.get_parameter("use_hazard_uncertainty")
+
+        # Setup fragility translation structures
+        values_payload = []
+        values_payload_liq = []
+        unmapped_waterfacilities = []
+        mapped_waterfacilities = []
+
+        for facility in facilities:
+            if facility["id"] in fragility_sets.keys():
+                # Fill in generic details
+                fragility_set = fragility_sets[facility["id"]]
+                location = GeoUtil.get_location(facility)
+                loc = str(location.y) + "," + str(location.x)
+                demands = fragility_set.demand_types
+                units = fragility_set.demand_units
+                value = {
+                    "demands": demands,
+                    "units": units,
+                    "loc": loc
+                }
+                values_payload.append(value)
+                mapped_waterfacilities.append(facility)
+
+                # Fill in liquefaction parameters
+                if liquefaction_available and facility["id"] in fragility_sets_liq:
+                    fragility_set_liq = fragility_sets_liq[facility["id"]]
+                    demands_liq = fragility_set_liq.demand_types
+                    units_liq = fragility_set_liq.demand_units
+                    value_liq = {
+                        "demands": demands_liq,
+                        "units": units_liq,
+                        "loc": loc
+                    }
+                    values_payload_liq.append(value_liq)
+            else:
+                unmapped_waterfacilities.append(facility)
+
+        del facilities
+
+        if hazard_type == 'earthquake':
+            hazard_resp = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'tsunami':
+            hazard_resp = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
         else:
-            raise ValueError(
-                "Hazard type other than Earthquake and Tsunami are not currently supported.")
-        hazard_val = hazard_val_set[0]['hazardValue']
-        if hazard_val < 0:
-            hazard_val = 0
+            raise ValueError("The provided hazard type is not supported yet by this analysis")
 
-        limit_states = fragility.calculate_limit_state_w_conversion(hazard_val,
-                                                                    std_dev=hazard_std_dev,
-                                                                    inventory_type="water_facility")
+        # Check if liquefaction is applicable
+        if liquefaction_available:
+            liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id,
+                                                                        geology_dataset_id,
+                                                                        values_payload_liq)
 
-        pgd_demand_unit = None
+        # Calculate LS and DS
+        facility_results = []
+        damage_results = []
 
-        if liq_fragility is not None and liq_geology_dataset_id:
-            liq_hazard_type = liq_fragility.demand_types[0]
-            pgd_demand_unit = liq_fragility.demand_units[0]
-            point = str(location.y) + "," + str(location.x)
+        for i, facility in enumerate(mapped_waterfacilities):
+            fragility_set = fragility_sets[facility["id"]]
 
-            liquefaction = self.hazardsvc.get_liquefaction_values(
-                hazard_dataset_id, liq_geology_dataset_id,
-                pgd_demand_unit, [point])
-            liq_hazard_val = liquefaction[0][liq_hazard_type]
-            liquefaction_prob = liquefaction[0]['liqProbability']
-            pgd_limit_states = liq_fragility.calculate_limit_state_w_conversion(liq_hazard_val,
+            # Setup conditions for the analysis
+            hazard_std_dev = 0
+
+            if uncertainty:
+                hazard_std_dev = random.random()
+
+            if isinstance(fragility_set.fragility_curves[0], FragilityCurveRefactored):
+                hazard_vals = AnalysisUtil.update_precision_of_lists(hazard_resp[i]["hazardValues"])
+                demand_types = hazard_resp[i]["demands"]
+                demand_units = hazard_resp[i]["units"]
+
+                hval_dict = dict()
+
+                for j, d in enumerate(hazard_resp[i]["demands"]):
+                    hval_dict[d] = hazard_vals[j]
+
+                facility_args = fragility_set.construct_expression_args_from_inventory(facility)
+                limit_states = \
+                    fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
                                                                                 std_dev=hazard_std_dev,
-                                                                                inventory_type="water_facility")
+                                                                                inventory_type='water_facility',
+                                                                                **facility_args)
+            else:
+                hazard_vals = AnalysisUtil.update_precision(hazard_resp[i]["hazardValues"][0])
+                demand_types = hazard_resp[i]["demands"][0]
+                demand_units = hazard_resp[i]["units"][0]
+                limit_states = \
+                    fragility_set.calculate_limit_state_refactored_w_conversion(hazard_vals,
+                                                                                std_dev=hazard_std_dev,
+                                                                                inventory_type='water_facility')
 
-            limit_states = AnalysisUtil.adjust_limit_states_for_pgd(
-                limit_states, pgd_limit_states)
+            # TODO: ideally, this goes into a single variable declaration section
 
-        dmg_intervals = fragility.calculate_damage_interval(limit_states,
-                                                            hazard_type=hazard_type,
-                                                            inventory_type="water_facility")
+            # Evaluate liquefaction: if it is not none, then liquefaction is available
+            if liquefaction_resp is not None:
+                fragility_set_liq = fragility_sets_liq[facility["id"]]
 
-        result = collections.OrderedDict()
-        result['guid'] = facility['properties']['guid']
-        result.update(limit_states)
-        result.update(dmg_intervals)  # Needs py 3.5+
-        metadata = collections.OrderedDict()
-        metadata['guid'] = facility['properties']['guid']
-        metadata['hazardtype'] = hazard_type
-        metadata['hazardval'] = hazard_val
-        metadata['demandtypes'] = hazard_demand_type
-        metadata['demandunits'] = demand_unit
-        metadata['liqhaztype'] = liq_hazard_type
-        metadata['liqhazval'] = liq_hazard_val
-        metadata['liqprobability'] = liquefaction_prob
+                if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurveRefactored):
+                    liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
+                    liq_demand_types = liquefaction_resp[i]["demands"]
+                    liq_demand_units = liquefaction_resp[i]["units"]
+                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
+                else:
+                    liq_demand_types = fragility_set_liq.demand_types[0]
+                    liq_demand_units = fragility_set_liq.demand_units[0]
+                    liq_hazard_vals = AnalysisUtil.update_precision(liquefaction_resp[i]['pgdValues'][0])
+                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
 
-        return result, metadata
+                pgd_limit_states = fragility_set_liq.calculate_limit_state_w_conversion(liq_hazard_vals,
+                                                                                        std_dev=hazard_std_dev,
+                                                                                        inventory_type="water_facility")
+
+                limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
+
+            dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
+                                                                    inventory_type='water_facility')
+
+            facility_result = {'guid': facility['properties']['guid'], **limit_states, **dmg_intervals}
+            damage_result = dict()
+            damage_result['guid'] = facility['properties']['guid']
+            damage_result['fragility_id'] = fragility_set.id
+            damage_result['demandtypes'] = demand_types
+            damage_result['demandunits'] = demand_units
+            damage_result['hazardtype'] = hazard_type
+            damage_result['hazardvals'] = hazard_vals
+
+            if use_liquefaction and fragility_sets_liq and geology_dataset_id:
+                damage_result['liq_fragility_id'] = fragility_sets_liq[facility["id"]].id
+                damage_result['liqdemandtypes'] = liq_demand_types
+                damage_result['liqdemandunits'] = liq_demand_units
+                damage_result['liqhazval'] = liq_hazard_vals
+                damage_result['liqprobability'] = liquefaction_prob
+            else:
+                damage_result['liq_fragility_id'] = None
+                damage_result['liqdemandtypes'] = None
+                damage_result['liqdemandunits'] = None
+                damage_result['liqhazval'] = None
+                damage_result['liqprobability'] = None
+
+            facility_results.append(facility_result)
+            damage_results.append(damage_result)
+
+        for facility in unmapped_waterfacilities:
+            facility_result = dict()
+            damage_result = dict()
+            facility_result['guid'] = facility['properties']['guid']
+            damage_result['guid'] = facility['properties']['guid']
+            damage_result['fragility_id'] = None
+            damage_result['demandtypes'] = None
+            damage_result['demandunits'] = None
+            damage_result['hazardtype'] = None
+            damage_result['hazardvals'] = None
+            damage_result['liq_fragility_id'] = None
+            damage_result['liqdemandtypes'] = None
+            damage_result['liqdemandunits'] = None
+            damage_result['liqhazval'] = None
+            damage_result['liqprobability'] = None
+
+            facility_results.append(facility_result)
+            damage_results.append(damage_result)
+
+        return facility_results, damage_results
 
     def get_spec(self):
         return {
