@@ -30,10 +30,8 @@ class TornadoEpnDamage(BaseAnalysis):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
         self.datasetsvc = DataService(incore_client)
-        # self.fragility_tower_id = '5b201b41b1cf3e336de8fa67'  # legacy format
-        self.fragility_tower_id = '60beb0be1f2b7d4a9171926f'  # equation based refactored format
-        # self.fragility_pole_id = '5b201d91b1cf3e336de8fa68'  # legacy format
-        self.fragility_pole_id = '60beb0f31f2b7d4a91719290'  # equation based refactored format
+        self.fragility_tower_id = '5b201b41b1cf3e336de8fa67'
+        self.fragility_pole_id = '5b201d91b1cf3e336de8fa68'
 
         # this is for deciding to use indpnode field. Not using this could be safer for general dataset
         self.use_indpnode = False
