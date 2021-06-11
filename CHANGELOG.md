@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.4] - 2021-06-16
+### Added
+- Support refactored fragility curves for water facility damage [INCORE1-1063](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1063)
+- Support refactored fragility curves for pipeline damage [INCORE1-1057](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1057)
+- Support refactored fragility curves for non-structural building damage [INCORE1-1060](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1060)
+- Support refactored fragility curves for road damage [INCORE1-1180](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1180)
+- Support refactored fragility curves for Tornado EPN damage [INCORE1-1062](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1062)
+- Support Add refactored fragility curves for pipeline repair rate analysis [INCORE1-1165](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1065)
+
+### Changed
+- Merge roadway failure analysis into road damage [INCORE1-1180](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1180)
+- Damage calculation not subject to the upper/lowercase of the demand types and other fragility curve parameters [INCORE1-1221](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1221)
+
+
 ## [0.9.3] - 2021-05-21
 ### Changed
 - Split epf damage output to json and csv, rename LS/DS [INCORE1-1136](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1136)
