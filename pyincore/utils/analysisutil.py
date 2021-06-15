@@ -15,6 +15,7 @@ from decimal import getcontext, Decimal
 
 from pyincore import DataService
 from pyincore.globals import DAMAGE_PRECISION
+from pyincore.utils import evaluateexpression
 
 
 class AnalysisUtil:
@@ -459,9 +460,21 @@ class AnalysisUtil:
                             building_period = demand_type.split()[0]
                             adjusted_demand_type = str(building_period) + " " + "SA"
                     else:
-                        if building_period == 0.0 and BLDG_PERIOD in building[PROPERTIES]:
-                            if building[PROPERTIES][BLDG_PERIOD] > 0.0:
+                        if building_period == 0.0:
+                            if BLDG_PERIOD in building[PROPERTIES] and building[PROPERTIES][BLDG_PERIOD] > 0.0:
+
                                 building_period = building[PROPERTIES][BLDG_PERIOD]
+                            else:
+                                # try to calculate the period from the expression
+                                for param in fragility_set.fragility_curve_parameters:
+                                    if param["name"].lower() == "period":
+                                        # TODO: This is a hack and expects a parameter with name "period" present.
+                                        #  This can potentially cause naming conflicts in some fragilities
+
+                                        building_period = evaluateexpression.evaluate(param["expression"],
+                                                                                      {"num_stories": num_stories})
+                                        # TODO: num_stories logic is not tested. should find a fragility with
+                                        #  periodEqnType = 2 or 3 to test. periodEqnType = 1 doesn't need num_stories.
 
                         adjusted_demand_type = str(building_period) + " " + "SA"
 

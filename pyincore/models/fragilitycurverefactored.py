@@ -3,6 +3,8 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
+import json
+import math
 from abc import ABC
 
 from pyincore import globals as pyglobals
@@ -84,5 +86,13 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
                 if all(conditions_met):
                     probability = evaluateexpression.evaluate(rule["expression"], parameters)
                     break
+
+        if math.isnan(probability):
+            error_msg = "Unable to calculate limit state."
+            if self.rules:
+                error_msg += " Evaluation failed for expression: \n" + json.dumps(self.rules) + "\n"
+                error_msg += "Provided Inputs: \n" + json.dumps(hazard_values) + "\n" + json.dumps(kwargs)
+
+            raise ValueError(error_msg)
 
         return probability

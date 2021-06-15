@@ -190,7 +190,6 @@ class NonStructBuildingDamage(BaseAnalysis):
         for i, building in enumerate(mapped_buildings):
             fragility_set_as = fragility_sets_as[building["id"]]
             fragility_set_ds = fragility_sets_ds[building["id"]]
-            building_args = fragility_set_as.construct_expression_args_from_inventory(building)
 
             # TODO this value needs to come from the hazard service
             # adjust dmg probability for hazard uncertainty
@@ -204,8 +203,9 @@ class NonStructBuildingDamage(BaseAnalysis):
                 demand_types_as = hazard_resp_as[i]["demands"]
                 demand_units_as = hazard_resp_as[i]["units"]
                 hval_dict_as = dict()
-                for j, d in enumerate(hazard_resp_as[i]["demands"]):
+                for j, d in enumerate(fragility_set_as.demand_types):
                     hval_dict_as[d] = hazard_vals_as[j]
+                building_args = fragility_set_as.construct_expression_args_from_inventory(building)
                 dmg_probability_as = fragility_set_as.\
                     calculate_limit_state_refactored_w_conversion(hval_dict_as, inventory_type="building",
                                                                   **building_args)
@@ -234,8 +234,10 @@ class NonStructBuildingDamage(BaseAnalysis):
                 demand_types_ds = hazard_resp_ds[i]["demands"]
                 demand_units_ds = hazard_resp_ds[i]["units"]
                 hval_dict_ds = dict()
-                for j, d in enumerate(hazard_resp_ds[i]["demands"]):
+                for j, d in enumerate(fragility_set_ds.demand_types):
                     hval_dict_ds[d] = hazard_vals_ds[j]
+
+                building_args = fragility_set_ds.construct_expression_args_from_inventory(building)
                 dmg_probability_ds = fragility_set_ds.\
                     calculate_limit_state_refactored_w_conversion(hval_dict_ds, inventory_type="building",
                                                                   **building_args)

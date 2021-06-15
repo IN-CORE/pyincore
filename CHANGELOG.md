@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Merge roadway failure analysis into road damage [INCORE1-1180](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1180)
 - Damage calculation not subject to the upper/lowercase of the demand types and other fragility curve parameters [INCORE1-1221](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1221)
 
+### Fixed
+- Calculate building period and conjugate it with "SA" to form the correct demand type [INCORE1-1240](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1240) 
+
 
 ## [0.9.3] - 2021-05-21
 ### Changed

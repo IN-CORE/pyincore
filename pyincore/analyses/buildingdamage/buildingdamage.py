@@ -179,8 +179,12 @@ class BuildingDamage(BaseAnalysis):
 
                 hval_dict = dict()
                 j = 0
-                for d in hazard_vals[i]["demands"]:
-                    hval_dict[d] = hazard_vals[i]["hazardValues"][j]
+
+                # To calculate damage, use demand type name from fragility that will be used in the expression, instead
+                # of using what the hazard service returns. There could be a difference "SA" in DFR3 vs "1.07 SA"
+                # from hazard
+                for d in selected_fragility_set.demand_types:
+                    hval_dict[d] = b_haz_vals[j]
                     j += 1
 
                 building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
