@@ -215,7 +215,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 demand_units = hazard_resp[i]["units"]
 
                 hval_dict = dict()
-                for j, d in enumerate(hazard_resp[i]["demands"]):
+                for j, d in enumerate(fragility_set.demand_types):
                     hval_dict[d] = hazard_vals[j]
 
                 pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)

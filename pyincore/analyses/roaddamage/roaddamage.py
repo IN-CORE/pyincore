@@ -187,7 +187,7 @@ class RoadDamage(BaseAnalysis):
                 demand_types = hazard_resp[i]["demands"]
                 demand_units = hazard_resp[i]["units"]
                 hval_dict = dict()
-                for j, d in enumerate(hazard_resp[i]["demands"]):
+                for j, d in enumerate(selected_fragility_set.demand_types):
                     hval_dict[d] = hazard_vals[j]
                 road_args = selected_fragility_set.construct_expression_args_from_inventory(road)
                 dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,

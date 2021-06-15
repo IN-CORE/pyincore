@@ -246,7 +246,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
                 hval_dict = dict()
 
-                for j, d in enumerate(hazard_resp[i]["demands"]):
+                for j, d in enumerate(fragility_set.demand_types):
                     hval_dict[d] = hazard_vals[j]
 
                 facility_args = fragility_set.construct_expression_args_from_inventory(facility)
@@ -260,9 +260,9 @@ class WaterFacilityDamage(BaseAnalysis):
                 demand_types = hazard_resp[i]["demands"][0]
                 demand_units = hazard_resp[i]["units"][0]
                 limit_states = \
-                    fragility_set.calculate_limit_state_refactored_w_conversion(hazard_vals,
-                                                                                std_dev=hazard_std_dev,
-                                                                                inventory_type='water_facility')
+                    fragility_set.calculate_limit_state_w_conversion(hazard_vals,
+                                                                     std_dev=hazard_std_dev,
+                                                                     inventory_type='water_facility')
 
             # TODO: ideally, this goes into a single variable declaration section
 
@@ -275,15 +275,27 @@ class WaterFacilityDamage(BaseAnalysis):
                     liq_demand_types = liquefaction_resp[i]["demands"]
                     liq_demand_units = liquefaction_resp[i]["units"]
                     liquefaction_prob = liquefaction_resp[i]['liqProbability']
+
+                    hval_dict_liq = dict()
+
+                    for j, d in enumerate(fragility_set_liq.demand_types):
+                        hval_dict_liq[d] = liq_hazard_vals[j]
+
+                    facility_liq_args = fragility_set_liq.construct_expression_args_from_inventory(facility)
+                    pgd_limit_states = \
+                        fragility_set_liq.calculate_limit_state_refactored_w_conversion(hval_dict_liq,
+                                                                                        std_dev=hazard_std_dev,
+                                                                                        inventory_type="water_facility",
+                                                                                        **facility_liq_args)
                 else:
                     liq_demand_types = fragility_set_liq.demand_types[0]
                     liq_demand_units = fragility_set_liq.demand_units[0]
                     liq_hazard_vals = AnalysisUtil.update_precision(liquefaction_resp[i]['pgdValues'][0])
                     liquefaction_prob = liquefaction_resp[i]['liqProbability']
 
-                pgd_limit_states = fragility_set_liq.calculate_limit_state_w_conversion(liq_hazard_vals,
-                                                                                        std_dev=hazard_std_dev,
-                                                                                        inventory_type="water_facility")
+                    pgd_limit_states = fragility_set_liq.calculate_limit_state_w_conversion(liq_hazard_vals,
+                                                                                            std_dev=hazard_std_dev,
+                                                                                            inventory_type="water_facility")
 
                 limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
 

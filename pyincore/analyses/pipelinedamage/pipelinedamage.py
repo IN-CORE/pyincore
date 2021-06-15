@@ -169,7 +169,7 @@ class PipelineDamage(BaseAnalysis):
 
                 # construct hazard_value dictionary {"demand_type":"hazard_value", ...}
                 hval_dict = dict()
-                for j, d in enumerate(hazard_vals[i]["demands"]):
+                for j, d in enumerate(fragility_set.demand_types):
                     hval_dict[d] = haz_vals[j]
 
                 pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)

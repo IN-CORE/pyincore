@@ -179,8 +179,8 @@ class EpfDamage(BaseAnalysis):
 
                 hval_dict = dict()
                 j = 0
-                for d in hazard_vals[i]["demands"]:
-                    hval_dict[d] = hazard_vals[i]["hazardValues"][j]
+                for d in selected_fragility_set.demand_types:
+                    hval_dict[d] = hazard_val[j]
                     j += 1
 
                 epf_args = selected_fragility_set.construct_expression_args_from_inventory(epf)
