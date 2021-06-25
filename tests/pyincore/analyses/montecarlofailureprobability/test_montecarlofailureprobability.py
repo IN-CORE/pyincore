@@ -12,13 +12,13 @@ def run_with_base_class():
     # damage_dataset = Dataset.from_file("memphis_bldg_dmg_result.csv",
     #                                    "ergo:buildingDamageVer4")
     # mc.set_input_dataset("damage", damage_dataset)
-    mc.load_remote_input_dataset("damage", "5a29782fc7d30d4af537ace5")
+    mc.load_remote_input_dataset("damage", "602d96e4b1db9c28aeeebdce")
     mc.set_parameter("result_name", "building_damage")
     mc.set_parameter("num_cpu", 8)
     mc.set_parameter("num_samples", 10)
     mc.set_parameter("damage_interval_keys",
-                     ["insignific", "moderate", "heavy", "complete"])
-    mc.set_parameter("failure_state_keys", ["moderate", "heavy", "complete"])
+                     ["DS_0", "DS_1", "DS_2", "DS_3"])
+    mc.set_parameter("failure_state_keys", ["DS_1", "DS_2", "DS_3"])
 
     # optional parameter
     mc.set_parameter("seed", 2)

@@ -99,6 +99,11 @@ class MonteCarloFailureProbability(BaseAnalysis):
                     'id': 'sample_failure_state',
                     'description': 'CSV file of failure state for each sample',
                     'type': 'incore:sampleFailureState'
+                },
+                {
+                    'id': 'sample_damage_states',
+                    'description': 'CSV file of simulated damage states for each sample',
+                    'type': 'incore:sampleDamageState'
                 }
             ]
         }
@@ -141,13 +146,15 @@ class MonteCarloFailureProbability(BaseAnalysis):
                 seed_list.append([None for i in range(count - 1, count+avg_bulk_input_size - 1)])
                 count += avg_bulk_input_size
 
-        fs_results, fp_results = self.monte_carlo_failure_probability_concurrent_future(
+        fs_results, fp_results, samples_results = self.monte_carlo_failure_probability_concurrent_future(
             self.monte_carlo_failure_probability_bulk_input, num_workers,
             inventory_args, seed_list)
         self.set_result_csv_data("sample_failure_state",
                                  fs_results, name=self.get_parameter("result_name") + "_failure_state")
         self.set_result_csv_data("failure_probability",
                                  fp_results, name=self.get_parameter("result_name") + "_failure_probability")
+        self.set_result_csv_data("sample_damage_states",
+                                 samples_results, name=self.get_parameter("result_name") + "_sample_damage_states")
         return True
 
     def monte_carlo_failure_probability_concurrent_future(self, function_name,
@@ -165,13 +172,15 @@ class MonteCarloFailureProbability(BaseAnalysis):
         """
         fs_output = []
         fp_output = []
+        samples_output = []
         with concurrent.futures.ProcessPoolExecutor(
                 max_workers=parallelism) as executor:
-            for fs_ret, fp_ret in executor.map(function_name, *args):
+            for fs_ret, fp_ret, samples_ret in executor.map(function_name, *args):
                 fs_output.extend(fs_ret)
                 fp_output.extend(fp_ret)
+                samples_output.extend(samples_ret)
 
-        return fs_output, fp_output
+        return fs_output, fp_output, samples_output
 
     def monte_carlo_failure_probability_bulk_input(self, damage, seed_list):
         """Run analysis for monte carlo failure probability calculation
@@ -191,16 +200,18 @@ class MonteCarloFailureProbability(BaseAnalysis):
 
         fs_result = []
         fp_result = []
+        samples_output = []
 
         i = 0
         for dmg in damage:
-            fs, fp = self.monte_carlo_failure_probability(dmg, damage_interval_keys, failure_state_keys,
+            fs, fp, samples_result = self.monte_carlo_failure_probability(dmg, damage_interval_keys, failure_state_keys,
                                                           num_samples, seed_list[i])
             fs_result.append(fs)
             fp_result.append(fp)
+            samples_output.append(samples_result)
             i += 1
 
-        return fs_result, fp_result
+        return fs_result, fp_result, samples_output
 
     def monte_carlo_failure_probability(self, dmg, damage_interval_keys,
                                         failure_state_keys, num_samples, seed):
@@ -216,17 +227,26 @@ class MonteCarloFailureProbability(BaseAnalysis):
         Returns:
             fs_result: A dictionary with id/guid and failure state for N samples
             fp_result: A dictionary with failure probability and other data/metadata.
+            samples_result: A dictionary with id/guid and damage states for N samples
 
         """
         # failure state
         fs_result = collections.OrderedDict()
+
+        # sample damage states
+        samples_result = collections.OrderedDict()
+
         # copying guid/id column to the sample damage failure table
         if 'guid' in dmg.keys():
             fs_result['guid'] = dmg['guid']
+            samples_result['guid'] = dmg['guid']
+
         elif 'id' in dmg.keys():
             fs_result['id'] = dmg['id']
+            samples_result['id'] = dmg['id']
         else:
             fs_result['id'] = 'NA'
+            samples_result['id'] = 'NA'
 
         # failure probability
         fp_result = collections.OrderedDict()
@@ -238,8 +258,9 @@ class MonteCarloFailureProbability(BaseAnalysis):
 
         fs_result['failure'] = ",".join(func.values())
         fp_result['failure_probability'] = fp
+        samples_result['sample_damage_states'] = ','.join(ds_sample.values())
 
-        return fs_result, fp_result
+        return fs_result, fp_result, samples_result
 
     def sample_damage_interval(self, dmg, damage_interval_keys, num_samples, seed):
         """
