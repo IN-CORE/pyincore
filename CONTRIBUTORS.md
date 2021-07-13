@@ -9,7 +9,7 @@ The following is a list of contributors in alphabetical order
 * **Jong Sung Lee**
 * **Gowtham Naraharisetty**
 * **Christopher Navarro**
+* **Santiago Núñez-Corrales**
 * **Michal Ondrejcek**
 * **Nathan Tolbert**
 * **Chen Wang**
-

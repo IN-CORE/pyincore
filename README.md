@@ -4,7 +4,7 @@
                       
 ## Prerequisites
 
-* Requirements: IN-CORE account, Python 3.5+, Anaconda or Miniconda, Jupyter notebook.
+* Requirements: IN-CORE account, Python 3.6-3.8, Anaconda or Miniconda, Jupyter notebook.
 
 Please read through the [Prerequisites](https://incore.ncsa.illinois.edu/doc/incore/prerequisites.html) section at IN-CORE manual at least once completely before actually following them to avoid any installation problems!
 
