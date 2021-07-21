@@ -2,7 +2,7 @@ boto3
 deprecated
 fiona>=1.8.4
 geopandas>=0.6.1
-#ipopt>=3.11
+ipopt>=3.11
 jsonpickle>=1.1
 networkx>=2.2
 numpy>=1.16.6,<2.0a0
