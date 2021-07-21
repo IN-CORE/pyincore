@@ -58,6 +58,11 @@ analyses/example
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
     :members:
 
+analyses/housingrecoveryserial
+==============================
+..  autoclass:: housingrecoveryserial.housingrecoveryserial.HousingRecoverySerial
+    :members:
+
 analyses/housingunitallocation
 ==============================
 ..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
@@ -118,6 +123,11 @@ analyses/populationdislocation
 ..  autoclass:: populationdislocation.populationdislocation.PopulationDislocation
     :members:
 ..  autoclass:: populationdislocation.populationdislocationutil.PopulationDislocationUtil
+    :members:
+
+analyses/residentialrecovery
+============================
+..  autoclass:: residentialrecovery.residentialrecovery.ResidentialRecovery
     :members:
 
 analyses/roaddamage
@@ -222,6 +232,11 @@ models/periodbuildingfragilitycurve
 models/periodstandardfragilitycurve
 ===================================
 ..  autoclass:: models.periodstandardfragilitycurve.PeriodStandardFragilityCurve
+    :members:
+
+models/repaircurveset
+=====================
+..  autoclass:: models.repaircurveset.RepairCurveSet
     :members:
 
 models/standardfragilitycurve
