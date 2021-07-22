@@ -407,7 +407,7 @@ class TornadoEpnDamage(BaseAnalysis):
             ds_result["stdcost"] = stdcost[i]
             ds_result["meantime"] = meantime[i]
             ds_result["stdtime"] = stdtime[i]
-            ds_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(hazardval, "tornado")
+            ds_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(hazardval[i], "tornado")
 
             damage_result['guid'] = guid_list[i]
             damage_result["fragility_tower_id"] = self.fragility_tower_id
