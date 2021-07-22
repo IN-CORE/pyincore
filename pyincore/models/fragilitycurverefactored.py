@@ -63,6 +63,8 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
                 elif parameter["name"].lower() == kwargs_key.lower():
                     parameters[parameter["name"]] = kwargs_value
 
+        probability = 0.0
+
         # use hazard values if present
         # consider case insensitive situation
         for key, value in hazard_values.items():
@@ -70,8 +72,12 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
                 key = mapped_demand_types[key]
             for parameter_key in parameters.keys():
                 if parameter_key.lower() == key.lower():
-                    parameters[parameter_key] = value
-        probability = 0.0
+                    if value is not None:
+                        parameters[parameter_key] = value
+                    else:
+                        # returning 0 even if a single demand value is None, assumes there is no hazard exposure. TBD
+                        return probability
+
         for rule in self.rules:
             if "condition" not in rule or rule["condition"] is None:
                 probability = evaluateexpression.evaluate(rule["expression"], parameters)
