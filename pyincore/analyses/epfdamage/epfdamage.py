@@ -188,20 +188,8 @@ class EpfDamage(BaseAnalysis):
                                                                                                     inventory_type='electric_facility',
                                                                                                     **epf_args)
             else:
-                hazard_val = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
-                # Sometimes the geotiffs give large negative values for out of bounds instead of 0
-                if hazard_val <= 0.0:
-                    hazard_val = 0.0
-
-                std_dev = 0.0
-                if use_hazard_uncertainty:
-                    raise ValueError("Uncertainty Not Implemented!")
-
-                input_demand_types = hazard_vals[i]["demands"][0]
-                input_demand_units = hazard_vals[i]["units"][0]
-                limit_states = selected_fragility_set.calculate_limit_state_w_conversion(hazard_val,
-                                                                                         std_dev=std_dev,
-                                                                                         inventory_type='electric_facility')
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
 
             dmg_interval = selected_fragility_set.calculate_damage_interval(limit_states,
                                                                             hazard_type=hazard_type,
@@ -210,6 +198,7 @@ class EpfDamage(BaseAnalysis):
             ds_result["guid"] = epf["properties"]["guid"]
             ds_result.update(limit_states)
             ds_result.update(dmg_interval)
+            ds_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_val, hazard_type)
 
             damage_result['guid'] = epf['properties']['guid']
             damage_result['fragility_id'] = selected_fragility_set.id
@@ -398,7 +387,7 @@ class EpfDamage(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'epfs',
-                    'type': 'incore:epfDamageVer2'
+                    'type': 'incore:epfDamageVer3'
                 },
                 {
                     'id': 'metadata',

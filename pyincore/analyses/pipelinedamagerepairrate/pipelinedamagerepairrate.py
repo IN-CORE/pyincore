@@ -226,17 +226,8 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 pgv_repairs = PipelineUtil.convert_result_unit(fragility_curve.return_type["unit"], pgv_repairs)
 
             else:
-                # Non Refactored Fragility curves that always only have a single demand type
-                hazard_vals = AnalysisUtil.update_precision(hazard_resp[i]["hazardValues"][0])
-                demand_types = hazard_resp[i]["demands"][0]
-                demand_units = hazard_resp[i]["units"][0]
-                diameter = PipelineUtil.get_pipe_diameter(pipeline)
-                fragility_vars = {'x': hazard_vals, 'y': diameter}
-                pgv_repairs = fragility_curve.compute_custom_limit_state_probability(fragility_vars)
-
-                # Convert PGV repairs to SI units
-                # TODO in legacy fragility curve there is no good place to store the unit info of return type
-                pgv_repairs = PipelineUtil.convert_result_unit(fragility_curve.description, pgv_repairs)
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
 
             # Check if liquefaction is applicable
             if use_liquefaction is True \
@@ -269,20 +260,8 @@ class PipelineDamageRepairRate(BaseAnalysis):
                                                                    pgd_repairs)
 
                 else:
-                    liq_demand_types = fragility_set_liq.demand_types[0]
-                    liq_demand_units = fragility_set_liq.demand_units[0]
-                    liq_hazard_vals = AnalysisUtil.update_precision(liquefaction_resp[i]['pgdValues'][0])
-                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
-
-                    # !important! removing the liqProbability and passing in the "diameter"
-                    # no fragility is actually using liqProbability
-                    diameter = PipelineUtil.get_pipe_diameter(pipeline)
-                    liq_fragility_vars = {'x': liq_hazard_vals, 'y': diameter}
-                    pgd_repairs = liq_fragility_curve.compute_custom_limit_state_probability(liq_fragility_vars)
-
-                    # Convert PGD repairs to SI units
-                    # TODO in legacy fragility curve there is no good place to store the unit info of return type
-                    pgd_repairs = PipelineUtil.convert_result_unit(liq_fragility_curve.description, pgd_repairs)
+                    raise ValueError("One of the fragilities is in deprecated format. This should not happen. "
+                                     "If you are seeing this please report the issue.")
 
             total_repair_rate = pgd_repairs + pgv_repairs
             break_rate = 0.2 * pgv_repairs + 0.8 * pgd_repairs
@@ -316,6 +295,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
             ds_result['numpgvrpr'] = num_pgv_repairs
             ds_result['numpgdrpr'] = num_pgd_repairs
             ds_result['numrepairs'] = num_repairs
+            ds_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
 
             damage_result['fragility_id'] = fragility_set.id
             damage_result['demandtypes'] = demand_types
@@ -450,7 +430,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'pipeline',
-                    'type': 'ergo:pipelineDamageVer2'
+                    'type': 'ergo:pipelineDamageVer3'
                 },
                 {
                     'id': 'metadata',

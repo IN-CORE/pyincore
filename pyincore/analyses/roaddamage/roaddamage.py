@@ -214,30 +214,8 @@ class RoadDamage(BaseAnalysis):
                     liquefaction_prob = None
 
             else:
-                # Non Refactored Fragility curves that always only have a single demand type
-                hazard_vals = AnalysisUtil.update_precision(hazard_resp[i]["hazardValues"][0])
-                demand_types = hazard_resp[i]["demands"][0]
-                demand_units = hazard_resp[i]["units"][0]
-                dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(hazard_vals,
-                                                                                            std_dev=hazard_std_dev,
-                                                                                            inventory_type="road")
-
-                # if there is liquefaction, overwrite the hazardval with liquefaction value
-                # recalculate dmg_probability and dmg_interval
-                if liquefaction_resp is not None and len(liquefaction_resp) > 0:
-                    liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])[0]
-                    demand_types_liq = liquefaction_resp[i]['demands'][0]
-                    demand_units_liq = liquefaction_resp[i]['units'][0]
-                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
-                    dmg_probability = \
-                        selected_fragility_set.calculate_limit_state_w_conversion(liq_hazard_vals,
-                                                                                  std_dev=hazard_std_dev,
-                                                                                  inventory_type="road")
-                else:
-                    demand_types_liq = None
-                    demand_units_liq = None
-                    liq_hazard_vals = None
-                    liquefaction_prob = None
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
 
             dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability,
                                                                              hazard_type=hazard_type,
@@ -246,6 +224,7 @@ class RoadDamage(BaseAnalysis):
             ds_result['guid'] = road['properties']['guid']
             ds_result.update(dmg_probability)
             ds_result.update(dmg_interval)
+            ds_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
 
             damage_result = dict()
             damage_result['guid'] = road['properties']['guid']
@@ -365,7 +344,7 @@ class RoadDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'roads',
                     'description': 'CSV file of road structural damage',
-                    'type': 'ergo:roadDamageVer2'
+                    'type': 'ergo:roadDamageVer3'
                 },
                 {
                     'id': 'metadata',

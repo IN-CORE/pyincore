@@ -178,16 +178,14 @@ class PipelineDamage(BaseAnalysis):
                                                                                            **pipeline_args)
 
             else:
-                # Non Refactored Fragility curves that always only have a single demand type
-                haz_vals = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
-                demand_types = hazard_vals[i]["demands"][0]
-                demand_units = hazard_vals[i]["units"][0]
-                limit_states = fragility_set.calculate_limit_state_w_conversion(haz_vals, inventory_type="pipeline")
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
 
             dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
                                                                     inventory_type="pipeline")
 
             pipeline_result = {'guid': pipeline['properties']['guid'], **limit_states, **dmg_intervals}
+            pipeline_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(haz_vals, hazard_type)
             damage_result = dict()
             damage_result['guid'] = pipeline['properties']['guid']
             damage_result['fragility_id'] = fragility_set.id
@@ -283,7 +281,7 @@ class PipelineDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'pipeline',
                     'description': 'CSV file of damage states for pipeline damage',
-                    'type': 'incore:pipelineDamageVer2'
+                    'type': 'incore:pipelineDamageVer3'
                 },
                 {
                     'id': 'metadata',
