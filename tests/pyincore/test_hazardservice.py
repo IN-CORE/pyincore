@@ -236,12 +236,11 @@ def test_get_tornado_hazard_values(hazardsvc):
                                                 ["35.228, -97.478",
                                                  "35.229, -97.465"])
 
-    assert ((hvals[0]['hazardValue'] > 85) and (
-                hvals[0]['hazardValue'] < 165)) and hvals[1][
-               'hazardValue'] == 0
+    assert ((hvals[0]['hazardValue'] > 85) and (hvals[0]['hazardValue'] < 165)) and hvals[1]['hazardValue'] is None
 
 
 def test_post_tornado_hazard_values(hazardsvc):
+    # point out of coverage, should return none
     payload = [
         {
             "demands": ["wind"],
@@ -258,8 +257,7 @@ def test_post_tornado_hazard_values(hazardsvc):
            and len(response[0]['demands']) == len(payload[0]['demands']) \
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
-           and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
-           and response[0]['hazardValues'] == [0.0]
+           and response[0]['hazardValues'] == [None]
 
 
 def test_get_tsunami_hazard_metadata_list(hazardsvc):
