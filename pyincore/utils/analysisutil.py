@@ -524,8 +524,8 @@ class AnalysisUtil:
             tsunami, hurricane and hurricane windfields
 
         Args:
-            hazard_vals: List of hazard values returned by the service for a particular point
-            hazard_type:
+            hazard_vals(list): List of hazard values returned by the service for a particular point
+            hazard_type(str): Type of the hazard
 
         Returns:
             str: If hazard is exposed or not. Can be one of 'yes', 'no', 'partial', 'error' or 'n/a'
