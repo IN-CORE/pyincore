@@ -10,6 +10,7 @@ from abc import ABC
 from pyincore import globals as pyglobals
 from pyincore.utils import evaluateexpression
 from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.utils.analysisutil import AnalysisUtil
 
 logger = pyglobals.LOGGER
 
@@ -63,7 +64,9 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
                 elif parameter["name"].lower() == kwargs_key.lower():
                     parameters[parameter["name"]] = kwargs_value
 
-        probability = 0.0
+        # Based on scicom feedback "partial" and "error" conditions might have to be treated differently
+        if AnalysisUtil.get_exposure_from_hazard_values(hazard_values.values()) != 'yes':
+            return 0
 
         # use hazard values if present
         # consider case insensitive situation
@@ -72,11 +75,8 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
                 key = mapped_demand_types[key]
             for parameter_key in parameters.keys():
                 if parameter_key.lower() == key.lower():
-                    if value is not None:
-                        parameters[parameter_key] = value
-                    else:
-                        # returning 0 even if a single demand value is None, assumes there is no hazard exposure. TBD
-                        return probability
+                    parameters[parameter_key] = value
+        probability = 0.0
 
         for rule in self.rules:
             if "condition" not in rule or rule["condition"] is None:
