@@ -185,7 +185,7 @@ class PipelineDamage(BaseAnalysis):
                                                                     inventory_type="pipeline")
 
             pipeline_result = {'guid': pipeline['properties']['guid'], **limit_states, **dmg_intervals}
-            pipeline_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(haz_vals, hazard_type)
+            pipeline_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(haz_vals, hazard_type)
             damage_result = dict()
             damage_result['guid'] = pipeline['properties']['guid']
             damage_result['fragility_id'] = fragility_set.id

@@ -292,7 +292,7 @@ class WaterFacilityDamage(BaseAnalysis):
                                                                     inventory_type='water_facility')
 
             facility_result = {'guid': facility['properties']['guid'], **limit_states, **dmg_intervals}
-            facility_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
+            facility_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
             damage_result = dict()
             damage_result['guid'] = facility['properties']['guid']
             damage_result['fragility_id'] = fragility_set.id

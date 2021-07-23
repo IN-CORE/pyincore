@@ -198,7 +198,7 @@ class EpfDamage(BaseAnalysis):
             ds_result["guid"] = epf["properties"]["guid"]
             ds_result.update(limit_states)
             ds_result.update(dmg_interval)
-            ds_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_val, hazard_type)
+            ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_val, hazard_type)
 
             damage_result['guid'] = epf['properties']['guid']
             damage_result['fragility_id'] = selected_fragility_set.id

@@ -203,7 +203,7 @@ class BuildingDamage(BaseAnalysis):
 
             ds_result.update(dmg_probability)
             ds_result.update(dmg_interval)
-            ds_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(b_haz_vals, hazard_type)
+            ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(b_haz_vals, hazard_type)
 
             damage_result['fragility_id'] = selected_fragility_set.id
             damage_result['demandtype'] = b_demands

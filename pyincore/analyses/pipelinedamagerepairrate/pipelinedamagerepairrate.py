@@ -295,7 +295,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
             ds_result['numpgvrpr'] = num_pgv_repairs
             ds_result['numpgdrpr'] = num_pgd_repairs
             ds_result['numrepairs'] = num_repairs
-            ds_result['hazard_exposure'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
+            ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
 
             damage_result['fragility_id'] = fragility_set.id
             damage_result['demandtypes'] = demand_types
