@@ -14,7 +14,7 @@ from pyincore import BaseAnalysis, RepairService
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 
 
-class ResidentialRecovery(BaseAnalysis):
+class ResidentialBuildingRecovery(BaseAnalysis):
     """
     Args:
         incore_client (IncoreClient): Service authentication.
@@ -24,18 +24,18 @@ class ResidentialRecovery(BaseAnalysis):
     def __init__(self, incore_client):
         self.repairsvc = RepairService(incore_client)
 
-        super(ResidentialRecovery, self).__init__(incore_client)
+        super(ResidentialBuildingRecovery, self).__init__(incore_client)
 
     def get_spec(self):
-        """Get specifications of the residential recovery analysis.
+        """Get specifications of the residential building recovery analysis.
 
         Returns:
-            obj: A JSON object of specifications of the residential recovery analysis.
+            obj: A JSON object of specifications of the residential building recovery analysis.
 
         """
         return {
-            'name': 'residential-recovery',
-            'description': 'calculate residential recovery',
+            'name': 'residential-building-recovery',
+            'description': 'calculate residential building recovery',
             'input_parameters': [
                 {
                     'id': 'result_name',
@@ -112,7 +112,7 @@ class ResidentialRecovery(BaseAnalysis):
         }
 
     def run(self):
-        """Executes the residential recovery analysis.
+        """Executes the residential building recovery analysis.
 
         Returns:
             bool: True if successful, False otherwise.
@@ -148,7 +148,7 @@ class ResidentialRecovery(BaseAnalysis):
     def residential_recovery(self, buildings, sample_damage_states, socio_demographic_data, financial_resources,
                              redi_delay_factors, num_samples):
         """
-        Calculates residential recovery for buildings
+        Calculates residential building recovery for buildings
 
         Args:
             buildings(list): Buildings dataset
@@ -164,25 +164,25 @@ class ResidentialRecovery(BaseAnalysis):
         """
 
         start_household_income_prediction = time.process_time()
-        household_income_prediction = ResidentialRecovery.household_income_prediction(socio_demographic_data,
-                                                                                      num_samples)
+        household_income_prediction = ResidentialBuildingRecovery.household_income_prediction(socio_demographic_data,
+                                                                                              num_samples)
         end_start_household_income_prediction = time.process_time()
         print("Finished executing household_income_prediction() in " +
               str(end_start_household_income_prediction - start_household_income_prediction) + " secs")
 
 
-        household_aggregation = ResidentialRecovery.household_aggregation(household_income_prediction, num_samples)
+        household_aggregation = ResidentialBuildingRecovery.household_aggregation(household_income_prediction, num_samples)
         end_household_aggregation = time.process_time()
         print("Finished executing household_aggregation() in " +
               str(end_household_aggregation - end_start_household_income_prediction) + " secs")
 
-        financing_delay = ResidentialRecovery.financing_delay(household_aggregation, financial_resources, num_samples)
+        financing_delay = ResidentialBuildingRecovery.financing_delay(household_aggregation, financial_resources, num_samples)
         end_financing_delay = time.process_time()
         print("Finished executing financing_delay() in " +
               str(end_financing_delay - end_household_aggregation) + " secs")
 
-        total_delay = ResidentialRecovery.total_delay(sample_damage_states, redi_delay_factors, financing_delay,
-                                                      num_samples)
+        total_delay = ResidentialBuildingRecovery.total_delay(sample_damage_states, redi_delay_factors, financing_delay,
+                                                              num_samples)
         end_total_delay = time.process_time()
         print("Finished executing total_delay() in " + str(end_total_delay - end_financing_delay) + " secs")
 
@@ -190,7 +190,7 @@ class ResidentialRecovery(BaseAnalysis):
         end_recovery = time.process_time()
         print("Finished executing recovery_rate() in " + str(end_recovery - end_total_delay) + " secs")
 
-        time_stepping_recovery = ResidentialRecovery.time_stepping_recovery(recovery, num_samples)
+        time_stepping_recovery = ResidentialBuildingRecovery.time_stepping_recovery(recovery, num_samples)
         end_time_stepping_recovery = time.process_time()
         print("Finished executing time_stepping_recovery() in " +
               str(end_time_stepping_recovery - end_recovery) + " secs")

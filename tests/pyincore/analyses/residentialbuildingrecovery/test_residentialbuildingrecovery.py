@@ -3,7 +3,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 from pyincore import IncoreClient, RepairService, MappingSet
-from pyincore.analyses.residentialrecovery.residentialrecovery import ResidentialRecovery
+from pyincore.analyses.residentialbuildingrecovery.residentialbuildingrecovery import ResidentialBuildingRecovery
 import pyincore.globals as pyglobals
 
 
@@ -23,7 +23,7 @@ def run_with_base_class():
     seed = 1238  # not used yet
     num_samples = 10
 
-    res_recovery = ResidentialRecovery(client)
+    res_recovery = ResidentialBuildingRecovery(client)
     res_recovery.load_remote_input_dataset("buildings", buildings)
 
     mapping_id = "60edfa3efc0f3a7af53a21b5"
