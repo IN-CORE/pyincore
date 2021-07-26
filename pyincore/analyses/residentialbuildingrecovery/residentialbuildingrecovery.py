@@ -266,7 +266,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
     @staticmethod
     def financing_delay(household_aggregated_income_groups, financial_resources, num_samples):
         """ Gets financing delay, the percentages calculated are the probabilities of housing units financed by
-            different resources.
+        different resources.
 
         Args:
             household_aggregated_income_groups (pd.DataFrame): Household aggregation of income groups at the building
@@ -334,7 +334,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
     def recovery_rate(self, buildings, sample_damage_states, total_delay, num_samples):
         """ Gets total time required for each building to receive full restoration. Determined by the combination of
-            delay time and repair time
+        delay time and repair time
 
         Args:
             buildings (list): List of buildings

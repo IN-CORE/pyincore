@@ -125,9 +125,9 @@ analyses/populationdislocation
 ..  autoclass:: populationdislocation.populationdislocationutil.PopulationDislocationUtil
     :members:
 
-analyses/residentialrecovery
+analyses/residentialbuildingrecovery
 ============================
-..  autoclass:: residentialrecovery.residentialrecovery.ResidentialRecovery
+..  autoclass:: residentialbuildingrecovery.residentialbuildingrecovery.ResidentialBuildingRecovery
     :members:
 
 analyses/roaddamage
