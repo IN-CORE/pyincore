@@ -94,12 +94,15 @@ def test_get_fragility_mapping(fragilitysvc):
     assert mapping["id"] == mapping_id
 
 
-def test_create_fragility_set(fragilitysvc):
+def test_create_and_delete_fragility_set(fragilitysvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "fragilityset.json"), 'r') as f:
         fragility_set = json.load(f)
     created = fragilitysvc.create_dfr3_set(fragility_set)
 
     assert "id" in created.keys()
+
+    del_response = fragilitysvc.(dataset_response["id"])
+    assert del_response["id"] is not None
 
 
 def test_create_fragility_mapping(fragilitysvc):
