@@ -9,6 +9,7 @@ from pyincore.analyses.transportationrecovery import WIPW as WIPW
 from pyincore.analyses.transportationrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
 from pyincore import BaseAnalysis
 
+
 class TransportationRecovery(BaseAnalysis):
 
     def run(self):
@@ -185,7 +186,7 @@ class TransportationRecovery(BaseAnalysis):
         recovery_trajectory = pd.DataFrame(
             {"Ending Time": schedule_time, "Travel Efficiency": efficiency})
         self.set_result_csv_data("overall_transportation_recovery_trajectory", recovery_trajectory,
-                                      name="overall_transportation_recovery_trajectory", source="dataframe")
+                                 name="overall_transportation_recovery_trajectory", source="dataframe")
 
         return None
 
@@ -207,33 +208,33 @@ class TransportationRecovery(BaseAnalysis):
                     'type': int
                 },
                 {
-                    'id':'ini_num_population',
+                    'id': 'ini_num_population',
                     'required': True,
-                    'description':'ini_num_population: 5 or 50',
+                    'description': 'ini_num_population: 5 or 50',
                     'type': int
                 },
                 {
-                    'id':'population_size',
+                    'id': 'population_size',
                     'required': True,
-                    'description':'population_size: 3 or 30',
+                    'description': 'population_size: 3 or 30',
                     'type': int
                 },
                 {
-                    'id':'num_generation',
+                    'id': 'num_generation',
                     'required': True,
                     'description': 'num_generation: 2 or 250',
                     'type': int
                 },
                 {
-                    'id':'mutation_rate',
+                    'id': 'mutation_rate',
                     'required': True,
-                    'description':'0.1',
+                    'description': '0.1',
                     'type': float
                 },
                 {
-                    'id':'crossover_rate',
+                    'id': 'crossover_rate',
                     'required': True,
-                    'description':'1.0',
+                    'description': '1.0',
                     'type': float
                 }
             ],
@@ -254,25 +255,25 @@ class TransportationRecovery(BaseAnalysis):
                     'id': 'bridges',
                     'required': True,
                     'description': 'bridges',
-                    'type': ['ergo:bridges', 'ergo:bridgesVer2'],
+                    'type': ['ergo:bridges', 'ergo:bridgesVer2', 'ergo:bridgesVer3'],
                 },
                 {
                     'id': 'bridge_damage_value',
                     'required': True,
-                    'description':'',
+                    'description': '',
                     'type': ['incore:bridgeDamageValue']
                 },
                 {
                     'id': 'unrepaired_bridge',
                     'required': True,
-                    'description':'',
-                    'type':['incore:unrepairedBridge']
+                    'description': '',
+                    'type': ['incore:unrepairedBridge']
                 },
                 {
                     'id': 'ADT',
                     'required': True,
-                    'description':'',
-                    'type':['incore:ADT']
+                    'description': '',
+                    'type': ['incore:ADT']
                 }
 
             ],
@@ -291,4 +292,3 @@ class TransportationRecovery(BaseAnalysis):
                 }
             ]
         }
-

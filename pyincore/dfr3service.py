@@ -339,7 +339,7 @@ class Dfr3Service:
             # should be integer
             if isinstance(properties[rule_key], eval(known_types[rule_type])):
                 # additional steps to strip "'" for string matches
-                if rule_type == 'java.lang.String':
+                if known_types[rule_type] == 'str':
                     if rule_operator == "MATCHES":
                         matched = bool(re.search(rule_value, properties[rule_key]))
                     elif rule_operator == "NMATCHES":

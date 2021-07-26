@@ -138,10 +138,10 @@ class BridgeDamage(BaseAnalysis):
                 demands = fragility_set[bridge_id].demand_types
                 units = fragility_set[bridge_id].demand_units
                 value = {
-                            "demands": demands,
-                            "units": units,
-                            "loc": loc
-                        }
+                    "demands": demands,
+                    "units": units,
+                    "loc": loc
+                }
                 values_payload.append(value)
                 mapped_bridges.append(b)
 
@@ -202,7 +202,6 @@ class BridgeDamage(BaseAnalysis):
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
 
-
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
             retrofit_type = BridgeUtil.get_retrofit_type(fragility_key)
 
@@ -221,12 +220,16 @@ class BridgeDamage(BaseAnalysis):
             damage_result["hazardval"] = hazard_val
 
             # add spans to bridge output so mean damage calculation can use that info
-            if "spans" in bridge["properties"] and bridge["properties"]["spans"] \
-                    is not None and bridge["properties"]["spans"].isdigit():
-                damage_result['spans'] = int(bridge["properties"]["spans"])
-            elif "SPANS" in bridge["properties"] and bridge["properties"]["SPANS"] \
-                    is not None and bridge["properties"]["SPANS"].isdigit():
-                damage_result['spans'] = int(bridge["properties"]["SPANS"])
+            if "spans" in bridge["properties"] and bridge["properties"]["spans"] is not None:
+                if isinstance(bridge["properties"]["spans"], str) and bridge["properties"]["spans"].isdigit():
+                    damage_result['spans'] = int(bridge["properties"]["spans"])
+                elif isinstance(bridge["properties"]["spans"], int):
+                    damage_result['spans'] = bridge["properties"]["spans"]
+            elif "SPANS" in bridge["properties"] and bridge["properties"]["SPANS"] is not None:
+                if isinstance(bridge["properties"]["SPANS"], str) and bridge["properties"]["SPANS"].isdigit():
+                    damage_result['SPANS'] = int(bridge["properties"]["SPANS"])
+                elif isinstance(bridge["properties"]["SPANS"], int):
+                    damage_result['SPANS'] = bridge["properties"]["SPANS"]
             else:
                 damage_result['spans'] = 1
 
@@ -313,7 +316,7 @@ class BridgeDamage(BaseAnalysis):
                     'id': 'bridges',
                     'required': True,
                     'description': 'Bridge Inventory',
-                    'type': ['ergo:bridges', 'ergo:bridgesVer2'],
+                    'type': ['ergo:bridges', 'ergo:bridgesVer2', 'ergo:bridgesVer3'],
                 },
                 {
                     'id': 'dfr3_mapping_set',
