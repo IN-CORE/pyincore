@@ -10,7 +10,7 @@ import pandas as pd
 import collections as cl
 
 
-class HousingRecoverySerial(BaseAnalysis):
+class HousingRecoverySequential(BaseAnalysis):
     """Household-level Housing Recovery Serial Analysis computes a probable sequence of housing recovery stages
     per household unit after a disaster, considering its damage level of the home and neighborhood-level social
     vulnerability. Given a transition probability matrix (TPM) for time t that represents the household-level housing
@@ -75,7 +75,7 @@ class HousingRecoverySerial(BaseAnalysis):
     }
 
     def __init__(self, incore_client):
-        super(HousingRecoverySerial, self).__init__(incore_client)
+        super(HousingRecoverySequential, self).__init__(incore_client)
 
     def run(self):
         """Execute the HHRS analysis using parameters and input data.

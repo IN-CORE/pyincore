@@ -3,7 +3,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 from pyincore import IncoreClient, FragilityService, MappingSet
-from pyincore.analyses.housingrecoveryserial import HousingRecoverySerial
+from pyincore.analyses.housingrecoverysequential import HousingRecoverySequential
 import pyincore.globals as pyglobals
 
 
@@ -18,7 +18,7 @@ def run_with_base_class():
     t_delta = 1.0
     t_final = 90.0
 
-    housing_recovery = HousingRecoverySerial(client)
+    housing_recovery = HousingRecoverySequential(client)
 
     # Parameter setup
     housing_recovery.set_parameter('seed', seed)
