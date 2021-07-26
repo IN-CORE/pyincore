@@ -8,7 +8,6 @@ import os
 import numpy as np
 import pytest
 
-from pyincore import HazardService, IncoreClient
 from pyincore import globals as pyglobals
 
 
@@ -221,30 +220,12 @@ def test_create_and_delete_tornado_scenario(hazardsvc):
     assert del_response["id"] is not None
 
 
-def test_get_tornado_hazard_value(hazardsvc):
-    hval = hazardsvc.get_tornado_hazard_value("5df913b83494fe000861a743",
-                                              "mph", 35.228, -97.478, 0)
-    assert ((hval > 85) and (hval < 165))
-
-
-def test_get_tornado_hazard_values(hazardsvc):
-    """
-    Testing getting multiple hazard values
-    """
-    hvals = hazardsvc.get_tornado_hazard_values("5df913b83494fe000861a743",
-                                                "mph",
-                                                ["35.228, -97.478",
-                                                 "35.229, -97.465"])
-
-    assert ((hvals[0]['hazardValue'] > 85) and (hvals[0]['hazardValue'] < 165)) and hvals[1]['hazardValue'] is None
-
-
 def test_post_tornado_hazard_values(hazardsvc):
     # point out of coverage, should return none
     payload = [
         {
             "demands": ["wind"],
-            "units": ["m"],
+            "units": ["mph"],
             "loc": "37.07,-94.50"
         }
     ]

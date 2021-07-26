@@ -72,7 +72,7 @@ class Dfr3Service:
                                                      'dfr3/api/mappings/')
 
     def get_dfr3_set(self, dfr3_id: str):
-        """Get all DFR3 sets.
+        """Get specific DFR3 set.
 
         Args:
             dfr3_id (str): ID of the DFR3 set.
@@ -83,6 +83,21 @@ class Dfr3Service:
         """
         url = urllib.parse.urljoin(self.base_dfr3_url, dfr3_id)
         r = self.client.get(url)
+
+        return r.json()
+
+    def delete_dfr3_set(self, dfr3_id: str):
+        """delete specific DFR3 set.
+
+                Args:
+                    dfr3_id (str): ID of the DFR3 set.
+
+                Returns:
+                    obj: HTTP response with return results.
+
+                """
+        url = urllib.parse.urljoin(self.base_dfr3_url, dfr3_id)
+        r = self.client.delete(url)
 
         return r.json()
 
@@ -399,7 +414,7 @@ class Dfr3Service:
         return r.json()
 
     def get_mapping(self, mapping_id):
-        """Get all inventory mappings.
+        """Get specific inventory mapping.
 
         Args:
             mapping_id (str): ID of the Mapping set.
@@ -410,5 +425,20 @@ class Dfr3Service:
         """
         url = urllib.parse.urljoin(self.base_mapping_url, mapping_id)
         r = self.client.get(url)
+
+        return r.json()
+
+    def delete_mapping(self, mapping_id):
+        """delete specific inventory mappings.
+
+        Args:
+            mapping_id (str): ID of the Mapping set.
+
+        Returns:
+            obj: HTTP response with return results.
+
+        """
+        url = urllib.parse.urljoin(self.base_mapping_url, mapping_id)
+        r = self.client.delete(url)
 
         return r.json()
