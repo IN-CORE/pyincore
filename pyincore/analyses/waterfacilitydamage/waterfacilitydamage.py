@@ -256,13 +256,8 @@ class WaterFacilityDamage(BaseAnalysis):
                                                                                 inventory_type='water_facility',
                                                                                 **facility_args)
             else:
-                hazard_vals = AnalysisUtil.update_precision(hazard_resp[i]["hazardValues"][0])
-                demand_types = hazard_resp[i]["demands"][0]
-                demand_units = hazard_resp[i]["units"][0]
-                limit_states = \
-                    fragility_set.calculate_limit_state_w_conversion(hazard_vals,
-                                                                     std_dev=hazard_std_dev,
-                                                                     inventory_type='water_facility')
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
 
             # TODO: ideally, this goes into a single variable declaration section
 
@@ -288,14 +283,8 @@ class WaterFacilityDamage(BaseAnalysis):
                                                                                         inventory_type="water_facility",
                                                                                         **facility_liq_args)
                 else:
-                    liq_demand_types = fragility_set_liq.demand_types[0]
-                    liq_demand_units = fragility_set_liq.demand_units[0]
-                    liq_hazard_vals = AnalysisUtil.update_precision(liquefaction_resp[i]['pgdValues'][0])
-                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
-
-                    pgd_limit_states = fragility_set_liq.calculate_limit_state_w_conversion(liq_hazard_vals,
-                                                                                            std_dev=hazard_std_dev,
-                                                                                            inventory_type="water_facility")
+                    raise ValueError("One of the fragilities is in deprecated format. This should not happen. "
+                                     "If you are seeing this please report the issue.")
 
                 limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
 
@@ -303,6 +292,7 @@ class WaterFacilityDamage(BaseAnalysis):
                                                                     inventory_type='water_facility')
 
             facility_result = {'guid': facility['properties']['guid'], **limit_states, **dmg_intervals}
+            facility_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
             damage_result = dict()
             damage_result['guid'] = facility['properties']['guid']
             damage_result['fragility_id'] = fragility_set.id
@@ -430,7 +420,7 @@ class WaterFacilityDamage(BaseAnalysis):
                     'parent_type': 'water_facilities',
                     'description': 'A csv file with limit state probabilities and damage states '
                                    'for each water facility',
-                    'type': 'ergo:waterFacilityDamageVer5'
+                    'type': 'ergo:waterFacilityDamageVer6'
                 },
                 {
                     'id': 'metadata',

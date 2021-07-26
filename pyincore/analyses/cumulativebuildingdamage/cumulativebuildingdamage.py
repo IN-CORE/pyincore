@@ -198,13 +198,13 @@ class CumulativeBuildingDamage(BaseAnalysis):
                     'id': 'eq_bldg_dmg',
                     'required': True,
                     'description': 'Earthquake Building Damage Results',
-                    'type': ['ergo:buildingDamageVer5'],
+                    'type': ['ergo:buildingDamageVer5', 'ergo:buildingDamageVer6']
                 },
                 {
                     'id': 'tsunami_bldg_dmg',
                     'required': True,
                     'description': 'Tsunami Building Damage Results',
-                    'type': ['ergo:buildingDamageVer5'],
+                    'type': ['ergo:buildingDamageVer5', 'ergo:buildingDamageVer6'],
                 }
             ],
             'output_datasets': [

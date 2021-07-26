@@ -308,8 +308,9 @@ class TornadoEpnDamage(BaseAnalysis):
                                                 hval_dict,
                                                 inventory_type=fragility_set_used.inventory_type, **inventory_args)
                                     else:
-                                        resistivity_probability = \
-                                            fragility_set_used.calculate_limit_state_w_conversion(tor_hazard_values[0])
+                                        raise ValueError(
+                                            "One of the fragilities is in deprecated format. This should not happen. "
+                                            "If you are seeing this please report the issue.")
 
                                     # randomly generated capacity of each poles ; 1 m/s is 2.23694 mph
                                     poleresist = resistivity_probability.get('LS_0') * 2.23694
@@ -406,6 +407,7 @@ class TornadoEpnDamage(BaseAnalysis):
             ds_result["stdcost"] = stdcost[i]
             ds_result["meantime"] = meantime[i]
             ds_result["stdtime"] = stdtime[i]
+            ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazardval[i], "tornado")
 
             damage_result['guid'] = guid_list[i]
             damage_result["fragility_tower_id"] = self.fragility_tower_id
@@ -414,7 +416,6 @@ class TornadoEpnDamage(BaseAnalysis):
             damage_result['hazardvals'] = hazardval[i]
             damage_result['demandtypes'] = demandtypes[i]
             damage_result['demandunits'] = demandunits[i]
-
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)
@@ -537,7 +538,7 @@ class TornadoEpnDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'epn_node',
                     'description': 'CSV file of damages for electric power network by tornado',
-                    'type': 'incore:tornadoEPNDamageVer2'
+                    'type': 'incore:tornadoEPNDamageVer3'
                 },
                 {
                     'id': 'metadata',

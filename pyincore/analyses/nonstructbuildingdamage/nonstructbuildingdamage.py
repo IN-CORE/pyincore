@@ -210,12 +210,8 @@ class NonStructBuildingDamage(BaseAnalysis):
                     calculate_limit_state_refactored_w_conversion(hval_dict_as, inventory_type="building",
                                                                   **building_args)
             else:
-                # Non Refactored Fragility curves that always only have a single demand type
-                hazard_vals_as = AnalysisUtil.update_precision(hazard_resp_as[i]["hazardValues"][0])
-                demand_types_as = hazard_resp_as[i]["demands"][0]
-                demand_units_as = hazard_resp_as[i]["units"][0]
-                dmg_probability_as = fragility_set_as.calculate_limit_state_w_conversion(hazard_vals_as,
-                                                                                         inventory_type="building")
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
             # adjust dmg probability for liquefaction
             if use_liquefaction:
                 if liq_geology_dataset_id is not None:
@@ -242,12 +238,8 @@ class NonStructBuildingDamage(BaseAnalysis):
                     calculate_limit_state_refactored_w_conversion(hval_dict_ds, inventory_type="building",
                                                                   **building_args)
             else:
-                # Non Refactored Fragility curves that always only have a single demand type
-                hazard_vals_ds = AnalysisUtil.update_precision(hazard_resp_ds[i]["hazardValues"][0])
-                demand_types_ds = hazard_resp_ds[i]["demands"][0]
-                demand_units_ds = hazard_resp_ds[i]["units"][0]
-                dmg_probability_ds = fragility_set_ds.calculate_limit_state_w_conversion(hazard_vals_ds,
-                                                                                         inventory_type="building")
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
             # adjust dmg probability for liquefaction
             if use_liquefaction:
                 if liq_geology_dataset_id is not None:
@@ -278,6 +270,8 @@ class NonStructBuildingDamage(BaseAnalysis):
             building_result['DS_DS_1'] = dmg_interval_ds['DS_1']
             building_result['DS_DS_2'] = dmg_interval_ds['DS_2']
             building_result['DS_DS_3'] = dmg_interval_ds['DS_3']
+            building_result['hazard_exposure_as'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_as, hazard_type)
+            building_result['hazard_exposure_ds'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_ds, hazard_type)
 
             # put damage results in dictionary
             damage_result = dict()
@@ -402,7 +396,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'buildings',
                     'description': 'CSV file of damage states for building non-structural damage',
-                    'type': 'ergo:nsBuildingInventoryDamageVer2'
+                    'type': 'ergo:nsBuildingInventoryDamageVer3'
                 },
                 {
                     'id': 'damage_result',

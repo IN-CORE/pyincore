@@ -53,7 +53,7 @@ class PopulationDislocation(BaseAnalysis):
                     'id': 'building_dmg',
                     'required': True,
                     'description': 'Building damage results CSV file',
-                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingDamageVer5',
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingDamageVer5', 'ergo:buildingDamageVer6'
                              'ergo:buildingInventory']
                 },
                 {

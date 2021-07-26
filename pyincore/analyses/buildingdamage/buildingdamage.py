@@ -192,12 +192,8 @@ class BuildingDamage(BaseAnalysis):
                 dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
                     hval_dict, **building_args, period=building_period)
             else:
-                # Non Refactored Fragility curves that always only have a single demand type
-                b_haz_vals = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
-                b_demands = hazard_vals[i]["demands"][0]
-                b_units = hazard_vals[i]["units"][0]
-                dmg_probability = selected_fragility_set.calculate_limit_state_w_conversion(b_haz_vals,
-                                                                                            building_period)
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
 
             dmg_interval = selected_fragility_set.calculate_damage_interval(
                 dmg_probability, hazard_type=hazard_type, inventory_type="building")
@@ -207,6 +203,7 @@ class BuildingDamage(BaseAnalysis):
 
             ds_result.update(dmg_probability)
             ds_result.update(dmg_interval)
+            ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(b_haz_vals, hazard_type)
 
             damage_result['fragility_id'] = selected_fragility_set.id
             damage_result['demandtype'] = b_demands
@@ -312,7 +309,7 @@ class BuildingDamage(BaseAnalysis):
                     'id': 'ds_result',
                     'parent_type': 'buildings',
                     'description': 'CSV file of damage states for building structural damage',
-                    'type': 'ergo:buildingDamageVer5'
+                    'type': 'ergo:buildingDamageVer6'
                 },
                 {
                     'id': 'damage_result',

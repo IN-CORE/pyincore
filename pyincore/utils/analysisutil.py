@@ -9,6 +9,7 @@ import math
 import os
 import re
 from typing import List, Dict
+from collections import Counter
 
 from deprecated.sphinx import deprecated
 from decimal import getcontext, Decimal
@@ -47,7 +48,13 @@ class AnalysisUtil:
 
     @staticmethod
     def update_precision_of_lists(hazard_vals: List) -> List:
-        updated_hazard_vals = [AnalysisUtil.update_precision(val) for val in hazard_vals]
+        updated_hazard_vals = []
+        for val in hazard_vals:
+            # Also handle -9999/NaN when hazard service handles exceptions
+            if val is not None:
+                updated_hazard_vals.append(AnalysisUtil.update_precision(val))
+            else:
+                updated_hazard_vals.append(None)
         return updated_hazard_vals
 
     @staticmethod
@@ -510,3 +517,36 @@ class AnalysisUtil:
             grouped_inventory.setdefault(tpl, []).append(fragility_id)
 
         return grouped_inventory
+
+    @staticmethod
+    def get_exposure_from_hazard_values(hazard_vals, hazard_type):
+        """ Finds if a point is exposed to hazard based on all the demand values present. Returns "n/a" for earthquake,
+            tsunami, hurricane and hurricane windfields
+
+        Args:
+            hazard_vals(list): List of hazard values returned by the service for a particular point
+            hazard_type(str): Type of the hazard
+
+        Returns:
+            str: If hazard is exposed or not. Can be one of 'yes', 'no', 'partial', 'error' or 'n/a'
+        """
+
+        # This method should handle other 'error' cases when service is able to handle exceptions by returning -9999/NaN
+        # and return "error". hazard_type parameter should be removed when all hazards are supported on the service.
+
+        if len(hazard_vals) == 0:
+            return "error"
+
+        supported_hazards = ["tornado", "flood"]
+        hazard_exposure = "n/a"
+        if hazard_type.lower() in supported_hazards:
+            cnt_hazard_vals = Counter(hazard_vals)
+            if None in cnt_hazard_vals:
+                if cnt_hazard_vals.get(None) == len(hazard_vals):
+                    hazard_exposure = "no"
+                else:
+                    hazard_exposure = "partial"
+            else:
+                hazard_exposure = "yes"  # none of the values are nulls
+
+        return hazard_exposure

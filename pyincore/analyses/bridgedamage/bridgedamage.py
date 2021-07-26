@@ -199,20 +199,8 @@ class BridgeDamage(BaseAnalysis):
                                                                                  hazard_type=hazard_type,
                                                                                  inventory_type="bridge")
             else:
-                hazard_val = AnalysisUtil.update_precision(hazard_vals[i]["hazardValues"][0])
-                hazard_std_dev = 0.0
-                if use_hazard_uncertainty:
-                    # TODO Get this from API once implemented
-                    raise ValueError("Uncertainty Not Implemented!")
-
-                input_demand_types = hazard_vals[i]["demands"][0]
-                input_demand_units = hazard_vals[i]["units"][0]
-                dmg_probability = adjusted_fragility_set.calculate_limit_state_w_conversion(hazard_val,
-                                                                                            std_dev=hazard_std_dev,
-                                                                                            inventory_type="bridge")
-                dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
-                                                                                 hazard_type=hazard_type,
-                                                                                 inventory_type="bridge")
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
 
 
             retrofit_cost = BridgeUtil.get_retrofit_cost(fragility_key)
@@ -221,6 +209,7 @@ class BridgeDamage(BaseAnalysis):
             ds_result['guid'] = bridge['properties']['guid']
             ds_result.update(dmg_probability)
             ds_result.update(dmg_intervals)
+            ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_val, hazard_type)
 
             damage_result['guid'] = bridge['properties']['guid']
             damage_result['fragility_id'] = selected_fragility_set.id
@@ -338,7 +327,7 @@ class BridgeDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'bridges',
                     'description': 'CSV file of bridge structural damage',
-                    'type': 'ergo:bridgeDamageVer2'
+                    'type': 'ergo:bridgeDamageVer3'
                 },
                 {
                     'id': 'metadata',
