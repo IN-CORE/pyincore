@@ -428,7 +428,7 @@ class Dfr3Service:
 
         return r.json()
 
-    def delete(self, mapping_id):
+    def delete_mapping(self, mapping_id):
         """delete specific inventory mappings.
 
         Args:
