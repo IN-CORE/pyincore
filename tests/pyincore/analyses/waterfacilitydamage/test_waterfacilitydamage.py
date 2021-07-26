@@ -14,7 +14,6 @@ def run_with_base_class():
     hazard_id = "5b902cb273c3371e1236b36b"
     facility_datasetid = "5a284f2ac7d30d13bc081e52"
 
-    #mapping_id = "5b47c3b1337d4a387e85564b"  # Hazus Potable Water Facility Fragility Mapping - Only PGA
     mapping_id = "5b47c383337d4a387669d592"
 
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
