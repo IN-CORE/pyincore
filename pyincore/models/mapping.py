@@ -13,7 +13,6 @@ class Mapping:
         rules (list): mapping match rules
 
     """
-
     def __init__(self, entry: dict, rules: list):
         self.entry = entry
         self.rules = rules

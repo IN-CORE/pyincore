@@ -26,7 +26,6 @@ class TornadoEpnDamage(BaseAnalysis):
     Based on the fragility, the hazard intensity at the location of the infrastructure is computed. Using this
     information, the probability of exceeding each limit state is computed, along with the probability of damage.
     """
-
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
@@ -292,8 +291,7 @@ class TornadoEpnDamage(BaseAnalysis):
                                     }]
                                     h_vals = self.hazardsvc.post_tornado_hazard_values(
                                         tornado_id, values_payload)
-                                    tor_hazard_values = AnalysisUtil.update_precision_of_lists(
-                                        h_vals[0]["hazardValues"])
+                                    tor_hazard_values = AnalysisUtil.update_precision_of_lists(h_vals[0]["hazardValues"])
                                     demand_types = h_vals[0]["demands"]
                                     demand_units = h_vals[0]["units"]
                                     hval_dict = dict()
@@ -427,7 +425,6 @@ class TornadoEpnDamage(BaseAnalysis):
     """
     align coordinate values in a list as a single pair in order
     """
-
     def align_list_cooridnate(self, coord_list):
         coord_iterator = iter(coord_list)
         first = prev = next(coord_iterator)

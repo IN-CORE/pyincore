@@ -145,7 +145,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 liquefaction_fragility_key)
 
         values_payload = []
-        values_payload_liq = []  # for liquefaction if used
+        values_payload_liq = [] # for liquefaction if used
         unmapped_pipelines = []
         mapped_pipelines = []
         for pipeline in pipelines:

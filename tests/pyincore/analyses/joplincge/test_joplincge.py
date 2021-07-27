@@ -1,6 +1,6 @@
-import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 from pyincore.analyses.joplincge import JoplinCGEModel
+import pyincore.globals as pyglobals
 
 
 def run_base_analysis():

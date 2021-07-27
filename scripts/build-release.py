@@ -1,7 +1,7 @@
-import os
-import zipfile
-
 import yaml
+import zipfile
+import os
+
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 dest_path = os.path.abspath(os.path.join(script_path, '..', '..'))

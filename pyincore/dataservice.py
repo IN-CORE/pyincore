@@ -24,7 +24,6 @@ class DataService:
         client (IncoreClient): Service authentication.
 
     """
-
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_url = urllib.parse.urljoin(client.service_url, 'data/api/datasets/')
@@ -73,7 +72,7 @@ class DataService:
 
         """
         url = urllib.parse.urljoin(self.base_url,
-                                   dataset_id + "/files/" + file_id)
+            dataset_id + "/files/" + file_id)
         r = self.client.get(url)
         return r.json()
 
@@ -118,7 +117,7 @@ class DataService:
         else:
             return local_filename
 
-    def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None):
+    def download_dataset_blob(self, cache_data_dir:str, dataset_id:str, join=None):
         # construct url for file download
         url = urllib.parse.urljoin(self.base_url, dataset_id + '/blob')
         kwargs = {"stream": True}
@@ -244,7 +243,7 @@ class DataService:
         return r.json()
 
     def add_files_to_network_dataset(self, dataset_id: str, filepaths: list,
-                                     nodename: str, linkname: str, graphname: str):
+                                     nodename: str, linkname: str, graphname:str):
         """Add files to the network dataset. Post API endpoint is called.
 
         Args:

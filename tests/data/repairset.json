@@ -1,46 +1,46 @@
 {
-  "description": "pytest EPN sub-station earthquake repair models",
-  "authors": [
-    "HAZUS"
-  ],
-  "paperReference": null,
-  "resultUnit": null,
-  "resultType": "Limit State",
-  "timeUnits": "days",
-  "hazardType": "earthquake",
-  "inventoryType": "electric_power_facility",
-  "repairCurves": [
-    {
-      "className": "StandardRepairCurve",
-      "description": "Slight",
-      "alpha": 1,
-      "beta": 0.47,
-      "curveType": "LogNormal",
-      "alphaType": "median"
-    },
-    {
-      "className": "StandardRepairCurve",
-      "description": "Moderate",
-      "alpha": 2.7,
-      "beta": 0.47,
-      "curveType": "LogNormal",
-      "alphaType": "median"
-    },
-    {
-      "className": "StandardRepairCurve",
-      "description": "Extensive",
-      "alpha": 6.3,
-      "beta": 0.47,
-      "curveType": "LogNormal",
-      "alphaType": "median"
-    },
-    {
-      "className": "StandardRepairCurve",
-      "description": "Complete",
-      "alpha": 27,
-      "beta": 0.47,
-      "curveType": "LogNormal",
-      "alphaType": "median"
-    }
-  ]
+"description": "pytest EPN sub-station earthquake repair models",
+    "authors": [
+        "HAZUS"
+    ],
+    "paperReference": null,
+    "resultUnit": null,
+    "resultType": "Limit State",
+    "timeUnits": "days",
+    "hazardType": "earthquake",
+    "inventoryType": "electric_power_facility",
+    "repairCurves": [
+        {
+            "className": "StandardRepairCurve",
+            "description": "Slight",
+            "alpha": 1,
+            "beta": 0.47,
+            "curveType": "LogNormal",
+            "alphaType": "median"
+        },
+        {
+            "className": "StandardRepairCurve",
+            "description": "Moderate",
+            "alpha": 2.7,
+            "beta": 0.47,
+            "curveType": "LogNormal",
+            "alphaType": "median"
+        },
+        {
+            "className": "StandardRepairCurve",
+            "description": "Extensive",
+            "alpha": 6.3,
+            "beta": 0.47,
+            "curveType": "LogNormal",
+            "alphaType": "median"
+        },
+        {
+            "className": "StandardRepairCurve",
+            "description": "Complete",
+            "alpha": 27,
+            "beta": 0.47,
+            "curveType": "LogNormal",
+            "alphaType": "median"
+        }
+    ]
 }

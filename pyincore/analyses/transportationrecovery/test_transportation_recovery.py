@@ -1,8 +1,10 @@
+
 from pyincore import IncoreClient
 from pyincore.analyses.transportationrecovery import TransportationRecovery
 
 
 def run_with_base_class():
+
     client = IncoreClient()
     transportation_recovery = TransportationRecovery(client)
 

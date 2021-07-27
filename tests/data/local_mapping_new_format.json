@@ -10,18 +10,8 @@
       },
       "rules": {
         "AND": [
-          {
-            "OR": [
-              "int no_stories GE 1",
-              "int no_stories LE 3"
-            ]
-          },
-          {
-            "OR": [
-              "int year_built EQUALS 1978",
-              "int year_built EQUALS 1925"
-            ]
-          },
+          {"OR": ["int no_stories GE 1", "int no_stories LE 3"] },
+          {"OR": [ "int year_built EQUALS 1978", "int year_built EQUALS 1925"]},
           "java.lang.String struct_typ EQUALS C1"
         ]
       }

@@ -18,7 +18,6 @@ class FragilityService(Dfr3Service):
         client (IncoreClient): Service authentication.
 
     """
-
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_dfr3_url = urllib.parse.urljoin(client.service_url, 'dfr3/api/fragilities/')

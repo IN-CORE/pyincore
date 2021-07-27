@@ -1,6 +1,6 @@
-import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 from pyincore.analyses.seasidecge import SeasideCGEModel
+import pyincore.globals as pyglobals
 
 
 def run_base_analysis():

@@ -81,7 +81,7 @@ class CapitalShocks(BaseAnalysis):
         inventory_failure = pd.merge(building_inventory, failure_probability, on='guid')
         inventory_failure = pd.merge(inventory_failure, buildings_to_sectors, on='guid')
         inventory_failure['cap_rem'] = inventory_failure.appr_bldg * (
-                1 - inventory_failure.failure_probability)
+                    1 - inventory_failure.failure_probability)
 
         sectors = buildings_to_sectors.sector.unique()
         sector_shocks = {}

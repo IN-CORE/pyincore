@@ -1,7 +1,6 @@
-import pytest
-
 from pyincore import Parser
 from pyincore.utils import evaluateexpression
+import pytest
 
 
 def test_evaluator():
@@ -45,3 +44,7 @@ def test_parser():
     assert parser.parse('log(16,2)').evaluate({}) == 4.0
 
     assert parser.parse("x^2").variables() == ['x']
+
+
+
+

@@ -1,7 +1,7 @@
-import pyincore.globals as pyglobals
-from pyincore import IncoreClient
 from pyincore.analyses.tornadoepndamage.tornadoepndamage import \
     TornadoEpnDamage
+from pyincore import IncoreClient
+import pyincore.globals as pyglobals
 
 
 def run_with_base_class():

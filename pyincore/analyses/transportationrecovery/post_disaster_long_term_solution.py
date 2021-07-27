@@ -81,28 +81,28 @@ class PostDisasterLongTermSolution(Solution):
                 if temp_bridge_damage_value[candidate_schedule[i]] == 1:
                     end[candidate_schedule[i]] \
                         = start[candidate_schedule[i]] \
-                          + PostDisasterLongTermSolution.slightRepair
+                        + PostDisasterLongTermSolution.slightRepair
 
                 # if damage state of bridge is moderate damage, repair time
                 # is modRepair
                 elif temp_bridge_damage_value[candidate_schedule[i]] == 2:
                     end[candidate_schedule[i]] \
                         = start[candidate_schedule[i]] \
-                          + PostDisasterLongTermSolution.modRepair
+                        + PostDisasterLongTermSolution.modRepair
 
                 # if damage state of bridge is extensive damage, repair time
                 # is extRepair
                 elif temp_bridge_damage_value[candidate_schedule[i]] == 3:
                     end[candidate_schedule[i]] \
                         = start[candidate_schedule[i]] \
-                          + PostDisasterLongTermSolution.extRepair
+                        + PostDisasterLongTermSolution.extRepair
 
                 # if damage state of bridge is complete damage, repair time
                 # is compRepair
                 else:
                     end[candidate_schedule[i]] \
                         = start[candidate_schedule[i]] \
-                          + PostDisasterLongTermSolution.compRepair
+                        + PostDisasterLongTermSolution.compRepair
 
                 # store the ending time
                 schedule_time.append(end[candidate_schedule[i]])
@@ -119,22 +119,22 @@ class PostDisasterLongTermSolution(Solution):
                 if temp_bridge_damage_value[candidate_schedule[i]] == 1:
                     end[candidate_schedule[i]] \
                         = start[candidate_schedule[i]] \
-                          + PostDisasterLongTermSolution.slightRepair
+                        + PostDisasterLongTermSolution.slightRepair
 
                 elif temp_bridge_damage_value[candidate_schedule[i]] == 2:
                     end[candidate_schedule[i]] \
                         = start[candidate_schedule[i]] \
-                          + PostDisasterLongTermSolution.modRepair
+                        + PostDisasterLongTermSolution.modRepair
 
                 elif temp_bridge_damage_value[candidate_schedule[i]] == 3:
                     end[candidate_schedule[i]] \
                         = start[candidate_schedule[i]] \
-                          + PostDisasterLongTermSolution.extRepair
+                        + PostDisasterLongTermSolution.extRepair
 
                 else:
                     end[candidate_schedule[i]] \
                         = start[candidate_schedule[i]] \
-                          + PostDisasterLongTermSolution.compRepair
+                        + PostDisasterLongTermSolution.compRepair
 
                 schedule_time.append(end[candidate_schedule[i]])
                 schedule_time.sort()
@@ -179,18 +179,18 @@ class PostDisasterLongTermSolution(Solution):
                             fg[bridge] = 1
 
                 for i in range(len(self.arc_df)):
-                    nod1 = self.node_df.loc[self.node_df['ID'] == self.arc_df['fromnode'][i], 'guid'].values[0]
-                    nod2 = self.node_df.loc[self.node_df['ID'] == self.arc_df['tonode'][i], 'guid'].values[0]
+                    nod1 = self.node_df.loc[self.node_df['ID']==self.arc_df['fromnode'][i], 'guid'].values[0]
+                    nod2 = self.node_df.loc[self.node_df['ID']==self.arc_df['tonode'][i], 'guid'].values[0]
                     self.network.edges[nod1, nod2]['Damage_Status'] = 0
 
                 for key, val in temp_bridge_damage_value.items():
-                    linknwid = self.bridge_df.loc[self.bridge_df['guid'] == key, 'linkID'].values[0]
+                    linknwid = self.bridge_df.loc[self.bridge_df['guid']==key,'linkID'].values[0]
 
-                    nod_id1 = self.arc_df[self.arc_df['id'] == linknwid]['fromnode'].values[0]
-                    nod1 = self.node_df.loc[self.node_df['ID'] == nod_id1, 'guid'].values[0]
+                    nod_id1 = self.arc_df[self.arc_df['id']==linknwid]['fromnode'].values[0]
+                    nod1 = self.node_df.loc[self.node_df['ID']==nod_id1, 'guid'].values[0]
 
                     nod_id2 = self.arc_df[self.arc_df['id'] == linknwid]['tonode'].values[0]
-                    nod2 = self.node_df.loc[self.node_df['ID'] == nod_id2, 'guid'].values[0]
+                    nod2 = self.node_df.loc[self.node_df['ID']==nod_id2, 'guid'].values[0]
 
                     self.network.edges[nod1, nod2]['Damage_Status'] = val
 

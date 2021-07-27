@@ -119,7 +119,7 @@ class HousingUnitAllocation(BaseAnalysis):
 
         """
         size_row, size_col = housing_unit_inventory.shape
-
+        
         random_generator = np.random.RandomState(seed)
         sorted_housing_unit0 = housing_unit_inventory.sort_values(by=["huid"])
 
@@ -270,8 +270,8 @@ class HousingUnitAllocation(BaseAnalysis):
         match_column = set(table1_cols).intersection(table2_cols)
         for col in match_column:
             # Compare two columns and marked similarity or rename and drop
-            if col + "_x" in table_merged.columns and col + "_y" in table_merged.columns:
-                table_merged = self.compare_columns(table_merged, col + "_x", col + "_y", True)
+            if col+"_x" in table_merged.columns and col+"_y" in table_merged.columns:
+                table_merged = self.compare_columns(table_merged, col+"_x", col+"_y", True)
 
         return table_merged
 
@@ -290,14 +290,15 @@ class HousingUnitAllocation(BaseAnalysis):
 
         """
         # Values in columns match or not, add True/False column
-        table.loc[table[col1] == table[col2], col1 + "-" + col2] = True
-        table.loc[table[col1] != table[col2], col1 + "-" + col2] = False
+        table.loc[table[col1] == table[col2], col1+"-"+col2] = True
+        table.loc[table[col1] != table[col2], col1+"-"+col2] = False
 
         if table[col1].equals(table[col2]):
             col1_base = col1.rsplit("_", 1)[0]
             col2_base = col1.rsplit("_", 1)[0]
             if col1_base == col2_base and drop:
+
                 table[col1_base] = table[col1]
-                table = table.drop(columns=[col1, col2, col1 + "-" + col2])
+                table = table.drop(columns=[col1, col2, col1+"-"+col2])
 
         return table

@@ -1,7 +1,7 @@
 import pytest
 
-from pyincore import Dataset, DataService
 from pyincore.utils.dataprocessutil import DataProcessUtil as util
+from pyincore import Dataset, DataService
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def test_get_mapped_result(client):
 def test_get_mapped_result_from_analysis(client):
     bldg_dataset_id = "5f9091df3e86721ed82f701d"
 
-    bldg_dmg_dataset_id = "5f9868c00ace240b22a7f2a5"  # legacy DS_name
+    bldg_dmg_dataset_id = "5f9868c00ace240b22a7f2a5" # legacy DS_name
     # bldg_dmg_dataset_id = "602d96e4b1db9c28aeeebdce" # new DS_name
     dmg_result_dataset = Dataset.from_data_service(bldg_dmg_dataset_id, DataService(client))
 

@@ -1,60 +1,56 @@
 {
-  "id": "5b47b34f337d4a3629076470",
-  "legacyId": "NSDS_PFM_MTB_UL_475_C1_11",
-  "description": "Mid-Rise Concrete Moment Frame",
-  "authors": [
-    "Amr S. Elnashai",
-    "Seong-Hoon Jeong",
-    "Joshua S. Steelman"
-  ],
-  "paperReference": null,
-  "resultUnit": null,
-  "resultType": "Limit State",
-  "hazardType": "earthquake",
-  "inventoryType": "building",
-  "creator": "incore",
-  "demandTypes": [
-    "PGA"
-  ],
-  "demandUnits": [
-    "g"
-  ],
-  "fragilityCurves": [
-    {
-      "className": "PeriodStandardFragilityCurve",
-      "description": "Moderate",
-      "alpha": -0.57,
-      "beta": 0.636,
-      "alphaType": "lambda",
-      "curveType": "LogNormal",
-      "periodParam2": 0,
-      "periodParam1": 0,
-      "periodParam0": 0.75,
-      "periodEqnType": 1
-    },
-    {
-      "className": "PeriodStandardFragilityCurve",
-      "description": "Extensive",
-      "alpha": 0.652,
-      "beta": 0.636,
-      "alphaType": "lambda",
-      "curveType": "LogNormal",
-      "periodParam2": 0,
-      "periodParam1": 0,
-      "periodParam0": 0.75,
-      "periodEqnType": 1
-    },
-    {
-      "className": "PeriodStandardFragilityCurve",
-      "description": "Complete",
-      "alpha": 1.396,
-      "beta": 0.636,
-      "alphaType": "lambda",
-      "curveType": "LogNormal",
-      "periodParam2": 0,
-      "periodParam1": 0,
-      "periodParam0": 0.75,
-      "periodEqnType": 1
-    }
-  ]
+    "id": "5b47b34f337d4a3629076470",
+    "legacyId": "NSDS_PFM_MTB_UL_475_C1_11",
+    "description": "Mid-Rise Concrete Moment Frame",
+    "authors": [
+        "Amr S. Elnashai",
+        "Seong-Hoon Jeong",
+        "Joshua S. Steelman"
+    ],
+    "paperReference": null,
+    "resultUnit": null,
+    "resultType": "Limit State",
+    "hazardType": "earthquake",
+    "inventoryType": "building",
+    "creator": "incore",
+    "demandTypes": ["PGA"],
+    "demandUnits": ["g"],
+    "fragilityCurves": [
+        {
+            "className": "PeriodStandardFragilityCurve",
+            "description": "Moderate",
+            "alpha": -0.57,
+            "beta": 0.636,
+            "alphaType": "lambda",
+            "curveType": "LogNormal",
+            "periodParam2": 0,
+            "periodParam1": 0,
+            "periodParam0": 0.75,
+            "periodEqnType": 1
+        },
+        {
+            "className": "PeriodStandardFragilityCurve",
+            "description": "Extensive",
+            "alpha": 0.652,
+            "beta": 0.636,
+            "alphaType": "lambda",
+            "curveType": "LogNormal",
+            "periodParam2": 0,
+            "periodParam1": 0,
+            "periodParam0": 0.75,
+            "periodEqnType": 1
+        },
+        {
+            "className": "PeriodStandardFragilityCurve",
+            "description": "Complete",
+            "alpha": 1.396,
+            "beta": 0.636,
+            "alphaType": "lambda",
+            "curveType": "LogNormal",
+            "periodParam2": 0,
+            "periodParam1": 0,
+            "periodParam0": 0.75,
+            "periodEqnType": 1
+        }
+    ]
 }

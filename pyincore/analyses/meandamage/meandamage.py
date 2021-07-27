@@ -4,11 +4,10 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import collections
-import concurrent.futures
-from itertools import repeat
-
 from pyincore import BaseAnalysis, AnalysisUtil
+from itertools import repeat
+import concurrent.futures
+import collections
 
 
 class MeanDamage(BaseAnalysis):
@@ -56,17 +55,14 @@ class MeanDamage(BaseAnalysis):
                     'required': True,
                     'description': 'damage result that has damage intervals in it',
                     'type': ['ergo:buildingDamageVer4', 'ergo:buildingDamageVer5', 'ergo:buildingDamageVer6'
-                                                                                   'ergo:nsBuildingInventoryDamage',
-                             'ergo:nsBuildingInventoryDamageVer2',
+                             'ergo:nsBuildingInventoryDamage', 'ergo:nsBuildingInventoryDamageVer2',
                              'ergo:nsBuildingInventoryDamageVer3'
                              'ergo:bridgeDamage', 'ergo:bridgeDamageVer2', 'ergo:bridgeDamageVer3'
-                                                                           'ergo:waterFacilityDamageVer4',
-                             'ergo:waterFacilityDamageVer5',
+                             'ergo:waterFacilityDamageVer4', 'ergo:waterFacilityDamageVer5',
                              'ergo:waterFacilityDamageVer6'
                              'ergo:roadDamage', 'ergo:roadDamageVer2', 'ergo:roadDamageVer3',
                              'incore:epfDamage', 'incore:epfDamageVer2', 'incore:epfDamageVer3'
-                                                                         'incore:pipelineDamage',
-                             'incore:pipelineDamageVer2', 'incore:pipelineDamageVer3']
+                             'incore:pipelineDamage', 'incore:pipelineDamageVer2', 'incore:pipelineDamageVer3']
                 },
                 {
                     'id': 'dmg_ratios',

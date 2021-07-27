@@ -5,8 +5,9 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import pytest
+import requests
 
-from pyincore import Client, IncoreClient
+from pyincore import Client, IncoreClient, InsecureIncoreClient, DataService
 
 
 def test_client_success(monkeypatch):

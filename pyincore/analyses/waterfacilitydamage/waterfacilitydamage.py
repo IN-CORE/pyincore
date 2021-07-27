@@ -16,7 +16,6 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, GeoUtil, \
     AnalysisUtil
 from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
 
-
 class WaterFacilityDamage(BaseAnalysis):
     """Computes water facility damage for an earthquake tsunami, tornado, or hurricane exposure.
 
@@ -81,8 +80,8 @@ class WaterFacilityDamage(BaseAnalysis):
         return True
 
     def waterfacility_damage_concurrent_futures(self, function_name,
-                                                parallel_processes,
-                                                *args):
+                                                  parallel_processes,
+                                                  *args):
         """Utilizes concurrent.future module.
 
             Args:
@@ -107,7 +106,7 @@ class WaterFacilityDamage(BaseAnalysis):
         return output_ds, output_dmg
 
     def waterfacilityset_damage_analysis_bulk_input(self, facilities, hazard_type,
-                                                    hazard_dataset_id):
+                                         hazard_dataset_id):
         """Gets applicable fragilities and calculates damage
 
         Args:
@@ -131,6 +130,7 @@ class WaterFacilityDamage(BaseAnalysis):
         liq_demand_units = None
         liquefaction_prob = None
         loc = None
+
 
         # Obtain the fragility key
         fragility_key = self.get_parameter("fragility_key")

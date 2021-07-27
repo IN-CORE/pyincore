@@ -160,7 +160,7 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set)
         return r.json()
 
-    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str, add_info: list = None):
+    def match_inventory(self, mapping:MappingSet, inventories: list, entry_key: str, add_info:list=None):
         """
         This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
@@ -190,10 +190,10 @@ class Dfr3Service:
             if add_info is not None:
                 for add_info_row in add_info:
                     if inventory["properties"].get("guid") is not None and \
-                            add_info_row.get("guid") is not None and \
+                        add_info_row.get("guid") is not None and \
                             inventory["properties"].get("guid") == add_info_row.get("guid"):
                         inventory["properties"].update(add_info_row)
-                        break  # assume no duplicated guid
+                        break # assume no duplicated guid
 
             for m in mapping.mappings:
                 # for old format rule matching [[]]
@@ -253,9 +253,9 @@ class Dfr3Service:
 
         else:
             # rules = [[A and B], OR [C and D], OR [E and F]]
-            or_matched = [False for i in range(len(rules))]  # initiate all false state outer list
+            or_matched = [False for i in range(len(rules))] # initiate all false state outer list
             for i, and_rules in enumerate(rules):
-                and_matched = [False for j in range(len(and_rules))]  # initialte all false state for inner list
+                and_matched = [False for j in range(len(and_rules))] # initialte all false state for inner list
                 for j, rule in enumerate(and_rules):
                     # evaluate, return True or False. And place it in the corresponding place
                     and_matched[j] = Dfr3Service._eval_criterion(rule, properties)
@@ -282,7 +282,7 @@ class Dfr3Service:
         if rules == {}:
             return True
         else:
-            boolean = list(rules.keys())[0]  # AND or OR
+            boolean = list(rules.keys())[0] # AND or OR
             criteria = rules[boolean]
 
             matches = []
@@ -322,13 +322,13 @@ class Dfr3Service:
         # e.g. "java.lang.String Soil EQUALS Upland",
         # e.g. "java.lang.String struct_typ EQUALS W2"
 
-        rule_type = elements[0]  # e.g. int, str, double, java.lang.String, etc...
+        rule_type = elements[0] # e.g. int, str, double, java.lang.String, etc...
         if rule_type not in known_types.keys():
             raise ValueError(rule_type + " Unknown. Cannot parse the rules of this mapping!")
 
-        rule_key = elements[1]  # e.g. no_storeis, year_built, etc...
+        rule_key = elements[1] # e.g. no_storeis, year_built, etc...
 
-        rule_operator = elements[2]  # e.g. EQ, GE, LE, EQUALS
+        rule_operator = elements[2] # e.g. EQ, GE, LE, EQUALS
         if rule_operator not in known_operators.keys():
             raise ValueError(rule_operator + " Unknown. Cannot parse the rules of this mapping!")
 

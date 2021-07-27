@@ -1,5 +1,6 @@
-import pyincore.globals as pyglobals
 from pyincore import IncoreClient, MappingSet, FragilityService
+import pyincore.globals as pyglobals
+from pyincore import Dataset
 from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore.analyses.cumulativebuildingdamage.cumulativebuildingdamage import CumulativeBuildingDamage
 

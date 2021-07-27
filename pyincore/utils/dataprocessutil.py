@@ -4,9 +4,8 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import json
-
 import geopandas as gpd
+import json
 import pandas as pd
 
 from pyincore import Dataset, DataService
@@ -195,9 +194,8 @@ class DataProcessUtil:
             'cluster', 'category']]
 
         # group by cluster
-        result_by_cluster = mapped_df.groupby(by=['cluster', 'category'], sort=False, as_index=False).agg(
-            {'guid': 'count',
-             'probability': 'mean'})
+        result_by_cluster = mapped_df.groupby(by=['cluster', 'category'], sort=False, as_index=False).agg({'guid': 'count',
+                                                                                               'probability': 'mean'})
         result_by_cluster.rename(columns={'guid': 'tot_count', 'probability': 'percent_functional'}, inplace=True)
         result_by_cluster["percent_non_functional"] = 1 - result_by_cluster["percent_functional"]
         result_by_cluster["num_functional"] = (result_by_cluster["tot_count"] * result_by_cluster[
@@ -212,8 +210,7 @@ class DataProcessUtil:
         # replace NaN
         result_by_cluster[func_state] = result_by_cluster[func_state].fillna(-1)
         result_by_cluster[["num_functional", "num_non_functional"]] = result_by_cluster[["num_functional",
-                                                                                         "num_non_functional"]].astype(
-            int)
+                                                                                       "num_non_functional"]].astype(int)
 
         # group by category
         result_by_category = mapped_df.groupby(by=['category'], sort=False, as_index=False).agg({'guid': 'count',

@@ -1,11 +1,11 @@
-import collections
 import json
 import os
+import collections
 
-import numpy as np
 import pytest
 
 from pyincore import globals as pyglobals, FragilityCurveSet, AnalysisUtil
+import numpy as np
 
 
 def test_fragility_set_small_overlap():

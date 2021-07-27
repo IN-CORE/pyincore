@@ -8,11 +8,11 @@ import csv
 import math
 import os
 import re
-from collections import Counter
-from decimal import getcontext, Decimal
 from typing import List, Dict
+from collections import Counter
 
 from deprecated.sphinx import deprecated
+from decimal import getcontext, Decimal
 
 from pyincore import DataService
 from pyincore.globals import DAMAGE_PRECISION

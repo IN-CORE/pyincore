@@ -111,7 +111,6 @@ class SeasideCGEModel(BaseAnalysis):
                 }
             ]
         }
-
     # ----------------------------------------------------------------
     # set file paths
     # ----------------------------------------------------------------
@@ -119,6 +118,8 @@ class SeasideCGEModel(BaseAnalysis):
     def run(self):
         def _(x):
             return ExprM(vars, m=x)
+
+
 
         # ----------------------------------------------------------------
         # define sets
@@ -1808,9 +1809,9 @@ class SeasideCGEModel(BaseAnalysis):
         # create CGE tmp folder, solverconstatns
         # TODO: we need to generate the "solverconstatnt" folder with username since it uses system tmp
         # TODO: there is a situation that multiple users on system can run this together
-
+        
         cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
-        if not os.path.isdir(cge_tmp_folder):  # create the folder if there is no folder
+        if not os.path.isdir(cge_tmp_folder): # create the folder if there is no folder
             os.mkdir(cge_tmp_folder)
         logger.debug(cge_tmp_folder)
 
@@ -2001,3 +2002,4 @@ class SeasideCGEModel(BaseAnalysis):
         self.set_result_csv_data("Seaside_output", cge_output, name="Seaside_output", source="dataframe")
 
         return True
+

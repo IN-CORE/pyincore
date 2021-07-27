@@ -1,13 +1,13 @@
 {
-  "name": "pytest - Florida coast cat-1 hurricane",
-  "description": "Simulated pytest hurricane",
-  "coast": "florida",
-  "category": 1,
-  "demandType": "3s",
-  "demandUnits": "mph",
-  "gridResolution": 6,
-  "rasterResolution": 6,
-  "transD": -83,
-  "landfallLocation": "28.08, -80.61",
-  "gridPoints": 10
+	"name": "pytest - Florida coast cat-1 hurricane",
+	"description": "Simulated pytest hurricane",
+	"coast": "florida",
+	"category": 1,
+	"demandType": "3s",
+	"demandUnits": "mph",
+	"gridResolution": 6,
+	"rasterResolution": 6,
+	"transD": -83,
+	"landfallLocation": "28.08, -80.61",
+	"gridPoints": 10
 }

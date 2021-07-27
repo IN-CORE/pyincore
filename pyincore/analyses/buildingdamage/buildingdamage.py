@@ -22,7 +22,6 @@ class BuildingDamage(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
 
     """
-
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
@@ -132,10 +131,10 @@ class BuildingDamage(BaseAnalysis):
                 demands = AnalysisUtil.get_hazard_demand_types(b, fragility_sets[bldg_id], hazard_type)
                 units = fragility_sets[bldg_id].demand_units
                 value = {
-                    "demands": demands,
-                    "units": units,
-                    "loc": loc
-                }
+                            "demands": demands,
+                            "units": units,
+                            "loc": loc
+                        }
                 values_payload.append(value)
                 mapped_buildings.append(b)
 
@@ -299,7 +298,7 @@ class BuildingDamage(BaseAnalysis):
                     'type': ['incore:dfr3MappingSet'],
                 },
                 {
-                    'id': 'retrofit_strategy',
+                    'id':'retrofit_strategy',
                     'required': False,
                     'description': 'Building retrofit strategy that contains guid and retrofit method',
                     'type': ['incore:retrofitStrategy']

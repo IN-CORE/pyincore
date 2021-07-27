@@ -1,17 +1,16 @@
 """Joplin CGE model"""
-import os
-import tempfile
-
-import pandas as pd
-from pyomo.environ import *
-from pyomo.opt import SolverFactory
-
 from pyincore import BaseAnalysis
 from pyincore import globals as pyglobals
 from pyincore.analyses.joplincge.equationlib import *
 
-logger = pyglobals.LOGGER
+from pyomo.environ import *
+from pyomo.opt import SolverFactory
 
+import os
+import tempfile
+import pandas as pd
+
+logger = pyglobals.LOGGER
 
 class JoplinCGEModel(BaseAnalysis):
     """A computable general equilibrium (CGE) model is based on fundamental economic principles.
@@ -1674,7 +1673,7 @@ class JoplinCGEModel(BaseAnalysis):
 
             if opt is None:
                 print("")
-                print("ERROR: Unable to create solver plugin for %s "
+                print("ERROR: Unable to create solver plugin for %s " 
                       "using the %s interface" % (solver, solver_io))
                 print("")
                 exit(1)
@@ -1748,9 +1747,9 @@ class JoplinCGEModel(BaseAnalysis):
         # create CGE tmp folder, solverconstatns
         # TODO: we need to generate the "solverconstatnt" folder with username since it uses system tmp
         # TODO: there is a situation that multiple users on system can run this together
-
+        
         cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
-        if not os.path.isdir(cge_tmp_folder):  # create the folder if there is no folder
+        if not os.path.isdir(cge_tmp_folder): # create the folder if there is no folder
             os.mkdir(cge_tmp_folder)
         logger.debug(cge_tmp_folder)
 

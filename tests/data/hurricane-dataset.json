@@ -1,31 +1,30 @@
 {
-  "name": "pytest - Galveston Deterministic Hurricane - Kriging ",
-  "description": "Galveston dataset based deterministic hazard - 3 datasets",
-  "hurricaneType": "dataset",
-  "hazardDatasets": [
-    {
-      "hazardType": "deterministic",
-      "demandType": "waveHeight",
-      "demandUnits": "m",
-      "hurricaneParameters": {
-        "model": "Kriging"
-      }
-    },
-    {
-      "hazardType": "deterministic",
-      "demandType": "surgeLevel",
-      "demandUnits": "m",
-      "hurricaneParameters": {
-        "model": "Kriging"
-      }
-    },
-    {
-      "hazardType": "deterministic",
-      "demandType": "inundationDuration",
-      "demandUnits": "hr",
-      "hurricaneParameters": {
-        "model": "Kriging"
-      }
-    }
-  ]
+	"name": "pytest - Galveston Deterministic Hurricane - Kriging ",
+	"description": "Galveston dataset based deterministic hazard - 3 datasets",
+	"hurricaneType": "dataset",
+
+	"hazardDatasets": [{
+		"hazardType": "deterministic",
+		"demandType": "waveHeight",
+		"demandUnits": "m",
+		"hurricaneParameters": {
+			"model": "Kriging"
+		}
+	},
+	{
+		"hazardType": "deterministic",
+		"demandType": "surgeLevel",
+		"demandUnits": "m",
+		"hurricaneParameters": {
+			"model": "Kriging"
+		}
+	},
+	{
+		"hazardType": "deterministic",
+		"demandType": "inundationDuration",
+		"demandUnits": "hr",
+		"hurricaneParameters": {
+			"model": "Kriging"
+		}
+	}]
 }

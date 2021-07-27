@@ -8,8 +8,8 @@ import math
 from abc import ABC
 
 from pyincore import globals as pyglobals
-from pyincore.models.fragilitycurve import FragilityCurve
 from pyincore.utils import evaluateexpression
+from pyincore.models.fragilitycurve import FragilityCurve
 
 logger = pyglobals.LOGGER
 

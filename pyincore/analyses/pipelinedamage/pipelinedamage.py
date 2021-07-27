@@ -291,3 +291,4 @@ class PipelineDamage(BaseAnalysis):
                 }
             ]
         }
+

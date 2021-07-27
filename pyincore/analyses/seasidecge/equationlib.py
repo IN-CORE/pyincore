@@ -1,10 +1,9 @@
-import math
-import operator as op
 from copy import deepcopy
+from pyincore import globals as pyglobals
 
 import pandas as pd
-
-from pyincore import globals as pyglobals
+import operator as op
+import math
 
 logger = pyglobals.LOGGER
 

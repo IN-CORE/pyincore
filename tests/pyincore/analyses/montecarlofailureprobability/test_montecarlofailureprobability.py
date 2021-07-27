@@ -1,7 +1,7 @@
-import pyincore.globals as pyglobals
+from pyincore.client import IncoreClient
 from pyincore.analyses.montecarlofailureprobability import \
     MonteCarloFailureProbability
-from pyincore.client import IncoreClient
+import pyincore.globals as pyglobals
 
 
 def run_with_base_class():

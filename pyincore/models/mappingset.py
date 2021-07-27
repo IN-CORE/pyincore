@@ -6,7 +6,6 @@
 
 
 import json
-
 from pyincore.models.mapping import Mapping
 
 
