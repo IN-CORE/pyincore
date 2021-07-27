@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 from pyincore import IncoreClient

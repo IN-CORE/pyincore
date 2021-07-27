@@ -1,72 +1,78 @@
 {
-    "description": "Galveston building fragility specific for hurricane surge",
-    "authors": [
-        "Tomiczek, T. Kennedy, A, and Rogers, S."
-    ],
-    "paperReference": null,
-    "resultUnit": null,
-    "resultType": null,
-    "hazardType": "hurricane",
-    "inventoryType": "building",
-    "creator": "cwang138",
-    "demandTypes": ["surgeLevel","waveHeight"],
-    "demandUnits": ["m","m"],
-    "fragilityCurves": [
+  "description": "Galveston building fragility specific for hurricane surge",
+  "authors": [
+    "Tomiczek, T. Kennedy, A, and Rogers, S."
+  ],
+  "paperReference": null,
+  "resultUnit": null,
+  "resultType": null,
+  "hazardType": "hurricane",
+  "inventoryType": "building",
+  "creator": "cwang138",
+  "demandTypes": [
+    "surgeLevel",
+    "waveHeight"
+  ],
+  "demandUnits": [
+    "m",
+    "m"
+  ],
+  "fragilityCurves": [
+    {
+      "className": "FragilityCurveRefactored",
+      "description": "new schema proposed for parametric fragility curves",
+      "rules": [
         {
-            "className": "FragilityCurveRefactored",
-            "description": "new schema proposed for parametric fragility curves",
-            "rules": [
-                {
-                    "condition": [
-                        "-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048) >= -2.79*waveHeight"
-                    ],
-                    "expression": "scipy.stats.norm.cdf(-3.56+1.52*waveHeight-1.73*waveHeight*(-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048))-0.31*(-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048))^2-0.141*age_group^2)"
-                },
-                {
-                    "condition": [
-                        "-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048) < -2.79*waveHeight"
-                    ],
-                    "expression": "scipy.stats.norm.cdf(-3.56+1.52*waveHeight+2.42*(-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048))^2-0.141*age_group^2)"
-                }
-            ],
-            "returnType": {
-                "type": "Probability Failure",
-                "unit": "",
-                "description": "NA"
-            },
-            "fragilityCurveParameters": null
+          "condition": [
+            "-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048) >= -2.79*waveHeight"
+          ],
+          "expression": "scipy.stats.norm.cdf(-3.56+1.52*waveHeight-1.73*waveHeight*(-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048))-0.31*(-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048))^2-0.141*age_group^2)"
+        },
+        {
+          "condition": [
+            "-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048) < -2.79*waveHeight"
+          ],
+          "expression": "scipy.stats.norm.cdf(-3.56+1.52*waveHeight+2.42*(-(surgeLevel-g_elev+0.7*waveHeight-lhsm_elev*0.3048))^2-0.141*age_group^2)"
         }
-    ],
-    "fragilityCurveParameters": [
-        {
-            "name": "surgeLevel",
-            "unit": "m",
-            "description": "surge level (m) coming from hazard data",
-            "expression": "3"
-        },
-        {
-            "name": "waveHeight",
-            "unit": "m",
-            "description": "Significant wave height (m) coming from hazard data",
-            "expression": "2"
-        },
-        {
-            "name": "lhsm_elev",
-            "unit": "ft",
-            "description": "Elevation of the lowest horizontal structural member (ft) coming from building inventory",
-            "expression": "9"
-        },
-        {
-            "name": "age_group",
-            "unit": "",
-            "description": "Age group of the building (1,2,3, and 4 representing age group pre-1974, 1974–1987, 1987–1995, and 1995– 2008, respectively) coming from building Inventory",
-            "expression": "4"
-        },
-        {
-            "name": "g_elev",
-            "unit": "m",
-            "description": " Elevation of the building with respect to the ground (m) coming from building inventory",
-            "expression": "1"
-        }
-    ]
+      ],
+      "returnType": {
+        "type": "Probability Failure",
+        "unit": "",
+        "description": "NA"
+      },
+      "fragilityCurveParameters": null
+    }
+  ],
+  "fragilityCurveParameters": [
+    {
+      "name": "surgeLevel",
+      "unit": "m",
+      "description": "surge level (m) coming from hazard data",
+      "expression": "3"
+    },
+    {
+      "name": "waveHeight",
+      "unit": "m",
+      "description": "Significant wave height (m) coming from hazard data",
+      "expression": "2"
+    },
+    {
+      "name": "lhsm_elev",
+      "unit": "ft",
+      "description": "Elevation of the lowest horizontal structural member (ft) coming from building inventory",
+      "expression": "9"
+    },
+    {
+      "name": "age_group",
+      "unit": "",
+      "description": "Age group of the building (1,2,3, and 4 representing age group pre-1974, 1974–1987, 1987–1995, and 1995– 2008, respectively) coming from building Inventory",
+      "expression": "4"
+    },
+    {
+      "name": "g_elev",
+      "unit": "m",
+      "description": " Elevation of the building with respect to the ground (m) coming from building inventory",
+      "expression": "1"
+    }
+  ]
 }

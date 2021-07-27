@@ -1,1 +1,2 @@
-from pyincore.analyses.buildingportfolio.recovery.BuildingPortfolioRecoveryAnalysis import BuildingPortfolioRecoveryAnalysis
+from pyincore.analyses.buildingportfolio.recovery.BuildingPortfolioRecoveryAnalysis import \
+    BuildingPortfolioRecoveryAnalysis

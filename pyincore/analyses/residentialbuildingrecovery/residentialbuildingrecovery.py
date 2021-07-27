@@ -170,13 +170,14 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         print("Finished executing household_income_prediction() in " +
               str(end_start_household_income_prediction - start_household_income_prediction) + " secs")
 
-
-        household_aggregation = ResidentialBuildingRecovery.household_aggregation(household_income_prediction, num_samples)
+        household_aggregation = ResidentialBuildingRecovery.household_aggregation(household_income_prediction,
+                                                                                  num_samples)
         end_household_aggregation = time.process_time()
         print("Finished executing household_aggregation() in " +
               str(end_household_aggregation - end_start_household_income_prediction) + " secs")
 
-        financing_delay = ResidentialBuildingRecovery.financing_delay(household_aggregation, financial_resources, num_samples)
+        financing_delay = ResidentialBuildingRecovery.financing_delay(household_aggregation, financial_resources,
+                                                                      num_samples)
         end_financing_delay = time.process_time()
         print("Finished executing financing_delay() in " +
               str(end_financing_delay - end_household_aggregation) + " secs")

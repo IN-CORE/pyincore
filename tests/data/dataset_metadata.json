@@ -1,67 +1,67 @@
 {
-    "id": "5ee7af50772cf80008577ae3",
-    "deleted": false,
-    "title": "Seaside roads",
-    "description": "Seaside roads in wgs84 coordinates.",
-    "date": "2020-06-15T17:26:40+0000",
-    "creator": "cwang138",
-    "contributors": [],
-    "fileDescriptors": [
-        {
-            "id": "5ee7af939ef8410008505755",
-            "deleted": false,
-            "filename": "Seaside_roads_links_wgs84.CPG",
-            "mimeType": "application/octet-stream",
-            "size": 5,
-            "dataURL": "5e/e7/5ee7af939ef8410008505755/Seaside_roads_links_wgs84.CPG",
-            "md5sum": "ae3b3df9970b49b6523e608759bc957d"
-        },
-        {
-            "id": "5ee7af949ef8410008505758",
-            "deleted": false,
-            "filename": "Seaside_roads_links_wgs84.dbf",
-            "mimeType": "application/octet-stream",
-            "size": 219728,
-            "dataURL": "5e/e7/5ee7af949ef8410008505758/Seaside_roads_links_wgs84.dbf",
-            "md5sum": "1f01bb87a25d326310c0494049262db5"
-        },
-        {
-            "id": "5ee7af949ef841000850575b",
-            "deleted": false,
-            "filename": "Seaside_roads_links_wgs84.prj",
-            "mimeType": "application/octet-stream",
-            "size": 205,
-            "dataURL": "5e/e7/5ee7af949ef841000850575b/Seaside_roads_links_wgs84.prj",
-            "md5sum": "30e5566d68356bfc059d296c42c0480e"
-        },
-        {
-            "id": "5ee7af959ef841000850575e",
-            "deleted": false,
-            "filename": "Seaside_roads_links_wgs84.shp",
-            "mimeType": "application/octet-stream",
-            "size": 53548,
-            "dataURL": "5e/e7/5ee7af959ef841000850575e/Seaside_roads_links_wgs84.shp",
-            "md5sum": "f2ca7cd992936e972baaaeeab80ffcd4"
-        },
-        {
-            "id": "5ee7af959ef8410008505761",
-            "deleted": false,
-            "filename": "Seaside_roads_links_wgs84.shx",
-            "mimeType": "application/octet-stream",
-            "size": 4780,
-            "dataURL": "5e/e7/5ee7af959ef8410008505761/Seaside_roads_links_wgs84.shx",
-            "md5sum": "b9ae7474f369a2259f580e0c27fdcdd8"
-        }
-    ],
-    "dataType": "incore:roads",
-    "storedUrl": "",
-    "format": "shapefile",
-    "sourceDataset": "",
-    "boundingBox": [
-        -123.95506700000148,
-        45.96994113918297,
-        -123.89329282687332,
-        46.01607699749688
-    ],
-    "networkDataset": null
+  "id": "5ee7af50772cf80008577ae3",
+  "deleted": false,
+  "title": "Seaside roads",
+  "description": "Seaside roads in wgs84 coordinates.",
+  "date": "2020-06-15T17:26:40+0000",
+  "creator": "cwang138",
+  "contributors": [],
+  "fileDescriptors": [
+    {
+      "id": "5ee7af939ef8410008505755",
+      "deleted": false,
+      "filename": "Seaside_roads_links_wgs84.CPG",
+      "mimeType": "application/octet-stream",
+      "size": 5,
+      "dataURL": "5e/e7/5ee7af939ef8410008505755/Seaside_roads_links_wgs84.CPG",
+      "md5sum": "ae3b3df9970b49b6523e608759bc957d"
+    },
+    {
+      "id": "5ee7af949ef8410008505758",
+      "deleted": false,
+      "filename": "Seaside_roads_links_wgs84.dbf",
+      "mimeType": "application/octet-stream",
+      "size": 219728,
+      "dataURL": "5e/e7/5ee7af949ef8410008505758/Seaside_roads_links_wgs84.dbf",
+      "md5sum": "1f01bb87a25d326310c0494049262db5"
+    },
+    {
+      "id": "5ee7af949ef841000850575b",
+      "deleted": false,
+      "filename": "Seaside_roads_links_wgs84.prj",
+      "mimeType": "application/octet-stream",
+      "size": 205,
+      "dataURL": "5e/e7/5ee7af949ef841000850575b/Seaside_roads_links_wgs84.prj",
+      "md5sum": "30e5566d68356bfc059d296c42c0480e"
+    },
+    {
+      "id": "5ee7af959ef841000850575e",
+      "deleted": false,
+      "filename": "Seaside_roads_links_wgs84.shp",
+      "mimeType": "application/octet-stream",
+      "size": 53548,
+      "dataURL": "5e/e7/5ee7af959ef841000850575e/Seaside_roads_links_wgs84.shp",
+      "md5sum": "f2ca7cd992936e972baaaeeab80ffcd4"
+    },
+    {
+      "id": "5ee7af959ef8410008505761",
+      "deleted": false,
+      "filename": "Seaside_roads_links_wgs84.shx",
+      "mimeType": "application/octet-stream",
+      "size": 4780,
+      "dataURL": "5e/e7/5ee7af959ef8410008505761/Seaside_roads_links_wgs84.shx",
+      "md5sum": "b9ae7474f369a2259f580e0c27fdcdd8"
+    }
+  ],
+  "dataType": "incore:roads",
+  "storedUrl": "",
+  "format": "shapefile",
+  "sourceDataset": "",
+  "boundingBox": [
+    -123.95506700000148,
+    45.96994113918297,
+    -123.89329282687332,
+    46.01607699749688
+  ],
+  "networkDataset": null
 }

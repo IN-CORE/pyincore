@@ -13,12 +13,12 @@ import requests
 
 from pyincore import globals as pyglobals
 
-
 logger = pyglobals.LOGGER
 
 
 class Client:
     """Incore service Client class. It handles connection to the server with INCORE services and user authentication."""
+
     def __init__(self):
         self.session = requests.session()
 
@@ -140,6 +140,7 @@ class IncoreClient(Client):
         service_url (str): Service url.
         token_file_name (str): Path to file containing the authorization token.
     """
+
     def __init__(self, service_url: str = None, token_file_name: str = None):
         super().__init__()
         if service_url is None or len(service_url.strip()) == 0:
@@ -158,7 +159,8 @@ class IncoreClient(Client):
 
         else:
             if self.login():
-                print("Connection successful to IN-CORE services.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
+                print("Connection successful to IN-CORE services.", "pyIncore version detected:",
+                      pyglobals.PACKAGE_VERSION)
 
     def login(self):
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):

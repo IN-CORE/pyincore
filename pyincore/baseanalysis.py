@@ -18,6 +18,7 @@ class BaseAnalysis:
         incore_client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, incore_client):
         self.spec = self.get_spec()
         self.client = incore_client

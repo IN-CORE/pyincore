@@ -12,8 +12,8 @@ def run_with_base_class():
 
     # Joplin
     building_inv = "5f218e36114b783cb0b01833"
-    housing_unit_inv = "5df7ce61425e0b00092d0013" # 2ev3
-    address_point_inv = "5df7ce0d425e0b00092cffee" # 2ev2
+    housing_unit_inv = "5df7ce61425e0b00092d0013"  # 2ev3
+    address_point_inv = "5df7ce0d425e0b00092cffee"  # 2ev2
     result_name = "IN-CORE_2ev3_HUA"
 
     seed = 1238

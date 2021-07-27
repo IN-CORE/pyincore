@@ -8,8 +8,12 @@
   ],
   "description": "Mid-Rise Steel Moment Frame",
   "resultType": "Limit State",
-  "demandTypes": ["0.2 sec Sa"],
-  "demandUnits": ["g"],
+  "demandTypes": [
+    "0.2 sec Sa"
+  ],
+  "demandUnits": [
+    "g"
+  ],
   "fragilityCurves": [
     {
       "className": "PeriodStandardFragilityCurve",

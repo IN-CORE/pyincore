@@ -18,7 +18,7 @@ class TransportationRecoveryUtil:
         :return:
         """
         NBI = pd.read_csv(NBI_file)
-        NBI['LONG_017'] = NBI['LONG_017'].apply(lambda x: -1 *(GeoUtil.degree_to_decimal(x)))
+        NBI['LONG_017'] = NBI['LONG_017'].apply(lambda x: -1 * (GeoUtil.degree_to_decimal(x)))
         NBI['LAT_016'] = NBI['LAT_016'].apply(lambda x: GeoUtil.degree_to_decimal(x))
 
         return NBI
@@ -59,11 +59,11 @@ class TransportationRecoveryUtil:
 
                 if mean_damage > 0 and mean_damage < 0.25:
                     bridge_damage_value[id] = 1
-                elif mean_damage >= 0.25 and mean_damage <0.5:
+                elif mean_damage >= 0.25 and mean_damage < 0.5:
                     bridge_damage_value[id] = 2
-                elif mean_damage >=0.5 and mean_damage <0.75:
+                elif mean_damage >= 0.5 and mean_damage < 0.75:
                     bridge_damage_value[id] = 3
-                elif mean_damage >=0.75 and mean_damage <=1:
+                elif mean_damage >= 0.75 and mean_damage <= 1:
                     bridge_damage_value[id] = 4
                 else:
                     raise ValueError('mean damage should not larger than 1!')
@@ -89,10 +89,10 @@ class TransportationRecoveryUtil:
         # add arcs to the network
         for i in range(len(arc_df)):
             fromnode = \
-            node_df.loc[node_df['ID'] == arc_df['fromnode'][i], 'guid'].values[
-                0]
+                node_df.loc[node_df['ID'] == arc_df['fromnode'][i], 'guid'].values[
+                    0]
             tonode = \
-            node_df.loc[node_df['ID'] == arc_df['tonode'][i], 'guid'].values[0]
+                node_df.loc[node_df['ID'] == arc_df['tonode'][i], 'guid'].values[0]
             dis = arc_df['len_mile'][i] / arc_df['freeflowsp'][i]
             network.add_edge(fromnode, tonode, distance=dis,
                              adt=adt_data[arc_df['guid'][i]])

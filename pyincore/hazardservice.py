@@ -21,6 +21,7 @@ class HazardService:
         client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, client: IncoreClient):
         self.client = client
 

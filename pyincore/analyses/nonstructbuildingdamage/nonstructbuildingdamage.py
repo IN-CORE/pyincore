@@ -20,6 +20,7 @@ class NonStructBuildingDamage(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, incore_client):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
@@ -206,7 +207,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                 for j, d in enumerate(fragility_set_as.demand_types):
                     hval_dict_as[d] = hazard_vals_as[j]
                 building_args = fragility_set_as.construct_expression_args_from_inventory(building)
-                dmg_probability_as = fragility_set_as.\
+                dmg_probability_as = fragility_set_as. \
                     calculate_limit_state_refactored_w_conversion(hval_dict_as, inventory_type="building",
                                                                   **building_args)
             else:
@@ -234,7 +235,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     hval_dict_ds[d] = hazard_vals_ds[j]
 
                 building_args = fragility_set_ds.construct_expression_args_from_inventory(building)
-                dmg_probability_ds = fragility_set_ds.\
+                dmg_probability_ds = fragility_set_ds. \
                     calculate_limit_state_refactored_w_conversion(hval_dict_ds, inventory_type="building",
                                                                   **building_args)
             else:
@@ -270,8 +271,10 @@ class NonStructBuildingDamage(BaseAnalysis):
             building_result['DS_DS_1'] = dmg_interval_ds['DS_1']
             building_result['DS_DS_2'] = dmg_interval_ds['DS_2']
             building_result['DS_DS_3'] = dmg_interval_ds['DS_3']
-            building_result['hazard_exposure_as'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_as, hazard_type)
-            building_result['hazard_exposure_ds'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_ds, hazard_type)
+            building_result['hazard_exposure_as'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_as,
+                                                                                                 hazard_type)
+            building_result['hazard_exposure_ds'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_ds,
+                                                                                                 hazard_type)
 
             # put damage results in dictionary
             damage_result = dict()

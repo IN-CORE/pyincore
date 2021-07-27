@@ -44,7 +44,7 @@ def test_search_fragility_sets(fragilitysvc):
     text = "Elnashai and Jeong"
     fragility_sets = fragilitysvc.search_dfr3_sets(text)
 
-    assert len(fragility_sets)>0 and text in fragility_sets[0]['authors']
+    assert len(fragility_sets) > 0 and text in fragility_sets[0]['authors']
 
 
 def test_match_fragilities_single_inventory(fragilitysvc):
@@ -76,7 +76,7 @@ def test_match_fragilities_multiple_inventories_new_format(fragilitysvc):
         inventories = ast.literal_eval(file.read())
     key = "Non-Retrofit Fragility ID Code"
     mapping = MappingSet.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "local_mapping_new_format.json"),
-                                            "fragility")
+                                        "fragility")
     frag_set = fragilitysvc.match_inventory(mapping, inventories, key)
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
 
@@ -84,7 +84,7 @@ def test_match_fragilities_multiple_inventories_new_format(fragilitysvc):
 def test_get_fragility_mappings(fragilitysvc):
     mappings = fragilitysvc.get_mappings(hazard_type="earthquake", creator="cwang138")
 
-    assert len(mappings)>0 and "id" in mappings[0].keys()
+    assert len(mappings) > 0 and "id" in mappings[0].keys()
 
 
 def test_get_fragility_mapping(fragilitysvc):

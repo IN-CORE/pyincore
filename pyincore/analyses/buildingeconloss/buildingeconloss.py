@@ -21,6 +21,7 @@ class BuildingEconLoss(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, incore_client):
         # percentage
         self.infl_factor = 0.0

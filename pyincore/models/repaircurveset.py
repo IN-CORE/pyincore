@@ -72,5 +72,3 @@ class RepairCurveSet:
             instance = cls(json.load(f))
 
         return instance
-
-
