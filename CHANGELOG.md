@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.5] - 2021-07-31
+### Changed
+- Handle no hazard exposure cases [INCORE1-1130](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1130)
+- Modify bridge damage to support MMSA bridge damage [INCORE1-1269](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1269) 
+- update python version in requirements [INCORE1-1270](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1270)
+- Rename residential recovery analysis [INCORE1-1322](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1322)
+- Rename household-level housing serial recovery to sequential [INCORE1-1323](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1323)
+
+### Added
+- Samples max damage states as an output for monte carlo analysis [INCORE1-1266](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1266)
+- Create joplin residential recovery analysis [INCORE1-1274](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1274)
+- Integrate household-level housing recovery sequential model [INCORE1-1275](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1275)
+- pyincore-data reference link in pyincore doc [INCORE1-1298](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1298)
+- Links to analyses to pyincore doc [INCORE1-1307](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1307)
+
+### Fixed
+- Micromamba build with version 0.15.2 [INCORE1-1315](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1315)
+- Failing pytests such as posting legacy dfr3 curves, and GET tornado values [INCORE1-1319](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1319)
+
 ## [0.9.4] - 2021-06-16
 ### Added
 - Support refactored fragility curves for water facility damage [INCORE1-1063](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1063)
