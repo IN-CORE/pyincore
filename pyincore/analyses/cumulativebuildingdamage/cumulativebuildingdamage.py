@@ -128,17 +128,19 @@ class CumulativeBuildingDamage(BaseAnalysis):
                 limit_states = collections.OrderedDict()
 
                 limit_states["LS_0"] = eq_limit_states["LS_0"] + tsunami_limit_states["LS_0"] \
-                    - eq_limit_states["LS_0"] * tsunami_limit_states["LS_0"]
+                                       - eq_limit_states["LS_0"] * tsunami_limit_states["LS_0"]
 
                 limit_states["LS_1"] = eq_limit_states["LS_1"] + tsunami_limit_states["LS_1"] \
-                    - eq_limit_states["LS_1"] * tsunami_limit_states["LS_1"] \
-                    + ((eq_limit_states["LS_0"] - eq_limit_states["LS_1"]) * (tsunami_limit_states["LS_0"] -
-                                                                              tsunami_limit_states["LS_1"]))
+                                       - eq_limit_states["LS_1"] * tsunami_limit_states["LS_1"] \
+                                       + ((eq_limit_states["LS_0"] - eq_limit_states["LS_1"]) * (
+                        tsunami_limit_states["LS_0"] -
+                        tsunami_limit_states["LS_1"]))
 
                 limit_states["LS_2"] = eq_limit_states["LS_2"] + tsunami_limit_states["LS_2"] \
-                    - eq_limit_states["LS_2"] * tsunami_limit_states["LS_2"] \
-                    + ((eq_limit_states["LS_1"] - eq_limit_states["LS_2"]) * (tsunami_limit_states["LS_1"] -
-                                                                              tsunami_limit_states["LS_2"]))
+                                       - eq_limit_states["LS_2"] * tsunami_limit_states["LS_2"] \
+                                       + ((eq_limit_states["LS_1"] - eq_limit_states["LS_2"]) * (
+                        tsunami_limit_states["LS_1"] -
+                        tsunami_limit_states["LS_2"]))
 
                 damage_state = FragilityCurveSet._3ls_to_4ds(limit_states)
 

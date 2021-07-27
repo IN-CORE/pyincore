@@ -16,6 +16,7 @@ class NetworkData:
         file_path (str): Path to a file with GIS layers.
 
     """
+
     def __init__(self, network_type: str, file_path: str):
         self.network_type = network_type
         if os.path.exists(file_path):

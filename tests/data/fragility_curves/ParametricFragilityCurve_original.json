@@ -1,7 +1,11 @@
 {
   "className": "FragilitySet",
-  "demandTypes": ["PGA"],
-  "demandUnits": ["g"],
+  "demandTypes": [
+    "PGA"
+  ],
+  "demandUnits": [
+    "g"
+  ],
   "fragilityCurves": [
     {
       "className": "ParametricFragilityCurve",

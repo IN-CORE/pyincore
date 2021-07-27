@@ -10,12 +10,12 @@ import re
 
 import pytest
 
-from pyincore import globals as pyglobals
 from pyincore import (
     Dataset,
     NetworkData,
     NetworkDataset,
 )
+from pyincore import globals as pyglobals
 
 
 @pytest.fixture

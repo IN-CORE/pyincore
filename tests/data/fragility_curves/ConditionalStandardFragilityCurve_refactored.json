@@ -1,7 +1,11 @@
 {
   "className": "FragilitySet",
-  "demandTypes": ["Vmax"],
-  "demandUnits": ["ft/s"],
+  "demandTypes": [
+    "Vmax"
+  ],
+  "demandUnits": [
+    "ft/s"
+  ],
   "fragilityCurves": [
     {
       "description": "legacy - ConditionalStandardFragilityCurve",

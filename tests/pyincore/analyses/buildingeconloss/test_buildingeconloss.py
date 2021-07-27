@@ -1,6 +1,6 @@
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 from pyincore.analyses.buildingeconloss.buildingeconloss import BuildingEconLoss
-import pyincore.globals as pyglobals
 
 
 def run_with_base_class():

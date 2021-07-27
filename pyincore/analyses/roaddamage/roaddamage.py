@@ -4,7 +4,6 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import collections
 import concurrent.futures
 from itertools import repeat
 
@@ -72,12 +71,15 @@ class RoadDamage(BaseAnalysis):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        (ds_results, damage_results) = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input, num_workers,
-                                                     inventory_args,
-                                                     repeat(hazard_type), repeat(hazard_dataset_id),
-                                                     repeat(use_hazard_uncertainty),
-                                                     repeat(geology_dataset_id), repeat(fragility_key),
-                                                     repeat(use_liquefaction))
+        (ds_results, damage_results) = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input,
+                                                                          num_workers,
+                                                                          inventory_args,
+                                                                          repeat(hazard_type),
+                                                                          repeat(hazard_dataset_id),
+                                                                          repeat(use_hazard_uncertainty),
+                                                                          repeat(geology_dataset_id),
+                                                                          repeat(fragility_key),
+                                                                          repeat(use_liquefaction))
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
         self.set_result_json_data("metadata",
@@ -134,7 +136,7 @@ class RoadDamage(BaseAnalysis):
         values_payload = []
         mapped_roads = []
         unmapped_roads = []
-        pgd_flag = True # for liquefaction
+        pgd_flag = True  # for liquefaction
         liquefaction_resp = None
 
         for road in roads:
@@ -204,9 +206,10 @@ class RoadDamage(BaseAnalysis):
                     liq_hval_dict = dict()
                     for j, d in enumerate(liquefaction_resp[i]["demands"]):
                         liq_hval_dict[d] = liq_hazard_vals[j]
-                    dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(liq_hval_dict,
-                                                                                                           inventory_type='road',
-                                                                                                           **road_args)
+                    dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
+                        liq_hval_dict,
+                        inventory_type='road',
+                        **road_args)
                 else:
                     demand_types_liq = None
                     demand_units_liq = None
@@ -218,8 +221,8 @@ class RoadDamage(BaseAnalysis):
                                  "seeing this please report the issue.")
 
             dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability,
-                                                                             hazard_type=hazard_type,
-                                                                             inventory_type="road")
+                                                                            hazard_type=hazard_type,
+                                                                            inventory_type="road")
             ds_result = dict()
             ds_result['guid'] = road['properties']['guid']
             ds_result.update(dmg_probability)

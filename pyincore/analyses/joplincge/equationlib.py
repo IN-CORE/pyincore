@@ -1,6 +1,7 @@
-from copy import deepcopy
-import pandas as pd
 import operator as op
+from copy import deepcopy
+
+import pandas as pd
 
 
 class VarContainer:

@@ -3,9 +3,9 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
-import pyincore.globals as pyglobals
 
 
 def run_with_base_class():

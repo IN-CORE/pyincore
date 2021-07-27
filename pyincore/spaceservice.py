@@ -15,6 +15,7 @@ class SpaceService:
         client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_space_url = urllib.parse.urljoin(client.service_url, "space/api/spaces/")

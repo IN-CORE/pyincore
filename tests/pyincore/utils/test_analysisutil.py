@@ -1,6 +1,6 @@
+import pytest
 
 from pyincore.utils.analysisutil import AnalysisUtil
-import pytest
 
 
 @pytest.mark.parametrize("hazard_vals, hazard_type, expected", [

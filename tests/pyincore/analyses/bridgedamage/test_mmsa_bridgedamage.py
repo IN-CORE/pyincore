@@ -1,6 +1,5 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.bridgedamage import BridgeDamage
-import pyincore.globals as pyglobals
 
 
 def run_with_base_class():

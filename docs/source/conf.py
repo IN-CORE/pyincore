@@ -37,7 +37,6 @@ version = '0.9.5'
 # The full version, including alpha/beta/rc tags
 release = '0.9.5'
 
-
 # -- General configuration ---------------------------------------------------
 
 # If your documentation.rst needs a minimal Sphinx version, state it here.
@@ -153,7 +152,6 @@ html_static_path = []
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pyincoredoc'
 
-
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
@@ -181,7 +179,6 @@ latex_documents = [
     (master_doc, 'pyincore.tex', 'pyincore Documentation',
      'ISDA NCSA', 'manual'),
 ]
-
 
 # -- Options for manual page output ------------------------------------------
 

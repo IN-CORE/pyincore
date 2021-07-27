@@ -1,8 +1,8 @@
 import time
 
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 from pyincore.analyses.buildingfunctionality.buildingfunctionality import BuildingFunctionality
-import pyincore.globals as pyglobals
 
 
 def run_with_base_class():

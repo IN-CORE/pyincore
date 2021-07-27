@@ -310,10 +310,10 @@ class HousingRecoverySequential(BaseAnalysis):
 
             if spin < self.__sv_generator[zone]['threshold']:
                 sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['below_lower'],
-                                                               self.__sv_generator[zone]['below_upper']), 3)
+                                                         self.__sv_generator[zone]['below_upper']), 3)
             else:
                 sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['above_lower'],
-                                                               self.__sv_generator[zone]['above_upper']), 3)
+                                                         self.__sv_generator[zone]['above_upper']), 3)
 
         return sv_scores
 

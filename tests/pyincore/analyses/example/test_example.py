@@ -1,10 +1,10 @@
-
 import os
+import traceback
 from pathlib import Path
+
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 from pyincore.analyses.example.exampleanalysis import ExampleAnalysis
-import traceback
-import pyincore.globals as pyglobals
 
 if __name__ == '__main__':
     cred = None

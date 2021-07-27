@@ -5,6 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import json
+
 from pyincore.models.standardfragilitycurve import StandardFragilityCurve
 
 
@@ -72,5 +73,3 @@ class RepairCurveSet:
             instance = cls(json.load(f))
 
         return instance
-
-

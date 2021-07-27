@@ -2,9 +2,9 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 from pyincore.analyses.housingunitallocation.housingunitallocation import HousingUnitAllocation
-import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
@@ -12,8 +12,8 @@ def run_with_base_class():
 
     # Joplin
     building_inv = "5f218e36114b783cb0b01833"
-    housing_unit_inv = "5df7ce61425e0b00092d0013" # 2ev3
-    address_point_inv = "5df7ce0d425e0b00092cffee" # 2ev2
+    housing_unit_inv = "5df7ce61425e0b00092d0013"  # 2ev3
+    address_point_inv = "5df7ce0d425e0b00092cffee"  # 2ev2
     result_name = "IN-CORE_2ev3_HUA"
 
     seed = 1238

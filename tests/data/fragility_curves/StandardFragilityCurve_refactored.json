@@ -1,7 +1,11 @@
 {
   "className": "FragilitySet",
-  "demandTypes": ["momentumFlux"],
-  "demandUnits": ["ft^3/s^2"],
+  "demandTypes": [
+    "momentumFlux"
+  ],
+  "demandUnits": [
+    "ft^3/s^2"
+  ],
   "fragilityCurves": [
     {
       "description": "legacy - StandardFragilityCurve",

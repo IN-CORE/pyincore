@@ -3,9 +3,9 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
-import pyincore.globals as pyglobals
 
 
 def test_pipeline_dmg_w_repair_rate():
@@ -39,7 +39,7 @@ def test_pipeline_dmg_w_repair_rate():
     test_pipeline_dmg_w_rr.set_parameter("hazard_id", hazard_id)
     test_pipeline_dmg_w_rr.set_parameter("liquefaction_fragility_key", "pgd")
     # test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", False)
-    test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", True) # toggle on and off to see liquefaction
+    test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", True)  # toggle on and off to see liquefaction
     test_pipeline_dmg_w_rr.set_parameter("num_cpu", 4)
     test_pipeline_dmg_w_rr.set_parameter("liquefaction_geology_dataset_id",
                                          liq_geology_dataset_id)

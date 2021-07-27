@@ -1,6 +1,6 @@
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.buildingdamage import BuildingDamage
-import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
@@ -112,8 +112,8 @@ def run_with_base_class():
     bldg_dmg.run_analysis()
 
     # joplin tornado with retrofit strategy
-    bldg_dataset_id = "5df7d0de425e0b00092d0082" # joplin building v6
-    retrofit_strategy_id = "6091d5a8daa06e14ee96d502" # plan 1
+    bldg_dataset_id = "5df7d0de425e0b00092d0082"  # joplin building v6
+    retrofit_strategy_id = "6091d5a8daa06e14ee96d502"  # plan 1
     # retrofit_strategy_id = "6091d5ffdaa06e14ee96d5ef" # plan 2
 
     bldg_dmg = BuildingDamage(client)
@@ -121,7 +121,7 @@ def run_with_base_class():
     bldg_dmg.load_remote_input_dataset("retrofit_strategy", retrofit_strategy_id)
 
     # lumberton building mapping (with equation)
-    mapping_id = "6091d9fbb53ed4646fd276ca" # 19 archetype with retrofit
+    mapping_id = "6091d9fbb53ed4646fd276ca"  # 19 archetype with retrofit
     # mapping_id = "60994a1906d63d5ded1d6dcc" # 19 archetype with retrofit new format mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
@@ -136,6 +136,7 @@ def run_with_base_class():
     bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
+
 
 if __name__ == '__main__':
     run_with_base_class()

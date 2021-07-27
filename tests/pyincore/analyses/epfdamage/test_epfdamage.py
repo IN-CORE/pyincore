@@ -1,6 +1,6 @@
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.epfdamage import EpfDamage
-import pyincore.globals as pyglobals
 
 
 def run_with_base_class():

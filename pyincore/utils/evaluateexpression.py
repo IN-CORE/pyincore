@@ -1,5 +1,4 @@
 import math
-import scipy
 
 INVALID_NAMES = ["exec", "func", "eval", "type", "isinstance", "getattr", "setattr", "repr",
                  "compile", "open"]

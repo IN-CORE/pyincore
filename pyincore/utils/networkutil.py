@@ -1,12 +1,13 @@
-import fiona
-import csv
 import copy
+import csv
 import uuid
-import networkx as nx
-import matplotlib.pyplot as plt
 
-from shapely.geometry import shape, LineString, Point, mapping
+import fiona
+import matplotlib.pyplot as plt
+import networkx as nx
 from fiona.crs import from_epsg
+from shapely.geometry import shape, LineString, Point, mapping
+
 
 class NetworkUtil:
     @staticmethod
@@ -99,7 +100,8 @@ class NetworkUtil:
         return True
 
     @staticmethod
-    def build_dataset_by_line(line_filename, line_id_field, fromnode_field, tonode_field, out_node_filename, out_graph_filename):
+    def build_dataset_by_line(line_filename, line_id_field, fromnode_field, tonode_field, out_node_filename,
+                              out_graph_filename):
         """
         create node dataset based on line shapefile and graph file
         graph should be in csv format
@@ -117,7 +119,7 @@ class NetworkUtil:
         # read line shapefile
         linefile = fiona.open(line_filename)
 
-        node_list =[]
+        node_list = []
         node_id_list = []
         graph_list = []
 

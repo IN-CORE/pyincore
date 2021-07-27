@@ -23,7 +23,7 @@ class ParametricFragilityCurve(FragilityCurve):
 
         super(ParametricFragilityCurve, self).__init__(curve_parameters)
 
-    def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0,  **kwargs):
+    def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         """
 
         Args:
@@ -37,7 +37,7 @@ class ParametricFragilityCurve(FragilityCurve):
         probability = float(0.0)
 
         if self.curve_type.lower() == "logit":
-            cumulate_term = 0 # X*theta'
+            cumulate_term = 0  # X*theta'
 
             for parameter_set in self.parameters:
                 name = parameter_set["name"].lower()
