@@ -60,7 +60,7 @@ analyses/example
 
 analyses/housingrecoveryserial
 ==============================
-..  autoclass:: housingrecoveryserial.housingrecoveryserial.HousingRecoverySerial
+..  autoclass:: housingrecoverysequential.housingrecoverysequential.HousingRecoverySequential
     :members:
 
 analyses/housingunitallocation
