@@ -16,6 +16,24 @@ from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 
 class ResidentialBuildingRecovery(BaseAnalysis):
     """
+    This analysis computes the recovery time needed for each residential building from any damage states to receive the
+    full restoration. Currently, supported hazards are tornadoes.
+
+    The methodology incorporates the multi-layer Monte Carlo simulation approach and determines the two-step recovery
+    time that includes delay and repair. The delay model was modified based on the REDi framework and calculated the
+    end-result outcomes resulted from delay impeding factors such as post-disaster inspection, insurance claim, and
+    government permit. The repair model followed the FEMA P-58 approach and was controlled by fragility functions.
+
+    The outputs of this analysis is a CSV file with time-stepping recovery probabilities at the building level.
+
+    Contributors
+        | Science: Wanting Lisa Wang, John W. van de Lindt
+        | Implementation: Wanting Lisa Wang, Gowtham Naraharisetty, and NCSA IN-CORE Dev Team
+
+    Related publications
+        Wang, Wanting Lisa, and John W. van de Lindt. "Quantitative Modeling of Residential Building Disaster Recovery
+        and Effects of Pre-and Post-event Policies." International Journal of Disaster Risk Reduction (2021): 102259.
+
     Args:
         incore_client (IncoreClient): Service authentication.
 

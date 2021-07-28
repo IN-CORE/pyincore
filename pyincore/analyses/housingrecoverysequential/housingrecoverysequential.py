@@ -23,12 +23,10 @@ class HousingRecoverySequential(BaseAnalysis):
     The output of the computation is the history of housing recovery changes for each household unit in CSV format.
 
     Contributors
-
-        Science: Elaina Sutley, Sara Hamideh
-        Implementation: Nathanael Rosenheim, Santiago Núñez-Corrales, and NCSA IN-CORE Dev Team
+        | Science: Elaina Sutley, Sara Hamideh
+        | Implementation: Nathanael Rosenheim, Santiago Núñez-Corrales, and NCSA IN-CORE Dev Team
 
     Related publications
-
         Sutley, E.J. and Hamideh, S., 2020. Postdisaster housing stages: a Markov chain approach to model sequences
         and duration based on social vulnerability. Risk Analysis, 40(12), pp.2675-2695.
 
