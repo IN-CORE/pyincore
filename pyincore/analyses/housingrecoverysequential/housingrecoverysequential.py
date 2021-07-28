@@ -11,25 +11,26 @@ import collections as cl
 
 
 class HousingRecoverySequential(BaseAnalysis):
-    """Household-level Housing Recovery Serial Analysis computes a probable sequence of housing recovery stages
-    per household unit after a disaster, considering its damage level of the home and neighborhood-level social
-    vulnerability. Given a transition probability matrix (TPM) for time t that represents the household-level housing
-    recovery process and household unit information, compute the sequence of stages a household unit undergoes from a
-    departing post-disaster state.
+    """
+    This analysis computes the series of household recovery states given a population
+    dislocation dataset, a transition probability matrix (TPM) and an initial state vector.
 
-    Reference article(s):
-        Sutley, E.J. and Hamideh, S., 2020. Postdisaster housing stages: a markov chain approach to model
-        sequences and duration based on social vulnerability. Risk Analysis, 40(12), pp.2675-2695.
+    The computation operates by segregating household units into five zones as a way of
+    assigning social vulnerability. Using this vulnerability in conjunction with the TPM
+    and the initial state vector, a Markov chain computation simulates most probable
+    states to generate a stage history of housing recovery changes for each household.
 
-    Scientific contributors:
-        Elaina Sutley, PhD (University of Kansas)
-        Sara Hamideh, PhD (Stony Brook University)
+    The output of the computation is the history of housing recovery changes for each household unit in CSV format.
 
-    Code contributors:
-        Nathanael Rosenheim, PhD (Texas A&M)
-        Santiago Nunez-Corrales (NSCA)
-        Chris Navarro (NCSA)
-        Jong Sung Lee (NCSA)
+    Contributors
+
+        Science: Elaina Sutley, Sara Hamideh
+        Implementation: Nathanael Rosenheim, Santiago Núñez-Corrales, and NCSA IN-CORE Dev Team
+
+    Related publications
+
+        Sutley, E.J. and Hamideh, S., 2020. Postdisaster housing stages: a Markov chain approach to model sequences
+        and duration based on social vulnerability. Risk Analysis, 40(12), pp.2675-2695.
 
     Args:
         incore_client (IncoreClient): Service authentication.
