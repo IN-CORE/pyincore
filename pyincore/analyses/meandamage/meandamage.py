@@ -103,8 +103,7 @@ class MeanDamage(BaseAnalysis):
 
         # read in file and parameters
         damage = self.get_input_dataset("damage").get_csv_reader()
-        damage_result = AnalysisUtil.get_csv_table_rows(damage,
-                                                        ignore_first_row=False)
+        damage_result = AnalysisUtil.get_csv_table_rows(damage, ignore_first_row=False)
 
         dmg_ratio_csv = self.get_input_dataset("dmg_ratios").get_csv_reader()
         dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(dmg_ratio_csv)
@@ -167,8 +166,9 @@ class MeanDamage(BaseAnalysis):
         """
         damage_interval_keys = self.get_parameter("damage_interval_keys")
 
-        if self.get_input_dataset("damage").data_type == "ergo:bridgeDamage" or self.get_input_dataset(
-                "damage").data_type == "ergo:bridgeDamageVer2":
+        data_type = self.get_input_dataset("damage").data_type
+
+        if ":bridgeDamage" in data_type:
             is_bridge = True
         else:
             is_bridge = False
@@ -187,7 +187,7 @@ class MeanDamage(BaseAnalysis):
         Args:
             dmg (obj): dmg analysis output for a single entry.
             dmg_ratio_tbl (list): dmg ratio table.
-            damage_interval_keys (list): damage interval keys, must be 4 and ranged in order
+            damage_interval_keys (list): damage interval keys
             is_bridge (bool): a boolean to indicate if the inventory type is bridge.
             Bridge has its own way of calculating mean damage
 
