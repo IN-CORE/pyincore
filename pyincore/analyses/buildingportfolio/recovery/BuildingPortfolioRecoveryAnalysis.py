@@ -586,16 +586,22 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         Args:
             res_buildings (int): Initial Damage State 1: Slight Damage.
             finance (int): Financing types, Can be a number from 1 to 5:
-                1: Insurance, 2: SBA Business Loan, 3: Private, 4: Savings, 5: Not covered.
+
+                1. Insurance
+                2. SBA Business Loan
+                3. Private
+                4. Savings
+                5. Not covered
 
         Returns:
             np.Array: Impeding. It takes into account each factor that alters the recovery time.
-                Each item in the temporary array represents:
-                impeding[0]: Initial Damage State
-                impeding[1]: Engineering Mobilization
-                impeding[2]: Insurance
-                impeding[3]: Contractor Mobilization
-                impeding[4]: Obtain permits
+            Each item in the temporary array represents:
+
+            1. impeding[0]: Initial Damage State
+            2. impeding[1]: Engineering Mobilization
+            3. impeding[2]: Insurance
+            4. impeding[3]: Contractor Mobilization
+            5. impeding[4]: Obtain permits
 
         """
         impeding = np.zeros(5)

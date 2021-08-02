@@ -239,12 +239,13 @@ class DataProcessUtil:
 
     @staticmethod
     def get_max_damage_state(dmg_result):
-        """
-        given damage result output decide the maximum damage state for each guid
-        Args:
-            dmg_result: damage result output, such as building damage, EPF damage and etc.
+        """Given damage result output decide the maximum damage state for each guid.
 
-        Returns: pandas dataframe that has column GUID and column max_state
+        Args:
+            dmg_result (pd.DataFrame): damage result output, such as building damage, EPF damage and etc.
+
+        Returns:
+            pd.DataFrame: Pandas dataframe that has column GUID and column max_state.
 
         """
         if all(column in dmg_result.columns for column in ['DS_0', 'DS_1', 'DS_2', 'DS_3']):

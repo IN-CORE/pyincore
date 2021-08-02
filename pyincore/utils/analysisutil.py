@@ -20,9 +20,7 @@ from pyincore.utils import evaluateexpression
 
 
 class AnalysisUtil:
-    """
-    Utility methods for analysis
-    """
+    """Utility methods for analysis"""
     DOCSTR_FORMAT = "$DESC$ \n\n" \
                     "Args: \n\t" \
                     "$ARGS$ " \
@@ -205,14 +203,16 @@ class AnalysisUtil:
     @staticmethod
     def determine_parallelism_locally(self, number_of_loops,
                                       user_defined_parallelism=0):
-        '''
-        Determine the parallelism on the current compute node
+        """Determine the parallelism on the current compute node.
+
         Args:
             number_of_loops: total number of loops will be executed on current compute node
             user_defined_parallelism: a customized parallelism specified by users
+
         Returns:
-            number_of_cpu: parallelism on current compute node
-        '''
+            int: parallelism on current compute node
+
+        """
 
         # gets the local cpu number
         number_of_cpu = os.cpu_count()
@@ -282,10 +282,10 @@ class AnalysisUtil:
         """
 
         Args:
-            specs: Json of the specs for each analysis
+            specs (dict): Json of the specs for each analysis
 
         Returns:
-            Google format docstrings to copy for the run() method of any analysis
+            str: Google format docstrings to copy for the run() method of any analysis
 
         """
         desc = specs['description']
@@ -325,10 +325,10 @@ class AnalysisUtil:
         """
 
         Args:
-            class_type(str): Example: <class 'int'>
+            class_type (str): Example: <class 'int'>
 
         Returns:
-            Text inside first single quotes of a string
+            str: Text inside first single quotes of a string
 
         """
 
@@ -341,11 +341,12 @@ class AnalysisUtil:
     @staticmethod
     def get_custom_types_str(types):
         """
+
         Args:
-            types: Can be string or List of strings
+            types (str, list): Can be string or List of strings
 
         Returns:
-            Formatted string with applicable datatypes used to generate docstrigns from specs
+            str: Formatted string with applicable datatypes used to generate docstrigns from specs
 
         """
         custom_types_str = 'Applicable dataset type(s): '
@@ -493,13 +494,15 @@ class AnalysisUtil:
         """
         This method should replace group_by_demand_type in the future. Fragility_sets is not list of dictionary (
         json) anymore but a list of FragilityCurveSet objects
-        Args:
-            inventories: dictionary of {id: intentory}
-            fragility_sets: fragility_sets
-            hazard_type: default to earthquake
-            is_building: if the inventory is builiding or not
 
-        Returns: dictionary of grouped inventory with { (demandunit, demandtype):[inventory ids] }
+        Args:
+            inventories (dict): dictionary of {id: intentory}
+            fragility_sets (dict): fragility_sets
+            hazard_type (str): default to earthquake
+            is_building (bool): if the inventory is building or not
+
+        Returns:
+            dict: dGrouped inventory with { (demandunit, demandtype):[inventory ids] }
 
         """
         grouped_inventory = dict()
@@ -524,11 +527,12 @@ class AnalysisUtil:
             tsunami, hurricane and hurricane windfields
 
         Args:
-            hazard_vals(list): List of hazard values returned by the service for a particular point
-            hazard_type(str): Type of the hazard
+            hazard_vals (list): List of hazard values returned by the service for a particular point
+            hazard_type (str): Type of the hazard
 
         Returns:
             str: If hazard is exposed or not. Can be one of 'yes', 'no', 'partial', 'error' or 'n/a'
+
         """
 
         # This method should handle other 'error' cases when service is able to handle exceptions by returning -9999/NaN

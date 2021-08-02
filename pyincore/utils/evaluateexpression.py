@@ -1,12 +1,20 @@
 import math
-import scipy
 
 INVALID_NAMES = ["exec", "func", "eval", "type", "isinstance", "getattr", "setattr", "repr",
                  "compile", "open"]
 
 
 def evaluate(expression: str, parameters: dict = {}):
-    """Evaluate a math expression."""
+    """Evaluate a math expression.
+
+        Args:
+            expression (str):  Math expression.
+            parameters (dict): Expression parameters.
+
+        Returns:
+            float: A result of expression evaluation.
+
+        """
     # Compile the expression
     code = compile(expression, "<string>", "eval")
 
