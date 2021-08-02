@@ -169,8 +169,9 @@ class MonteCarloFailureProbability(BaseAnalysis):
             *args: All the arguments in order to pass into parameter function_name.
 
         Returns:
-            fs_output (list): A list of dictionary with id/guid and failure state for N samples
-            fp_output (list): A list dictionary with failure probability and other data/metadata.
+            list: A list of dictionary with id/guid and failure state for N samples.
+            list: A list dictionary with failure probability and other data/metadata.
+
         """
         fs_output = []
         fp_output = []
@@ -188,7 +189,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
         """Run analysis for monte carlo failure probability calculation
 
         Args:
-            damage (obj): output of building/bridge/waterfacility/epn damage that has damage interval
+            damage (obj): An output of building/bridge/waterfacility/epn damage that has damage interval.
             seed_list (list): Random number generator seed per building for reproducibility.
 
         Returns:
@@ -220,16 +221,16 @@ class MonteCarloFailureProbability(BaseAnalysis):
         """Calculates building damage results for a single building.
 
         Args:
-            dmg (obj): dmg analysis output for a single entry.
-            damage_interval_keys (list): list of the name of the damage intervals
-            failure_state_keys (list): list of the name of the damage state that is considered as failed
-            num_samples (int): number of samples for mc simulation
+            dmg (obj): Damage analysis output for a single entry.
+            damage_interval_keys (list): A list of the name of the damage intervals.
+            failure_state_keys (list): A list of the name of the damage state that is considered as failed.
+            num_samples (int): Number of samples for mc simulation.
             seed (int): Random number generator seed for reproducibility.
 
         Returns:
-            fs_result: A dictionary with id/guid and failure state for N samples
-            fp_result: A dictionary with failure probability and other data/metadata.
-            samples_result: A dictionary with id/guid and damage states for N samples
+            dict: A dictionary with id/guid and failure state for N samples
+            dict: A dictionary with failure probability and other data/metadata.
+            dict: A dictionary with id/guid and damage states for N samples
 
         """
         # failure state
@@ -266,14 +267,16 @@ class MonteCarloFailureProbability(BaseAnalysis):
 
     def sample_damage_interval(self, dmg, damage_interval_keys, num_samples, seed):
         """
-        Dylan Sanderson code to calculate the monte carlo simulations of damage state
+        Dylan Sanderson code to calculate the Monte Carlo simulations of damage state.
+
         Args:
-            dmg (dict): damage results that contains dmg interval values
-            damage_interval_keys (list): keys of the damage states
-            num_samples (int): number of simulation
+            dmg (dict): Damage results that contains dmg interval values.
+            damage_interval_keys (list): Keys of the damage states.
+            num_samples (int): Number of simulation.
             seed (int): Random number generator seed for reproducibility.
 
-        Returns: {sample_n: dmg_state} in dictionary format
+        Returns:
+            dict: A dictionary of damage states.
 
         """
         ds = {}
@@ -298,14 +301,15 @@ class MonteCarloFailureProbability(BaseAnalysis):
 
     def calc_probability_failure_value(self, ds_sample, failure_state_keys):
         """
-        Lisa Wang's approach to calculate a single value of failure probability
+        Lisa Wang's approach to calculate a single value of failure probability.
+
         Args:
-            ds_sample (dict): dictionary of { sample_n: dmg_state }
-            failure_state_keys (list): damage state keys that considered as failure
+            ds_sample (dict): A dictionary of damage states.
+            failure_state_keys (list): Damage state keys that considered as failure.
 
         Returns:
-            failure state on each sample 0 (failed), 1 (not failed)
-            failure probability (0 - 1)
+            float: Failure state on each sample 0 (failed), 1 (not failed).
+            float: Failure probability (0 - 1).
 
         """
         count = 0

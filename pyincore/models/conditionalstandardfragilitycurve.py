@@ -14,7 +14,7 @@ from pyincore.models.fragilitycurve import FragilityCurve
 
 class ConditionalStandardFragilityCurve(FragilityCurve):
     """
-    class to represent conditional standard fragility curve
+    A class to represent conditional standard fragility curve.
     """
 
     def __init__(self, curve_parameters):
@@ -27,14 +27,15 @@ class ConditionalStandardFragilityCurve(FragilityCurve):
         super(ConditionalStandardFragilityCurve, self).__init__(curve_parameters)
 
     def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
-        """
-            Computes limit state probabilities.
-            Args:
-                hazard: hazard value to compute probability for
-                period: building period default to 0
-                std_dev: standard deviation
+        """Computes limit state probabilities.
 
-            Returns: limit state probability
+        Args:
+            hazard (float): A hazard value to compute probability for.
+            period (float): A building period default to 0.
+            std_dev (float): A standard deviation.
+
+        Returns:
+            float: A limit state probability.
 
         """
         probability = float(0.0)
@@ -58,14 +59,14 @@ class ConditionalStandardFragilityCurve(FragilityCurve):
 
     @staticmethod
     def _fragility_curve_rules_match(rules, value):
-        """
-        given value and rules; decide which index to use
+        """Given value and rules; decide which index to use.
+
         Args:
-            rules: index: ["rule1", "rule2"...]
-            value: value to be evaluated against
+            rules (dict): Index: ["rule1", "rule2"...].
+            value (float): A value to be evaluated against.
 
         Returns:
-            index (which used to decide which pair of alpha and beta to use)
+            int: index (which used to decide which pair of alpha and beta to use)
         """
 
         # add more operators if needed

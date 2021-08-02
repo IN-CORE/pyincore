@@ -78,12 +78,7 @@ class HousingRecoverySequential(BaseAnalysis):
         super(HousingRecoverySequential, self).__init__(incore_client)
 
     def run(self):
-        """Execute the HHRS analysis using parameters and input data.
-
-        Returns:
-            None
-
-        """
+        """Execute the HHRS analysis using parameters and input data."""
         # Read parameters
         t_delta = self.get_parameter('t_delta')
         t_final = self.get_parameter('t_final')
@@ -124,15 +119,14 @@ class HousingRecoverySequential(BaseAnalysis):
         self.housing_serial_recovery_model(t_delta, t_final, tpm, initial_prob, households_df)
 
     def housing_serial_recovery_model(self, t_delta, t_final, tpm, initial_prob, households_df):
-        """
-        Performs the computation of the model as indicated in Sutley and Hamide (2020)
+        """Performs the computation of the model as indicated in Sutley and Hamide (2020).
+
         Args:
             t_delta (float): Time step size.
             t_final (float): Final time.
             tpm (np.Array): Transition probability matrix.
             initial_prob (pd.DataFrame): Initial probability Markov vector.
             households_df (pd.DataFrame): Households with population dislocation data.
-        Returns:
 
         """
         seed = self.get_parameter('seed')
@@ -280,6 +274,7 @@ class HousingRecoverySequential(BaseAnalysis):
 
         Returns:
             pd.DataFrame: Social vulnerability score.
+
         """
         zone_map = {0: 'Z5', 1: 'Z4', 2: 'Z3', 3: 'Z2', 4: 'Z1', np.nan: 'missing'}
 
@@ -299,6 +294,7 @@ class HousingRecoverySequential(BaseAnalysis):
 
         Returns:
             pd.Series: social vulnerability scores.
+
         """
         # Social vulnerability zone generator: this generalizes the code in the first version
         sv_scores = np.zeros(num_households)
@@ -328,8 +324,10 @@ class HousingRecoverySequential(BaseAnalysis):
             household (int): Index of the household.
             lower (int): Lower index to check past history.
             upper (int): Upper index to check past history.
+
         Returns:
-            integer: Number of regressions between a given time window.
+            int: Number of regressions between a given time window.
+
         """
         regressions = 0
 
