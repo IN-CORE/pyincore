@@ -139,6 +139,7 @@ class IncoreClient(Client):
     Args:
         service_url (str): Service url.
         token_file_name (str): Path to file containing the authorization token.
+
     """
 
     def __init__(self, service_url: str = None, token_file_name: str = None):
@@ -188,10 +189,11 @@ class IncoreClient(Client):
         exit(0)
 
     def store_authorization_in_file(self, authorization: str):
-        """
-        Store the access token in local file. If the file does not exist, this function creates it.
-        :param authorization: authorization in the format "bearer access_token"
-        :return: None
+        """Store the access token in local file. If the file does not exist, this function creates it.
+
+        Args:
+            authorization (str): An authorization in the format "bearer access_token".
+
         """
         try:
             with open(self.token_file, 'w') as f:
@@ -200,9 +202,12 @@ class IncoreClient(Client):
             logger.warning(e)
 
     def retrieve_token_from_file(self):
-        """
-        Attempts to retrieve authorization from a local file, if it exists.
-        :return: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
+        """Attempts to retrieve authorization from a local file, if it exists.
+
+        Returns:
+            None if token file does not exist
+            dict: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
+
         """
         if not os.path.isfile(self.token_file):
             return None
@@ -312,6 +317,7 @@ class InsecureIncoreClient(Client):
         Args:
             service_url (str): Service url.
             username (str): Username string.
+
         """
 
     def __init__(self, service_url: str = None, username: str = None):
