@@ -29,6 +29,7 @@ class FragilityCurveSet:
     Raises:
         ValueError: Raised if there are unsupported number of fragility curves
         or if missing a key curve field.
+
     """
 
     def __init__(self, metadata):
@@ -112,14 +113,16 @@ class FragilityCurveSet:
 
     @deprecated(version="0.9.0", reason="use calculate_limit_state_w_conversion instead")
     def calculate_limit_state(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
-        """
-            Computes limit state probabilities.
-            Args:
-                hazard: hazard value to compute probability for
-                period: period of the structure, if applicable
-                std_dev: standard deviation
+        """Computes limit state probabilities.
 
-            Returns: limit state probabilities
+        Args:
+            hazard (float): A hazard value to compute probability for.
+            period (float): A period of the structure, if applicable.
+            std_dev (float): A standard deviation.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            OrderedDict: Limit state probabilities.
 
         """
         output = collections.OrderedDict()
@@ -143,14 +146,16 @@ class FragilityCurveSet:
 
     @deprecated(version="0.9.0", reason="use calculate_limit_state_refactored_w_conversion instead")
     def calculate_limit_state_refactored(self, hazard_values: dict = {}, **kwargs):
+        """WIP computation of limit state probabilities accounting for custom expressions.
+
+        Args:
+            hazard_values (dict): A dictionary with hazard values to compute probability.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            OrderedDict: Limit state probabilities.
+
         """
-                WIP computation of limit state probabilities accounting for custom expressions.
-                :param std_dev: standard deviation
-                :param hazard_values: dictionary with hazard values to compute probability
-
-                Returns: limit state probabilities
-                """
-
         output = collections.OrderedDict()
         index = 0
 
@@ -175,13 +180,16 @@ class FragilityCurveSet:
     def calculate_limit_state_refactored_w_conversion(self, hazard_values: dict = {},
                                                       inventory_type: str = "building",
                                                       **kwargs):
-        """
-        WIP computation of limit state probabilities accounting for custom expressions.
-        :param std_dev: standard deviation
-        :param hazard_values: dictionary with hazard values to compute probability
-        :param inventory_type: type of inventory
+        """WIP computation of limit state probabilities accounting for custom expressions.
 
-        Returns: limit state probabilities
+        Args:
+            hazard_values (dict): A dictionary with hazard values to compute probability.
+            inventory_type (str): An inventory type.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            OrderedDict: Limit state probabilities.
+
         """
         output = FragilityCurveSet._initialize_limit_states(inventory_type)
         limit_state = list(output.keys())
@@ -201,11 +209,13 @@ class FragilityCurveSet:
 
     @deprecated(version="0.9.0", reason="use calculate_custom_limit_state_w_conversion instead")
     def calculate_custom_limit_state(self, variables: dict):
-        """
-            Computes limit state probabilities.
-            Args:
+        """Computes limit state probabilities.
 
-            Returns: limit state probabilities for custom expression fragilities
+        Args:
+            variables (dict): A dictionary of variables.
+
+        Returns:
+            OrderedDict: Limit state probabilities for custom expression fragilities.
 
         """
         output = collections.OrderedDict()
@@ -229,16 +239,16 @@ class FragilityCurveSet:
 
     def calculate_limit_state_w_conversion(self, hazard, period: float = 0.0, std_dev: float = 0.0,
                                            inventory_type: str = "building", **kwargs):
-        """
-            Computes limit state probabilities.
-            Args:
-                hazard (float): hazard value to compute probability for
-                period (float): period of the structure, if applicable
-                std_dev (float): standard deviation
-                inventory_type (str): type of inventory
+        """Computes limit state probabilities.
+
+        Args:
+            hazard (float): Hazard value to compute probability for.
+            period (float): Period of the structure, if applicable.
+            std_dev (float): Standard deviation.
+            inventory_type (str): A type of inventory.
 
             Returns:
-                dict: limit state probabilities
+                dict: Limit state probabilities.
 
         """
         output = FragilityCurveSet._initialize_limit_states(inventory_type)
@@ -256,11 +266,14 @@ class FragilityCurveSet:
         return output
 
     def calculate_custom_limit_state_w_conversion(self, variables: dict, inventory_type: str = "building"):
-        """
-            Computes limit state probabilities.
-            Args:
+        """Computes limit state probabilities.
 
-            Returns: limit state probabilities for custom expression fragilities
+        Args:
+            variables (dict): A dictionary of variables.
+            inventory_type (str): A type of inventory.
+
+        Returns:
+            dict: Limit state probabilities for custom expression fragilities.
 
         """
         output = FragilityCurveSet._initialize_limit_states(inventory_type)
@@ -279,13 +292,15 @@ class FragilityCurveSet:
 
     def calculate_damage_interval(self, damage, hazard_type="earthquake", inventory_type: str = "building"):
         """"
+
         Args:
-            damage: list of limit states
-            hazard_type: string describing the hazard being evaluated
-            inventory_type: string describing the type of element being evaluated
+            damage (list): A list of limit states.
+            hazard_type (str): A string describing the hazard being evaluated.
+            inventory_type (str): A string describing the type of element being evaluated.
 
         Returns:
             list: LS-to-DS mapping
+
         """
         # Organize conceptually per LS-to-DS mapping , then by event, then by structure and by count
         # This may help keep track of scientific requirements also.
@@ -326,6 +341,15 @@ class FragilityCurveSet:
         return ls_ds_dspatcher[hazard_type, inventory_type, len(self.fragility_curves)](damage)
 
     def construct_expression_args_from_inventory(self, inventory_unit: dict):
+        """"
+
+        Args:
+            inventory_unit (dict): An inventory set.
+
+        Returns:
+            dict: Function parameters.
+
+        """
         kwargs_dict = {}
         for parameters in self.fragility_curve_parameters:
 
@@ -358,6 +382,15 @@ class FragilityCurveSet:
 
     @staticmethod
     def _3ls_to_4ds(limit_states):
+        """"
+
+        Args:
+            limit_states (dict): Limit states.
+
+        Returns:
+            dict: Damage states.
+
+        """
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
         damage_states = AnalysisUtil.float_dict_to_decimal({"DS_0": 0.0, "DS_1": 0.0, "DS_2": 0.0, "DS_3": 0.0})
 
@@ -381,6 +414,15 @@ class FragilityCurveSet:
 
     @staticmethod
     def _4ls_to_5ds(limit_states):
+        """"
+
+        Args:
+            limit_states (dict): Limit states.
+
+        Returns:
+            dict: Damage states.
+
+        """
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
         damage_states = AnalysisUtil.float_dict_to_decimal({"DS_0": 0.0, "DS_1": 0.0, "DS_2": 0.0, "DS_3": 0.0,
                                                             "DS_4": 0.0})
@@ -407,6 +449,15 @@ class FragilityCurveSet:
 
     @staticmethod
     def _1ls_to_4ds(limit_states):
+        """"
+
+        Args:
+            limit_states (dict): Limit states.
+
+        Returns:
+            dict: Damage states.
+
+        """
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
         damage_states = dict()
         damage_states['DS_0'] = 1 - limit_states["LS_0"]
@@ -418,6 +469,15 @@ class FragilityCurveSet:
 
     @staticmethod
     def _1ls_to_5ds(limit_states):
+        """"
+
+        Args:
+            limit_states (dict): Limit states.
+
+        Returns:
+            dict: Damage states.
+
+        """
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
         damage_states = dict()
         damage_states['DS_0'] = 1 - limit_states["LS_0"]
@@ -443,6 +503,17 @@ class FragilityCurveSet:
 
     @staticmethod
     def adjust_for_small_overlap(small_overlap, limit_states, damage_states):
+        """"
+
+        Args:
+            small_overlap (obj): Overlap.
+            limit_states (dict): Limit states.
+            damage_states (dict): Damage states.
+
+        Returns:
+            list: Damage states overlap.
+
+        """
         ls_overlap = list(limit_states.values())
         ds_overlap = [0.0] * len(damage_states)
         for index in range(len(damage_states)):
@@ -470,6 +541,15 @@ class FragilityCurveSet:
 
     @staticmethod
     def _initialize_limit_states(inventory_type):
+        """"
+
+        Args:
+            inventory_type (str): Inventory type..
+
+        Returns:
+            dict: Limit states..
+
+        """
         if inventory_type == "building":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
         elif inventory_type == "pipeline":

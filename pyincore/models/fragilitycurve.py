@@ -7,21 +7,23 @@
 
 class FragilityCurve:
     """
-    abstract class for fragility curves.
+    Abstract class for fragility curves.
     """
 
     def __init__(self, curve_parameters):
         self.description = curve_parameters['description']
 
     def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
-        """
-            Computes limit state probabilities.
-            Args:
-                hazard: hazard value to compute probability for
-                period: building period default to 0
-                std_dev: standard deviation
+        """Computes limit state probabilities.
 
-            Returns: limit state probability
+        Args:
+            hazard (float): A hazard value.
+            period (float): A period value.
+            std_dev (float): A standard deviation.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            float: Limit state probability.
 
         """
         probability = float(0.0)
@@ -33,7 +35,6 @@ class FragilityCurve:
         Args:
             liquefaction (str): Liquefaction type.
 
-        Returns:
         """
         raise NotImplementedError("This function is currently only applied to Standard Fragility Curve, "
                                   "and Period Standard Fragility Curve")
@@ -53,10 +54,13 @@ class FragilityCurve:
 
     def compute_custom_limit_state_probability(self, variables: dict):
         """Computes custom limit state probabilities.
-            Args:
-                variables: variables to set
 
-            Returns: limit state probability
+        Args:
+            variables (dict): Variables to set.
+
+        Returns:
+            float: Limit state probability.
+
         """
         probability = float(0.0)
         return probability

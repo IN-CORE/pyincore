@@ -29,6 +29,7 @@ class CustomExpressionFragilityCurve(FragilityCurve):
 
         Raises:
             ValueError: If this limit state calculation method is not supported.
+
         """
         raise ValueError("Custom Expression Fragility Curve does not support this limit state calculation method. "
                          "Please use compute_custom_limit_state_probability(variables) instead!")
