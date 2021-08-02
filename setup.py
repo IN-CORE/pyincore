@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyincore',
-    version='0.9.4',
+    version='0.9.5',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     package_data={
@@ -26,7 +26,7 @@ setup(
     # TODO need to figure out what are the dependency requirements
     # TODO this is a hack, really should only be packages needed to run
     install_requires=[line.strip() for line in open("requirements.txt").readlines()],
-    python_requires=">=3.6, <=3.8",
+    python_requires=">=3.6, <3.9",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",

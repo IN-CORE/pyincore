@@ -18,7 +18,7 @@ def run_with_base_class():
 
     # Load fragility mapping
     fragility_service = FragilityService(client)
-    mapping_set = MappingSet(fragility_service.get_mapping("60b124e01f2b7d4a916ba456")) # new format fragility curves
+    mapping_set = MappingSet(fragility_service.get_mapping("60b124e01f2b7d4a916ba456"))  # new format fragility curves
     # mapping_set = MappingSet(fragility_service.get_mapping("5ef11888da15730b13b84353")) # legacy fragility curves
     pipeline_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 

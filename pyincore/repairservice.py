@@ -18,16 +18,17 @@ class RepairService(Dfr3Service):
         client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, client: IncoreClient):
         self.client = client
         self.base_dfr3_url = urllib.parse.urljoin(client.service_url,
-            'dfr3/api/repairs/')
+                                                  'dfr3/api/repairs/')
 
         super(RepairService, self).__init__(client)
 
     def get_dfr3_sets(self, hazard_type: str = None, inventory_type: str = None,
-                           author: str = None, creator: str = None, space: str = None,
-                           skip: int = None, limit: int = None):
+                      author: str = None, creator: str = None, space: str = None,
+                      skip: int = None, limit: int = None):
         """Get the set of repair data, curves.
 
         Args:

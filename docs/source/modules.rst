@@ -58,9 +58,9 @@ analyses/example
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
     :members:
 
-analyses/housingrecoveryserial
+analyses/housingrecoverysequential
 ==============================
-..  autoclass:: housingrecoveryserial.housingrecoveryserial.HousingRecoverySerial
+..  autoclass:: housingrecoverysequential.housingrecoverysequential.HousingRecoverySequential
     :members:
 
 analyses/housingunitallocation

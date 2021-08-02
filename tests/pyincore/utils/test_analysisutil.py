@@ -1,4 +1,3 @@
-
 from pyincore.utils.analysisutil import AnalysisUtil
 import pytest
 

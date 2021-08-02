@@ -35,5 +35,5 @@ from pyincore.networkdata import NetworkData
 from pyincore.networkdataset import NetworkDataset
 from pyincore.baseanalysis import BaseAnalysis
 import pyincore.globals
-__version__ = pyincore.globals.PACKAGE_VERSION
 
+__version__ = pyincore.globals.PACKAGE_VERSION

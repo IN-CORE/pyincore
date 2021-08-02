@@ -1,7 +1,7 @@
 class BuildingData:
     def __init__(self, tract_id, lon, lat, structural, code_level, epsa_node_id, pwsa_node_id, tep_id, build_id_x,
                  epsa_id, pwsa_id, finance, ep_pw_id, occupation_code):
-        self.tract_id= tract_id
+        self.tract_id = tract_id
         self.lon = lon
         self.lat = lat
         self.structural = structural
@@ -15,4 +15,3 @@ class BuildingData:
         self.finance = finance
         self.ep_pw_id = ep_pw_id
         self.occupation_code = occupation_code
-

@@ -79,15 +79,27 @@ class MonteCarloFailureProbability(BaseAnalysis):
                     'id': 'damage',
                     'required': True,
                     'description': 'damage result that has damage intervals in it',
-                    'type': ['ergo:buildingDamageVer4', 'ergo:buildingDamageVer5', 'ergo:buildingDamageVer6'
-                             'ergo:nsBuildingInventoryDamage', 'ergo:nsBuildingInventoryDamageVer2',
-                             'ergo:nsBuildingInventoryDamageVer3'
-                             'ergo:bridgeDamage', 'ergo:bridgeDamageVer2', 'ergo:bridgeDamageVer3'
-                             'ergo:waterFacilityDamageVer4', 'ergo:waterFacilityDamageVer5',
-                             'ergo:waterFacilityDamageVer6'
-                             'ergo:roadDamage', 'ergo:roadDamageVer2', 'ergo:roadDamageVer3',
-                             'incore:epfDamage', 'incore:epfDamageVer2', 'incore:epfDamageVer3'
-                             'incore:pipelineDamage', 'incore:pipelineDamageVer2', 'incore:pipelineDamageVer3']
+                    'type': ['ergo:buildingDamageVer4',
+                             'ergo:buildingDamageVer5',
+                             'ergo:buildingDamageVer6',
+                             'ergo:nsBuildingInventoryDamage',
+                             'ergo:nsBuildingInventoryDamageVer2',
+                             'ergo:nsBuildingInventoryDamageVer3',
+                             'ergo:bridgeDamage',
+                             'ergo:bridgeDamageVer2',
+                             'ergo:bridgeDamageVer3',
+                             'ergo:waterFacilityDamageVer4',
+                             'ergo:waterFacilityDamageVer5',
+                             'ergo:waterFacilityDamageVer6',
+                             'ergo:roadDamage',
+                             'ergo:roadDamageVer2',
+                             'ergo:roadDamageVer3',
+                             'incore:epfDamage',
+                             'incore:epfDamageVer2',
+                             'incore:epfDamageVer3',
+                             'incore:pipelineDamage',
+                             'incore:pipelineDamageVer2',
+                             'incore:pipelineDamageVer3']
                 },
 
             ],
@@ -139,13 +151,13 @@ class MonteCarloFailureProbability(BaseAnalysis):
             while count < len(inventory_list):
                 inventory_args.append(
                     inventory_list[count:count + avg_bulk_input_size])
-                seed_list.append([seed + i for i in range(count - 1, count+avg_bulk_input_size - 1)])
+                seed_list.append([seed + i for i in range(count - 1, count + avg_bulk_input_size - 1)])
                 count += avg_bulk_input_size
         else:
             while count < len(inventory_list):
                 inventory_args.append(
                     inventory_list[count:count + avg_bulk_input_size])
-                seed_list.append([None for i in range(count - 1, count+avg_bulk_input_size - 1)])
+                seed_list.append([None for i in range(count - 1, count + avg_bulk_input_size - 1)])
                 count += avg_bulk_input_size
 
         fs_results, fp_results, samples_results = self.monte_carlo_failure_probability_concurrent_future(
@@ -208,7 +220,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
         i = 0
         for dmg in damage:
             fs, fp, samples_result = self.monte_carlo_failure_probability(dmg, damage_interval_keys, failure_state_keys,
-                                                          num_samples, seed_list[i])
+                                                                          num_samples, seed_list[i])
             fs_result.append(fs)
             fp_result.append(fp)
             samples_output.append(samples_result)

@@ -20,12 +20,6 @@ class MeanDamage(BaseAnalysis):
         super(MeanDamage, self).__init__(incore_client)
 
     def get_spec(self):
-        """Get specifications of the mean damage calculation.
-
-        Returns:
-            obj: A JSON object of specifications of the mean damage calculation.
-
-        """
         return {
             'name': 'mean-damage',
             'description': 'calculate the mean and expected damage using damage ratio table',
@@ -54,15 +48,27 @@ class MeanDamage(BaseAnalysis):
                     'id': 'damage',
                     'required': True,
                     'description': 'damage result that has damage intervals in it',
-                    'type': ['ergo:buildingDamageVer4', 'ergo:buildingDamageVer5', 'ergo:buildingDamageVer6'
-                             'ergo:nsBuildingInventoryDamage', 'ergo:nsBuildingInventoryDamageVer2',
-                             'ergo:nsBuildingInventoryDamageVer3'
-                             'ergo:bridgeDamage', 'ergo:bridgeDamageVer2', 'ergo:bridgeDamageVer3'
-                             'ergo:waterFacilityDamageVer4', 'ergo:waterFacilityDamageVer5',
-                             'ergo:waterFacilityDamageVer6'
-                             'ergo:roadDamage', 'ergo:roadDamageVer2', 'ergo:roadDamageVer3',
-                             'incore:epfDamage', 'incore:epfDamageVer2', 'incore:epfDamageVer3'
-                             'incore:pipelineDamage', 'incore:pipelineDamageVer2', 'incore:pipelineDamageVer3']
+                    'type': ['ergo:buildingDamageVer4',
+                             'ergo:buildingDamageVer5',
+                             'ergo:buildingDamageVer6',
+                             'ergo:nsBuildingInventoryDamage',
+                             'ergo:nsBuildingInventoryDamageVer2',
+                             'ergo:nsBuildingInventoryDamageVer3',
+                             'ergo:bridgeDamage',
+                             'ergo:bridgeDamageVer2',
+                             'ergo:bridgeDamageVer3',
+                             'ergo:waterFacilityDamageVer4',
+                             'ergo:waterFacilityDamageVer5',
+                             'ergo:waterFacilityDamageVer6',
+                             'ergo:roadDamage',
+                             'ergo:roadDamageVer2',
+                             'ergo:roadDamageVer3',
+                             'incore:epfDamage',
+                             'incore:epfDamageVer2',
+                             'incore:epfDamageVer3',
+                             'incore:pipelineDamage',
+                             'incore:pipelineDamageVer2',
+                             'incore:pipelineDamageVer3']
                 },
                 {
                     'id': 'dmg_ratios',
@@ -85,6 +91,12 @@ class MeanDamage(BaseAnalysis):
                 }
             ]
         }
+        """Get specifications of the mean damage calculation.
+
+        Returns:
+            obj: A JSON object of specifications of the mean damage calculation.
+
+        """
 
     def run(self):
         """Executes mean damage calculation."""

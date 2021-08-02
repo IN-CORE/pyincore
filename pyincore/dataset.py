@@ -18,6 +18,7 @@ import rasterio
 import wntr
 import warnings
 from pyincore import DataService
+
 warnings.filterwarnings("ignore", "", UserWarning)
 
 
@@ -28,6 +29,7 @@ class Dataset:
         metadata (dict): Dataset metadata.
 
     """
+
     def __init__(self, metadata):
         self.metadata = metadata
 
@@ -331,6 +333,7 @@ class DamageRatioDataset:
         filename (str): CSV file with damage ratios.
 
     """
+
     def __init__(self, filename):
         self.damage_ratio = None
         csvfile = open(filename, 'r')
@@ -347,6 +350,7 @@ class InventoryDataset:
         filename (str): file with GIS layers.
 
     """
+
     def __init__(self, filename):
         self.inventory_set = None
         if os.path.isdir(filename):

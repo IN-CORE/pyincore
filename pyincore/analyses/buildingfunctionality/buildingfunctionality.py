@@ -22,6 +22,7 @@ class BuildingFunctionality(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, incore_client):
         super().__init__(incore_client)
 
@@ -89,14 +90,16 @@ class BuildingFunctionality(BaseAnalysis):
 
         # enable index on "guid" column
         buildings_df = self.get_input_dataset("building_damage_mcs_samples").get_dataframe_from_csv().set_index("guid")
-        substations_df = self.get_input_dataset("substations_damage_mcs_samples").get_dataframe_from_csv().set_index("guid")
+        substations_df = self.get_input_dataset("substations_damage_mcs_samples").get_dataframe_from_csv().set_index(
+            "guid")
         poles_df = self.get_input_dataset("poles_damage_mcs_samples").get_dataframe_from_csv().set_index("guid")
 
         functionality_probabilities = []
         functionality_samples = []
         for building_guid in buildings_df.index:
-            building_guid, sample, probability = self.functionality(building_guid, buildings_df, substations_df, poles_df,
-                                                               interdependency_dict)
+            building_guid, sample, probability = self.functionality(building_guid, buildings_df, substations_df,
+                                                                    poles_df,
+                                                                    interdependency_dict)
             functionality_probabilities.append([building_guid, probability])
             functionality_samples.append([building_guid, sample])
 
@@ -137,16 +140,15 @@ class BuildingFunctionality(BaseAnalysis):
             substations_mc_samples = substations.loc[interdependency[building_guid]["substations_guid"]]
             poles_mc_samples = poles.loc[interdependency[building_guid]["poles_guid"]]
 
-
             building_list = []
             try:
-                #building_list = list(building_mc_samples.iloc[0])[1].split(",")
+                # building_list = list(building_mc_samples.iloc[0])[1].split(",")
                 building_list = building_mc_samples["failure"].split(",")
             except IndexError:
                 print("error with buildings")
                 print(building_mc_samples)
                 return {building_guid: -1}
-            
+
             substation_list = []
             try:
                 substation_list = substations_mc_samples["failure"].split(",")
@@ -154,7 +156,7 @@ class BuildingFunctionality(BaseAnalysis):
                 print("error with substations")
                 print(interdependency[building_guid]["substations_guid"])
                 return {building_guid: -1}
-            
+
             pole_list = []
             try:
                 pole_list = poles_mc_samples["failure"].split(",")
@@ -170,7 +172,7 @@ class BuildingFunctionality(BaseAnalysis):
             num_samples = len(functionality_samples)
             probability = 0.0
             if functionality_sum > 0:
-                probability = (functionality_sum/num_samples)
+                probability = (functionality_sum / num_samples)
             return building_guid, ",".join([str(sample) for sample in functionality_samples]), probability
 
         else:

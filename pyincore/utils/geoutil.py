@@ -17,11 +17,12 @@ import fiona
 import uuid
 import copy
 
-logging.basicConfig(stream = sys.stderr, level = logging.INFO)
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 
 class GeoUtil:
     """Utility methods for georeferenced data."""
+
     @staticmethod
     def get_location(feature):
         """Location of the object.
@@ -89,9 +90,9 @@ class GeoUtil:
 
         with fiona.open(
                 filename, 'w',
-                crs = source.crs,
-                driver = source.driver,
-                schema = new_schema,
+                crs=source.crs,
+                driver=source.driver,
+                schema=new_schema,
         ) as sink:
             for f in source:
                 try:
@@ -144,7 +145,7 @@ class GeoUtil:
             decimal = 'NA'
         else:
             degree = str(int(degree))
-            decimal = int(degree[:-6]) + int(degree[-6:-4])/60 + (int(degree[-4:-2]) + int(degree[-2:])/100)/3600
+            decimal = int(degree[:-6]) + int(degree[-6:-4]) / 60 + (int(degree[-4:-2]) + int(degree[-2:]) / 100) / 3600
 
         return decimal
 
@@ -163,9 +164,12 @@ class GeoUtil:
         dist = 0
         if (line_segment.__class__.__name__) == "MultiLineString":
             for line in line_segment:
-                dist = dist + float(GeoUtil.calc_geog_distance_between_points(Point(line.coords[0]), Point(line.coords[1]), unit))
+                dist = dist + float(
+                    GeoUtil.calc_geog_distance_between_points(Point(line.coords[0]), Point(line.coords[1]), unit))
         elif (line_segment.__class__.__name__) == "LineString":
-            dist = float(GeoUtil.calc_geog_distance_between_points(Point(line_segment.coords[0]), Point(line_segment.coords[1]), unit))
+            dist = float(
+                GeoUtil.calc_geog_distance_between_points(Point(line_segment.coords[0]), Point(line_segment.coords[1]),
+                                                          unit))
 
         return dist
 
@@ -198,7 +202,6 @@ class GeoUtil:
             return mile
 
         return meter
-
 
     @staticmethod
     def create_rtree_index(inshp):
@@ -234,7 +237,7 @@ class GeoUtil:
             Boolean: sucess or fail to add guid
         """
 
-        #TODO: 
+        # TODO:
         # - need to handle when there is existing GUID
         # - need to handle when there is existing GUID and some missing guid for some rows
         # - need to handle when input and output are same
@@ -263,11 +266,8 @@ class GeoUtil:
                 for i in range(len(shape_property_list)):
                     new_feature = shape_property_list[i]
                     output.write(new_feature)
-        except: 
+        except:
             logging.exception("Error writing features %s:", outshp_filename)
             return False
 
         return True
-
-
-

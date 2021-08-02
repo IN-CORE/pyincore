@@ -26,6 +26,7 @@ class PopulationDislocation(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
 
     """
+
     def __init__(self, incore_client):
         super(PopulationDislocation, self).__init__(incore_client)
 
@@ -53,7 +54,9 @@ class PopulationDislocation(BaseAnalysis):
                     'id': 'building_dmg',
                     'required': True,
                     'description': 'Building damage results CSV file',
-                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingDamageVer5', 'ergo:buildingDamageVer6'
+                    'type': ['ergo:buildingInventoryVer4',
+                             'ergo:buildingDamageVer5',
+                             'ergo:buildingDamageVer6',
                              'ergo:buildingInventory']
                 },
                 {
@@ -196,7 +199,7 @@ class PopulationDislocation(BaseAnalysis):
         # total_prob_disl is the sum of the probability of dislocation at four damage states
         # times the probability of being in that damage state.
         total_prob_disl = prob0_disl * prob0 + prob1_disl * prob1 + prob2_disl * prob2 + \
-            prob3_disl * prob3
+                          prob3_disl * prob3
 
         inventory["prdis"] = total_prob_disl
 
