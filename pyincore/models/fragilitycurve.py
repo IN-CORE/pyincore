@@ -59,7 +59,7 @@ class FragilityCurve:
             variables (dict): Variables to set.
 
         Returns:
-            float: Limit state probability.
+            float: A limit state probability.
 
         """
         probability = float(0.0)

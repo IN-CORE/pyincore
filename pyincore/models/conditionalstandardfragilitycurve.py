@@ -33,6 +33,7 @@ class ConditionalStandardFragilityCurve(FragilityCurve):
             hazard (float): A hazard value to compute probability for.
             period (float): A building period default to 0.
             std_dev (float): A standard deviation.
+            **kwargs: Keyword arguments.
 
         Returns:
             float: A limit state probability.

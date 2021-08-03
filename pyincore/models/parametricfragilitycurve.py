@@ -27,12 +27,16 @@ class ParametricFragilityCurve(FragilityCurve):
         """
 
         Args:
-            hazard: intercept terms. Unit: g
-            period: building period default to 0
-            std_dev: standard deviation
-            **kwargs: interception terms
-        Returns: pf (DS) = exp(X*theta')/(1+exp(X*theta'));
-        example: pf(DS) = EXP(1 * A0 + log(PGA) * A1 + A2*X2 + ...) / (1 + EXP(1 *A0 + log(PGA) * A1 + ...))
+            hazard (float): A hazard value to compute probability for.
+            period (float): A building period default to 0.
+            std_dev (float): A standard deviation.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            float: A probability, pf (DS) = exp(X*theta')/(1+exp(X*theta'));
+
+        Example: pf(DS) = EXP(1 * A0 + log(PGA) * A1 + A2*X2 + ...) / (1 + EXP(1 *A0 + log(PGA) * A1 + ...))
+
         """
         probability = float(0.0)
 
