@@ -291,7 +291,7 @@ class FragilityCurveSet:
         return output
 
     def calculate_damage_interval(self, damage, hazard_type="earthquake", inventory_type: str = "building"):
-        """"
+        """
 
         Args:
             damage (list): A list of limit states.
@@ -341,7 +341,7 @@ class FragilityCurveSet:
         return ls_ds_dspatcher[hazard_type, inventory_type, len(self.fragility_curves)](damage)
 
     def construct_expression_args_from_inventory(self, inventory_unit: dict):
-        """"
+        """
 
         Args:
             inventory_unit (dict): An inventory set.
@@ -382,7 +382,7 @@ class FragilityCurveSet:
 
     @staticmethod
     def _3ls_to_4ds(limit_states):
-        """"
+        """
 
         Args:
             limit_states (dict): Limit states.
@@ -414,7 +414,7 @@ class FragilityCurveSet:
 
     @staticmethod
     def _4ls_to_5ds(limit_states):
-        """"
+        """
 
         Args:
             limit_states (dict): Limit states.
@@ -449,7 +449,7 @@ class FragilityCurveSet:
 
     @staticmethod
     def _1ls_to_4ds(limit_states):
-        """"
+        """
 
         Args:
             limit_states (dict): Limit states.
@@ -469,7 +469,7 @@ class FragilityCurveSet:
 
     @staticmethod
     def _1ls_to_5ds(limit_states):
-        """"
+        """
 
         Args:
             limit_states (dict): Limit states.
@@ -503,7 +503,7 @@ class FragilityCurveSet:
 
     @staticmethod
     def adjust_for_small_overlap(small_overlap, limit_states, damage_states):
-        """"
+        """
 
         Args:
             small_overlap (obj): Overlap.
@@ -541,7 +541,7 @@ class FragilityCurveSet:
 
     @staticmethod
     def _initialize_limit_states(inventory_type):
-        """"
+        """
 
         Args:
             inventory_type (str): Inventory type..

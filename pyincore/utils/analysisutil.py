@@ -523,8 +523,8 @@ class AnalysisUtil:
 
     @staticmethod
     def get_exposure_from_hazard_values(hazard_vals, hazard_type):
-        """ Finds if a point is exposed to hazard based on all the demand values present. Returns "n/a" for earthquake,
-            tsunami, hurricane and hurricane windfields
+        """Finds if a point is exposed to hazard based on all the demand values present.
+        Returns \"n/a\" for earthquake, tsunami, hurricane and hurricane windfields
 
         Args:
             hazard_vals (list): List of hazard values returned by the service for a particular point
