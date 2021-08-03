@@ -6,9 +6,7 @@
 
 
 class FragilityCurve:
-    """
-    Abstract class for fragility curves.
-    """
+    """Abstract class for fragility curves."""
 
     def __init__(self, curve_parameters):
         self.description = curve_parameters['description']

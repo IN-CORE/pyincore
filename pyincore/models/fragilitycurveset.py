@@ -21,7 +21,7 @@ from pyincore.utils.analysisutil import AnalysisUtil
 
 
 class FragilityCurveSet:
-    """class for fragility curves.
+    """A class for fragility curves.
 
     Args:
         metadata (dict): fragility curve metadata.
@@ -246,9 +246,10 @@ class FragilityCurveSet:
             period (float): Period of the structure, if applicable.
             std_dev (float): Standard deviation.
             inventory_type (str): A type of inventory.
+            **kwargs: Keyword arguments.
 
-            Returns:
-                dict: Limit state probabilities.
+        Returns:
+            dict: Limit state probabilities.
 
         """
         output = FragilityCurveSet._initialize_limit_states(inventory_type)

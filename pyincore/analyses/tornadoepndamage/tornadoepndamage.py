@@ -105,10 +105,13 @@ class TornadoEpnDamage(BaseAnalysis):
 
     def get_damage(self, node_dataset, link_dataset, tornado_dataset, tornado_id):
         """
-        :param node_dataset:
-        :param link_dataset:
-        :param tornado_dataset:
-        :return:
+
+        Args:
+            node_dataset (obj): Node dataset.
+            link_dataset (obj): Link dataset.
+            tornado_dataset (obj): Tornado dataset.
+            tornado_id (str): Tornado id.
+
         """
         self.set_tornado_variables(tornado_dataset)
         self.set_node_variables(node_dataset)

@@ -20,10 +20,11 @@ class SeasideCGEModel(BaseAnalysis):
      using intermediate inputs, capital, land and labor to produce goods and services for both
      domestic consumption and export; (3) the government sector that collects taxes and uses
      tax revenues in order to finance the provision of public services; and (4) the rest of the world.
-        Args:
-            incore_client (IncoreClient): Service authentication.
 
-        """
+    Args:
+        incore_client (IncoreClient): Service authentication.
+
+    """
 
     def __init__(self, incore_client):
         super(SeasideCGEModel, self).__init__(incore_client)
@@ -1429,8 +1430,7 @@ class SeasideCGEModel(BaseAnalysis):
             line1 = ExprM(vars, m=HW0.loc[H] / HH0.loc[H])
             LSEQ1line2pre = FD.loc(L, Z).sum(1)
             line2 = (((RA.loc(L) / ExprM(vars, m=RA0.loc[L])).sum(L) / 5) / (
-                    CPI.loc(H) / ExprM(vars, m=CPI0[H]))) ** ExprM(
-                vars, m=ETARA.loc[H])
+                    CPI.loc(H) / ExprM(vars, m=CPI0[H]))) ** ExprM(vars, m=ETARA.loc[H])
             line3 = ((ExprM(vars, m=TP.loc[H, G]) / CPI.loc(H)).sum(G) / (
                     ExprM(vars, m=TP.loc[H, G]) / ExprM(vars, m=CPI0.loc[H])).sum(G)) ** ExprM(vars, m=ETAPT.loc[H])
             # line4 =( ((ExprM(vars, m = PIT.loc[GI,H])* ExprM(vars, m = HH0.loc[H])).sum(GI)+ (ExprM(vars, m = TAUH0.loc[G,H])*ExprM(vars, m = HH0.loc[H])).sum(G))\
