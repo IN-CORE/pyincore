@@ -15,9 +15,11 @@ class PipelineUtil:
     @staticmethod
     def convert_result_unit(result_unit: str, result: float):
         """Convert values between different units.
+
         Args:
             result_unit (str): Resulting unit.
             result (float): Input value.
+
         Returns:
             float: Converted value.
 
