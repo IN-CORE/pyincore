@@ -103,11 +103,10 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         print("Finished executing household_income_prediction() in " +
               str(end_start_household_income_prediction - start_household_income_prediction) + " secs")
 
-        #household_aggregation = ResidentialBuildingRecovery.household_aggregation(household_income_prediction,
-                                                                                  #num_samples)
-        #end_household_aggregation = time.process_time()
-        #print("Finished executing household_aggregation() in " +
-        #      str(end_household_aggregation - end_start_household_income_prediction) + " secs")
+        household_aggregation = ResidentialBuildingRecovery.household_aggregation(household_income_prediction)
+        end_household_aggregation = time.process_time()
+        print("Finished executing household_aggregation() in " +
+              str(end_household_aggregation - end_start_household_income_prediction) + " secs")
 
         #financing_delay = ResidentialBuildingRecovery.financing_delay(household_aggregation, financial_resources,
                                                                       #num_samples)
@@ -189,7 +188,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         return prediction_results
 
     @staticmethod
-    def household_aggregation(household_income_predictions, num_samples):
+    def household_aggregation(household_income_predictions):
         """ Gets household aggregation of income groups at the building level.
 
         Args:
@@ -200,16 +199,43 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             pd.DataFrame: Results of household aggregation of income groups at the building level.
         """
 
-        guid = household_income_predictions.groupby('guid')
-        household_aggregation_results = pd.DataFrame(columns=household_income_predictions.columns)
-        household_aggregation_results = household_aggregation_results.drop(columns=['huid', 'blockid', 'hhinc'])
+        # Drop all unnecessary columns first
+        print(household_income_predictions.head(10))
+        household_income_predictions_dropped = household_income_predictions.drop(columns=['huid', 'blockid', 'hhinc'])
+        guid_group = household_income_predictions_dropped.groupby('guid')
 
-        count = 0
-        for name, group in guid:
-            household_aggregation_results = household_aggregation_results.append({'guid': name}, ignore_index=True)
-            for i in range(num_samples):
-                household_aggregation_results['sample_{}'.format(i)][count] = group['sample_{}'.format(i)].max()
-            count += 1
+        # Obtain sample column names
+        colnames = list(household_income_predictions_dropped.columns[1:])
+
+        # Iterate over all groups
+        new_groups = []
+
+        for name, group in guid_group:
+            # Obtain guids
+            local_guids = group['guid']
+
+            # Remove guids
+            no_guids = group.drop(columns=['guid']).to_numpy()
+
+            # Compute the maxima of all columns
+            maxima = list(no_guids.max(axis=0))
+
+            # Generate a matrix to store the results efficiently
+            num_guids = no_guids.shape[0]
+            num_cols = len(colnames)
+            no_guids_maxima = np.zeros((num_guids, num_cols))
+
+            for i in range(0, num_cols):
+                no_guids_maxima[:, i] = maxima[i]
+
+            group_new = pd.DataFrame(no_guids_maxima, columns=colnames, index=group.index)
+            group_new.insert(0, 'guid', local_guids)
+            new_groups.append(group_new)
+
+        # Construct a new DataFrame
+        household_aggregation_results = pd.concat(new_groups).sort_index()
+        print(household_aggregation_results.head(10))
+
         return household_aggregation_results
 
     @staticmethod
