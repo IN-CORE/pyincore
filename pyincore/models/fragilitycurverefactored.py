@@ -15,9 +15,7 @@ logger = pyglobals.LOGGER
 
 
 class FragilityCurveRefactored(FragilityCurve, ABC):
-    """
-    class to represent conditional standard fragility curve
-    """
+    """A class to represent conditional standard fragility curve."""
 
     def __init__(self, curve_parameters):
         self.rules = curve_parameters['rules']
@@ -29,14 +27,16 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
         super(FragilityCurveRefactored, self).__init__(curve_parameters)
 
     def calculate_limit_state_probability(self, hazard_values: dict, fragility_curve_parameters: dict, **kwargs):
-        """
-        Computes limit state probability.
-        :param hazard_values: hazard values to compute probability based on demand type
-        :param fragility_curve_parameters: set of rules (condition and expression) for each element of the curves
-        :key demandType: hazard values the curve uses to compute probability
+        """Computes limit state probabilities.
 
-        :returns: limit state probability
-        :rtype: float
+        Args:
+            hazard_values (dict): Hazard values.
+            fragility_curve_parameters (dict): Fragility curve parameters.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            float: A limit state probability.
+
         """
         parameters = {}
         mapped_demand_types = {}

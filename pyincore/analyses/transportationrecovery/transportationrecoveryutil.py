@@ -11,11 +11,15 @@ class TransportationRecoveryUtil:
 
     @staticmethod
     def NBI_coordinate_mapping(NBI_file):
-        """
-        coordinate in NBI is in format of xx(degree)xx(minutes)xx.xx(seconds)
-        map it to traditional xx.xxxx in order to create shapefile
-        :param NBI_file:
-        :return:
+        """Coordinate in NBI is in format of xx(degree)xx(minutes)xx.xx(seconds)
+        map it to traditional xx.xxxx in order to create shapefile.
+
+        Args:
+            NBI_file (str): Filename of a NBI file.
+
+        Returns:
+            dict: NBI.
+
         """
         NBI = pd.read_csv(NBI_file)
         NBI['LONG_017'] = NBI['LONG_017'].apply(lambda x: -1 * (GeoUtil.degree_to_decimal(x)))
@@ -40,13 +44,17 @@ class TransportationRecoveryUtil:
 
     @staticmethod
     def convert_dmg_prob2state(dmg_results_filename):
-        """
-        upstream bridge damage analysis will generate a dmg result file with the probability
-        of each damage state; here determine what state using the maximum probability
-        :param dmg_results_filename:
-        :return: bridge_damage_value, unrepaired_bridge
-        """
+        """Upstream bridge damage analysis will generate a dmg result file with the probability
+        of each damage state; here determine what state using the maximum probability.
 
+        Args:
+            dmg_results_filename (str): Filename of a damage results file.
+
+        Returns:
+            dict: Bridge damage values.
+            list: Unrepaired bridge.
+
+        """
         bridge_damage_value = {}
         unrepaired_bridge = []
 
@@ -75,10 +83,15 @@ class TransportationRecoveryUtil:
     @staticmethod
     def nw_reconstruct(node_df, arc_df, adt_data):
         """
-        :param node_df: node in _node_.csv
-        :param arc_df:  edge in _edge_.csv
-        :param adt_data: Average daily traffic flow
-        :return: network
+
+        Args:
+            node_df (pd.DataFrame): A node in _node_.csv.
+            arc_df (pd.DataFrame): A node in edge in _edge_.csv.
+            adt_data (pd.DataFrame): Average daily traffic flow.
+
+        Returns:
+            obj: Network
+
         """
         # create network
         network = nx.Graph()
@@ -94,19 +107,21 @@ class TransportationRecoveryUtil:
             tonode = \
                 node_df.loc[node_df['ID'] == arc_df['tonode'][i], 'guid'].values[0]
             dis = arc_df['len_mile'][i] / arc_df['freeflowsp'][i]
-            network.add_edge(fromnode, tonode, distance=dis,
-                             adt=adt_data[arc_df['guid'][i]])
+            network.add_edge(fromnode, tonode, distance=dis, adt=adt_data[arc_df['guid'][i]])
 
         return network
 
     @staticmethod
     def traveltime_freeflow(temp_network):
-        """
-        travel time calculation
-        :param temp_network: the investigated network
-        :return: travel efficiency
-        """
+        """A travel time calculation.
 
+        Args:
+            temp_network (obj): The investigated network.
+
+        Returns:
+            float: Travel efficiency.
+
+        """
         network = copy.deepcopy(temp_network)
 
         for Ed in temp_network.edges():

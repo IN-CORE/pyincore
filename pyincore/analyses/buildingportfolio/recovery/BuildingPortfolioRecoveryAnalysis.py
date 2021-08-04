@@ -15,7 +15,14 @@ from pyincore import BaseAnalysis
 
 
 class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
+    """The Building Portfolio Recovery analysis uses damage probabilities of structural components,
+    nonstructural drift-sensitive components, and nonstructural acceleration-sensitive components
+    to calculate building’s initial functionality loss.
 
+    Args:
+        incore_client (IncoreClient): Service authentication.
+
+    """
     def __init__(self, incore_client):
         super(BuildingPortfolioRecoveryAnalysis, self).__init__(incore_client)
 
@@ -574,23 +581,28 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
     # TODO: Review
     def calculate_delay_time(self, res_buildings, finance):
-        """
-        This function calculates the delay time given an initial functionality state and a financing resource
-        :param res_buildings: Initial Damage State
-        1: Slight Damage
-        :param finance: Financing types, Can be a number from 1 to 5
-        1: Insurance
-        2: SBA Business Loan
-        3: Private
-        4: Savings
-        5: Not covered
-        :return: Impeding
-        Takes into account each factor that alters the recovery time. Each item in the temporary array represents:
-        impeding[0]: Initial Damage State
-        impeding[1]: Engineering Mobilization
-        impeding[2]: Insurance
-        impeding[3]: Contractor Mobilization
-        impeding[4]: Obtain permits
+        """This function calculates the delay time given an initial functionality state and a financing resource.
+
+        Args:
+            res_buildings (int): Initial Damage State 1: Slight Damage.
+            finance (int): Financing types, Can be a number from 1 to 5:
+
+                1. Insurance
+                2. SBA Business Loan
+                3. Private
+                4. Savings
+                5. Not covered
+
+        Returns:
+            np.Array: Impeding. It takes into account each factor that alters the recovery time.
+            Each item in the temporary array represents:
+
+            1. impeding[0]: Initial Damage State
+            2. impeding[1]: Engineering Mobilization
+            3. impeding[2]: Insurance
+            4. impeding[3]: Contractor Mobilization
+            5. impeding[4]: Obtain permits
+
         """
         impeding = np.zeros(5)
 

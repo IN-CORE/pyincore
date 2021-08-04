@@ -17,13 +17,22 @@ class BuildingFunctionality(BaseAnalysis):
     the interdependency between buildings and substations, and between buildings and poles in close proximity.
     If both the nearest pole to the building and the substation where buildings belong to its service area are
     functional, buildings are considered to be able to receive electric power.
+
+    Args:
+        incore_client (IncoreClient): Service authentication.
+
     """
 
     def __init__(self, incore_client):
         super().__init__(incore_client)
 
     def get_spec(self):
+        """Get specifications of the building functionality analysis.
 
+        Returns:
+            obj: A JSON object of specifications of the building functionality analysis.
+
+        """
         return {
             'name': 'functionality_probability',
             'description': 'calculate the functionality probability of each building',
@@ -113,14 +122,16 @@ class BuildingFunctionality(BaseAnalysis):
         """
 
         Args:
-            building_guid: building guid
-            buildings: buildings DataFrame
-            substations: substations DataFrame
-            poles: poles DataFrame
-            interdependency: interdependency between buildings and substations and poles dictionary
+            building_guid (str): A building defined by its guid.
+            buildings (pd.DataFrame): A list of buildings.
+            substations (pd.DataFrame): A list of substations.
+            poles (pd.DataFrame): A list of poles.
+            interdependency (dict): An interdependency between buildings and substations and poles.
 
-        Returns: building, functionality sampe that is a string of "0,0,1...", probability [0,1] of building being
-        functional
+        Returns:
+            str: A building guid.
+            str: A functionality sample that is a string of "0,0,1...".
+            str: A probability [0,1] of building being functional.
 
         """
         # if building is defined in the interdependency lookup table
@@ -170,12 +181,14 @@ class BuildingFunctionality(BaseAnalysis):
     def functionality_probability(self, building_sample, substation_sample, pole_sample):
         """ This function is subject to change. For now, buildings have a 1-to-1 relationship with
         substations and poles, so it suffices to check that the poles and substations are up.
-        Args:
-            building_sample: monte carlo samples of building functionality
-            substation_sample: monte carlo samples of substation functionality
-            pole_sample: monte carlo samples of pole functionality
 
-        Returns: 1 if building is functional, 0 otherwise
+        Args:
+            building_sample (str): Monte Carlo samples of building functionality.
+            substation_sample (str): Monte Carlo samples of substation functionality.
+            pole_sample (str): Monte Carlo samples of pole functionality.
+
+        Returns:
+            int: 1 if building is functional, 0 otherwise
 
         """
         if building_sample == "1" and substation_sample == "1" and pole_sample == "1":

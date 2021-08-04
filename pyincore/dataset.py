@@ -67,6 +67,7 @@ class Dataset:
             json_str (str): JSON of the Dataset.
             data_service (obj): Data Service class.
             file_path (str): File path.
+
         Returns:
             obj: Dataset from JSON.
 
@@ -305,13 +306,10 @@ class Dataset:
     def get_dataframe_from_shapefile(self):
         """Utility method for reading different standard file formats: GeoDataFrame from shapefile.
 
-        Args:
-
         Returns:
             obj: Geopanda's GeoDataFrame.
 
         """
-
         # read shapefile directly by Geopandas.read_file()
         # It will preserve CRS information also
         gdf = gpd.read_file(self.local_file_path)

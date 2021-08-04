@@ -13,9 +13,7 @@ from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class PeriodBuildingFragilityCurve(FragilityCurve):
-    """
-    class to represent period building fragility curve
-    """
+    """A class to represent period building fragility curve"""
 
     def __init__(self, curve_parameters):
         self.period_eqn_type = curve_parameters['periodEqnType']
@@ -55,13 +53,16 @@ class PeriodBuildingFragilityCurve(FragilityCurve):
         return period
 
     def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
-        """
-            Computes limit state probabilities.
-            Args:
-                hazard: hazard value to compute probability for
-                period: period of the structure, if applicable
+        """Computes limit state probabilities.
 
-            Returns: limit state probability
+            Args:
+                hazard (float): A hazard value to compute probability for.
+                period (float): A building period default to 0.
+                std_dev (float): A standard deviation.
+                **kwargs: Keyword arguments.
+
+            Returns:
+                float: A limit state probability.
 
         """
 
@@ -98,4 +99,3 @@ class PeriodBuildingFragilityCurve(FragilityCurve):
 
         return probability
 
-        return probability

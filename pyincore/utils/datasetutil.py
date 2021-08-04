@@ -15,11 +15,11 @@ class DatasetUtil:
         """Join Geopands geodataframe and non-geospatial Dataset using GUID field
 
         Args:
-            geodataset (Dataset):  pyincore Dataset object with geospatial data
-            tabledataset (Dataset): pyincore Dataset object without geospatial data
+            geodataset (gpd.Dataset):  pyincore Dataset object with geospatial data
+            tabledataset (gpd.Dataset): pyincore Dataset object without geospatial data
 
         Returns:
-            GeoDataFrame: Geopandas DataFrame object
+            gpd.GeoDataFrame: Geopandas DataFrame object
 
         """
         gdf = gpd.read_file(geodataset.local_file_path)
@@ -37,7 +37,7 @@ class DatasetUtil:
                 client (Client): pyincore service client object
 
             Returns:
-                joined_dbf (geodataframe): geopandas geodataframe object
+                gpd.Dataset: Geopandas geodataframe object.
 
         """
         is_source_dataset = False

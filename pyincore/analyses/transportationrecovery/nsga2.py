@@ -6,14 +6,10 @@ import sys, random
 
 
 class Solution:
-    """
-    Abstract solution. To be implemented.
-    """
+    """Abstract solution. To be implemented."""
 
     def __init__(self, num_objectives):
-        """
-        Constructor. Parameters: number of objectives.
-        """
+        """Constructor. Parameters: number of objectives."""
         self.num_objectives = num_objectives
         self.objectives = []
         for _ in range(num_objectives):
@@ -26,9 +22,7 @@ class Solution:
         self.sch = {}
 
     def __rshift__(self, other):
-        """
-        True if this solution dominates the other (">>" operator).
-        """
+        """True if this solution dominates the other (">>" operator)."""
         dominates = False
 
         for i in range(len(self.objectives)):
@@ -41,20 +35,21 @@ class Solution:
         return dominates
 
     def __lshift__(self, other):
-        """
-        True if this solution is dominated by the other ("<<" operator).
-        """
+        """True if this solution is dominated by the other ("<<" operator)."""
         return other >> self
 
 
 def crowded_comparison(s1, s2):
-    """
-    Compare the two solutions based on crowded comparison.
-    :param s1: one chromosome
-    :param s2: another chromosome
-    :return: comparison value
-    """
+    """Compare the two solutions based on crowded comparison.
 
+    Args:
+        s1 (obj): One chromosome.
+        s2 (obj): Another chromosome.
+
+    Returns:
+        float: A comparison value.
+
+    """
     if s1.rank < s2.rank:
         return 1
 
@@ -72,19 +67,18 @@ def crowded_comparison(s1, s2):
 
 
 class NSGAII:
-    """
-    Implementation of NSGA-II algorithm.
-    """
+    """Implementation of NSGA-II algorithm."""
     current_evaluated_objective = 0
 
     def __init__(self, num_objectives, mutation_rate=0.1, crossover_rate=1.0):
-        """
-        Constructor.
-        :param num_objectives: number of objectives
-        :param mutation_rate: mutation rate (default value 10%)
-        :param crossover_rate: crossover rate (default value 100%).
-        """
+        """Constructor.
 
+        Args:
+            num_objectives (obj): Number of objectives.
+            mutation_rate (float): Mutation rate (default value 10%).
+            crossover_rate (float): Crossover rate (default value 100%)..
+
+        """
         self.num_objectives = num_objectives
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
@@ -92,16 +86,17 @@ class NSGAII:
         random.seed(100)
 
     def run(self, p, population_size, num_generations):
+        """Run NSGA-II.
+
+        Args:
+            p (obj): A set of chromosomes (population).
+            population_size (obj): A population size.
+            num_generations (obj): A number of generations.
+
+        Returns:
+            list: First front of Pareto front.
+
         """
-        Run NSGA-II.
-
-        :param p: set of chromosomes (population)
-        :param population_size: population size
-        :param num_generations: number of generations
-
-        Return: First front of Pareto front
-        """
-
         for s in p:
             s.evaluate_solution(0)
 
@@ -135,12 +130,12 @@ class NSGAII:
 
     @staticmethod
     def sort_ranking(p):
-        """
-        Run sort the sort of chromosomes according to their ranks.
-        :param p: set of chromosomes (population)
-        Return: None
-        """
+        """Run sort the sort of chromosomes according to their ranks.
 
+        Args:
+            p (obj): A set of chromosomes (population).
+
+        """
         for i in range(len(p) - 1, -1, -1):
             for j in range(1, i + 1):
                 s1 = p[j - 1]
@@ -152,13 +147,13 @@ class NSGAII:
 
     @staticmethod
     def sort_objective(p, obj_idx):
-        """
-        Run sort the chromosome based on their objective value
-        :param p: set of chromosomes (population)
-        :param obj_idx: the index of objective function
-        Return: None
-        """
+        """Run sort the chromosome based on their objective value.
 
+        Args:
+            p (obj): A set of chromosomes (population).
+            obj_idx (int): The index of objective function.
+
+        """
         for i in range(len(p) - 1, -1, -1):
             for j in range(1, i + 1):
                 s1 = p[j - 1]
@@ -170,12 +165,12 @@ class NSGAII:
 
     @staticmethod
     def sort_crowding(p):
-        """
-        Run calculate the crowding distance of adjacent two chromosome in a front level
-        :param p: set of chromosomes (population)
-        Return: None
-        """
+        """Run calculate the crowding distance of adjacent two chromosome in a front level.
 
+        Args:
+            p (obj): A set of chromosomes (population).
+
+        """
         for i in range(len(p) - 1, -1, -1):
             for j in range(1, i + 1):
                 s1 = p[j - 1]
@@ -186,12 +181,15 @@ class NSGAII:
                     p[j] = s1
 
     def make_new_pop(self, p):
-        """
-        Make new population Q, offspring of P.
-        :param p: set of chromosomes (population)
-        Return: offspring
-        """
+        """Make new population Q, offspring of P.
 
+        Args:
+            p (obj): A set of chromosomes (population).
+
+        Returns:
+            list: Offspring.
+
+        """
         q = []
 
         while len(q) != len(p):
@@ -224,13 +222,15 @@ class NSGAII:
 
     @staticmethod
     def fast_nondominated_sort(p):
-        """
-        Discover Pareto fronts in P, based on non-domination criterion.
+        """Discover Pareto fronts in P, based on non-domination criterion.
 
-        :param p: set of chromosomes
-        Return: fronts
-        """
+        Args:
+            p (obj): A set of chromosomes (population).
 
+        Returns:
+            dict: Fronts.
+
+        """
         fronts = {}
 
         s = {}
@@ -270,13 +270,12 @@ class NSGAII:
         return fronts
 
     def crowding_distance_assignment(self, front):
-        """
-        Assign a crowding distance for each solution in the front.
+        """Assign a crowding distance for each solution in the front.
 
-        :param front: set of chromosomes in the front level
-        Return: None
-        """
+        Args:
+            front (dict): A set of chromosomes in the front level.
 
+        """
         for p in front:
             p.distance = 0
 

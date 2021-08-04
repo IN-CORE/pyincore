@@ -13,9 +13,7 @@ from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class StandardFragilityCurve(FragilityCurve):
-    """
-    class to represent standard fragility curve
-    """
+    """A class to represent standard fragility curve"""
 
     def __init__(self, curve_parameters):
         self.alpha = curve_parameters['alpha']
@@ -26,14 +24,16 @@ class StandardFragilityCurve(FragilityCurve):
         super(StandardFragilityCurve, self).__init__(curve_parameters)
 
     def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
-        """
-            Computes limit state probabilities.
-            Args:
-                hazard: hazard value to compute probability for
-                period: building period default to 0
-                std_dev: standard deviation
+        """Computes limit state probabilities.
 
-            Returns: limit state probability
+            Args:
+                hazard (float): A hazard value to compute probability for.
+                period (float): A building period default to 0.
+                std_dev (float): A standard deviation.
+                **kwargs: Keyword arguments.
+
+            Returns:
+                float: A limit state probability.
 
         """
         probability = float(0.0)
@@ -57,7 +57,6 @@ class StandardFragilityCurve(FragilityCurve):
         Args:
             liquefaction (str): Liquefaction type.
 
-        Returns:
         """
         liquefaction_unified = str(liquefaction).upper()
         if liquefaction_unified == "U":

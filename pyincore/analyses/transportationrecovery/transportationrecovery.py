@@ -13,7 +13,7 @@ from pyincore import BaseAnalysis
 class TransportationRecovery(BaseAnalysis):
 
     def run(self):
-        """ Executes transporation recovery analysis"""
+        """ Executes transportation recovery analysis"""
 
         # read the nodes in transportation
         node_set = self.get_input_dataset("nodes").get_inventory_reader()
@@ -191,6 +191,12 @@ class TransportationRecovery(BaseAnalysis):
         return None
 
     def get_spec(self):
+        """Get specifications of the transportation recovery model.
+
+        Returns:
+            obj: A JSON object of specifications of the transportation recovery model.
+
+        """
         return {
             'name': 'transportation-recovery',
             'description': 'transportation recovery model',

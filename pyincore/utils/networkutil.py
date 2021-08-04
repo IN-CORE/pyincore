@@ -12,17 +12,17 @@ from fiona.crs import from_epsg
 class NetworkUtil:
     @staticmethod
     def build_dataset_by_node(node_filename, graph_filename, id_field, out_filename):
-        """
-        create line dataset based on node shapefile and graph file
-        graph should be in csv format
+        """Create line dataset based on node shapefile and graph file graph should be in csv format.
+
         Args:
-            node_filename (string):  node shapefile file name pull path with *.shp file extension.
-            graph_filename (string): graph csv file name pull path.
-            id_field (string): field name for node shapefiles unique id that matches the information in the graph
-            out_filename (string): line file name pull path that will be newly created by the process.
+            node_filename (string):  A node shapefile file name pull path with *.shp file extension.
+            graph_filename (string): A graph csv file name pull path.
+            id_field (string): A field name for node shapefiles unique id that matches the information in the graph.
+            out_filename (string): A line file name pull path that will be newly created by the process.
 
         Returns:
-            line_created (boolean): boolean to indicated if the line was created or not.
+            bool: To indicated if the line was created or not.
+
         """
         # read graph
         with open(graph_filename) as f:
@@ -102,9 +102,8 @@ class NetworkUtil:
     @staticmethod
     def build_dataset_by_line(line_filename, line_id_field, fromnode_field, tonode_field, out_node_filename,
                               out_graph_filename):
-        """
-        create node dataset based on line shapefile and graph file
-        graph should be in csv format
+        """Create node dataset based on line shapefile and graph file graph should be in csv format
+
         Args:
             line_filename (string):  line shapefile file name pull path with *.shp file extension.
             line_id_field (string): line shapefile unique id field
@@ -114,7 +113,8 @@ class NetworkUtil:
             out_graph_filename (string): output graph csv file name with *.csv extension
 
         Returns:
-            node_created (boolean): boolean to indicated if the shapefile and graph were created or not.
+            bool: To indicated if the shapefile and graph were created or not.
+
         """
         # read line shapefile
         linefile = fiona.open(line_filename)
@@ -201,7 +201,8 @@ class NetworkUtil:
                 False for Graph.
 
         Returns:
-            obj, dict: Graph and coordinates.
+            obj: A graph from field.
+            dict: Coordinates.
 
         """
         # iterate link
@@ -289,7 +290,8 @@ class NetworkUtil:
                 False for Graph.
 
         Returns:
-            obj, dict: Graph and node coordinates.
+            obj: A graph from field.
+            dict: Coordinates.
 
         """
         geom = nx.read_shp(filename)

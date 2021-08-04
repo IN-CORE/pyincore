@@ -51,7 +51,8 @@ class GeoUtil:
              query_point (obj): A query point
 
          Returns:
-             obj, obj: A nearest feature and distances
+             obj: A nearest feature.
+             obj: Nearest distances.
 
          """
         points = np.asarray([feature['geometry']['coordinates'] for feature in features])
@@ -138,7 +139,8 @@ class GeoUtil:
             last 4 digits are xx.xx seconds.
 
         Returns:
-            str, int: Decimal value.
+            str: A decimal value.
+            int: A decimal value.
 
         """
         if degree == 0.0 or degree == None or degree == '':
@@ -234,7 +236,8 @@ class GeoUtil:
             outshp_filename (str): Full path and filename of Ouptut shapefile
 
         Returns:
-            Boolean: sucess or fail to add guid
+            bool: A success or fail to add guid.
+
         """
 
         # TODO:

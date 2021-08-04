@@ -87,28 +87,29 @@ class Dfr3Service:
         return r.json()
 
     def delete_dfr3_set(self, dfr3_id: str):
-        """delete specific DFR3 set.
+        """Delete specific DFR3 set.
 
-                Args:
-                    dfr3_id (str): ID of the DFR3 set.
+            Args:
+                dfr3_id (str): ID of the DFR3 set.
 
-                Returns:
-                    obj: HTTP response with return results.
+            Returns:
+                obj: HTTP response with return results.
 
-                """
+        """
         url = urllib.parse.urljoin(self.base_dfr3_url, dfr3_id)
         r = self.client.delete(url)
 
         return r.json()
 
     def batch_get_dfr3_set(self, dfr3_id_lists: list):
-        """
-        this method is intended to replace batch_get_dfr3_set in the future
-        It retrieve dfr3 sets from services using id and instantiate DFR3Curveset objects in bulk
-        Args:
-            dfr3_id_lists: list of ids
+        """This method is intended to replace batch_get_dfr3_set in the future. It retrieve dfr3 sets
+        from services using id and instantiate DFR3Curveset objects in bulk.
 
-        Returns: list of dfr3curve object
+        Args:
+            dfr3_id_lists (list): A list of ids.
+
+        Returns:
+            list: A list of dfr3curve objects.
 
         """
         batch_dfr3_sets = {}
@@ -161,17 +162,18 @@ class Dfr3Service:
         return r.json()
 
     def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str, add_info: list = None):
-        """
-        This method is intended to replace the match_inventory method in the future. The functionality is same as
+        """This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
-        FragilityCurveSet Object
-        Args:
-            mapping: MappingSet Object that has the rules and entries
-            inventories: inventories
-            entry_key: keys such as PGA, pgd, and etc
-            add_info: additional information that used to match rules, e.g. retrofit strategy per building
+        FragilityCurveSet Object.
 
-        Returns: a dictionary of {"inventory id": FragilityCurveSet object}
+        Args:
+            mapping (obj): MappingSet Object that has the rules and entries.
+            inventories (list): A list of inventories.
+            entry_key (str): keys such as PGA, pgd, and etc.
+            add_info (None, dict): additional information that used to match rules, e.g. retrofit strategy per building.
+
+        Returns:
+             dict: A dictionary of {"inventory id": FragilityCurveSet object}.
 
         """
         dfr3_sets = {}
@@ -238,13 +240,15 @@ class Dfr3Service:
 
     @staticmethod
     def _property_match_legacy(rules, properties):
-        """
-        method to determine whether current set of rules rules applied to the inventory row (legacy rule format)
-        Args:
-            rules: [[A and B] or [C and D]]
-            properties: dictionary that contains properties of the inventory row
+        """A method to determine whether current set of rules rules applied to the inventory row (legacy rule format).
 
-        Returns: True or False
+        Args:
+            rules (obj): [[A and B] or [C and D]]
+            properties (dict): A dictionary that contains properties of the inventory row.
+
+        Returns:
+            True or False
+
         """
 
         # if there's no condition, it indicates a match
@@ -269,14 +273,16 @@ class Dfr3Service:
 
     @staticmethod
     def _property_match(rules, properties):
-        """
-        method to determine whether current set of rules applied to the inventory row (legacy rule format)
-        Args:
-            rules:  e.g. {"AND": ["int archetype EQUALS 1", "int retrofit_level EQUALS 0”, {“OR": ["int archetype
-            EQUALS 1", "int archetype EQUALS 1"]}]
-            properties: dictionary that contains properties of the inventory row
+        """A method to determine whether current set of rules applied to the inventory row (legacy rule format).
 
-        Returns: True or False
+        Args:
+            rules (dict):  e.g. {"AND": ["int archetype EQUALS 1", "int retrofit_level EQUALS 0”,
+            {“OR": ["int archetype EQUALS 1", "int archetype EQUALS 1"]}]
+            properties (dict): dictionary that contains properties of the inventory row
+
+        Returns:
+            True or False
+
         """
         # if without any condition, consider it as a match
         if rules == {}:
@@ -305,13 +311,14 @@ class Dfr3Service:
 
     @staticmethod
     def _eval_criterion(rule, properties):
-        """
-        method to evaluate individual rule and see if it appies to a certain inventory row.
-        Args:
-            rule: # e.g. "int no_stories EQ 1",
-            properties: dictionary of properties of an invnetory item. e.g. {"guid":xxx, "num_stories":xxx, ...}
+        """A method to evaluate individual rule and see if it appies to a certain inventory row.
 
-        Returns: True/False indicates matched or not
+        Args:
+            rule (str): # e.g. "int no_stories EQ 1",
+            properties (dict): dictionary of properties of an invnetory item. e.g. {"guid":xxx, "num_stories":xxx, ...}
+
+        Returns:
+            True or False which indicates a match.
 
         """
         matched = False

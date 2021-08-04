@@ -4,24 +4,21 @@ import operator as op
 
 
 class VarContainer:
-    """
-     All matrix variable(tables) in the GAMS model is flatten to a array to make a better
-     interface to the solver.
+    """All matrix variable(tables) in the GAMS model is flatten to a array to make a better
+    interface to the solver.
 
-     AllVarList stores all initial values of varibles used in the GAMS model in an array.
-     It also has a indexing system for looking up.
+    AllVarList stores all initial values of variables used in the GAMS model in an array.
+    It also has a indexing system for looking up.
 
-     Attributes:
-         namelist: A dictionary with all stored GAMS variables and its information.
-         nvars: The length of the array, i.e. the size of all matrix variables summed up.
-         initialVals: Stored initial values of all variables
+    Attributes:
+        namelist: A dictionary with all stored GAMS variables and its information.
+        nvars: The length of the array, i.e. the size of all matrix variables summed up.
+        initialVals: Stored initial values of all variables
 
     """
 
     def __init__(self):
-        """
-          Initialize to an empty list
-        """
+        """Initialize to an empty list"""
         self.namelist = {}
         self.initialVals = []
         self.nvars = 0
@@ -30,10 +27,12 @@ class VarContainer:
 
     def add(self, name, rows=None, cols=None):
         """
-        :param name:
-        :param rows:
-        :param cols:
-        :return:
+
+        Args:
+            name (str): Name of the variable in GAMS.
+            rows (obj): Rows.
+            cols (obj): Columns.
+
         """
         if rows is not None and cols is not None:
             size = len(rows) * len(cols)
@@ -65,14 +64,13 @@ class VarContainer:
         return ExprM(self, name=name, rows=rows, cols=cols)
 
     def set_value(self, name, values, target):
-        """
-        An internal method for setting the initial values or UPs and LOs for variables
+        """An internal method for setting the initial values or UPs and LOs for variables.
 
-        :param name: Name of the variable in GAMS
-        :param values: a pandas DataFrame, pandas Series, int or float with initial values
-        :param target: target array to be set
+        Args:
+            name (str): Name of the variable in GAMS.
+            values (obj): a pandas DataFrame, pandas Series, int or float with initial values.
+            target (obj): target array to be set.
 
-        :return: None
         """
         if type(values) == int or type(values) == float:
             info = self.namelist[name]
@@ -95,43 +93,52 @@ class VarContainer:
             target[self.get_index(name)] = values
 
     def init(self, name, initial_value):
-        """
-        Flatten the table variable and add to the list.
-        Also set the initial variable values array.
+        """Flatten the table variable and add to the list. Also set the initial variable values array.
 
-        :param name: Name of the variable in GAMS
-        :param initial_value: a pandas DataFrame or pandas Series with initial values
+        Args:
+            name (str): Name of the variable in GAMS.
+            initial_value (obj): A pandas DataFrame or pandas Series with initial values.
 
-        :return: None.
+
         """
         self.set_value(name, initial_value, self.initialVals)
 
     def in_list(self, name: str):
-        """
-        Check if a GAMS varible is added to the container
+        """Check if a GAMS variable is added to the container.
 
-        :param name: name of GAMS variable you want to look up
-        :return: Boolean, whether the variable is added.
+        Args:
+            name (str): Name of the variable in GAMS.
+            initial_value (obj): A pandas DataFrame or pandas Series with initial values.
+
+        Returns:
+            bool: Whether the variable is added.
+
         """
         return name in self.namelist
 
     def get_info(self, name: str):
-        """
-        Get the information about a GAMS variable
+        """Get the information about a GAMS variable.
 
-        :param name: name of GAMS variable you want to look up
-        :return: a dictionary with all information
+        Args:
+            name (str): Name of the variable in GAMS.
+
+        Returns:
+            dict: A dictionary with all information.
+
         """
         return self.namelist[name]
 
     def get_index(self, name, row=None, col=None):
-        """
-        Look up the index by providing the variable name and label information
+        """Look up the index by providing the variable name and label information.
 
-        :param name: name of GAMS variable you want to look up
-        :param row: row label of the position you want to look up index for(if it has row labels)
-        :param col: column label of the position you want to look up index for(if it has column labels)
-        :return: the index of the position in the array
+        Args:
+            name (str): Name of the variable in GAMS.
+            row (obj): A row label of the position you want to look up index for (if it has row labels).
+            col (obj): A column label of the position you want to look up index for (if it has column labels)
+
+        Returns:
+            int: The index of the position in the array.
+
         """
         info = self.namelist[name]
         result = info['start']
@@ -142,11 +149,14 @@ class VarContainer:
         return result
 
     def get_label(self, index):
-        """
-        Look up variable name and label information by providing the index
+        """Look up variable name and label information by providing the index.
 
-        :param index: the index in the array
-        :return: its information including the variable name, row label and column label if applicable
+        Args:
+            index (int): The index in the array.
+
+        Returns:
+            list: Its information including the variable name, row label and column label if applicable.
+
         """
         result = []
         for i in self.namelist.keys():
@@ -162,12 +172,16 @@ class VarContainer:
                 return result
 
     def get(self, name, x=None):
-        """
-          Returns a Dataframe, Series, or a variable based on the given name and the result array returned from the solver
+        """Returns a Dataframe, Series, or a variable based on the given name and the result array
+        returned from the solver.
 
-          :param name: GAMS variable name
-          :return: if x is not given, it returns the initial values
-            if x is set to the result, returns the result variable value
+        Args:
+            name (str): Name of the variable in GAMS.
+
+        Returns:
+            obj: If x is not given, it returns the initial values if x is set to the result,
+                returns the result variable value.
+
         """
         if x is None:
             x = self.initialVals
@@ -188,31 +202,31 @@ class VarContainer:
         return ret
 
     def lo(self, name, value):
-        """
-          Set the LOs of a GAMS variable providing the LOs with a Dataframe, Series, int or float
+        """Set the LOs of a GAMS variable providing the LOs with a Dataframe, Series, int or float.
 
-          :param name: GAMS variable name
-          :param value: The lower bound to be set
-          :return: None
+        Args:
+            name (str): Name of the variable in GAMS.
+            value (obj): The lower bound to be set.
+
         """
         self.set_value(name, value, self.LO)
 
     def up(self, name, value):
-        """
-          Set the UPs of a GAMS variable providing the LOs with a Dataframe, Series, int or float
+        """Set the UPs of a GAMS variable providing the LOs with a Dataframe, Series, int or float.
 
-          :param name: GAMS variable name
-          :param value: The upper bound to be set
-          :return: None
+        Args:
+            name (str): GAMS variable name.
+            value (obj): The upper bound to be set.
+
         """
         self.set_value(name, value, self.UP)
 
     def write(self, filename):
-        """
-          Write(append) the variables to a file, in the format of setting ipopt model variables
+        """Write (append) the variables to a file, in the format of setting ipopt model variables.
 
-          :param filename: the output filename
-          :return: None
+        Args:
+            filename (str): The output filename.
+
         """
         with open(filename, 'a') as f:
             for i in range(self.nvars):
@@ -223,19 +237,17 @@ class VarContainer:
 
 
 class Variable:
-    """
-      A single variable, initialized by given the GAMS variable and its label
-    """
+    """A single variable, initialized by given the GAMS variable and its label."""
 
     def __init__(self, gams_vars, name, row=None, col=None):
-        """
-          Initialize it with a variable container, the GAMS name, the labels
+        """Initialize it with a variable container, the GAMS name, the labels.
 
-          :param gams_vars: the variable container that already added the GAMS variable
-          :param name: GAMS variable name
-          :param row: GAMS row label if there is
-          :param col: GAMS col label if there is
-          :return: None
+        Args:
+            gams_vars (obj): The variable container that already added the GAMS variable.
+            name (str): GAMS variable name.
+            row (obj): GAMS rows label if there is.
+            cols (obj): GAMS columns label if there is.
+
         """
         try:
             self.index = gams_vars.get_index(name, row, col)
@@ -244,19 +256,13 @@ class Variable:
             # print("invalid name for a variable")
 
     def __str__(self):
-        """
-          returns the variable in the format of "model.x#" if gets printed,
-          with # being the index in the array in the container
-
-          :return: String
-        """
+        """Returns the variable in the format of "model.x#" if gets printed, with # being the index
+        in the array in the container."""
         return 'model.x' + str(self.index) + ''
 
 
 class ExprItem:
-    """
-      You can construct it with a variable, a constant or a deepcopy of another ExprItem
-    """
+    """You can construct it with a variable, a constant or a deepcopy of another ExprItem."""
 
     def __init__(self, v, const=1):
         self.varList = []
@@ -491,11 +497,13 @@ class Expr:
 class ExprM:
     """
     Three ways to create a ExprMatrix:
+
     1. Give it the variable name, selected rows and cols(could be empty),
-      The constructor will create a Expression matrix from the variable matrix
+    The constructor will create a Expression matrix from the variable matrix.
     2. Give it a pandas Series or DataFrame, it will create the Expression matrix
-      with the content in the Series or DataFrame as constants
-    3. Give it a ExprMatrix, will return a deep copy of it
+    with the content in the Series or DataFrame as constants.
+    3. Give it a ExprMatrix, will return a deep copy of it.
+
     """
 
     def __init__(self, vars, name=None, rows=None, cols=None, m=None, em=None):
@@ -642,9 +650,8 @@ class ExprM:
             return copy
 
     def __invert__(self):
-        """
-          Return the transpose of a Expression matrix
-        """
+        """Return the transpose of a Expression matrix"""
+
         copy = ExprM(self.vars, em=self)
         result = [[copy.m[i][j] for i in range(copy.info['height'])] for j in range(copy.info['width'])]
         copy.info['height'], copy.info['width'] = copy.info['width'], copy.info['height']
@@ -661,9 +668,8 @@ class ExprM:
         return result
 
     def loc(self, rows=None, cols=None):
-        """
-          get a subset of the matrix by labels
-        """
+        """Get a subset of the matrix by labels"""
+
         copy = ExprM(self.vars, em=self)
         if cols is not None:
             result = [[Expr(copy.m[self.info['rows'].index(i)][self.info['cols'].index(j)]) for j in cols] for i in

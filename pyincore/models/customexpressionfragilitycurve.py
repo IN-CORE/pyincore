@@ -11,9 +11,7 @@ from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class CustomExpressionFragilityCurve(FragilityCurve):
-    """
-    class to represent custom expression fragility curve
-    """
+    """A class to represent custom expression fragility curve"""
 
     def __init__(self, curve_parameters):
         self.expression = curve_parameters['expression']
@@ -21,15 +19,30 @@ class CustomExpressionFragilityCurve(FragilityCurve):
         super(CustomExpressionFragilityCurve, self).__init__(curve_parameters)
 
     def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
+        """
+
+        Args:
+            hazard (float): A hazard value.
+            period (float): A period value.
+            std_dev (float): A standard deviation.
+            **kwargs: Keyword arguments.
+
+        Raises:
+            ValueError: If this limit state calculation method is not supported.
+
+        """
         raise ValueError("Custom Expression Fragility Curve does not support this limit state calculation method. "
                          "Please use compute_custom_limit_state_probability(variables) instead!")
 
     def compute_custom_limit_state_probability(self, variables: dict):
         """Computes custom limit state probabilities.
-            Args:
-                variables: variables to set
 
-            Returns: limit state probability
+        Args:
+            variables (dict): Variables to set.
+
+        Returns:
+            float: A limit state probability.
+
         """
         expression = self.expression
         parser = Parser()
