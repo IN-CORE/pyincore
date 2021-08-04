@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.9.5] - 2021-07-31
+## [0.9.6] - 2021-08-04
+## Fixed
+- Docstrings for technical manual when rendering some method parameters [INCORE1-1333](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1333)
+- A bug related to mean damage analysis [INCORE1-1317](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1317)
+
+## [0.9.5] - 2021-07-28
 ### Changed
 - Handle no hazard exposure cases [INCORE1-1130](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1130)
 - Modify bridge damage to support MMSA bridge damage [INCORE1-1269](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1269) 
