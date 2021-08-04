@@ -108,11 +108,11 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         print("Finished executing household_aggregation() in " +
               str(end_household_aggregation - end_start_household_income_prediction) + " secs")
 
-        #financing_delay = ResidentialBuildingRecovery.financing_delay(household_aggregation, financial_resources,
-                                                                      #num_samples)
-        #end_financing_delay = time.process_time()
-        #print("Finished executing financing_delay() in " +
-        #      str(end_financing_delay - end_household_aggregation) + " secs")
+        financing_delay = ResidentialBuildingRecovery.financing_delay(household_aggregation, financial_resources,
+                                                                      num_samples)
+        end_financing_delay = time.process_time()
+        print("Finished executing financing_delay() in " +
+              str(end_financing_delay - end_household_aggregation) + " secs")
 
         #total_delay = ResidentialBuildingRecovery.total_delay(sample_damage_states, redi_delay_factors,
         # financing_delay,
@@ -200,7 +200,6 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         """
 
         # Drop all unnecessary columns first
-        print(household_income_predictions.head(10))
         household_income_predictions_dropped = household_income_predictions.drop(columns=['huid', 'blockid', 'hhinc'])
         guid_group = household_income_predictions_dropped.groupby('guid')
 
@@ -234,7 +233,6 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
         # Construct a new DataFrame
         household_aggregation_results = pd.concat(new_groups).sort_index()
-        print(household_aggregation_results.head(10))
 
         return household_aggregation_results
 
@@ -252,24 +250,44 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         Returns:
             pd.DataFrame: Results of financial delay
         """
+        colnames = list(household_aggregated_income_groups.columns)[1:]
 
-        financing_delay = pd.DataFrame(columns=household_aggregated_income_groups.columns)
-        for index, row in household_aggregated_income_groups.iterrows():
-            for i in range(num_samples):
-                value = row['sample_{}'.format(i)]
-                hhinc = financial_resources.loc[financial_resources['hhinc'] == float(value)]
-                ind = financial_resources.loc[financial_resources['hhinc'] == float(value)].index[0]
-                delay = np.random.lognormal(np.log(financial_resources['Insurance'][5]),
-                                            financial_resources['Insurance'][6]) * hhinc['Insurance'] + \
-                        np.random.lognormal(np.log(financial_resources['Private'][5]),
-                                            financial_resources['Private'][6]) * hhinc['Private'] + \
-                        np.random.lognormal(np.log(financial_resources['SBA'][5]),
-                                            financial_resources['SBA'][6]) * hhinc['SBA'] + \
-                        np.random.lognormal(np.log(financial_resources['Savings'][5]),
-                                            financial_resources['Savings'][6]) * hhinc['Savings']
-                delay = np.round(delay, 1)
-                row['sample_{}'.format(i)] = delay[ind]
-            financing_delay.loc[index] = row
+        # Save guid's for later
+        household_guids = household_aggregated_income_groups['guid']
+
+        # Convert household aggregated income to numpy
+        samples_np = household_aggregated_income_groups.drop(columns=['guid']).to_numpy()
+
+        # Number of guids
+        num_households = household_guids.shape[0]
+        num_samples = len(colnames)
+
+        # Convert the sample matrix to numpy
+        resources_np = financial_resources.to_numpy()
+
+        # Also, convert financial resources to numpy to perform linear algebra
+        hhinc = resources_np[0:5, 0]
+        sources = resources_np[:, 1:]
+
+        # Give names to mean and sigma indices
+        mean_idx = 5
+        sigma_idx = 6
+
+        for household in range(0, num_households):
+            for sample in range(0, num_samples):
+                value = samples_np[household, sample]
+                idx = np.where(hhinc == value)
+
+                # 1. Sample the lognormal distribution vectorially
+                lognormal_vec = np.random.lognormal(np.log(sources[mean_idx, :]), sources[sigma_idx, :])
+
+                # 2. Compute the delay using the dot product of the prior vector and sources for the current index,
+                # round to one significant figure
+                samples_np[household, sample] = np.round(np.dot(lognormal_vec, sources[idx, :].flatten()), 1)
+
+        financing_delay = pd.DataFrame(samples_np, columns=colnames, index=household_aggregated_income_groups.index)
+        financing_delay.insert(0, 'guid', household_guids)
+
         return financing_delay
 
     @staticmethod
