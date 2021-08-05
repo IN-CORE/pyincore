@@ -108,17 +108,15 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         print("Finished executing household_aggregation() in " +
               str(end_household_aggregation - end_start_household_income_prediction) + " secs")
 
-        financing_delay = ResidentialBuildingRecovery.financing_delay(household_aggregation, financial_resources,
-                                                                      num_samples)
+        financing_delay = ResidentialBuildingRecovery.financing_delay(household_aggregation, financial_resources)
         end_financing_delay = time.process_time()
         print("Finished executing financing_delay() in " +
               str(end_financing_delay - end_household_aggregation) + " secs")
 
-        #total_delay = ResidentialBuildingRecovery.total_delay(sample_damage_states, redi_delay_factors,
-        # financing_delay,
-        #                                                      num_samples)
-        #end_total_delay = time.process_time()
-        #print("Finished executing total_delay() in " + str(end_total_delay - end_financing_delay) + " secs")
+        total_delay = ResidentialBuildingRecovery.total_delay(sample_damage_states, redi_delay_factors,
+                                                                financing_delay)
+        end_total_delay = time.process_time()
+        print("Finished executing total_delay() in " + str(end_total_delay - end_financing_delay) + " secs")
 
         #recovery = self.recovery_rate(buildings, sample_damage_states, total_delay, num_samples)
         #end_recovery = time.process_time()
@@ -175,6 +173,9 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             group_samples = np.zeros((num_samples, group_size))
 
             for i in range(num_samples):
+                # Note to Lisa that this is not the appropriate distribution. Since this case is discrete,
+                # the natural choice is a Bernoulli distribution parameterized as to approximate the
+                # corresponding normal.
                 sample = np.random.normal(mean, std, number_nan)
                 sample[np.where(sample > 5)] = 5
                 sample[np.where(sample < 1)] = 1
@@ -193,7 +194,6 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
         Args:
             household_income_predictions (pd.DataFrame): Income group prediction for each household
-            num_samples (int): Number of sample scenarios.
 
         Returns:
             pd.DataFrame: Results of household aggregation of income groups at the building level.
@@ -237,7 +237,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         return household_aggregation_results
 
     @staticmethod
-    def financing_delay(household_aggregated_income_groups, financial_resources, num_samples):
+    def financing_delay(household_aggregated_income_groups, financial_resources):
         """ Gets financing delay, the percentages calculated are the probabilities of housing units financed by
         different resources.
 
@@ -245,7 +245,6 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             household_aggregated_income_groups (pd.DataFrame): Household aggregation of income groups at the building
                 level.
             financial_resources (pd.DataFrame): Financial resources by household income groups.
-            num_samples (int): Number of sample scenarios.
 
         Returns:
             pd.DataFrame: Results of financial delay
@@ -291,7 +290,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         return financing_delay
 
     @staticmethod
-    def total_delay(sample_damage_states, redi_delay_factors, financing_delay, num_samples):
+    def total_delay(sample_damage_states, redi_delay_factors, financing_delay):
         """ Calculates total delay by combining financial delay and other factors from REDi framework
 
         Args:
@@ -300,31 +299,66 @@ class ResidentialBuildingRecovery(BaseAnalysis):
                 and government permit based on building's damage state.
             financing_delay (pd.DataFrame): Financing delay, the percentages calculated are the probabilities of housing
                 units financed by different resources.
-            num_samples (int): Number of sample scenarios.
 
         Returns:
             pd.DataFrame: Total delay time of financial delay and other factors from REDi framework.
         """
 
-        total_delay = pd.DataFrame(columns=financing_delay.columns)
+        colnames = list(financing_delay.columns)[1:]
 
-        for index, row in sample_damage_states.iterrows():
-            samples_mcs = row["sample_damage_states"].split(",")
+        # Perform an inner join to ensure only households with damage states are processed
+        merged_delay = pd.merge(financing_delay, sample_damage_states, on='guid')
 
-            for i in range(num_samples):
-                value = samples_mcs[i]
+        # Obtain the guids
+        merged_delay_guids = merged_delay['guid']
 
-                # redi_delay_factors dataset represents DS0
-                building_conditions = redi_delay_factors.loc[redi_delay_factors['Building_specific_conditions']
-                                                             == value]
-                inspection = np.random.lognormal(np.log(building_conditions['Ins_med']), building_conditions['Ins_sdv'])
-                engmob = np.random.lognormal(np.log(building_conditions['Enmo_med']), building_conditions['Enmo_sdv'])
-                conmob = np.random.lognormal(np.log(building_conditions['Como_med']), building_conditions['Como_sdv'])
-                permitting = np.random.lognormal(np.log(building_conditions['Per_med']), building_conditions['Per_sdv'])
-                financing_time = financing_delay['sample_{}'.format(i)][index]
-                delay = np.round(inspection[0] + max(engmob[0], conmob[0], financing_time) + permitting[0], 1)
-                row['sample_{}'.format(i)] = delay
-            total_delay.loc[index] = row
+        # Obtain the damage states
+        merged_delay_damage_states = merged_delay['sample_damage_states']
+
+        # Convert to numpy
+        samples_np = merged_delay.drop(columns=['guid', 'sample_damage_states']).to_numpy()
+        num_samples = len(colnames)
+
+        # First, we decompose redi_delay_factors into two dictionaries that can be used to compute vector operations
+        redi_idx = dict(zip(redi_delay_factors['Building_specific_conditions'], redi_delay_factors.index))
+
+        # Next, we produce two intermediate numpy matrices: one for med and one for sdv
+        redi_med = redi_delay_factors[['Ins_med', 'Enmo_med', 'Como_med', 'Per_med']].to_numpy()
+        redi_sdv = redi_delay_factors[['Ins_sdv', 'Enmo_sdv', 'Como_sdv', 'Per_sdv']].to_numpy()
+
+        # Define indices to facilitate interpretation of the code
+        inspection_idx = 0
+        engineer_idx = 1
+        contractor_idx = 2
+        permit_idx = 3
+
+        for i, ds_list in enumerate(list(merged_delay_damage_states)):
+            samples_mcs = ds_list.split(",")
+
+            for j in range(num_samples):
+                # TODO: ask why there are many more damage states than samples
+                # Obtain the index for the corresponding damage state
+                dmg_state_idx = redi_idx[samples_mcs[j]]
+
+                # Use the index to select the appropriate mean and stdev vectors
+                mean_vec = redi_med[dmg_state_idx, :]
+                sdv_vec = redi_sdv[dmg_state_idx, :]
+
+                # Compute the delay vector
+                delay_vec = np.random.lognormal(np.log(mean_vec), sdv_vec)
+
+                # Compute the delay using that vector and financing delays, already computed in the prior step
+                samples_np[i, j] = np.round(delay_vec[inspection_idx] +
+                                            np.max([
+                                                delay_vec[engineer_idx],
+                                                samples_np[i, j],
+                                                delay_vec[contractor_idx]
+                                            ]) +
+                                            delay_vec[permit_idx])
+
+        total_delay = pd.DataFrame(samples_np, columns=colnames)
+        total_delay.insert(0, 'guid', merged_delay_guids)
+
         return total_delay
 
     def recovery_rate(self, buildings, sample_damage_states, total_delay, num_samples):
