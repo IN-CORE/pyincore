@@ -3,6 +3,8 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
+import pprint
+
 import numpy
 import numpy as np
 import pandas as pd
@@ -118,9 +120,9 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         end_total_delay = time.process_time()
         print("Finished executing total_delay() in " + str(end_total_delay - end_financing_delay) + " secs")
 
-        #recovery = self.recovery_rate(buildings, sample_damage_states, total_delay, num_samples)
-        #end_recovery = time.process_time()
-        #print("Finished executing recovery_rate() in " + str(end_recovery - end_total_delay) + " secs")
+        recovery = self.recovery_rate(buildings, sample_damage_states, total_delay)
+        end_recovery = time.process_time()
+        print("Finished executing recovery_rate() in " + str(end_recovery - end_total_delay) + " secs")
 
         #time_stepping_recovery = ResidentialBuildingRecovery.time_stepping_recovery(recovery, num_samples)
         #end_time_stepping_recovery = time.process_time()
@@ -304,6 +306,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             pd.DataFrame: Total delay time of financial delay and other factors from REDi framework.
         """
 
+        # Obtain the column names
         colnames = list(financing_delay.columns)[1:]
 
         # Perform an inner join to ensure only households with damage states are processed
@@ -361,7 +364,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
         return total_delay
 
-    def recovery_rate(self, buildings, sample_damage_states, total_delay, num_samples):
+    def recovery_rate(self, buildings, sample_damage_states, total_delay):
         """ Gets total time required for each building to receive full restoration. Determined by the combination of
         delay time and repair time
 
@@ -369,7 +372,6 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             buildings (list): List of buildings
             sample_damage_states (pd.DataFrame): Samples' damage states
             total_delay (pd.DataFrame): Total delay time of financial delay and other factors from REDi framework.
-            num_samples (int): Number of sample scenarios.
 
         Returns:
             pd.DataFrame: Recovery rates of all buildings for each sample
@@ -380,30 +382,64 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         repair_sets_by_guid = {}  # get repair sets by guid so they can be mapped with output of monte carlo
 
         # This is sort of a workaround until we define Repair Curve models and abstract this out there
-        i = 0
-        for b in buildings:
+        for i, b in enumerate(buildings):
             repair_sets_by_guid[b["properties"]['guid']] = repair_sets[str(i)]
-            i += 1
 
-        recovery_time = total_delay.drop(total_delay.columns[1: num_samples + 1], axis=1)
+        # Obtain the column names
+        colnames = list(total_delay.columns)[1:]
 
-        for count_N1 in range(num_samples):
-            for count_N2 in range(num_samples):
-                recovery_time['sample_{}_{}'.format(count_N1, count_N2)] = 'default'
+        # Perform an inner join to ensure only households with damage states are processed
+        merged_delay = pd.merge(total_delay, sample_damage_states, on='guid')
 
-        for index, row in sample_damage_states.iterrows():
-            guid = row["guid"]
-            samples_mcs = row["sample_damage_states"].split(",")
-            for count_N1 in range(num_samples):
-                state = int(samples_mcs[count_N1].replace("DS_", ""))  # map DS_0 to repair curve at index 0, etc.
-                for count_N2 in range(num_samples):
-                    rand = random.random()
-                    mapped_repair = repair_sets_by_guid[guid]
-                    lognormal_mean = mapped_repair.repair_curves[state].alpha
-                    lognormal_sdv = mapped_repair.repair_curves[state].beta
-                    repair_time = (lognorm.ppf(rand, lognormal_sdv, scale=np.exp(lognormal_mean))) / 7
-                    recovery_time['sample_{}_{}'.format(count_N1, count_N2)][index] = \
-                        round(total_delay['sample_{}'.format(count_N1)][index] + repair_time, 1)
+        # Obtain the guids
+        merged_delay_guids = merged_delay['guid']
+
+        # Obtain the damage states
+        merged_delay_damage_states = merged_delay['sample_damage_states']
+
+        # Convert to numpy
+        samples_np = merged_delay.drop(columns=['guid', 'sample_damage_states']).to_numpy()
+        num_samples = len(colnames)
+        num_households = samples_np.shape[0]
+
+        # Generate a long numpy matrix for combined N1, N2 samples
+        samples_n1_n2 = np.zeros((num_households, num_samples*num_samples))
+
+        # Now, we define an internal function to take care of the index for the prior case
+        # Now, we define an internal function to take care of the index for the prior case
+        def idx(x, y):
+            return x*num_samples + y
+
+        for household in range(0, num_households):
+            # Obtain the damage states
+            mapped_repair = repair_sets_by_guid[merged_delay_guids.iloc[household]]
+            samples_mcs = merged_delay_damage_states.iloc[household].split(",")
+
+            # Use a lambda to obtain the damage state in numeric form. Note that since damage states are single digits,
+            # it suffices to look at the last character and convert into an integer value. Do this computation once
+            # per household only.
+            extract_ds = lambda x: int(x[-1])
+            samples_mcs_ds = list(map(extract_ds, samples_mcs))
+
+            # Now, perform the two nested loops, using the indexing function to simplify the syntax.
+            for i in range(0, num_samples):
+                state = samples_mcs_ds[i]
+                lognormal_mean = mapped_repair.repair_curves[state].alpha
+                lognormal_sdv = mapped_repair.repair_curves[state].beta
+
+                # Generate a vector of random values to use in the inner loop
+                rand_vals = np.random.random(num_samples)
+
+                for j in range(0, num_samples):
+                    # TODO: find an alternative scipy for lognorm.ppf, this line explains 90% of current total CPU time
+                    repair_time = lognorm.ppf(rand_vals[j], lognormal_sdv, scale=np.exp(lognormal_mean)) / 7
+                    samples_n1_n2[household, idx(i, j)] = round(samples_np[household, i] + repair_time, 1)
+
+        # Now, generate all the labels using list comprehension outside the loops
+        colnames = [f'sample_{i}_{j}' for i in range(0, num_samples) for j in range(0, num_samples)]
+        recovery_time = pd.DataFrame(samples_n1_n2, columns=colnames)
+        recovery_time.insert(0, 'guid', merged_delay_guids)
+
         return recovery_time
 
     @staticmethod
