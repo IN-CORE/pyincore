@@ -76,7 +76,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         # Returns dataframe
         recovery_results = self.residential_recovery(buildings, sample_damage_states, socio_demographic_data,
                                                      financial_resources, redi_delay_factors, num_samples)
-        #self.set_result_csv_data("residential_building_recovery", recovery_results, result_name, "dataframe")
+        self.set_result_csv_data("residential_building_recovery", recovery_results, result_name, "dataframe")
 
         return True
 
@@ -124,17 +124,17 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         end_recovery = time.process_time()
         print("Finished executing recovery_rate() in " + str(end_recovery - end_total_delay) + " secs")
 
-        #time_stepping_recovery = ResidentialBuildingRecovery.time_stepping_recovery(recovery, num_samples)
-        #end_time_stepping_recovery = time.process_time()
-        #print("Finished executing time_stepping_recovery() in " +
-        #      str(end_time_stepping_recovery - end_recovery) + " secs")
+        time_stepping_recovery = ResidentialBuildingRecovery.time_stepping_recovery(recovery)
+        end_time_stepping_recovery = time.process_time()
+        print("Finished executing time_stepping_recovery() in " +
+              str(end_time_stepping_recovery - end_recovery) + " secs")
 
-        #result = time_stepping_recovery
+        result = time_stepping_recovery
 
-        #end_time = time.process_time()
-        #print("Analysis completed in " + str(end_time - start_household_income_prediction) + " secs")
+        end_time = time.process_time()
+        print("Analysis completed in " + str(end_time - start_household_income_prediction) + " secs")
 
-        #return result
+        return result
 
     @staticmethod
     def household_income_prediction(income_groups, num_samples):
@@ -443,7 +443,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         return recovery_time
 
     @staticmethod
-    def time_stepping_recovery(recovery_results, num_samples):
+    def time_stepping_recovery(recovery_results):
         """ Converts results to a time frame. Currently gives results for 16 quarters over 4 year.
 
         Args:
@@ -454,24 +454,36 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             pd.DataFrame: Time formatted recovery results.
 
         """
-
         time_step = 90 / 7  # a quarter in weeks
         year = 4
 
         total_time = time_step * np.linspace(0, 4 * year, num=17, endpoint=True)
 
-        for i in range(len(total_time)):
-            recovery_results['quarter_{}'.format(i)] = float(1111)
+        # Save guid's for later
+        recovery_results_guids = recovery_results['guid']
 
-        for index, row in recovery_results.iterrows():
-            row = row.drop('guid').values
+        # Convert household aggregated income to numpy
+        samples_n1_n2 = recovery_results.drop(columns=['guid']).to_numpy()
 
+        # Number of guids
+        num_households = recovery_results.shape[0]
+        num_samples = samples_n1_n2.shape[1]
+        num_times = len(total_time)
+
+        # Generate a numpy to hold the results as desired
+        times_np = np.full((num_households, num_times), 1111.0)
+
+        for household in range(0, num_households):
             for i in range(len(total_time)):
-                fun_state = len(row[row < total_time[i]]) / (len(row) - len(total_time))
-                recovery_results['quarter_{}'.format(i)][index] = round(fun_state, 2)
+                fun_state = np.count_nonzero(samples_n1_n2[household, :] < total_time[i]) / num_samples
+                times_np[household, i] = np.round(fun_state, 2)
 
-        recovery_results = recovery_results.drop(recovery_results.columns[1: num_samples ** 2 + 1], axis=1)
-        return recovery_results
+        colnames = [f'quarter_{i}' for i in range(0, num_times)]
+
+        time_stepping_recovery = pd.DataFrame(times_np, columns=colnames)
+        time_stepping_recovery.insert(0, 'guid', recovery_results_guids)
+
+        return time_stepping_recovery
 
     def get_spec(self):
         """Get specifications of the residential building recovery analysis.
