@@ -429,11 +429,10 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
                 # Generate a vector of random values to use in the inner loop
                 rand_vals = np.random.random(num_samples)
+                repair_time = lognorm.ppf(rand_vals, lognormal_sdv, scale=np.exp(lognormal_mean)) / 7
 
                 for j in range(0, num_samples):
-                    # TODO: find an alternative scipy for lognorm.ppf, this line explains 90% of current total CPU time
-                    repair_time = lognorm.ppf(rand_vals[j], lognormal_sdv, scale=np.exp(lognormal_mean)) / 7
-                    samples_n1_n2[household, idx(i, j)] = round(samples_np[household, i] + repair_time, 1)
+                    samples_n1_n2[household, idx(i, j)] = round(samples_np[household, i] + repair_time[j], 1)
 
         # Now, generate all the labels using list comprehension outside the loops
         colnames = [f'sample_{i}_{j}' for i in range(0, num_samples) for j in range(0, num_samples)]
