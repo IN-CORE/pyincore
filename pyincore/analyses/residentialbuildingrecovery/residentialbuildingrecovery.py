@@ -3,14 +3,11 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-import pprint
 
-import numpy
 import numpy as np
 import pandas as pd
 from scipy.stats import lognorm
 import time
-import random
 
 from pyincore import BaseAnalysis, RepairService
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
@@ -159,7 +156,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
             # Compute normal ddistribution parameters from group data
             mean = np.mean(group_hhinc_values)
-            std = numpy.std(group_hhinc_values)
+            std = np.std(group_hhinc_values)
 
             if np.isnan(mean):
                 mean = 3
@@ -447,7 +444,6 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
         Args:
             recovery_results (pd.DataFrame): Total recovery time of financial delay and other factors from REDi framework.
-            num_samples (int): Number of sample scenarios.
 
         Returns:
             pd.DataFrame: Time formatted recovery results.
