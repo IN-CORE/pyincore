@@ -13,6 +13,8 @@ def run_with_base_class():
     # Joplin
     buildings = "5df7d0de425e0b00092d0082"  # joplin ergo:buildingInventoryVer6 28k buildings
 
+
+    # sample_damage_states = "6112d9ccca3e973ce144b4d9"  # 500 samples 28k buildings - MCS output format
     sample_damage_states = "60f883c059a8cc52bab4dd77"  # 10 samples 28k buildings - MCS output format - fails to run
     socio_demographic_data = "60dbd77602897f12fcd449c3"
     financial_resources = "60dbd64702897f12fcd448f5"
