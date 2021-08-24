@@ -109,7 +109,7 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
         for parameter in fragility_curve_parameters:
             # if default exists, use default
             if parameter["name"] == "num_stories" and "expression" in parameter and parameter["expression"] is not None:
-                num_stories = parameter["expression"]
+                num_stories = evaluateexpression.evaluate(parameter["expression"])
 
             # if exist in building inventory
             for kwargs_key, kwargs_value in kwargs.items():

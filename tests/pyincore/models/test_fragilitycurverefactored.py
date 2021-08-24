@@ -111,3 +111,14 @@ def test_curves_results(curve, hazard_val, refactored_curve, hazard_val_refactor
             refactored_result = refactored_fragility_set.calculate_limit_state_refactored_w_conversion(
                 hazard_val_refactored,
                 num_stories=1)
+
+
+@pytest.mark.parametrize("fragility_set,args,expected", [
+    (get_remote_fragility_set("5b47b2d7337d4a36187c61c9"), {}, 1.08),
+    # 	"(0.097) * math.pow(num_stories * (13.0), 0.624)"
+    (get_remote_fragility_set("5b47b2d8337d4a36187c6c05"), {"num_stories": 2}, 0.7408241022436427),
+    (get_remote_fragility_set("5b47b2d8337d4a36187c6c05"), {}, 0.4806980784822461),
+])
+def test_get_building_period(fragility_set, args, expected):
+    fragility_curve = fragility_set.fragility_curves[0]
+    assert fragility_curve.get_building_period(fragility_set.fragility_curve_parameters, **args) == expected
