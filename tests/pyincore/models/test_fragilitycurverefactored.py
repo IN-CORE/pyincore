@@ -63,7 +63,12 @@ def test_create_fragility_set():
      {"CLEARANCE": 4, "span_maSS": 12, "g_ELEV": 0.2},
      0.142618908),
     (get_fragility_set("fragility_curves/PeriodStandardFragilityCurve_refactored.json"), {"0.2 sec Sa": 4}, {},
-     0.9905435183)
+     0.9905435183),
+    # test liquefaction
+    (get_remote_fragility_set("5b47bcce337d4a37755e0c85"),
+     {"pga": 0.314128903},
+     {"inventory_type": "bridge"},
+     0.8097974088),
 ])
 def test_calculate_limit_state_probability(fragility_set, hazard_values, args, expected):
     result = fragility_set.calculate_limit_state_refactored_w_conversion(hazard_values, **args)
