@@ -41,8 +41,6 @@ class FragilityCurve:
         raise NotImplementedError("This function is currently only applied to Standard Fragility Curve, "
                                   "and Period Standard Fragility Curve")
 
-    @deprecated(version="0.9.7", reason="This method is already incorporated in refactored fragility curves and will "
-                                        "be deprecated")
     def get_building_period(self, num_stories):
         """Get building period from the fragility curve.
 

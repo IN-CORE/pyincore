@@ -47,7 +47,7 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
         for parameter in fragility_curve_parameters:
             # if default exists, use default
             if "expression" in parameter and parameter["expression"] is not None:
-                parameters[parameter["name"]] = evaluateexpression.evaluate(parameter["expression"], parameters)
+                parameters[parameter["name"]] = evaluateexpression.evaluate(parameter["expression"], {})
             else:
                 parameters[parameter["name"]] = None
 
@@ -102,3 +102,22 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
             raise ValueError(error_msg)
 
         return probability
+
+    def get_building_period(self, fragility_curve_parameters, **kwargs):
+        period = 0.0
+        num_stories = 1.0
+        for parameter in fragility_curve_parameters:
+            # if default exists, use default
+            if parameter["name"] == "num_stories" and "expression" in parameter and parameter["expression"] is not None:
+                num_stories = parameter["expression"]
+
+            # if exist in building inventory
+            for kwargs_key, kwargs_value in kwargs.items():
+                if kwargs_key.lower() == "num_stories" and kwargs_value is not None and kwargs_value > 0:
+                    num_stories = kwargs_value
+
+            # calculate period
+            if parameter["name"] == "period" and "expression" in parameter and parameter["expression"] is not None:
+                period = evaluateexpression.evaluate(parameter["expression"], {"num_stories": num_stories})
+
+        return period
