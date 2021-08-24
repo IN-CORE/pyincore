@@ -47,7 +47,7 @@ class FragilityCurveRefactored(FragilityCurve, ABC):
         for parameter in fragility_curve_parameters:
             # if default exists, use default
             if "expression" in parameter and parameter["expression"] is not None:
-                parameters[parameter["name"]] = evaluateexpression.evaluate(parameter["expression"], {})
+                parameters[parameter["name"]] = evaluateexpression.evaluate(parameter["expression"], parameters)
             else:
                 parameters[parameter["name"]] = None
 
