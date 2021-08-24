@@ -4,6 +4,8 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+from deprecated.sphinx import deprecated
+
 
 class FragilityCurve:
     """Abstract class for fragility curves."""
@@ -27,6 +29,8 @@ class FragilityCurve:
         probability = float(0.0)
         return probability
 
+    @deprecated(version="0.9.7", reason="This method is already incorporated in refactored fragility curves and will "
+                                        "be deprecated")
     def adjust_fragility_for_liquefaction(self, liquefaction: str):
         """Adjusts fragility curve object by input parameter liquefaction.
 
@@ -37,6 +41,8 @@ class FragilityCurve:
         raise NotImplementedError("This function is currently only applied to Standard Fragility Curve, "
                                   "and Period Standard Fragility Curve")
 
+    @deprecated(version="0.9.7", reason="This method is already incorporated in refactored fragility curves and will "
+                                        "be deprecated")
     def get_building_period(self, num_stories):
         """Get building period from the fragility curve.
 
