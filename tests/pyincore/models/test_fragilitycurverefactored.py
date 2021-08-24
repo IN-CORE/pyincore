@@ -45,7 +45,7 @@ def get_remote_fragility_set(fragility_id: str):
 
 def test_create_fragility_set():
     fragility_set = get_fragility_set("refactored_fragility_curve.json")
-    assert fragility_set.id == "5f6ccf67de7b566bb71b202d" and len(fragility_set.fragility_curves) != 0
+    assert len(fragility_set.fragility_curves) != 0
 
 
 @pytest.mark.parametrize("fragility_set,hazard_values,args,expected", [

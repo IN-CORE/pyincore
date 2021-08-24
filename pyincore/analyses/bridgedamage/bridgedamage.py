@@ -173,11 +173,6 @@ class BridgeDamage(BaseAnalysis):
             damage_result = dict()
             selected_fragility_set = fragility_set[bridge["id"]]
 
-            adjusted_fragility_set = copy.deepcopy(selected_fragility_set)
-            if use_liquefaction and 'liq' in bridge['properties']:
-                for fragility in adjusted_fragility_set.fragility_curves:
-                    fragility.adjust_fragility_for_liquefaction(bridge['properties']['liq'])
-
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
                 # Supports multiple demand types in same fragility
                 hazard_val = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
@@ -190,7 +185,7 @@ class BridgeDamage(BaseAnalysis):
                     hval_dict[d] = hazard_val[j]
                     j += 1
 
-                bridge_args = adjusted_fragility_set.construct_expression_args_from_inventory(bridge)
+                bridge_args = selected_fragility_set.construct_expression_args_from_inventory(bridge)
                 dmg_probability = \
                     selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
                                                                                          inventory_type="bridge",
