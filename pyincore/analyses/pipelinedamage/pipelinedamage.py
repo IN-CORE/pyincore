@@ -104,8 +104,6 @@ class PipelineDamage(BaseAnalysis):
             dict: An ordered dictionaries with other pipeline data/metadata.
 
         """
-        pipeline_results = []
-        damage_results = []
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -158,6 +156,9 @@ class PipelineDamage(BaseAnalysis):
         pipeline_results = []
         damage_results = []
         for i, pipeline in enumerate(mapped_pipelines):
+            limit_states = dict()
+            dmg_intervals = dict()
+            pipeline_result = dict()
             fragility_set = fragility_sets[pipeline["id"]]
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
@@ -172,19 +173,21 @@ class PipelineDamage(BaseAnalysis):
                 for j, d in enumerate(fragility_set.demand_types):
                     hval_dict[d] = haz_vals[j]
 
-                pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
-                limit_states = fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
-                                                                                           inventory_type="pipeline",
-                                                                                           **pipeline_args)
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_vals[i]["hazardValues"]):
+                    pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
+                    limit_states = fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
+                                                                                               inventory_type="pipeline",
+                                                                                               **pipeline_args)
+                    dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
+                                                                            inventory_type="pipeline")
 
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
 
-            dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
-                                                                    inventory_type="pipeline")
-
-            pipeline_result = {'guid': pipeline['properties']['guid'], **limit_states, **dmg_intervals}
+            pipeline_result['guid'] = pipeline['properties']['guid']
+            pipeline_result.update(limit_states)
+            pipeline_result.update(dmg_intervals)
             pipeline_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(haz_vals, hazard_type)
             damage_result = dict()
             damage_result['guid'] = pipeline['properties']['guid']

@@ -165,6 +165,8 @@ class BuildingDamage(BaseAnalysis):
         for b in mapped_buildings:
             ds_result = dict()
             damage_result = dict()
+            dmg_probability = dict()
+            dmg_interval = dict()
             b_id = b["id"]
             num_stories = b['properties']['no_stories']
             selected_fragility_set = fragility_sets[b_id]
@@ -187,17 +189,16 @@ class BuildingDamage(BaseAnalysis):
                 for d in selected_fragility_set.demand_types:
                     hval_dict[d] = b_haz_vals[j]
                     j += 1
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_vals[i]["hazardValues"]):
+                    building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
 
-                building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
-
-                dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
-                    hval_dict, **building_args, period=building_period)
+                    dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
+                        hval_dict, **building_args, period=building_period)
+                    dmg_interval = selected_fragility_set.calculate_damage_interval(
+                        dmg_probability, hazard_type=hazard_type, inventory_type="building")
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
-
-            dmg_interval = selected_fragility_set.calculate_damage_interval(
-                dmg_probability, hazard_type=hazard_type, inventory_type="building")
 
             ds_result['guid'] = b['properties']['guid']
             damage_result['guid'] = b['properties']['guid']

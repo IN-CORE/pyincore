@@ -201,8 +201,25 @@ class PipelineDamageRepairRate(BaseAnalysis):
         damage_results = []
         for i, pipeline in enumerate(mapped_pipelines):
             # default
-            pgv_repairs = 0.0
-            pgd_repairs = 0.0
+            pgv_repairs = None
+            pgd_repairs = None
+            total_repair_rate = None
+            break_rate = None
+            leak_rate = None
+            failure_probability = None
+            num_pgv_repairs = None
+            num_pgd_repairs = None
+            num_repairs = None
+
+            liq_hazard_vals = None
+            liq_demand_types = None
+            liq_demand_units = None
+            liquefaction_prob = None
+
+            ds_result = dict()
+            damage_result = dict()
+            ds_result['guid'] = pipeline['properties']['guid']
+            damage_result['guid'] = pipeline['properties']['guid']
 
             fragility_set = fragility_sets[pipeline["id"]]
             # TODO assume there is only one curve
@@ -218,73 +235,68 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 for j, d in enumerate(fragility_set.demand_types):
                     hval_dict[d] = hazard_vals[j]
 
-                pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
-                pgv_repairs = fragility_curve.calculate_limit_state_probability(hval_dict,
-                                                                                fragility_set.fragility_curve_parameters,
-                                                                                **pipeline_args)
-                # Convert PGV repairs to SI units
-                pgv_repairs = PipelineUtil.convert_result_unit(fragility_curve.return_type["unit"], pgv_repairs)
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp[i]["hazardValues"]):
+                    pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
+                    pgv_repairs = fragility_curve.calculate_limit_state_probability(hval_dict,
+                                                                                    fragility_set.fragility_curve_parameters,
+                                                                                    **pipeline_args)
+                    # Convert PGV repairs to SI units
+                    pgv_repairs = PipelineUtil.convert_result_unit(fragility_curve.return_type["unit"], pgv_repairs)
+
+                    # Check if liquefaction is applicable
+                    if use_liquefaction is True \
+                            and fragility_sets_liq is not None \
+                            and geology_dataset_id is not None \
+                            and liquefaction_resp is not None:
+                        fragility_set_liq = fragility_sets_liq[pipeline["id"]]
+
+                        # TODO assume there is only one curve
+                        liq_fragility_curve = fragility_set_liq.fragility_curves[0]
+
+                        # TODO: Once all fragilities are migrated to new format, we can remove this condition
+                        if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurveRefactored):
+                            liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
+                            liq_demand_types = liquefaction_resp[i]["demands"]
+                            liq_demand_units = liquefaction_resp[i]["units"]
+                            liquefaction_prob = liquefaction_resp[i]['liqProbability']
+                            liq_hval_dict = dict()
+                            for j, d in enumerate(liquefaction_resp[i]["demands"]):
+                                liq_hval_dict[d] = liq_hazard_vals[j]
+
+                            # !important! removing the liqProbability and passing in the "diameter"
+                            # no fragility is actually using liqProbability
+                            pipeline_args = fragility_set_liq.construct_expression_args_from_inventory(pipeline)
+                            pgd_repairs = liq_fragility_curve.calculate_limit_state_probability(liq_hval_dict,
+                                                                                                fragility_set_liq.fragility_curve_parameters,
+                                                                                                **pipeline_args)
+                            # Convert PGD repairs to SI units
+                            pgd_repairs = PipelineUtil.convert_result_unit(liq_fragility_curve.return_type["unit"],
+                                                                           pgd_repairs)
+                            total_repair_rate = pgd_repairs + pgv_repairs
+                            break_rate = 0.2 * pgv_repairs + 0.8 * pgd_repairs
+                            leak_rate = 0.8 * pgv_repairs + 0.2 * pgd_repairs
+
+                            length = PipelineUtil.get_pipe_length(pipeline)
+
+                            failure_probability = 1 - math.exp(-1.0 * break_rate * length)
+                            num_pgd_repairs = pgd_repairs * length
+                            num_pgv_repairs = pgv_repairs * length
+                            num_repairs = num_pgd_repairs + num_pgv_repairs
+
+                            # record results
+                            if 'pipetype' in pipeline['properties']:
+                                damage_result['pipeclass'] = pipeline['properties']['pipetype']
+                            elif 'pipelinesc' in pipeline['properties']:
+                                damage_result['pipeclass'] = pipeline['properties']['pipelinesc']
+                            else:
+                                damage_result['pipeclass'] = ""
+                        else:
+                            raise ValueError("One of the fragilities is in deprecated format. This should not happen. "
+                                             "If you are seeing this please report the issue.")
 
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
-
-            # Check if liquefaction is applicable
-            if use_liquefaction is True \
-                    and fragility_sets_liq is not None \
-                    and geology_dataset_id is not None \
-                    and liquefaction_resp is not None:
-                fragility_set_liq = fragility_sets_liq[pipeline["id"]]
-
-                # TODO assume there is only one curve
-                liq_fragility_curve = fragility_set_liq.fragility_curves[0]
-
-                # TODO: Once all fragilities are migrated to new format, we can remove this condition
-                if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurveRefactored):
-                    liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
-                    liq_demand_types = liquefaction_resp[i]["demands"]
-                    liq_demand_units = liquefaction_resp[i]["units"]
-                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
-                    liq_hval_dict = dict()
-                    for j, d in enumerate(liquefaction_resp[i]["demands"]):
-                        liq_hval_dict[d] = liq_hazard_vals[j]
-
-                    # !important! removing the liqProbability and passing in the "diameter"
-                    # no fragility is actually using liqProbability
-                    pipeline_args = fragility_set_liq.construct_expression_args_from_inventory(pipeline)
-                    pgd_repairs = liq_fragility_curve.calculate_limit_state_probability(liq_hval_dict,
-                                                                                        fragility_set_liq.fragility_curve_parameters,
-                                                                                        **pipeline_args)
-                    # Convert PGD repairs to SI units
-                    pgd_repairs = PipelineUtil.convert_result_unit(liq_fragility_curve.return_type["unit"],
-                                                                   pgd_repairs)
-
-                else:
-                    raise ValueError("One of the fragilities is in deprecated format. This should not happen. "
-                                     "If you are seeing this please report the issue.")
-
-            total_repair_rate = pgd_repairs + pgv_repairs
-            break_rate = 0.2 * pgv_repairs + 0.8 * pgd_repairs
-            leak_rate = 0.8 * pgv_repairs + 0.2 * pgd_repairs
-
-            length = PipelineUtil.get_pipe_length(pipeline)
-
-            failure_probability = 1 - math.exp(-1.0 * break_rate * length)
-            num_pgd_repairs = pgd_repairs * length
-            num_pgv_repairs = pgv_repairs * length
-            num_repairs = num_pgd_repairs + num_pgv_repairs
-
-            # record results
-            ds_result = dict()
-            damage_result = dict()
-            ds_result['guid'] = pipeline['properties']['guid']
-            damage_result['guid'] = pipeline['properties']['guid']
-            if 'pipetype' in pipeline['properties']:
-                damage_result['pipeclass'] = pipeline['properties']['pipetype']
-            elif 'pipelinesc' in pipeline['properties']:
-                damage_result['pipeclass'] = pipeline['properties']['pipelinesc']
-            else:
-                damage_result['pipeclass'] = ""
 
             ds_result['pgvrepairs'] = pgv_repairs
             ds_result['pgdrepairs'] = pgd_repairs

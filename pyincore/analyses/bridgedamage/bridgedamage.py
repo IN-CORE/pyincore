@@ -171,12 +171,9 @@ class BridgeDamage(BaseAnalysis):
         for bridge in mapped_bridges:
             ds_result = dict()
             damage_result = dict()
+            dmg_probability = dict()
+            dmg_intervals = dict()
             selected_fragility_set = fragility_set[bridge["id"]]
-
-            adjusted_fragility_set = copy.deepcopy(selected_fragility_set)
-            if use_liquefaction and 'liq' in bridge['properties']:
-                for fragility in adjusted_fragility_set.fragility_curves:
-                    fragility.adjust_fragility_for_liquefaction(bridge['properties']['liq'])
 
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
                 # Supports multiple demand types in same fragility
@@ -190,14 +187,14 @@ class BridgeDamage(BaseAnalysis):
                     hval_dict[d] = hazard_val[j]
                     j += 1
 
-                bridge_args = adjusted_fragility_set.construct_expression_args_from_inventory(bridge)
-                dmg_probability = \
-                    selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
-                                                                                         inventory_type="bridge",
-                                                                                         **bridge_args)
-                dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
-                                                                                 hazard_type=hazard_type,
-                                                                                 inventory_type="bridge")
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_vals[i]["hazardValues"]):
+                    bridge_args = selected_fragility_set.construct_expression_args_from_inventory(bridge)
+                    dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
+                                                                                             inventory_type="bridge",
+                                                                                             **bridge_args)
+                    dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
+                                                                                     hazard_type=hazard_type,
+                                                                                     inventory_type="bridge")
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
