@@ -377,19 +377,24 @@ class HazardService:
 
         return response
 
-    def post_tornado_hazard_values(self, hazard_id: str, payload: list):
+    def post_tornado_hazard_values(self, hazard_id: str, payload: list, seed=None):
         """ Retrieve bulk tornado hazard values from the Hazard service.
 
         Args:
             hazard_id (str): ID of the Tornado.
             payload (list):
+            seed: (None or int): Seed value for random values.
         Returns:
             obj: Hazard values.
 
         """
         url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/values")
 
-        kwargs = {"files": {('points', json.dumps(payload))}}
+        if seed is not None:
+            kwargs = {"files": {('points', json.dumps(payload)), ('seed', json.dumps(seed))}}
+        else:
+            kwargs = {"files": {('points', json.dumps(payload))}}
+
         r = self.client.post(url, **kwargs)
         response = r.json()
 

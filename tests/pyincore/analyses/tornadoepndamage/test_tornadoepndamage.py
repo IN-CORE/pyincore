@@ -19,6 +19,7 @@ def run_with_base_class():
     result_name = "tornado_dmg_result"
     ted.set_parameter("result_name", result_name)
     ted.set_parameter('tornado_id', tornado_id)
+    ted.set_parameter('seed', 1001)
 
     ted.run_analysis()
 

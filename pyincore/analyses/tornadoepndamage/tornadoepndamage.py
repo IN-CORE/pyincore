@@ -90,7 +90,6 @@ class TornadoEpnDamage(BaseAnalysis):
     def run(self):
         node_dataset = self.get_input_dataset("epn_node").get_inventory_reader()
         link_dataset = self.get_input_dataset("epn_link").get_inventory_reader()
-
         tornado_id = self.get_parameter('tornado_id')
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
         self.load_remote_input_dataset("tornado", tornado_metadata["datasetId"])
@@ -293,8 +292,9 @@ class TornadoEpnDamage(BaseAnalysis):
                                         "units": [x.lower() for x in fragility_set_used.demand_units],
                                         "loc": str(any_point.coords[0][1]) + "," + str(any_point.coords[0][0])
                                     }]
+
                                     h_vals = self.hazardsvc.post_tornado_hazard_values(
-                                        tornado_id, values_payload)
+                                        tornado_id, values_payload, self.get_parameter('seed'))
                                     tor_hazard_values = AnalysisUtil.update_precision_of_lists(
                                         h_vals[0]["hazardValues"])
                                     demand_types = h_vals[0]["demands"]
@@ -517,6 +517,12 @@ class TornadoEpnDamage(BaseAnalysis):
                     'required': True,
                     'description': 'Tornado hazard id',
                     'type': str
+                },
+                {
+                    'id': 'seed',
+                    'required': False,
+                    'description': 'Initial seed for the tornado hazard value',
+                    'type': int
                 }
             ],
             'input_datasets': [
