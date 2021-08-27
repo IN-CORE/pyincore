@@ -33,28 +33,6 @@ def test_get_earthquake_hazard_metadata(hazardsvc):
     assert response['id'] == "5b902cb273c3371e1236b36b"
 
 
-def test_get_earthquake_hazard_value(hazardsvc):
-    """
-    testing getting hazard value
-    """
-    hval = hazardsvc.get_earthquake_hazard_value("5b902cb273c3371e1236b36b",
-                                                 "0.2 SA", "g", 35.07899,
-                                                 -90.0178)
-    assert hval == 0.5322993805448739
-
-
-def test_get_earthquake_hazard_values(hazardsvc):
-    """
-    Testing getting multiple hazard values
-    """
-    hvals = hazardsvc.get_earthquake_hazard_values("5b902cb273c3371e1236b36b",
-                                                   "0.2 SA", "g",
-                                                   ["35.07899,-90.0178",
-                                                    "35.17899,-90.0178"])
-    assert hvals[0]['hazardValue'] == 0.5322993805448739 and hvals[1][
-        'hazardValue'] == 0.5926201634382787
-
-
 def test_get_earthquake_hazard_value_set(hazardsvc):
     # raster?demandType=0.2+SA&demandUnits=g&minX=-90.3099&minY=34.9942&maxX=-89.6231&maxY=35.4129&gridSpacing=0.01696
     x, y, hazard_val = hazardsvc.get_earthquake_hazard_value_set(
@@ -79,7 +57,7 @@ def test_post_earthquake_hazard_values(hazardsvc):
         }
     ]
     response = hazardsvc.post_earthquake_hazard_values(
-        "5ba92505ec23090435209071",
+        "5b902cb273c3371e1236b36b",
         payload
     )
 
@@ -88,8 +66,8 @@ def test_post_earthquake_hazard_values(hazardsvc):
            and response[0]['units'] == payload[0]['units'] \
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
            and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
-           and response[0]['hazardValues'] == [6.450534998833372e-07, 0.0004718339145815013, 0.0023929501099907297,
-                                               0.00047485016281570663, 0.0891881076522886]
+           and response[0]['hazardValues'] == [1.5411689639186665, 2.5719942615949374, 0.9241786244448712,
+                                               2.5884360071121133, 34.445240752324956]
 
 
 def test_get_liquefaction_values(hazardsvc):
@@ -255,21 +233,6 @@ def test_get_tsunami_hazard_metadata(hazardsvc):
     assert response['id'] == "5bc9e25ef7b08533c7e610dc"
 
 
-def test_get_tsunami_hazard_value(hazardsvc):
-    response = hazardsvc.get_tsunami_hazard_value("5bc9ead7f7b08533c7e610e0",
-                                                  "hmax", "m", 46.006,
-                                                  -123.935)
-    assert response == 5.900000095367432
-
-
-def test_get_tsunami_hazard_values(hazardsvc):
-    response = hazardsvc.get_tsunami_hazard_values("5bc9ead7f7b08533c7e610e0",
-                                                   "hmax", "m",
-                                                   ["46.006,-123.935",
-                                                    "46.007, -123.969"])
-    assert response[0]["hazardValue"] == 5.900000095367432 and response[1]["hazardValue"] == 4.099999904632568
-
-
 def test_post_tsunami_hazard_values(hazardsvc):
     payload = [
         {
@@ -333,12 +296,6 @@ def test_get_hurricane_metadata(hazardsvc):
 def test_get_hurricane_metadata_list(hazardsvc):
     response = hazardsvc.get_hurricane_metadata_list()
     assert len(response) > 0 and 'id' in response[0].keys()
-
-
-def test_get_hurricane_values(hazardsvc):
-    response = hazardsvc.get_hurricane_values("5f10837c01d3241d77729a4f",
-                                              "inundationDuration", "hr", ["29.22,-95.06", "29.20, -95.10"])
-    assert response[0]["hazardValue"] == 18.346923306935572 and response[1]["hazardValue"] == 14.580423799099865
 
 
 def test_post_hurricane_values(hazardsvc):
@@ -406,12 +363,6 @@ def test_get_flood_metadata_list(hazardsvc):
     assert len(response) > 0 and 'id' in response[0].keys()
 
 
-def test_get_flood_values(hazardsvc):
-    response = hazardsvc.get_flood_values("5f4d02e99f43ee0dde768406", "waterSurfaceElevation", "ft",
-                                          ["34.60,-79.16", "34.62,-79.16"])
-    assert response[0]["hazardValue"] == 137.69830322265625 and response[1]["hazardValue"] == 141.17652893066406
-
-
 def test_post_flood_hazard_values(hazardsvc):
     payload = [
         {
@@ -458,14 +409,6 @@ def test_get_hurricanewf_metadata(hazardsvc):
 def test_get_hurricanewf_metadata_list(hazardsvc):
     response = hazardsvc.get_hurricanewf_metadata_list(coast="florida")
     assert len(response) > 0 and 'id' in response[0].keys()
-
-
-@pytest.mark.skip(reason="performance issues")
-def test_get_hurricanewf_values(hazardsvc):
-    hvals = hazardsvc.get_hurricanewf_values("5cffdcf35648c404a6414f7e",
-                                             "3s", "mph", ["28,-81"], 10.0, 0.03)
-
-    assert (pytest.approx(hvals[0]['hazardValue'], 1e-6) == 81.57440785011988)
 
 
 def test_post_hurricanewf_hazard_values(hazardsvc):

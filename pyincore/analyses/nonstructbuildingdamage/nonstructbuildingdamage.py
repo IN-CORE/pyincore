@@ -189,6 +189,10 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         # calculate LS and DS
         for i, building in enumerate(mapped_buildings):
+            dmg_probability_as = {"LS_0": None, "LS_1": None, "LS_2": None}
+            dmg_interval_as = {"DS_0": None, "DS_1": None, "DS_2": None, "DS_3": None}
+            dmg_probability_ds = {"LS_0": None, "LS_1": None, "LS_2": None}
+            dmg_interval_ds = {"DS_0": None, "DS_1": None, "DS_2": None, "DS_3": None}
             fragility_set_as = fragility_sets_as[building["id"]]
             fragility_set_ds = fragility_sets_ds[building["id"]]
 
@@ -206,23 +210,25 @@ class NonStructBuildingDamage(BaseAnalysis):
                 hval_dict_as = dict()
                 for j, d in enumerate(fragility_set_as.demand_types):
                     hval_dict_as[d] = hazard_vals_as[j]
-                building_args = fragility_set_as.construct_expression_args_from_inventory(building)
-                dmg_probability_as = fragility_set_as. \
-                    calculate_limit_state_refactored_w_conversion(hval_dict_as, inventory_type="building",
-                                                                  **building_args)
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp_as[i]["hazardValues"]):
+                    building_args = fragility_set_as.construct_expression_args_from_inventory(building)
+                    dmg_probability_as = fragility_set_as. \
+                        calculate_limit_state_refactored_w_conversion(hval_dict_as, inventory_type="building",
+                                                                      **building_args)
+                    # adjust dmg probability for liquefaction
+                    if use_liquefaction:
+                        if liq_geology_dataset_id is not None:
+                            liquefaction_dmg = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i][
+                                                                                          "groundFailureProb"])
+                            dmg_probability_as = AnalysisUtil.update_precision_of_dicts(
+                                NonStructBuildingUtil.adjust_damage_for_liquefaction(dmg_probability_as,
+                                                                                     liquefaction_dmg))
+                    dmg_interval_as = fragility_set_ds.calculate_damage_interval(dmg_probability_as,
+                                                                                 hazard_type=hazard_type,
+                                                                                 inventory_type="building")
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
-            # adjust dmg probability for liquefaction
-            if use_liquefaction:
-                if liq_geology_dataset_id is not None:
-                    liquefaction_dmg = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i][
-                                                                                  "groundFailureProb"])
-                    dmg_probability_as = \
-                        AnalysisUtil.update_precision_of_dicts(NonStructBuildingUtil.adjust_damage_for_liquefaction(
-                            dmg_probability_as, liquefaction_dmg))
-            dmg_interval_as = fragility_set_ds.calculate_damage_interval(dmg_probability_as, hazard_type=hazard_type,
-                                                                         inventory_type="building")
 
             ###############
             # DS
@@ -234,23 +240,25 @@ class NonStructBuildingDamage(BaseAnalysis):
                 for j, d in enumerate(fragility_set_ds.demand_types):
                     hval_dict_ds[d] = hazard_vals_ds[j]
 
-                building_args = fragility_set_ds.construct_expression_args_from_inventory(building)
-                dmg_probability_ds = fragility_set_ds. \
-                    calculate_limit_state_refactored_w_conversion(hval_dict_ds, inventory_type="building",
-                                                                  **building_args)
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp_ds[i]["hazardValues"]):
+                    building_args = fragility_set_ds.construct_expression_args_from_inventory(building)
+                    dmg_probability_ds = fragility_set_ds. \
+                        calculate_limit_state_refactored_w_conversion(hval_dict_ds, inventory_type="building",
+                                                                      **building_args)
+                    # adjust dmg probability for liquefaction
+                    if use_liquefaction:
+                        if liq_geology_dataset_id is not None:
+                            liquefaction_dmg = AnalysisUtil.update_precision_of_lists(
+                                liquefaction_resp[i]["groundFailureProb"])
+                            dmg_probability_ds = AnalysisUtil.update_precision_of_dicts(
+                                NonStructBuildingUtil.adjust_damage_for_liquefaction(dmg_probability_ds,
+                                                                                     liquefaction_dmg))
+                    dmg_interval_ds = fragility_set_ds.calculate_damage_interval(dmg_probability_ds,
+                                                                                 hazard_type=hazard_type,
+                                                                                 inventory_type="building")
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
-            # adjust dmg probability for liquefaction
-            if use_liquefaction:
-                if liq_geology_dataset_id is not None:
-                    liquefaction_dmg = AnalysisUtil.update_precision_of_lists(
-                        liquefaction_resp[i]["groundFailureProb"])
-                    dmg_probability_ds = \
-                        AnalysisUtil.update_precision_of_dicts(NonStructBuildingUtil.adjust_damage_for_liquefaction(
-                            dmg_probability_ds, liquefaction_dmg))
-            dmg_interval_ds = fragility_set_ds.calculate_damage_interval(dmg_probability_ds, hazard_type=hazard_type,
-                                                                         inventory_type="building")
 
             # put results in dictionary
             # AS denotes acceleration-sensitive fragility assigned to the building.

@@ -171,6 +171,8 @@ class BridgeDamage(BaseAnalysis):
         for bridge in mapped_bridges:
             ds_result = dict()
             damage_result = dict()
+            dmg_probability = dict()
+            dmg_intervals = dict()
             selected_fragility_set = fragility_set[bridge["id"]]
 
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
@@ -185,14 +187,15 @@ class BridgeDamage(BaseAnalysis):
                     hval_dict[d] = hazard_val[j]
                     j += 1
 
-                bridge_args = selected_fragility_set.construct_expression_args_from_inventory(bridge)
-                dmg_probability = \
-                    selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
-                                                                                         inventory_type="bridge",
-                                                                                         **bridge_args)
-                dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
-                                                                                 hazard_type=hazard_type,
-                                                                                 inventory_type="bridge")
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_vals[i]["hazardValues"]):
+                    bridge_args = selected_fragility_set.construct_expression_args_from_inventory(bridge)
+                    dmg_probability = \
+                        selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
+                                                                                             inventory_type="bridge",
+                                                                                             **bridge_args)
+                    dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
+                                                                                     hazard_type=hazard_type,
+                                                                                     inventory_type="bridge")
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")

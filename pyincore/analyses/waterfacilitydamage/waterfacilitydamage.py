@@ -232,6 +232,8 @@ class WaterFacilityDamage(BaseAnalysis):
 
         for i, facility in enumerate(mapped_waterfacilities):
             fragility_set = fragility_sets[facility["id"]]
+            limit_states = dict()
+            dmg_intervals = dict()
 
             # Setup conditions for the analysis
             hazard_std_dev = 0
@@ -249,47 +251,46 @@ class WaterFacilityDamage(BaseAnalysis):
                 for j, d in enumerate(fragility_set.demand_types):
                     hval_dict[d] = hazard_vals[j]
 
-                facility_args = fragility_set.construct_expression_args_from_inventory(facility)
-                limit_states = \
-                    fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
-                                                                                std_dev=hazard_std_dev,
-                                                                                inventory_type='water_facility',
-                                                                                **facility_args)
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp[i]["hazardValues"]):
+                    facility_args = fragility_set.construct_expression_args_from_inventory(facility)
+                    limit_states = \
+                        fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
+                                                                                    std_dev=hazard_std_dev,
+                                                                                    inventory_type='water_facility',
+                                                                                    **facility_args)
+                    # Evaluate liquefaction: if it is not none, then liquefaction is available
+                    if liquefaction_resp is not None:
+                        fragility_set_liq = fragility_sets_liq[facility["id"]]
+
+                        if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurveRefactored):
+                            liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
+                            liq_demand_types = liquefaction_resp[i]["demands"]
+                            liq_demand_units = liquefaction_resp[i]["units"]
+                            liquefaction_prob = liquefaction_resp[i]['liqProbability']
+
+                            hval_dict_liq = dict()
+
+                            for j, d in enumerate(fragility_set_liq.demand_types):
+                                hval_dict_liq[d] = liq_hazard_vals[j]
+
+                            facility_liq_args = fragility_set_liq.construct_expression_args_from_inventory(facility)
+                            pgd_limit_states = \
+                                fragility_set_liq.calculate_limit_state_refactored_w_conversion(
+                                    hval_dict_liq,std_dev=hazard_std_dev,inventory_type="water_facility",
+                                    **facility_liq_args)
+                        else:
+                            raise ValueError("One of the fragilities is in deprecated format. This should not happen. "
+                                         "If you are seeing this please report the issue.")
+
+                        limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
+
+                    dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
+                                                                        inventory_type='water_facility')
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
 
             # TODO: ideally, this goes into a single variable declaration section
-
-            # Evaluate liquefaction: if it is not none, then liquefaction is available
-            if liquefaction_resp is not None:
-                fragility_set_liq = fragility_sets_liq[facility["id"]]
-
-                if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurveRefactored):
-                    liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
-                    liq_demand_types = liquefaction_resp[i]["demands"]
-                    liq_demand_units = liquefaction_resp[i]["units"]
-                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
-
-                    hval_dict_liq = dict()
-
-                    for j, d in enumerate(fragility_set_liq.demand_types):
-                        hval_dict_liq[d] = liq_hazard_vals[j]
-
-                    facility_liq_args = fragility_set_liq.construct_expression_args_from_inventory(facility)
-                    pgd_limit_states = \
-                        fragility_set_liq.calculate_limit_state_refactored_w_conversion(hval_dict_liq,
-                                                                                        std_dev=hazard_std_dev,
-                                                                                        inventory_type="water_facility",
-                                                                                        **facility_liq_args)
-                else:
-                    raise ValueError("One of the fragilities is in deprecated format. This should not happen. "
-                                     "If you are seeing this please report the issue.")
-
-                limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
-
-            dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
-                                                                    inventory_type='water_facility')
 
             facility_result = {'guid': facility['properties']['guid'], **limit_states, **dmg_intervals}
             facility_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)

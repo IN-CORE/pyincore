@@ -48,9 +48,11 @@ class AnalysisUtil:
     def update_precision_of_lists(hazard_vals: List) -> List:
         updated_hazard_vals = []
         for val in hazard_vals:
-            # Also handle -9999/NaN when hazard service handles exceptions
             if val is not None:
-                updated_hazard_vals.append(AnalysisUtil.update_precision(val))
+                if math.ceil(val) == -9999:  # if it's an error code(-9999.x) do not update precision
+                    updated_hazard_vals.append(val)
+                else:
+                    updated_hazard_vals.append(AnalysisUtil.update_precision(val))
             else:
                 updated_hazard_vals.append(None)
         return updated_hazard_vals
@@ -541,16 +543,31 @@ class AnalysisUtil:
         if len(hazard_vals) == 0:
             return "error"
 
-        supported_hazards = ["tornado", "flood"]
+        supported_hazards = ["earthquake", "tsunami", "tornado", "hurricane", "flood"]
         hazard_exposure = "n/a"
         if hazard_type.lower() in supported_hazards:
-            cnt_hazard_vals = Counter(hazard_vals)
-            if None in cnt_hazard_vals:
-                if cnt_hazard_vals.get(None) == len(hazard_vals):
-                    hazard_exposure = "no"
-                else:
-                    hazard_exposure = "partial"
+            if AnalysisUtil.do_hazard_values_have_errors(hazard_vals):
+                hazard_exposure = "error"
             else:
-                hazard_exposure = "yes"  # none of the values are nulls
+                cnt_hazard_vals = Counter(hazard_vals)
+                if None in cnt_hazard_vals:
+                    if cnt_hazard_vals.get(None) == len(hazard_vals):
+                        hazard_exposure = "no"
+                    else:
+                        hazard_exposure = "partial"
+                else:
+                    hazard_exposure = "yes"  # none of the values are nulls
 
         return hazard_exposure
+
+    @staticmethod
+    def do_hazard_values_have_errors(hazard_vals):
+        """ Checks if any of the hazard values have errors
+
+        Args:
+            hazard_vals(list): List of hazard values returned by the service for a particular point
+
+        Returns: True if any of the values are error codes such as -9999.1, -9999.2 etc.
+
+        """
+        return any("-9999" in str(val) for val in hazard_vals)

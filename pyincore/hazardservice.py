@@ -78,48 +78,7 @@ class HazardService:
 
         return response
 
-    def get_earthquake_hazard_value(self, hazard_id: str, demand_type: str,
-                                    demand_unit: str, site_lat, site_long):
-        """Retrieve earthquake hazard value from the Hazard service.
 
-        Args:
-            hazard_id (str): ID of the Earthquake.
-            demand_type (str):  Ground motion demand type. Examples: PGA, PGV, 0.2 SA
-            demand_unit (str): Ground motion demand unit. Examples: g, %g, cm/s, etc.
-            points (list): Latitude and longitude of a point.
-
-        Returns:
-            obj: Hazard value.
-
-        """
-        hazard_value_set = self.get_earthquake_hazard_values(hazard_id,
-                                                             demand_type,
-                                                             demand_unit,
-                                                             points=[str(site_lat) + "," + str(site_long)])
-        return hazard_value_set[0]['hazardValue']
-
-    def get_earthquake_hazard_values(self, hazard_id: str, demand_type: str,
-                                     demand_unit: str, points: List):
-        """Retrieve earthquake hazard values from the Hazard service.
-
-        Args:
-            hazard_id (str): ID of the Earthquake.
-            demand_type (str):  Ground motion demand type. Examples: PGA, PGV, 0.2 SA
-            demand_unit (str): Ground motion demand unit. Examples: g, %g, cm/s, etc.
-            points (list): List of points provided as lat,long.
-
-        Returns:
-            obj: Hazard value.
-
-        """
-        url = urllib.parse.urljoin(self.base_earthquake_url,
-                                   hazard_id + "/values")
-        payload = {'demandType': demand_type, 'demandUnits': demand_unit,
-                   'point': points}
-        r = self.client.get(url, params=payload)
-        response = r.json()
-
-        return response
 
     def get_earthquake_hazard_value_set(self, hazard_id: str, demand_type: str,
                                         demand_unit: str, bbox,
@@ -418,51 +377,6 @@ class HazardService:
 
         return response
 
-    def get_tornado_hazard_value(self, hazard_id: str, demand_unit: str,
-                                 site_lat, site_long, simulation=0):
-        """Retrieve tornado hazard value from the Hazard service.
-
-        Args:
-            hazard_id (str): ID of the Tornado.
-            demand_unit (str): Ground motion demand unit. Examples: m.
-            site_lat (float): Latitude of a point.
-            site_long (float): Longitude of a point.
-            simulation (int): Simulated wind hazard. Example: 0, Default 0.
-
-        Returns:
-            obj: Hazard value.
-
-        """
-        points = str(site_lat) + ',' + str(site_long)
-
-        hazard_value_set = self.get_tornado_hazard_values(hazard_id,
-                                                          demand_unit, points,
-                                                          simulation)
-        return hazard_value_set[0]['hazardValue']
-
-    def get_tornado_hazard_values(self, hazard_id: str, demand_unit: str,
-                                  points: list, simulation=0):
-        """Retrieve tornado hazard values from the Hazard service.
-
-        Args:
-            hazard_id (str): ID of the Hurricane.
-            demand_unit (str): Ground motion demand unit. Examples: g, %g, cm/s, etc.
-            points (list): List of points provided as lat,long.
-            simulation (int): Simulated wind hazard. Example: 0, Default 0.
-
-        Returns:
-            obj: Hazard value.
-
-        """
-        url = urllib.parse.urljoin(self.base_tornado_url,
-                                   hazard_id + "/values")
-        payload = {'demandUnits': demand_unit, 'point': points,
-                   'simulation': simulation}
-        r = self.client.get(url, params=payload)
-        response = r.json()
-
-        return response
-
     def post_tornado_hazard_values(self, hazard_id: str, payload: list):
         """ Retrieve bulk tornado hazard values from the Hazard service.
 
@@ -578,52 +492,6 @@ class HazardService:
         """
         url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id)
         r = self.client.get(url)
-        response = r.json()
-
-        return response
-
-    def get_tsunami_hazard_value(self, hazard_id: str, demand_type: str,
-                                 demand_unit: str,
-                                 site_lat: float, site_long: float):
-        """Retrieve tsunami hazard value from the Hazard service.
-
-        Args:
-            hazard_id (str): ID of the Tsunami.
-            demand_type (str): Tsunami demand type. Examples: Hmax, Vmax, Mmax.
-            demand_unit (str): Tsunami demand unit. Example: m.
-            site_lat (float): Latitude of a point.
-            site_long (float): Longitude of a point.
-
-        Returns:
-            obj: Hazard value.
-
-        """
-        points = [str(site_lat) + ',' + str(site_long)]
-        hazard_value_set = self.get_tsunami_hazard_values(hazard_id,
-                                                          demand_type,
-                                                          demand_unit, points)
-
-        return hazard_value_set[0]['hazardValue']
-
-    def get_tsunami_hazard_values(self, hazard_id: str, demand_type: str,
-                                  demand_unit: str, points: List):
-        """Retrieve tsunami hazard values from the Hazard service.
-
-        Args:
-            hazard_id (str): ID of the Tsunami.
-            demand_type (str):  Tsunami demand type. Examples: Hmax, Vmax, Mmax
-            demand_unit (str): Tsunami demand unit.. Examples: m.
-            points (list): List of points provided as lat,long.
-
-        Returns:
-            obj: Hazard value.
-
-        """
-        url = urllib.parse.urljoin(self.base_tsunami_url,
-                                   hazard_id + "/values")
-        payload = {'demandType': demand_type, 'demandUnits': demand_unit,
-                   'point': points}
-        r = self.client.get(url, params=payload)
         response = r.json()
 
         return response
@@ -768,26 +636,6 @@ class HazardService:
 
         return response
 
-    def get_hurricane_values(self, hazard_id: str, demand_type: str, demand_unit: str, points: List):
-        """ Retrieve hurricane hazard values from the Hazard service.
-
-        Args:
-            hazard_id (str): ID of the Hurricane.
-            demand_type (str): Hurricane demand type. Examples: waveHeight, surgeLevel, inundationDuration
-            demand_unit (str): Hurricane demand unit. Example: m, hr, min
-            points (list): List of points provided as lat,long.
-
-        Returns:
-            obj: Hazard values.
-
-        """
-        url = urllib.parse.urljoin(self.base_hurricane_url,
-                                   hazard_id + "/values")
-        payload = {'demandType': demand_type, 'demandUnits': demand_unit, 'point': points}
-        r = self.client.get(url, params=payload)
-        response = r.json()
-        return response
-
     def post_hurricane_hazard_values(self, hazard_id: str, payload: list):
         """ Retrieve bulk hurricane hazard values from the Hazard service.
 
@@ -904,26 +752,6 @@ class HazardService:
         r = self.client.get(url)
         response = r.json()
 
-        return response
-
-    def get_flood_values(self, hazard_id: str, demand_type: str, demand_unit: str, points: List):
-        """ Retrieve flood hazard values from the Hazard service.
-
-        Args:
-            hazard_id (str): ID of the Flood.
-            demand_type (str): Flood demand type. Examples: floodDepth, waterSurfaceElevation
-            demand_unit (str): Flood demand unit. Example: m
-            points (list): List of points provided as lat,long.
-
-        Returns:
-            obj: Hazard values.
-
-        """
-        url = urllib.parse.urljoin(self.base_flood_url,
-                                   hazard_id + "/values")
-        payload = {'demandType': demand_type, 'demandUnits': demand_unit, 'point': points}
-        r = self.client.get(url, params=payload)
-        response = r.json()
         return response
 
     def post_flood_hazard_values(self, hazard_id: str, payload: list):
@@ -1045,31 +873,6 @@ class HazardService:
         """
         url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id)
         r = self.client.get(url)
-        response = r.json()
-
-        return response
-
-    def get_hurricanewf_values(self, hazard_id: str, demand_type: str, demand_unit: str,
-                               points: List, elevation: float = None, roughness: float = None):
-        """ Retrieve hurricane hazard values from the Hazard service.
-
-        Args:
-            hazard_id (str): ID of the Hurricane.
-            demand_type (str): Hurricane demand type. Examples: 3s, 60s
-            demand_unit (str): Hurricane demand unit. Example: mph.
-            points (list): List of points provided as lat,long.
-            elevation (float): Elevation in meters at which wind speed has to be calculated. Default None.
-            roughness (float): Terrain exposure or roughness length. Default None.
-
-        Returns:
-            obj: Hazard values.
-
-        """
-        url = urllib.parse.urljoin(self.base_hurricanewf_url,
-                                   hazard_id + "/values")
-        payload = {'demandType': demand_type, 'demandUnits': demand_unit,
-                   'point': points, 'elevation': elevation, 'roughness': roughness}
-        r = self.client.get(url, params=payload)
         response = r.json()
 
         return response

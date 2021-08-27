@@ -180,6 +180,12 @@ class RoadDamage(BaseAnalysis):
         ds_results = []
         damage_results = []
         for i, road in enumerate(mapped_roads):
+            dmg_probability = dict()
+            dmg_interval = dict()
+            demand_types_liq = None
+            demand_units_liq = None
+            liq_hazard_vals = None
+            liquefaction_prob = None
             selected_fragility_set = fragility_sets[road["id"]]
             hazard_std_dev = 0.0
             if use_hazard_uncertainty:
@@ -192,38 +198,35 @@ class RoadDamage(BaseAnalysis):
                 hval_dict = dict()
                 for j, d in enumerate(selected_fragility_set.demand_types):
                     hval_dict[d] = hazard_vals[j]
-                road_args = selected_fragility_set.construct_expression_args_from_inventory(road)
-                dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
-                                                                                                       inventory_type='road',
-                                                                                                       **road_args)
 
-                # if there is liquefaction, overwrite the hazardval with liquefaction value
-                # recalculate dmg_probability and dmg_interval
-                if liquefaction_resp is not None and len(liquefaction_resp) > 0:
-                    liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
-                    demand_types_liq = liquefaction_resp[i]['demands']
-                    demand_units_liq = liquefaction_resp[i]['units']
-                    liquefaction_prob = liquefaction_resp[i]['liqProbability']
-                    liq_hval_dict = dict()
-                    for j, d in enumerate(liquefaction_resp[i]["demands"]):
-                        liq_hval_dict[d] = liq_hazard_vals[j]
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp[i]["hazardValues"]):
+                    road_args = selected_fragility_set.construct_expression_args_from_inventory(road)
                     dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
-                        liq_hval_dict,
-                        inventory_type='road',
-                        **road_args)
-                else:
-                    demand_types_liq = None
-                    demand_units_liq = None
-                    liq_hazard_vals = None
-                    liquefaction_prob = None
+                        hval_dict, inventory_type='road', **road_args)
 
+                    # if there is liquefaction, overwrite the hazardval with liquefaction value
+                    # recalculate dmg_probability and dmg_interval
+                    if liquefaction_resp is not None and len(liquefaction_resp) > 0:
+                        liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
+                        demand_types_liq = liquefaction_resp[i]['demands']
+                        demand_units_liq = liquefaction_resp[i]['units']
+                        liquefaction_prob = liquefaction_resp[i]['liqProbability']
+                        liq_hval_dict = dict()
+                        for j, d in enumerate(liquefaction_resp[i]["demands"]):
+                            liq_hval_dict[d] = liq_hazard_vals[j]
+                        dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
+                            liq_hval_dict,
+                            inventory_type='road',
+                            **road_args)
+
+
+                    dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability,
+                                                                                    hazard_type=hazard_type,
+                                                                                    inventory_type="road")
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
 
-            dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability,
-                                                                            hazard_type=hazard_type,
-                                                                            inventory_type="road")
             ds_result = dict()
             ds_result['guid'] = road['properties']['guid']
             ds_result.update(dmg_probability)
