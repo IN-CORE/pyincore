@@ -3,6 +3,10 @@ from pyincore.analyses.joplincge import JoplinCGEModel
 import pyincore.globals as pyglobals
 
 
+# This script runs JoplinCGEModel analysis with input files from
+# IN-CORE development services.
+
+
 def run_base_analysis():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     joplin_cge = JoplinCGEModel(client)
