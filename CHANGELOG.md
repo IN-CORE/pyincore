@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.0] - 2021-08-31
+### Changed
+
+### Added
+
+### Fixed
+
+
 ## [0.9.6] - 2021-08-04
 ## Fixed
 - Docstrings for technical manual when rendering some method parameters [INCORE1-1333](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1333)
