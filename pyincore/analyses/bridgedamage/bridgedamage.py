@@ -189,7 +189,8 @@ class BridgeDamage(BaseAnalysis):
 
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_vals[i]["hazardValues"]):
                     bridge_args = selected_fragility_set.construct_expression_args_from_inventory(bridge)
-                    dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
+                    dmg_probability = \
+                        selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
                                                                                              inventory_type="bridge",
                                                                                              **bridge_args)
                     dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,

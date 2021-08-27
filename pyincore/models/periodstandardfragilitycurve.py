@@ -10,6 +10,7 @@ import math
 from scipy.stats import norm
 
 from pyincore.models.fragilitycurve import FragilityCurve
+from deprecated.sphinx import deprecated
 
 
 class PeriodStandardFragilityCurve(FragilityCurve):
@@ -78,6 +79,8 @@ class PeriodStandardFragilityCurve(FragilityCurve):
 
         return probability
 
+    @deprecated(version="0.9.7", reason="This method is already incorporated in refactored fragility curves and will "
+                                        "be deprecated")
     def adjust_fragility_for_liquefaction(self, liquefaction: str):
         """Adjusts fragility curve object by input parameter liquefaction.
 
