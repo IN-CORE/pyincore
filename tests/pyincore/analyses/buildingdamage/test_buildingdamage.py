@@ -135,6 +135,7 @@ def run_with_base_class():
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
+    bldg_dmg.set_parameter("seed", 1000)
     bldg_dmg.run_analysis()
 
 
