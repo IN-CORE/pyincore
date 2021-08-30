@@ -7,11 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.0.0] - 2021-08-31
 ### Changed
+- Improve runtime efficiency of residential recovery analysis [INCORE1-1339](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1339)
 
 ### Added
+- Allow users to specify seed value for tornado using hazard service [INCORE1-1374](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1374)
+- Create auto docker build and push script [INCORE1-1348](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1348)
+- Convert CGE analysis to JSON for visualization purposes [INCORE1-1370](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1370)
+- Apply hazard exposure to all analyses [INCORE1-1376](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1376)
 
 ### Fixed
-
+- Apply PEP8 formatting consistently across codebase [INCORE1-1231](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1231)
+- Regularize application of liquefaction for fragility curves across various analyses [INCORE1-1264](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1264)
+- Change `math.exp(0)` to 0 in all MMSA bridge DFR3 curves [INCORE1-1377](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1377)
+- Change types of capital shock files in Joplin and Seaside CGE to `incore:capitalShocks` [INCORE1-1388](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1388)
 
 ## [0.9.6] - 2021-08-04
 ## Fixed
