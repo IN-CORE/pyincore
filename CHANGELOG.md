@@ -11,8 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Allow users to specify seed value for tornado using hazard service [INCORE1-1374](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1374)
-- Create auto docker build and push script [INCORE1-1348](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1348)
-- Convert CGE analysis to JSON for visualization purposes [INCORE1-1370](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1370)
+- Create auto docker build and push script for pyincore docs [INCORE1-1348](https://opensource.ncsa.illinois.
+  edu/jira/browse/INCORE1-1348)
+- Convert CGE analysis output to JSON  [INCORE1-1370](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1370)
 - Apply hazard exposure to all analyses [INCORE1-1376](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1376)
 
 ### Fixed
@@ -22,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Change types of capital shock files in Joplin and Seaside CGE to `incore:capitalShocks` [INCORE1-1388](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1388)
 
 ## [0.9.6] - 2021-08-04
-## Fixed
+### Fixed
 - Docstrings for technical manual when rendering some method parameters [INCORE1-1333](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1333)
 - A bug related to mean damage analysis [INCORE1-1317](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1317)
 
