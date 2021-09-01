@@ -11,8 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Allow users to specify seed value for tornado using hazard service [INCORE1-1374](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1374)
-- Create auto docker build and push script for pyincore docs [INCORE1-1348](https://opensource.ncsa.illinois.
-  edu/jira/browse/INCORE1-1348)
+- Create auto docker build and push script for pyincore docs [INCORE1-1348](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1348)
 - Convert CGE analysis output to JSON  [INCORE1-1370](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1370)
 - Apply hazard exposure to all analyses [INCORE1-1376](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1376)
 
