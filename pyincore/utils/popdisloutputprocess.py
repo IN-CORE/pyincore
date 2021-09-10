@@ -13,7 +13,8 @@ class PopdislOutputProcess:
     """This class converts various population dislocation results outputs to json format and shapefiles."""
 
     @staticmethod
-    def get_heatmap_shp(pop_dislocation_result, pop_dislocation_result_path=None, filename="pop-disl-numprec.shp"):
+    def get_heatmap_shp(pop_dislocation_result, pop_dislocation_result_path=None,
+                        filter_on=True, filename="pop-disl-numprec.shp"):
         """Convert and filter opulation dislocatin output to shapefile that contains only guid and numprec column
             Args:
                 pop_dislocation_result (obj): IN-CORE output of populationdislocation.
@@ -32,7 +33,8 @@ class PopdislOutputProcess:
         df['geometry'] = df['geometry'].apply(wkt.loads)
 
         # only keep dislocated & guid
-        df = df[(df['dislocated'] is True) & (df['guid'].notnull()) & (df["numprec"].notnull())]
+        if filter_on:
+            df = df[(df['dislocated'] is True) & (df['guid'].notnull()) & (df["numprec"].notnull())]
 
         # save as shapefile
         gdf = gpd.GeoDataFrame(df, crs='epsg:4326')
