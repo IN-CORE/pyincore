@@ -45,7 +45,7 @@ def get_remote_fragility_set(fragility_id: str):
 
 def test_create_fragility_set():
     fragility_set = get_fragility_set("refactored_fragility_curve.json")
-    assert fragility_set.id == "5f6ccf67de7b566bb71b202d" and len(fragility_set.fragility_curves) != 0
+    assert len(fragility_set.fragility_curves) != 0
 
 
 @pytest.mark.parametrize("fragility_set,hazard_values,args,expected", [
@@ -63,7 +63,12 @@ def test_create_fragility_set():
      {"CLEARANCE": 4, "span_maSS": 12, "g_ELEV": 0.2},
      0.142618908),
     (get_fragility_set("fragility_curves/PeriodStandardFragilityCurve_refactored.json"), {"0.2 sec Sa": 4}, {},
-     0.9905435183)
+     0.9905435183),
+    # test liquefaction
+    (get_remote_fragility_set("5b47bcce337d4a37755e0c85"),
+     {"pga": 0.314128903},
+     {"inventory_type": "bridge"},
+     0.8097974088),
 ])
 def test_calculate_limit_state_probability(fragility_set, hazard_values, args, expected):
     result = fragility_set.calculate_limit_state_refactored_w_conversion(hazard_values, **args)
@@ -106,3 +111,14 @@ def test_curves_results(curve, hazard_val, refactored_curve, hazard_val_refactor
             refactored_result = refactored_fragility_set.calculate_limit_state_refactored_w_conversion(
                 hazard_val_refactored,
                 num_stories=1)
+
+
+# @pytest.mark.parametrize("fragility_set,args,expected", [
+#     (get_remote_fragility_set("5b47b2d7337d4a36187c61c9"), {}, 1.08),
+#     # 	"(0.097) * math.pow(num_stories * (13.0), 0.624)"
+#     (get_remote_fragility_set("5b47b2d8337d4a36187c6c05"), {"num_stories": 2}, 0.7408241022436427),
+#     (get_remote_fragility_set("5b47b2d8337d4a36187c6c05"), {}, 0.4806980784822461),
+# ])
+# def test_get_building_period(fragility_set, args, expected):
+#     fragility_curve = fragility_set.fragility_curves[0]
+#     assert fragility_curve.get_building_period(fragility_set.fragility_curve_parameters, **args) == expected

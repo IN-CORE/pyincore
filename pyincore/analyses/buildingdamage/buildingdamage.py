@@ -138,7 +138,6 @@ class BuildingDamage(BaseAnalysis):
                 }
                 values_payload.append(value)
                 mapped_buildings.append(b)
-
             else:
                 unmapped_buildings.append(b)
 
@@ -148,7 +147,8 @@ class BuildingDamage(BaseAnalysis):
         if hazard_type == 'earthquake':
             hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
         elif hazard_type == 'tornado':
-            hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
+            hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload,
+                                                                    self.get_parameter('seed'))
         elif hazard_type == 'tsunami':
             hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
         elif hazard_type == 'hurricane':
@@ -284,6 +284,12 @@ class BuildingDamage(BaseAnalysis):
                     'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
                 },
+                {
+                    'id': 'seed',
+                    'required': False,
+                    'description': 'Initial seed for the tornado hazard value',
+                    'type': int
+                }
             ],
             'input_datasets': [
                 {

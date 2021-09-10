@@ -10,6 +10,7 @@ import math
 from scipy.stats import norm
 
 from pyincore.models.fragilitycurve import FragilityCurve
+from deprecated.sphinx import deprecated
 
 
 class PeriodBuildingFragilityCurve(FragilityCurve):
@@ -98,4 +99,3 @@ class PeriodBuildingFragilityCurve(FragilityCurve):
                         a13_param + a14_param * period))
 
         return probability
-

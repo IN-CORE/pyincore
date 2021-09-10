@@ -1,3 +1,9 @@
+# Copyright (c) 2021 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
 import os
 import tempfile
 
@@ -94,7 +100,7 @@ class SeasideCGEModel(BaseAnalysis):
                     'id': 'sector_shocks',
                     'required': True,
                     'description': 'Aggregation of building functionality states to capital shocks per sector',
-                    'type': ['incore:SeasideCGEshocks']
+                    'type': ['incore:capitalShocks']
                 }
             ],
             'output_datasets': [
