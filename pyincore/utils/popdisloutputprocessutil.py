@@ -9,7 +9,7 @@ import pandas as pd
 from shapely import wkt
 
 
-class PopdislOutputProcess:
+class PopdislOutputProcessUtil:
     """This class converts various population dislocation results outputs to json format and shapefiles."""
 
     @staticmethod
