@@ -34,7 +34,7 @@ class PopdislOutputProcessUtil:
 
         # only keep dislocated & guid
         if filter_on:
-            df = df[(df['dislocated'] is True) & (df['guid'].notnull()) & (df["numprec"].notnull())]
+            df = df[(df['dislocated']) & (df['guid'].notnull()) & (df["numprec"].notnull())]
 
         # save as shapefile
         gdf = gpd.GeoDataFrame(df, crs='epsg:4326')
