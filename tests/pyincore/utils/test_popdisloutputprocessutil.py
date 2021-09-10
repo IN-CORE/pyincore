@@ -2,7 +2,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import IncoreClient, FragilityService, MappingSet
+from pyincore import IncoreClient, DataService, SpaceService
 from pyincore.analyses.populationdislocation import PopulationDislocation
 import pyincore.globals as pyglobals
 from pyincore import PopdislOutputProcessUtil
@@ -33,10 +33,34 @@ def run_with_base_class():
 
     pop_dis.run_analysis()
 
+    #######################################################
     # get result
     pop_dislocation_result = pop_dis.get_output_dataset("result")
-    PopdislOutputProcessUtil.get_heatmap_shp(pop_dislocation_result, filter_on=True,
-                                             filename="joplin-pop-disl-numprec.shp")
+    filename = PopdislOutputProcessUtil.get_heatmap_shp(pop_dislocation_result, filter_on=True,
+                                                        filename="joplin-pop-disl-numprec.shp")
+
+    # upload to incore services and put under commresilience space
+    datasvc = DataService(client)
+    dataset_prop = {
+        "title": "Joplin Population Dislocation For Heatmap Plotting",
+        "description": "only contain dislocated numprec for joplin playbook plotting usage",
+        "contributors": [],
+        "dataType": "incore:popdislocationShp",
+        "storedUrl": "",
+        "format": "shapefile"
+    }
+    response = datasvc.create_dataset(dataset_prop)
+    dataset_id = response['id']
+    files = ['joplin-pop-disl-numprec.shp',
+             'joplin-pop-disl-numprec.dbf',
+             'joplin-pop-disl-numprec.shx',
+             'joplin-pop-disl-numprec.prj']
+    datasvc.add_files_to_dataset(dataset_id, files)
+
+    # add to space
+    spacesvc = SpaceService(client)
+    spacesvc.add_dataset_to_space("5f99ba8b0ace240b22a82e00", dataset_id=dataset_id)  # commresilience
+    print(dataset_id + " successfully uploaded and move to commresilience space!")
 
 
 if __name__ == '__main__':
