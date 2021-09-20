@@ -11,8 +11,8 @@ import pandas as pd
 from pyincore import BaseAnalysis
 
 
-class BusinessCeaseOperation(BaseAnalysis):
-    """The model predicts cease operation days of a business based on a number of predictors,
+class BusinessClosure(BaseAnalysis):
+    """The model predicts closure days of a business based on a number of predictors,
     including damage state of the building, content, and machinery of the business, as well as disruptions
     in the utilities. This model is developed using a stepwise modeling approach based on Bayesian linear
     regression which was proposed by Aghababaei et al. (2020).
@@ -24,19 +24,19 @@ class BusinessCeaseOperation(BaseAnalysis):
 
     def __init__(self, incore_client):
 
-        super(BusinessCeaseOperation, self).__init__(incore_client)
+        super(BusinessClosure, self).__init__(incore_client)
 
     def run(self):
-        """Executes business cease operation model analysis."""
+        """Executes business closure model analysis."""
         # Get predictors dataset and create Pandas DataFrame
         pred_set = self.get_input_dataset("predictors").get_dataframe_from_csv(low_memory=False)
 
-        cease_days = self.get_cease_days(pred_set)
-        print("\nBusiness cease operation days:", cease_days)
+        closure_days = self.get_closure_days(pred_set)
+        print("\nBusiness closure days:", closure_days)
 
         return True
 
-    def get_cease_days(self, predictors):
+    def get_closure_days(self, predictors):
         """Utilizes concurrent.future module.
 
         Args:
@@ -44,7 +44,7 @@ class BusinessCeaseOperation(BaseAnalysis):
                                        also, days of loss of water, electricity, gas, internet, and sewer.
 
         Returns:
-            float: Business cease operation days
+            float: Business closure days
 
         """
         db = predictors['deltaB']
@@ -71,25 +71,25 @@ class BusinessCeaseOperation(BaseAnalysis):
         epsilon = np.random.normal(loc=0.0, scale=sigma, size=n_businesses)
 
         # now, using the randomly generated parameters and imported
-        # predictors, cease operation days can be calculated
+        # predictors, closure days can be calculated
         transformed_value = theta1 * (1 - 0.263 * np.log(le + lw + lg + ls + li + 1))
         +theta2 * (db + dc + dm) - 0.47 * np.log(le + lw + lg + ls + li + 1) + epsilon
 
-        # finally, the predicted cease operation days can be calculated as follows
-        cease_days = np.exp(-np.exp(-transformed_value)) * 3 * 365
+        # finally, the predicted closure days can be calculated as follows
+        closure_days = np.exp(-np.exp(-transformed_value)) * 3 * 365
 
-        return float(cease_days)
+        return float(closure_days)
 
     def get_spec(self):
-        """Get specifications of the building damage analysis.
+        """Get specifications of the building closure analysis.
 
         Returns:
-            obj: A JSON object of specifications of the building damage analysis.
+            obj: A JSON object of specifications of the building closure analysis.
 
         """
         return {
-            'name': 'business-cease-operation',
-            'description': 'business cease model analysis',
+            'name': 'business-closure-operation',
+            'description': 'business closure model analysis',
             'input_parameters': [
                 {
                     'id': 'result_name',
@@ -117,8 +117,8 @@ class BusinessCeaseOperation(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'businesses',
                     'description': 'A dataset containing results (format: CSV) with values for the predicted '
-                                   'cease operation days of the businesses.',
-                    'type': 'incore:businessCeaseOperation'
+                                   'closure operation days of the businesses.',
+                    'type': 'incore:businessClosureOperation'
                 }
             ]
         }
