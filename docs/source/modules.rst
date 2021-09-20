@@ -25,6 +25,11 @@ analyses/buildingfunctionality
 ..  autoclass:: buildingfunctionality.buildingfunctionality.BuildingFunctionality
     :members:
 
+analyses/businessclosure
+========================
+..  autoclass:: businessclosure.businessclosure.BusinessClosure
+    :members:
+    
 analyses/buildingportfolio
 ==========================
 
