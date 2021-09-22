@@ -18,7 +18,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, \
     AnalysisUtil, GeoUtil
 from pyincore.analyses.pipelinedamagerepairrate.pipelineutil import \
     PipelineUtil
-from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class PipelineDamageRepairRate(BaseAnalysis):
@@ -226,7 +226,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
             fragility_curve = fragility_set.fragility_curves[0]
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
-            if isinstance(fragility_set.fragility_curves[0], FragilityCurveRefactored):
+            if isinstance(fragility_set.fragility_curves[0], FragilityCurve):
                 hazard_vals = AnalysisUtil.update_precision_of_lists(hazard_resp[i]["hazardValues"])
                 demand_types = hazard_resp[i]["demands"]
                 demand_units = hazard_resp[i]["units"]
@@ -254,7 +254,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                         liq_fragility_curve = fragility_set_liq.fragility_curves[0]
 
                         # TODO: Once all fragilities are migrated to new format, we can remove this condition
-                        if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurveRefactored):
+                        if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurve):
                             liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
                             liq_demand_types = liquefaction_resp[i]["demands"]
                             liq_demand_units = liquefaction_resp[i]["units"]

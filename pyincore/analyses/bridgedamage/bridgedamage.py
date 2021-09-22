@@ -13,7 +13,7 @@ import copy
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
-from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class BridgeDamage(BaseAnalysis):
@@ -175,7 +175,7 @@ class BridgeDamage(BaseAnalysis):
             dmg_intervals = dict()
             selected_fragility_set = fragility_set[bridge["id"]]
 
-            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
+            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurve):
                 # Supports multiple demand types in same fragility
                 hazard_val = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
                 input_demand_types = hazard_vals[i]["demands"]
@@ -190,9 +190,9 @@ class BridgeDamage(BaseAnalysis):
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_vals[i]["hazardValues"]):
                     bridge_args = selected_fragility_set.construct_expression_args_from_inventory(bridge)
                     dmg_probability = \
-                        selected_fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
-                                                                                             inventory_type="bridge",
-                                                                                             **bridge_args)
+                        selected_fragility_set.calculate_limit_state(hval_dict,
+                                                                     inventory_type="bridge",
+                                                                     **bridge_args)
                     dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
                                                                                      hazard_type=hazard_type,
                                                                                      inventory_type="bridge")

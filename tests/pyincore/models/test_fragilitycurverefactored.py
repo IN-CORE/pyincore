@@ -71,7 +71,7 @@ def test_create_fragility_set():
      0.8097974088),
 ])
 def test_calculate_limit_state_probability(fragility_set, hazard_values, args, expected):
-    result = fragility_set.calculate_limit_state_refactored_w_conversion(hazard_values, **args)
+    result = fragility_set.calculate_limit_state(hazard_values, **args)
     assert np.isclose(result["LS_0"], expected)
 
 
@@ -97,7 +97,7 @@ def test_curves_results(curve, hazard_val, refactored_curve, hazard_val_refactor
     if len(fragility_set.fragility_curves) <= 4:
         result = fragility_set.calculate_limit_state_w_conversion(hazard_val, period=building_period,
                                                                   inventory_type=inventory_type)
-        refactored_result = refactored_fragility_set.calculate_limit_state_refactored_w_conversion(
+        refactored_result = refactored_fragility_set.calculate_limit_state(
             hazard_val_refactored,
             num_stories=num_stories,
             inventory_type=inventory_type
@@ -108,7 +108,7 @@ def test_curves_results(curve, hazard_val, refactored_curve, hazard_val_refactor
     # no longer handle fragility curves > 4, test if can catch this error
     else:
         with pytest.raises(ValueError):
-            refactored_result = refactored_fragility_set.calculate_limit_state_refactored_w_conversion(
+            refactored_result = refactored_fragility_set.calculate_limit_state(
                 hazard_val_refactored,
                 num_stories=1)
 

@@ -12,7 +12,7 @@ from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, \
     FragilityCurveSet, AnalysisUtil, GeoUtil
-from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class PipelineDamage(BaseAnalysis):
@@ -162,7 +162,7 @@ class PipelineDamage(BaseAnalysis):
             fragility_set = fragility_sets[pipeline["id"]]
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
-            if isinstance(fragility_set.fragility_curves[0], FragilityCurveRefactored):
+            if isinstance(fragility_set.fragility_curves[0], FragilityCurve):
                 # Supports multiple demand types in same fragility
                 haz_vals = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
                 demand_types = hazard_vals[i]["demands"]
@@ -175,9 +175,9 @@ class PipelineDamage(BaseAnalysis):
 
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_vals[i]["hazardValues"]):
                     pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
-                    limit_states = fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
-                                                                                               inventory_type="pipeline",
-                                                                                               **pipeline_args)
+                    limit_states = fragility_set.calculate_limit_state(hval_dict,
+                                                                       inventory_type="pipeline",
+                                                                       **pipeline_args)
                     dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
                                                                             inventory_type="pipeline")
 

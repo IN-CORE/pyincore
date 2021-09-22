@@ -10,7 +10,7 @@ from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore.analyses.nonstructbuildingdamage.nonstructbuildingutil import \
     NonStructBuildingUtil
-from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class NonStructBuildingDamage(BaseAnalysis):
@@ -203,7 +203,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
             ###############
             # AS
-            if isinstance(fragility_set_as.fragility_curves[0], FragilityCurveRefactored):
+            if isinstance(fragility_set_as.fragility_curves[0], FragilityCurve):
                 hazard_vals_as = AnalysisUtil.update_precision_of_lists(hazard_resp_as[i]["hazardValues"])
                 demand_types_as = hazard_resp_as[i]["demands"]
                 demand_units_as = hazard_resp_as[i]["units"]
@@ -213,8 +213,8 @@ class NonStructBuildingDamage(BaseAnalysis):
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp_as[i]["hazardValues"]):
                     building_args = fragility_set_as.construct_expression_args_from_inventory(building)
                     dmg_probability_as = fragility_set_as. \
-                        calculate_limit_state_refactored_w_conversion(hval_dict_as, inventory_type="building",
-                                                                      **building_args)
+                        calculate_limit_state(hval_dict_as, inventory_type="building",
+                                              **building_args)
                     # adjust dmg probability for liquefaction
                     if use_liquefaction:
                         if liq_geology_dataset_id is not None:
@@ -232,7 +232,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
             ###############
             # DS
-            if isinstance(fragility_set_ds.fragility_curves[0], FragilityCurveRefactored):
+            if isinstance(fragility_set_ds.fragility_curves[0], FragilityCurve):
                 hazard_vals_ds = AnalysisUtil.update_precision_of_lists(hazard_resp_ds[i]["hazardValues"])
                 demand_types_ds = hazard_resp_ds[i]["demands"]
                 demand_units_ds = hazard_resp_ds[i]["units"]
@@ -243,8 +243,8 @@ class NonStructBuildingDamage(BaseAnalysis):
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp_ds[i]["hazardValues"]):
                     building_args = fragility_set_ds.construct_expression_args_from_inventory(building)
                     dmg_probability_ds = fragility_set_ds. \
-                        calculate_limit_state_refactored_w_conversion(hval_dict_ds, inventory_type="building",
-                                                                      **building_args)
+                        calculate_limit_state(hval_dict_ds, inventory_type="building",
+                                              **building_args)
                     # adjust dmg probability for liquefaction
                     if use_liquefaction:
                         if liq_geology_dataset_id is not None:
