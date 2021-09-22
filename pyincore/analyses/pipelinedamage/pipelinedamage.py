@@ -175,9 +175,10 @@ class PipelineDamage(BaseAnalysis):
 
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_vals[i]["hazardValues"]):
                     pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
-                    limit_states = fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
-                                                                                               inventory_type="pipeline",
-                                                                                               **pipeline_args)
+                    limit_states = \
+                        fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
+                                                                                    inventory_type="pipeline",
+                                                                                    **pipeline_args)
                     dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
                                                                             inventory_type="pipeline")
 

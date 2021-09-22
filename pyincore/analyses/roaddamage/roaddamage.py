@@ -219,7 +219,6 @@ class RoadDamage(BaseAnalysis):
                             inventory_type='road',
                             **road_args)
 
-
                     dmg_interval = selected_fragility_set.calculate_damage_interval(dmg_probability,
                                                                                     hazard_type=hazard_type,
                                                                                     inventory_type="road")
