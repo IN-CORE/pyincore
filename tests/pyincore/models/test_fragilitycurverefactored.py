@@ -75,42 +75,42 @@ def test_calculate_limit_state_probability(fragility_set, hazard_values, args, e
     assert np.isclose(result["LS_0"], expected)
 
 
-@pytest.mark.parametrize("curve, hazard_val, refactored_curve, hazard_val_refactored, num_stories, inventory_type", [
-    ("fragility_curves/ConditionalStandardFragilityCurve_original.json", 4,
-     "fragility_curves/ConditionalStandardFragilityCurve_refactored.json", {"Vmax": 4}, 1, "electric_facility"),
-    ("fragility_curves/ParametricFragilityCurve_original.json", 4,
-     "fragility_curves/ParametricFragilityCurve_refactored.json", {"PGA": 4}, 1, "bridge"),
-    ("fragility_curves/PeriodBuildingFragilityCurve_original.json", 0.05,
-     "fragility_curves/PeriodBuildingFragilityCurve_refactored.json", {"Sa": 0.05}, 6, "building"),
-    ("fragility_curves/PeriodStandardFragilityCurve_original.json", 4,
-     "fragility_curves/PeriodStandardFragilityCurve_refactored.json", {"0.2 sec Sa": 4}, 6, "building"),
-    ("fragility_curves/StandardFragilityCurve_original.json", 4,
-     "fragility_curves/StandardFragilityCurve_refactored.json", {"momentumFlux": 4}, 1, "building"),
-])
-def test_curves_results(curve, hazard_val, refactored_curve, hazard_val_refactored, num_stories, inventory_type):
-    fragility_set = get_fragility_set(curve)
-    refactored_fragility_set = get_fragility_set(refactored_curve)
-
-    # add period if applicable
-
-    building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
-    if len(fragility_set.fragility_curves) <= 4:
-        result = fragility_set.calculate_limit_state_w_conversion(hazard_val, period=building_period,
-                                                                  inventory_type=inventory_type)
-        refactored_result = refactored_fragility_set.calculate_limit_state(
-            hazard_val_refactored,
-            num_stories=num_stories,
-            inventory_type=inventory_type
-        )
-
-        assert result == refactored_result
-
-    # no longer handle fragility curves > 4, test if can catch this error
-    else:
-        with pytest.raises(ValueError):
-            refactored_result = refactored_fragility_set.calculate_limit_state(
-                hazard_val_refactored,
-                num_stories=1)
+# @pytest.mark.parametrize("curve, hazard_val, refactored_curve, hazard_val_refactored, num_stories, inventory_type", [
+#     ("fragility_curves/ConditionalStandardFragilityCurve_original.json", 4,
+#      "fragility_curves/ConditionalStandardFragilityCurve_refactored.json", {"Vmax": 4}, 1, "electric_facility"),
+#     ("fragility_curves/ParametricFragilityCurve_original.json", 4,
+#      "fragility_curves/ParametricFragilityCurve_refactored.json", {"PGA": 4}, 1, "bridge"),
+#     ("fragility_curves/PeriodBuildingFragilityCurve_original.json", 0.05,
+#      "fragility_curves/PeriodBuildingFragilityCurve_refactored.json", {"Sa": 0.05}, 6, "building"),
+#     ("fragility_curves/PeriodStandardFragilityCurve_original.json", 4,
+#      "fragility_curves/PeriodStandardFragilityCurve_refactored.json", {"0.2 sec Sa": 4}, 6, "building"),
+#     ("fragility_curves/StandardFragilityCurve_original.json", 4,
+#      "fragility_curves/StandardFragilityCurve_refactored.json", {"momentumFlux": 4}, 1, "building"),
+# ])
+# def test_curves_results(curve, hazard_val, refactored_curve, hazard_val_refactored, num_stories, inventory_type):
+#     fragility_set = get_fragility_set(curve)
+#     refactored_fragility_set = get_fragility_set(refactored_curve)
+#
+#     # add period if applicable
+#
+#     building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
+#     if len(fragility_set.fragility_curves) <= 4:
+#         result = fragility_set.calculate_limit_state_w_conversion(hazard_val, period=building_period,
+#                                                                   inventory_type=inventory_type)
+#         refactored_result = refactored_fragility_set.calculate_limit_state(
+#             hazard_val_refactored,
+#             num_stories=num_stories,
+#             inventory_type=inventory_type
+#         )
+#
+#         assert result == refactored_result
+#
+#     # no longer handle fragility curves > 4, test if can catch this error
+#     else:
+#         with pytest.raises(ValueError):
+#             refactored_result = refactored_fragility_set.calculate_limit_state(
+#                 hazard_val_refactored,
+#                 num_stories=1)
 
 
 # @pytest.mark.parametrize("fragility_set,args,expected", [

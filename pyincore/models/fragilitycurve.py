@@ -101,6 +101,16 @@ class FragilityCurve(ABC):
 
         return probability
 
+    def get_building_period(self, num_stories):
+        """Get building period from the fragility curve.
+        Args:
+            num_stories (int): Number of building stories.
+        Returns:
+            float: Building period.
+        """
+        period = 0.0
+        return period
+
     # def get_building_period(self, fragility_curve_parameters, **kwargs):
     #     period = 0.0
     #     num_stories = 1.0
