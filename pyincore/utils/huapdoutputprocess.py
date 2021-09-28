@@ -70,7 +70,6 @@ class HUADislOutputProcess:
         # Serializing json
         return json.dumps(pd_by_race_json)
 
-
     @staticmethod
     def pd_by_income(income_count, income_count_path=None, filename_json=None):
         """ Calculate income results from the output files of the Joplin Population Dislocation analysis
@@ -94,6 +93,43 @@ class HUADislOutputProcess:
             obj: PD total count by income. A JSON of the hua and population dislocation income results by category.
 
         """
+        # [
+        # 	{
+        # 		"housing_unit_characteristics": "HH1 (less than $15,000)",
+        # 		"housing_unit_dislocation":311,
+        # 		"housing_unit_in_total":3252
+        # 	},
+        # 	{
+        # 		"housing_unit_characteristics": "HH2 ($15,000 to $35,000)",
+        # 		"housing_unit_dislocation": 280,
+        # 		"housing_unit_in_total": 3133
+        # 	},
+        # 	{
+        # 		"housing_unit_characteristics": "HH3 ($35,000 to $70,000)",
+        # 		"housing_unit_dislocation": 741,
+        # 		"housing_unit_in_total": 9272
+        # 	},
+        # 	{
+        # 		"housing_unit_characteristics": "HH4 ($70,000 to $120,000)",
+        # 		"housing_unit_dislocation": 741,
+        # 		"housing_unit_in_total": 9252
+        # 	},
+        # 	{
+        # 		"housing_unit_characteristics": "HH5 (More than $120,000)",
+        # 		"housing_unit_dislocation": 131,
+        # 		"housing_unit_in_total": 1887
+        # 	},
+        # 	{
+        # 		"housing_unit_characteristics":"Unknown",
+        # 		"housing_unit_dislocation": 422,
+        # 		"housing_unit_in_total": 4210
+        # 	},
+        # 	{
+        # 		"housing_unit_characteristics":"total",
+        # 		"housing_unit_dislocation": 1999,
+        # 		"housing_unit_in_total": 23261
+        # 	}
+        # ]
         income_categories = ["HH1 (less than $15,000)",
                              "HH2 ($15,000 to $35,000)",
                              "HH3 ($35,000 to $70,000)",
@@ -128,7 +164,6 @@ class HUADislOutputProcess:
         # Serializing json
         return json.dumps(pd_by_income_json)
 
-
     @staticmethod
     def pd_by_tenure(tenure_count, tenure_count_path=None, filename_json=None):
         """ Calculate tenure results from the output files of the Joplin Population Dislocation analysis
@@ -144,7 +179,7 @@ class HUADislOutputProcess:
 
         Args:
             tenure_count (obj): IN-CORE dataset for Joplin Population Dislocation income count result.
-            income_count_path (obj): A fallback for the case that count by income object of PD is not provided.
+            tenure_count_path (obj): A fallback for the case that count by income object of PD is not provided.
                  For example a user wants to directly pass in csv files, a path to PD income count result.
             filename_json (str): Path and name to save json output file in. E.g "pd_income_count.json"
 
@@ -187,7 +222,6 @@ class HUADislOutputProcess:
         # Serializing json
         return json.dumps(pd_by_tenure_json)
 
-
     @staticmethod
     def pd_by_housing(housing_count, housing_count_path=None, filename_json=None):
         """ Calculate housing results from the output files of the Joplin Population Dislocation analysis
@@ -209,6 +243,23 @@ class HUADislOutputProcess:
             obj: PD total count by housing. A JSON of the hua and population dislocation housing results by category.
 
         """
+        # [
+        # 	{
+        # 		"housing_unit_characterstics": "Single Family",
+        # 		"housing_unit_dislocation": 1162,
+        # 		"housing_unit_in_total":837
+        # 	},
+        # 	{
+        # 		"housing_unit_characterstics": "Multi Family",
+        # 		"housing_unit_dislocation": 14317,
+        # 		"housing_unit_in_total": 8944
+        # 	},
+        # 	{
+        # 		"housing_unit_characterstics": "Total",
+        # 		"housing_unit_dislocation": 1999,
+        # 		"housing_unit_in_total": 23261
+        # 	}
+        # ]
         hu_dislocated = 1999
         hu_tot = 23261
         pop_dislocated = 4197
@@ -231,19 +282,18 @@ class HUADislOutputProcess:
         pop_disl = {}
         pop_disl["dislocated"] = {"number": pop_dislocated, "percentage": pop_dislocated/pop_tot}
         pop_disl["not_dislocated"] = {"number": pop_tot - pop_dislocated,
-                                     "percentage": (pop_tot - pop_dislocated)/pop_tot}
+                                      "percentage": (pop_tot - pop_dislocated)/pop_tot}
         pop_disl["total"] = {"number": pop_tot, "percentage": 1}
 
-        pd_by_tenure_json = {"housing_unit_dslocation": hu_disl, "population_dislocation": pop_disl}
+        pd_by_housing_json = {"housing_unit_dislocation": hu_disl, "population_dislocation": pop_disl}
 
-        print(pd_by_tenure_json)
+        print(pd_by_housing_json)
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(pd_by_tenure_json, outfile)
+                json.dump(pd_by_housing_json, outfile)
         # Serializing json
-        return json.dumps(pd_by_tenure_json)
-
+        return json.dumps(pd_by_housing_json)
 
     @staticmethod
     def pd_total(total_count, total_count_path=None, filename_json=None):
@@ -289,7 +339,7 @@ class HUADislOutputProcess:
         pop_disl = {}
         pop_disl["dislocated"] = {"number": pop_dislocated, "percentage": pop_dislocated/pop_tot}
         pop_disl["not_dislocated"] = {"number": pop_tot - pop_dislocated,
-                                     "percentage": (pop_tot - pop_dislocated)/pop_tot}
+                                      "percentage": (pop_tot - pop_dislocated)/pop_tot}
         pop_disl["total"] = {"number": pop_tot, "percentage": 1}
 
         pd_total_json = {"housing_unit_dslocation": hu_disl, "population_dislocation": pop_disl}
@@ -301,5 +351,3 @@ class HUADislOutputProcess:
                 json.dump(pd_total_json, outfile)
         # Serializing json
         return json.dumps(pd_total_json)
-
-
