@@ -30,13 +30,13 @@ class HUADislOutputProcess:
 
     def __init__(self, hua_count, pd_count, hua_count_path=None, pd_count_path=None):
         if hua_count_path:
-            self.hua_count = pd.read_csv(hua_count_path)
+            self.hua_count = pd.read_csv(hua_count_path, low_memory=False)
         else:
-            self.hua_count = hua_count_path.get_dataframe_from_csv()
+            self.hua_count = hua_count_path.get_dataframe_from_csv(low_memory=False)
         if pd_count_path:
-            self.pd_count = pd.read_csv(pd_count_path)
+            self.pd_count = pd.read_csv(pd_count_path, low_memory=False)
         else:
-            self.pd_count = pd_count_path.get_dataframe_from_csv()
+            self.pd_count = pd_count_path.get_dataframe_from_csv(low_memory=False)
         self.numprec = 11.64
 
     def pd_by_race(self, filename_json=None):
@@ -72,9 +72,9 @@ class HUADislOutputProcess:
         # before_values = self.pd_count["HH0"]
         # after_values = self.pd_count["HHL"]
 
-        huapd_race = {}
         pd_by_race_json = []
         for i in range(len(race_categories)):
+            huapd_race = {}
             huapd_race[self.HUPD_CATEGORIES[0]] = race_categories[i]
             huapd_race[self.HUPD_CATEGORIES[1]] = hu_disl[i]
             huapd_race[self.HUPD_CATEGORIES[2]] = hu_disl_tot[i]
@@ -180,9 +180,9 @@ class HUADislOutputProcess:
         # before_values = self.pd_count["HH0"]
         # after_values = self.pd_count["HHL"]
 
-        huapd_income = {}
         pd_by_income_json = []
         for i in range(len(income_categories)):
+            huapd_income = {}
             huapd_income[self.HUPD_CATEGORIES[0]] = income_categories[i]
             huapd_income[self.HUPD_CATEGORIES[1]] = hu_disl[i]
             huapd_income[self.HUPD_CATEGORIES[2]] = hu_disl_tot[i]
@@ -237,9 +237,9 @@ class HUADislOutputProcess:
         # before_values = self.pd_count["HH0"]
         # after_values = self.pd_count["HHL"]
 
-        huapd_tenure = {}
         pd_by_tenure_json = []
         for i in range(len(tenure_categories)):
+            huapd_tenure = {}
             huapd_tenure[self.HUPD_CATEGORIES[0]] = tenure_categories[i]
             huapd_tenure[self.HUPD_CATEGORIES[1]] = hu_disl[i]
             huapd_tenure[self.HUPD_CATEGORIES[2]] = hu_disl_tot[i]
@@ -296,10 +296,10 @@ class HUADislOutputProcess:
         pop_dislocated = 4197
         pop_tot = 23261
 
-        before_values = self.hua_count["HH0"]
-        after_values = self.hua_count["HHL"]
-        before_values = self.pd_count["HH0"]
-        after_values = self.pd_count["HHL"]
+        # before_values = self.hua_count["HH0"]
+        # after_values = self.hua_count["HHL"]
+        # before_values = self.pd_count["HH0"]
+        # after_values = self.pd_count["HHL"]
 
         hu_disl = {}
         hu_disl["dislocated"] = {"number": hu_dislocated, "percentage": hu_dislocated/hu_tot}
@@ -346,10 +346,10 @@ class HUADislOutputProcess:
         pop_dislocated = 4197
         pop_tot = 23261
 
-        before_values = self.hua_count["HH0"]
-        after_values = self.hua_count["HHL"]
-        before_values = self.pd_count["HH0"]
-        after_values = self.pd_count["HHL"]
+        # before_values = self.hua_count["HH0"]
+        # after_values = self.hua_count["HHL"]
+        # before_values = self.pd_count["HH0"]
+        # after_values = self.pd_count["HHL"]
 
         hu_disl = {}
         hu_disl["dislocated"] = {"number": hu_dislocated, "percentage": hu_dislocated/hu_tot}
