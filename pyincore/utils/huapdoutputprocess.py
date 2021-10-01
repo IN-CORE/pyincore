@@ -167,77 +167,50 @@ class HUADislOutputProcess:
                              "HH5 (More than $120,000)",
                              "Unknown",
                              "Total"]
-        
+
+        huapd = self.pd_count
         # Allocated by income
-        hua = self.hua_count
         hua_tot = []
         for i in range (1, 6):
-            hua_tot.append((hua["hhinc"] == i).sum())
-        hua_tot.append(pd.isna(hua["hhinc"]).sum())
+            hua_tot.append(int((huapd["hhinc"] == i).sum()))
+        hua_tot.append(int(pd.isna(huapd["hhinc"]).sum()))
         hua_tot.append(int(sum(hua_tot)))
         print(hua_tot)
 
         pop_tot = []
         for i in range(1, 6):
-            pop_tot.append(int(hua["numprec"].where(hua["hhinc"] == i).sum()))
-        pop_tot.append(int(hua["numprec"].where(pd.isna(hua["hhinc"])).sum()))
+            alloc = huapd["numprec"].where(huapd["hhinc"] == i).sum()
+            pop_tot.append(int(alloc))
+        pop_tot.append(int(huapd["numprec"].where(pd.isna(huapd["hhinc"])).sum()))
         pop_tot.append(int(sum(pop_tot)))
         print(pop_tot)
 
         # Dislocated by income
-        hua_income = hua[["guid", "hhinc"]]
-        pd_dislocated = self.pd_count[["guid", "dislocated"]]
-        print(hua_income)
-        print(pd_dislocated)
-        # hud= self.pd_count
-        pd_dislocated.set_index("guid", inplace=True)
-        hua_income.set_index("guid", inplace=True)
-        hud = pd_dislocated.head(100).set_index("guid").join(hua_income.head(100).set_index("guid"), how='left')
-        # hud = pd.merge(pd_dislocated, hua_income, how="left", on="guid")
-        print(hud)
-        hud["hud_inc"] = "0"
-        hud.loc[(hud["race"] == 1) & (hud["hispan"] == 0) & hud["dislocated"], "hud_inc"] = "1"
-        hud.loc[(hud["race"] == 2) & (hud["hispan"] == 0) & hud["dislocated"], "hud_inc"] = "2"
-        hud.loc[(hud["race"].isin([3, 4, 5, 6, 7])) & (hud["hispan"] == 0) & hud["dislocated"], "hud_inc"] = "3"
-        hud.loc[(hud["hispan"] == 1) & hud["dislocated"], "hud_inc"] = "4"
-        hud.loc[(hud["gqtype"] >= 1) & hud["dislocated"], "hud_inc"] = "5"
-        hud_vals = hud["hud_inc"].value_counts()
         hua_disl = []
-        for i in range(len(income_categories)):
-            hua_disl.append(int(hud_vals[str(i)]))
-        hua_disl.append(int(sum(hua_disl[0:])))
+        for i in range (1, 6):
+            disl = huapd.loc[huapd["hhinc"] == i & huapd["dislocated"]].sum()
+            hua_disl.append(int(disl["dislocated"]))
+        hua_disl.append(int(pd.isna(huapd["hhinc"]).sum()))
+        hua_disl.append(int(sum(hua_tot)))
         print(hua_disl)
 
         pd_disl = []
-        pd_disl.append(int(hud["numprec"].where(hud["hud_inc"] == "0").sum()))
-        pd_disl.append(int(hud["numprec"].where(hud["hud_inc"] == "1").sum()))
-        pd_disl.append(int(hud["numprec"].where(hud["hud_inc"] == "2").sum()))
-        pd_disl.append(int(hud["numprec"].where(hud["hud_inc"] == "3").sum()))
-        pd_disl.append(int(hud["numprec"].where(hud["hud_inc"] == "4").sum()))
-        pd_disl.append(int(hud["numprec"].where(hud["hud_inc"] == "5").sum()))
-        pd_disl.append(int(sum(pd_disl[1:])))
+        for i in range(1, 6):
+            disl = huapd["numprec"].where((huapd["hhinc"] == i) & huapd["dislocated"]).sum()
+            pd_disl.append(int(disl))
+        pd_disl.append(int(huapd["numprec"].where(pd.isna(huapd["hhinc"]) & huapd["dislocated"]).sum()))
+        pd_disl.append(int(sum(pd_disl)))
         print(pd_disl)
-
-        hu_disl = [311, 280, 741, 741, 131, 422, 1999]
-        hu_disl_tot = [3252, 3133, 9272, 9252, 1887, 4210, 23261]
-        pd_disl = [2.14 * x for x in hu_disl]
-        pd_disl_tot = [2.14 * x for x in hu_disl_tot]
-
-        # before_values = self.hua_count["HH0"]
-        # after_values = self.hua_count["HHL"]
-        # before_values = self.pd_count["HH0"]
-        # after_values = self.pd_count["HHL"]
 
         pd_by_income_json = []
         for i in range(len(income_categories)):
             huapd_income = {}
             huapd_income[self.HUPD_CATEGORIES[0]] = income_categories[i]
-            huapd_income[self.HUPD_CATEGORIES[1]] = hu_disl[i]
-            huapd_income[self.HUPD_CATEGORIES[2]] = hu_disl_tot[i]
+            huapd_income[self.HUPD_CATEGORIES[1]] = hua_disl[i]
+            huapd_income[self.HUPD_CATEGORIES[2]] = hua_tot[i]
             huapd_income[self.HUPD_CATEGORIES[3]] = pd_disl[i]
-            huapd_income[self.HUPD_CATEGORIES[4]] = pd_disl_tot[i]
+            huapd_income[self.HUPD_CATEGORIES[4]] = pop_tot[i]
             pd_by_income_json.append(huapd_income)
-
         print(pd_by_income_json)
 
         if filename_json:
