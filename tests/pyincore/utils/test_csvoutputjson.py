@@ -25,15 +25,14 @@ def run_convert_cge_json():
 
 
 def run_convert_pd_json():
-    pd_json = HUADislOutputProcess(None, None,
-                                   "/Users/mo/dev/GitHub/pyincore/tests/pyincore/analyses/housingunitallocation/IN-CORE_2ev3_HUA_1238.csv",
+    pd_json = HUADislOutputProcess(None,
                                    "/Users/mo/dev/GitHub/pyincore/tests/pyincore/analyses/populationdislocation/joplin-pop-disl-results.csv",
                                    )
-    # pd_json.pd_by_race("PD_by_race.json")
+    pd_json.pd_by_race("PD_by_race.json")
     pd_json.pd_by_income("PD_by_income.json")
-    # pd_json.pd_by_tenure("PD_by_tenure.json")
-    # pd_json.pd_by_housing("PD_by_housing.json")
-    # pd_json.pd_total("PD_by_total.json")
+    pd_json.pd_by_tenure("PD_by_tenure.json")
+    pd_json.pd_by_housing("PD_by_housing.json")
+    pd_json.pd_total("PD_by_total.json")
     return True
 
 
