@@ -252,6 +252,11 @@ utils/analysisutil
 ..  autoclass:: utils.analysisutil.AnalysisUtil
     :members:
 
+utils/cgeoutputprocess
+======================
+..  autoclass:: utils.cgeoutputprocess.CGEOutputProcess
+    :members:
+
 utils/dataprocessutil
 =====================
 ..  autoclass:: utils.dataprocessutil.DataProcessUtil
@@ -270,6 +275,11 @@ utils/evaluateexpression
 utils/geoutil
 =============
 ..  autoclass:: utils.geoutil.GeoUtil
+    :members:
+
+utils/huapdoutputprocess
+========================
+..  autoclass:: utils.huapdoutputprocess.HUADislOutputProcess
     :members:
 
 utils/networkutil
