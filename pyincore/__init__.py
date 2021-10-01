@@ -34,6 +34,8 @@ from pyincore.models.mapping import Mapping
 from pyincore.networkdata import NetworkData
 from pyincore.networkdataset import NetworkDataset
 from pyincore.baseanalysis import BaseAnalysis
+from pyincore.utils.cgeoutputprocess import CGEOutputProcess
+from pyincore.utils.huapdoutputprocess import HUADislOutputProcess
 import pyincore.globals
 
 __version__ = pyincore.globals.PACKAGE_VERSION

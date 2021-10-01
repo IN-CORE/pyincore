@@ -29,19 +29,5 @@ def run_convert_cge_json():
     return True
 
 
-def run_convert_pd_json():
-    analysis = "populationdislocation"
-    filepath = os.path.join(PYINCOREPATH, TESTAPATH, analysis,
-                            "joplin-pop-disl-results.csv")
-    pd_json = HUADislOutputProcess(None, filepath)
-    pd_json.pd_by_race("PD_by_race.json")
-    pd_json.pd_by_income("PD_by_income.json")
-    pd_json.pd_by_tenure("PD_by_tenure.json")
-    pd_json.pd_by_housing("PD_by_housing.json")
-    pd_json.pd_total("PD_by_total.json")
-    return True
-
-
 if __name__ == '__main__':
-    # run_convert_cge_json()
-    run_convert_pd_json()
+    run_convert_cge_json()

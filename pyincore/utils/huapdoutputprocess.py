@@ -28,7 +28,7 @@ class HUADislOutputProcess:
         if pd_count_path:
             self.pd_count = pd.read_csv(pd_count_path, low_memory=False)
         else:
-            self.pd_count = pd_count_path.get_dataframe_from_csv(low_memory=False)
+            self.pd_count = pd_count.get_dataframe_from_csv(low_memory=False)
 
     def pd_by_race(self, filename_json=None):
         """ Calculate race results from the output files of the Joplin Population Dislocation analysis
