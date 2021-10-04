@@ -89,6 +89,11 @@ analyses/joplincge
 ..  autofunction:: joplincge.outputfunctions.get_diff
     :members:
 
+analyses/joplinempiricalrestoration
+===================================
+..  autoclass:: joplinempiricalrestoration.joplinempiricalrestoration.JoplinEmpiricalRestoration
+    :members:
+
 analyses/meandamage
 ===================
 ..  autoclass:: meandamage.meandamage.MeanDamage
