@@ -6,3 +6,4 @@
 
 
 from pyincore.analyses.joplinempiricalrestoration.joplinempiricalrestoration import JoplinEmpiricalRestoration
+from pyincore.analyses.joplinempiricalrestoration.joplinempirrestor_util import JoplinEmpirRestorUtil

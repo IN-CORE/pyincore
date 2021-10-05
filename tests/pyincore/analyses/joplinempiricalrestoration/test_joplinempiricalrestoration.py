@@ -10,10 +10,11 @@ def run_with_base_class():
     # incore-dev
     building_dmg = "602d96e4b1db9c28aeeebdce"  # dev Joplin
     # Funcionality level dataset
-    func_level_id = "61142ef2ca3e973ce145ba05"
+    # func_level_id = ""
 
     restoration = JoplinEmpiricalRestoration(client)
-    restoration.load_remote_input_dataset("functionality_level", func_level_id)
+    restoration.load_remote_input_dataset("building_dmg", building_dmg)
+    # restoration.load_remote_input_dataset("functionality_level", func_level_id)
 
     result_name = "Joplin_empirical_restoration_result"
     restoration.set_parameter("result_name", result_name)

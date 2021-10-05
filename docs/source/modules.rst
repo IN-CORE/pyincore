@@ -93,6 +93,8 @@ analyses/joplinempiricalrestoration
 ===================================
 ..  autoclass:: joplinempiricalrestoration.joplinempiricalrestoration.JoplinEmpiricalRestoration
     :members:
+..  autoclass:: joplinempiricalrestoration.joplinempirrestor_util.JoplinEmpirRestorUtil
+    :members:
 
 analyses/meandamage
 ===================

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from pyincore import BaseAnalysis
+from pyincore.analyses.joplinempiricalrestoration.joplinempirrestor_util import JoplinEmpirRestorUtil
 
 
 class JoplinEmpiricalRestoration(BaseAnalysis):
@@ -22,7 +23,6 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
     """
 
     def __init__(self, incore_client):
-
         super(JoplinEmpiricalRestoration, self).__init__(incore_client)
 
     def run(self):
@@ -34,68 +34,65 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
         """
         # Get seed
         seed_i = self.get_parameter("seed")
+        targetFL = self.get_parameter("target_functionality_level")
 
         result_name = self.get_parameter("result_name")
 
         # Building damage dataset
         building_dmg = self.get_input_dataset("building_dmg").get_dataframe_from_csv(low_memory=False)
 
-        # Get functionality level dataset and create Pandas DataFrame
-        func_levels = self.get_input_dataset("functionality_level").get_dataframe_from_csv(low_memory=False)
+        building_func = building_dmg[["guid"]].copy()
+        building_func["targetFL"] = targetFL
 
-        # Returns dataframe
-        final_inventory = self.get_restoration_days(seed_i, building_dmg, func_levels)
+        initial_func_level, restoration_days = self.get_restoration_days(seed_i, building_dmg, building_func["targetFL"])
+        building_func["initialFL"] = initial_func_level
+        building_func["restorDays"] = restoration_days
+
+        building_func_fin = building_func[["guid", "initialFL", "targetFL", "restorDays"]]
         csv_source = "dataframe"
-        self.set_result_csv_data("result", final_inventory, result_name, "dataframe")
+        self.set_result_csv_data("result", building_func_fin, result_name, csv_source)
 
         return True
 
-    def get_restoration_days(self, seed, building_dmg, func_levels):
+    def get_restoration_days(self, seed_i, building_dmg, target_func_levels):
         """ Calculates restoration days.
 
         Args:
             seed_i (int): Seed for random number generator to ensure replication if run as part
                     of a stochastic analysis, for example in connection with housing unit allocation analysis.
             building_dmg (pd.DataFrame): Building damage dataset with Damage states.
-            func_levels (pd.DataFrame): A target functionality level of the building.
+            target_func_levels (pd.DataFrame): A target functionality level of the building.
 
         Returns:
-            float: Building restoration days.
+            np.array: Initial functionality level based on damage state
+            np.array: Building restoration days.
 
         """
-        iFL = func_levels.iloc[0]["initialFL"]
-        tFL = func_levels.iloc[0]["targetFL"]
-        # import the initial functionality level of the building
-        # and the target functionality level
+        fl_coef = JoplinEmpirRestorUtil.FL_COEF
 
-        restoration_days = 0.0
-        if iFL == 4:  # if initial functionality is FL4
-            if tFL == 3:  # if target functionality is FL3
-                restoration_days = np.random.lognormal(6.13, 0.33, None)
-            elif tFL == 2:  # if target functionality is FL2
-                restoration_days = np.random.lognormal(6.49, 0.6, None)
-            elif tFL == 1:  # if target functionality is FL1
-                restoration_days = np.random.lognormal(6.39, 0.48, None)
-            elif tFL == 0:  # if target functionality is FL0
-                restoration_days = np.random.lognormal(6.60, 0.53, None)
-        elif iFL == 3:  # if initial functionality is FL3
-            if tFL == 2:  # if target functionality is FL2
-                restoration_days = np.random.lognormal(5.56, 0.46, None)
-            elif tFL == 1:  # if target functionality is FL1
-                restoration_days = np.random.lognormal(5.74, 0.55, None)
-            elif tFL == 0:  # if target functionality is FL0
-                restoration_days = np.random.lognormal(5.90, 0.60, None)
-        elif iFL == 2:  # if initial functionality is FL2
-            if tFL == 1:  # if target functionality is FL1
-                restoration_days = np.random.lognormal(5.87, 0.35, None)
-            elif tFL == 0:  # if target functionality is FL0
-                restoration_days = np.random.lognormal(6.06, 0.32, None)
-        elif iFL == 1:  # if initial functionality is FL1
-            if tFL == 0:  # if target functionality is FL0
-                restoration_days = np.random.lognormal(5.90, 0.5, None)
+        hazard_value = building_dmg[["hazardval"]].to_numpy() != 0
+        hazard_value = hazard_value.flatten()
+
+        bdnp = building_dmg[["DS_0", "DS_1", "DS_2", "DS_3"]].to_numpy()
+        # get index of Damage state of max probability
+        bdnp_init = np.argmax(bdnp, axis=1)
+        bdnp_target = target_func_levels.to_numpy()
+
+        means = fl_coef[bdnp_init, bdnp_target, 0]
+        sigmas = fl_coef[bdnp_init, bdnp_target, 1]
+
+        np.random.seed(seed_i)
+        rest_days = np.random.lognormal(means, sigmas)
+
+        # only when exposed to hazard, otherwise no damage and restoration = 0
+        restoration_days = np.where(hazard_value, rest_days, 0).astype(int)
+        # F1-F4 notation
+        bdnp_init = bdnp_init + 1
+        # F0 where not exposed to hazard
+        initial_func_level = np.where(hazard_value, bdnp_init, 0).astype(int)
 
         # Output of the model is restoration_days
-        return float(restoration_days)
+        return initial_func_level, restoration_days
 
     def get_spec(self):
         """Get specifications of the Joplin empirical restoration analysis.
