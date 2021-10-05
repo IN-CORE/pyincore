@@ -17,6 +17,7 @@ def run_with_base_class():
 
     result_name = "Joplin_empirical_restoration_result"
     restoration.set_parameter("result_name", result_name)
+    restoration.set_parameter("target_functionality_level", 0)
     restoration.set_parameter("seed", 1234)
 
     # Run Analysis

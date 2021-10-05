@@ -115,6 +115,12 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
                     "type": str
                 },
                 {
+                    "id": "target_functionality_level",
+                    "required": False,
+                    "description": "Target functionality level for all infrastructure",
+                    "type": int
+                },
+                {
                     "id": "seed",
                     "required": False,
                     "description": "Initial seed for the tornado hazard value",
@@ -135,7 +141,7 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
                 },
                 {
                     "id": "functionality_level",
-                    "required": True,
+                    "required": False,
                     "description": "The target functionality level of the building.",
                     "type": ["incore:TargetFunctionalityVer1"]
                 }
