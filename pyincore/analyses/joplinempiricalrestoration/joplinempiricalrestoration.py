@@ -38,13 +38,20 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
 
         result_name = self.get_parameter("result_name")
 
+        # Building dataset
+        building_set = self.get_input_dataset("buildings").get_dataframe_from_shapefile()
         # Building damage dataset
         building_dmg = self.get_input_dataset("building_dmg").get_dataframe_from_csv(low_memory=False)
 
-        building_func = building_dmg[["guid"]].copy()
+        # merge and filter out archetypes > 5
+        building_dmg_all = pd.merge(building_dmg, building_set, how="left", on="guid", copy=True, validate="1:1")
+        building_dmg_5 = building_dmg_all[["guid", "archetype", "LS_0", "LS_1", "LS_2", "haz_expose"]].copy()
+        building_func_5 = building_dmg_5[building_dmg_all["archetype"] <= 5]
+
+        building_func = building_func_5[["guid", "LS_0", "LS_1", "LS_2", "haz_expose"]].copy()
         building_func["targetFL"] = targetFL
 
-        initial_func_level, restoration_days = self.get_restoration_days(seed_i, building_dmg, building_func["targetFL"])
+        initial_func_level, restoration_days = self.get_restoration_days(seed_i, building_func)
         building_func["initialFL"] = initial_func_level
         building_func["restorDays"] = restoration_days
 
@@ -54,14 +61,13 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
 
         return True
 
-    def get_restoration_days(self, seed_i, building_dmg, target_func_levels):
+    def get_restoration_days(self, seed_i, building_func):
         """ Calculates restoration days.
 
         Args:
             seed_i (int): Seed for random number generator to ensure replication if run as part
                     of a stochastic analysis, for example in connection with housing unit allocation analysis.
-            building_dmg (pd.DataFrame): Building damage dataset with Damage states.
-            target_func_levels (pd.DataFrame): A target functionality level of the building.
+            building_dmg (pd.DataFrame): Building damage dataset with guid, limit states, hazard exposure.
 
         Returns:
             np.array: Initial functionality level based on damage state
@@ -70,13 +76,20 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
         """
         fl_coef = JoplinEmpirRestorUtil.FL_COEF
 
-        hazard_value = building_dmg[["hazardval"]].to_numpy() != 0
+        hazard_value = building_func[["haz_expose"]].to_numpy() != "no"
         hazard_value = hazard_value.flatten()
 
-        bdnp = building_dmg[["DS_0", "DS_1", "DS_2", "DS_3"]].to_numpy()
-        # get index of Damage state of max probability
-        bdnp_init = np.argmax(bdnp, axis=1)
-        bdnp_target = target_func_levels.to_numpy()
+        bdnp = building_func[["LS_0", "LS_1", "LS_2"]].to_numpy()
+
+        # generate a random number between 0 and 1 and see where in boundaries it locates and use it to assign FL,
+        # for each building
+        rnd_num = np.random.uniform(0, 1, (len(building_func.index, )))
+        bdnp_init = np.zeros(len(building_func.index, )).astype(int)  # first, set all to 0
+        bdnp_init = np.where(rnd_num < bdnp[:, 0], 1, bdnp_init)  # if rnd_num < LS_0 set to 1
+        bdnp_init = np.where(rnd_num < bdnp[:, 1], 2, bdnp_init)  # if rnd_num < LS_0 set to 2
+        bdnp_init = np.where(rnd_num < bdnp[:, 2], 3, bdnp_init)  # if rnd_num < LS_0 set to 3
+
+        bdnp_target = building_func["targetFL"].to_numpy()
 
         means = fl_coef[bdnp_init, bdnp_target, 0]
         sigmas = fl_coef[bdnp_init, bdnp_target, 1]
@@ -126,6 +139,13 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
             ],
             "input_datasets": [
                 {
+                    'id': 'buildings',
+                    'required': True,
+                    'description': 'Building Inventory',
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5',
+                             'ergo:buildingInventoryVer6', 'ergo:buildingInventoryVer7'],
+                },
+                {
                     "id": "building_dmg",
                     "required": True,
                     "description": "Building damage results CSV file",
@@ -135,12 +155,6 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
                              "ergo:buildingInventory",
                              "ergo:nsBuildingInventoryDamage",
                              "ergo:nsBuildingInventoryDamageVer2"]
-                },
-                {
-                    "id": "functionality_level",
-                    "required": False,
-                    "description": "The target functionality level of the building.",
-                    "type": ["incore:TargetFunctionalityVer1"]
                 }
             ],
             "output_datasets": [
