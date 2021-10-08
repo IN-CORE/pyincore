@@ -59,7 +59,7 @@ analyses/example
     :members:
 
 analyses/housingrecoverysequential
-==============================
+==================================
 ..  autoclass:: housingrecoverysequential.housingrecoverysequential.HousingRecoverySequential
     :members:
 
@@ -126,7 +126,7 @@ analyses/populationdislocation
     :members:
 
 analyses/residentialbuildingrecovery
-============================
+====================================
 ..  autoclass:: residentialbuildingrecovery.residentialbuildingrecovery.ResidentialBuildingRecovery
     :members:
 
@@ -279,7 +279,7 @@ utils/geoutil
 
 utils/huapdoutputprocess
 ========================
-..  autoclass:: utils.huapdoutputprocess.HUADislOutputProcess
+..  autoclass:: utils.huapdoutputprocess.HUAPDOutputProcess
     :members:
 
 utils/networkutil

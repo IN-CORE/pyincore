@@ -2,7 +2,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore.utils.huapdoutputprocess import HUADislOutputProcess
+from pyincore.utils.huapdoutputprocess import HUAPDOutputProcess
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.populationdislocation import PopulationDislocation
 import pyincore.globals as pyglobals
@@ -35,12 +35,12 @@ def run_convert_pd_json_chained():
     pop_dis.run_analysis()
     pd_result = pop_dis.get_output_dataset("result")
 
-    pd_json = HUADislOutputProcess(pd_result)
+    pd_json = HUAPDOutputProcess(pd_result)
     return pd_json
 
 def run_convert_pd_json_path(testpath):
     # test the external file with a path
-    pd_json = HUADislOutputProcess(None, os.path.join(testpath, "joplin-pop-disl-results.csv"))
+    pd_json = HUAPDOutputProcess(None, os.path.join(testpath, "joplin-pop-disl-results.csv"))
     return pd_json
 
 

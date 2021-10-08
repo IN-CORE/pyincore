@@ -8,7 +8,7 @@ import json
 import pandas as pd
 
 
-class HUADislOutputProcess:
+class HUAPDOutputProcess:
     """This class converts csv results outputs of Population dislocation analysis to json format.
 
     Args:

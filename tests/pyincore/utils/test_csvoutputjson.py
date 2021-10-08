@@ -3,13 +3,13 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 from pyincore.utils.cgeoutputprocess import CGEOutputProcess
-from pyincore.utils.huapdoutputprocess import HUADislOutputProcess
 import os
 
-PYINCOREPATH = "/Users/mo/dev/GitHub/"
+PYINCOREPATH = "path-to-pyincore"
 TESTAPATH = "pyincore/tests/pyincore/analyses/"
 
 def run_convert_cge_json():
+    # run the JoplinCGE analysis first to get results, csv files
     cge_json = CGEOutputProcess()
     filepath = os.path.join(PYINCOREPATH, TESTAPATH, "joplincge")
 
