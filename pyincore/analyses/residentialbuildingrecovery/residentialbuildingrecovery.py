@@ -155,8 +155,8 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             group_hhinc_values = group['hhinc'].values
 
             # Compute normal ddistribution parameters from group data
-            mean = np.mean(group_hhinc_values)
-            std = np.std(group_hhinc_values)
+            mean = np.nanmean(group_hhinc_values)
+            std = np.nanstd(group_hhinc_values)
 
             if np.isnan(mean):
                 mean = 3
@@ -166,7 +166,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
             # Directly compute the indices of NaN values in the hhinc vector
             group_nan_idx = np.where(np.isnan(group_hhinc_values))
-            number_nan = len(group_nan_idx)
+            number_nan = len(group_nan_idx[0])
 
             # Now, generate a numpy matrix to hold the samples for the group
             group_samples = np.zeros((num_samples, group_size))
@@ -228,10 +228,10 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
             group_new = pd.DataFrame(no_guids_maxima, columns=colnames, index=group.index)
             group_new.insert(0, 'guid', local_guids)
-            new_groups.append(group_new)
+            new_groups.append(group_new.head(1))
 
         # Construct a new DataFrame
-        household_aggregation_results = pd.concat(new_groups).sort_index()
+        household_aggregation_results = pd.concat(new_groups).reset_index(drop=True)
 
         return household_aggregation_results
 
