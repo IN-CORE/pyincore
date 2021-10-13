@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import json
-from pyincore.models.standardfragilitycurve import StandardFragilityCurve
+from pyincore.models.standardrepaircurve import StandardRepairCurve
 
 
 class RepairCurveSet:
@@ -35,9 +35,7 @@ class RepairCurveSet:
         if 'repairCurves' in metadata.keys():
             for repair_curve in metadata["repairCurves"]:
                 if repair_curve['className'] == 'StandardRepairCurve':
-                    # Using StandardFragilityCurve for now instead of creating a StandardRepairCurve because it will be
-                    # deprecated and repair curves will be using the expression based format the in near future.
-                    self.repair_curves.append(StandardFragilityCurve(repair_curve))
+                    self.repair_curves.append(StandardRepairCurve(repair_curve))
                 else:
                     # TODO make a custom repair curve class that accept other formats
                     self.repair_curves.append(repair_curve)

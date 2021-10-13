@@ -9,7 +9,7 @@ import concurrent.futures
 from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
-from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class RoadDamage(BaseAnalysis):
@@ -191,7 +191,7 @@ class RoadDamage(BaseAnalysis):
             if use_hazard_uncertainty:
                 raise ValueError("Uncertainty Not Implemented Yet.")
 
-            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
+            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurve):
                 hazard_vals = AnalysisUtil.update_precision_of_lists(hazard_resp[i]["hazardValues"])
                 demand_types = hazard_resp[i]["demands"]
                 demand_units = hazard_resp[i]["units"]
@@ -201,7 +201,7 @@ class RoadDamage(BaseAnalysis):
 
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp[i]["hazardValues"]):
                     road_args = selected_fragility_set.construct_expression_args_from_inventory(road)
-                    dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
+                    dmg_probability = selected_fragility_set.calculate_limit_state(
                         hval_dict, inventory_type='road', **road_args)
 
                     # if there is liquefaction, overwrite the hazardval with liquefaction value
@@ -214,7 +214,7 @@ class RoadDamage(BaseAnalysis):
                         liq_hval_dict = dict()
                         for j, d in enumerate(liquefaction_resp[i]["demands"]):
                             liq_hval_dict[d] = liq_hazard_vals[j]
-                        dmg_probability = selected_fragility_set.calculate_limit_state_refactored_w_conversion(
+                        dmg_probability = selected_fragility_set.calculate_limit_state(
                             liq_hval_dict,
                             inventory_type='road',
                             **road_args)

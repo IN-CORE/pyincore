@@ -9,20 +9,17 @@ import math
 
 from scipy.stats import norm
 
-from pyincore.models.fragilitycurve import FragilityCurve
-from deprecated.sphinx import deprecated
 
-
-class StandardFragilityCurve(FragilityCurve):
-    """A class to represent standard fragility curve"""
+# TODO: This will be deprecated when repair curves are migrated to expression based format.
+class StandardRepairCurve:
+    """A class to represent standard Repair curve."""
 
     def __init__(self, curve_parameters):
+        self.description = curve_parameters['description']
         self.alpha = curve_parameters['alpha']
         self.beta = curve_parameters['beta']
         self.alpha_type = curve_parameters['alphaType']
         self.curve_type = curve_parameters['curveType']
-
-        super(StandardFragilityCurve, self).__init__(curve_parameters)
 
     def calculate_limit_state_probability(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
         """Computes limit state probabilities.
@@ -52,22 +49,3 @@ class StandardFragilityCurve(FragilityCurve):
 
         return probability
 
-    @deprecated(version="0.9.7", reason="This method is already incorporated in refactored fragility curves and will "
-                                        "be deprecated")
-    def adjust_fragility_for_liquefaction(self, liquefaction: str):
-        """Adjusts fragility curve object by input parameter liquefaction.
-
-        Args:
-            liquefaction (str): Liquefaction type.
-
-        """
-        liquefaction_unified = str(liquefaction).upper()
-        if liquefaction_unified == "U":
-            multiplier = 0.85
-        elif liquefaction_unified == "Y":
-            multiplier = 0.65
-        else:
-            multiplier = 1.0
-
-        self.alpha = self.alpha * multiplier
-        self.beta = self.beta
