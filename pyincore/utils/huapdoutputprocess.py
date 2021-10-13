@@ -15,29 +15,40 @@ class HUAPDOutputProcess:
         pd_count (obj): IN-CORE dataset for Joplin Population Dislocation (PD) results.
         pd_count_path (obj): A fallback for the case that Joplin PD object is not provided.
             For example a user wants to directly pass in csv files, a path to PD results.
+        filter_on (bool): A flag to filter all data, default True counts only Joplin buildings
 
     """
-    HUPD_CATEGORIES = ["housing_unit_characteristics",
-                       "housing_unit_dislocations",
-                       "housing_unit_in_total",
-                       "population_dislocations",
-                       "population_in_total"
+    HUPD_CATEGORIES = ["household_characteristics",
+                       "household_dislocated",
+                       "total_households",
+                       "%_households_dislocated",
+                       "population_dislocated",
+                       "total_population",
+                       "%_population_dislocated"
                        ]
 
-    def __init__(self, pd_count, pd_count_path=None):
+    def __init__(self, pd_count, pd_count_path=None, filter_on=True):
         if pd_count_path:
-            self.pd_count = pd.read_csv(pd_count_path, low_memory=False)
+            huapd_count = pd.read_csv(pd_count_path, low_memory=False)
         else:
-            self.pd_count = pd_count.get_dataframe_from_csv(low_memory=False)
+            huapd_count = pd_count.get_dataframe_from_csv(low_memory=False)
+        # keep only inventory with guid; filter for Joplin since only Joplin inventory has guids
+        if filter_on:
+            huapd_count = huapd_count[(huapd_count["guid"].notnull()) & (huapd_count["numprec"].notnull())]
+        self.pd_count = huapd_count
 
     def pd_by_race(self, filename_json=None):
         """ Calculate race results from the output files of the Joplin Population Dislocation analysis
         and convert the results to json format.
         [
-            {"housing_unit_characteristics": "White alone, Not Hispanic",
-             "housing_unit_dislocation": 1521,
-             "housing_unit_in_total": 18507
-            },{"housing_unit_characteristics": "Black alone, Not Hispanic",..,..},{},{},
+            {"household_characteristics": "Not Hispanic/White",
+             "household_dislocated": 1521,
+             "total_households": 18507,
+             "%_households_dislocated": 7.3,
+             "population_dislocated",
+             "total_population",
+             "%_population_dislocated"
+            },{"household_characteristics": "Not Hispanic/Black",..,..},{},{},
             {"No race Ethnicity Data"},{"Total"}
         ]
 
@@ -50,13 +61,13 @@ class HUAPDOutputProcess:
         """
         # Race categories
         # The numbering follows the Community description notebook
-        # 0 - Vacant HU No Race Ethnicity Data, 1 - White alone, Not Hispanic, 2 - Black alone, Not Hispanic
-        # 3 - Other race, Not Hispanic, 4 - Any race, Hispanic, 5 - No race Ethnicity Data
-        race_categories = ["White alone, Not Hispanic",
-                           "Black alone, Not Hispanic",
-                           "Other race, Not Hispanic",
-                           "Any race, Hispanic",
-                           "No race Ethnicity Data",
+        # 0 - Vacant HU No Race Ethnicity Data, 1 - Not Hispanic/White, 2 - Not Hispanic/Black
+        # 3 - Not Hispanic/Other race, 4 - Hispanic, 5 - No Race or Ethnicity Data
+        race_categories = ["Not Hispanic/White",
+                           "Not Hispanic/Black",
+                           "Not Hispanic/Other Race",
+                           "Hispanic",
+                           "No Race or Ethnicity Data",
                            "Total"]
 
         huapd = self.pd_count
@@ -102,8 +113,10 @@ class HUAPDOutputProcess:
             huapd_race[self.HUPD_CATEGORIES[0]] = race_categories[i]
             huapd_race[self.HUPD_CATEGORIES[1]] = hua_disl[i + 1]
             huapd_race[self.HUPD_CATEGORIES[2]] = hua_tot[i + 1]
-            huapd_race[self.HUPD_CATEGORIES[3]] = pd_disl[i + 1]
-            huapd_race[self.HUPD_CATEGORIES[4]] = pop_tot[i + 1]
+            huapd_race[self.HUPD_CATEGORIES[3]] = (hua_tot[i + 1] - hua_disl[i + 1])/hua_tot[i + 1]
+            huapd_race[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
+            huapd_race[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
+            huapd_race[self.HUPD_CATEGORIES[6]] = (pop_tot[i + 1] - pd_disl[i + 1])/pop_tot[i + 1]
             pd_by_race_json.append(huapd_race)
         # print(pd_by_race_json)
 
@@ -117,11 +130,13 @@ class HUAPDOutputProcess:
         """ Calculate income results from the output files of the Joplin Population Dislocation analysis
         and convert the results to json format.
         [
-            {"housing_unit_characteristics": "HH1 (less than $15,000)",
-             "housing_unit_dislocation": 311,
-             "housing_unit_in_total": 3252,
-             "population_dislocation": 311,
-             "population_in_total": 3252
+            {"household_characteristics": "HH1 (less than $15,000)",
+             "household_dislocated": 311,
+             "total_households": 3252,
+             "%_households_dislocated": 7.3,
+             "population_dislocated": 311,
+             "total_population": 3252,
+             "%_population_dislocated"
              },
              {"HH2 ($15,000 to $35,000)",..,..,..,..},{},{},{},{},
              {"Unknown",..,..,..,..}
@@ -181,8 +196,10 @@ class HUAPDOutputProcess:
             huapd_income[self.HUPD_CATEGORIES[0]] = income_categories[i]
             huapd_income[self.HUPD_CATEGORIES[1]] = hua_disl[i]
             huapd_income[self.HUPD_CATEGORIES[2]] = hua_tot[i]
-            huapd_income[self.HUPD_CATEGORIES[3]] = pd_disl[i]
-            huapd_income[self.HUPD_CATEGORIES[4]] = pop_tot[i]
+            huapd_income[self.HUPD_CATEGORIES[3]] = (hua_tot[i] - hua_disl[i]) / hua_tot[i]
+            huapd_income[self.HUPD_CATEGORIES[4]] = pd_disl[i]
+            huapd_income[self.HUPD_CATEGORIES[5]] = pop_tot[i]
+            huapd_income[self.HUPD_CATEGORIES[6]] = (pop_tot[i] - pd_disl[i]) / pop_tot[i]
             pd_by_income_json.append(huapd_income)
         # print(pd_by_income_json)
 
@@ -196,13 +213,15 @@ class HUAPDOutputProcess:
         """ Calculate tenure results from the output files of the Joplin Population Dislocation analysis
         and convert the results to json format.
         [
-            {"housing_unit_characteristics": "Owner occupied",
-             "housing_unit_dislocation": 1018,
-             "housing_unit_in_total": 11344,
-             "population_dislocation": 1018,
-             "population_in_total": 11344
+            {"household_characteristics": "Owner occupied",
+             "household_dislocated": 1018,
+             "total_households": 11344,
+             "%_households_dislocated": 7.3,
+             "population_dislocated": 1018,
+             "total_population": 11344,
+             "%_population_dislocated"
             },
-            {"housing_unit_characteristics": "Renter occupied",..,..,..,..},{},{},{},{},{},
+            {"household_characteristics": "Renter occupied",..,..,..,..},{},{},{},{},{},
             {"total",..,..,..,..}
         ]
 
@@ -274,8 +293,10 @@ class HUAPDOutputProcess:
             huapd_tenure[self.HUPD_CATEGORIES[0]] = tenure_categories[i]
             huapd_tenure[self.HUPD_CATEGORIES[1]] = hua_disl[i + 1]
             huapd_tenure[self.HUPD_CATEGORIES[2]] = hua_tot[i + 1]
-            huapd_tenure[self.HUPD_CATEGORIES[3]] = pd_disl[i + 1]
-            huapd_tenure[self.HUPD_CATEGORIES[4]] = pop_tot[i + 1]
+            huapd_tenure[self.HUPD_CATEGORIES[3]] = (hua_tot[i + 1] - hua_disl[i + 1]) / hua_tot[i + 1]
+            huapd_tenure[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
+            huapd_tenure[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
+            huapd_tenure[self.HUPD_CATEGORIES[6]] = (pop_tot[i + 1] - pd_disl[i + 1]) / pop_tot[i + 1]
             pd_by_tenure_json.append(huapd_tenure)
         # print(pd_by_tenure_json)
 
@@ -290,11 +311,13 @@ class HUAPDOutputProcess:
         using huestimate column (huestimate = 1 is single family, huestimate > 1 means multi family house)
         and convert the results to json format.
         [
-            {"housing_unit_characteristics": "Single Family",
-             "housing_unit_dislocation": 1162,
-             "housing_unit_in_total": 837,
-             "population_dislocation": 1162,
-             "population_in_total": 837
+            {"household_characteristics": "Single Family",
+             "household_dislocated": 1162,
+             "total_households": 837,
+             "%_households_dislocated": 7.3,
+             "population_dislocated": 1162,
+             "total_population": 837,
+             "%_population_dislocated"
              },{},{"Total",..,..,..,..}
         ]
 
@@ -361,12 +384,12 @@ class HUAPDOutputProcess:
     def pd_total(self, filename_json=None):
         """ Calculate total results from the output files of the Joplin Population Dislocation analysis
         and convert the results to json format.
-        {   "housing_unit_dislocation": {
+        {   "household_dislocated": {
                 "dislocated": {
                     "number": 1999,
                     "percentage": 0.085
                 }, "not_dislocated": {}, "total": {}
-            },"population_dislocation": {"dislocated": {},"not_dislocated": {}, "total": {}}
+            },"population_dislocated": {"dislocated": {},"not_dislocated": {}, "total": {}}
         }
 
         Args:
@@ -389,18 +412,18 @@ class HUAPDOutputProcess:
         pop_tot = sum(pd_disl)
 
         hua_disl_tot = {}
-        hua_disl_tot["dislocated"] = {"number": hua_disl[1], "percentage": hua_disl[1]/hua_tot}
-        hua_disl_tot["not_dislocated"] = {"number": hua_tot - hua_disl[1],
-                                          "percentage": (hua_tot - hua_disl[1])/hua_tot}
-        hua_disl_tot["total"] = {"number": hua_tot, "percentage": 1}
+        hua_disl_tot["dislocated"] = {"households": hua_disl[1], "%_of_households": hua_disl[1]/hua_tot}
+        hua_disl_tot["not_dislocated"] = {"households": hua_tot - hua_disl[1],
+                                          "%_of_households": (hua_tot - hua_disl[1])/hua_tot}
+        hua_disl_tot["total"] = {"households": hua_tot, "%_of_households": 1}
 
         pop_disl_tot = {}
-        pop_disl_tot["dislocated"] = {"number": pd_disl[1], "percentage": pd_disl[1]/pop_tot}
-        pop_disl_tot["not_dislocated"] = {"number": pop_tot - pd_disl[1],
-                                          "percentage": (pop_tot - pd_disl[1])/pop_tot}
-        pop_disl_tot["total"] = {"number": pop_tot, "percentage": 1}
+        pop_disl_tot["dislocated"] = {"population": pd_disl[1], "%_of_population": pd_disl[1]/pop_tot}
+        pop_disl_tot["not_dislocated"] = {"population": pop_tot - pd_disl[1],
+                                          "%_of_population": (pop_tot - pd_disl[1])/pop_tot}
+        pop_disl_tot["total"] = {"population": pop_tot, "%_of_population": 1}
 
-        pd_total_json = {"housing_unit_dislocation": hua_disl_tot, "population_dislocation": pop_disl_tot}
+        pd_total_json = {"household_dislocation_in_total": hua_disl_tot, "population_dislocation_in_total": pop_disl_tot}
         # print(pd_total_json)
 
         if filename_json:
