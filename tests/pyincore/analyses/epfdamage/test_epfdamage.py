@@ -105,6 +105,9 @@ def run_with_base_class():
     # Run Analysis
     epf_dmg_tsu_re.run_analysis()
 
+    result = epf_dmg_tsu_re.get_output_dataset("result")
+    print(result.data_type == "incore:epfDamageVer3")
+
 
 if __name__ == '__main__':
     run_with_base_class()

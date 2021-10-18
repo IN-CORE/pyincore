@@ -239,10 +239,10 @@ class BaseAnalysis:
         if not name.endswith(".json"):
             name = name + ".json"
 
+        dataset_type = self.output_datasets[result_id]["spec"]["type"]
         if source == 'file':
-            dataset = Dataset.from_json_data(result_data, name)
+            dataset = Dataset.from_json_data(result_data, name, dataset_type)
 
-        dataset.data_type = self.output_datasets[result_id]["spec"]["type"]
         self.set_output_dataset(result_id, dataset)
 
     def run_analysis(self):
