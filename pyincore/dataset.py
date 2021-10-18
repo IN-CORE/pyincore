@@ -108,27 +108,29 @@ class Dataset:
         return instance
 
     @classmethod
-    def from_dataframe(cls, dataframe, name):
+    def from_dataframe(cls, dataframe, name, data_type="csv"):
         """Get Dataset from Panda's DataFrame.
 
         Args:
             dataframe (obj): Panda's DataFrame.
             name (str): filename.
+            data_type (str): Incore data type, e.g. incore:xxxx or ergo:xxxx
 
         Returns:
             obj: Dataset from file.
 
         """
         dataframe.to_csv(name, index=False)
-        return Dataset.from_file(name, "csv")
+        return Dataset.from_file(name, data_type)
 
     @classmethod
-    def from_csv_data(cls, result_data, name):
+    def from_csv_data(cls, result_data, name, data_type="csv"):
         """Get Dataset from CSV data.
 
         Args:
             result_data (obj): Result data and metadata.
             name (str): A CSV filename.
+            data_type (str): Incore data type, e.g. incore:xxxx or ergo:xxxx
 
         Returns:
             obj: Dataset from file.
@@ -140,15 +142,16 @@ class Dataset:
                 writer = csv.DictWriter(csv_file, dialect="unix", fieldnames=result_data[0].keys())
                 writer.writeheader()
                 writer.writerows(result_data)
-        return Dataset.from_file(name, "csv")
+        return Dataset.from_file(name, data_type)
 
     @classmethod
-    def from_json_data(cls, result_data, name):
+    def from_json_data(cls, result_data, name, data_type="json"):
         """Get Dataset from JSON data.
 
         Args:
             result_data (obj): Result data and metadata.
             name (str): A JSON filename.
+            data_type (str): Incore data type, e.g. incore:xxxx or ergo:xxxx
 
         Returns:
             obj: Dataset from file.
@@ -158,7 +161,7 @@ class Dataset:
             with open(name, 'w') as json_file:
                 json_dumps_str = json.dumps(result_data, indent=4)
                 json_file.write(json_dumps_str)
-        return Dataset.from_file(name, "json")
+        return Dataset.from_file(name, data_type)
 
     def cache_files(self, data_service: DataService):
         """Get the set of fragility data, curves.
