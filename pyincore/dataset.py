@@ -108,7 +108,7 @@ class Dataset:
         return instance
 
     @classmethod
-    def from_dataframe(cls, dataframe, name, data_type="csv"):
+    def from_dataframe(cls, dataframe, name, data_type):
         """Get Dataset from Panda's DataFrame.
 
         Args:
@@ -124,7 +124,7 @@ class Dataset:
         return Dataset.from_file(name, data_type)
 
     @classmethod
-    def from_csv_data(cls, result_data, name, data_type="csv"):
+    def from_csv_data(cls, result_data, name, data_type):
         """Get Dataset from CSV data.
 
         Args:
@@ -145,7 +145,7 @@ class Dataset:
         return Dataset.from_file(name, data_type)
 
     @classmethod
-    def from_json_data(cls, result_data, name, data_type="json"):
+    def from_json_data(cls, result_data, name, data_type):
         """Get Dataset from JSON data.
 
         Args:
