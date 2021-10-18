@@ -27,7 +27,7 @@ class HUAPDOutputProcess:
                        "%_population_dislocated"
                        ]
 
-    def __init__(self, pd_count, pd_count_path=None, filter_on=True):
+    def __init__(self, pd_count, pd_count_path=None, filter_on=False):
         if pd_count_path:
             huapd_count = pd.read_csv(pd_count_path, low_memory=False)
         else:
@@ -113,10 +113,16 @@ class HUAPDOutputProcess:
             huapd_race[self.HUPD_CATEGORIES[0]] = race_categories[i]
             huapd_race[self.HUPD_CATEGORIES[1]] = hua_disl[i + 1]
             huapd_race[self.HUPD_CATEGORIES[2]] = hua_tot[i + 1]
-            huapd_race[self.HUPD_CATEGORIES[3]] = (hua_tot[i + 1] - hua_disl[i + 1])/hua_tot[i + 1]
+            if hua_tot[i + 1]:
+                huapd_race[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i + 1]/ hua_tot[i + 1])
+            else:
+                huapd_race[self.HUPD_CATEGORIES[3]] = None
             huapd_race[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
             huapd_race[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
-            huapd_race[self.HUPD_CATEGORIES[6]] = (pop_tot[i + 1] - pd_disl[i + 1])/pop_tot[i + 1]
+            if pop_tot[i + 1]:
+                huapd_race[self.HUPD_CATEGORIES[6]] = 100 * (pop_tot[i + 1] /pop_tot[i + 1])
+            else:
+                huapd_race[self.HUPD_CATEGORIES[6]] = None
             pd_by_race_json.append(huapd_race)
         # print(pd_by_race_json)
 
@@ -196,10 +202,16 @@ class HUAPDOutputProcess:
             huapd_income[self.HUPD_CATEGORIES[0]] = income_categories[i]
             huapd_income[self.HUPD_CATEGORIES[1]] = hua_disl[i]
             huapd_income[self.HUPD_CATEGORIES[2]] = hua_tot[i]
-            huapd_income[self.HUPD_CATEGORIES[3]] = (hua_tot[i] - hua_disl[i]) / hua_tot[i]
+            if hua_tot[i]:
+                huapd_income[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i] / hua_tot[i])
+            else:
+                huapd_income[self.HUPD_CATEGORIES[3]] = None
             huapd_income[self.HUPD_CATEGORIES[4]] = pd_disl[i]
             huapd_income[self.HUPD_CATEGORIES[5]] = pop_tot[i]
-            huapd_income[self.HUPD_CATEGORIES[6]] = (pop_tot[i] - pd_disl[i]) / pop_tot[i]
+            if pop_tot[i]:
+                huapd_income[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i] / pop_tot[i])
+            else:
+                huapd_income[self.HUPD_CATEGORIES[6]] = None
             pd_by_income_json.append(huapd_income)
         # print(pd_by_income_json)
 
@@ -293,10 +305,16 @@ class HUAPDOutputProcess:
             huapd_tenure[self.HUPD_CATEGORIES[0]] = tenure_categories[i]
             huapd_tenure[self.HUPD_CATEGORIES[1]] = hua_disl[i + 1]
             huapd_tenure[self.HUPD_CATEGORIES[2]] = hua_tot[i + 1]
-            huapd_tenure[self.HUPD_CATEGORIES[3]] = (hua_tot[i + 1] - hua_disl[i + 1]) / hua_tot[i + 1]
+            if hua_tot[i + 1]:
+                huapd_tenure[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i + 1] / hua_tot[i + 1])
+            else:
+                huapd_tenure[self.HUPD_CATEGORIES[3]] = None
             huapd_tenure[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
             huapd_tenure[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
-            huapd_tenure[self.HUPD_CATEGORIES[6]] = (pop_tot[i + 1] - pd_disl[i + 1]) / pop_tot[i + 1]
+            if pop_tot[i + 1]:
+                huapd_tenure[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i + 1] / pop_tot[i + 1])
+            else:
+                huapd_tenure[self.HUPD_CATEGORIES[6]] = None
             pd_by_tenure_json.append(huapd_tenure)
         # print(pd_by_tenure_json)
 
@@ -371,8 +389,16 @@ class HUAPDOutputProcess:
             huapd_household[self.HUPD_CATEGORIES[0]] = household_categories[i]
             huapd_household[self.HUPD_CATEGORIES[1]] = hua_disl[i + 1]
             huapd_household[self.HUPD_CATEGORIES[2]] = hua_tot[i + 1]
-            huapd_household[self.HUPD_CATEGORIES[3]] = pd_disl[i + 1]
-            huapd_household[self.HUPD_CATEGORIES[4]] = pop_tot[i + 1]
+            if hua_tot[i + 1]:
+                huapd_household[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i + 1] / hua_tot[i + 1])
+            else:
+                huapd_household[self.HUPD_CATEGORIES[3]] = None
+            huapd_household[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
+            huapd_household[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
+            if pop_tot[i + 1]:
+                huapd_household[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i + 1] / pop_tot[i + 1])
+            else:
+                huapd_household[self.HUPD_CATEGORIES[6]] = None
             pd_by_housing_json.append(huapd_household)
         # print(pd_by_housing_json)
 
@@ -412,16 +438,33 @@ class HUAPDOutputProcess:
         pop_tot = sum(pd_disl)
 
         hua_disl_tot = {}
-        hua_disl_tot["dislocated"] = {"households": hua_disl[1], "%_of_households": hua_disl[1]/hua_tot}
-        hua_disl_tot["not_dislocated"] = {"households": hua_tot - hua_disl[1],
-                                          "%_of_households": (hua_tot - hua_disl[1])/hua_tot}
-        hua_disl_tot["total"] = {"households": hua_tot, "%_of_households": 1}
+        if hua_tot:
+            hua_disl_tot["dislocated"] = {"households": hua_disl[1],
+                                            "%_of_households": 100 * (hua_disl[1]/hua_tot)}
+            hua_disl_tot["not_dislocated"] = {"households": hua_tot - hua_disl[1],
+                                          "%_of_households": 100 * ((hua_tot - hua_disl[1])/hua_tot)}
+            hua_disl_tot["total"] = {"households": hua_tot, "%_of_households": 1}
+        else:
+            hua_disl_tot["dislocated"] = {"households": hua_disl[1],
+                                          "%_of_households": 100 * (hua_disl[1]/hua_tot)}
+            hua_disl_tot["not_dislocated"] = {"households": hua_tot - hua_disl[1],
+                                              "%_of_households": 100 * ((hua_tot - hua_disl[1])/hua_tot)}
+            hua_disl_tot["total"] = {"households": hua_tot, "%_of_households": 1}
 
         pop_disl_tot = {}
-        pop_disl_tot["dislocated"] = {"population": pd_disl[1], "%_of_population": pd_disl[1]/pop_tot}
-        pop_disl_tot["not_dislocated"] = {"population": pop_tot - pd_disl[1],
-                                          "%_of_population": (pop_tot - pd_disl[1])/pop_tot}
-        pop_disl_tot["total"] = {"population": pop_tot, "%_of_population": 1}
+        if pop_tot:
+            pop_disl_tot["dislocated"] = {"population": pd_disl[1],
+                                          "%_of_population": 100 * (pd_disl[1]/pop_tot)}
+            pop_disl_tot["not_dislocated"] = {"population": pop_tot - pd_disl[1],
+                                              "%_of_population": 100 * ((pop_tot - pd_disl[1])/pop_tot)}
+            pop_disl_tot["total"] = {"population": pop_tot, "%_of_population": 1}
+        else:
+            pop_disl_tot["dislocated"] = {"population": pd_disl[1],
+                                          "%_of_population": None}
+            pop_disl_tot["not_dislocated"] = {"population": pop_tot - pd_disl[1],
+                                              "%_of_population": None}
+            pop_disl_tot["total"] = {"population": None, "%_of_population": None}
+
 
         pd_total_json = {"household_dislocation_in_total": hua_disl_tot, "population_dislocation_in_total": pop_disl_tot}
         # print(pd_total_json)

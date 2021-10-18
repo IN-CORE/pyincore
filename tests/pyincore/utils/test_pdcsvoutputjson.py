@@ -55,11 +55,15 @@ if __name__ == '__main__':
     pd_json.pd_total("PD_by_total.json")
 
     # test the external file with a path
-    testpath = "/Users/<user>/<path_to_pyincore>/pyincore/tests/pyincore/utils"
-    pd_json = run_convert_pd_json_path(testpath)
+    testpath = ""
+    # testpath = "/Users/<user>/<path_to_pyincore>/pyincore/tests/pyincore/utils"
+    if testpath:
+        pd_json = run_convert_pd_json_path(testpath)
 
-    pd_json.pd_by_race("PD_by_race.json")
-    pd_json.pd_by_income("PD_by_income.json")
-    pd_json.pd_by_tenure("PD_by_tenure.json")
-    pd_json.pd_by_housing("PD_by_housing.json")
-    pd_json.pd_total("PD_by_total.json")
+        pd_json.pd_by_race("PD_by_race.json")
+        pd_json.pd_by_income("PD_by_income.json")
+        pd_json.pd_by_tenure("PD_by_tenure.json")
+        pd_json.pd_by_housing("PD_by_housing.json")
+        pd_json.pd_total("PD_by_total.json")
+
+    print("DONE")
