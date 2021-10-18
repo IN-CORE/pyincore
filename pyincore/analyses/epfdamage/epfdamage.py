@@ -10,7 +10,7 @@ from itertools import repeat
 
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
-from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class EpfDamage(BaseAnalysis):
@@ -81,8 +81,8 @@ class EpfDamage(BaseAnalysis):
                                                                          repeat(liq_geology_dataset_id))
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
-        self.set_result_json_data("metadata", damage_results,
-                                  name=self.get_parameter("result_name") + "_additional_info")
+        self.set_result_json_data("metadata", damage_results, name=self.get_parameter("result_name") +
+                                                                   "_additional_info")
 
         return True
 
@@ -172,7 +172,7 @@ class EpfDamage(BaseAnalysis):
             damage_result = dict()
             selected_fragility_set = fragility_set[epf["id"]]
 
-            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurveRefactored):
+            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurve):
                 hazard_val = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
                 input_demand_types = hazard_vals[i]["demands"]
                 input_demand_units = hazard_vals[i]["units"]
@@ -184,9 +184,9 @@ class EpfDamage(BaseAnalysis):
                     j += 1
 
                 epf_args = selected_fragility_set.construct_expression_args_from_inventory(epf)
-                limit_states = \
-                    selected_fragility_set.calculate_limit_state_refactored_w_conversion(
-                        hval_dict, inventory_type='electric_facility', **epf_args)
+                limit_states = selected_fragility_set.calculate_limit_state(hval_dict,
+                                                                            inventory_type='electric_facility',
+                                                                            **epf_args)
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
@@ -256,7 +256,8 @@ class EpfDamage(BaseAnalysis):
                 liquefaction_prob = liquefaction_vals[i]['liqProbability']
 
                 selected_liq_fragility = liq_fragility_set[liq_epf_id]
-                pgd_limit_states = selected_liq_fragility.calculate_limit_state(liq_hazard_val, std_dev=std_dev)
+                pgd_limit_states = \
+                    selected_liq_fragility.calculate_limit_state_w_conversion(liq_hazard_val, std_dev=std_dev)
 
                 # match id and add liqhaztype, liqhazval, liqprobability field as well as rewrite limit
                 # states and dmg_interval
