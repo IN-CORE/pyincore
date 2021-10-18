@@ -276,16 +276,17 @@ class WaterFacilityDamage(BaseAnalysis):
                             facility_liq_args = fragility_set_liq.construct_expression_args_from_inventory(facility)
                             pgd_limit_states = \
                                 fragility_set_liq.calculate_limit_state(
-                                    hval_dict_liq,std_dev=hazard_std_dev,inventory_type="water_facility",
+                                    hval_dict_liq, std_dev=hazard_std_dev, inventory_type="water_facility",
                                     **facility_liq_args)
                         else:
-                            raise ValueError("One of the fragilities is in deprecated format. This should not happen. "
-                                         "If you are seeing this please report the issue.")
+                            raise ValueError("One of the fragilities is in deprecated format. "
+                                             "This should not happen If you are seeing this please report the issue.")
 
                         limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
 
-                    dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
-                                                                        inventory_type='water_facility')
+                    dmg_intervals = fragility_set.calculate_damage_interval(limit_states,
+                                                                            hazard_type=hazard_type,
+                                                                            inventory_type='water_facility')
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
