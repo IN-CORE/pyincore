@@ -198,8 +198,7 @@ class PopulationDislocation(BaseAnalysis):
 
         # total_prob_disl is the sum of the probability of dislocation at four damage states
         # times the probability of being in that damage state.
-        total_prob_disl = prob0_disl * prob0 + prob1_disl * prob1 + prob2_disl * prob2 + \
-                          prob3_disl * prob3
+        total_prob_disl = prob0_disl * prob0 + prob1_disl * prob1 + prob2_disl * prob2 + prob3_disl * prob3
 
         inventory["prdis"] = total_prob_disl
 

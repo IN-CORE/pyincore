@@ -78,8 +78,6 @@ class HazardService:
 
         return response
 
-
-
     def get_earthquake_hazard_value_set(self, hazard_id: str, demand_type: str,
                                         demand_unit: str, bbox,
                                         grid_spacing: float):

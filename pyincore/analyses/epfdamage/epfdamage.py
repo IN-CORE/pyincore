@@ -81,8 +81,8 @@ class EpfDamage(BaseAnalysis):
                                                                          repeat(liq_geology_dataset_id))
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
-        self.set_result_json_data("metadata", damage_results, name=self.get_parameter("result_name") +
-                                                                   "_additional_info")
+        self.set_result_json_data("metadata", damage_results,
+                                  name=self.get_parameter("result_name") + "_additional_info")
 
         return True
 

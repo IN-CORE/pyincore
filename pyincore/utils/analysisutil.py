@@ -295,20 +295,23 @@ class AnalysisUtil:
         rets = ""
 
         for dataset in specs['input_datasets']:
-            isOpt = ""
+            is_opt = ""
             if not dataset['required']:
-                isOpt = ", " + "optional"
+                is_opt = ", " + "optional"
 
-            args = args + dataset['id'] + "(str" + isOpt + ") : " + dataset['description'] + ". " \
-                   + AnalysisUtil.get_custom_types_str(dataset['type']) + "\n\t"
+            args = \
+                args + dataset['id'] + "(str" + is_opt + ") : " \
+                + dataset['description'] + ". " \
+                + AnalysisUtil.get_custom_types_str(dataset['type']) + "\n\t"
 
         for param in specs['input_parameters']:
-            isOpt = ""
+            is_opt = ""
             if not param['required']:
-                isOpt = ", " + "optional"
+                is_opt = ", " + "optional"
 
-            args = args + param['id'] + "(" \
-                   + AnalysisUtil.get_type_str(param['type']) + isOpt + ") : " + param['description'] + "\n\t"
+            args = \
+                args + param['id'] + "(" + AnalysisUtil.get_type_str(param['type']) + is_opt + ") : " \
+                + param['description'] + "\n\t"
 
         for dataset in specs['output_datasets']:
             rets = rets + dataset['id'] + ": " \
