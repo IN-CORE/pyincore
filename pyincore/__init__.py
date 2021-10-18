@@ -20,6 +20,8 @@ from pyincore.repairservice import RepairService
 from pyincore.restorationservice import RestorationService
 from pyincore.spaceservice import SpaceService
 from pyincore.utils.analysisutil import AnalysisUtil
+from pyincore.utils.popdisloutputprocessutil import PopdislOutputProcessUtil
+from pyincore.utils.cgeoutputprocess import CGEOutputProcess
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.fragilitycurve import FragilityCurve
