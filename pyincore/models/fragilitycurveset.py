@@ -4,19 +4,9 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import collections
 import json
 
-from deprecated.sphinx import deprecated
-
-from pyincore.models.customexpressionfragilitycurve import CustomExpressionFragilityCurve
 from pyincore.models.fragilitycurve import FragilityCurve
-from pyincore.models.periodbuildingfragilitycurve import PeriodBuildingFragilityCurve
-from pyincore.models.periodstandardfragilitycurve import PeriodStandardFragilityCurve
-from pyincore.models.standardfragilitycurve import StandardFragilityCurve
-from pyincore.models.conditionalstandardfragilitycurve import ConditionalStandardFragilityCurve
-from pyincore.models.parametricfragilitycurve import ParametricFragilityCurve
-from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
 from pyincore.utils.analysisutil import AnalysisUtil
 
 
@@ -52,29 +42,7 @@ class FragilityCurveSet:
 
         if 'fragilityCurves' in metadata.keys():
             for fragility_curve in metadata["fragilityCurves"]:
-
-                # if it's already an df3curve object, directly put it in the list:
-                if isinstance(fragility_curve, FragilityCurve):
-                    self.fragility_curves.append(fragility_curve)
-                # based on what type of fragility_curve it is, instantiate different fragility curve object
-                else:
-                    if fragility_curve['className'] == 'StandardFragilityCurve':
-                        self.fragility_curves.append(StandardFragilityCurve(fragility_curve))
-                    elif fragility_curve['className'] == 'PeriodBuildingFragilityCurve':
-                        self.fragility_curves.append(PeriodBuildingFragilityCurve(fragility_curve))
-                    elif fragility_curve['className'] == 'PeriodStandardFragilityCurve':
-                        self.fragility_curves.append(PeriodStandardFragilityCurve(fragility_curve))
-                    elif fragility_curve['className'] == 'CustomExpressionFragilityCurve':
-                        self.fragility_curves.append(CustomExpressionFragilityCurve(fragility_curve))
-                    elif fragility_curve['className'] == 'ConditionalStandardFragilityCurve':
-                        self.fragility_curves.append(ConditionalStandardFragilityCurve(fragility_curve))
-                    elif fragility_curve['className'] == 'ParametricFragilityCurve':
-                        self.fragility_curves.append(ParametricFragilityCurve(fragility_curve))
-                    elif fragility_curve['className'] == 'FragilityCurveRefactored':
-                        self.fragility_curves.append(FragilityCurveRefactored(fragility_curve))
-                    else:
-                        # TODO make a custom fragility curve class that accept whatever
-                        self.fragility_curves.append(fragility_curve)
+                self.fragility_curves.append(FragilityCurve(fragility_curve))
         elif 'repairCurves' in metadata.keys():
             self.repairCurves = metadata['repairCurves']
         elif 'restorationCurves' in metadata.keys():
@@ -111,75 +79,9 @@ class FragilityCurveSet:
 
         return instance
 
-    @deprecated(version="0.9.0", reason="use calculate_limit_state_w_conversion instead")
-    def calculate_limit_state(self, hazard, period: float = 0.0, std_dev: float = 0.0, **kwargs):
-        """Computes limit state probabilities.
-
-        Args:
-            hazard (float): A hazard value to compute probability for.
-            period (float): A period of the structure, if applicable.
-            std_dev (float): A standard deviation.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            OrderedDict: Limit state probabilities.
-
-        """
-        output = collections.OrderedDict()
-        index = 0
-
-        if len(self.fragility_curves) == 1:
-            limit_state = ['failure']
-        elif len(self.fragility_curves) == 3:
-            limit_state = ['immocc', 'lifesfty', 'collprev']
-        elif len(self.fragility_curves) == 4:
-            limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
-        else:
-            raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
-
-        for fragility_curve in self.fragility_curves:
-            probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
-            output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
-            index += 1
-
-        return output
-
-    @deprecated(version="0.9.0", reason="use calculate_limit_state_refactored_w_conversion instead")
-    def calculate_limit_state_refactored(self, hazard_values: dict = {}, **kwargs):
-        """WIP computation of limit state probabilities accounting for custom expressions.
-
-        Args:
-            hazard_values (dict): A dictionary with hazard values to compute probability.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            OrderedDict: Limit state probabilities.
-
-        """
-        output = collections.OrderedDict()
-        index = 0
-
-        if len(self.fragility_curves) == 1:
-            limit_state = ['failure']
-        elif len(self.fragility_curves) == 3:
-            limit_state = ['immocc', 'lifesfty', 'collprev']
-        elif len(self.fragility_curves) == 4:
-            limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
-        else:
-            raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
-
-        for fragility_curve in self.fragility_curves:
-            probability = fragility_curve.calculate_limit_state_probability(hazard_values,
-                                                                            self.fragility_curve_parameters,
-                                                                            **kwargs)
-            output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
-            index += 1
-
-        return output
-
-    def calculate_limit_state_refactored_w_conversion(self, hazard_values: dict = {},
-                                                      inventory_type: str = "building",
-                                                      **kwargs):
+    def calculate_limit_state(self, hazard_values: dict = {},
+                              inventory_type: str = "building",
+                              **kwargs):
         """WIP computation of limit state probabilities accounting for custom expressions.
 
         Args:
@@ -204,36 +106,6 @@ class FragilityCurveSet:
                 index += 1
         else:
             raise ValueError("We can only handle fragility curves with less than 4 limit states.")
-
-        return output
-
-    @deprecated(version="0.9.0", reason="use calculate_custom_limit_state_w_conversion instead")
-    def calculate_custom_limit_state(self, variables: dict):
-        """Computes limit state probabilities.
-
-        Args:
-            variables (dict): A dictionary of variables.
-
-        Returns:
-            OrderedDict: Limit state probabilities for custom expression fragilities.
-
-        """
-        output = collections.OrderedDict()
-        index = 0
-
-        if len(self.fragility_curves) == 1:
-            limit_state = ['failure']
-        elif len(self.fragility_curves) == 3:
-            limit_state = ['immocc', 'lifesfty', 'collprev']
-        elif len(self.fragility_curves) == 4:
-            limit_state = ['ls-slight', 'ls-moderat', 'ls-extensi', 'ls-complet']
-        else:
-            raise ValueError("We can only handle fragility curves with 1, 3 or 4 limit states!")
-
-        for fragility_curve in self.fragility_curves:
-            probability = fragility_curve.compute_custom_limit_state_probability(variables)
-            output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
-            index += 1
 
         return output
 

@@ -14,7 +14,7 @@ from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, GeoUtil, \
     AnalysisUtil
-from pyincore.models.fragilitycurverefactored import FragilityCurveRefactored
+from pyincore.models.fragilitycurve import FragilityCurve
 
 
 class WaterFacilityDamage(BaseAnalysis):
@@ -241,7 +241,7 @@ class WaterFacilityDamage(BaseAnalysis):
             if uncertainty:
                 hazard_std_dev = random.random()
 
-            if isinstance(fragility_set.fragility_curves[0], FragilityCurveRefactored):
+            if isinstance(fragility_set.fragility_curves[0], FragilityCurve):
                 hazard_vals = AnalysisUtil.update_precision_of_lists(hazard_resp[i]["hazardValues"])
                 demand_types = hazard_resp[i]["demands"]
                 demand_units = hazard_resp[i]["units"]
@@ -254,15 +254,15 @@ class WaterFacilityDamage(BaseAnalysis):
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp[i]["hazardValues"]):
                     facility_args = fragility_set.construct_expression_args_from_inventory(facility)
                     limit_states = \
-                        fragility_set.calculate_limit_state_refactored_w_conversion(hval_dict,
-                                                                                    std_dev=hazard_std_dev,
-                                                                                    inventory_type='water_facility',
-                                                                                    **facility_args)
+                        fragility_set.calculate_limit_state(hval_dict,
+                                                            std_dev=hazard_std_dev,
+                                                            inventory_type='water_facility',
+                                                            **facility_args)
                     # Evaluate liquefaction: if it is not none, then liquefaction is available
                     if liquefaction_resp is not None:
                         fragility_set_liq = fragility_sets_liq[facility["id"]]
 
-                        if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurveRefactored):
+                        if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurve):
                             liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
                             liq_demand_types = liquefaction_resp[i]["demands"]
                             liq_demand_units = liquefaction_resp[i]["units"]
@@ -275,17 +275,18 @@ class WaterFacilityDamage(BaseAnalysis):
 
                             facility_liq_args = fragility_set_liq.construct_expression_args_from_inventory(facility)
                             pgd_limit_states = \
-                                fragility_set_liq.calculate_limit_state_refactored_w_conversion(
-                                    hval_dict_liq,std_dev=hazard_std_dev,inventory_type="water_facility",
+                                fragility_set_liq.calculate_limit_state(
+                                    hval_dict_liq, std_dev=hazard_std_dev, inventory_type="water_facility",
                                     **facility_liq_args)
                         else:
-                            raise ValueError("One of the fragilities is in deprecated format. This should not happen. "
-                                         "If you are seeing this please report the issue.")
+                            raise ValueError("One of the fragilities is in deprecated format. "
+                                             "This should not happen If you are seeing this please report the issue.")
 
                         limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
 
-                    dmg_intervals = fragility_set.calculate_damage_interval(limit_states, hazard_type=hazard_type,
-                                                                        inventory_type='water_facility')
+                    dmg_intervals = fragility_set.calculate_damage_interval(limit_states,
+                                                                            hazard_type=hazard_type,
+                                                                            inventory_type='water_facility')
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
