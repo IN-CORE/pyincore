@@ -27,7 +27,7 @@ class HUAPDOutputProcess:
                        "%_population_dislocated"
                        ]
 
-    def __init__(self, pd_count, pd_count_path=None, filter_on=False):
+    def __init__(self, pd_count, pd_count_path=None, filter_on=True):
         if pd_count_path:
             huapd_count = pd.read_csv(pd_count_path, low_memory=False)
         else:
@@ -81,7 +81,10 @@ class HUAPDOutputProcess:
         hua_vals = huapd["hua_re"].value_counts()
         hua_tot = []
         for i in range(len(race_categories)):
-            hua_tot.append(int(hua_vals[str(i)]))
+            try:
+                hua_tot.append(int(hua_vals[str(i)]))
+            except Exception:
+                hua_tot.append(0)
         hua_tot.append(int(sum(hua_tot[1:])))
 
         pop_tot = []
@@ -99,7 +102,10 @@ class HUAPDOutputProcess:
         hud_vals = huapd["hud_re"].value_counts()
         hua_disl = []
         for i in range(len(race_categories)):
-            hua_disl.append(int(hud_vals[str(i)]))
+            try:
+                hua_disl.append(int(hud_vals[str(i)]))
+            except Exception:
+                hua_disl.append(0)
         hua_disl.append(int(sum(hua_disl[1:])))
 
         pd_disl = []
@@ -120,7 +126,7 @@ class HUAPDOutputProcess:
             huapd_race[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
             huapd_race[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
             if pop_tot[i + 1]:
-                huapd_race[self.HUPD_CATEGORIES[6]] = 100 * (pop_tot[i + 1] /pop_tot[i + 1])
+                huapd_race[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i + 1] /pop_tot[i + 1])
             else:
                 huapd_race[self.HUPD_CATEGORIES[6]] = None
             pd_by_race_json.append(huapd_race)
@@ -271,7 +277,10 @@ class HUAPDOutputProcess:
         hua_vals = huapd["hua_tnr"].value_counts()
         hua_tot = []
         for i in range(len(tenure_categories)):
-            hua_tot.append(int(hua_vals[str(i)]))
+            try:
+                hua_tot.append(int(hua_vals[str(i)]))
+            except Exception:
+                hua_tot.append(0)
         hua_tot.append(int(sum(hua_tot[1:])))
 
         pop_tot = []
@@ -291,7 +300,10 @@ class HUAPDOutputProcess:
         hud_vals = huapd["hud_tnr"].value_counts()
         hua_disl = []
         for i in range(len(tenure_categories)):
-            hua_disl.append(int(hud_vals[str(i)]))
+            try:
+                hua_disl.append(int(hud_vals[str(i)]))
+            except Exception:
+                hua_disl.append(0)
         hua_disl.append(int(sum(hua_disl[1:])))
 
         pd_disl = []
@@ -360,7 +372,10 @@ class HUAPDOutputProcess:
         hua_vals = huapd["hua_house"].value_counts()
         hua_tot = []
         for i in range(len(household_categories)):
-            hua_tot.append(int(hua_vals[str(i)]))
+            try:
+                hua_tot.append(int(hua_vals[str(i)]))
+            except Exception:
+                hua_tot.append(0)
         hua_tot.append(int(sum(hua_tot[1:])))
 
         pop_tot = []
@@ -375,7 +390,10 @@ class HUAPDOutputProcess:
         hud_vals = huapd["hud_house"].value_counts()
         hua_disl = []
         for i in range(len(household_categories)):
-            hua_disl.append(int(hud_vals[str(i)]))
+            try:
+                hua_disl.append(int(hud_vals[str(i)]))
+            except Exception:
+                hua_disl.append(0)
         hua_disl.append(int(sum(hua_disl[1:])))
 
         pd_disl = []
@@ -443,13 +461,13 @@ class HUAPDOutputProcess:
                                             "%_of_households": 100 * (hua_disl[1]/hua_tot)}
             hua_disl_tot["not_dislocated"] = {"households": hua_tot - hua_disl[1],
                                           "%_of_households": 100 * ((hua_tot - hua_disl[1])/hua_tot)}
-            hua_disl_tot["total"] = {"households": hua_tot, "%_of_households": 1}
+            hua_disl_tot["total"] = {"households": hua_tot, "%_of_households": 100}
         else:
-            hua_disl_tot["dislocated"] = {"households": hua_disl[1],
-                                          "%_of_households": 100 * (hua_disl[1]/hua_tot)}
-            hua_disl_tot["not_dislocated"] = {"households": hua_tot - hua_disl[1],
-                                              "%_of_households": 100 * ((hua_tot - hua_disl[1])/hua_tot)}
-            hua_disl_tot["total"] = {"households": hua_tot, "%_of_households": 1}
+            hua_disl_tot["dislocated"] = {"households": None,
+                                          "%_of_households": None}
+            hua_disl_tot["not_dislocated"] = {"households": None,
+                                              "%_of_households": None}
+            hua_disl_tot["total"] = {"households": None, "%_of_households": None}
 
         pop_disl_tot = {}
         if pop_tot:
@@ -457,11 +475,11 @@ class HUAPDOutputProcess:
                                           "%_of_population": 100 * (pd_disl[1]/pop_tot)}
             pop_disl_tot["not_dislocated"] = {"population": pop_tot - pd_disl[1],
                                               "%_of_population": 100 * ((pop_tot - pd_disl[1])/pop_tot)}
-            pop_disl_tot["total"] = {"population": pop_tot, "%_of_population": 1}
+            pop_disl_tot["total"] = {"population": pop_tot, "%_of_population": 100}
         else:
-            pop_disl_tot["dislocated"] = {"population": pd_disl[1],
+            pop_disl_tot["dislocated"] = {"population": None,
                                           "%_of_population": None}
-            pop_disl_tot["not_dislocated"] = {"population": pop_tot - pd_disl[1],
+            pop_disl_tot["not_dislocated"] = {"population": None,
                                               "%_of_population": None}
             pop_disl_tot["total"] = {"population": None, "%_of_population": None}
 
