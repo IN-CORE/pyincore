@@ -34,7 +34,7 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
         """
         # Get seed
         seed_i = self.get_parameter("seed")
-        targetFL = self.get_parameter("target_functionality_level")
+        target_fl = self.get_parameter("target_functionality_level")
 
         result_name = self.get_parameter("result_name")
 
@@ -49,7 +49,7 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
         building_func_5 = building_dmg_5[building_dmg_all["archetype"] <= 5]
 
         building_func = building_func_5[["guid", "LS_0", "LS_1", "LS_2", "haz_expose"]].copy()
-        building_func["targetFL"] = targetFL
+        building_func["targetFL"] = target_fl
 
         initial_func_level, restoration_days = self.get_restoration_days(seed_i, building_func)
         building_func["initialFL"] = initial_func_level

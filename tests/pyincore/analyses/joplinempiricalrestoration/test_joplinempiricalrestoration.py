@@ -5,6 +5,7 @@ from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore.analyses.joplinempiricalrestoration import JoplinEmpiricalRestoration
 import pyincore.globals as pyglobals
 
+
 def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
