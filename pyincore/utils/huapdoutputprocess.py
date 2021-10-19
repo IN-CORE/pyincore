@@ -261,7 +261,7 @@ class HUAPDOutputProcess:
                              "Other group quarters",
                              "Vacant for rent",
                              "Vacant for sale",
-                             "Vacant other"
+                             "Vacant other",
                              "Total"]
 
         huapd = self.pd_count
