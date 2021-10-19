@@ -21,7 +21,7 @@ class HUAPDOutputProcess:
     HUPD_CATEGORIES = ["household_characteristics",
                        "household_dislocated",
                        "total_households",
-                       "%_households_dislocated",
+                       "%_household_dislocated",
                        "population_dislocated",
                        "total_population",
                        "%_population_dislocated"
@@ -44,7 +44,7 @@ class HUAPDOutputProcess:
             {"household_characteristics": "Not Hispanic/White",
              "household_dislocated": 1521,
              "total_households": 18507,
-             "%_households_dislocated": 7.3,
+             "%_household_dislocated": 7.3,
              "population_dislocated",
              "total_population",
              "%_population_dislocated"
@@ -145,7 +145,7 @@ class HUAPDOutputProcess:
             {"household_characteristics": "HH1 (less than $15,000)",
              "household_dislocated": 311,
              "total_households": 3252,
-             "%_households_dislocated": 7.3,
+             "%_household_dislocated": 7.3,
              "population_dislocated": 311,
              "total_population": 3252,
              "%_population_dislocated"
@@ -234,7 +234,7 @@ class HUAPDOutputProcess:
             {"household_characteristics": "Owner occupied",
              "household_dislocated": 1018,
              "total_households": 11344,
-             "%_households_dislocated": 7.3,
+             "%_household_dislocated": 7.3,
              "population_dislocated": 1018,
              "total_population": 11344,
              "%_population_dislocated"
@@ -344,7 +344,7 @@ class HUAPDOutputProcess:
             {"household_characteristics": "Single Family",
              "household_dislocated": 1162,
              "total_households": 837,
-             "%_households_dislocated": 7.3,
+             "%_household_dislocated": 7.3,
              "population_dislocated": 1162,
              "total_population": 837,
              "%_population_dislocated"
