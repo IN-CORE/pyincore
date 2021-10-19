@@ -120,13 +120,13 @@ class HUAPDOutputProcess:
             huapd_race[self.HUPD_CATEGORIES[1]] = hua_disl[i + 1]
             huapd_race[self.HUPD_CATEGORIES[2]] = hua_tot[i + 1]
             if hua_tot[i + 1]:
-                huapd_race[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i + 1]/ hua_tot[i + 1])
+                huapd_race[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i + 1] / hua_tot[i + 1])
             else:
                 huapd_race[self.HUPD_CATEGORIES[3]] = None
             huapd_race[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
             huapd_race[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
             if pop_tot[i + 1]:
-                huapd_race[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i + 1] /pop_tot[i + 1])
+                huapd_race[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i + 1] / pop_tot[i + 1])
             else:
                 huapd_race[self.HUPD_CATEGORIES[6]] = None
             pd_by_race_json.append(huapd_race)
@@ -458,9 +458,9 @@ class HUAPDOutputProcess:
         hua_disl_tot = {}
         if hua_tot:
             hua_disl_tot["dislocated"] = {"households": hua_disl[1],
-                                            "%_of_households": 100 * (hua_disl[1]/hua_tot)}
+                                          "%_of_households": 100 * (hua_disl[1]/hua_tot)}
             hua_disl_tot["not_dislocated"] = {"households": hua_tot - hua_disl[1],
-                                          "%_of_households": 100 * ((hua_tot - hua_disl[1])/hua_tot)}
+                                              "%_of_households": 100 * ((hua_tot - hua_disl[1])/hua_tot)}
             hua_disl_tot["total"] = {"households": hua_tot, "%_of_households": 100}
         else:
             hua_disl_tot["dislocated"] = {"households": None,
@@ -483,8 +483,8 @@ class HUAPDOutputProcess:
                                               "%_of_population": None}
             pop_disl_tot["total"] = {"population": None, "%_of_population": None}
 
-
-        pd_total_json = {"household_dislocation_in_total": hua_disl_tot, "population_dislocation_in_total": pop_disl_tot}
+        pd_total_json = {"household_dislocation_in_total": hua_disl_tot,
+                         "population_dislocation_in_total": pop_disl_tot}
         # print(pd_total_json)
 
         if filename_json:
