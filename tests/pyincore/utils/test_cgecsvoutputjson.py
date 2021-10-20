@@ -1,14 +1,19 @@
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
 from pyincore import IncoreClient
 from pyincore.analyses.joplincge import JoplinCGEModel
 from pyincore.utils.cgeoutputprocess import CGEOutputProcess
 import pyincore.globals as pyglobals
+import os
 
 
 # This script runs JoplinCGEModel analysis with input files from
 # IN-CORE development services. The output csv files are converted to json
 # format suitable for the IN-CORE Playbook tool.
 
-def run_base_analysis():
+def run_convert_cge_json_chained():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     joplin_cge = JoplinCGEModel(client)
 
@@ -59,16 +64,37 @@ def run_base_analysis():
     cge_json.get_cge_gross_income(gross_income_result, None, "cge_total_household_income.json")
     cge_json.get_cge_employment(pre_demand_result, post_demand_result, None, None, "cge_employment.json")
 
-    # Alternatively, you can run the output conversion with files on the file system.
-    # my_path = "PATH_TO_PYINCORE/pyincore/tests/pyincore/analyses/joplincge/"
-    # cge_json.get_cge_household_count(None, my_path + "household-count.csv", "cge_total_household_count.json")
-    # cge_json.get_cge_gross_income(None, my_path + "gross-income.csv", "cge_total_household_income.json")
-    # cge_json.get_cge_employment(None, None,
-    #                             my_path + "pre-disaster-factor-demand.csv",
-    #                             my_path + "post-disaster-factor-demand.csv",
-    #                             "cge_employment.json")
-    # cge_json.get_cge_domestic_supply(None, my_path + "domestic-supply.csv", "cge_domestic_supply.json")
+    return True
+
+
+def run_convert_cge_json_path(testpath):
+    # test the external file with a path
+
+    cge_json = CGEOutputProcess()
+    cge_json.get_cge_household_count(None,
+                                     os.path.join(testpath, "household-count.csv"),
+                                     "cge_total_household_count.json")
+    cge_json.get_cge_gross_income(None,
+                                  os.path.join(testpath, "gross-income.csv"),
+                                  "cge_total_household_income.json")
+    cge_json.get_cge_employment(None, None,
+                                os.path.join(testpath, "pre-disaster-factor-demand.csv"),
+                                os.path.join(testpath, "post-disaster-factor-demand.csv"),
+                                "cge_employment.json")
+    cge_json.get_cge_domestic_supply(None,
+                                     os.path.join(testpath, "domestic-supply.csv"),
+                                     "cge_domestic_supply.json")
+    return True
 
 
 if __name__ == '__main__':
-    run_base_analysis()
+    # test chaining with Joplin CGE analysis
+    run_convert_cge_json_chained()
+
+    # test the external file with a path
+    testpath = ""
+    # testpath = "/Users/<user>/<path_to_pyincore>/pyincore/tests/pyincore/utils"
+    if testpath:
+        run_convert_cge_json_path(testpath)
+
+    print("DONE")
