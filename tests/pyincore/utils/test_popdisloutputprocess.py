@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     filename = pd_process.get_heatmap_shp("joplin-pop-disl-numprec.shp")
     print("Test chaining", filename)
-    upload_shapefile_to_services(client)
+    # upload_shapefile_to_services(client)
 
     # test the external file with a path
     testpath = ""
