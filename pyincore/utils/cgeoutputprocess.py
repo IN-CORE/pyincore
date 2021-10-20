@@ -18,6 +18,7 @@ class CGEOutputProcess:
         {
             "beforeEvent": {"HH1": 3611, "HH2": 5997.0, "HH3": 7544.1, "HH4": 2394.1, "HH5": 793.0},
             "afterEvent": {"HH1": 3588, "HH2": 5929.8, "HH3": 7324.1, "HH4": 2207.5, "HH5": 766.4},
+            "%_change": {"HH1": -0.6369, "HH2": -1.1, "HH3": -2.92, "HH4": -7.8, "HH5": -3.35}
         }
 
         Args:
@@ -42,11 +43,16 @@ class CGEOutputProcess:
 
         before_event = {}
         after_event = {}
+        pct_change = {}
         for i in range(len(income_categories)):
             before_event[income_categories[i]] = before_values[i]
             after_event[income_categories[i]] = after_values[i]
+            if before_values[i]:
+                pct_change[income_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+            else:
+                pct_change[income_categories[i]] = None
 
-        cge_total_household_count = {"beforeEvent": before_event, "afterEvent": after_event}
+        cge_total_household_count = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
         if filename_json:
             with open(filename_json, "w") as outfile:
@@ -61,6 +67,7 @@ class CGEOutputProcess:
         {
             "beforeEvent": {"HH1": 13, "HH2": 153.5, "HH3": 453.1, "HH4": 438.9, "HH5": 125.0},
             "afterEvent": {"HH1": 13, "HH2": 152.5, "HH3": 445.6, "HH4": 432.9, "HH5": 124.5},
+            "%_change": {"HH1": -0, "HH2": -x.x, "HH3": -x.x, "HH4": -x.x, "HH5": -x.x}
         }
 
         Args:
@@ -85,11 +92,16 @@ class CGEOutputProcess:
 
         before_event = {}
         after_event = {}
+        pct_change = {}
         for i in range(len(income_categories)):
             before_event[income_categories[i]] = before_values[i]
             after_event[income_categories[i]] = after_values[i]
+            if before_values[i]:
+                pct_change[income_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+            else:
+                pct_change[income_categories[i]] = None
 
-        cge_total_household_income = {"beforeEvent": before_event, "afterEvent": after_event}
+        cge_total_household_income = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
         if filename_json:
             with open(filename_json, "w") as outfile:
@@ -109,7 +121,8 @@ class CGEOutputProcess:
                 "Trade": 8876,
                 "Other": 23767
             },
-            "beforeEvent": {"Goods": 6744, "Trade": 8940, "Other": 24147}
+            "beforeEvent": {"Goods": 6744, "Trade": 8940, "Other": 24147},
+            "%_change": {"Goods": -0, "Trade": -x.x, "Other": -x.x}
         }
 
         Args:
@@ -145,11 +158,16 @@ class CGEOutputProcess:
 
         before_event = {}
         after_event = {}
+        pct_change = {}
         for i in range(len(demand_categories)):
             before_event[demand_categories[i]] = before_values[i]
             after_event[demand_categories[i]] = after_values[i]
+            if before_values[i]:
+                pct_change[demand_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+            else:
+                pct_change[demand_categories[i]] = None
 
-        cge_employment = {"beforeEvent": before_event, "afterEvent": after_event}
+        cge_employment = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
         if filename_json:
             with open(filename_json, "w") as outfile:
@@ -165,7 +183,9 @@ class CGEOutputProcess:
             "afterEvent": {"Goods": 662.3, "Trade": 209.0, "Other": 254.1,
                            "HS1": 22.0, "HS2": 1337.1, "HS3": 466.2},
             "beforeEvent": {"Goods": 662.3, "Trade": 209.0, "Other": 254.1,
-                            "HS1": 22.0, "HS2": 1337.1, "HS3": 466.2}
+                            "HS1": 22.0, "HS2": 1337.1, "HS3": 466.2},
+            "%_change": {"Goods": -1.1, "Trade":  -1.1, "Other":  -1.1,
+                            "HS1":  -1.1, "HS2":  -1.1, "HS3":  -1.1}
         }
 
         Args:
@@ -189,11 +209,16 @@ class CGEOutputProcess:
 
         before_event = {}
         after_event = {}
+        pct_change = {}
         for i in range(len(supply_categories)):
             before_event[supply_categories[i]] = before_values[i]
             after_event[supply_categories[i]] = after_values[i]
+            if before_values[i]:
+                pct_change[supply_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+            else:
+                pct_change[supply_categories[i]] = None
 
-        cge_domestic_supply = {"beforeEvent": before_event, "afterEvent": after_event}
+        cge_domestic_supply = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
         if filename_json:
             with open(filename_json, "w") as outfile:
