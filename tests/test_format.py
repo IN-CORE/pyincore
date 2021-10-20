@@ -51,7 +51,10 @@ paths = [
                  'tests/pyincore/analyses/cumulativebuildingdamage/test_cumulativebuildingdamage.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/populationdislocation/test_populationdislocation.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/utils/cgeoutputprocess.py'),
-    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/utils/test_cgecsvoutputjson.py')
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/utils/test_cgecsvoutputjson.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/populationdislocation/test_populationdislocation.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/utils/huapdoutputprocess.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/utils/test_pdcsvoutputjson.py')
 ]
 
 
