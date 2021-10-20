@@ -50,7 +50,13 @@ paths = [
     os.path.join(PYINCORE_ROOT_FOLDER,
                  'tests/pyincore/analyses/cumulativebuildingdamage/test_cumulativebuildingdamage.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/populationdislocation/test_populationdislocation.py'),
-    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/models/test_dataset.py')
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/models/test_dataset.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/utils/cgeoutputprocess.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/utils/test_cgecsvoutputjson.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/joplinempiricalrestoration/joplinempiricalrestoration.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/joplinempiricalrestoration/joplinempirrestor_util.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER,
+                 'tests/pyincore/analyses/joplinempiricalrestoration/test_joplinempiricalrestoration.py')
 ]
 
 
