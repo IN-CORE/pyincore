@@ -6,14 +6,16 @@
 
 import json
 import pandas as pd
+import geopandas as gpd
+from shapely import wkt
 
 
-class HUAPDOutputProcess:
-    """This class converts csv results outputs of Population dislocation analysis to json format.
+class PopDislOutputProcess:
+    """This class converts csv results outputs of Population dislocation analysis to json format and shapefiles.
 
     Args:
-        pd_count (obj): IN-CORE dataset for Joplin Population Dislocation (PD) results.
-        pd_count_path (obj): A fallback for the case that Joplin PD object is not provided.
+        pop_disl_result (obj): IN-CORE dataset for Joplin Population Dislocation (PD) results.
+        pop_disl_result_path (obj): A fallback for the case that Joplin PD object is not provided.
             For example a user wants to directly pass in csv files, a path to PD results.
         filter_on (bool): A flag to filter all data, default True counts only Joplin buildings
 
@@ -27,15 +29,43 @@ class HUAPDOutputProcess:
                        "%_population_dislocated"
                        ]
 
-    def __init__(self, pd_count, pd_count_path=None, filter_on=True):
-        if pd_count_path:
-            huapd_count = pd.read_csv(pd_count_path, low_memory=False)
+    def __init__(self, pop_disl_result, pop_disl_result_path=None, filter_on=True):
+        if pop_disl_result_path:
+            pd_result = pd.read_csv(pop_disl_result_path, low_memory=False)
         else:
-            huapd_count = pd_count.get_dataframe_from_csv(low_memory=False)
+            pd_result = pop_disl_result.get_dataframe_from_csv(low_memory=False)
+        pd_result["geometry"] = pd_result["geometry"].apply(wkt.loads)
+
+        pd_result_shp = None
         # keep only inventory with guid; filter for Joplin since only Joplin inventory has guids
         if filter_on:
-            huapd_count = huapd_count[(huapd_count["guid"].notnull()) & (huapd_count["numprec"].notnull())]
-        self.pd_count = huapd_count
+            pd_result = pd_result[(pd_result["guid"].notnull()) &
+                                  (pd_result["numprec"].notnull())]
+            # only keep guid and dislocated
+            pd_result_shp = pd_result[(pd_result["dislocated"].notnull()) &
+                                      (pd_result["guid"].notnull()) &
+                                      (pd_result["numprec"].notnull())]
+        self.pop_disl_result = pd_result
+        self.pop_disl_result_shp = pd_result_shp
+
+    def get_heatmap_shp(self, filename="pop-disl-numprec.shp"):
+        """ Convert and filter population dislocation output to shapefile that contains only guid and numprec columns
+
+            Args:
+                filename (str): Path and name to save shapefile output file in. E.g "heatmap.shp"
+
+            Returns:
+                str: full path and filename of the shapefile
+
+        """
+        df = self.pop_disl_result_shp
+
+        # save as shapefile
+        gdf = gpd.GeoDataFrame(df, crs='epsg:4326')
+        gdf = gdf[["guid", "numprec", "geometry"]]
+        gdf.to_file(filename)
+
+        return filename
 
     def pd_by_race(self, filename_json=None):
         """ Calculate race results from the output files of the Joplin Population Dislocation analysis
@@ -70,7 +100,7 @@ class HUAPDOutputProcess:
                            "No Race or Ethnicity Data",
                            "Total"]
 
-        huapd = self.pd_count
+        huapd = self.pop_disl_result
         # Allocated by race and ethnicity
         huapd["hua_re"] = "0"
         huapd.loc[(huapd["race"] == 1) & (huapd["hispan"] == 0), "hua_re"] = "1"
@@ -169,7 +199,7 @@ class HUAPDOutputProcess:
                              "Unknown",
                              "Total"]
 
-        huapd = self.pd_count
+        huapd = self.pop_disl_result
         # Allocated by income
         hua_tot = []
         for i in range(1, 6):
@@ -264,7 +294,7 @@ class HUAPDOutputProcess:
                              "Vacant other",
                              "Total"]
 
-        huapd = self.pd_count
+        huapd = self.pop_disl_result
         # Allocated by tenure
         huapd["hua_tnr"] = "0"
         huapd.loc[huapd["ownershp"] == 1.0, "hua_tnr"] = "1"
@@ -364,7 +394,7 @@ class HUAPDOutputProcess:
                                 "Multi Family",
                                 "Total"]
 
-        huapd = self.pd_count
+        huapd = self.pop_disl_result
         # Allocated by housing
         huapd["hua_house"] = "0"
         huapd.loc[(huapd["huestimate"] == 1.0), "hua_house"] = "1"
@@ -444,7 +474,7 @@ class HUAPDOutputProcess:
 
         """
         # Dislocated by race and ethnicity
-        hud = self.pd_count
+        hud = self.pop_disl_result
         hud_vals = hud["dislocated"].value_counts()
         hua_disl = [int(hud_vals[False]), int(hud_vals[True])]
 

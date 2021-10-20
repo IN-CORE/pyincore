@@ -277,9 +277,9 @@ utils/geoutil
 ..  autoclass:: utils.geoutil.GeoUtil
     :members:
 
-utils/huapdoutputprocess
-========================
-..  autoclass:: utils.huapdoutputprocess.HUAPDOutputProcess
+utils/popdisloutputprocess.py
+=============================
+..  autoclass:: utils.popdisloutputprocess.PopDislOutputProcess
     :members:
 
 utils/networkutil
