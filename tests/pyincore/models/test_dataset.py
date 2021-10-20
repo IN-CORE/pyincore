@@ -19,5 +19,3 @@ def test_from_json_data():
     result_data = {}
     dataset = Dataset.from_json_data(result_data, "empty.json", "incore:buildingDamageSupplement")
     assert dataset.data_type == "incore:buildingDamageSupplement"
-
-
