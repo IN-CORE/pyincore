@@ -42,7 +42,7 @@ class PopDislOutputProcess:
             pd_result = pd_result[(pd_result["guid"].notnull()) &
                                   (pd_result["numprec"].notnull())]
             # only keep guid and dislocated
-            pd_result_shp = pd_result[(pd_result["dislocated"].notnull()) &
+            pd_result_shp = pd_result[(pd_result["dislocated"]) &
                                       (pd_result["guid"].notnull()) &
                                       (pd_result["numprec"].notnull())]
         self.pop_disl_result = pd_result
