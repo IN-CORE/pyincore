@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.0] - 2021-10-27
+
+### Added
+- Convert HUA and PD outputs to JSON [#9](https://github.com/IN-CORE/pyincore/issues/9)
+- Convert population dislocation output to heatmap [#3](https://github.com/IN-CORE/pyincore/issues/3)
+- Joplin empirical restoration analysis [#28](https://github.com/IN-CORE/pyincore/issues/28)
+- GitHub action to run unit tests [#26](https://github.com/IN-CORE/pyincore/issues/26)
+- GitHub action to build documentation [#23](https://github.com/IN-CORE/pyincore/issues/23)
+- Conda recipe [#17](https://github.com/IN-CORE/pyincore/issues/17)
+
+### Changed
+- Percent change in utils converting CGE output to JSON [#34](https://github.com/IN-CORE/pyincore/issues/34)
+- Show API response messages that services return [#6](https://github.com/IN-CORE/pyincore/issues/6)
+- Removed deprecated methods [#7](https://github.com/IN-CORE/pyincore/issues/7)
+
+### Fixed
+- Pass dataset type as parameter to from_dataframe method [#8](https://github.com/IN-CORE/pyincore/issues/8)
+- PEP8 styling issues [#20](https://github.com/IN-CORE/pyincore/issues/20)
+- Corrections to residential building recovery [#25](https://github.com/IN-CORE/pyincore/issues/25)
+
 ## [1.0.0] - 2021-08-31
 ### Changed
 - Improve runtime efficiency of residential recovery analysis [INCORE1-1339](https://opensource.ncsa.illinois.edu/jira/browse/INCORE1-1339)
