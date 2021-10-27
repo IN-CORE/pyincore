@@ -104,11 +104,10 @@ class Client:
             http_response.raise_for_status()
             return http_response
         except requests.exceptions.HTTPError:
-            logger.error('HTTPError: The server returned a '
-                         + str(http_response.status_code) + ' failure response code. You can '
-                                                            'find information about HTTP response '
-                                                            'status codes here: '
-                                                            'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status')
+            logger.error('A HTTPError has occurred \n' +
+                         'HTTP Status code: ' + str(http_response.status_code) + '\n' +
+                         'Error Message: ' + http_response.content.decode()
+                         )
             raise
         except requests.exceptions.ConnectionError:
             logger.error("ConnectionError: Failed to establish a connection with the server. "
