@@ -93,7 +93,8 @@ class PopDislOutputProcess:
         # The numbering follows the Community description notebook
         # 0 - Vacant HU No Race Ethnicity Data, 1 - Not Hispanic/White, 2 - Not Hispanic/Black
         # 3 - Not Hispanic/Other race, 4 - Hispanic, 5 - No Race or Ethnicity Data
-        race_categories = ["Not Hispanic/White",
+        race_categories = ["Vacant HU No Race or Ethnicity Data",
+                           "Not Hispanic/White",
                            "Not Hispanic/Black",
                            "Not Hispanic/Other Race",
                            "Hispanic",
@@ -109,18 +110,19 @@ class PopDislOutputProcess:
         huapd.loc[(huapd["hispan"] == 1), "hua_re"] = "4"
         huapd.loc[(huapd["gqtype"] >= 1), "hua_re"] = "5"
         hua_vals = huapd["hua_re"].value_counts()
+
         hua_tot = []
-        for i in range(len(race_categories)):
+        for i in range(len(race_categories) - 1):
             try:
                 hua_tot.append(int(hua_vals[str(i)]))
             except Exception:
                 hua_tot.append(0)
-        hua_tot.append(int(sum(hua_tot[1:])))
+        hua_tot.append(int(sum(hua_tot)))
 
         pop_tot = []
-        for i in range(len(race_categories)):
+        for i in range(len(race_categories) - 1):
             pop_tot.append(int(huapd["numprec"].where(huapd["hua_re"] == str(i)).sum()))
-        pop_tot.append(int(sum(pop_tot[1:])))
+        pop_tot.append(int(sum(pop_tot)))
 
         # Dislocated by race and ethnicity
         huapd["hud_re"] = "0"
@@ -130,33 +132,39 @@ class PopDislOutputProcess:
         huapd.loc[(huapd["hispan"] == 1) & huapd["dislocated"], "hud_re"] = "4"
         huapd.loc[(huapd["gqtype"] >= 1) & huapd["dislocated"], "hud_re"] = "5"
         hud_vals = huapd["hud_re"].value_counts()
+        # vacant HU do not dislocate
+        hud_vals[str(0)] = 0
         hua_disl = []
-        for i in range(len(race_categories)):
+        for i in range(len(race_categories) - 1):
             try:
                 hua_disl.append(int(hud_vals[str(i)]))
             except Exception:
                 hua_disl.append(0)
-        hua_disl.append(int(sum(hua_disl[1:])))
+        hua_disl.append(int(sum(hua_disl)))
 
         pd_disl = []
-        for i in range(len(race_categories)):
-            pd_disl.append(int(huapd["numprec"].where(huapd["hud_re"] == str(i)).sum()))
-        pd_disl.append(int(sum(pd_disl[1:])))
+        for i in range(len(race_categories) - 1):
+            # vacant HU do not dislocate
+            if i == 0:
+                pd_disl.append(0)
+            else:
+                pd_disl.append(int(huapd["numprec"].where(huapd["hud_re"] == str(i)).sum()))
+        pd_disl.append(int(sum(pd_disl)))
 
         pd_by_race_json = []
         for i in range(len(race_categories)):
             huapd_race = {}
             huapd_race[self.HUPD_CATEGORIES[0]] = race_categories[i]
-            huapd_race[self.HUPD_CATEGORIES[1]] = hua_disl[i + 1]
-            huapd_race[self.HUPD_CATEGORIES[2]] = hua_tot[i + 1]
-            if hua_tot[i + 1]:
-                huapd_race[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i + 1] / hua_tot[i + 1])
+            huapd_race[self.HUPD_CATEGORIES[1]] = hua_disl[i]
+            huapd_race[self.HUPD_CATEGORIES[2]] = hua_tot[i]
+            if hua_tot[i]:
+                huapd_race[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i] / hua_tot[i])
             else:
                 huapd_race[self.HUPD_CATEGORIES[3]] = None
-            huapd_race[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
-            huapd_race[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
-            if pop_tot[i + 1]:
-                huapd_race[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i + 1] / pop_tot[i + 1])
+            huapd_race[self.HUPD_CATEGORIES[4]] = pd_disl[i]
+            huapd_race[self.HUPD_CATEGORIES[5]] = pop_tot[i]
+            if pop_tot[i]:
+                huapd_race[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i] / pop_tot[i])
             else:
                 huapd_race[self.HUPD_CATEGORIES[6]] = None
             pd_by_race_json.append(huapd_race)

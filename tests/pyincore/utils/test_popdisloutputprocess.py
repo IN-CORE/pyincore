@@ -40,7 +40,7 @@ def run_convert_pd_json_chained(client):
     # incore-dev
     building_dmg = "602d96e4b1db9c28aeeebdce"  # dev Joplin
     # building_dmg = "602d975db1db9c28aeeebe35" # 15 guids test - dev Joplin
-    housing_unit_alloc = "61563545483ecb19e4304c2a"  # dev Joplin 2ev3
+    housing_unit_alloc = "6177089781ce0838fbacd6a8"  # dev Joplin 2ev3
     bg_data = "5df7cb0b425e0b00092c9464"  # Joplin 2ev2
     value_loss = "602d508fb1db9c28aeedb2a5"
 
