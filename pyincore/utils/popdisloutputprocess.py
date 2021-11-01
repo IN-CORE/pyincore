@@ -125,7 +125,8 @@ class PopDislOutputProcess:
         pop_tot.append(int(sum(pop_tot)))
 
         # Dislocated by race and ethnicity
-        huapd["hud_re"] = "0"
+        huapd["hud_re"] = ""
+        huapd.loc[huapd["dislocated"], "hud_re"] = "0"
         huapd.loc[(huapd["race"] == 1) & (huapd["hispan"] == 0) & huapd["dislocated"], "hud_re"] = "1"
         huapd.loc[(huapd["race"] == 2) & (huapd["hispan"] == 0) & huapd["dislocated"], "hud_re"] = "2"
         huapd.loc[(huapd["race"].isin([3, 4, 5, 6, 7])) & (huapd["hispan"] == 0) & huapd["dislocated"], "hud_re"] = "3"
@@ -133,7 +134,7 @@ class PopDislOutputProcess:
         huapd.loc[(huapd["gqtype"] >= 1) & huapd["dislocated"], "hud_re"] = "5"
         hud_vals = huapd["hud_re"].value_counts()
         # vacant HU do not dislocate
-        hud_vals[str(0)] = 0
+        # hud_vals[str(0)] = 0
         hua_disl = []
         for i in range(len(race_categories) - 1):
             try:
@@ -327,7 +328,8 @@ class PopDislOutputProcess:
         pop_tot.append(int(sum(pop_tot[1:])))
 
         # Dislocated by tenure
-        huapd["hud_tnr"] = "0"
+        huapd["hud_tnr"] = ""
+        huapd.loc[huapd["dislocated"], "hud_tnr"] = "0"
         huapd.loc[(huapd["ownershp"] == 1.0) & huapd["dislocated"], "hud_tnr"] = "1"
         huapd.loc[(huapd["ownershp"] == 2.0) & huapd["dislocated"], "hud_tnr"] = "2"
         huapd.loc[(huapd["gqtype"] == 3) & huapd["dislocated"], "hud_tnr"] = "3"
@@ -422,7 +424,8 @@ class PopDislOutputProcess:
         pop_tot.append(int(sum(pop_tot[1:])))
 
         # Dislocated by household
-        huapd["hud_house"] = "0"
+        huapd["hud_house"] = ""
+        huapd.loc[huapd["dislocated"], "hud_house"] = "0"
         huapd.loc[(huapd["huestimate"] == 1.0) & huapd["dislocated"], "hud_house"] = "1"
         huapd.loc[(huapd["huestimate"] > 1.0) & huapd["dislocated"], "hud_house"] = "2"
         hud_vals = huapd["hud_house"].value_counts()
