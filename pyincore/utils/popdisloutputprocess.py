@@ -133,8 +133,7 @@ class PopDislOutputProcess:
         huapd.loc[(huapd["hispan"] == 1) & huapd["dislocated"], "hud_re"] = "4"
         huapd.loc[(huapd["gqtype"] >= 1) & huapd["dislocated"], "hud_re"] = "5"
         hud_vals = huapd["hud_re"].value_counts()
-        # vacant HU do not dislocate
-        # hud_vals[str(0)] = 0
+
         hua_disl = []
         for i in range(len(race_categories) - 1):
             try:
@@ -145,11 +144,7 @@ class PopDislOutputProcess:
 
         pd_disl = []
         for i in range(len(race_categories) - 1):
-            # vacant HU do not dislocate
-            if i == 0:
-                pd_disl.append(0)
-            else:
-                pd_disl.append(int(huapd["numprec"].where(huapd["hud_re"] == str(i)).sum()))
+            pd_disl.append(int(huapd["numprec"].where(huapd["hud_re"] == str(i)).sum()))
         pd_disl.append(int(sum(pd_disl)))
 
         pd_by_race_json = []
