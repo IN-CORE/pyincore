@@ -4,9 +4,9 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import os
-
 import numpy as np
 import pytest
+import requests.exceptions
 
 from pyincore import globals as pyglobals
 
@@ -68,6 +68,42 @@ def test_post_earthquake_hazard_values(hazardsvc):
            and all(isinstance(hazardval, float) for hazardval in response[0]['hazardValues']) \
            and response[0]['hazardValues'] == [1.5411689639186665, 2.5719942615949374, 0.9241786244448712,
                                                2.5884360071121133, 34.445240752324956]
+
+
+def test_bad_units_post_earthquake_hazard_values(hazardsvc):
+    payload = [
+        {
+            "demands": ["1.0 SD", "0.2 SA"],
+            "units": ["cm", "zzz"],
+            "loc": "35.84,-89.90"
+        }
+    ]
+    response = hazardsvc.post_earthquake_hazard_values(
+        "5b902cb273c3371e1236b36b",
+        payload
+    )
+
+    assert len(response) == len(payload) and response[0]['hazardValues'][1] == -9999.3
+
+
+def test_bad_format_post_earthquake_hazard_values(hazardsvc):
+    payload = [
+        {
+            "demands": ["1.0 SD", "0.2 SA"],
+            "units": ["cm", "g"],
+            "loc": "35.84-89.90"
+        }
+    ]
+
+    try:
+        hazardsvc.post_earthquake_hazard_values(
+            "5b902cb273c3371e1236b36b",
+            payload
+        )
+    except requests.exceptions.HTTPError as e:
+        assert e.response.status_code == 400
+    else:
+        assert False
 
 
 def test_get_liquefaction_values(hazardsvc):
