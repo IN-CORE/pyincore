@@ -18,10 +18,10 @@ import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 from pandas import DataFrame
 from pyomo.environ import ConcreteModel, Set, Var, Param, Objective, Constraint
-#from pyomo.environ import quicksum, minimize, maximize, NonNegativeReals, Any
+from pyomo.environ import quicksum, minimize, maximize, NonNegativeReals, Any
 from pyomo.environ import sum_product
 import pyomo.environ as pyo
-from pyomo.environ import *
+#from pyomo.environ import *
 from pyomo.opt import SolverFactory, SolverManagerFactory
 from pyomo.opt import SolverStatus, TerminationCondition
 from pyomo.util.infeasible import log_infeasible_constraints
@@ -106,10 +106,23 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             building_functionality_csv (pd.DataFrame): building repairs after a disaster event
             strategy_costs_csv (pd.DataFrame): strategy cost data per building
         """
-        model = self.configure_model(budget_available, scaling_factor, building_functionality_csv, strategy_costs_csv)
-
+        # Setup the model
+        base_model = self.configure_model(budget_available, scaling_factor, building_functionality_csv,
+                                        strategy_costs_csv)
+        model_with_objectives = self.configure_model_objectives(base_model)
+        model_with_constraints = self.configure_model_retrofit_costs(model_with_objectives)
 
     def configure_model(self, budget_available, scaling_factor, building_functionality_csv, strategy_costs_csv):
+        """ Configure the base model to perform the multiobjective optimization.
+
+        Args:
+            budget_available (float): available budget
+            scaling_factor (float): value to scale monetary input data
+            building_functionality_csv (DataFrame): table containing building functionality data
+            strategy_costs_csv (DataFrame): table containing retrofit strategy costs data
+        Returns
+            ConcreteModel: a base, parameterized cost/functionality model
+        """
         # Rescale data
         myData = building_functionality_csv[self.__Q_col] / scaling_factor
         myData_Sc = strategy_costs_csv[self.__SC_col] / scaling_factor
@@ -232,6 +245,82 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.B = sumSc * budget_available
 
         return model
+
+    def configure_model_objectives(self, model):
+        """ Configure the model by adding objectives
+
+        Args:
+            model (ConcreteModel): a base cost/functionality model
+
+        Returns:
+            ConcreteModel: a model extended with objective functions
+
+        """
+        model.objective_1 = Objective(rule=self.obj_economic, sense=minimize)
+        model.econ_loss = Param(mutable=True, within=NonNegativeReals)  # ,default=10000000000)
+
+        model.objective_2 = Objective(rule=self.obj_dislocation, sense=minimize)
+        model.dislocation = Param(mutable=True, within=NonNegativeReals)  # ,default=30000)
+
+        model.objective_3 = Objective(rule=self.obj_functionality, sense=maximize)
+        model.functionality = Param(mutable=True, within=NonNegativeReals)  # ,default=1)
+
+        return model
+
+    def configure_model_retrofit_costs(self, model):
+        model.retrofit_budget_constraint = Constraint(rule=self.retrofit_cost_rule)
+        model.number_buildings_ij_constraint = Constraint(model.ZS, rule=self.number_buildings_ij_rule)
+        model.building_level_constraint = Constraint(model.ZSK, rule=self.building_level_rule)
+
+        return model
+
+    ## Objective functions
+    @staticmethod
+    def obj_economic(model):
+        # return(sum_product(model.l_ijk,model.x_ijk))
+        return (quicksum(model.l_ijk[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK))
+
+    @staticmethod
+    def obj_dislocation(model):
+        # return(sum_product(model.d_ijk,model.x_ijk))
+        return (quicksum(model.d_ijk[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK))
+
+    @staticmethod
+    def obj_functionality(model):
+        # return(sum_product(model.Q_t_hat,model.x_ijk))
+        return (quicksum(model.Q_t_hat[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK))
+
+    # Retrofit cost constraints
+    @staticmethod
+    def retrofit_cost_rule(model):
+        return (None,
+                quicksum(
+                    model.Sc_ijkk_prime[i, j, k, k_prime] * model.y_ijkk_prime[i, j, k, k_prime] for (i, j, k, k_prime)
+                    in model.ZSKK_prime),  # zskk_prime),
+                pyo.value(model.B))
+
+    @staticmethod
+    def number_buildings_ij_rule(model, i, j):
+        return (quicksum(pyo.value(model.b_ijk[i, j, k]) for k in model.K),
+                quicksum(model.x_ijk[i, j, k] for k in model.K),
+                quicksum(pyo.value(model.b_ijk[i, j, k]) for k in model.K))
+        # (sum(pyo.value(model.b_ijk[i,j,k]) for k in model.K) == sum(pyo.value(model.b_ijk[i,j,k]) for k in model.K) for (i,j) in model.ZS))
+
+    @staticmethod
+    def building_level_rule(model, i, j, k):
+        model.a = Param(mutable=True)
+        model.c = Param(mutable=True)
+
+        model.a = quicksum(model.y_ijkk_prime[i, j, k_prime, k] for k_prime in model.K_prime if
+                           (i, j, k_prime, k) in model.zskk_prime)
+        model.c = quicksum(model.y_ijkk_prime[i, j, k, k_prime] for k_prime in model.K_prime if
+                           (i, j, k, k_prime) in model.zskk_prime)
+        return (pyo.value(model.b_ijk[i, j, k]),
+                model.x_ijk[i, j, k] + quicksum(model.y_ijkk_prime[i, j, k, k_prime] for k_prime in model.K_prime if
+                                                (i, j, k, k_prime) in model.zskk_prime) - quicksum(
+                    model.y_ijkk_prime[i, j, k_prime, k] for k_prime in model.K_prime if
+                    (i, j, k_prime, k) in model.zskk_prime),
+                pyo.value(model.b_ijk[i, j, k]))
 
     def get_spec(self):
         """Get specifications of the multiobjective retrofit optimization model.
