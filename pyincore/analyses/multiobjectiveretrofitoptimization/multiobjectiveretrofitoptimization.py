@@ -107,10 +107,21 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             strategy_costs_csv (pd.DataFrame): strategy cost data per building
         """
         # Setup the model
-        base_model = self.configure_model(budget_available, scaling_factor, building_functionality_csv,
-                                        strategy_costs_csv)
+        base_model, sum_sc = self.configure_model(budget_available, scaling_factor, building_functionality_csv,
+                                                  strategy_costs_csv)
         model_with_objectives = self.configure_model_objectives(base_model)
         model_with_constraints = self.configure_model_retrofit_costs(model_with_objectives)
+
+        # Choose the solver setting
+        model_solver_setting = None
+        if model_solver == "gurobi":
+            modelSolverSetting = pyo.SolverFactory('gurobi', solver_io="python")
+        else:
+            modelSolverSetting = pyo.SolverFactory(model_solver)
+
+        # Solve each model individually
+        model_solved_individual = self.solve_individual_models(model_with_constraints, model_solver_setting, sum_sc)
+
 
     def configure_model(self, budget_available, scaling_factor, building_functionality_csv, strategy_costs_csv):
         """ Configure the base model to perform the multiobjective optimization.
@@ -244,7 +255,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Define the total available budget based on user's input:
         model.B = sumSc * budget_available
 
-        return model
+        return model, sumSc
 
     def configure_model_objectives(self, model):
         """ Configure the model by adding objectives
@@ -271,6 +282,151 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.retrofit_budget_constraint = Constraint(rule=self.retrofit_cost_rule)
         model.number_buildings_ij_constraint = Constraint(model.ZS, rule=self.number_buildings_ij_rule)
         model.building_level_constraint = Constraint(model.ZSK, rule=self.building_level_rule)
+
+        return model
+
+    def solve_individual_models(self, model, model_solver_setting, sum_sc):
+        print("Max Budget: $", sum_sc)
+        print("Available Budget: $", pyo.value(model.B))
+        print("")
+
+        model = self.solve_model_1(model, model_solver_setting)
+        model = self.solve_model_2(model, model_solver_setting)
+        model = self.solve_model_3(model, model_solver_setting)
+
+        return model
+
+    def solve_model_1(self, model, model_solver_setting):
+        starttime = time.time()
+        print("Initial solve for objective function 1 starting.")
+        # Activate objective function 1 (minimize economic loss) and deactivate others:
+        model.objective_1.activate()
+        model.objective_2.deactivate()
+        model.objective_3.deactivate()
+
+        # Solve the model:
+        results = model_solver_setting.solve(model)
+
+        # Save the results if the solver returns an optimal solution:
+        if (results.solver.status == SolverStatus.ok) and (
+                results.solver.termination_condition == TerminationCondition.optimal):
+            model.econ_loss = quicksum(
+                pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
+            model.dislocation = quicksum(
+                pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                model.ZSK)  # Assign dislocation to the model.dislocation parameter.
+            model.functionality = quicksum(
+                pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                model.ZSK)  # Assign functionality to the model.functionality parameter.
+            obj_1_min_epsilon = pyo.value(model.objective_1)  # Save the optimal economic loss value.
+            obj_2_value_1 = pyo.value(model.dislocation)  # Save the dislocation value when optimizing economic loss.
+            obj_3_value_1 = pyo.value(
+                model.functionality)  # Save the functionality value when optimizing economic loss.
+            print("Initial solve for objective function 1 complete.")
+            print("Economic Loss: ", pyo.value(model.econ_loss),
+                  "Dislocation: ", pyo.value(model.dislocation),
+                  "Functionality: ", pyo.value(model.functionality))
+
+            print("Economic loss min epsilon (optimal value):", obj_1_min_epsilon)
+            print("Dislocation when optimizing Economic Loss:", obj_2_value_1)
+            print("Functionality when optimizing Economic Loss:", obj_3_value_1)
+            print("")
+        else:
+            print("Not Optimal")
+
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time for initial obj 1 solve: ", elapsedtime)
+        print("")
+
+        return model
+
+    def solve_model_2(self, model, model_solver_setting):
+        starttime = time.time()
+        print("Initial solve for objective function 2 starting.")
+        # Activate objective function 2 (minimize dislocation) and deactivate others:
+        model.objective_1.deactivate()
+        model.objective_2.activate()
+        model.objective_3.deactivate()
+
+        # Solve the model:
+        results = model_solver_setting.solve(model)
+
+        # Save the results if the solver returns an optimal solution:
+        if (results.solver.status == SolverStatus.ok) and (
+                results.solver.termination_condition == TerminationCondition.optimal):
+            model.econ_loss = quicksum(
+                pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
+            model.dislocation = quicksum(
+                pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                model.ZSK)  # Assign dislocation to the model.dislocation parameter.
+            model.functionality = quicksum(
+                pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                model.ZSK)  # Assign functionality to the model.functionality parameter.
+            obj_2_min_epsilon = pyo.value(model.objective_2)  # Save the optimal dislocation value.
+            obj_1_value_2 = pyo.value(model.econ_loss)  # Save the economic loss value when optimizing dislocation.
+            obj_3_value_2 = pyo.value(model.functionality)  # Save the functionality value when optimizing dislocation.
+            print("Initial solve for objective function 2 complete.")
+            print("Economic Loss: ", pyo.value(model.econ_loss),
+                  "Dislocation: ", pyo.value(model.dislocation),
+                  "Functionality: ", pyo.value(model.functionality))
+
+            print("Dislocation min epsilon (optimal value):", obj_2_min_epsilon)
+            print("Economic Loss when optimizing Dislocation:", obj_1_value_2)
+            print("Functionality when optimizing Dislocation:", obj_3_value_2)
+            print("")
+        else:
+            print("Not Optimal")
+
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time for initial obj 2 solve: ", elapsedtime)
+        print("")
+
+        return model
+
+    def solve_model_3(self, model, model_solver_setting):
+        starttime = time.time()
+        print("Initial solve for objective function 3 starting.")
+        # Activate objective function 3 (maximize functionality) and deactivate others:
+        model.objective_1.deactivate()
+        model.objective_2.deactivate()
+        model.objective_3.activate()
+
+        # Solve the model:
+        results = model_solver_setting.solve(model)
+
+        # Save the results if the solver returns an optimal solution:
+        if (results.solver.status == SolverStatus.ok) and (
+                results.solver.termination_condition == TerminationCondition.optimal):
+            model.econ_loss = quicksum(
+                pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
+            model.dislocation = quicksum(
+                pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                model.ZSK)  # Assign dislocation to the model.dislocation parameter.
+            model.functionality = quicksum(
+                pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                model.ZSK)  # Assign functionality to the model.functionality parameter.
+            obj_3_max_epsilon = pyo.value(model.objective_3)  # Save the optimal functionality value.
+            obj_1_value_3 = pyo.value(model.econ_loss)  # Save the economic loss value when optimizing functionality.
+            obj_2_value_3 = pyo.value(model.dislocation)  # Save the dislocation value when optimizing functionality.
+            print("Initial solve for objective function 3 complete.")
+            print("Economic Loss: ", pyo.value(model.econ_loss),
+                  "Dislocation: ", pyo.value(model.dislocation),
+                  "Functionality: ", pyo.value(model.functionality))
+
+            print("Functionality max epsilon (optimal value):", obj_3_max_epsilon)
+            print("Economic Loss when optimizing Functionality:", obj_1_value_3)
+            print("Dislocation when optimizing Functionality:", obj_2_value_3)
+        else:
+            print("Not Optimal")
+
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time for initial obj 3 solve: ", elapsedtime)
 
         return model
 
@@ -304,7 +460,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         return (quicksum(pyo.value(model.b_ijk[i, j, k]) for k in model.K),
                 quicksum(model.x_ijk[i, j, k] for k in model.K),
                 quicksum(pyo.value(model.b_ijk[i, j, k]) for k in model.K))
-        # (sum(pyo.value(model.b_ijk[i,j,k]) for k in model.K) == sum(pyo.value(model.b_ijk[i,j,k]) for k in model.K) for (i,j) in model.ZS))
 
     @staticmethod
     def building_level_rule(model, i, j, k):
