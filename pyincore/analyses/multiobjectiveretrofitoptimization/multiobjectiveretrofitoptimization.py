@@ -122,6 +122,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model_solved_individual = self.solve_individual_models(model_with_constraints, model_solver_setting, sum_sc)
         model_solved_epsilon = self.solve_epsilon_models(model_solved_individual, model_solver_setting,
                                                          inactive_submodels)
+        file_list = self.compute_optimal_results(inactive_submodels)
 
     def configure_model(self, budget_available, scaling_factor, building_functionality_csv, strategy_costs_csv):
         """ Configure the base model to perform the multiobjective optimization.
@@ -865,56 +866,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     percent_budget_used = (budget_used / pyo.value(
                         model.B)) * 100  # Record percentage of available budget used.
                     # Add objective (economic loss), dislocation, and functionality values to results dataframe:
+                    # TODO: optimize this search
                     obj_1_23_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(model.functionality)
                     obj_1_23_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
                         model.econ_loss)
                     obj_1_23_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(model.dislocation)
-                    xresults_df = pd.DataFrame()
-                    yresults_df = pd.DataFrame()
-                    newxresults_df = pd.DataFrame()
-                    newyresults_df = pd.DataFrame()
-
-                    for v in model.component_objects(pyo.Var):
-                        row = 1
-                        for index in v:
-                            yresults_df.at[row, v.name + 'index'] = str(index)
-                            yresults_df.at[row, v.name] = pyo.value(v[index])
-                            if row <= len(model.x_ijk):
-                                xresults_df.at[row, v.name + 'index'] = str(index)
-                                xresults_df.at[row, v.name] = pyo.value(v[index])
-                            row += 1
-
-                    yresults_df["y_ijkk_primeindex"] = yresults_df['y_ijkk_primeindex'].apply(lambda x: list(eval(x)))
-                    newyresults_df[["Z", "S", "K", "K'"]] = pd.DataFrame(yresults_df["y_ijkk_primeindex"].tolist(),
-                                                                         index=yresults_df.index)
-                    newyresults_df['y_ijkk_prime'] = yresults_df["y_ijkk_prime"]
-
-                    xresults_df["x_ijkindex"] = xresults_df['x_ijkindex'].apply(lambda x: list(eval(x)))
-                    newxresults_df[["Z", "S", "K"]] = pd.DataFrame(xresults_df["x_ijkindex"].tolist(),
-                                                                   index=xresults_df.index)
-                    newxresults_df["x_ijk"] = xresults_df["x_ijk"]
-
-                    newxresults_df.to_csv(os.path.join(
-                       'obj_1_23_xit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    with open("obj_1_23_xit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv',
-                    'a+',
-                             newline='') as file:
-                       writer = csv.writer(file)
-                       writer.writerow(["Ojective functions values:"])
-                       writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                       writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                       writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
-
-                    newyresults_df.to_csv(os.path.join(
-                       'obj_1_23_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    with open("obj_1_23_yit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv',
-                        'a+',
-                             newline='') as file:
-                       writer = csv.writer(file)
-                       writer.writerow(["Ojective functions values:"])
-                       writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                       writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                       writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
@@ -991,59 +947,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     percent_budget_used = (budget_used / pyo.value(
                         model.B)) * 100  # Record percentage of available budget used.
                     # Add objective (dislocation), economic loss, and functionality values to results dataframe:
+                    # TODO: optimize this search
                     obj_2_13_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(model.functionality)
                     obj_2_13_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
                         model.econ_loss)
                     obj_2_13_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(model.dislocation)
-
-                    xresults_df = pd.DataFrame()
-                    yresults_df = pd.DataFrame()
-                    newxresults_df = pd.DataFrame()
-                    newyresults_df = pd.DataFrame()
-
-                    for v in model.component_objects(pyo.Var):
-                        row = 1
-                        for index in v:
-                            yresults_df.at[row, v.name + 'index'] = str(index)
-                            yresults_df.at[row, v.name] = pyo.value(v[index])
-                            row += 1
-
-                    yresults_df["y_ijkk_primeindex"] = yresults_df['y_ijkk_primeindex'].apply(lambda x: list(eval(x)))
-                    newyresults_df[["Z", "S", "K", "K'"]] = pd.DataFrame(yresults_df["y_ijkk_primeindex"].tolist(),
-                                                                         index=yresults_df.index)
-                    newyresults_df['y_ijkk_prime'] = yresults_df["y_ijkk_prime"]
-
-                    for v in model.component_objects(pyo.Var):
-                        row = 1
-                        for index in v:
-                            xresults_df.at[row, v.name + 'index'] = str(index)
-                            xresults_df.at[row, v.name] = pyo.value(v[index])
-                            row += 1
-                        break
-                    xresults_df["x_ijkindex"] = xresults_df['x_ijkindex'].apply(lambda x: list(eval(x)))
-                    newxresults_df[["Z", "S", "K"]] = pd.DataFrame(xresults_df["x_ijkindex"].tolist(),
-                                                                   index=xresults_df.index)
-                    newxresults_df["x_ijk"] = xresults_df["x_ijk"]
-
-                    newxresults_df.to_csv(os.path.join('Test_result/obj_2_13_xit' + str(counter) + '_model_' + str(
-                        time.strftime("%m-%d-%Y")) + '.csv'))
-                    with open("Test_result/obj_2_13_xit" + str(counter) + '_model_' + str(
-                            time.strftime("%m-%d-%Y")) + '.csv', 'a+', newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerow(["Ojective functions values:"])
-                        writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                        writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                        writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
-
-                    newyresults_df.to_csv(os.path.join(
-                        'obj_2_13_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    with open("Test_result/obj_2_13_yit" + str(counter) + '_model_' + str(
-                            time.strftime("%m-%d-%Y")) + '.csv', 'a+', newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerow(["Ojective functions values:"])
-                        writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                        writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                        writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
@@ -1120,58 +1028,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     percent_budget_used = (budget_used / pyo.value(
                         model.B)) * 100  # Record percentage of available budget used.
                     # Add objective (functionality), economic loss, and dislocation values to results dataframe:
+                    # TODO: optimize this search
                     obj_3_12_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(model.functionality)
                     obj_3_12_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
                         model.econ_loss)
                     obj_3_12_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(model.dislocation)
-                    xresults_df = pd.DataFrame()
-                    yresults_df = pd.DataFrame()
-                    newxresults_df = pd.DataFrame()
-                    newyresults_df = pd.DataFrame()
-
-                    for v in model.component_objects(pyo.Var):
-                        row = 1
-                        for index in v:
-                            yresults_df.at[row, v.name + 'index'] = str(index)
-                            yresults_df.at[row, v.name] = pyo.value(v[index])
-                            row += 1
-
-                    yresults_df["y_ijkk_primeindex"] = yresults_df['y_ijkk_primeindex'].apply(lambda x: list(eval(x)))
-                    newyresults_df[["Z", "S", "K", "K'"]] = pd.DataFrame(yresults_df["y_ijkk_primeindex"].tolist(),
-                                                                         index=yresults_df.index)
-                    newyresults_df['y_ijkk_prime'] = yresults_df["y_ijkk_prime"]
-
-                    for v in model.component_objects(pyo.Var):
-                        row = 1
-                        for index in v:
-                            xresults_df.at[row, v.name + 'index'] = str(index)
-                            xresults_df.at[row, v.name] = pyo.value(v[index])
-                            row += 1
-                        break
-                    xresults_df["x_ijkindex"] = xresults_df['x_ijkindex'].apply(lambda x: list(eval(x)))
-                    newxresults_df[["Z", "S", "K"]] = pd.DataFrame(xresults_df["x_ijkindex"].tolist(),
-                                                                   index=xresults_df.index)
-                    newxresults_df["x_ijk"] = xresults_df["x_ijk"]
-
-                    newxresults_df.to_csv(os.path.join(
-                        'obj_3_12_xit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    with open("obj_3_12_xit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv', 'a+',
-                              newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerow(["Ojective functions values:"])
-                        writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                        writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                        writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
-
-                    newyresults_df.to_csv(os.path.join(
-                        'obj_3_12_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    with open("obj_3_12_yit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv', 'a+',
-                              newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerow(["Ojective functions values:"])
-                        writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                        writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                        writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
@@ -1203,6 +1064,33 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Elapsed time: ", elapsedtime)
 
         return model
+
+    def compute_optimal_results(self, inactive_submodels):
+        epsilon_models = {
+            7: 'obj_1_23',
+            8: 'obj_2_13',
+            9: 'obj_3_12'
+        }
+
+        file_list = []
+
+        for k, obj in epsilon_models.items():
+            if k not in inactive_submodels:
+                results = pd.read_csv(obj + '_epsilon_results.csv', usecols=['Economic Loss(Million Dollars)',
+                                                                             'Dislocation Value',
+                                                                             'Functionality Value'],
+                                      low_memory=False)
+                list_loss = results['Economic Loss(Million Dollars)'].values.tolist()
+                list_dislocation = results['Dislocation Value'].values.tolist()
+                list_func = results['Functionality Value'].values.tolist()
+                zipped_list = self.optimal_points(list_loss, list_dislocation, list_func)
+                optimal = pd.DataFrame(zipped_list, columns=['Iteration', 'Economic Loss(Million Dollars)',
+                                                             'Dislocation Value', 'Functionality Value'])
+                file_name = obj + '_optimal_results.csv'
+                optimal.to_csv(file_name, index=False)
+                file_list.append(file_name)
+
+        return file_list
 
     ## Objective functions
     @staticmethod
