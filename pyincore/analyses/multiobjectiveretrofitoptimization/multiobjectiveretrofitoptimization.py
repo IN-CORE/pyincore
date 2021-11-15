@@ -113,15 +113,18 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model_with_constraints = self.configure_model_retrofit_costs(model_with_objectives)
 
         # Choose the solver setting
-        model_solver_setting = None
         if model_solver == "gurobi":
-            modelSolverSetting = pyo.SolverFactory('gurobi', solver_io="python")
+            model_solver_setting = pyo.SolverFactory('gurobi', solver_io="python")
         else:
-            modelSolverSetting = pyo.SolverFactory(model_solver)
+            model_solver_setting = pyo.SolverFactory(model_solver)
 
         # Solve each model individually
         model_solved_individual = self.solve_individual_models(model_with_constraints, model_solver_setting, sum_sc)
 
+        #TODO: need to save intermediate results here
+
+        model_solved_epsilon = self.solve_epsilon_models(model_solved_individual, model_solver_setting,
+                                                         inactive_submodels)
 
     def configure_model(self, budget_available, scaling_factor, building_functionality_csv, strategy_costs_csv):
         """ Configure the base model to perform the multiobjective optimization.
@@ -427,6 +430,849 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time for initial obj 3 solve: ", elapsedtime)
+
+        return model
+
+    def solve_epsilon_models(self, model, model_solver_setting, inactive_submodels):
+        if 1 not in inactive_submodels:
+            model = self.solve_epsilon_model_1(model, model_solver_setting)
+
+        if 2 not in inactive_submodels:
+            model = self.solve_epsilon_model_2(model, model_solver_setting)
+
+        if 3 not in inactive_submodels:
+            model = self.solve_epsilon_model_3(model, model_solver_setting)
+
+        if 4 not in inactive_submodels:
+            model = self.solve_epsilon_model_4(model, model_solver_setting)
+
+        if 5 not in inactive_submodels:
+            model = self.solve_epsilon_model_5(model, model_solver_setting)
+
+        if 6 not in inactive_submodels:
+            model = self.solve_epsilon_model_6(model, model_solver_setting)
+
+        if 7 not in inactive_submodels:
+            model = self.solve_epsilon_model_7(model, model_solver_setting)
+
+        if 8 not in inactive_submodels:
+            model = self.solve_epsilon_model_8(model, model_solver_setting)
+
+        if 9 not in inactive_submodels:
+            model = self.solve_epsilon_model_9(model, model_solver_setting)
+
+        return model
+
+    def solve_epsilon_model_1(self, model, model_solver_setting):
+        starttime = time.time()
+        print("****OPTIMIZING ECONOMIC LOSS SUBJECT TO POPULATION DISLOCATION EPSILON CONSTRAINTS****")
+        # Activate objective function 1 and deactivate others:
+        model.objective_1.activate()
+        model.objective_2.deactivate()
+        model.objective_3.deactivate()
+
+        # Add objective function 2 as epsilon constraint of objective function 1:
+        # Dataframe to store optimization results:
+        obj_1_2_epsilon_results = pd.DataFrame(
+            columns=['Economic Loss(Million Dollars)', 'Dislocation Value', 'Functionality Value'])
+
+        # Parameter for objective 2 (dislocation) epsilon value:
+        model.obj_2_e = Param(mutable=True, within=NonNegativeReals)
+        # For each dislocation epsilon value (starting at min) set as constraint and solve model:
+        counter = 0
+        for e in np.arange(pyo.value(model.dislocation_min), pyo.value(model.dislocation_max) + 0.000001,
+                           pyo.value(model.dislocation_step)):
+            counter += 1
+            print("Step ", counter, ": ", e)
+
+            model.obj_2_e = e  # Set the model parameter to the epsilon value.
+            model.add_component("objective_2_constraint",
+                                Constraint(expr=sum_product(model.d_ijk, model.x_ijk) <= pyo.value(
+                                    model.obj_2_e)))  # Add the epsilon constraint.
+            # Solve the model:
+            results = model_solver_setting.solve(model)
+
+            # Save the results if the solver returns an optimal solution:
+            if (results.solver.status == SolverStatus.ok) and (
+                    results.solver.termination_condition == TerminationCondition.optimal):
+                model.econ_loss = quicksum(
+                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
+                model.dislocation = quicksum(
+                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
+                model.functionality = quicksum(
+                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                # Add objective (economic loss), dislocation, and functionality values to results dataframe:
+                obj_1_2_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
+                    model.econ_loss)  # Save the optimal economic loss value.
+                obj_1_2_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
+                    model.dislocation)  # Save the resulting dislocation value.
+                obj_1_2_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
+                    model.functionality)  # Save the resulting functionality value.
+            else:
+                print(results.solver.termination_condition)
+                log_infeasible_constraints(model)
+
+            # Remove the given epsilon constraint from the model now that optimization is complete:
+            model.del_component(model.objective_2_constraint)
+
+        # Remove the dislocation epsilon parameter from the model:
+        model.del_component(model.obj_2_e)
+
+        # Display and save the results of optimizing economic loss subject to dislocation epsilon constraints:
+        print(obj_1_2_epsilon_results)
+        #filename = 'obj_1_2_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        #obj_1_2_epsilon_results.to_csv(filename)
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time: ", elapsedtime)
+        return model
+
+    def solve_epsilon_model_2(self, model, model_solver_setting):
+        starttime = time.time()
+        print("****OPTIMIZING ECONOMIC LOSS SUBJECT TO BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
+        # Activate objective function 1 and deactivate others:
+        model.objective_1.activate()
+        model.objective_2.deactivate()
+        model.objective_3.deactivate()
+
+        # Add objective function 3 as epsilon constraint of objective function 1:
+        # Dataframe to store optimization results:
+        obj_1_3_epsilon_results = pd.DataFrame(
+            columns=['Economic Loss(Million Dollars)', 'Dislocation Value', 'Functionality Value'])
+
+        # Parameter for objective 3 (functionality) epsilon value:
+        model.obj_3_e = Param(mutable=True, within=NonNegativeReals)
+        counter = 0
+        # For each functionality epsilon value (starting at min) set as constraint and solve model:
+        # Adding 0.0000000000001 to the maximum value allows np.arange() to include the maximum functionality.
+        for e in np.arange(pyo.value(model.functionality_min),
+                           pyo.value(model.functionality_max) + 0.000000000000000001,
+                           pyo.value(model.functionality_step)):
+            counter += 1
+            print("Step ", counter, ": ", e)
+
+            model.obj_3_e = e  # Set the model parameter to the epsilon value.
+            model.add_component("objective_3_constraint",
+                                Constraint(expr=sum_product(model.Q_t_hat, model.x_ijk) >= pyo.value(
+                                    model.obj_3_e)))  # Add the epsilon constraint.
+            # Solve the model:
+            results = model_solver_setting.solve(model)
+
+            # Save the results if the solver returns an optimal solution:
+            if (results.solver.status == SolverStatus.ok) and (
+                    results.solver.termination_condition == TerminationCondition.optimal):
+                model.econ_loss = quicksum(
+                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
+                model.dislocation = quicksum(
+                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
+                model.functionality = quicksum(
+                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                # Add objective (economic loss), dislocation, and functionality values to results dataframe:
+                obj_1_3_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
+                    model.econ_loss)  # Save the optimal economic loss value.
+                obj_1_3_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
+                    model.dislocation)  # Save the resulting dislocation value.
+                obj_1_3_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
+                    model.functionality)  # Save the resulting functionality value.
+            else:
+                print(results.solver.termination_condition)
+                log_infeasible_constraints(model)
+
+            # Remove the given epsilon constraint from the model now that optimization is complete:
+            model.del_component(model.objective_3_constraint)
+
+        # Remove the functionality epsilon parameter from the model:
+        model.del_component(model.obj_3_e)
+
+        # Display and save the results of optimizing economic loss subject to functionality epsilon constraints:
+        print(obj_1_3_epsilon_results)
+        #filename = 'obj_1_3_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        #obj_1_3_epsilon_results.to_csv(filename)
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time: ", elapsedtime)
+
+        return model
+
+    def solve_epsilon_model_3(self, model, model_solver_setting):
+        starttime = time.time()
+        print("****OPTIMIZING POPULATION DISLOCATION SUBJECT TO ECONOMIC LOSS EPSILON CONSTRAINTS****")
+        # Activate objective function 2 and deactivate others:
+        model.objective_1.deactivate()
+        model.objective_2.activate()
+        model.objective_3.deactivate()
+
+        # Add objective function 1 as epsilon constraint of objective function 2:
+        # Dataframe to store optimization results:
+        obj_2_1_epsilon_results = pd.DataFrame(
+            columns=['Economic Loss(Million Dollars)', 'Dislocation Value', 'Functionality Value'])
+
+        # Parameter for objective 1 (economic loss) epsilon value:
+        model.obj_1_e = Param(mutable=True, within=NonNegativeReals)
+        # For each economic loss epsilon value (starting at min) set as constraint and solve model:
+        # Adding 1 to the maximum value allows np.arange() to include the maximum economic loss.
+        counter = 0
+        for e in np.arange(pyo.value(model.econ_loss_min), pyo.value(model.econ_loss_max) + 0.1,
+                           pyo.value(model.econ_loss_step)):
+            counter += 1
+            print("Step ", counter, ": ", e)
+
+            model.obj_1_e = e  # Set the model parameter to the epsilon value.
+            model.add_component("objective_1_constraint",
+                                Constraint(expr=sum_product(model.l_ijk, model.x_ijk) <= pyo.value(
+                                    model.obj_1_e)))  # Set epsilon constraint.
+            # Solve the model:
+            results = model_solver_setting.solve(model)
+
+            # Save the results if the solver returns an optimal solution:
+            if (results.solver.status == SolverStatus.ok) and (
+                    results.solver.termination_condition == TerminationCondition.optimal):
+                model.econ_loss = quicksum(
+                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
+                model.dislocation = quicksum(
+                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
+                model.functionality = quicksum(
+                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                # Add objective (dislocation), economic loss, and functionality values to results dataframe:
+                obj_2_1_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
+                    model.dislocation)  # Save the optimal dislocation value.
+                obj_2_1_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
+                    model.econ_loss)  # Save the resulting economic loss value.
+                obj_2_1_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
+                    model.functionality)  # Save the resulting functionality value.
+            else:
+                print(results.solver.termination_condition)
+                log_infeasible_constraints(model)
+
+            # Remove the given epsilon constraint from the model now that optimization is complete:
+            model.del_component(model.objective_1_constraint)
+
+        # Remove the functionality epsilon parameter from the model:
+        model.del_component(model.obj_1_e)
+
+        # Display the results of optimizing dislocation subject to economic loss epsilon constraints:
+        print(obj_2_1_epsilon_results)
+        #filename = 'obj_2_1_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        #obj_2_1_epsilon_results.to_csv(filename)
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time: ", elapsedtime)
+
+        return model
+
+    def solve_epsilon_model_4(self, model, model_solver_setting):
+        starttime = time.time()
+        print("****OPTIMIZING POPULATION DISLOCATION SUBJECT TO BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
+        # Activate objective function 2 and deactivate others:
+        model.objective_1.deactivate()
+        model.objective_2.activate()
+        model.objective_3.deactivate()
+
+        # Add objective function 3 as epsilon constraint of objective function 2:
+        # Dataframe to store optimization results:
+        obj_2_3_epsilon_results = pd.DataFrame(
+            columns=['Economic Loss(Million Dollars)', 'Dislocation Value', 'Functionality Value'])
+
+        # Parameter for objective 3 (functionality) epsilon value:
+        model.obj_3_e = Param(mutable=True, within=NonNegativeReals)
+        # For each functionality epsilon value (starting at min) set as constraint and solve model:
+        # Adding 0.0000000000001 to the maximum value allows np.arange() to include the maximum functionality.
+        counter = 0
+        for e in np.arange(pyo.value(model.functionality_min), pyo.value(model.functionality_max) + 0.0000000000001,
+                           pyo.value(model.functionality_step)):
+            counter += 1
+            print("Step ", counter, ": ", e)
+
+            model.obj_3_e = e  # Set the model parameter to the epsilon value.
+            model.add_component("objective_3_constraint",
+                                Constraint(expr=sum_product(model.Q_t_hat, model.x_ijk) >= (
+                                    pyo.value(model.obj_3_e))))  # Set the epsilon constraint.
+            # Solve the model:
+            results = model_solver_setting.solve(model)
+
+            # Save the results if the solver returns an optimal solution:
+            if (results.solver.status == SolverStatus.ok) and (
+                    results.solver.termination_condition == TerminationCondition.optimal):
+                model.econ_loss = quicksum(
+                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
+                model.dislocation = quicksum(
+                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
+                model.functionality = quicksum(
+                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                # Add objective (dislocation), economic loss, and functionality values to results dataframe:
+                obj_2_3_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
+                    model.dislocation)  # Save the optimal dislocation value.
+                obj_2_3_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
+                    model.econ_loss)  # Save the resulting economic loss value.
+                obj_2_3_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
+                    model.functionality)  # Save the resulting functionality value.
+            else:
+                print(results.solver.termination_condition)
+                log_infeasible_constraints(model)
+
+            # Remove the given epsilon constraint from the model now that optimization is complete:
+            model.del_component(model.objective_3_constraint)
+
+        # Remove the functionality epsilon parameter from the model:
+        model.del_component(model.obj_3_e)
+
+        # Display the results of optimizing dislocation subject to functionality epsilon constraints:
+        print(obj_2_3_epsilon_results)
+        #filename = 'obj_2_3_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        #obj_2_3_epsilon_results.to_csv(filename)
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time: ", elapsedtime)
+
+        return model
+
+    def solve_epsilon_model_5(self, model, model_solver_setting):
+        starttime = time.time()
+        print("****OPTIMIZING BUILDING FUNCTIONALITY SUBJECT TO ECONOMIC LOSS EPSILON CONSTRAINTS****")
+        # Activate objective function 3 and deactivate others:
+        model.objective_1.deactivate()
+        model.objective_2.deactivate()
+        model.objective_3.activate()
+
+        # Add objective function 1 as epsilon constraint of objective function 3:
+        # Dataframe to store optimization results:
+        obj_3_1_epsilon_results = pd.DataFrame(
+            columns=['Economic Loss(Million Dollars)', 'Dislocation Value', 'Functionality Value'])
+
+        # Parameter for objective 1 (economic loss) epsilon value:
+        model.obj_1_e = Param(mutable=True, within=NonNegativeReals)
+        # For each economic loss epsilon value (starting at min) set as constraint and solve model:
+        # Adding 1 to the maximum value allows np.arange() to include the maximum economic loss.
+        counter = 0
+        for e in np.arange(pyo.value(model.econ_loss_min), pyo.value(model.econ_loss_max) + 0.000001,
+                           pyo.value(model.econ_loss_step)):
+            counter += 1
+            print("Step ", counter, ": ", e)
+
+            model.obj_1_e = e
+            model.add_component("objective_1_constraint",
+                                Constraint(expr=sum_product(model.l_ijk, model.x_ijk) <= pyo.value(
+                                    model.obj_1_e)))  # Set the epsilon constraint.
+            # Solve the model:
+            results = model_solver_setting.solve(model)
+
+            # Save the results if the solver returns an optimal solution:
+            if (results.solver.status == SolverStatus.ok) and (
+                    results.solver.termination_condition == TerminationCondition.optimal):
+                model.econ_loss = quicksum(
+                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
+                model.dislocation = quicksum(
+                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
+                model.functionality = quicksum(
+                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                # Add objective (functionality), economic loss, and dislocation values to results dataframe:
+                obj_3_1_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
+                    model.functionality)  # Save the optimal functionality value.
+                obj_3_1_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
+                    model.econ_loss)  # Save the resulting economic loss value.
+                obj_3_1_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
+                    model.dislocation)  # Save the resulting dislocation value.
+            else:
+                print(results.solver.termination_condition)
+                log_infeasible_constraints(model)
+
+            # Remove the given epsilon constraint from the model now that optimization is complete:
+            model.del_component(model.objective_1_constraint)
+
+        # Remove the economic loss epsilon parameter from the model:
+        model.del_component(model.obj_1_e)
+
+        # Display the results of optimizing functionality subject to economic loss epsilon constraints:
+        print(obj_3_1_epsilon_results)
+        #filename = 'obj_3_1_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        #obj_3_1_epsilon_results.to_csv(filename)
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time: ", elapsedtime)
+
+        return model
+
+    def solve_epsilon_model_6(self, model, model_solver_setting):
+        starttime = time.time()
+        print("****OPTIMIZING BUILDING FUNCTIONALITY SUBJECT TO POPULATION DISLOCATION EPSILON CONSTRAINTS****")
+        # Activate objective function 3 (functionality) and deactivate others:
+        model.objective_1.deactivate()
+        model.objective_2.deactivate()
+        model.objective_3.activate()
+
+        # Add objective function 2 as epsilon constraint of objective function 3:
+        # Dataframe to store optimization results:
+        obj_3_2_epsilon_results = pd.DataFrame(
+            columns=['Economic Loss(Million Dollars)', 'Dislocation Value', 'Functionality Value'])
+
+        # Parameter for objective 2 (dislocation) epsilon value:
+        model.obj_2_e = Param(mutable=True, within=NonNegativeReals)
+        # For each dislocation epsilon value (starting at min) set as constraint and solve model:
+        # Adding 1 to the maximum value allows np.arange() to include the maximum dislocation.
+        counter = 0
+        for e in np.arange(pyo.value(model.dislocation_min), pyo.value(model.dislocation_max) + 0.000001,
+                           pyo.value(model.dislocation_step)):
+            counter += 1
+            print("Step ", counter, ": ", e)
+
+            model.obj_2_e = e
+            model.add_component("objective_2_constraint",
+                                Constraint(expr=sum_product(model.d_ijk, model.x_ijk) <= pyo.value(
+                                    model.obj_2_e)))  # Set the epsilon constraint.
+            # Solve the model:
+            results = model_solver_setting.solve(model)
+
+            # Save the results if the solver returns an optimal solution:
+            if (results.solver.status == SolverStatus.ok) and (
+                    results.solver.termination_condition == TerminationCondition.optimal):
+                model.econ_loss = quicksum(
+                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
+                model.dislocation = quicksum(
+                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
+                model.functionality = quicksum(
+                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
+                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                # Add objective (functionality), economic loss, and dislocation values to results dataframe:
+                obj_3_2_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
+                    model.functionality)  # Save the optimal functionality value.
+                obj_3_2_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
+                    model.econ_loss)  # Save the resulting economic loss value.
+                obj_3_2_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
+                    model.dislocation)  # Save the resulting dislocation value.
+            else:
+                print(results.solver.termination_condition)
+                log_infeasible_constraints(model)
+
+            # Remove the given epsilon constraint from the model now that optimization is complete:
+            model.del_component(model.objective_2_constraint)
+
+        # Remove the economic loss epsilon parameter from the model:
+        model.del_component(model.obj_2_e)
+
+        # Display the results of optimizing functionality subject to dislocation epsilon constraints:
+        print(obj_3_2_epsilon_results)
+        #filename = 'obj_3_2_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        #obj_3_2_epsilon_results.to_csv(filename)
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time: ", elapsedtime)
+
+        return model
+
+    def solve_epsilon_model_7(self, model, model_solver_setting):
+        starttime = time.time()
+        print(
+            "****OPTIMIZING ECONOMIC LOSS SUBJECT TO POPULATION DISLOCATION AND BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
+        model.objective_1.activate()
+        model.objective_2.deactivate()
+        model.objective_3.deactivate()
+
+        # Add objective functions 2 and 3 as epsilon constraints of objective function 1:
+        # Dataframe to store optimization results:
+        obj_1_23_epsilon_results = pd.DataFrame(
+            columns=['Economic Loss(Million Dollars)', 'Dislocation Value', 'Functionality Value'])
+
+        # Parameter for objective 2 (dislocation) and objective 3 (functionality) epsilon values:
+        model.obj_2_e = Param(mutable=True, within=NonNegativeReals)
+        model.obj_3_e = Param(mutable=True, within=NonNegativeReals)
+        counter = 0
+        for e in np.arange(pyo.value(model.dislocation_min), pyo.value(model.dislocation_max) + 0.000001,
+                           pyo.value(model.dislocation_step)):
+            model.obj_2_e = e
+            model.add_component("objective_2_constraint",
+                                Constraint(expr=sum_product(model.d_ijk, model.x_ijk) <= pyo.value(model.obj_2_e)))
+            for e2 in np.arange(pyo.value(model.functionality_min),
+                                pyo.value(model.functionality_max) + 0.0000000000001,
+                                pyo.value(model.functionality_step)):
+                counter += 1
+                model.obj_3_e = e2
+                print("Step ", counter, " e: ", e, "  e2:", e2)
+                #             obj_1_23_epsilon_results.loc[counter-1,'Dislocation Epsilon']=e
+                #             obj_1_23_epsilon_results.loc[counter-1,'Functionality Epsilon']=e2
+
+                model.add_component("objective_3_constraint",
+                                    Constraint(
+                                        expr=sum_product(model.Q_t_hat, model.x_ijk) >= pyo.value(model.obj_3_e)))
+                # Solve the model:
+                results = model_solver_setting.solve(model)
+
+                # Save the results if the solver returns an optimal solution:
+                if (results.solver.status == SolverStatus.ok) and (
+                        results.solver.termination_condition == TerminationCondition.optimal):
+                    model.econ_loss = quicksum(
+                        pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    model.dislocation = quicksum(
+                        pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    model.functionality = quicksum(
+                        pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    budget_used = quicksum(pyo.value(model.y_ijkk_prime[i, j, k, k_prime]) * pyo.value(
+                        model.Sc_ijkk_prime[i, j, k, k_prime]) for (i, j, k, k_prime) in model.ZSKK_prime)
+                    percent_budget_used = (budget_used / pyo.value(
+                        model.B)) * 100  # Record percentage of available budget used.
+                    # Add objective (economic loss), dislocation, and functionality values to results dataframe:
+                    obj_1_23_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(model.functionality)
+                    obj_1_23_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
+                        model.econ_loss)
+                    obj_1_23_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(model.dislocation)
+                    xresults_df = pd.DataFrame()
+                    yresults_df = pd.DataFrame()
+                    newxresults_df = pd.DataFrame()
+                    newyresults_df = pd.DataFrame()
+
+                    for v in model.component_objects(pyo.Var):
+                        row = 1
+                        for index in v:
+                            yresults_df.at[row, v.name + 'index'] = str(index)
+                            yresults_df.at[row, v.name] = pyo.value(v[index])
+                            if row <= len(model.x_ijk):
+                                xresults_df.at[row, v.name + 'index'] = str(index)
+                                xresults_df.at[row, v.name] = pyo.value(v[index])
+                            row += 1
+
+                    yresults_df["y_ijkk_primeindex"] = yresults_df['y_ijkk_primeindex'].apply(lambda x: list(eval(x)))
+                    newyresults_df[["Z", "S", "K", "K'"]] = pd.DataFrame(yresults_df["y_ijkk_primeindex"].tolist(),
+                                                                         index=yresults_df.index)
+                    newyresults_df['y_ijkk_prime'] = yresults_df["y_ijkk_prime"]
+
+                    xresults_df["x_ijkindex"] = xresults_df['x_ijkindex'].apply(lambda x: list(eval(x)))
+                    newxresults_df[["Z", "S", "K"]] = pd.DataFrame(xresults_df["x_ijkindex"].tolist(),
+                                                                   index=xresults_df.index)
+                    newxresults_df["x_ijk"] = xresults_df["x_ijk"]
+
+                    #newxresults_df.to_csv(os.path.join(\\
+                    #    'obj_1_23_xit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    #with open("obj_1_23_xit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv',
+                    # 'a+',
+                    #          newline='') as file:
+                    #    writer = csv.writer(file)
+                    #    writer.writerow(["Ojective functions values:"])
+                    #    writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                    #    writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                    #    writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+
+                    #newyresults_df.to_csv(os.path.join(
+                    #    'obj_1_23_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    #with open("obj_1_23_yit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv',
+                        # 'a+',
+                    #          newline='') as file:
+                    #    writer = csv.writer(file)
+                    #    writer.writerow(["Ojective functions values:"])
+                    #    writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                    #    writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                    #    writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+                else:
+                    print(results.solver.termination_condition)
+                    log_infeasible_constraints(model)
+
+                # Remove the given epsilon constraint from the model now that optimization is complete:
+                model.del_component(model.objective_3_constraint)
+
+            # Remove the given epsilon constraint from the model now that optimization is complete:
+            model.del_component(model.objective_2_constraint)
+
+        # Remove the economic loss epsilon parameter from the model:
+        model.del_component(model.obj_2_e)
+        model.del_component(model.obj_3_e)
+
+        print(obj_1_23_epsilon_results)
+
+        # Drop rows with infeasible results:
+        initial_length = len(obj_1_23_epsilon_results)
+        obj_1_23_data = obj_1_23_epsilon_results.dropna(axis=0, how='any')
+        print("Infeasible rows dropped: ", initial_length - len(obj_1_23_data), " rows.")
+
+        # Save results:
+        #filename = 'obj_1_23_epsilon_results.csv'
+        #obj_1_23_data.index += 1
+        #obj_1_23_data.to_csv(filename)
+
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time: ", elapsedtime)
+
+        return model
+
+    def solve_epsilon_model_8(self, model, model_solver_setting):
+        starttime = time.time()
+        print(
+            "****OPTIMIZING POPULATION DISLOCATION SUBJECT TO ECONOMIC LOSS AND BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
+        model.objective_1.deactivate()
+        model.objective_2.activate()
+        model.objective_3.deactivate()
+
+        # Add objective functions 1 and 3 as epsilon constraints of objective function 2:
+        # Dataframe to store optimization results:
+        obj_2_13_epsilon_results = pd.DataFrame(
+            columns=['Economic Loss(Million Dollars)', 'Dislocation Value', 'Functionality Value'])
+
+        # Parameter for objective 1 (economic loss) and objective 3 (functionality) epsilon values:
+        model.obj_1_e = Param(mutable=True, within=NonNegativeReals)
+        model.obj_3_e = Param(mutable=True, within=NonNegativeReals)
+        counter = 0
+        for e in np.arange(pyo.value(model.econ_loss_min), pyo.value(model.econ_loss_max) + 0.000001,
+                           pyo.value(model.econ_loss_step)):
+            model.obj_1_e = e
+            model.add_component("objective_1_constraint",
+                                Constraint(expr=sum_product(model.l_ijk, model.x_ijk) <= pyo.value(model.obj_1_e)))
+            for e2 in np.arange(pyo.value(model.functionality_min), pyo.value(model.functionality_max) +
+                                0.0000000000001, pyo.value(model.functionality_step)):
+                counter += 1
+                model.obj_3_e = e2
+                print("Step ", counter, " e: ", e, "  e2:", e2)
+                #             obj_2_13_epsilon_results.loc[counter-1,'Economic Loss Epsilon']=e
+                #             obj_2_13_epsilon_results.loc[counter-1,'Functionality Epsilon']=e2
+                model.add_component("objective_3_constraint",
+                                    Constraint(
+                                        expr=sum_product(model.Q_t_hat, model.x_ijk) >= pyo.value(model.obj_3_e)))
+                # Solve the model:
+                results = model_solver_setting.solve(model)
+
+                # Save the results if the solver returns an optimal solution:
+                if (results.solver.status == SolverStatus.ok) and (
+                        results.solver.termination_condition == TerminationCondition.optimal):
+                    model.econ_loss = quicksum(
+                        pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    model.dislocation = quicksum(
+                        pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    model.functionality = quicksum(
+                        pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    budget_used = quicksum(pyo.value(model.y_ijkk_prime[i, j, k, k_prime]) * pyo.value(
+                        model.Sc_ijkk_prime[i, j, k, k_prime]) for (i, j, k, k_prime) in model.ZSKK_prime)
+                    percent_budget_used = (budget_used / pyo.value(
+                        model.B)) * 100  # Record percentage of available budget used.
+                    # Add objective (dislocation), economic loss, and functionality values to results dataframe:
+                    obj_2_13_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(model.functionality)
+                    obj_2_13_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
+                        model.econ_loss)
+                    obj_2_13_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(model.dislocation)
+
+                    xresults_df = pd.DataFrame()
+                    yresults_df = pd.DataFrame()
+                    newxresults_df = pd.DataFrame()
+                    newyresults_df = pd.DataFrame()
+
+                    for v in model.component_objects(pyo.Var):
+                        row = 1
+                        for index in v:
+                            yresults_df.at[row, v.name + 'index'] = str(index)
+                            yresults_df.at[row, v.name] = pyo.value(v[index])
+                            row += 1
+
+                    yresults_df["y_ijkk_primeindex"] = yresults_df['y_ijkk_primeindex'].apply(lambda x: list(eval(x)))
+                    newyresults_df[["Z", "S", "K", "K'"]] = pd.DataFrame(yresults_df["y_ijkk_primeindex"].tolist(),
+                                                                         index=yresults_df.index)
+                    newyresults_df['y_ijkk_prime'] = yresults_df["y_ijkk_prime"]
+
+                    for v in model.component_objects(pyo.Var):
+                        row = 1
+                        for index in v:
+                            xresults_df.at[row, v.name + 'index'] = str(index)
+                            xresults_df.at[row, v.name] = pyo.value(v[index])
+                            row += 1
+                        break
+                    xresults_df["x_ijkindex"] = xresults_df['x_ijkindex'].apply(lambda x: list(eval(x)))
+                    newxresults_df[["Z", "S", "K"]] = pd.DataFrame(xresults_df["x_ijkindex"].tolist(),
+                                                                   index=xresults_df.index)
+                    newxresults_df["x_ijk"] = xresults_df["x_ijk"]
+
+                    # newxresults_df.to_csv(os.path.join('Test_result/obj_2_13_xit' + str(counter) + '_model_' + str(
+                    #     time.strftime("%m-%d-%Y")) + '.csv'))
+                    # with open("Test_result/obj_2_13_xit" + str(counter) + '_model_' + str(
+                    #         time.strftime("%m-%d-%Y")) + '.csv', 'a+', newline='') as file:
+                    #     writer = csv.writer(file)
+                    #     writer.writerow(["Ojective functions values:"])
+                    #     writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                    #     writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                    #     writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+                    #
+                    # newyresults_df.to_csv(os.path.join(
+                    #     'obj_2_13_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    # with open("Test_result/obj_2_13_yit" + str(counter) + '_model_' + str(
+                    #         time.strftime("%m-%d-%Y")) + '.csv', 'a+', newline='') as file:
+                    #     writer = csv.writer(file)
+                    #     writer.writerow(["Ojective functions values:"])
+                    #     writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                    #     writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                    #     writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+                else:
+                    print(results.solver.termination_condition)
+                    log_infeasible_constraints(model)
+
+                # Remove the given epsilon constraint from the model now that optimization is complete:
+                model.del_component(model.objective_3_constraint)
+
+            # Remove the given epsilon constraint from the model now that optimization is complete:
+            model.del_component(model.objective_1_constraint)
+
+        # Remove the economic loss epsilon parameter from the model:
+        model.del_component(model.obj_1_e)
+        model.del_component(model.obj_3_e)
+
+        print(obj_2_13_epsilon_results)
+
+        # Drop rows with infeasible results:
+        initial_length = len(obj_2_13_epsilon_results)
+        obj_2_13_data = obj_2_13_epsilon_results.dropna(axis=0, how='any')
+        print("Infeasible rows dropped: ", initial_length - len(obj_2_13_data), " rows.")
+
+        # Save results:
+        filename = 'obj_2_13_epsilon_results.csv'
+        obj_2_13_data.index += 1
+        obj_2_13_data.to_csv(filename)
+
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time: ", elapsedtime)
+
+        return model
+
+    def solve_epsilon_model_9(self, model, model_solver_setting):
+        starttime = time.time()
+        print(
+            "****OPTIMIZING BUILDING FUNCTIONALITY SUBJECT TO ECONOMIC LOSS AND POPULATION DISLOCATION EPSILON CONSTRAINTS****")
+        model.objective_1.deactivate()
+        model.objective_2.deactivate()
+        model.objective_3.activate()
+
+        # Add objective functions 1 and 2 as epsilon constraints of objective function 3:
+        # Dataframe to store optimization results:
+        obj_3_12_epsilon_results = pd.DataFrame(
+            columns=['Economic Loss(Million Dollars)', 'Dislocation Value', 'Functionality Value'])
+
+        # Parameter for objective 2 (dislocation) and objective 1 (economic loss) epsilon values:
+        model.obj_1_e = Param(mutable=True, within=NonNegativeReals)
+        model.obj_2_e = Param(mutable=True, within=NonNegativeReals)
+        counter = 0
+        for e in np.arange(pyo.value(model.econ_loss_min), pyo.value(model.econ_loss_max),
+                           pyo.value(model.econ_loss_step)):
+            model.obj_1_e = e
+            model.add_component("objective_1_constraint",
+                                Constraint(expr=sum_product(model.l_ijk, model.x_ijk) <= pyo.value(model.obj_1_e)))
+            for e2 in np.arange(pyo.value(model.dislocation_min), pyo.value(model.dislocation_max),
+                                pyo.value(model.dislocation_step)):
+                counter += 1
+                model.obj_2_e = e2
+                print("Step ", counter, " e: ", e, "  e2:", e2)
+                #             obj_3_12_epsilon_results.loc[counter-1,'Economic Loss Epsilon']=e
+                #             obj_3_12_epsilon_results.loc[counter-1,'Dislocation Epsilon']=e2
+                model.add_component("objective_2_constraint",
+                                    Constraint(
+                                        expr=sum_product(model.d_ijk, model.x_ijk) <= (pyo.value(model.obj_2_e))))
+                # Solve the model:
+                results = model_solver_setting.solve(model)
+
+                # Save the results if the solver returns an optimal solution:
+                if (results.solver.status == SolverStatus.ok) and (
+                        results.solver.termination_condition == TerminationCondition.optimal):
+                    model.econ_loss = quicksum(
+                        pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    model.dislocation = quicksum(
+                        pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    model.functionality = quicksum(
+                        pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    budget_used = quicksum(pyo.value(model.y_ijkk_prime[i, j, k, k_prime]) * pyo.value(
+                        model.Sc_ijkk_prime[i, j, k, k_prime]) for (i, j, k, k_prime) in model.ZSKK_prime)
+                    percent_budget_used = (budget_used / pyo.value(
+                        model.B)) * 100  # Record percentage of available budget used.
+                    # Add objective (functionality), economic loss, and dislocation values to results dataframe:
+                    obj_3_12_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(model.functionality)
+                    obj_3_12_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
+                        model.econ_loss)
+                    obj_3_12_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(model.dislocation)
+                    xresults_df = pd.DataFrame()
+                    yresults_df = pd.DataFrame()
+                    newxresults_df = pd.DataFrame()
+                    newyresults_df = pd.DataFrame()
+
+                    for v in model.component_objects(pyo.Var):
+                        row = 1
+                        for index in v:
+                            yresults_df.at[row, v.name + 'index'] = str(index)
+                            yresults_df.at[row, v.name] = pyo.value(v[index])
+                            row += 1
+
+                    yresults_df["y_ijkk_primeindex"] = yresults_df['y_ijkk_primeindex'].apply(lambda x: list(eval(x)))
+                    newyresults_df[["Z", "S", "K", "K'"]] = pd.DataFrame(yresults_df["y_ijkk_primeindex"].tolist(),
+                                                                         index=yresults_df.index)
+                    newyresults_df['y_ijkk_prime'] = yresults_df["y_ijkk_prime"]
+
+                    for v in model.component_objects(pyo.Var):
+                        row = 1
+                        for index in v:
+                            xresults_df.at[row, v.name + 'index'] = str(index)
+                            xresults_df.at[row, v.name] = pyo.value(v[index])
+                            row += 1
+                        break
+                    xresults_df["x_ijkindex"] = xresults_df['x_ijkindex'].apply(lambda x: list(eval(x)))
+                    newxresults_df[["Z", "S", "K"]] = pd.DataFrame(xresults_df["x_ijkindex"].tolist(),
+                                                                   index=xresults_df.index)
+                    newxresults_df["x_ijk"] = xresults_df["x_ijk"]
+
+                    # newxresults_df.to_csv(os.path.join(
+                    #     'obj_3_12_xit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    # with open("obj_3_12_xit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv', 'a+',
+                    #           newline='') as file:
+                    #     writer = csv.writer(file)
+                    #     writer.writerow(["Ojective functions values:"])
+                    #     writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                    #     writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                    #     writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+                    #
+                    # newyresults_df.to_csv(os.path.join(
+                    #     'obj_3_12_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    # with open("obj_3_12_yit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv', 'a+',
+                    #           newline='') as file:
+                    #     writer = csv.writer(file)
+                    #     writer.writerow(["Ojective functions values:"])
+                    #     writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                    #     writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                    #     writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+                else:
+                    print(results.solver.termination_condition)
+                    log_infeasible_constraints(model)
+
+                # Remove the given epsilon constraint from the model now that optimization is complete:
+                model.del_component(model.objective_2_constraint)
+
+            # Remove the given epsilon constraint from the model now that optimization is complete:
+            model.del_component(model.objective_1_constraint)
+
+        # Remove the economic loss epsilon parameter from the model:
+        model.del_component(model.obj_1_e)
+        model.del_component(model.obj_2_e)
+
+        print(obj_3_12_epsilon_results)
+
+        # Drop rows with infeasible results:
+        initial_length = len(obj_3_12_epsilon_results)
+        obj_3_12_data = obj_3_12_epsilon_results.dropna(axis=0, how='any')
+        print("Infeasible rows dropped: ", initial_length - len(obj_3_12_data), " rows.")
+
+        # Save results:
+        #filename = 'obj_3_12_epsilon_results.csv'
+        obj_3_12_data.index += 1
+        #obj_3_12_data.to_csv(filename)
+
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        print("Elapsed time: ", elapsedtime)
 
         return model
 
