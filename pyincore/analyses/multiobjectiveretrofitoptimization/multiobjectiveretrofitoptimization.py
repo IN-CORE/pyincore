@@ -120,9 +120,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Solve each model individually
         model_solved_individual = self.solve_individual_models(model_with_constraints, model_solver_setting, sum_sc)
-
-        #TODO: need to save intermediate results here
-
         model_solved_epsilon = self.solve_epsilon_models(model_solved_individual, model_solver_setting,
                                                          inactive_submodels)
 
@@ -293,9 +290,21 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Available Budget: $", pyo.value(model.B))
         print("")
 
-        model = self.solve_model_1(model, model_solver_setting)
-        model = self.solve_model_2(model, model_solver_setting)
-        model = self.solve_model_3(model, model_solver_setting)
+        model, rlist_obj_1 = self.solve_model_1(model, model_solver_setting)
+        model, rlist_obj_2 = self.solve_model_2(model, model_solver_setting)
+        model, rlist_obj_3 = self.solve_model_3(model, model_solver_setting)
+
+        values_list = [sum_sc, pyo.value(model.B)] + rlist_obj_1 + rlist_obj_2 + rlist_obj_3
+
+        no_epsilon_constr_init_results = pd.DataFrame(data={
+            "Label": ["Max Budget: $", "Budget (20% of max)", "Economic loss min epsilon (optimal value)",
+                      "Dislocation when optimizing Economic Loss", "Functionality when optimizing Economic Loss",
+                      "Dislocation min epsilon (optimal value)", "Economic Loss when optimizing Dislocation",
+                      "Functionality when optimizing Dislocation", "Functionality max epsilon (optimal value)",
+                      "Economic Loss when optimizing Functionality", "Dislocation when optimizing Functionality"]
+            , "Value": values_list})
+        filename = 'no_epsilon_constr_init_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        no_epsilon_constr_init_results.to_csv(filename)
 
         return model
 
@@ -313,15 +322,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Save the results if the solver returns an optimal solution:
         if (results.solver.status == SolverStatus.ok) and (
                 results.solver.termination_condition == TerminationCondition.optimal):
-            model.econ_loss = quicksum(
-                pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
-            model.dislocation = quicksum(
-                pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                model.ZSK)  # Assign dislocation to the model.dislocation parameter.
-            model.functionality = quicksum(
-                pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                model.ZSK)  # Assign functionality to the model.functionality parameter.
+            model = self.extract_optimization_results(model)
             obj_1_min_epsilon = pyo.value(model.objective_1)  # Save the optimal economic loss value.
             obj_2_value_1 = pyo.value(model.dislocation)  # Save the dislocation value when optimizing economic loss.
             obj_3_value_1 = pyo.value(
@@ -335,15 +336,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             print("Dislocation when optimizing Economic Loss:", obj_2_value_1)
             print("Functionality when optimizing Economic Loss:", obj_3_value_1)
             print("")
+            results_list = [obj_1_min_epsilon, obj_2_value_1, obj_3_value_1]
         else:
             print("Not Optimal")
+            results_list = [0, 0, 0]
 
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time for initial obj 1 solve: ", elapsedtime)
         print("")
 
-        return model
+        return model, results_list
 
     def solve_model_2(self, model, model_solver_setting):
         starttime = time.time()
@@ -359,15 +362,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Save the results if the solver returns an optimal solution:
         if (results.solver.status == SolverStatus.ok) and (
                 results.solver.termination_condition == TerminationCondition.optimal):
-            model.econ_loss = quicksum(
-                pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
-            model.dislocation = quicksum(
-                pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                model.ZSK)  # Assign dislocation to the model.dislocation parameter.
-            model.functionality = quicksum(
-                pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                model.ZSK)  # Assign functionality to the model.functionality parameter.
+            model = self.extract_optimization_results(model)
             obj_2_min_epsilon = pyo.value(model.objective_2)  # Save the optimal dislocation value.
             obj_1_value_2 = pyo.value(model.econ_loss)  # Save the economic loss value when optimizing dislocation.
             obj_3_value_2 = pyo.value(model.functionality)  # Save the functionality value when optimizing dislocation.
@@ -380,15 +375,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             print("Economic Loss when optimizing Dislocation:", obj_1_value_2)
             print("Functionality when optimizing Dislocation:", obj_3_value_2)
             print("")
+            results_list = [obj_2_min_epsilon, obj_1_value_2, obj_3_value_2]
         else:
             print("Not Optimal")
+            results_list = [0, 0, 0]
 
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time for initial obj 2 solve: ", elapsedtime)
         print("")
 
-        return model
+        return model, results_list
 
     def solve_model_3(self, model, model_solver_setting):
         starttime = time.time()
@@ -404,15 +401,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Save the results if the solver returns an optimal solution:
         if (results.solver.status == SolverStatus.ok) and (
                 results.solver.termination_condition == TerminationCondition.optimal):
-            model.econ_loss = quicksum(
-                pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
-            model.dislocation = quicksum(
-                pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                model.ZSK)  # Assign dislocation to the model.dislocation parameter.
-            model.functionality = quicksum(
-                pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                model.ZSK)  # Assign functionality to the model.functionality parameter.
+            model = self.extract_optimization_results(model)
             obj_3_max_epsilon = pyo.value(model.objective_3)  # Save the optimal functionality value.
             obj_1_value_3 = pyo.value(model.econ_loss)  # Save the economic loss value when optimizing functionality.
             obj_2_value_3 = pyo.value(model.dislocation)  # Save the dislocation value when optimizing functionality.
@@ -424,14 +413,16 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             print("Functionality max epsilon (optimal value):", obj_3_max_epsilon)
             print("Economic Loss when optimizing Functionality:", obj_1_value_3)
             print("Dislocation when optimizing Functionality:", obj_2_value_3)
+            results_list = [obj_3_max_epsilon, obj_1_value_3, obj_2_value_3]
         else:
             print("Not Optimal")
+            results_list = [0, 0, 0]
 
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time for initial obj 3 solve: ", elapsedtime)
 
-        return model
+        return model, results_list
 
     def solve_epsilon_models(self, model, model_solver_setting, inactive_submodels):
         if 1 not in inactive_submodels:
@@ -495,15 +486,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model.econ_loss = quicksum(
-                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
-                model.dislocation = quicksum(
-                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
-                model.functionality = quicksum(
-                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                model = self.extract_optimization_results(model)
                 # Add objective (economic loss), dislocation, and functionality values to results dataframe:
                 obj_1_2_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
                     model.econ_loss)  # Save the optimal economic loss value.
@@ -523,8 +506,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Display and save the results of optimizing economic loss subject to dislocation epsilon constraints:
         print(obj_1_2_epsilon_results)
-        #filename = 'obj_1_2_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
-        #obj_1_2_epsilon_results.to_csv(filename)
+        filename = 'obj_1_2_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        obj_1_2_epsilon_results.to_csv(filename)
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
@@ -564,15 +547,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model.econ_loss = quicksum(
-                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
-                model.dislocation = quicksum(
-                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
-                model.functionality = quicksum(
-                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                model = self.extract_optimization_results(model)
                 # Add objective (economic loss), dislocation, and functionality values to results dataframe:
                 obj_1_3_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
                     model.econ_loss)  # Save the optimal economic loss value.
@@ -592,8 +567,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Display and save the results of optimizing economic loss subject to functionality epsilon constraints:
         print(obj_1_3_epsilon_results)
-        #filename = 'obj_1_3_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
-        #obj_1_3_epsilon_results.to_csv(filename)
+        filename = 'obj_1_3_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        obj_1_3_epsilon_results.to_csv(filename)
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
@@ -633,15 +608,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model.econ_loss = quicksum(
-                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
-                model.dislocation = quicksum(
-                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
-                model.functionality = quicksum(
-                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                model = self.extract_optimization_results(model)
                 # Add objective (dislocation), economic loss, and functionality values to results dataframe:
                 obj_2_1_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
                     model.dislocation)  # Save the optimal dislocation value.
@@ -661,8 +628,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Display the results of optimizing dislocation subject to economic loss epsilon constraints:
         print(obj_2_1_epsilon_results)
-        #filename = 'obj_2_1_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
-        #obj_2_1_epsilon_results.to_csv(filename)
+        filename = 'obj_2_1_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        obj_2_1_epsilon_results.to_csv(filename)
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
@@ -702,15 +669,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model.econ_loss = quicksum(
-                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
-                model.dislocation = quicksum(
-                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
-                model.functionality = quicksum(
-                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                model = self.extract_optimization_results(model)
                 # Add objective (dislocation), economic loss, and functionality values to results dataframe:
                 obj_2_3_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
                     model.dislocation)  # Save the optimal dislocation value.
@@ -730,8 +689,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Display the results of optimizing dislocation subject to functionality epsilon constraints:
         print(obj_2_3_epsilon_results)
-        #filename = 'obj_2_3_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
-        #obj_2_3_epsilon_results.to_csv(filename)
+        filename = 'obj_2_3_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        obj_2_3_epsilon_results.to_csv(filename)
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
@@ -771,15 +730,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model.econ_loss = quicksum(
-                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
-                model.dislocation = quicksum(
-                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
-                model.functionality = quicksum(
-                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                model = self.extract_optimization_results(model)
                 # Add objective (functionality), economic loss, and dislocation values to results dataframe:
                 obj_3_1_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
                     model.functionality)  # Save the optimal functionality value.
@@ -799,8 +750,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Display the results of optimizing functionality subject to economic loss epsilon constraints:
         print(obj_3_1_epsilon_results)
-        #filename = 'obj_3_1_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
-        #obj_3_1_epsilon_results.to_csv(filename)
+        filename = 'obj_3_1_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        obj_3_1_epsilon_results.to_csv(filename)
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
@@ -840,15 +791,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model.econ_loss = quicksum(
-                    pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign economic loss to the model.econ_loss parameter.
-                model.dislocation = quicksum(
-                    pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign dislocation to the model.dislocation parameter.
-                model.functionality = quicksum(
-                    pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in
-                    model.ZSK)  # Assign functionality to the model.functionality parameter.
+                model = self.extract_optimization_results(model)
                 # Add objective (functionality), economic loss, and dislocation values to results dataframe:
                 obj_3_2_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
                     model.functionality)  # Save the optimal functionality value.
@@ -868,8 +811,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Display the results of optimizing functionality subject to dislocation epsilon constraints:
         print(obj_3_2_epsilon_results)
-        #filename = 'obj_3_2_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
-        #obj_3_2_epsilon_results.to_csv(filename)
+        filename = 'obj_3_2_epsilon_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
+        obj_3_2_epsilon_results.to_csv(filename)
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
@@ -916,12 +859,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 # Save the results if the solver returns an optimal solution:
                 if (results.solver.status == SolverStatus.ok) and (
                         results.solver.termination_condition == TerminationCondition.optimal):
-                    model.econ_loss = quicksum(
-                        pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
-                    model.dislocation = quicksum(
-                        pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
-                    model.functionality = quicksum(
-                        pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    model = self.extract_optimization_results(model)
                     budget_used = quicksum(pyo.value(model.y_ijkk_prime[i, j, k, k_prime]) * pyo.value(
                         model.Sc_ijkk_prime[i, j, k, k_prime]) for (i, j, k, k_prime) in model.ZSKK_prime)
                     percent_budget_used = (budget_used / pyo.value(
@@ -956,27 +894,27 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                                                                    index=xresults_df.index)
                     newxresults_df["x_ijk"] = xresults_df["x_ijk"]
 
-                    #newxresults_df.to_csv(os.path.join(\\
-                    #    'obj_1_23_xit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    #with open("obj_1_23_xit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv',
-                    # 'a+',
-                    #          newline='') as file:
-                    #    writer = csv.writer(file)
-                    #    writer.writerow(["Ojective functions values:"])
-                    #    writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                    #    writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                    #    writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+                    newxresults_df.to_csv(os.path.join(
+                       'obj_1_23_xit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    with open("obj_1_23_xit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv',
+                    'a+',
+                             newline='') as file:
+                       writer = csv.writer(file)
+                       writer.writerow(["Ojective functions values:"])
+                       writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                       writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                       writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
 
-                    #newyresults_df.to_csv(os.path.join(
-                    #    'obj_1_23_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    #with open("obj_1_23_yit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv',
-                        # 'a+',
-                    #          newline='') as file:
-                    #    writer = csv.writer(file)
-                    #    writer.writerow(["Ojective functions values:"])
-                    #    writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                    #    writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                    #    writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+                    newyresults_df.to_csv(os.path.join(
+                       'obj_1_23_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    with open("obj_1_23_yit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv',
+                        'a+',
+                             newline='') as file:
+                       writer = csv.writer(file)
+                       writer.writerow(["Ojective functions values:"])
+                       writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                       writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                       writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
@@ -999,9 +937,9 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Infeasible rows dropped: ", initial_length - len(obj_1_23_data), " rows.")
 
         # Save results:
-        #filename = 'obj_1_23_epsilon_results.csv'
-        #obj_1_23_data.index += 1
-        #obj_1_23_data.to_csv(filename)
+        filename = 'obj_1_23_epsilon_results.csv'
+        obj_1_23_data.index += 1
+        obj_1_23_data.to_csv(filename)
 
         endtime = time.time()
         elapsedtime = endtime - starttime
@@ -1047,12 +985,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 # Save the results if the solver returns an optimal solution:
                 if (results.solver.status == SolverStatus.ok) and (
                         results.solver.termination_condition == TerminationCondition.optimal):
-                    model.econ_loss = quicksum(
-                        pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
-                    model.dislocation = quicksum(
-                        pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
-                    model.functionality = quicksum(
-                        pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    model = self.extract_optimization_results(model)
                     budget_used = quicksum(pyo.value(model.y_ijkk_prime[i, j, k, k_prime]) * pyo.value(
                         model.Sc_ijkk_prime[i, j, k, k_prime]) for (i, j, k, k_prime) in model.ZSKK_prime)
                     percent_budget_used = (budget_used / pyo.value(
@@ -1092,25 +1025,25 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                                                                    index=xresults_df.index)
                     newxresults_df["x_ijk"] = xresults_df["x_ijk"]
 
-                    # newxresults_df.to_csv(os.path.join('Test_result/obj_2_13_xit' + str(counter) + '_model_' + str(
-                    #     time.strftime("%m-%d-%Y")) + '.csv'))
-                    # with open("Test_result/obj_2_13_xit" + str(counter) + '_model_' + str(
-                    #         time.strftime("%m-%d-%Y")) + '.csv', 'a+', newline='') as file:
-                    #     writer = csv.writer(file)
-                    #     writer.writerow(["Ojective functions values:"])
-                    #     writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                    #     writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                    #     writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
-                    #
-                    # newyresults_df.to_csv(os.path.join(
-                    #     'obj_2_13_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    # with open("Test_result/obj_2_13_yit" + str(counter) + '_model_' + str(
-                    #         time.strftime("%m-%d-%Y")) + '.csv', 'a+', newline='') as file:
-                    #     writer = csv.writer(file)
-                    #     writer.writerow(["Ojective functions values:"])
-                    #     writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                    #     writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                    #     writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+                    newxresults_df.to_csv(os.path.join('Test_result/obj_2_13_xit' + str(counter) + '_model_' + str(
+                        time.strftime("%m-%d-%Y")) + '.csv'))
+                    with open("Test_result/obj_2_13_xit" + str(counter) + '_model_' + str(
+                            time.strftime("%m-%d-%Y")) + '.csv', 'a+', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(["Ojective functions values:"])
+                        writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                        writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                        writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+
+                    newyresults_df.to_csv(os.path.join(
+                        'obj_2_13_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    with open("Test_result/obj_2_13_yit" + str(counter) + '_model_' + str(
+                            time.strftime("%m-%d-%Y")) + '.csv', 'a+', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(["Ojective functions values:"])
+                        writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                        writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                        writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
@@ -1181,12 +1114,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 # Save the results if the solver returns an optimal solution:
                 if (results.solver.status == SolverStatus.ok) and (
                         results.solver.termination_condition == TerminationCondition.optimal):
-                    model.econ_loss = quicksum(
-                        pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
-                    model.dislocation = quicksum(
-                        pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
-                    model.functionality = quicksum(
-                        pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+                    model = self.extract_optimization_results(model)
                     budget_used = quicksum(pyo.value(model.y_ijkk_prime[i, j, k, k_prime]) * pyo.value(
                         model.Sc_ijkk_prime[i, j, k, k_prime]) for (i, j, k, k_prime) in model.ZSKK_prime)
                     percent_budget_used = (budget_used / pyo.value(
@@ -1225,25 +1153,25 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                                                                    index=xresults_df.index)
                     newxresults_df["x_ijk"] = xresults_df["x_ijk"]
 
-                    # newxresults_df.to_csv(os.path.join(
-                    #     'obj_3_12_xit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    # with open("obj_3_12_xit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv', 'a+',
-                    #           newline='') as file:
-                    #     writer = csv.writer(file)
-                    #     writer.writerow(["Ojective functions values:"])
-                    #     writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                    #     writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                    #     writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
-                    #
-                    # newyresults_df.to_csv(os.path.join(
-                    #     'obj_3_12_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
-                    # with open("obj_3_12_yit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv', 'a+',
-                    #           newline='') as file:
-                    #     writer = csv.writer(file)
-                    #     writer.writerow(["Ojective functions values:"])
-                    #     writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
-                    #     writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
-                    #     writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+                    newxresults_df.to_csv(os.path.join(
+                        'obj_3_12_xit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    with open("obj_3_12_xit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv', 'a+',
+                              newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(["Ojective functions values:"])
+                        writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                        writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                        writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
+
+                    newyresults_df.to_csv(os.path.join(
+                        'obj_3_12_yit' + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv'))
+                    with open("obj_3_12_yit" + str(counter) + '_model_' + str(time.strftime("%m-%d-%Y")) + '.csv', 'a+',
+                              newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(["Ojective functions values:"])
+                        writer.writerow(["Direct economic loss:", pyo.value(model.econ_loss)])
+                        writer.writerow(["Population dislocation:", pyo.value(model.dislocation)])
+                        writer.writerow(["Buildings functionality:", pyo.value(model.functionality)])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
@@ -1266,9 +1194,9 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Infeasible rows dropped: ", initial_length - len(obj_3_12_data), " rows.")
 
         # Save results:
-        #filename = 'obj_3_12_epsilon_results.csv'
+        filename = 'obj_3_12_epsilon_results.csv'
         obj_3_12_data.index += 1
-        #obj_3_12_data.to_csv(filename)
+        obj_3_12_data.to_csv(filename)
 
         endtime = time.time()
         elapsedtime = endtime - starttime
@@ -1322,6 +1250,94 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     model.y_ijkk_prime[i, j, k_prime, k] for k_prime in model.K_prime if
                     (i, j, k_prime, k) in model.zskk_prime),
                 pyo.value(model.b_ijk[i, j, k]))
+
+    @staticmethod
+    def extract_optimization_results(model):
+        model.econ_loss = quicksum(
+            pyo.value(model.l_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+        model.dislocation = quicksum(
+            pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+        model.functionality = quicksum(
+            pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+
+        return model
+
+    @staticmethod
+    def optimal_points(list_loss, list_dislocation, list_func):
+
+        l_com = []
+        for i in range(0, len(list_loss)):
+            l_com.append(tuple([list_loss[i], list_dislocation[i], list_func[i]]))
+        # remove the repeated the points
+        set_com = set(l_com)
+
+        # change the set to list
+        list_temp = []
+        for x in set_com:
+            list_temp.append(x)
+
+        final_f = []
+        f_temp = []
+        for i in range(len(list_temp)):
+            for j in range(i + 1, len(list_temp)):
+                if list_temp[i][0] == list_temp[j][0] and list_temp[i][1] == list_temp[j][1]:
+                    if list_temp[i][2] > list_temp[j][2]:
+                        f_temp.append(list_temp[j])
+
+                    elif list_temp[j][2] > list_temp[i][2]:
+                        f_temp.append(list_temp[i])
+        final_f = list(set(list_temp) - set(f_temp))
+
+        # find the optimal value for dislocation if loss and functionality are same as the last loop
+        final_d = []
+        d_temp = []
+        for i in range(len(final_f)):
+            for j in range(i + 1, len(final_f)):
+                if final_f[i][0] == final_f[j][0] and final_f[i][2] == final_f[j][2]:
+                    if final_f[i][1] < final_f[j][1]:
+                        d_temp.append(final_f[j])
+                    elif final_f[i][1] > final_f[j][1]:
+                        d_temp.append(final_f[i])
+
+        final_d = list(set(final_f) - set(d_temp))
+
+        # find the optimal value for loss if dislocation and functionality are same as the last loop
+        final_l = []
+        l_temp = []
+        for i in range(len(final_d)):
+            for j in range(i + 1, len(final_d)):
+                if final_d[i][1] == final_d[j][1] and final_d[i][2] == final_d[j][2]:
+                    if final_d[i][0] < final_d[j][0]:
+                        l_temp.append(final_d[j])
+                    elif final_d[i][0] > final_d[j][0]:
+                        l_temp.append(final_d[i])
+        final_l = list(set(final_d) - set(l_temp))
+
+        loss_optimal = []
+        dislocation_optimal = []
+        func_optimal = []
+        for x in final_l:
+            loss_optimal.append(x[0])
+            dislocation_optimal.append(x[1])
+            func_optimal.append(x[2])
+        comb1 = []
+        for i in range(len(list_loss)):
+            comb1.append([list_loss[i], list_dislocation[i], list_func[i]])
+
+        comb2 = []
+        for i in range(len(loss_optimal)):
+            comb2.append([loss_optimal[i], dislocation_optimal[i],
+                          func_optimal[i]])
+
+        optimal_index = {}
+        for i in range(len(comb2)):
+            if comb2[i] not in comb1:
+                pass
+            else:
+                optimal_index[comb1.index(comb2[i])] = comb2[i]
+        optimal_index_list = list(optimal_index.keys())
+        zipped_list = list(zip(optimal_index_list, loss_optimal, dislocation_optimal, func_optimal))
+        return zipped_list
 
     def get_spec(self):
         """Get specifications of the multiobjective retrofit optimization model.
