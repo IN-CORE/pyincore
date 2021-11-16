@@ -119,9 +119,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             model_solver_setting = pyo.SolverFactory(model_solver)
 
         # Solve each model individually
-        model_solved_individual = self.solve_individual_models(model_with_constraints, model_solver_setting, sum_sc)
-        model_solved_epsilon = self.solve_epsilon_models(model_solved_individual, model_solver_setting,
-                                                         inactive_submodels)
+        model_solved_individual, obj_list = self.solve_individual_models(model_with_constraints, model_solver_setting,
+                                                                    sum_sc)
+        model_min_max_epsilon_values = self.configure_min_max_epsilon_values(model_solved_individual, obj_list,
+                                                                             num_epsilon_steps)
+        self.solve_epsilon_models(model_min_max_epsilon_values, model_solver_setting, inactive_submodels)
+
         file_list = self.compute_optimal_results(inactive_submodels)
         self.set_result_csv_data("out1", file_list[0], name="out1",
                                  source="dataframe")
@@ -317,7 +320,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         filename = 'no_epsilon_constr_init_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
         no_epsilon_constr_init_results.to_csv(filename)
 
-        return model
+        return model, rlist_obj_1 + rlist_obj_2 + rlist_obj_3
 
     def solve_model_1(self, model, model_solver_setting):
         starttime = time.time()
@@ -434,6 +437,39 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Elapsed time for initial obj 3 solve: ", elapsedtime)
 
         return model, results_list
+
+    def configure_min_max_epsilon_values(self, model, objs, num_epsilon_steps):
+
+        # Define positions in the incoming list
+        __obj_1_value_2_pos = 4
+        __obj_1_value_3_pos = 7
+        __obj_1_min_epsilon_pos = 0
+        __obj_2_value_1_pos = 1
+        __obj_2_value_3_pos = 8
+        __obj_2_min_epsilon_pos = 3
+        __obj_3_value_1_pos = 2
+        __obj_3_value_2_pos = 5
+        __obj_3_max_epsilon_pos = 6
+
+        model.econ_loss_max = Param(within=NonNegativeReals, initialize=max(objs[__obj_1_value_2_pos],
+                                                                            objs[__obj_1_value_3_pos]))
+        model.econ_loss_min = Param(within=NonNegativeReals, initialize=objs[__obj_1_min_epsilon_pos])
+        model.dislocation_max = Param(within=NonNegativeReals, initialize=max(objs[__obj_2_value_1_pos],
+                                                                              objs[__obj_2_value_3_pos]))
+        model.dislocation_min = Param(within=NonNegativeReals, initialize=objs[__obj_2_min_epsilon_pos])
+        model.functionality_max = Param(within=NonNegativeReals, initialize=objs[__obj_3_max_epsilon_pos])
+        model.functionality_min = Param(within=NonNegativeReals, initialize=min(objs[__obj_3_value_1_pos],
+                                                                                objs[__obj_3_value_2_pos]))
+
+        model.econ_loss_step = Param(within=NonNegativeReals,
+                                     initialize=(pyo.value(model.econ_loss_max) - pyo.value(model.econ_loss_min)) * (
+                                                 1 / (num_epsilon_steps - 1)))
+        model.dislocation_step = Param(within=NonNegativeReals, initialize=(pyo.value(
+            model.dislocation_max) - pyo.value(model.dislocation_min)) * (1 / (num_epsilon_steps - 1)))
+        model.functionality_step = Param(within=NonNegativeReals, initialize=(pyo.value(
+            model.functionality_max) - pyo.value(model.functionality_min)) * (1 / (num_epsilon_steps - 1)))
+
+        return model
 
     def solve_epsilon_models(self, model, model_solver_setting, inactive_submodels):
         if 1 not in inactive_submodels:
