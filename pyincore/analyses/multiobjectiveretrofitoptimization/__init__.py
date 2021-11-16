@@ -1,1 +1,2 @@
-from pyincore.analyses.multiobjectiveretrofitoptimization.multiobjectiveretrofitoptimization import MultiObjectiveRetrofitOptimization
+from pyincore.analyses.multiobjectiveretrofitoptimization.multiobjectiveretrofitoptimization import \
+    MultiObjectiveRetrofitOptimization

@@ -30,6 +30,7 @@ import zipfile
 import getopt
 import glob
 
+
 class MultiObjectiveRetrofitOptimization(BaseAnalysis):
     """
         This analysis computes a series of linear programming models for single- and multi-objective
@@ -84,13 +85,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         if self.get_parameter('scale_data'):
             scaling_factor = self.get_parameter('scaling_factor')
 
-        building_repairs_csv = self.get_input_dataset('building_repairs_data').get_csv_reader()
-        strategy_costs_csv = self.get_input_dataset('strategy_costs_data').get_csv_reader()
+        building_repairs_csv = self.get_input_dataset('building_repairs_data').get_dataframe_from_csv()
+        strategy_costs_csv = self.get_input_dataset('strategy_costs_data').get_dataframe_from_csv()
 
         self.multiobjective_retrofit_optimization_model(model_solver, num_epsilon_steps, budget_available,
                                                         scaling_factor, inactive_submodels, building_repairs_csv,
                                                         strategy_costs_csv)
-
 
     def multiobjective_retrofit_optimization_model(self, model_solver, num_epsilon_steps, budget_available,
                                                    scaling_factor, inactive_submodels, building_functionality_csv,
@@ -113,7 +113,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model_with_constraints = self.configure_model_retrofit_costs(model_with_objectives)
 
         # Choose the solver setting
-        if model_solver == "gurobi":
+        if model_solver == "gurobi" or model_solver is None:
             model_solver_setting = pyo.SolverFactory('gurobi', solver_io="python")
         else:
             model_solver_setting = pyo.SolverFactory(model_solver)
@@ -123,6 +123,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model_solved_epsilon = self.solve_epsilon_models(model_solved_individual, model_solver_setting,
                                                          inactive_submodels)
         file_list = self.compute_optimal_results(inactive_submodels)
+        self.set_result_csv_data("out1", file_list[0], name="out1",
+                                 source="dataframe")
+        self.set_result_csv_data("out2", file_list[1], name="out2",
+                                 source="dataframe")
+        self.set_result_csv_data("out3", file_list[2], name="out3",
+                                 source="dataframe")
+        return True
 
     def configure_model(self, budget_available, scaling_factor, building_functionality_csv, strategy_costs_csv):
         """ Configure the base model to perform the multiobjective optimization.
@@ -136,46 +143,47 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             ConcreteModel: a base, parameterized cost/functionality model
         """
         # Rescale data
-        myData = building_functionality_csv[self.__Q_col] / scaling_factor
-        myData_Sc = strategy_costs_csv[self.__SC_col] / scaling_factor
+        building_functionality_csv[self.__Q_col] = \
+            building_functionality_csv[self.__Q_col].map(lambda a: a/scaling_factor)
+        strategy_costs_csv[self.__SC_col] = strategy_costs_csv[self.__SC_col].map(lambda a: a/scaling_factor)
 
         # Setup pyomo
         model = ConcreteModel()
 
-        model.Z = Set(initialize=myData.Z.unique())  # Set of all unique blockid numbers in the 'Z' column.
-        model.S = Set(initialize=myData.S.unique())  # Set of all unique archtypes in the 'S' column.
-        model.K = Set(initialize=myData.K.unique())  # Set of all unique numbers in the 'K' column.
-        model.K_prime = Set(initialize=myData_Sc["K'"].unique())
+        model.Z = Set(initialize=building_functionality_csv["Z"].unique())
+        model.S = Set(initialize=building_functionality_csv["S"].unique())
+        model.K = Set(initialize=building_functionality_csv["K"].unique())
+        model.K_prime = Set(initialize=strategy_costs_csv["K'"].unique())
 
         zsk = []
-        for y in range(len(myData)):
-            i = myData.loc[y, 'Z']  # Identify the i ∈ Z value.
-            j = myData.loc[y, 'S']  # Identify the j ∈ S value.
-            k = myData.loc[y, 'K']  # Identify the k ∈ K value.
+        for y in range(len(building_functionality_csv)):
+            i = building_functionality_csv.loc[y, 'Z']  # Identify the i ∈ Z value.
+            j = building_functionality_csv.loc[y, 'S']  # Identify the j ∈ S value.
+            k = building_functionality_csv.loc[y, 'K']  # Identify the k ∈ K value.
             zsk.append((i, j, k))  # Add the combination to the list.
         zsk = sorted(set(zsk), key=zsk.index)  # Convert the list to an ordered set for Pyomo.
         model.ZSK = Set(initialize=zsk)  # Define and initialize the ZSK set in Pyomo.
 
         zs = []
-        for y in range(len(myData)):
-            i = myData.loc[y, 'Z']  # Identify the i ∈ Z value.
-            j = myData.loc[y, 'S']  # Identify the j ∈ S value.
+        for y in range(len(building_functionality_csv)):
+            i = building_functionality_csv.loc[y, 'Z']  # Identify the i ∈ Z value.
+            j = building_functionality_csv.loc[y, 'S']  # Identify the j ∈ S value.
             zs.append((i, j))  # Add the combination to the list.
         zs = sorted(set(zs), key=zs.index)  # Convert the list to an ordered set for Pyomo.
         model.ZS = Set(initialize=zs)  # Define and initialize the ZS set in Pyomo.
 
         kk_prime = []
-        for y in range(len(myData_Sc)):
-            k = myData_Sc.loc[y, 'K']  # Identify the k ∈ K value.
-            k_prime = myData_Sc.loc[y, "K'"]  # Identify the k ∈ K value.
+        for y in range(len(strategy_costs_csv)):
+            k = strategy_costs_csv.loc[y, 'K']  # Identify the k ∈ K value.
+            k_prime = strategy_costs_csv.loc[y, "K'"]  # Identify the k ∈ K value.
             kk_prime.append((k, k_prime))  # Add the combination to the list.
         kk_prime = sorted(set(kk_prime), key=kk_prime.index)  # Convert the list to an ordered set for Pyomo.
         model.KK_prime = Set(initialize=kk_prime)  # Define and initialize the KK_prime set in Pyomo.
 
         k_primek = []
-        for y in range(len(myData_Sc)):
-            k = myData_Sc.loc[y, 'K']  # Identify the k ∈ K value.
-            k_prime = myData_Sc.loc[y, "K'"]  # Identify the k ∈ K value.
+        for y in range(len(strategy_costs_csv)):
+            k = strategy_costs_csv.loc[y, 'K']  # Identify the k ∈ K value.
+            k_prime = strategy_costs_csv.loc[y, "K'"]  # Identify the k ∈ K value.
             if k_prime <= k:
                 k_primek.append((k_prime, k))  # Add the combination to the list.
         k_primek = sorted(set(k_primek), key=k_primek.index)  # Convert the list to an ordered set for Pyomo.
@@ -183,11 +191,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Define the set of all ZSKK' combinations:
         zskk_prime = []
-        for y in range(len(myData_Sc)):
-            i = myData_Sc.loc[y, 'Z']  # Identify the i ∈ Z value.
-            j = myData_Sc.loc[y, 'S']  # Identify the j ∈ S value.
-            k = myData_Sc.loc[y, 'K']  # Identify the k ∈ K value.
-            k_prime = myData_Sc.loc[y, "K'"]  # Identify the k ∈ K value.
+        for y in range(len(strategy_costs_csv)):
+            i = strategy_costs_csv.loc[y, 'Z']  # Identify the i ∈ Z value.
+            j = strategy_costs_csv.loc[y, 'S']  # Identify the j ∈ S value.
+            k = strategy_costs_csv.loc[y, 'K']  # Identify the k ∈ K value.
+            k_prime = strategy_costs_csv.loc[y, "K'"]  # Identify the k ∈ K value.
             zskk_prime.append((i, j, k, k_prime))  # Add the combination to the list.
         zskk_prime = sorted(set(zskk_prime), key=zskk_prime.index)  # Convert the list to an ordered set for Pyomo.
         model.ZSKK_prime = Set(initialize=zskk_prime)  # Define and initialize the ZSKK_prime set in Pyomo.
@@ -195,52 +203,54 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         ####################################################################################################
         # DEFINE VARIABLES AND PARAMETERS:
         ####################################################################################################
-        # Declare the decision variable x_ijk (total # buildings in zone i of structure type j at code level k after retrofitting):
+        # Declare the decision variable x_ijk (total # buildings in zone i of structure type
+        # j at code level k after retrofitting):
         model.x_ijk = Var(model.ZSK, within=NonNegativeReals)
 
-        # Declare the decision variable y_ijkk_prime (total # buildings in zone i of structure type j retrofitted from code level k to code level k_prime):
+        # Declare the decision variable y_ijkk_prime
+        # (total # buildings in zone i of structure type j retrofitted from code level k to code level k_prime):
         model.y_ijkk_prime = Var(model.ZSKK_prime, within=NonNegativeReals)
 
         # Declare economic loss cost parameter l_ijk:
         model.l_ijk = Param(model.ZSK, within=NonNegativeReals, mutable=True)
-        for y in range(len(myData)):
-            i = myData.loc[y, 'Z']
-            j = myData.loc[y, 'S']
-            k = myData.loc[y, 'K']
-            model.l_ijk[i, j, k] = myData.loc[y, 'l']
+        for y in range(len(building_functionality_csv)):
+            i = building_functionality_csv.loc[y, 'Z']
+            j = building_functionality_csv.loc[y, 'S']
+            k = building_functionality_csv.loc[y, 'K']
+            model.l_ijk[i, j, k] = building_functionality_csv.loc[y, 'l']
 
         # Declare dislocation parameter d_ijk:
         model.d_ijk = Param(model.ZSK, within=NonNegativeReals, mutable=True)
-        for y in range(len(myData)):
-            i = myData.loc[y, 'Z']
-            j = myData.loc[y, 'S']
-            k = myData.loc[y, 'K']
-            model.d_ijk[i, j, k] = myData.loc[y, 'd_ijk']
+        for y in range(len(building_functionality_csv)):
+            i = building_functionality_csv.loc[y, 'Z']
+            j = building_functionality_csv.loc[y, 'S']
+            k = building_functionality_csv.loc[y, 'K']
+            model.d_ijk[i, j, k] = building_functionality_csv.loc[y, 'd_ijk']
 
         # Declare the number of buildings parameter b_ijk:
         model.b_ijk = Param(model.ZSK, within=NonNegativeReals, mutable=True)
-        for y in range(len(myData)):
-            i = myData.loc[y, 'Z']
-            j = myData.loc[y, 'S']
-            k = myData.loc[y, 'K']
-            model.b_ijk[i, j, k] = myData.loc[y, 'b']
+        for y in range(len(building_functionality_csv)):
+            i = building_functionality_csv.loc[y, 'Z']
+            j = building_functionality_csv.loc[y, 'S']
+            k = building_functionality_csv.loc[y, 'K']
+            model.b_ijk[i, j, k] = building_functionality_csv.loc[y, 'b']
 
         # Declare the building functionality parameter Q_t_hat:
         model.Q_t_hat = Param(model.ZSK, within=NonNegativeReals, mutable=True)
-        for y in range(len(myData)):
-            i = myData.loc[y, 'Z']
-            j = myData.loc[y, 'S']
-            k = myData.loc[y, 'K']
-            model.Q_t_hat[i, j, k] = myData.loc[y, 'Q_t_hat']
+        for y in range(len(building_functionality_csv)):
+            i = building_functionality_csv.loc[y, 'Z']
+            j = building_functionality_csv.loc[y, 'S']
+            k = building_functionality_csv.loc[y, 'K']
+            model.Q_t_hat[i, j, k] = building_functionality_csv.loc[y, 'Q_t_hat']
 
         # Declare the retrofit cost parameter Sc_ijkk':
         model.Sc_ijkk_prime = Param(model.ZSKK_prime, within=NonNegativeReals, mutable=True)
-        for y in range(len(myData_Sc)):
-            i = myData_Sc.loc[y, 'Z']
-            j = myData_Sc.loc[y, 'S']
-            k = myData_Sc.loc[y, 'K']
-            k_prime = myData_Sc.loc[y, "K'"]
-            model.Sc_ijkk_prime[i, j, k, k_prime] = myData_Sc.loc[y, 'Sc']
+        for y in range(len(strategy_costs_csv)):
+            i = strategy_costs_csv.loc[y, 'Z']
+            j = strategy_costs_csv.loc[y, 'S']
+            k = strategy_costs_csv.loc[y, 'K']
+            k_prime = strategy_costs_csv.loc[y, "K'"]
+            model.Sc_ijkk_prime[i, j, k, k_prime] = strategy_costs_csv.loc[y, 'Sc']
 
         ####################################################################################################
         # DECLARE THE TOTAL MAX BUDGET AND TOTAL AVAILABLE BUDGET:
@@ -823,7 +833,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
     def solve_epsilon_model_7(self, model, model_solver_setting):
         starttime = time.time()
         print(
-            "****OPTIMIZING ECONOMIC LOSS SUBJECT TO POPULATION DISLOCATION AND BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
+            "****OPTIMIZING ECONOMIC LOSS SUBJECT TO POPULATION DISLOCATION "
+            "AND BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
         model.objective_1.activate()
         model.objective_2.deactivate()
         model.objective_3.deactivate()
@@ -906,7 +917,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
     def solve_epsilon_model_8(self, model, model_solver_setting):
         starttime = time.time()
         print(
-            "****OPTIMIZING POPULATION DISLOCATION SUBJECT TO ECONOMIC LOSS AND BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
+            "****OPTIMIZING POPULATION DISLOCATION SUBJECT TO "
+            "ECONOMIC LOSS AND BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
         model.objective_1.deactivate()
         model.objective_2.activate()
         model.objective_3.deactivate()
@@ -987,7 +999,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
     def solve_epsilon_model_9(self, model, model_solver_setting):
         starttime = time.time()
         print(
-            "****OPTIMIZING BUILDING FUNCTIONALITY SUBJECT TO ECONOMIC LOSS AND POPULATION DISLOCATION EPSILON CONSTRAINTS****")
+            "****OPTIMIZING BUILDING FUNCTIONALITY SUBJECT TO "
+            "ECONOMIC LOSS AND POPULATION DISLOCATION EPSILON CONSTRAINTS****")
         model.objective_1.deactivate()
         model.objective_2.deactivate()
         model.objective_3.activate()
@@ -1092,21 +1105,21 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         return file_list
 
-    ## Objective functions
+    # Objective functions
     @staticmethod
     def obj_economic(model):
         # return(sum_product(model.l_ijk,model.x_ijk))
-        return (quicksum(model.l_ijk[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK))
+        return quicksum(model.l_ijk[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK)
 
     @staticmethod
     def obj_dislocation(model):
         # return(sum_product(model.d_ijk,model.x_ijk))
-        return (quicksum(model.d_ijk[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK))
+        return quicksum(model.d_ijk[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK)
 
     @staticmethod
     def obj_functionality(model):
         # return(sum_product(model.Q_t_hat,model.x_ijk))
-        return (quicksum(model.Q_t_hat[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK))
+        return quicksum(model.Q_t_hat[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK)
 
     # Retrofit cost constraints
     @staticmethod
@@ -1114,7 +1127,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         return (None,
                 quicksum(
                     model.Sc_ijkk_prime[i, j, k, k_prime] * model.y_ijkk_prime[i, j, k, k_prime] for (i, j, k, k_prime)
-                    in model.ZSKK_prime),  # zskk_prime),
+                    in model.ZSKK_prime),
                 pyo.value(model.B))
 
     @staticmethod
@@ -1240,14 +1253,14 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             'input_parameters': [
                 {
                     'id': 'result_name',
-                    'required': True,
+                    'required': False,
                     'description': 'Result CSV dataset name',
                     'type': str
                 },
                 {
                     'id': 'model_solver',
-                    'required': True,
-                    'description': 'Choice of the model solver to use',
+                    'required': False,
+                    'description': 'Choice of the model solver to use. Gurobi is the default solver.',
                     'type': str
                 },
                 {
@@ -1304,10 +1317,22 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             ],
             'output_datasets': [
                 {
-                    'id': 'ds_result',
-                    'parent_type': 'xxxx',
-                    'description': 'A csv file',
-                    'type': 'incore:multiobjectiveRetrofitOptimization'
-                }
+                    'id': 'out1',
+                    'parent_type': '',
+                    'description': 'out1',
+                    'type': 'incore:multiobjective'
+                },
+                {
+                    'id': 'out2',
+                    'parent_type': '',
+                    'description': 'out2',
+                    'type': 'incore:multiobjective'
+                },
+                {
+                    'id': 'out3',
+                    'parent_type': '',
+                    'description': 'out3',
+                    'type': 'incore:multiobjective'
+                },
             ]
         }
