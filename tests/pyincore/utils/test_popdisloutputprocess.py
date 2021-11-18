@@ -70,6 +70,10 @@ if __name__ == '__main__':
     pd_result = run_convert_pd_json_chained(client)
 
     pd_process = PopDislOutputProcess(pd_result)
+    # pd_process = PopDislOutputProcess(pd_result,
+    #                                   filter_name="Joplin",
+    #                                   filter_guid=False,
+    #                                   vacant_disl=False)
 
     pd_process.pd_by_race("PD_by_race.json")
     pd_process.pd_by_income("PD_by_income.json")
@@ -86,7 +90,11 @@ if __name__ == '__main__':
     # testpath = "/Users/<user>/<path_to_pyincore>/pyincore/tests/pyincore/utils"
     if testpath:
         pd_process = PopDislOutputProcess(None, os.path.join(testpath, "joplin-pop-disl-results.csv"))
-
+        # pd_process = PopDislOutputProcess(None,
+        #                                   os.path.join(testpath, "joplin-pop-disl-results.csv"),
+        #                                   filter_name="Joplin",
+        #                                   filter_guid=True,
+        #                                   vacant_disl=True)
         pd_process.pd_by_race("PD_by_race.json")
         pd_process.pd_by_income("PD_by_income.json")
         pd_process.pd_by_tenure("PD_by_tenure.json")
