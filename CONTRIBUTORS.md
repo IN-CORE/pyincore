@@ -11,5 +11,6 @@ The following is a list of contributors in alphabetical order
 * **Christopher Navarro**
 * **Santiago Núñez-Corrales**
 * **Michal Ondrejcek**
+* **Nathanael Rosenheim**
 * **Nathan Tolbert**
 * **Chen Wang**
