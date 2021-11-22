@@ -251,12 +251,10 @@ class AnalysisUtil:
             adj_limit_states = collections.OrderedDict()
 
             for key, value in limit_states.items():
-                adj_limit_states[key] = limit_states[key] + pgd_limit_states[
-                    key] - \
-                                        (limit_states[key] * pgd_limit_states[
-                                            key])
+                adj_limit_states[key] = limit_states[key] + pgd_limit_states[key] - \
+                                        (limit_states[key] * pgd_limit_states[key])
 
-            return adj_limit_states
+            return AnalysisUtil.update_precision_of_dicts(adj_limit_states)
 
         except KeyError as e:
             print('Mismatched keys encountered in the limit states')
