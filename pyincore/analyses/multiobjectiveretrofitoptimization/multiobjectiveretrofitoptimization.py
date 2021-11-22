@@ -261,7 +261,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Define the total max budget based on user's input:
         model.B = Param(mutable=True, within=NonNegativeReals)
 
-        if budget_available != self.__budget_default:
+        if budget_available == self.__budget_default:
             sumSc = quicksum(
                 pyo.value(model.Sc_ijkk_prime[i, j, k, 3]) * pyo.value(model.b_ijk[i, j, k]) for i, j, k in model.ZSK)
         else:
@@ -439,7 +439,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         return model, results_list
 
     def configure_min_max_epsilon_values(self, model, objs, num_epsilon_steps):
-
         # Define positions in the incoming list
         __obj_1_value_2_pos = 4
         __obj_1_value_3_pos = 7
@@ -450,7 +449,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         __obj_3_value_1_pos = 2
         __obj_3_value_2_pos = 5
         __obj_3_max_epsilon_pos = 6
-
         model.econ_loss_max = Param(within=NonNegativeReals, initialize=max(objs[__obj_1_value_2_pos],
                                                                             objs[__obj_1_value_3_pos]))
         model.econ_loss_min = Param(within=NonNegativeReals, initialize=objs[__obj_1_min_epsilon_pos])
@@ -1315,7 +1313,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     'id': 'budget_available',
                     'required': False,
                     'description': 'Custom budget value',
-                    'type': int
+                    'type': float
                 },
                 {
                     'id': 'inactive_submodels',
