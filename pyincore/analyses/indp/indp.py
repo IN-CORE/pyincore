@@ -14,146 +14,126 @@ class INDP(BaseAnalysis):
         super(INDP, self).__init__(incore_client)
 
     def run(self):
-        pass
+
+        network_type = self.get_parameter("network_type")
+        sample_range = self.get_parameter("sample_range")
+        MAGS = self.get_parameter("MAGS")
+        filter_sce = None
+        FAIL_SCE_PARAM = {
+            'TYPE': network_type,
+            'SAMPLE_RANGE': sample_range,
+            'MAGS': MAGS,
+            'FILTER_SCE': filter_sce,
+        }
+
+        RC = self.get_parameter('RC')
+        layers = self.get_parameter('layers')
+        method = self.get_parameter('method')
+
+        t_steps = self.get_parameter('t_steps')
+        if t_steps is None:
+            t_steps = 10
+
+        DYNAMIC_PARAMS =
+        EXTRA_COMMODITY =
+        TIME_RESOURCE =
+
+        runutils.run_method(FAIL_SCE_PARAM, RC, layers, method=method, t_steps=t_steps,
+                            misc={'DYNAMIC_PARAMS': DYNAMIC_PARMAS, 'EXTRA_COMMODITY': EXTRA_COMMODITY,
+                                  'TIME_RESOURCE':
+                                True})
+
+        runutils.run_method(FAIL_SCE_PARAM, RC, layers, method=method, t_steps=t_steps,
+                            misc={'DYNAMIC_PARAMS': DYNAMIC_PARAMS, 'EXTRA_COMMODITY': EXTRA_COMMODITY,
+                                  'TIME_RESOURCE': True})
 
     def get_spec(self):
         return {
-            'name': 'Joplin-small-calibrated',
-            'description': 'CGE model for Joplin.',
+            'name': 'INDP',
+            'description': 'Interdependent Network Design Problem that models the restoration',
             'input_parameters': [
                 {
-                    'id': 'model_iterations',
+                    'id': 'network_type',
                     'required': True,
-                    'description': 'Number of dynamic model iterations.',
-                    'type': int
+                    'description': 'type of the network, which is set to `from_csv` for Seaside networks. '
+                                   'e.g. from_csv, incore',
+                    'type': str
                 },
                 {
-                    'id': 'solver_path',
-                    'required': False,
-                    'description': 'Path to ipopt package. If none is provided, it will default to your environment\'ts'
-                                   'path to the package.',
+                    'id': 'MAGS',
+                    'required': True,
+                    'description': 'sets the earthquake return period.',
+                    'type': list
+                },
+                {
+                    'id': 'sample_range',
+                    'required': True,
+                    'description': 'sets the range of sample scenarios to be analyzed',
+                    'type': range
+                },
+                {
+                    'id': 'dislocation_data_type',
+                    'required': True,
+                    'description': 'type of the dislocation data.',
                     'type': str
+                },
+                {
+                    'id': 'return',
+                    'required': True,
+                    'description': 'type of the model for the return of the dislocated population. '
+                                   'Options: *step_function* and *linear*.',
+                    'type': str
+                },
+                {
+                    'id': 'testbed_name',
+                    'required': True,
+                    'description': 'sets the name of the testbed in analysis',
+                    'type': str
+                },
+                {
+                    'id': 'extra_commodity',
+                    'required': True,
+                    'description': 'multi-commodity parameters dict',
+                    'type': dict
+                },
+                {
+                    'id': 'RC',
+                    'required': True,
+                    'description': 'list of resource caps or the number of available resources in each step of the '
+                                   'analysis. Each item of the list is a dictionary whose items show the type of '
+                                   'resource and the available number of that type of resource. For example: '
+                                   '* If `FAIL_SCE_PARAM[TYPE]`=*from_csv*, you have two options:* if, for example, '
+                                   '`R_c`= [{"budget": 3}, {"budget": 6}], then the analysis is done for the cases '
+                                   'when there are 3 and 6 resources available of type "budget" '
+                                   '(total resource assignment).* if, for example, `R_c`= [{"budget": {1:1, 2:1}}, '
+                                   '{"budget": {1:1, 2:2}}, {"budget": {1:3, 2:3}}] and given there are 2 layers,'
+                                   ' then the analysis is done for the case where each layer gets 1 resource of '
+                                   'type "budget", AND the case where layer 1 gets 1 and layer 2 gets 2 resources of '
+                                   'type "budget", AND the case where each layer gets 3 resources of type '
+                                   '"budget" (Prescribed resource for each layer).',
+                    'type': list
+                },
+                {
+                    'id': 'layers',
+                    'required': True,
+                    'description': 'list of layers in the analysis',
+                    'type': list
+                },
+                {
+                    'id': 'method',
+                    'required': True,
+                    'description': 'There are two choices of method: 1. `INDP`: runs Interdependent Network '
+                                   'Restoration Problem (INDP). 2. `TDINDP`: runs time-dependent INDP (td-INDP).  In '
+                                   'both cases, if "TIME_RESOURCE" is True, then the repair time for each element '
+                                   'is considered in devising the restoration plans',
+                    'type': str,
                 }
 
             ],
             'input_datasets': [
-                {
-                    'id': 'SAM',
-                    'required': True,
-                    'description': 'Social accounting matrix (SAM) contains data for firms, '
-                                   'households and government which are organized in a way to '
-                                   'represent the interactions of all three entities in a typical economy.',
-                    'type': ['incore:JoplinCGEsam']
-                },
-                {
-                    'id': 'BB',
-                    'required': True,
-                    'description': 'BB is a matrix which describes how investment in physical infrastructure is'
-                                   ' transformed into functioning capital such as commercial and residential buildings.'
-                                   ' These data are collected from the Bureau of Economic Analysis (BEA).',
-                    'type': ['incore:JoplinCGEbb']
-                },
-                {
-                    'id': 'IOUT',
-                    'required': True,
-                    'description': 'IOUT is a matrix that describes the transfer of tax revenue collected by the local'
-                                   ' government to help finance local government expenditures.',
-                    'type': ['incore:JoplinCGEiout']
-                },
-                {
-                    'id': 'MISC',
-                    'required': True,
-                    'description': 'MISC is the name of a file that contains data for commercial sector employment'
-                                   ' and physical capital. It also contains data for the number of households and'
-                                   ' working households in the economy.',
-                    'type': ['incore:JoplinCGEmisc']
-                },
-                {
-                    'id': 'MISCH',
-                    'required': True,
-                    'description': 'MISCH is a file that contains elasticities for the supply of labor with'
-                                   ' respect to paying income taxes.',
-                    'type': ['incore:JoplinCGEmisch']
-                },
-                {
-                    'id': 'LANDCAP',
-                    'required': True,
-                    'description': 'LANDCAP contains information regarding elasticity values for the response of '
-                                   'changes in the price of physical capital with respect to the supply of investment.',
-                    'type': ['incore:JoplinCGElandcap']
-                },
-                {
-                    'id': 'EMPLOY',
-                    'required': True,
-                    'description': 'EMPLOY is a table name containing data for commercial sector employment.',
-                    'type': ['incore:JoplinCGEemploy']
-                },
-                {
-                    'id': 'IGTD',
-                    'required': True,
-                    'description': 'IGTD variable represents a matrix describing the transfer of taxes collected'
-                                   ' to a variable which permits governments to spend the tax revenue on workers and'
-                                   ' intermediate inputs.',
-                    'type': ['incore:JoplinCGEigtd']
-                },
-                {
-                    'id': 'TAUFF',
-                    'required': True,
-                    'description': 'TAUFF represents social security tax rates',
-                    'type': ['incore:JoplinCGEtauff']
-                },
-                {
-                    'id': 'JOBCR',
-                    'required': True,
-                    'description': 'JOBCR is a matrix describing the supply of workers'
-                                   ' coming from each household group in the economy.',
-                    'type': ['incore:JoplinCGEjobcr']
-                },
-                {
-                    'id': 'OUTCR',
-                    'required': True,
-                    'description': 'OUTCR is a matrix describing the number of workers who'
-                                   ' live in Joplin but commute outside of town to work.',
-                    'type': ['incore:JoplinCGEoutcr']
-                },
-                {
-                    'id': 'sector_shocks',
-                    'required': True,
-                    'description': 'Aggregation of building functionality states to capital shocks per sector',
-                    'type': ['incore:capitalShocks']
-                }
+
             ],
             'output_datasets': [
-                {
-                    'id': 'domestic-supply',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting domestic supply',
-                    'type': 'incore:Employment'
-                },
-                {
-                    'id': 'gross-income',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting gross income',
-                    'type': 'incore:Employment'
-                },
-                {
-                    'id': 'pre-disaster-factor-demand',
-                    'parent_type': '',
-                    'description': 'CSV file of factor demand before disaster',
-                    'type': 'incore:FactorDemand'
-                },
-                {
-                    'id': 'post-disaster-factor-demand',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting factor-demand',
-                    'type': 'incore:FactorDemand'
-                },
-                {
-                    'id': 'household-count',
-                    'parent_type': '',
-                    'description': 'CSV file of household count',
-                    'type': 'incore:HouseholdCount'
-                }
+
             ]
         }
-
