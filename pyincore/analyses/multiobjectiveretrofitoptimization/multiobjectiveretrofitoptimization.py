@@ -107,9 +107,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             strategy_costs_csv (pd.DataFrame): strategy cost data per building
         """
         # Setup the model
+        print("Base model")
         base_model, sum_sc = self.configure_model(budget_available, scaling_factor, building_functionality_csv,
                                                   strategy_costs_csv)
+        print("With objectives model")
         model_with_objectives = self.configure_model_objectives(base_model)
+        print("With constraints model")
         model_with_constraints = self.configure_model_retrofit_costs(model_with_objectives)
 
         # Choose the solver setting
@@ -119,10 +122,14 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             model_solver_setting = pyo.SolverFactory(model_solver)
 
         # Solve each model individually
+        print("With individual model")
         model_solved_individual, obj_list = self.solve_individual_models(model_with_constraints, model_solver_setting,
                                                                     sum_sc)
+        print("Epsilon values")
         model_min_max_epsilon_values = self.configure_min_max_epsilon_values(model_solved_individual, obj_list,
                                                                              num_epsilon_steps)
+
+        print("Epsilon model")
         self.solve_epsilon_models(model_min_max_epsilon_values, model_solver_setting, inactive_submodels)
 
         file_list = self.compute_optimal_results(inactive_submodels)
@@ -146,16 +153,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             ConcreteModel: a base, parameterized cost/functionality model
         """
         # Rescale data
-        building_functionality_csv[self.__Q_col] = \
-            building_functionality_csv[self.__Q_col].map(lambda a: a/scaling_factor)
-        strategy_costs_csv[self.__SC_col] = strategy_costs_csv[self.__SC_col].map(lambda a: a/scaling_factor)
+        if scaling_factor != 1.0:
+            building_functionality_csv[self.__Q_col] = \
+                building_functionality_csv[self.__Q_col].map(lambda a: a/scaling_factor)
+            strategy_costs_csv[self.__SC_col] = strategy_costs_csv[self.__SC_col].map(lambda a: a/scaling_factor)
 
         # Setup pyomo
         model = ConcreteModel()
 
-        model.Z = Set(initialize=building_functionality_csv["Z"].unique())
-        model.S = Set(initialize=building_functionality_csv["S"].unique())
-        model.K = Set(initialize=building_functionality_csv["K"].unique())
+        model.Z = Set(initialize=building_functionality_csv.Z.unique())
+        model.S = Set(initialize=building_functionality_csv.S.unique())
+        model.K = Set(initialize=building_functionality_csv.K.unique())
         model.K_prime = Set(initialize=strategy_costs_csv["K'"].unique())
 
         zsk = []
@@ -293,8 +301,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         return model
 
     def configure_model_retrofit_costs(self, model):
+        print('budget constraint')
         model.retrofit_budget_constraint = Constraint(rule=self.retrofit_cost_rule)
+        print('biuldings ij constraint')
         model.number_buildings_ij_constraint = Constraint(model.ZS, rule=self.number_buildings_ij_rule)
+        print('building level constraint')
+        model.a = Param(mutable=True)
+        model.c = Param(mutable=True)
         model.building_level_constraint = Constraint(model.ZSK, rule=self.building_level_rule)
 
         return model
@@ -326,11 +339,16 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         starttime = time.time()
         print("Initial solve for objective function 1 starting.")
         # Activate objective function 1 (minimize economic loss) and deactivate others:
+        print('ob_1 ac')
         model.objective_1.activate()
+        print('ob_2 deac')
         model.objective_2.deactivate()
+        print('ob_3 deac')
         model.objective_3.deactivate()
 
         # Solve the model:
+        print('model solve')
+        model.display()
         results = model_solver_setting.solve(model)
 
         # Save the results if the solver returns an optimal solution:
@@ -405,11 +423,15 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         starttime = time.time()
         print("Initial solve for objective function 3 starting.")
         # Activate objective function 3 (maximize functionality) and deactivate others:
+        print('ob_1 deac')
         model.objective_1.deactivate()
+        print('ob_2 deac')
         model.objective_2.deactivate()
+        print('ob_3 ac')
         model.objective_3.activate()
 
         # Solve the model:
+        print('mod solve')
         results = model_solver_setting.solve(model)
 
         # Save the results if the solver returns an optimal solution:
@@ -1172,17 +1194,14 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
     @staticmethod
     def building_level_rule(model, i, j, k):
-        model.a = Param(mutable=True)
-        model.c = Param(mutable=True)
-
         model.a = quicksum(model.y_ijkk_prime[i, j, k_prime, k] for k_prime in model.K_prime if
                            (i, j, k_prime, k) in model.zskk_prime)
         model.c = quicksum(model.y_ijkk_prime[i, j, k, k_prime] for k_prime in model.K_prime if
                            (i, j, k, k_prime) in model.zskk_prime)
         return (pyo.value(model.b_ijk[i, j, k]),
                 model.x_ijk[i, j, k] + quicksum(model.y_ijkk_prime[i, j, k, k_prime] for k_prime in model.K_prime if
-                                                (i, j, k, k_prime) in model.zskk_prime) - quicksum(
-                    model.y_ijkk_prime[i, j, k_prime, k] for k_prime in model.K_prime if
+                                                (i, j, k, k_prime) in model.zskk_prime) -
+                quicksum(model.y_ijkk_prime[i, j, k_prime, k] for k_prime in model.K_prime if
                     (i, j, k_prime, k) in model.zskk_prime),
                 pyo.value(model.b_ijk[i, j, k]))
 
