@@ -59,7 +59,7 @@ analyses/example
     :members:
 
 analyses/housingrecoverysequential
-==============================
+==================================
 ..  autoclass:: housingrecoverysequential.housingrecoverysequential.HousingRecoverySequential
     :members:
 
@@ -133,7 +133,7 @@ analyses/populationdislocation
     :members:
 
 analyses/residentialbuildingrecovery
-============================
+====================================
 ..  autoclass:: residentialbuildingrecovery.residentialbuildingrecovery.ResidentialBuildingRecovery
     :members:
 
@@ -259,6 +259,11 @@ utils/analysisutil
 ..  autoclass:: utils.analysisutil.AnalysisUtil
     :members:
 
+utils/cgeoutputprocess
+======================
+..  autoclass:: utils.cgeoutputprocess.CGEOutputProcess
+    :members:
+
 utils/dataprocessutil
 =====================
 ..  autoclass:: utils.dataprocessutil.DataProcessUtil
@@ -277,6 +282,11 @@ utils/evaluateexpression
 utils/geoutil
 =============
 ..  autoclass:: utils.geoutil.GeoUtil
+    :members:
+
+utils/popdisloutputprocess.py
+=============================
+..  autoclass:: utils.popdisloutputprocess.PopDislOutputProcess
     :members:
 
 utils/networkutil

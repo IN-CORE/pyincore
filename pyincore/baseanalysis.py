@@ -224,12 +224,12 @@ class BaseAnalysis:
         if not name.endswith(".csv"):
             name = name + ".csv"
 
+        dataset_type = self.output_datasets[result_id]["spec"]["type"]
         if source == 'file':
-            dataset = Dataset.from_csv_data(result_data, name)
+            dataset = Dataset.from_csv_data(result_data, name, dataset_type)
         elif source == 'dataframe':
-            dataset = Dataset.from_dataframe(result_data, name)
+            dataset = Dataset.from_dataframe(result_data, name, dataset_type)
 
-        dataset.data_type = self.output_datasets[result_id]["spec"]["type"]
         self.set_output_dataset(result_id, dataset)
 
     def set_result_json_data(self, result_id, result_data, name, source='file'):
@@ -239,10 +239,10 @@ class BaseAnalysis:
         if not name.endswith(".json"):
             name = name + ".json"
 
+        dataset_type = self.output_datasets[result_id]["spec"]["type"]
         if source == 'file':
-            dataset = Dataset.from_json_data(result_data, name)
+            dataset = Dataset.from_json_data(result_data, name, dataset_type)
 
-        dataset.data_type = self.output_datasets[result_id]["spec"]["type"]
         self.set_output_dataset(result_id, dataset)
 
     def run_analysis(self):
