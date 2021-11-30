@@ -41,6 +41,9 @@ def run_with_base_class():
 
     restoration = JoplinEmpiricalRestoration(client)
 
+    # building_fl_id = "61a68979d5b02930aa43ae39"
+    # restoration.set_input_dataset("building_functionality_level", building_fl_id)
+
     restoration.load_remote_input_dataset("buildings", bldg_dataset_id)
     # restoration.load_remote_input_dataset("building_dmg", building_dmg_result)
     restoration.set_input_dataset("building_dmg", building_dmg_result)
