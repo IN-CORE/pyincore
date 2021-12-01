@@ -32,7 +32,6 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
             bool: True if successful, False otherwise.
 
         """
-        building_target_fl = None
         # Get seed
         seed_i = self.get_parameter("seed")
         target_fl = self.get_parameter("target_functionality_level")
@@ -44,10 +43,11 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
         # Building damage dataset
         building_dmg = self.get_input_dataset("building_dmg").get_dataframe_from_csv(low_memory=False)
         # Building functionality target level
-        building_fl_flag = False
-        if building_fl_flag:
-            building_target_fl = self.get_input_dataset("building_functionality_level")\
-                .get_dataframe_from_csv(low_memory=False)
+        building_target_fl = self.get_input_dataset("building_functionality_level")
+        if building_target_fl is not None:
+            building_target_fl = building_target_fl.get_dataframe_from_csv(low_memory=False)
+        else:
+            building_target_fl = None
 
         # merge and filter out archetypes > 5
         building_dmg_all = pd.merge(building_dmg, building_set, how="left", on="guid", copy=True, validate="1:1")
@@ -56,9 +56,15 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
 
         building_func = building_func_5[["guid", "LS_0", "LS_1", "LS_2", "haz_expose"]].copy()
         building_func["targetFL"] = target_fl
-        if building_target_fl:
+        if building_target_fl is not None:
             building_func = pd.merge(building_func, building_target_fl,
-                                     how="left", on="guid", copy=True, validate="1:1")
+                                         how="left", on="guid", copy=True, validate="1:1")
+            # Replace NaN value from targetFL_y with targetFL_x value
+            building_func["targetFL"] = building_func["targetFL_y"].fillna(building_func["targetFL_x"])
+            # Drop unwanted columns
+            building_func = building_func.drop(["targetFL_x", "targetFL_y"], axis=1)
+            building_func = building_func.astype({"targetFL": "int64"})
+
 
         initial_func_level, restoration_days = self.get_restoration_days(seed_i, building_func)
         building_func["initialFL"] = initial_func_level
