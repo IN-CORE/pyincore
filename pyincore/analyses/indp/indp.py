@@ -6,6 +6,9 @@
 
 
 from pyincore import BaseAnalysis
+from pyincore.analyses.indp import INDPUtil
+from pyincore.analyses.indp.infrastructure import add_from_csv_failure_scenario
+from pyincore.analyses.indp.dislocationutils import DislocationUtil
 
 
 class INDP(BaseAnalysis):
@@ -116,37 +119,174 @@ class INDP(BaseAnalysis):
                 params["SIM_NUMBER"] = i
                 params["MAGNITUDE"] = m
 
-                # Check if the results exist
-                out_dir_suffix_res = indp.get_resource_suffix(params)
-                output_dir_full = params["OUTPUT_DIR"] + '_L' + str(len(params["L"])) + '_m' + \
-                                  str(params["MAGNITUDE"]) + "_v" + out_dir_suffix_res + '/actions_' + str(i) + '_.csv'
-                if os.path.exists(output_dir_full):
-                    print('results are already there\n')
-                    continue
-
                 print('---Running Magnitude ' + str(m) + ' sample ' + str(i) + '...')
                 if params['TIME_RESOURCE']:
                     print('Computing repair times...')
-                    indp.time_resource_usage_curves(base_dir, damage_dir, i)
+                    INDPUtil.time_resource_usage_curves(base_dir, damage_dir, i)
 
                 print("Initializing network...")
-                params["N"] = indp.initialize_network(base_dir=base_dir, extra_commodity=params["EXTRA_COMMODITY"])
+                params["N"] = INDPUtil.initialize_network(base_dir=base_dir, extra_commodity=params["EXTRA_COMMODITY"])
 
                 if params['DYNAMIC_PARAMS']:
                     print("Computing dynamic demand based on dislocation data...")
-                    dyn_dmnd = dislocationutils.create_dynamic_param(params, N=params["N"], T=params["NUM_ITERATIONS"])
+                    dyn_dmnd = DislocationUtil.create_dynamic_param(params, N=params["N"], T=params["NUM_ITERATIONS"])
                     params['DYNAMIC_PARAMS']['DEMAND_DATA'] = dyn_dmnd
 
                 if fail_sce_param['TYPE'] == 'from_csv':
-                    indp.add_from_csv_failure_scenario(params["N"], sample=i, dam_dir=damage_dir)
+                    add_from_csv_failure_scenario(params["N"], sample=i, dam_dir=damage_dir)
                 else:
-                    sys.exit('Wrong failure scenario data type.')
+                    raise ValueError('Wrong failure scenario data type.')
 
                 if params["ALGORITHM"] == "INDP":
-                    indp.run_indp(params, layers=params['L'], controlled_layers=params['L'], T=params["T"],
+                    self.run_indp(params, layers=params['L'], controlled_layers=params['L'], T=params["T"],
                                   save_model=False, print_cmd_line=False, co_location=False)
                 else:
-                    sys.exit('Wrong algorithm type.')
+                    raise ValueError('Wrong algorithm type.')
+
+    def run_indp(self, params, layers=None, controlled_layers=None, functionality=None, T=1, save=True, suffix="",
+                 forced_actions=False, save_model=False, print_cmd_line=True, co_location=True):
+        """
+        This function runs iINDP (T=1) or td-INDP for a given number of time steps and input parameters.
+
+        Args:
+            params (dict): Parameters that are needed to run the INDP optimization.
+            layers (list): List of layers in the interdependent network. The default is 'None', which sets the list
+            to [1, 2, 3].
+            controlled_layers (list): List of layers that are included in the analysis. The default is 'None', which sets the list equal to layers.
+            functionality (dict): This dictionary is used to assign functionality values elements in the network before the analysis starts. The
+            default is 'None'.
+            T (int): Number of time steps to optimize over. T=1 shows an iINDP analysis, and T>1 shows a td-INDP. The default is 1.
+            TODO save & suffice aare not exposed to outside should remove it
+            save (bool): If the results should be saved to file. The default is True.
+            suffix (str): The suffix that should be added to the output files when saved. The default is ''.
+
+            forced_actions (bool): If True, the optimizer is forced to repair at least one element in each time step. The default is False.
+            TODO expose this parameter
+            save_model (bool): If the Gurobi optimization model should be saved to file. The default is False.
+            TODO expose this parameter
+            print_cmd_line (bool): If full information about the analysis should be written to the console. The default is True.
+            TODO expose this parameter
+            co_location (bool): If co-location and geographical interdependency should be considered in the analysis.
+            The default is True.
+
+        Returns:
+             indp_results (INDPResults): `~indputils.INDPResults` object containing the optimal restoration decisions.
+
+        """
+        # Initialize failure scenario.
+        global original_N
+        if functionality is None:
+            functionality = {}
+        if layers is None:
+            layers = [1, 2, 3]
+        if controlled_layers is None:
+            controlled_layers = layers
+
+        if "N" not in params:
+            interdependent_net = INDPUtil.initialize_network(base_dir="../data/INDP_7-20-2015/", sim_number=params[
+                'SIM_NUMBER'], magnitude=params["MAGNITUDE"])
+        else:
+            interdependent_net = params["N"]
+        if "NUM_ITERATIONS" not in params:
+            params["NUM_ITERATIONS"] = 1
+
+        out_dir_suffix_res = INDPUtil.get_resource_suffix(params)
+        indp_results = INDPResults(params["L"])
+        if T == 1:
+            print("--Running INDP (T=1) or iterative INDP.")
+            if print_cmd_line:
+                print("Num iters=", params["NUM_ITERATIONS"])
+
+            # Run INDP for 1 time step (original INDP).
+            output_dir = params["OUTPUT_DIR"] + '_L' + str(len(layers)) + '_m' + str(params["MAGNITUDE"]) + \
+                         "_v" + out_dir_suffix_res
+            # Initial calculations.
+            if params['DYNAMIC_PARAMS']:
+                original_N = copy.deepcopy(interdependent_net)  # !!! deepcopy
+                dislocationutils.dynamic_parameters(interdependent_net, original_N, 0,
+                                                    params['DYNAMIC_PARAMS']['DEMAND_DATA'])
+            v_0 = {x: 0 for x in params["V"].keys()}
+            results = indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
+                           functionality=functionality, co_location=co_location)
+            indp_results = results[1]
+            indp_results.add_components(0, INDPComponents.calculate_components(results[0], interdependent_net,
+                                                                               layers=controlled_layers))
+            for i in range(params["NUM_ITERATIONS"]):
+                print("-Time Step (iINDP)", i + 1, "/", params["NUM_ITERATIONS"])
+                if params['DYNAMIC_PARAMS']:
+                    dislocationutils.dynamic_parameters(interdependent_net, original_N, i + 1,
+                                                        params['DYNAMIC_PARAMS']['DEMAND_DATA'])
+                results = indp(interdependent_net, params["V"], T, layers, controlled_layers=controlled_layers,
+                               forced_actions=forced_actions, co_location=co_location)
+                indp_results.extend(results[1], t_offset=i + 1)
+                if save_model:
+                    save_indp_model_to_file(results[0], output_dir + "/Model", i + 1)
+                # Modify network to account for recovery and calculate components.
+                apply_recovery(interdependent_net, indp_results, i + 1)
+                indp_results.add_components(i + 1, INDPComponents.calculate_components(results[0], interdependent_net,
+                                                                                       layers=controlled_layers))
+        else:
+            # td-INDP formulations. Includes "DELTA_T" parameter for sliding windows to increase efficiency.
+            # Edit 2/8/16: "Sliding window" now overlaps.
+            num_time_windows = 1
+            time_window_length = T
+            if "WINDOW_LENGTH" in params:
+                time_window_length = params["WINDOW_LENGTH"]
+                num_time_windows = T
+            output_dir = params["OUTPUT_DIR"] + '_L' + str(len(layers)) + "_m" + str(
+                params["MAGNITUDE"]) + "_v" + out_dir_suffix_res
+
+            print("Running td-INDP (T=" + str(T) + ", Window size=" + str(time_window_length) + ")")
+            # Initial percolation calculations.
+            v_0 = {x: 0 for x in params["V"].keys()}
+            results = indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
+                           functionality=functionality, co_location=co_location)
+            indp_results = results[1]
+            indp_results.add_components(0, INDPComponents.calculate_components(results[0], interdependent_net,
+                                                                               layers=controlled_layers))
+            for n in range(num_time_windows):
+                print("-Time window (td-INDP)", n + 1, "/", num_time_windows)
+                functionality_t = {}
+                # Slide functionality matrix according to sliding time window.
+                if functionality:
+                    for t in functionality:
+                        if t in range(n, time_window_length + n + 1):
+                            functionality_t[t - n] = functionality[t]
+                    if len(functionality_t) < time_window_length + 1:
+                        diff = time_window_length + 1 - len(functionality_t)
+                        max_t = max(functionality_t.keys())
+                        for d in range(diff):
+                            functionality_t[max_t + d + 1] = functionality_t[max_t]
+                # Run td-INDP.
+                results = indp(interdependent_net, params["V"], time_window_length + 1, layers,
+                               controlled_layers=controlled_layers, functionality=functionality_t,
+                               forced_actions=forced_actions, co_location=co_location)
+                if save_model:
+                    save_indp_model_to_file(results[0], output_dir + "/Model", n + 1)
+                if "WINDOW_LENGTH" in params:
+                    indp_results.extend(results[1], t_offset=n + 1, t_start=1, t_end=2)
+                    # Modify network for recovery actions and calculate components.
+                    apply_recovery(interdependent_net, results[1], 1)
+                    indp_results.add_components(n + 1,
+                                                INDPComponents.calculate_components(results[0], interdependent_net,
+                                                                                    1, layers=controlled_layers))
+                else:
+                    indp_results.extend(results[1], t_offset=0)
+                    for t in range(1, T):
+                        # Modify network to account for recovery actions.
+                        apply_recovery(interdependent_net, indp_results, t)
+                        indp_results.add_components(1,
+                                                    INDPComponents.calculate_components(results[0], interdependent_net,
+                                                                                        t, layers=controlled_layers))
+        # Save results of current simulation.
+        if save:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            indp_results.to_csv(output_dir, params["SIM_NUMBER"], suffix=suffix)
+            if not os.path.exists(output_dir + '/agents'):
+                os.makedirs(output_dir + '/agents')
+            indp_results.to_csv_layer(output_dir + '/agents', params["SIM_NUMBER"], suffix=suffix)
+        return indp_results
 
     def get_spec(self):
         return {

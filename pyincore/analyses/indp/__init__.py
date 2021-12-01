@@ -6,3 +6,4 @@
 
 
 from pyincore.analyses.indp.indp import INDP
+from pyincore.analyses.indp.indputil import INDPUtil
