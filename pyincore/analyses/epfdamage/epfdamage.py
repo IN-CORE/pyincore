@@ -4,7 +4,6 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import collections
 import concurrent.futures
 from itertools import repeat
 
@@ -53,12 +52,6 @@ class EpfDamage(BaseAnalysis):
 
         if use_hazard_uncertainty:
             raise ValueError("Uncertainty is not implemented yet.")
-
-        # Liquefaction
-        use_liquefaction = False
-        if self.get_parameter("use_liquefaction") is not None:
-            use_liquefaction = self.get_parameter("use_liquefaction")
-        liq_geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
         user_defined_cpu = 1
 
@@ -286,7 +279,6 @@ class EpfDamage(BaseAnalysis):
             i += 1
 
         #############################################################
-
 
         # unmapped
         for epf in unmapped_epfs:
