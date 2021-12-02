@@ -42,6 +42,12 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
         building_set = self.get_input_dataset("buildings").get_dataframe_from_shapefile()
         # Building damage dataset
         building_dmg = self.get_input_dataset("building_dmg").get_dataframe_from_csv(low_memory=False)
+        # Building functionality target level
+        building_target_fl = self.get_input_dataset("building_functionality_level")
+        if building_target_fl is not None:
+            building_target_fl = building_target_fl.get_dataframe_from_csv(low_memory=False)
+        else:
+            building_target_fl = None
 
         # merge and filter out archetypes > 5
         building_dmg_all = pd.merge(building_dmg, building_set, how="left", on="guid", copy=True, validate="1:1")
@@ -50,6 +56,15 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
 
         building_func = building_func_5[["guid", "LS_0", "LS_1", "LS_2", "haz_expose"]].copy()
         building_func["targetFL"] = target_fl
+
+        if building_target_fl is not None:
+            building_func = pd.merge(building_func, building_target_fl,
+                                     how="left", on="guid", copy=True, validate="1:1")
+            # Replace NaN value from targetFL_y with targetFL_x value
+            building_func["targetFL"] = building_func["targetFL_y"].fillna(building_func["targetFL_x"])
+            # Drop merged columns
+            building_func = building_func.drop(["targetFL_x", "targetFL_y"], axis=1)
+            building_func = building_func.astype({"targetFL": "int64"})
 
         initial_func_level, restoration_days = self.get_restoration_days(seed_i, building_func)
         building_func["initialFL"] = initial_func_level
@@ -66,8 +81,9 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
 
         Args:
             seed_i (int): Seed for random number generator to ensure replication if run as part
-                    of a stochastic analysis, for example in connection with housing unit allocation analysis.
-            building_dmg (pd.DataFrame): Building damage dataset with guid, limit states, hazard exposure.
+                of a stochastic analysis, for example in connection with housing unit allocation analysis.
+            building_func (pd.DataFrame): Building damage dataset with guid, limit states, hazard exposure
+                and a target level column.
 
         Returns:
             np.array: Initial functionality level based on damage state
@@ -155,6 +171,13 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
                              "ergo:buildingInventory",
                              "ergo:nsBuildingInventoryDamage",
                              "ergo:nsBuildingInventoryDamageVer2"]
+                },
+                {
+                    "id": "building_functionality_level",
+                    "required": False,
+                    "description": "Functionality level per building. The target level defaults "
+                                   "to target_functionality_level parameter if building not in the dataset",
+                    "type": ["incore:buildingFuncTargetVer1"]
                 }
             ],
             "output_datasets": [
