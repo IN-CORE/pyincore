@@ -108,12 +108,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         """
         # Setup the model
         print("Base model")
-        base_model, sum_sc = self.configure_model(budget_available, scaling_factor, building_functionality_csv,
+        model, sum_sc = self.configure_model(budget_available, scaling_factor, building_functionality_csv,
                                                   strategy_costs_csv)
         print("With objectives model")
-        model_with_objectives = self.configure_model_objectives(base_model)
+        self.configure_model_objectives(model)
         print("With constraints model")
-        model_with_constraints = self.configure_model_retrofit_costs(model_with_objectives)
+        self.configure_model_retrofit_costs(model) # Suspicious
 
         # Choose the solver setting
         if model_solver == "gurobi" or model_solver is None:
@@ -123,14 +123,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Solve each model individually
         print("With individual model")
-        model_solved_individual, obj_list = self.solve_individual_models(model_with_constraints, model_solver_setting,
-                                                                    sum_sc)
+        obj_list = self.solve_individual_models(model, model_solver_setting, sum_sc)
         print("Epsilon values")
-        model_min_max_epsilon_values = self.configure_min_max_epsilon_values(model_solved_individual, obj_list,
-                                                                             num_epsilon_steps)
+        self.configure_min_max_epsilon_values(model, obj_list, num_epsilon_steps)
 
         print("Epsilon model")
-        self.solve_epsilon_models(model_min_max_epsilon_values, model_solver_setting, inactive_submodels)
+        self.solve_epsilon_models(model, model_solver_setting, inactive_submodels)
 
         file_list = self.compute_optimal_results(inactive_submodels)
         self.set_result_csv_data("out1", file_list[0], name="out1",
@@ -298,8 +296,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.objective_3 = Objective(rule=self.obj_functionality, sense=maximize)
         model.functionality = Param(mutable=True, within=NonNegativeReals)  # ,default=1)
 
-        return model
-
     def configure_model_retrofit_costs(self, model):
         print('budget constraint')
         model.retrofit_budget_constraint = Constraint(rule=self.retrofit_cost_rule)
@@ -310,16 +306,14 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.c = Param(mutable=True)
         model.building_level_constraint = Constraint(model.ZSK, rule=self.building_level_rule)
 
-        return model
-
     def solve_individual_models(self, model, model_solver_setting, sum_sc):
         print("Max Budget: $", sum_sc)
         print("Available Budget: $", pyo.value(model.B))
         print("")
 
-        model, rlist_obj_1 = self.solve_model_1(model, model_solver_setting)
-        model, rlist_obj_2 = self.solve_model_2(model, model_solver_setting)
-        model, rlist_obj_3 = self.solve_model_3(model, model_solver_setting)
+        rlist_obj_1 = self.solve_model_1(model, model_solver_setting)
+        rlist_obj_2 = self.solve_model_2(model, model_solver_setting)
+        rlist_obj_3 = self.solve_model_3(model, model_solver_setting)
 
         values_list = [sum_sc, pyo.value(model.B)] + rlist_obj_1 + rlist_obj_2 + rlist_obj_3
 
@@ -333,7 +327,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         filename = 'no_epsilon_constr_init_results_' + str(time.strftime("%m-%d-%Y")) + '.csv'
         no_epsilon_constr_init_results.to_csv(filename)
 
-        return model, rlist_obj_1 + rlist_obj_2 + rlist_obj_3
+        return rlist_obj_1 + rlist_obj_2 + rlist_obj_3
 
     def solve_model_1(self, model, model_solver_setting):
         starttime = time.time()
@@ -347,14 +341,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.objective_3.deactivate()
 
         # Solve the model:
-        print('model solve')
-        model.display()
         results = model_solver_setting.solve(model)
 
         # Save the results if the solver returns an optimal solution:
         if (results.solver.status == SolverStatus.ok) and (
                 results.solver.termination_condition == TerminationCondition.optimal):
-            model = self.extract_optimization_results(model)
+            self.extract_optimization_results(model)
             obj_1_min_epsilon = pyo.value(model.objective_1)  # Save the optimal economic loss value.
             obj_2_value_1 = pyo.value(model.dislocation)  # Save the dislocation value when optimizing economic loss.
             obj_3_value_1 = pyo.value(
@@ -378,7 +370,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Elapsed time for initial obj 1 solve: ", elapsedtime)
         print("")
 
-        return model, results_list
+        return results_list
 
     def solve_model_2(self, model, model_solver_setting):
         starttime = time.time()
@@ -394,7 +386,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Save the results if the solver returns an optimal solution:
         if (results.solver.status == SolverStatus.ok) and (
                 results.solver.termination_condition == TerminationCondition.optimal):
-            model = self.extract_optimization_results(model)
+            self.extract_optimization_results(model)
             obj_2_min_epsilon = pyo.value(model.objective_2)  # Save the optimal dislocation value.
             obj_1_value_2 = pyo.value(model.econ_loss)  # Save the economic loss value when optimizing dislocation.
             obj_3_value_2 = pyo.value(model.functionality)  # Save the functionality value when optimizing dislocation.
@@ -417,7 +409,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Elapsed time for initial obj 2 solve: ", elapsedtime)
         print("")
 
-        return model, results_list
+        return results_list
 
     def solve_model_3(self, model, model_solver_setting):
         starttime = time.time()
@@ -437,7 +429,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Save the results if the solver returns an optimal solution:
         if (results.solver.status == SolverStatus.ok) and (
                 results.solver.termination_condition == TerminationCondition.optimal):
-            model = self.extract_optimization_results(model)
+            self.extract_optimization_results(model)
             obj_3_max_epsilon = pyo.value(model.objective_3)  # Save the optimal functionality value.
             obj_1_value_3 = pyo.value(model.econ_loss)  # Save the economic loss value when optimizing functionality.
             obj_2_value_3 = pyo.value(model.dislocation)  # Save the dislocation value when optimizing functionality.
@@ -458,7 +450,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time for initial obj 3 solve: ", elapsedtime)
 
-        return model, results_list
+        return results_list
 
     def configure_min_max_epsilon_values(self, model, objs, num_epsilon_steps):
         # Define positions in the incoming list
@@ -489,37 +481,33 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.functionality_step = Param(within=NonNegativeReals, initialize=(pyo.value(
             model.functionality_max) - pyo.value(model.functionality_min)) * (1 / (num_epsilon_steps - 1)))
 
-        return model
-
     def solve_epsilon_models(self, model, model_solver_setting, inactive_submodels):
         if 1 not in inactive_submodels:
-            model = self.solve_epsilon_model_1(model, model_solver_setting)
+            self.solve_epsilon_model_1(model, model_solver_setting)
 
         if 2 not in inactive_submodels:
-            model = self.solve_epsilon_model_2(model, model_solver_setting)
+            self.solve_epsilon_model_2(model, model_solver_setting)
 
         if 3 not in inactive_submodels:
-            model = self.solve_epsilon_model_3(model, model_solver_setting)
+            self.solve_epsilon_model_3(model, model_solver_setting)
 
         if 4 not in inactive_submodels:
-            model = self.solve_epsilon_model_4(model, model_solver_setting)
+            self.solve_epsilon_model_4(model, model_solver_setting)
 
         if 5 not in inactive_submodels:
-            model = self.solve_epsilon_model_5(model, model_solver_setting)
+            self.solve_epsilon_model_5(model, model_solver_setting)
 
         if 6 not in inactive_submodels:
-            model = self.solve_epsilon_model_6(model, model_solver_setting)
+            self.solve_epsilon_model_6(model, model_solver_setting)
 
         if 7 not in inactive_submodels:
-            model = self.solve_epsilon_model_7(model, model_solver_setting)
+            self.solve_epsilon_model_7(model, model_solver_setting)
 
         if 8 not in inactive_submodels:
-            model = self.solve_epsilon_model_8(model, model_solver_setting)
+            self.solve_epsilon_model_8(model, model_solver_setting)
 
         if 9 not in inactive_submodels:
-            model = self.solve_epsilon_model_9(model, model_solver_setting)
-
-        return model
+            self.solve_epsilon_model_9(model, model_solver_setting)
 
     def solve_epsilon_model_1(self, model, model_solver_setting):
         starttime = time.time()
@@ -553,7 +541,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model = self.extract_optimization_results(model)
+                self.extract_optimization_results(model)
                 # Add objective (economic loss), dislocation, and functionality values to results dataframe:
                 obj_1_2_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
                     model.econ_loss)  # Save the optimal economic loss value.
@@ -578,7 +566,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
-        return model
 
     def solve_epsilon_model_2(self, model, model_solver_setting):
         starttime = time.time()
@@ -640,8 +627,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        return model
-
     def solve_epsilon_model_3(self, model, model_solver_setting):
         starttime = time.time()
         print("****OPTIMIZING POPULATION DISLOCATION SUBJECT TO ECONOMIC LOSS EPSILON CONSTRAINTS****")
@@ -700,8 +685,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
-
-        return model
 
     def solve_epsilon_model_4(self, model, model_solver_setting):
         starttime = time.time()
@@ -762,8 +745,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        return model
-
     def solve_epsilon_model_5(self, model, model_solver_setting):
         starttime = time.time()
         print("****OPTIMIZING BUILDING FUNCTIONALITY SUBJECT TO ECONOMIC LOSS EPSILON CONSTRAINTS****")
@@ -823,8 +804,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        return model
-
     def solve_epsilon_model_6(self, model, model_solver_setting):
         starttime = time.time()
         print("****OPTIMIZING BUILDING FUNCTIONALITY SUBJECT TO POPULATION DISLOCATION EPSILON CONSTRAINTS****")
@@ -883,8 +862,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
-
-        return model
 
     def solve_epsilon_model_7(self, model, model_solver_setting):
         starttime = time.time()
@@ -968,8 +945,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        return model
-
     def solve_epsilon_model_8(self, model, model_solver_setting):
         starttime = time.time()
         print(
@@ -1049,8 +1024,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
-
-        return model
 
     def solve_epsilon_model_9(self, model, model_solver_setting):
         starttime = time.time()
@@ -1132,8 +1105,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        return model
-
     def compute_optimal_results(self, inactive_submodels):
         epsilon_models = {
             7: 'obj_1_23',
@@ -1213,8 +1184,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
         model.functionality = quicksum(
             pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
-
-        return model
 
     @staticmethod
     def optimal_points(list_loss, list_dislocation, list_func):
