@@ -41,7 +41,7 @@ class HospitalFunctionality(BaseAnalysis):
         # Functionality and recovery trajectory of the telecommunication system in the investigated community
         Telecom = bt.iloc[:, 4].squeeze()
         # Functionality and recovery trajectory of the wastewater system in the investigated community
-        Westewater = bt.iloc[:, 5].squeeze()
+        Wastewater = bt.iloc[:, 5].squeeze()
         # Functionality and recovery trajectory of the fuel (natural gas) system in the investigated community
         Fuel = bt.iloc[:, 6].squeeze()
         # Functionality and recovery trajectory of the housing units in the investigated community
@@ -120,7 +120,7 @@ class HospitalFunctionality(BaseAnalysis):
 
         # Plot the change in utility functionality over the recovery time
         T_p = list(range(0, 300))  # Plot X axis range
-        plt.plot(T_p, Water, T_p, Power, T_p, Trans, T_p, Telecom, T_p, Westewater, T_p, Fuel, T_p, Housing)
+        plt.plot(T_p, Water, T_p, Power, T_p, Trans, T_p, Telecom, T_p, Wastewater, T_p, Fuel, T_p, Housing)
         plt.xlabel("Time (days)")
         plt.ylabel("Utility (Functionality)")
         font = {'family': 'DejaVu Sans', 'weight': 'bold', 'size': 15}
@@ -139,7 +139,7 @@ class HospitalFunctionality(BaseAnalysis):
 
             # average functionality of the utility
             # average functionality of the utility without transportation
-            E_s_average_no_trans[s] = np.mean([Water[s], Power[s], Telecom[s], Westewater[s], Fuel[s], E_S_n[s]])
+            E_s_average_no_trans[s] = np.mean([Water[s], Power[s], Telecom[s], Wastewater[s], Fuel[s], E_S_n[s]])
             # average utility and transportation
             Utility_trans[s] = (max(R12[s], R13[s]) + E_s_average_no_trans[s]) / 2
             # minimum of utility, transportation and housing
@@ -186,7 +186,7 @@ class HospitalFunctionality(BaseAnalysis):
             R14[s] = max(R14[s], 0)
 
             R15[s] = Telecom[s]  # Telecom service functionality
-            R17[s] = Westewater[s]  # Municipal wastwater functionality
+            R17[s] = Wastewater[s]  # Municipal wastwater functionality
             R19[s] = Water[s]  # Drinking water functionality
 
             # Backup systems
@@ -394,6 +394,40 @@ class HospitalFunctionality(BaseAnalysis):
         plt.xlim([0, 300])
         plt.ylim([0, 1])
         plt.show()
+
+        R_list = []
+        R_list.append(R1)
+        R_list.append(R2)
+        R_list.append(R3)
+        R_list.append(R4)
+        R_list.append(R5)
+        R_list.append(R6)
+        R_list.append(R7)
+        R_list.append(R8)
+        R_list.append(R9)
+        R_list.append(R10)
+        R_list.append(R11)
+        R_list.append(R12)
+        R_list.append(R13)
+        R_list.append(R14)
+        R_list.append(R15)
+        R_list.append(R16)
+        R_list.append(R17)
+        R_list.append(R18)
+        R_list.append(R19)
+        R_list.append(R20)
+        R_list.append(R21)
+        R_list.append(R22)
+        R_list.append(R23)
+        R_list.append(R24)
+        R_list.append(R25)
+        R_list.append(R26)
+        R_list.append(R27)
+        R_list.append(R28)
+        R_list.append(R29)
+        R_list.append(R30)
+
+        return T_p, Water, Power, Trans, Telecom, Wastewater, Fuel, Housing, R_list, Beds, Q_s, F
 
     def get_spec(self):
         return {

@@ -59,3 +59,5 @@ pyincore/analyses/seasidecge/solverconstants/tmp.py
 # credential
 *.incorepw
 
+# test data folder
+tests/pyincore/analyses/hospitalfunctionality/data*
