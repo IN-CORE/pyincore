@@ -69,27 +69,6 @@ class AnalysisUtil:
     def float_dict_to_decimal(num_dict: dict):
         return {key: Decimal(str(num_dict[key])) for key in num_dict}
 
-    @staticmethod
-    @deprecated(version="0.9.0", reason="Use calculate_damage_interval in fragilitycurveset class instead.")
-    def calculate_damage_interval(damage):
-        output = collections.OrderedDict()
-
-        # convert damage to decimal dictionary
-        damage = AnalysisUtil.float_dict_to_decimal(damage)
-
-        if len(damage) == 4:
-            output['ds-none'] = 1 - damage['ls-slight']
-            output['ds-slight'] = damage['ls-slight'] - damage['ls-moderat']
-            output['ds-moderat'] = damage['ls-moderat'] - damage['ls-extensi']
-            output['ds-extensi'] = damage['ls-extensi'] - damage['ls-complet']
-            output['ds-complet'] = damage['ls-complet']
-        elif len(damage) == 3:
-            output['insignific'] = 1 - damage['immocc']
-            output['moderate'] = damage['immocc'] - damage['lifesfty']
-            output['heavy'] = damage['lifesfty'] - damage['collprev']
-            output['complete'] = damage['collprev']
-
-        return output
 
     @staticmethod
     def calculate_mean_damage(dmg_ratio_tbl, dmg_intervals,
@@ -251,12 +230,10 @@ class AnalysisUtil:
             adj_limit_states = collections.OrderedDict()
 
             for key, value in limit_states.items():
-                adj_limit_states[key] = limit_states[key] + pgd_limit_states[
-                    key] - \
-                                        (limit_states[key] * pgd_limit_states[
-                                            key])
+                adj_limit_states[key] = limit_states[key] + pgd_limit_states[key] - \
+                                        (limit_states[key] * pgd_limit_states[key])
 
-            return adj_limit_states
+            return AnalysisUtil.update_precision_of_dicts(adj_limit_states)
 
         except KeyError as e:
             print('Mismatched keys encountered in the limit states')
