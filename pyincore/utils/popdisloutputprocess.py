@@ -19,7 +19,7 @@ class PopDislOutputProcess:
             For example a user wants to directly pass in csv files, a path to PD results.
         filter_name (str): A string to filter data by name, default empty. Example: filter_name="Joplin" for Joplin
             inventory, other is Duquesne etc. Name must be valid.
-        filter_on (bool): A flag to filter all data, default True counts only Joplin buildings.
+        filter_guid (bool): A flag to filter all data, default True counts only Joplin buildings.
         vacant_disl (bool): A flag to include vacant (Vacant for tenure) dislocation
 
     """
@@ -32,7 +32,8 @@ class PopDislOutputProcess:
                        "percent_population_dislocated"
                        ]
 
-    def __init__(self, pop_disl_result, pop_disl_result_path=None, filter_name=None, filter_guid=True, vacant_disl=True):
+    def __init__(self, pop_disl_result, pop_disl_result_path=None,
+                 filter_name=None, filter_guid=True, vacant_disl=True):
         if pop_disl_result_path:
             pd_result = pd.read_csv(pop_disl_result_path, low_memory=False)
         else:
