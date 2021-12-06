@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.0] - 2021-12-15
+
+### Added
+- Vacant household category to population dislocation output [#43](https://github.com/IN-CORE/pyincore/issues/43)
+- Input dataset with target functionality for Joplin empirical restoration [#56](https://github.com/IN-CORE/pyincore/issues/56)
+
+### Fixed
+- EPFDamage to remove deprecated LS/DS code and properly handle liquefaction [#32](https://github.com/IN-CORE/pyincore/issues/32)
+
 ## [1.1.0] - 2021-10-27
 
 ### Added
