@@ -4,7 +4,12 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from infrastructure import load_infrastructure_array_format_extended
+import os
+
+import pandas as pd
+
+from infrastructureutil import InfrastructureUtil
+from pyincore.analyses.indp.indpresults import INDPResults
 
 
 class INDPUtil:
@@ -105,9 +110,10 @@ class INDPUtil:
                             pipe_length_ft = v[1]['Length']
                             rep_rate = {'break': dmg_data_arc.iloc[0]['breakrate'],
                                         'leak': dmg_data_arc.iloc[0]['leakrate']}
-                            rep_time = (rep_rate['break'] * reptime_func_arc['# Fixed Breaks/Day/Worker'] + \
-                                        rep_rate['leak'] * reptime_func_arc['# Fixed Leaks/Day/Worker']) * \
-                                       pipe_length / 4  # assuming a 4-person crew per HAZUS
+                            # assuming a 4-person crew per HAZUS
+                            rep_time = (rep_rate['break'] * reptime_func_arc['# Fixed Breaks/Day/Worker'] +
+                                        rep_rate['leak'] * reptime_func_arc[
+                                            '# Fixed Leaks/Day/Worker']) * pipe_length / 4
                             dr = {'break': dr_data.iloc[0]['break_be'], 'leak': dr_data.iloc[0]['leak_be']}
                             # ..todo Add repair cost uncertainty here
                             # dr = {'break': np.random.uniform(dr_data.iloc[0]['break_min'],
@@ -147,8 +153,209 @@ class INDPUtil:
             interdep_net (class):`~infrastructure.InfrastructureNetwork` The object containing the network data.
 
         """
-        interdep_net = load_infrastructure_array_format_extended(base_dir=base_dir, cost_scale=cost_scale,
-                                                                 extra_commodity=extra_commodity)
+        interdep_net = InfrastructureUtil.load_infrastructure_array_format_extended(base_dir=base_dir,
+                                                                                    cost_scale=cost_scale,
+                                                                                    extra_commodity=extra_commodity)
         return interdep_net
 
+    @staticmethod
+    def save_indp_model_to_file(model, out_model_dir, t, layer=0, suffix=''):
+        """
+        This function saves Gurobi optimization model to file.
 
+        Parameters
+        ----------
+        model : gurobipy.Model
+            Gurobi optimization model
+        out_model_dir : str
+            Directory to which the models should be written
+        t : int
+            The time step corresponding to the model
+        layer : int
+            The layer number corresponding to the model. The default is 0, which means the model includes all layers in
+            the analysis
+        suffix : str
+            The suffix that should be added to files when saved. The default is ''.
+        Returns
+        -------
+        None.
+
+        """
+        if not os.path.exists(out_model_dir):
+            os.makedirs(out_model_dir)
+        # Write models to file
+        l_name = "/Model_t%d_l%d_%s.lp" % (t, layer, suffix)
+        model.write(out_model_dir + l_name)
+        model.update()
+        # Write solution to file
+        s_name = "/Solution_t%d_l%d_%s.txt" % (t, layer, suffix)
+        file_id = open(out_model_dir + s_name, 'w')
+        for vv in model.getVars():
+            file_id.write('%s %g\n' % (vv.varName, vv.x))
+        file_id.write('Obj: %g' % model.objVal)
+        file_id.close()
+
+    @staticmethod
+    def apply_recovery(N, indp_results, t):
+        """
+        This function applies the restoration decisions (solution of INDP) to a Gurobi model by changing the state of
+        repaired elements to functional
+
+        Parameters
+        ----------
+        N : :class:`~infrastructure.InfrastructureNetwork`
+            The model of the interdependent network.
+        indp_results : INDPResults
+            A :class:`~indputils.INDPResults` object containing the optimal restoration decisions.
+        t : int
+            The time step to which the results should apply.
+
+        Returns
+        -------
+        None.
+
+        """
+        for action in indp_results[t]['actions']:
+            if "/" in action:
+                # Edge recovery action.
+                data = action.split("/")
+                src = tuple([int(x) for x in data[0].split(".")])
+                dst = tuple([int(x) for x in data[1].split(".")])
+                N.G[src][dst]['data']['inf_data'].functionality = 1.0
+            else:
+                # Node recovery action.
+                node = tuple([int(x) for x in action.split(".")])
+                # print "Applying recovery:",node
+                N.G.nodes[node]['data']['inf_data'].repaired = 1.0
+                N.G.nodes[node]['data']['inf_data'].functionality = 1.0
+
+    @staticmethod
+    def collect_results(m, controlled_layers, T, n_hat, n_hat_prime, a_hat_prime, S, coloc=True):
+        """
+        This function computes the results (actions and costs) of the optimal results and writes them to a
+        :class:`~indputils.INDPResults` object.
+
+        Parameters
+        ----------
+        m : gurobi.Model
+            The object containing the solved optimization problem.
+        controlled_layers : list
+            Layer IDs that can be recovered in this optimization.
+        T : int
+            Number of time steps in the optimization (T=1 for iINDP, and T>=1 for td-INDP).
+        n_hat : list
+            List of Damaged nodes in the whole networks.
+        n_hat_prime : list
+            List of damaged nodes in controlled networks.
+        a_hat_prime : list
+            List of damaged arcs in controlled networks.
+        S : list
+            List of geographical sites.
+        coloc : bool, optional
+            If false, exclude geographical interdependency from the results. The default is True.
+
+        Returns
+        -------
+        indp_results : INDPResults
+        A :class:`~indputils.INDPResults` object containing the optimal restoration decisions.
+
+        """
+        layers = controlled_layers
+        indp_results = INDPResults(layers)
+        # compute total demand of all layers and each layer
+        total_demand = 0.0
+        total_demand_layer = {layer: 0.0 for layer in layers}
+        for n, d in n_hat.nodes(data=True):
+            demand_value = d['data']['inf_data'].demand
+            if demand_value < 0:
+                total_demand += demand_value
+                total_demand_layer[n[1]] += demand_value
+        for t in range(T):
+            node_cost = 0.0
+            arc_cost = 0.0
+            flow_cost = 0.0
+            over_supp_cost = 0.0
+            under_supp_cost = 0.0
+            under_supp = 0.0
+            space_prep_cost = 0.0
+            node_cost_layer = {layer: 0.0 for layer in layers}
+            arc_cost_layer = {layer: 0.0 for layer in layers}
+            flow_cost_layer = {layer: 0.0 for layer in layers}
+            over_supp_cost_layer = {layer: 0.0 for layer in layers}
+            under_supp_cost_layer = {layer: 0.0 for layer in layers}
+            under_supp_layer = {layer: 0.0 for layer in layers}
+            space_prep_cost_layer = {layer: 0.0 for layer in layers}  # !!! populate this for each layer
+            # Record node recovery actions.
+            for n, d in n_hat_prime:
+                node_var = 'w_tilde_' + str(n) + "," + str(t)
+                if T == 1:
+                    node_var = 'w_' + str(n) + "," + str(t)
+                if round(m.getVarByName(node_var).x) == 1:
+                    action = str(n[0]) + "." + str(n[1])
+                    indp_results.add_action(t, action)
+            # Record edge recovery actions.
+            for u, v, a in a_hat_prime:
+                arc_var = 'y_tilde_' + str(u) + "," + str(v) + "," + str(t)
+                if T == 1:
+                    arc_var = 'y_' + str(u) + "," + str(v) + "," + str(t)
+                if round(m.getVarByName(arc_var).x) == 1:
+                    action = str(u[0]) + "." + str(u[1]) + "/" + str(v[0]) + "." + str(v[1])
+                    indp_results.add_action(t, action)
+            # Calculate space preparation costs.
+            if coloc:
+                for s in S:
+                    space_prep_cost += s.cost * m.getVarByName('z_' + str(s.id) + "," + str(t)).x
+            indp_results.add_cost(t, "Space Prep", space_prep_cost, space_prep_cost_layer)
+            # Calculate arc preparation costs.
+            for u, v, a in a_hat_prime:
+                arc_var = 'y_tilde_' + str(u) + "," + str(v) + "," + str(t)
+                if T == 1:
+                    arc_var = 'y_' + str(u) + "," + str(v) + "," + str(t)
+                arc_cost += (a['data']['inf_data'].reconstruction_cost / 2.0) * m.getVarByName(arc_var).x
+                arc_cost_layer[u[1]] += (a['data']['inf_data'].reconstruction_cost / 2.0) * m.getVarByName(arc_var).x
+            indp_results.add_cost(t, "Arc", arc_cost, arc_cost_layer)
+            # Calculate node preparation costs.
+            for n, d in n_hat_prime:
+                node_var = 'w_tilde_' + str(n) + "," + str(t)
+                if T == 1:
+                    node_var = 'w_' + str(n) + "," + str(t)
+                node_cost += d['data']['inf_data'].reconstruction_cost * m.getVarByName(node_var).x
+                node_cost_layer[n[1]] += d['data']['inf_data'].reconstruction_cost * m.getVarByName(node_var).x
+            indp_results.add_cost(t, "Node", node_cost, node_cost_layer)
+            # Calculate under/oversupply costs.
+            for n, d in n_hat.nodes(data=True):
+                over_supp_cost += d['data']['inf_data'].oversupply_penalty * m.getVarByName(
+                    'delta+_' + str(n) + "," + str(t)).x
+                over_supp_cost_layer[n[1]] += d['data']['inf_data'].oversupply_penalty * m.getVarByName(
+                    'delta+_' + str(n) + "," + str(t)).x
+                under_supp += m.getVarByName('delta-_' + str(n) + "," + str(t)).x
+                under_supp_layer[n[1]] += m.getVarByName('delta-_' + str(n) + "," + str(t)).x / total_demand_layer[n[1]]
+                under_supp_cost += d['data']['inf_data'].undersupply_penalty * m.getVarByName(
+                    'delta-_' + str(n) + "," + str(t)).x
+                under_supp_cost_layer[n[1]] += d['data']['inf_data'].undersupply_penalty * m.getVarByName(
+                    'delta-_' + str(n) + "," + str(t)).x
+            indp_results.add_cost(t, "Over Supply", over_supp_cost, over_supp_cost_layer)
+            indp_results.add_cost(t, "Under Supply", under_supp_cost, under_supp_cost_layer)
+            indp_results.add_cost(t, "Under Supply Perc", under_supp / total_demand, under_supp_layer)
+            # Calculate flow costs.
+            for u, v, a in n_hat.edges(data=True):
+                flow_cost += a['data']['inf_data'].flow_cost * m.getVarByName(
+                    'x_' + str(u) + "," + str(v) + "," + str(t)).x
+                flow_cost_layer[u[1]] += a['data']['inf_data'].flow_cost * m.getVarByName(
+                    'x_' + str(u) + "," + str(v) + "," + str(t)).x
+            indp_results.add_cost(t, "Flow", flow_cost, flow_cost_layer)
+            # Calculate total costs.
+            total_lyr = {}
+            total_nd_lyr = {}
+            for layer in layers:
+                total_lyr[layer] = flow_cost_layer[layer] + arc_cost_layer[layer] + node_cost_layer[layer] + \
+                                   over_supp_cost_layer[layer] + under_supp_cost_layer[layer] + space_prep_cost_layer[
+                                       layer]
+                total_nd_lyr[layer] = space_prep_cost_layer[layer] + arc_cost_layer[layer] + flow_cost +  \
+                    node_cost_layer[layer]
+            indp_results.add_cost(t, "Total",
+                                  flow_cost + arc_cost + node_cost + over_supp_cost + under_supp_cost + space_prep_cost,
+                                  total_lyr)
+            indp_results.add_cost(t, "Total no disconnection", space_prep_cost + arc_cost + flow_cost + node_cost,
+                                  total_nd_lyr)
+        return indp_results

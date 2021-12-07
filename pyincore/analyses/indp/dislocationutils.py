@@ -37,8 +37,8 @@ class DislocationUtil:
         net_names = {'WATER': 1, 'GAS': 2, 'POWER': 3, 'TELECOME': 4}
         dynamic_params = {}
 
-        output_file = dynamic_param_dict['OUT_DIR'] + dynamic_param_dict['TESTBED'] + \
-                      '_pop_dislocation_demands_' + str(params['MAGNITUDE']) + 'yr.pkl'
+        output_file = dynamic_param_dict['OUT_DIR'] + dynamic_param_dict['TESTBED'] + '_pop_dislocation_demands_' + str(
+            params['MAGNITUDE']) + 'yr.pkl'
         if os.path.exists(output_file):
             print("\nReading from file...")
             with open(output_file, 'rb') as f:
@@ -72,7 +72,7 @@ class DislocationUtil:
                             total_pop_node += hh['numprec'] if ~np.isnan(hh['numprec']) else 0
                             if hh['dislocated']:
                                 # ..todo Lumebrton dislocation time model. Replace with that of Seaside when available
-                                return_time = lumberton_disloc_time_mode(hh)
+                                return_time = DislocationUtil.lumberton_disloc_time_mode(hh)
                                 for t in range(return_time):
                                     if t <= T and return_type == 'step_function':
                                         num_dilocated[t] += hh['numprec'] if ~np.isnan(hh['numprec']) else 0
@@ -140,9 +140,9 @@ class DislocationUtil:
         # ..todo verify that the explanatory variable correspond to columns in dt_params
         # ..todo Replace random insurance assumption
         linear_term = household_data['DS_0'] * dt_params['DS0'] + household_data['DS_1'] * dt_params['DS1'] + \
-                      household_data['DS_2'] * dt_params['DS2'] + household_data['DS_3'] * dt_params['DS3'] + \
-                      race_white * dt_params['white'] + race_balck * dt_params['black'] + hispan * dt_params['hispanic'] + \
-                      np.random.choice([0, 1], p=[.15, .85]) * dt_params['insurance']
+            household_data['DS_2'] * dt_params['DS2'] + household_data['DS_3'] * dt_params[
+                          'DS3'] + race_white * dt_params['white'] + race_balck * dt_params['black'] + hispan * \
+            dt_params['hispanic'] + np.random.choice([0, 1], p=[.15, .85]) * dt_params['insurance']
         # household_data['randincome']/1000*dt_params['income']+\#!!! income data
         disloc_time = np.exp(linear_term)
         return_time = math.ceil(disloc_time / 7)  # !!! assuming each time step is one week
