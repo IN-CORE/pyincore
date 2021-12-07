@@ -171,7 +171,6 @@ class BuildingDamage(BaseAnalysis):
             num_stories = b['properties']['no_stories']
             selected_fragility_set = fragility_sets[b_id]
 
-            building_period = selected_fragility_set.fragility_curves[0].get_building_period(num_stories)
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurve):
@@ -191,6 +190,9 @@ class BuildingDamage(BaseAnalysis):
                     j += 1
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_vals[i]["hazardValues"]):
                     building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
+
+                    building_period = selected_fragility_set.fragility_curves[0].get_building_period(
+                        selected_fragility_set.fragility_curve_parameters, **building_args)
 
                     dmg_probability = selected_fragility_set.calculate_limit_state(
                         hval_dict, **building_args, period=building_period)
