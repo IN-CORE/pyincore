@@ -5,30 +5,16 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 from pyincore import BaseAnalysis
-import sys
-import os
 import pandas as pd
 import numpy as np
-import csv
 import time
-import matplotlib.pyplot as plt
-#from gurobipy import *
-import scipy.interpolate as interp
-import matplotlib as mpl
-from mpl_toolkits.mplot3d import Axes3D
 from pandas import DataFrame
 from pyomo.environ import ConcreteModel, Set, Var, Param, Objective, Constraint
 from pyomo.environ import quicksum, minimize, maximize, NonNegativeReals, Any
 from pyomo.environ import sum_product
 import pyomo.environ as pyo
-#from pyomo.environ import *
-from pyomo.opt import SolverFactory, SolverManagerFactory
 from pyomo.opt import SolverStatus, TerminationCondition
 from pyomo.util.infeasible import log_infeasible_constraints
-#import palettable.colorbrewer
-import zipfile
-import getopt
-import glob
 
 
 class MultiObjectiveRetrofitOptimization(BaseAnalysis):
@@ -115,10 +101,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         self.ostr = open('pyincore.txt', 'w')
 
         # Setup the model
-        print("Base model")
         model, sum_sc = self.configure_model(budget_available, scaling_factor, building_functionality_csv,
                                                   strategy_costs_csv)
-        print("With objectives model")
         self.configure_model_objectives(model)
         print("With constraints model")
         self.configure_model_retrofit_costs(model) # Suspicious
@@ -164,13 +148,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 building_functionality_csv[self.__Q_col].map(lambda a: a/scaling_factor)
             strategy_costs_csv[self.__SC_col] = strategy_costs_csv[self.__SC_col].map(lambda a: a/scaling_factor)
 
-        # Create IO stream to store information
-
-
         # Setup pyomo
         model = ConcreteModel()
-        self.ostr.write('empty-model\n\n')
-        model.pprint(ostream=self.ostr)
 
         model.Z = Set(initialize=building_functionality_csv.Z.unique())
         model.S = Set(initialize=building_functionality_csv.S.unique())
@@ -221,6 +200,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             zskk_prime.append((i, j, k, k_prime))  # Add the combination to the list.
         zskk_prime = sorted(set(zskk_prime), key=zskk_prime.index)  # Convert the list to an ordered set for Pyomo.
         model.ZSKK_prime = Set(initialize=zskk_prime)  # Define and initialize the ZSKK_prime set in Pyomo.
+        model.zskk_prime = zskk_prime # Use the redundant index for later reference
 
         ####################################################################################################
         # DEFINE VARIABLES AND PARAMETERS:
@@ -288,9 +268,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Define the total available budget based on user's input:
         model.B = sumSc * budget_available
 
-        self.ostr.write('configured-model\n\n')
-        model.pprint(ostream=self.ostr)
-
         return model, sumSc
 
     def configure_model_objectives(self, model):
@@ -312,21 +289,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.objective_3 = Objective(rule=self.obj_functionality, sense=maximize)
         model.functionality = Param(mutable=True, within=NonNegativeReals)  # ,default=1)
 
-        self.ostr.write('objectives-model\n\n')
-        model.pprint(ostream=self.ostr)
-
     def configure_model_retrofit_costs(self, model):
-        print('budget constraint')
         model.retrofit_budget_constraint = Constraint(rule=self.retrofit_cost_rule)
-        print('biuldings ij constraint')
         model.number_buildings_ij_constraint = Constraint(model.ZS, rule=self.number_buildings_ij_rule)
-        print('building level constraint')
         model.a = Param(mutable=True)
         model.c = Param(mutable=True)
         model.building_level_constraint = Constraint(model.ZSK, rule=self.building_level_rule)
-
-        self.ostr.write('constrained-model\n\n')
-        model.pprint(ostream=self.ostr)
 
     def solve_individual_models(self, model, model_solver_setting, sum_sc):
         print("Max Budget: $", sum_sc)
@@ -355,15 +323,9 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         starttime = time.time()
         print("Initial solve for objective function 1 starting.")
         # Activate objective function 1 (minimize economic loss) and deactivate others:
-        print('ob_1 ac')
         model.objective_1.activate()
-        print('ob_2 deac')
         model.objective_2.deactivate()
-        print('ob_3 deac')
         model.objective_3.deactivate()
-
-        self.ostr.write('obj1-model\n\n')
-        model.pprint(ostream=self.ostr)
 
         # Solve the model:
         results = model_solver_setting.solve(model)
@@ -440,15 +402,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         starttime = time.time()
         print("Initial solve for objective function 3 starting.")
         # Activate objective function 3 (maximize functionality) and deactivate others:
-        print('ob_1 deac')
         model.objective_1.deactivate()
-        print('ob_2 deac')
         model.objective_2.deactivate()
-        print('ob_3 ac')
         model.objective_3.activate()
 
         # Solve the model:
-        print('mod solve')
         results = model_solver_setting.solve(model)
 
         # Save the results if the solver returns an optimal solution:
@@ -626,7 +584,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model = self.extract_optimization_results(model)
+                self.extract_optimization_results(model)
                 # Add objective (economic loss), dislocation, and functionality values to results dataframe:
                 obj_1_3_epsilon_results.loc[counter - 1, 'Economic Loss(Million Dollars)'] = pyo.value(
                     model.econ_loss)  # Save the optimal economic loss value.
@@ -685,7 +643,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model = self.extract_optimization_results(model)
+                self.extract_optimization_results(model)
                 # Add objective (dislocation), economic loss, and functionality values to results dataframe:
                 obj_2_1_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
                     model.dislocation)  # Save the optimal dislocation value.
@@ -744,7 +702,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model = self.extract_optimization_results(model)
+                self.extract_optimization_results(model)
                 # Add objective (dislocation), economic loss, and functionality values to results dataframe:
                 obj_2_3_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
                     model.dislocation)  # Save the optimal dislocation value.
@@ -803,7 +761,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model = self.extract_optimization_results(model)
+                self.extract_optimization_results(model)
                 # Add objective (functionality), economic loss, and dislocation values to results dataframe:
                 obj_3_1_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
                     model.functionality)  # Save the optimal functionality value.
@@ -862,7 +820,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             # Save the results if the solver returns an optimal solution:
             if (results.solver.status == SolverStatus.ok) and (
                     results.solver.termination_condition == TerminationCondition.optimal):
-                model = self.extract_optimization_results(model)
+                self.extract_optimization_results(model)
                 # Add objective (functionality), economic loss, and dislocation values to results dataframe:
                 obj_3_2_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
                     model.functionality)  # Save the optimal functionality value.
@@ -929,7 +887,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 # Save the results if the solver returns an optimal solution:
                 if (results.solver.status == SolverStatus.ok) and (
                         results.solver.termination_condition == TerminationCondition.optimal):
-                    model = self.extract_optimization_results(model)
+                    self.extract_optimization_results(model)
                     budget_used = quicksum(pyo.value(model.y_ijkk_prime[i, j, k, k_prime]) * pyo.value(
                         model.Sc_ijkk_prime[i, j, k, k_prime]) for (i, j, k, k_prime) in model.ZSKK_prime)
                     percent_budget_used = (budget_used / pyo.value(
@@ -1009,7 +967,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 # Save the results if the solver returns an optimal solution:
                 if (results.solver.status == SolverStatus.ok) and (
                         results.solver.termination_condition == TerminationCondition.optimal):
-                    model = self.extract_optimization_results(model)
+                    self.extract_optimization_results(model)
                     budget_used = quicksum(pyo.value(model.y_ijkk_prime[i, j, k, k_prime]) * pyo.value(
                         model.Sc_ijkk_prime[i, j, k, k_prime]) for (i, j, k, k_prime) in model.ZSKK_prime)
                     percent_budget_used = (budget_used / pyo.value(
@@ -1089,7 +1047,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 # Save the results if the solver returns an optimal solution:
                 if (results.solver.status == SolverStatus.ok) and (
                         results.solver.termination_condition == TerminationCondition.optimal):
-                    model = self.extract_optimization_results(model)
+                    self.extract_optimization_results(model)
                     budget_used = quicksum(pyo.value(model.y_ijkk_prime[i, j, k, k_prime]) * pyo.value(
                         model.Sc_ijkk_prime[i, j, k, k_prime]) for (i, j, k, k_prime) in model.ZSKK_prime)
                     percent_budget_used = (budget_used / pyo.value(
@@ -1173,12 +1131,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # return(sum_product(model.Q_t_hat,model.x_ijk))
         return quicksum(model.Q_t_hat[i, j, k] * model.x_ijk[i, j, k] for (i, j, k) in model.ZSK)
 
-    # Retrofit cost constraints
     @staticmethod
     def retrofit_cost_rule(model):
         return (None,
                 quicksum(
-                    model.Sc_ijkk_prime[i, j, k, k_prime] * model.y_ijkk_prime[i, j, k, k_prime] for (i, j, k, k_prime)
+                    model.Sc_ijkk_prime[i, j, k, k_prime] * model.y_ijkk_prime[i, j, k, k_prime] for
+                    (i, j, k, k_prime)
                     in model.ZSKK_prime),
                 pyo.value(model.B))
 
@@ -1198,7 +1156,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 model.x_ijk[i, j, k] + quicksum(model.y_ijkk_prime[i, j, k, k_prime] for k_prime in model.K_prime if
                                                 (i, j, k, k_prime) in model.zskk_prime) -
                 quicksum(model.y_ijkk_prime[i, j, k_prime, k] for k_prime in model.K_prime if
-                    (i, j, k_prime, k) in model.zskk_prime),
+                         (i, j, k_prime, k) in model.zskk_prime),
                 pyo.value(model.b_ijk[i, j, k]))
 
     @staticmethod
