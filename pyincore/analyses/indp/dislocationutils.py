@@ -3,11 +3,12 @@ These function compute the change of demand values over time based on population
 dislocation time model for Lumberton.
 """
 
-import pickle
-import pandas as pd
-import os
-import numpy as np
 import math
+import os
+import pickle
+
+import numpy as np
+import pandas as pd
 
 
 class DislocationUtil:
@@ -22,7 +23,8 @@ class DislocationUtil:
         params : dict
             Parameters that are needed to run the INDP optimization.
         T : int, optional
-            Number of time steps to optimize over. T=1 shows an iINDP analysis, and T>1 shows a td-INDP. The default is 1.
+            Number of time steps to optimize over. T=1 shows an iINDP analysis, and T>1 shows a td-INDP. The default is
+            1.
         N : :class:`~infrastructure.InfrastructureNetwork`
             The object containing the network data.
 
@@ -110,7 +112,7 @@ class DislocationUtil:
                                 if ~np.isnan(hh['numprec']) else 0
                             if hh['dislocated']:
                                 # ..todo Lumebrton dislocation time model. Replace with that of Seaside when available
-                                return_time = lumberton_disloc_time_mode(hh)
+                                return_time = DislocationUtil.lumberton_disloc_time_mode(hh)
                                 for t in range(return_time):
                                     if t <= T and return_type == 'step_function':
                                         node_pop[start_node]['num_dilocated'][t] += hh['numprec'] / 4 \

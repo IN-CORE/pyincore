@@ -359,3 +359,54 @@ class INDPUtil:
             indp_results.add_cost(t, "Total no disconnection", space_prep_cost + arc_cost + flow_cost + node_cost,
                                   total_nd_lyr)
         return indp_results
+
+    @staticmethod
+    def collect_solution_pool(m, T, n_hat_prime, a_hat_prime):
+        """
+        This function collects the result (list of repaired nodes and arcs) for all feasible solutions in the
+        solution pool.
+
+        Parameters
+        ----------
+        m : gurobi.Model
+            The object containing the solved optimization problem.
+        T : int
+            Number of time steps in the optimization (T=1 for iINDP, and T>=1 for td-INDP).
+        n_hat_prime : list
+            List of damaged nodes in controlled networks.
+        a_hat_prime : list
+            List of damaged arcs in controlled networks.
+
+        Returns
+        -------
+        sol_pool_results : dict
+        A dictionary containing one dictionary per solution that contains list of repaired node and arcs in the
+        solution.
+
+        """
+        sol_pool_results = {}
+        current_sol_count = 0
+        for sol in range(m.SolCount):
+            m.setParam('SolutionNumber', sol)
+            # print(m.PoolObjVal)
+            sol_pool_results[sol] = {'nodes': [], 'arcs': []}
+            for t in range(T):
+                # Record node recovery actions.
+                for n, d in n_hat_prime:
+                    node_var = 'w_tilde_' + str(n) + "," + str(t)
+                    if T == 1:
+                        node_var = 'w_' + str(n) + "," + str(t)
+                    if round(m.getVarByName(node_var).xn) == 1:
+                        sol_pool_results[sol]['nodes'].append(n)
+                # Record edge recovery actions.
+                for u, v, a in a_hat_prime:
+                    arc_var = 'y_tilde_' + str(u) + "," + str(v) + "," + str(t)
+                    if T == 1:
+                        arc_var = 'y_' + str(u) + "," + str(v) + "," + str(t)
+                    if round(m.getVarByName(arc_var).x) == 1:
+                        sol_pool_results[sol]['arcs'].append((u, v))
+            if sol > 0 and sol_pool_results[sol] == sol_pool_results[current_sol_count]:
+                del sol_pool_results[sol]
+            elif sol > 0:
+                current_sol_count = sol
+        return sol_pool_results

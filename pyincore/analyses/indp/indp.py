@@ -5,17 +5,18 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
+import copy
+import os
+import time
+
+from gurobipy import GRB, Model, LinExpr
+
 from pyincore import BaseAnalysis
-from pyincore.analyses.indp.indputil import INDPUtil
-from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 from pyincore.analyses.indp.dislocationutils import DislocationUtil
 from pyincore.analyses.indp.indpcomponents import INDPComponents
 from pyincore.analyses.indp.indpresults import INDPResults
-
-import time
-from gurobipy import GRB, Model, LinExpr
-import copy
-import os
+from pyincore.analyses.indp.indputil import INDPUtil
+from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 
 
 class INDP(BaseAnalysis):
@@ -71,8 +72,8 @@ class INDP(BaseAnalysis):
             fail_sce_param (dict): information about damage scenarios.
             v_r (list): number of resources, if this is a list of floats, each float is interpreted as a different
             total number of resources, and INDP
-            is run given the total number of resources. If this is a list of lists of floats, each list is interpreted as
-            fixed upper bounds on the number of resources each layer can use (same for all time steps).
+            is run given the total number of resources. If this is a list of lists of floats, each list is interpreted
+            as fixed upper bounds on the number of resources each layer can use (same for all time steps).
             layers (list): List of layers.
             method (str): Algorithm type.
             t_steps (int): Number of time steps of the analysis.
@@ -214,8 +215,8 @@ class INDP(BaseAnalysis):
                 DislocationUtil.dynamic_parameters(interdependent_net, original_N, 0,
                                                    params['DYNAMIC_PARAMS']['DEMAND_DATA'])
             v_0 = {x: 0 for x in params["V"].keys()}
-            results = indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
-                           functionality=functionality, co_location=co_location)
+            results = self.indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
+                                functionality=functionality, co_location=co_location)
             indp_results = results[1]
             indp_results.add_components(0, INDPComponents.calculate_components(results[0], interdependent_net,
                                                                                layers=controlled_layers))
@@ -224,8 +225,8 @@ class INDP(BaseAnalysis):
                 if params['DYNAMIC_PARAMS']:
                     DislocationUtil.dynamic_parameters(interdependent_net, original_N, i + 1,
                                                        params['DYNAMIC_PARAMS']['DEMAND_DATA'])
-                results = indp(interdependent_net, params["V"], T, layers, controlled_layers=controlled_layers,
-                               forced_actions=forced_actions, co_location=co_location)
+                results = self.indp(interdependent_net, params["V"], T, layers, controlled_layers=controlled_layers,
+                                    forced_actions=forced_actions, co_location=co_location)
                 indp_results.extend(results[1], t_offset=i + 1)
                 if save_model:
                     INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", i + 1)
@@ -247,8 +248,8 @@ class INDP(BaseAnalysis):
             print("Running td-INDP (T=" + str(T) + ", Window size=" + str(time_window_length) + ")")
             # Initial percolation calculations.
             v_0 = {x: 0 for x in params["V"].keys()}
-            results = indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
-                           functionality=functionality, co_location=co_location)
+            results = self.indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
+                                functionality=functionality, co_location=co_location)
             indp_results = results[1]
             indp_results.add_components(0, INDPComponents.calculate_components(results[0], interdependent_net,
                                                                                layers=controlled_layers))
@@ -266,9 +267,9 @@ class INDP(BaseAnalysis):
                         for d in range(diff):
                             functionality_t[max_t + d + 1] = functionality_t[max_t]
                 # Run td-INDP.
-                results = indp(interdependent_net, params["V"], time_window_length + 1, layers,
-                               controlled_layers=controlled_layers, functionality=functionality_t,
-                               forced_actions=forced_actions, co_location=co_location)
+                results = self.indp(interdependent_net, params["V"], time_window_length + 1, layers,
+                                    controlled_layers=controlled_layers, functionality=functionality_t,
+                                    forced_actions=forced_actions, co_location=co_location)
                 if save_model:
                     INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", n + 1)
                 if "WINDOW_LENGTH" in params:
@@ -310,11 +311,13 @@ class INDP(BaseAnalysis):
             If the value is a scalar for a type, it shows the total number of resources of that type for all layers.
             If the value is a list for a type, it shows the total number of resources of that type given to each layer.
         T : int, optional
-            Number of time steps to optimize over. T=1 shows an iINDP analysis, and T>1 shows a td-INDP. The default is 1.
+            Number of time steps to optimize over. T=1 shows an iINDP analysis, and T>1 shows a td-INDP. The default is
+            1.
         layers : list, optional
             Layer IDs in N included in the optimization.
         controlled_layers : list, optional
-            Layer IDs that can be recovered in this optimization. Used for decentralized optimization. The default is None.
+            Layer IDs that can be recovered in this optimization. Used for decentralized optimization. The default is
+            None.
         functionality : dict, optional
             Dictionary of nodes to functionality values for non-controlled nodes.
             Used for decentralized optimization. The default is None.
@@ -337,9 +340,9 @@ class INDP(BaseAnalysis):
         : list
         A list of the form ``[m, results]`` for a successful optimization where m is the Gurobi  optimization model and
             results is a :class:`~indputils.INDPResults` object generated using  :func:`collect_results`.
-            If :envvar:`solution_pool` is set to a number, the function returns ``[m, results,  sol_pool_results]`` where
-            `sol_pool_results` is dictionary of solution that should be retrieved from the optimizer in addition to the
-            optimal one collected using :func:`collect_solution_pool`.
+            If :envvar:`solution_pool` is set to a number, the function returns ``[m, results,  sol_pool_results]``
+            where `sol_pool_results` is dictionary of solution that should be retrieved from the optimizer in
+            addition to the optimal one collected using :func:`collect_solution_pool`.
 
         """
         if fixed_nodes is None:
@@ -400,9 +403,9 @@ class INDP(BaseAnalysis):
             for n, d in n_hat.nodes(data=True):
                 m.addVar(name='delta+_' + str(n) + "," + str(t), lb=0.0)
                 m.addVar(name='delta-_' + str(n) + "," + str(t), lb=0.0)
-                for l in d['data']['inf_data'].extra_com.keys():
-                    m.addVar(name='delta+_' + str(n) + "," + str(t) + "," + str(l), lb=0.0)
-                    m.addVar(name='delta-_' + str(n) + "," + str(t) + "," + str(l), lb=0.0)
+                for layer in d['data']['inf_data'].extra_com.keys():
+                    m.addVar(name='delta+_' + str(n) + "," + str(t) + "," + str(layer), lb=0.0)
+                    m.addVar(name='delta-_' + str(n) + "," + str(t) + "," + str(layer), lb=0.0)
             # Add functionality binary variables for each node in N'.
             for n, d in n_hat.nodes(data=True):
                 m.addVar(name='w_' + str(n) + "," + str(t), vtype=GRB.BINARY)
@@ -416,8 +419,8 @@ class INDP(BaseAnalysis):
             # Add flow variables for each arc. (main commodity)
             for u, v, a in n_hat.edges(data=True):
                 m.addVar(name='x_' + str(u) + "," + str(v) + "," + str(t), lb=0.0)
-                for l in a['data']['inf_data'].extra_com.keys():
-                    m.addVar(name='x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(l), lb=0.0)
+                for layer in a['data']['inf_data'].extra_com.keys():
+                    m.addVar(name='x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer), lb=0.0)
             # Add functionality binary variables for each arc in A'.
             for u, v, a in a_hat_prime:
                 m.addVar(name='y_' + str(u) + "," + str(v) + "," + str(t), vtype=GRB.BINARY)
@@ -448,18 +451,18 @@ class INDP(BaseAnalysis):
                 obj_func += d['data']['inf_data'].oversupply_penalty * m.getVarByName('delta+_' + str(n) + "," + str(t))
                 obj_func += d['data']['inf_data'].undersupply_penalty * m.getVarByName(
                     'delta-_' + str(n) + "," + str(t))
-                for l, val in d['data']['inf_data'].extra_com.items():
+                for layer, val in d['data']['inf_data'].extra_com.items():
                     obj_func += val['oversupply_penalty'] * m.getVarByName(
-                        'delta+_' + str(n) + "," + str(t) + "," + str(l))
+                        'delta+_' + str(n) + "," + str(t) + "," + str(layer))
                     obj_func += val['undersupply_penalty'] * m.getVarByName(
-                        'delta-_' + str(n) + "," + str(t) + "," + str(l))
+                        'delta-_' + str(n) + "," + str(t) + "," + str(layer))
 
             for u, v, a in n_hat.edges(data=True):
                 obj_func += a['data']['inf_data'].flow_cost * m.getVarByName(
                     'x_' + str(u) + "," + str(v) + "," + str(t))
-                for l, val in a['data']['inf_data'].extra_com.items():
+                for layer, val in a['data']['inf_data'].extra_com.items():
                     obj_func += val['flow_cost'] * m.getVarByName(
-                        'x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(l))
+                        'x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer))
 
         m.setObjective(obj_func, GRB.MINIMIZE)
         m.update()
@@ -514,19 +517,20 @@ class INDP(BaseAnalysis):
                     'delta+_' + str(n) + "," + str(t)) + m.getVarByName('delta-_' + str(n) + "," + str(t))
                 m.addConstr(out_flow_constr - in_flow_constr, GRB.EQUAL, demand_constr,
                             "Flow conservation constraint " + str(n) + "," + str(t))
-                for l, val in d['data']['inf_data'].extra_com.items():
+                for layer, val in d['data']['inf_data'].extra_com.items():
                     out_flow_constr = LinExpr()
                     in_flow_constr = LinExpr()
                     demand_constr = LinExpr()
                     for u, v, a in n_hat.out_edges(n, data=True):
-                        out_flow_constr += m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(l))
+                        out_flow_constr += m.getVarByName(
+                            'x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer))
                     for u, v, a in n_hat.in_edges(n, data=True):
-                        in_flow_constr += m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(l))
-                    demand_constr += val['demand'] - \
-                                     m.getVarByName('delta+_' + str(n) + "," + str(t) + "," + str(l)) + \
-                                     m.getVarByName('delta-_' + str(n) + "," + str(t) + "," + str(l))
+                        in_flow_constr += m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer))
+                    demand_constr += val['demand'] - m.getVarByName(
+                        'delta+_' + str(n) + "," + str(t) + "," + str(layer)) + m.getVarByName(
+                        'delta-_' + str(n) + "," + str(t) + "," + str(layer))
                     m.addConstr(out_flow_constr - in_flow_constr, GRB.EQUAL, demand_constr,
-                                "Flow conservation constraint " + str(n) + "," + str(t) + "," + str(l))
+                                "Flow conservation constraint " + str(n) + "," + str(t) + "," + str(layer))
 
             # Flow functionality constraints.
             if not functionality:
@@ -535,8 +539,8 @@ class INDP(BaseAnalysis):
                 interdep_nodes_list = interdep_nodes[t].keys()  # Interdependent nodes with a damaged dependee node
             for u, v, a in n_hat.edges(data=True):
                 lhs = m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t)) + \
-                      sum([m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(l)) \
-                           for l in a['data']['inf_data'].extra_com.keys()])
+                      sum([m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer)) for layer in
+                           a['data']['inf_data'].extra_com.keys()])
                 if (u in [n for (n, d) in n_hat_prime]) | (u in interdep_nodes_list):
                     m.addConstr(lhs, GRB.LESS_EQUAL,
                                 a['data']['inf_data'].capacity * m.getVarByName('w_' + str(u) + "," + str(t)),
@@ -605,13 +609,13 @@ class INDP(BaseAnalysis):
                         if is_sep_res:
                             res_left_constr_sep[idx_lyr] += res_use * m.getVarByName('w_tilde_' + str(n) + "," + str(t))
 
-                m.addConstr(resource_left_constr, GRB.LESS_EQUAL, total_resource,
-                            "Resource availability constraint for " + rc + " at " + str(t) + ".")
+                m.addConstr(resource_left_constr, GRB.LESS_EQUAL, total_resource, "Resource availability constraint "
+                                                                                  "for " + rc + " at " + str(t) + ".")
                 if is_sep_res:
                     for k, lval in val.items():
-                        m.addConstr(res_left_constr_sep[k], GRB.LESS_EQUAL, lval,
-                                    "Resource availability constraint for " + rc + " at " + \
-                                    str(t) + " for layer " + str(k) + ".")
+                        m.addConstr(res_left_constr_sep[k], GRB.LESS_EQUAL, lval, "Resource availability constraint "
+                                                                                  "for " + rc + " at " + str(
+                            t) + " for layer " + str(k) + ".")
 
             # Interdependency constraints
             infeasible_actions = []
@@ -707,10 +711,11 @@ class INDP(BaseAnalysis):
         if m.getAttr("Status") == GRB.OPTIMAL or m.status == 9:
             if m.status == 9:
                 print('\nOptimizer time limit, gap = %1.3f\n' % m.MIPGap)
-            results = collect_results(m, controlled_layers, T, n_hat, n_hat_prime, a_hat_prime, S, coloc=co_location)
+            results = INDPUtil.collect_results(m, controlled_layers, T, n_hat, n_hat_prime, a_hat_prime, S,
+                                               coloc=co_location)
             results.add_run_time(t, run_time)
             if solution_pool:
-                sol_pool_results = collect_solution_pool(m, T, n_hat_prime, a_hat_prime)
+                sol_pool_results = INDPUtil.collect_solution_pool(m, T, n_hat_prime, a_hat_prime)
                 return [m, results, sol_pool_results]
             return [m, results]
         else:

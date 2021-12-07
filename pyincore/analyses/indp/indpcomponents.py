@@ -1,3 +1,11 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+import string
+
 
 class INDPComponents:
     """
@@ -12,6 +20,7 @@ class INDPComponents:
     gc_size : int
         Size of the largest component of the network
     """
+
     def __init__(self):
         self.components = []
         self.num_components = 0
