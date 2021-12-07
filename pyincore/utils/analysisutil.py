@@ -11,7 +11,6 @@ import re
 from typing import List, Dict
 from collections import Counter
 
-from deprecated.sphinx import deprecated
 from decimal import getcontext, Decimal
 
 from pyincore import DataService

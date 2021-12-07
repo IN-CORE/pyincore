@@ -168,9 +168,7 @@ class BuildingDamage(BaseAnalysis):
             dmg_probability = dict()
             dmg_interval = dict()
             b_id = b["id"]
-            num_stories = b['properties']['no_stories']
             selected_fragility_set = fragility_sets[b_id]
-
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
             if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurve):
