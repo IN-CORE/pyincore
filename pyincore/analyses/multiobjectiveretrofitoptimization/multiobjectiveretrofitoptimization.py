@@ -81,12 +81,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         if in_subm is not None:
             inactive_submodels = in_subm
 
+        # Perform code scaling
         scaling_factor = 1.0
         if self.get_parameter('scale_data'):
             scaling_factor = self.get_parameter('scaling_factor')
 
         building_repairs_csv = self.get_input_dataset('building_repairs_data').get_dataframe_from_csv()
         strategy_costs_csv = self.get_input_dataset('strategy_costs_data').get_dataframe_from_csv()
+
+        # Convert Z columns to text in both datasets
+        building_repairs_csv['Z'] = building_repairs_csv['Z'].astype(str)
+        strategy_costs_csv['Z'] = strategy_costs_csv['Z'].astype(str)
 
         self.multiobjective_retrofit_optimization_model(model_solver, num_epsilon_steps, budget_available,
                                                         scaling_factor, inactive_submodels, building_repairs_csv,
@@ -106,6 +111,9 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             building_functionality_csv (pd.DataFrame): building repairs after a disaster event
             strategy_costs_csv (pd.DataFrame): strategy cost data per building
         """
+        # Setup the stream that will collect data
+        self.ostr = open('pyincore.txt', 'w')
+
         # Setup the model
         print("Base model")
         model, sum_sc = self.configure_model(budget_available, scaling_factor, building_functionality_csv,
@@ -156,8 +164,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 building_functionality_csv[self.__Q_col].map(lambda a: a/scaling_factor)
             strategy_costs_csv[self.__SC_col] = strategy_costs_csv[self.__SC_col].map(lambda a: a/scaling_factor)
 
+        # Create IO stream to store information
+
+
         # Setup pyomo
         model = ConcreteModel()
+        self.ostr.write('empty-model\n\n')
+        model.pprint(ostream=self.ostr)
 
         model.Z = Set(initialize=building_functionality_csv.Z.unique())
         model.S = Set(initialize=building_functionality_csv.S.unique())
@@ -275,6 +288,9 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Define the total available budget based on user's input:
         model.B = sumSc * budget_available
 
+        self.ostr.write('configured-model\n\n')
+        model.pprint(ostream=self.ostr)
+
         return model, sumSc
 
     def configure_model_objectives(self, model):
@@ -296,6 +312,9 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.objective_3 = Objective(rule=self.obj_functionality, sense=maximize)
         model.functionality = Param(mutable=True, within=NonNegativeReals)  # ,default=1)
 
+        self.ostr.write('objectives-model\n\n')
+        model.pprint(ostream=self.ostr)
+
     def configure_model_retrofit_costs(self, model):
         print('budget constraint')
         model.retrofit_budget_constraint = Constraint(rule=self.retrofit_cost_rule)
@@ -305,6 +324,9 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.a = Param(mutable=True)
         model.c = Param(mutable=True)
         model.building_level_constraint = Constraint(model.ZSK, rule=self.building_level_rule)
+
+        self.ostr.write('constrained-model\n\n')
+        model.pprint(ostream=self.ostr)
 
     def solve_individual_models(self, model, model_solver_setting, sum_sc):
         print("Max Budget: $", sum_sc)
@@ -339,6 +361,9 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.objective_2.deactivate()
         print('ob_3 deac')
         model.objective_3.deactivate()
+
+        self.ostr.write('obj1-model\n\n')
+        model.pprint(ostream=self.ostr)
 
         # Solve the model:
         results = model_solver_setting.solve(model)
