@@ -29,7 +29,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         Contributors
             | Science: Charles Nicholson, Yunjie Wen
-            | Implementation: Dale Cochran , Tarun Adluri , Jorge Duarte, Santiago Núñez-Corrales,
+            | Implementation: Dale Cochran , Tarun Adluri , Jorge Duarte, Santiago Núñez-Corrales, Diego Calderon
                               and NCSA IN-CORE Dev Team
 
         Related publications
