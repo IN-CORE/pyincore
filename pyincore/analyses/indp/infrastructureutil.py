@@ -41,6 +41,7 @@ class InfrastructureUtil:
         global_index = 0
         for file in files:
             fname = file[0:-4]
+
             if fname[-5:] == 'Nodes':
                 with open(base_dir + file) as f:
                     data = pd.read_csv(f, delimiter=',')
