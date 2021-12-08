@@ -122,12 +122,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Epsilon model")
         self.solve_epsilon_models(model, model_solver_setting, inactive_submodels)
 
-        file_list = self.compute_optimal_results(inactive_submodels)
-        self.set_result_csv_data("out1", file_list[0], name="out1",
+        df_list = self.compute_optimal_results(inactive_submodels)
+
+        self.set_result_csv_data("out1", df_list[0], name="out1",
                                  source="dataframe")
-        self.set_result_csv_data("out2", file_list[1], name="out2",
+        self.set_result_csv_data("out2", df_list[1], name="out2",
                                  source="dataframe")
-        self.set_result_csv_data("out3", file_list[2], name="out3",
+        self.set_result_csv_data("out3", df_list[2], name="out3",
                                  source="dataframe")
         return True
 
@@ -1109,9 +1110,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 zipped_list = self.optimal_points(list_loss, list_dislocation, list_func)
                 optimal = pd.DataFrame(zipped_list, columns=['Iteration', 'Economic Loss(Million Dollars)',
                                                              'Dislocation Value', 'Functionality Value'])
-                file_name = obj + '_optimal_results.csv'
-                optimal.to_csv(file_name, index=False)
-                file_list.append(file_name)
+                file_list.append(optimal)
 
         return file_list
 
