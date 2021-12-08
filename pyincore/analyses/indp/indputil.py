@@ -8,7 +8,7 @@ import os
 
 import pandas as pd
 
-from infrastructureutil import InfrastructureUtil
+from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 from pyincore.analyses.indp.indpresults import INDPResults
 
 
