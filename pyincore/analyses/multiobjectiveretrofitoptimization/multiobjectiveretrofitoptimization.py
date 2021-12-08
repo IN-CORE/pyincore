@@ -34,9 +34,10 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         Related publications
 
-
         Args:
+
             incore_client (IncoreClient): Service authentication.
+
         """
 
     # Column descriptors
@@ -89,6 +90,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         """Performs the computation of the model.
 
         Args:
+
             model_solver (str): model solver to use for analysis
             num_epsilon_steps (int): number of epsilon values for the multistep optimization algorithm
             budget_available (float): budget constraint of the optimization analysis
@@ -96,6 +98,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             inactive_submodels (list): submodels to avoid during the computation
             building_functionality_csv (pd.DataFrame): building repairs after a disaster event
             strategy_costs_csv (pd.DataFrame): strategy cost data per building
+
         """
         # Setup the stream that will collect data
         self.ostr = open('pyincore.txt', 'w')
@@ -136,12 +139,15 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         """ Configure the base model to perform the multiobjective optimization.
 
         Args:
+
             budget_available (float): available budget
             scaling_factor (float): value to scale monetary input data
             building_functionality_csv (DataFrame): table containing building functionality data
             strategy_costs_csv (DataFrame): table containing retrofit strategy costs data
-        Returns
+
+        Returns:
             ConcreteModel: a base, parameterized cost/functionality model
+
         """
         # Rescale data
         if scaling_factor != 1.0:
