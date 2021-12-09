@@ -11,7 +11,7 @@ def run_base_analysis():
     strategy_costs_data = "6193efa69340a2170d51f495"
 
     retrofit_optimization.set_parameter("model_solver", "ipopt")
-    retrofit_optimization.set_parameter("num_epsilon_steps", 2)
+    retrofit_optimization.set_parameter("num_epsilon_steps", 10)
     retrofit_optimization.set_parameter("max_budget", "default")
     retrofit_optimization.set_parameter("scale_data", False)
 
