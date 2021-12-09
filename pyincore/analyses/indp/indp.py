@@ -59,8 +59,6 @@ class INDP(BaseAnalysis):
         if time_resource is None:
             time_resource = True
 
-        # input files
-
         self.run_method(fail_sce_param, RC, layers, method=method, t_steps=t_steps,
                         misc={'DYNAMIC_PARAMS': dynamic_params,
                               'EXTRA_COMMODITY': extra_commodity,
@@ -118,9 +116,21 @@ class INDP(BaseAnalysis):
         Returns:
 
         """
+        # input files
+        nodes_reptime_func = self.get_input_dataset("nodes_reptime_func").get_dataframe_from_csv(low_memory=False)
+        nodes_damge_ratio = self.get_input_dataset("nodes_damge_ratio").get_dataframe_from_csv(low_memory=False)
+        arcs_reptime_func = self.get_input_dataset("arcs_reptime_func").get_dataframe_from_csv(low_memory=False)
+        arcs_damge_ratio = self.get_input_dataset("arcs_damge_ratio").get_dataframe_from_csv(low_memory=False)
+        dmg_sce_data = self.get_input_dataset("dmg_sce_data").get_dataframe_from_csv(low_memory=False)
+        power_arcs = self.get_input_dataset("power_arcs").get_dataframe_from_csv(low_memory=False)
+        power_nodes = self.get_input_dataset("power_nodes").get_dataframe_from_csv(low_memory=False)
+        water_arcs = self.get_input_dataset("water_arcs").get_dataframe_from_csv(low_memory=False)
+        water_nodes = self.get_input_dataset("water_nodes").get_dataframe_from_csv(low_memory=False)
+        pipeline_dmg = self.get_input_dataset("pipeline_dmg").get_dataframe_from_csv(low_memory=False)
+        arcs_damge_ratio = self.get_input_dataset("arcs_damge_ratio").get_dataframe_from_csv(low_memory=False)
+        interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
 
         # Set root directories
-        base_dir = fail_sce_param['BASE_DIR']
         damage_dir = fail_sce_param['DAMAGE_DIR']
 
         print('----Running for resources: ' + str(params['V']))
@@ -132,10 +142,14 @@ class INDP(BaseAnalysis):
                 print('---Running Magnitude ' + str(m) + ' sample ' + str(i) + '...')
                 if params['TIME_RESOURCE']:
                     print('Computing repair times...')
-                    INDPUtil.time_resource_usage_curves(base_dir, damage_dir, i)
+                    water_nodes, water_arcs, power_nodes, power_arcs =\
+                        INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
+                                                            pipeline_dmg, nodes_reptime_func, nodes_damge_ratio,
+                                                            arcs_reptime_func, arcs_damge_ratio, dmg_sce_data, i)
 
                 print("Initializing network...")
-                params["N"] = INDPUtil.initialize_network(base_dir=base_dir, extra_commodity=params["EXTRA_COMMODITY"])
+                params["N"] = INDPUtil.initialize_network(power_nodes, power_arcs, water_nodes, water_arcs, interdep,
+                                                          extra_commodity=params["EXTRA_COMMODITY"])
 
                 if params['DYNAMIC_PARAMS']:
                     print("Computing dynamic demand based on dislocation data...")
@@ -887,6 +901,12 @@ class INDP(BaseAnalysis):
                     "required": True,
                     "description": "Pipeline Repair Rate output",
                     "type": "ergo:pipelineDamageVer3"
+                },
+                {
+                    "id": "interdep",
+                    "required": True,
+                    "description": "Interdep.csv",
+                    "type": "incore:Interdep"
                 }
             ],
             'output_datasets': [

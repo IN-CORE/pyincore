@@ -9,33 +9,33 @@ import csv
 import os
 import pandas as pd
 
-from pyincore.analyses.indp import InfrastructureNode, InfrastructureArc
+from pyincore.analyses.indp import InfrastructureNode, InfrastructureArc, InfrastructureInterdepArc
 from pyincore.analyses.indp.infrastructurenetwork import InfrastructureNetwork
 
 
 class InfrastructureUtil:
 
     @staticmethod
-    def load_infrastructure_array_format_extended(power_nodes, power_arcs, water_nodes, water_arcs, cost_scale=1.0,
+    def load_infrastructure_array_format_extended(power_nodes, power_arcs, water_nodes, water_arcs,
+                                                  interdep, cost_scale=1.0,
                                                   extra_commodity=None):
         """
         This function reads the infrastructure network from file in the extended format
 
-        Parameters
-        ----------
-        cost_scale : float
-            The factor by which all cost values has to multiplied. The default is 1.0.
-        extra_commodity :
-            (only for extended format of input data) List of extra-commodities in the analysis. The default is None, which
-            only considers a main commodity.
+        Args:
+            power_nodes:
+            power_arcs:
+            water_nodes:
+            water_arcs:
+            interdep:
+            cost_scale (float): The factor by which all cost values has to multiplied. The default is 1.0.
+            extra_commodity (dict): ( only for extended format of input data) List of extra-commodities in the
+            analysis. The default is None, which only considers a main commodity.
 
-        Returns
-        -------
-        G : :class:`~infrastructure.InfrastructureNetwork`
-             The object containing the network data.
+        Returns:
+            G (class:`~infrastructure.InfrastructureNetwork`): The object containing the network data.
 
         """
-        # TODO hard coded?
         net_names = {'Water': 1, 'Gas': 2, 'Power': 3, 'Telecommunication': 4}  # !!!
         G = InfrastructureNetwork("Test")
         global_index = 0
@@ -113,34 +113,18 @@ class InfrastructureUtil:
                                 G.G[(a.source, a.layer)][(a.dest, a.layer)]['data']['inf_data'].extra_com[layer]
                             ext_com_data['flow_cost'] = float(v[1]['c_' + layer]) * cost_scale
 
+        for v in interdep.interrows():
+            if v[1]['Type'] == 'Physical':
+                i = int(v[1]['Dependee Node'])
+                net_i = net_names[v[1]['Dependee Network']]
+                j = int(v[1]['Depender Node'])
+                net_j = net_names[v[1]['Depender Network']]
+                a = InfrastructureInterdepArc(i, j, net_i, net_j, gamma=1.0)
+                G.G.add_edge((a.source, a.source_layer), (a.dest, a.dest_layer), data={'inf_data': a})
+                if extra_commodity:
+                    a.set_extra_commodity(extra_commodity[net_i])
+                    a.set_extra_commodity(extra_commodity[net_j])
 
-        for file in files:
-            fname = file[0:-4]
-            if fname in ['beta', 'alpha', 'g', 'Interdep']:
-                with open(base_dir + file) as f:
-                    data = pd.read_csv(f, delimiter=',')
-                    for v in data.iterrows():
-                        if fname == 'beta':
-                            net = net_names[v[1]['Network']]
-                            G.G[(int(v[1]['Start Node']), net)][(int(v[1]['End Node']), net)]['data'][
-                                'inf_data'].space = int(int(v[1]['Subspace']))
-                            G.G[(int(v[1]['End Node']), net)][(int(v[1]['Start Node']), net)]['data'][
-                                'inf_data'].space = int(int(v[1]['Subspace']))
-                        if fname == 'alpha':
-                            net = net_names[v[1]['Network']]
-                            G.G.node[(int(v[1]['ID']), net)]['data']['inf_data'].space = int(int(v[1]['Subspace']))
-                        if fname == 'g':
-                            G.S.append(InfrastructureSpace(int(v[1]['Subspace_ID']), float(v[1]['g'])))
-                        if fname == 'Interdep' and v[1]['Type'] == 'Physical':
-                            i = int(v[1]['Dependee Node'])
-                            net_i = net_names[v[1]['Dependee Network']]
-                            j = int(v[1]['Depender Node'])
-                            net_j = net_names[v[1]['Depender Network']]
-                            a = InfrastructureInterdepArc(i, j, net_i, net_j, gamma=1.0)
-                            G.G.add_edge((a.source, a.source_layer), (a.dest, a.dest_layer), data={'inf_data': a})
-                            if extra_commodity:
-                                a.set_extra_commodity(extra_commodity[net_i])
-                                a.set_extra_commodity(extra_commodity[net_j])
         return G
 
     @staticmethod

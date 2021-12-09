@@ -131,7 +131,8 @@ class INDPUtil:
         return water_nodes, water_arcs, power_nodes, power_arcs
 
     @staticmethod
-    def initialize_network(cost_scale=1.0, extra_commodity=None):
+    def initialize_network(power_nodes, power_arcs, water_nodes, water_arcs, interdep, cost_scale=1.0,
+                           extra_commodity=None):
         """
         This function initializes a :class:`~infrastructure.InfrastructureNetwork` object based on network data.
 
@@ -144,7 +145,12 @@ class INDPUtil:
             interdep_net (class):`~infrastructure.InfrastructureNetwork` The object containing the network data.
 
         """
-        interdep_net = InfrastructureUtil.load_infrastructure_array_format_extended(cost_scale=cost_scale,
+        interdep_net = InfrastructureUtil.load_infrastructure_array_format_extended(power_nodes,
+                                                                                    power_arcs,
+                                                                                    water_nodes,
+                                                                                    water_arcs,
+                                                                                    interdep,
+                                                                                    cost_scale=cost_scale,
                                                                                     extra_commodity=extra_commodity)
         return interdep_net
 
