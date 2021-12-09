@@ -38,113 +38,104 @@ class INDPUtil:
         return out_dir_suffix_res
 
     @staticmethod
-    def time_resource_usage_curves(base_dir, damage_dir, sample_num):
+    def time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes, pipeline_dmg, nodes_reptime_func,
+                                   nodes_damge_ratio, arcs_reptime_func,
+                                   arcs_damge_ratio, dmg_sce_data, sample_num):
         """
         This module calculates the repair time for nodes and arcs for the current scenario based on their damage
         state, and writes them to the input files of INDP. Currently, it is only compatible with NIST testbeds.
 
         Args:
-            damage_dir:
+            power_arcs (dataframe):
+            power_nodes (dataframe):
+            water_arcs (dataframe):
+            water_nodes (dataframe):
+            pipeline_dmg (dataframe):
+            nodes_reptime_func:
+            nodes_damge_ratio:
+            arcs_reptime_func:
+            arcs_damge_ratio:
+            dmg_sce_data:
             sample_num:
 
         Returns:
+            water_nodes:
+            water_arcs:
+            power_nodes:
+            power_arcs:
 
         """
-        files = [f for f in os.listdir(base_dir) if os.path.isfile(os.path.join(base_dir, f))]
-        nodes_reptime_func = pd.read_csv(base_dir + 'repair_time_curves_nodes.csv')
-        nodes_damge_ratio = pd.read_csv(base_dir + 'damage_ratio_nodes.csv')
-        arcs_reptime_func = pd.read_csv(base_dir + 'repair_time_curves_arcs.csv')
-        arcs_damge_ratio = pd.read_csv(base_dir + 'damage_ratio_arcs.csv')
-        dmg_sce_data = pd.read_csv(damage_dir + 'Initial_node_ds.csv', delimiter=',')
+        # TODO this is hardcoded?
         net_names = {'Water': 1, 'Power': 3}
 
-        for file in files:
-            fname = file[0:-4]
-            if fname[-5:] == 'Nodes':
-                with open(base_dir + file) as f:
-                    node_data = pd.read_csv(f, delimiter=',')
-                    for v in node_data.iterrows():
-                        node_type = v[1]['utilfcltyc']
-                        node_id = int(v[1]['nodenwid'])
+        for index, node_data in enumerate([water_nodes, power_nodes]):
+            for v in node_data.iterrows():
+                node_type = v[1]['utilfcltyc']
+                node_id = int(v[1]['nodenwid'])
 
-                        reptime_func_node = nodes_reptime_func[nodes_reptime_func['Type'] == node_type]
-                        dr_data = nodes_damge_ratio[nodes_damge_ratio['Type'] == node_type]
-                        rep_time = 0
-                        repair_cost = 0
-                        if not reptime_func_node.empty:
-                            node_name = '(' + str(node_id) + ',' + str(net_names[fname[:5]]) + ')'
-                            ds = dmg_sce_data[dmg_sce_data['name'] == node_name].iloc[0][sample_num + 1]
-                            rep_time = reptime_func_node.iloc[0]['ds_' + ds + '_mean']
-                            # ..todo Add repair time uncertainty here
-                            # rep_time = np.random.normal(reptime_func_node['ds_'+ds+'_mean'],
-                            #                             reptime_func_node['ds_'+ds+'_sd'], 1)[0]
+                reptime_func_node = nodes_reptime_func[nodes_reptime_func['Type'] == node_type]
+                dr_data = nodes_damge_ratio[nodes_damge_ratio['Type'] == node_type]
+                rep_time = 0
+                repair_cost = 0
+                if not reptime_func_node.empty:
+                    if index == 0:
+                        node_name = '(' + str(node_id) + ',' + str(net_names["Water"]) + ')'
+                    else:
+                        node_name = '(' + str(node_id) + ',' + str(net_names["Power"]) + ')'
+                    ds = dmg_sce_data[dmg_sce_data['name'] == node_name].iloc[0][sample_num + 1]
+                    rep_time = reptime_func_node.iloc[0]['ds_' + ds + '_mean']
+                    dr = dr_data.iloc[0]['dr_' + ds + '_be']
+                    repair_cost = v[1]['q (complete DS)'] * dr
+                node_data.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0
+                node_data.loc[v[0], 'p_budget'] = repair_cost
+                node_data.loc[v[0], 'q'] = repair_cost
 
-                            dr = dr_data.iloc[0]['dr_' + ds + '_be']
-                            # ..todo Add damage ratio uncertainty here
-                            # dr = np.random.uniform(dr_data.iloc[0]['dr_'+ds+'_min'],
-                            #                       dr_data.iloc[0]['dr_'+ds+'_max'], 1)[0]
-                            repair_cost = v[1]['q (complete DS)'] * dr
-                        node_data.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0
-                        node_data.loc[v[0], 'p_budget'] = repair_cost
-                        node_data.loc[v[0], 'q'] = repair_cost
-                    node_data.to_csv(base_dir + file, index=False)
+        for arc_data in [water_arcs, power_arcs]:
+            for v in arc_data.iterrows():
+                dmg_data_arc = pipeline_dmg[pipeline_dmg['guid'] == v[1]['guid']]
+                rep_time = 0
+                repair_cost = 0
+                if not dmg_data_arc.empty:
+                    if v[1]['diameter'] > 20:
+                        reptime_func_arc = arcs_reptime_func[arcs_reptime_func['Type'] == '>20 in']
+                        dr_data = arcs_damge_ratio[arcs_damge_ratio['Type'] == '>20 in']
+                    else:
+                        reptime_func_arc = arcs_reptime_func[arcs_reptime_func['Type'] == '<20 in']
+                        dr_data = arcs_damge_ratio[arcs_damge_ratio['Type'] == '<20 in']
+                    pipe_length = v[1]['length_km']
+                    pipe_length_ft = v[1]['Length']
+                    rep_rate = {'break': dmg_data_arc.iloc[0]['breakrate'],
+                                'leak': dmg_data_arc.iloc[0]['leakrate']}
+                    # assuming a 4-person crew per HAZUS
+                    rep_time = (rep_rate['break'] * reptime_func_arc['# Fixed Breaks/Day/Worker'] +
+                                rep_rate['leak'] * reptime_func_arc[
+                                    '# Fixed Leaks/Day/Worker']) * pipe_length / 4
+                    dr = {'break': dr_data.iloc[0]['break_be'], 'leak': dr_data.iloc[0]['leak_be']}
 
-        for file in files:
-            fname = file[0:-4]
-            if fname[-4:] == 'Arcs':
-                with open(base_dir + file) as f:
-                    data = pd.read_csv(f, delimiter=',')
-                    dmg_data_all = pd.read_csv(damage_dir + 'pipe_dmg.csv', delimiter=',')
-                    for v in data.iterrows():
-                        dmg_data_arc = dmg_data_all[dmg_data_all['guid'] == v[1]['guid']]
-                        rep_time = 0
-                        repair_cost = 0
-                        if not dmg_data_arc.empty:
-                            if v[1]['diameter'] > 20:
-                                reptime_func_arc = arcs_reptime_func[arcs_reptime_func['Type'] == '>20 in']
-                                dr_data = arcs_damge_ratio[arcs_damge_ratio['Type'] == '>20 in']
-                            else:
-                                reptime_func_arc = arcs_reptime_func[arcs_reptime_func['Type'] == '<20 in']
-                                dr_data = arcs_damge_ratio[arcs_damge_ratio['Type'] == '<20 in']
-                            pipe_length = v[1]['length_km']
-                            pipe_length_ft = v[1]['Length']
-                            rep_rate = {'break': dmg_data_arc.iloc[0]['breakrate'],
-                                        'leak': dmg_data_arc.iloc[0]['leakrate']}
-                            # assuming a 4-person crew per HAZUS
-                            rep_time = (rep_rate['break'] * reptime_func_arc['# Fixed Breaks/Day/Worker'] +
-                                        rep_rate['leak'] * reptime_func_arc[
-                                            '# Fixed Leaks/Day/Worker']) * pipe_length / 4
-                            dr = {'break': dr_data.iloc[0]['break_be'], 'leak': dr_data.iloc[0]['leak_be']}
-                            # ..todo Add repair cost uncertainty here
-                            # dr = {'break': np.random.uniform(dr_data.iloc[0]['break_min'],
-                            #                                  dr_data.iloc[0]['break_max'], 1)[0],
-                            #       'leak': np.random.uniform(dr_data.iloc[0]['leak_min'],
-                            #                                  dr_data.iloc[0]['leak_max'], 1)[0]}
+                    num_20_ft_seg = pipe_length_ft / 20
+                    num_breaks = rep_rate['break'] * pipe_length
+                    if num_breaks > num_20_ft_seg:
+                        repair_cost += v[1]['f (complete)'] * dr['break']
+                    else:
+                        repair_cost += v[1]['f (complete)'] / num_20_ft_seg * num_breaks * dr['break']
+                    num_leaks = rep_rate['leak'] * pipe_length
+                    if num_leaks > num_20_ft_seg:
+                        repair_cost += v[1]['f (complete)'] * dr['leak']
+                    else:
+                        repair_cost += v[1]['f (complete)'] / num_20_ft_seg * num_leaks * dr['leak']
+                    repair_cost = min(repair_cost, v[1]['f (complete)'])
+                arc_data.loc[v[0], 'h_time'] = float(rep_time)
+                arc_data.loc[v[0], 'h_budget'] = repair_cost
+                arc_data.loc[v[0], 'f'] = repair_cost
 
-                            num_20_ft_seg = pipe_length_ft / 20
-                            num_breaks = rep_rate['break'] * pipe_length
-                            if num_breaks > num_20_ft_seg:
-                                repair_cost += v[1]['f (complete)'] * dr['break']
-                            else:
-                                repair_cost += v[1]['f (complete)'] / num_20_ft_seg * num_breaks * dr['break']
-                            num_leaks = rep_rate['leak'] * pipe_length
-                            if num_leaks > num_20_ft_seg:
-                                repair_cost += v[1]['f (complete)'] * dr['leak']
-                            else:
-                                repair_cost += v[1]['f (complete)'] / num_20_ft_seg * num_leaks * dr['leak']
-                            repair_cost = min(repair_cost, v[1]['f (complete)'])
-                        data.loc[v[0], 'h_time'] = float(rep_time)
-                        data.loc[v[0], 'h_budget'] = repair_cost
-                        data.loc[v[0], 'f'] = repair_cost
-                    data.to_csv(base_dir + file, index=False)
+        return water_nodes, water_arcs, power_nodes, power_arcs
 
     @staticmethod
-    def initialize_network(base_dir, cost_scale=1.0, extra_commodity=None):
+    def initialize_network(cost_scale=1.0, extra_commodity=None):
         """
         This function initializes a :class:`~infrastructure.InfrastructureNetwork` object based on network data.
 
         Args:
-            base_dir (str): Base directory of Shelby County data or synthetic networks.
             cost_scale (float): Scales the cost to improve efficiency. The default is 1.0:
             extra_commodity (dict): Dictionary of commodities other than the default one for each layer of the
             network. The default is 'None', which means that there is only one commodity per layer.
@@ -153,8 +144,7 @@ class INDPUtil:
             interdep_net (class):`~infrastructure.InfrastructureNetwork` The object containing the network data.
 
         """
-        interdep_net = InfrastructureUtil.load_infrastructure_array_format_extended(base_dir=base_dir,
-                                                                                    cost_scale=cost_scale,
+        interdep_net = InfrastructureUtil.load_infrastructure_array_format_extended(cost_scale=cost_scale,
                                                                                     extra_commodity=extra_commodity)
         return interdep_net
 

@@ -25,7 +25,7 @@ class INDP(BaseAnalysis):
         super(INDP, self).__init__(incore_client)
 
     def run(self):
-
+        # input parameters
         network_type = self.get_parameter("network_type")
         sample_range = self.get_parameter("sample_range")
         MAGS = self.get_parameter("MAGS")
@@ -58,6 +58,8 @@ class INDP(BaseAnalysis):
         time_resource = self.get_parameter("time_resource")
         if time_resource is None:
             time_resource = True
+
+        # input files
 
         self.run_method(fail_sce_param, RC, layers, method=method, t_steps=t_steps,
                         misc={'DYNAMIC_PARAMS': dynamic_params,
@@ -826,7 +828,66 @@ class INDP(BaseAnalysis):
 
             ],
             'input_datasets': [
-
+                {
+                    "id": "nodes_reptime_func",
+                    "required": True,
+                    "description": "repair time curves nodes",
+                    "type": "incore:RepairTimeCurvesNodes"
+                },
+                {
+                    "id": "nodes_damge_ratio",
+                    "required": True,
+                    "description": "damage ratio nodes",
+                    "type": "incore:DamageRatioNodes"
+                },
+                {
+                    "id": "arcs_reptime_func",
+                    "required": True,
+                    "description": "repair time curves arcs",
+                    "type": "incore:RepairTimeCurvesArcs"
+                },
+                {
+                    "id": "arcs_damge_ratio",
+                    "required": True,
+                    "description": "damage ratio arcs",
+                    "type": "incore:DamageRatioArcs"
+                },
+                {
+                    "id": "dmg_sce_data",
+                    "required": True,
+                    "description": "initial node ds",
+                    "type": "incore:InitialNodeDS"
+                },
+                {
+                    "id": "power_arcs",
+                    "required": True,
+                    "description": "Power Arcs",
+                    "type": "incore:PowerArcs"
+                },
+                {
+                    "id": "power_nodes",
+                    "required": True,
+                    "description": "Power Nodes",
+                    "type": "incore:PowerNodes"
+                },
+                {
+                    "id": "water_arcs",
+                    "required": True,
+                    "description": "Water Arcs",
+                    "type": "incore:WaterArcs"
+                },
+                {
+                    "id": "water_nodes",
+                    "required": True,
+                    "description": "Water Nodes",
+                    "type": "incore:WaterNodes"
+                },
+                {
+                    "id": "pipeline_dmg",
+                    "required": True,
+                    "description": "Pipeline Repair Rate output",
+                    "type": "ergo:pipelineDamageVer3"
+                }
             ],
             'output_datasets': [
 
