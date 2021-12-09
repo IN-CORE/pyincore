@@ -128,7 +128,7 @@ class InfrastructureUtil:
         return G
 
     @staticmethod
-    def add_from_csv_failure_scenario(G, sample, dam_dir=""):
+    def add_from_csv_failure_scenario(G, sample, initial_node, initial_link, ):
         """
         This function reads initial damage data from file in the from_csv format, and applies it to the infrastructure
         network. This format only considers one magnitude value (0), and there can be as many samples from that magnitude.
@@ -139,15 +139,13 @@ class InfrastructureUtil:
              The object containing the network data.
         sample : int
             Sample number of the initial damage scenario,
-        dam_dir : str
-            The address of the folder where the initial damage data are stored
 
         Returns
         -------
         None.
 
         """
-        with open(dam_dir + 'Initial_node.csv') as csv_file:
+        initial_node
             data = csv.reader(csv_file, delimiter=',')
             next(data, None)  # skip the headers
             for row in data:

@@ -907,6 +907,18 @@ class INDP(BaseAnalysis):
                     "required": True,
                     "description": "Interdep.csv",
                     "type": "incore:Interdep"
+                },
+                {
+                    "id": "initial_node",
+                    "required": True,
+                    "description": "initial node csv",
+                    "type": "incore:InitialNode"
+                },
+                {
+                    "id": "initial_link",
+                    "required": True,
+                    "description": "initial link csv",
+                    "type": "incore:InitialLink"
                 }
             ],
             'output_datasets': [
