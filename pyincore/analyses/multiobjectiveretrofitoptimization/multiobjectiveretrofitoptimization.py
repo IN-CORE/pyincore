@@ -125,13 +125,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Epsilon model")
         xresults_df, yresults_df = self.solve_epsilon_models(model, model_solver_setting, inactive_submodels)
 
-        df_list = self.compute_optimal_results(inactive_submodels)
+        df_list = self.compute_optimal_results(inactive_submodels, xresults_df, yresults_df)
 
-        self.set_result_csv_data("out1", df_list[0], name="out1",
+        self.set_result_csv_data("optimal_solution_dv_x", df_list[0], name="optimal_solution_dv_x",
                                  source="dataframe")
-        self.set_result_csv_data("out2", df_list[1], name="out2",
-                                 source="dataframe")
-        self.set_result_csv_data("out3", df_list[2], name="out3",
+        self.set_result_csv_data("optimal_solution_dv_y", df_list[1], name="optimal_solution_dv_y",
                                  source="dataframe")
         return True
 
@@ -927,6 +925,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
                     # Fill in the dataset
                     # TODO
+                    # Add iteration number
 
                     # Append to local analysis result
                     epsilon7_xresult_df = epsilon7_xresult_df.append(newx_df)
@@ -953,7 +952,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Infeasible rows dropped: ", initial_length - len(obj_1_23_data), " rows.")
 
         # Save results:
-        filename = 'obj_1_23_epsilon_results.csv'
+        filename = '7_epsilon_results.csv'
         obj_1_23_data.index += 1
         obj_1_23_data.to_csv(filename)
 
@@ -961,8 +960,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        epsilon7_xresult_df['epsilon'] = 7
-        epsilon7_yresult_df['epsilon'] = 7
+        epsilon7_xresult_df['Epsilon'] = 7
+        epsilon7_yresult_df['Epsilon'] = 7
 
         return xresults_df.append(epsilon7_xresult_df), yresults_df.append(epsilon7_yresult_df)
 
@@ -1056,7 +1055,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Infeasible rows dropped: ", initial_length - len(obj_2_13_data), " rows.")
 
         # Save results:
-        filename = 'obj_2_13_epsilon_results.csv'
+        filename = '8_epsilon_results.csv'
         obj_2_13_data.index += 1
         obj_2_13_data.to_csv(filename)
 
@@ -1064,8 +1063,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        epsilon8_xresult_df['epsilon'] = 8
-        epsilon8_yresult_df['epsilon'] = 8
+        epsilon8_xresult_df['Epsilon'] = 8
+        epsilon8_yresult_df['Epsilon'] = 8
 
         return xresults_df.append(epsilon8_xresult_df), yresults_df.append(epsilon8_yresult_df)
 
@@ -1159,7 +1158,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         print("Infeasible rows dropped: ", initial_length - len(obj_3_12_data), " rows.")
 
         # Save results:
-        filename = 'obj_3_12_epsilon_results.csv'
+        filename = '9_epsilon_results.csv'
         obj_3_12_data.index += 1
         obj_3_12_data.to_csv(filename)
 
@@ -1167,23 +1166,21 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        epsilon9_xresult_df['epsilon'] = 9
-        epsilon9_yresult_df['epsilon'] = 9
+        epsilon9_xresult_df['Epsilon'] = 9
+        epsilon9_yresult_df['Epsilon'] = 9
 
         return xresults_df.append(epsilon9_xresult_df), yresults_df.append(epsilon9_yresult_df)
 
-    def compute_optimal_results(self, inactive_submodels):
-        epsilon_models = {
-            7: 'obj_1_23',
-            8: 'obj_2_13',
-            9: 'obj_3_12'
-        }
+    def compute_optimal_results(self, inactive_submodels, xresults_df, yresults_df):
+        # Fixed for the moment, will be expanded to the full model set in later iterations
+        epsilon_models = [7, 8, 9]
 
-        file_list = []
+        xresults_list: list = []
+        yresults_list: list = []
 
-        for k, obj in epsilon_models.items():
+        for k in epsilon_models:
             if k not in inactive_submodels:
-                results = pd.read_csv(obj + '_epsilon_results.csv', usecols=['Economic Loss(Million Dollars)',
+                results = pd.read_csv(str(k) + '_epsilon_results.csv', usecols=['Economic Loss(Million Dollars)',
                                                                              'Dislocation Value',
                                                                              'Functionality Value'],
                                       low_memory=False)
@@ -1193,9 +1190,21 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 zipped_list = self.optimal_points(list_loss, list_dislocation, list_func)
                 optimal = pd.DataFrame(zipped_list, columns=['Iteration', 'Economic Loss(Million Dollars)',
                                                              'Dislocation Value', 'Functionality Value'])
-                file_list.append(optimal)
 
-        return file_list
+                # Select only results corresponding to current epsilon step
+                epsilon_xresults_df = xresults_df[xresults_df['Epsilon'] == k]
+                epsilon_yresults_df = yresults_df[yresults_df['Epsilon'] == k]
+
+                # Filter results depending on optimal epsilon model
+                opt_xresults_df = epsilon_xresults_df[epsilon_xresults_df['Iteration'].isin(optimal['Iteration'])]
+                opt_yresults_df = epsilon_yresults_df[epsilon_yresults_df['Iteration'].isin(optimal['Iteration'])]
+
+                # Append for later construction of final dataset
+                xresults_list.append(opt_xresults_df)
+                yresults_list.append(opt_yresults_df)
+
+        # Construct the final dataframe per variable
+        return [pd.concat(xresults_list), pd.concat(yresults_list)]
 
     # Objective functions
     @staticmethod
@@ -1404,22 +1413,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             ],
             'output_datasets': [
                 {
-                    'id': 'out1',
+                    'id': 'optimal_solution_dv_x',
                     'parent_type': '',
-                    'description': 'out1',
-                    'type': 'incore:multiobjective'
+                    'description': 'Optimal solution for decision variable x',
+                    'type': 'incore:multiobjectiveOptimalSolutionX'
                 },
                 {
-                    'id': 'out2',
+                    'id': 'optimal_solution_dv_y',
                     'parent_type': '',
-                    'description': 'out2',
-                    'type': 'incore:multiobjective'
-                },
-                {
-                    'id': 'out3',
-                    'parent_type': '',
-                    'description': 'out3',
-                    'type': 'incore:multiobjective'
-                },
+                    'description': 'Optimal solution for decision variable y with initial and final retrofitted '
+                                   'strategies',
+                    'type': 'incore:multiobjectiveOptimalSolutionY'
+                }
             ]
         }
