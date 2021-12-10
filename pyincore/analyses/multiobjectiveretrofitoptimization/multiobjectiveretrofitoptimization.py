@@ -925,7 +925,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
 
                     # Append to local analysis result
-                    print(newx_df)
                     epsilon7_xresult_df = epsilon7_xresult_df.append(newx_df)
                     epsilon7_yresult_df = epsilon7_yresult_df.append(newy_df)
                 else:
@@ -964,7 +963,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         return xresults_df.append(epsilon7_xresult_df), yresults_df.append(epsilon7_yresult_df)
 
     def solve_epsilon_model_8(self, model, model_solver_setting, xresults_df, yresults_df):
-        print(xresults_df)
         starttime = time.time()
         print(
             "****OPTIMIZING POPULATION DISLOCATION SUBJECT TO "
@@ -1173,8 +1171,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         xresults_list: list = []
         yresults_list: list = []
 
-        print(xresults_df)
-
         for k in epsilon_models:
             if k not in inactive_submodels:
                 results = pd.read_csv(str(k) + '_epsilon_results.csv', usecols=['Economic Loss(Million Dollars)',
@@ -1263,11 +1259,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             "Z": x_index_lists[0],
             "S": x_index_lists[1],
             "K": x_index_lists[2],
-            variable: sol_dict.values()
         }
 
         if variable == "y_ijkk_prime":
             x_dict["K'"] = x_index_lists[3]
+
+        x_dict[variable] = sol_dict.values()
 
         df = pd.DataFrame(x_dict)
         df['Iteration'] = iteration
@@ -1276,7 +1273,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
     @staticmethod
     def optimal_points(list_loss, list_dislocation, list_func):
-
         l_com = []
         for i in range(0, len(list_loss)):
             l_com.append(tuple([list_loss[i], list_dislocation[i], list_func[i]]))
