@@ -14,7 +14,7 @@ import pandas as pd
 class DislocationUtil:
 
     @staticmethod
-    def create_dynamic_param(params, T=1, N=None):
+    def create_dynamic_param(params, pop_dislocation, T=1, N=None):
         """
         This function computes the change of demand values over time based on population dislocation models.
 
@@ -46,8 +46,6 @@ class DislocationUtil:
             with open(output_file, 'rb') as f:
                 dynamic_params = pickle.load(f)
             return dynamic_params
-        pop_dislocation_file = dynamic_param_dict['POP_DISLOC_DATA'] + 'PopDis_results.csv'
-        pop_dislocation = pd.read_csv(pop_dislocation_file, low_memory=False)
         for net in dynamic_param_dict['MAPPING'].keys():
             nn = net_names[net]
             mapping_data = pd.read_csv(dynamic_param_dict['MAPPING'][net], low_memory=False)

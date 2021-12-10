@@ -128,7 +128,7 @@ class InfrastructureUtil:
         return G
 
     @staticmethod
-    def add_from_csv_failure_scenario(G, sample, initial_node, initial_link, ):
+    def add_from_csv_failure_scenario(G, sample, initial_node, initial_link):
         """
         This function reads initial damage data from file in the from_csv format, and applies it to the infrastructure
         network. This format only considers one magnitude value (0), and there can be as many samples from that magnitude.
@@ -145,29 +145,25 @@ class InfrastructureUtil:
         None.
 
         """
-        initial_node
-            data = csv.reader(csv_file, delimiter=',')
-            next(data, None)  # skip the headers
-            for row in data:
-                raw_n = row[-1]
-                raw_n = raw_n.split(',')
-                n = (int(raw_n[0].strip(' )(')), int(raw_n[1].strip(' )(')))
-                state = float(row[sample + 1])
-                G.G.nodes[n]['data']['inf_data'].functionality = state
-                G.G.nodes[n]['data']['inf_data'].repaired = state
+        next(initial_node, None)  # skip the headers
+        for row in initial_node:
+            raw_n = row[-1]
+            raw_n = raw_n.split(',')
+            n = (int(raw_n[0].strip(' )(')), int(raw_n[1].strip(' )(')))
+            state = float(row[sample + 1])
+            G.G.nodes[n]['data']['inf_data'].functionality = state
+            G.G.nodes[n]['data']['inf_data'].repaired = state
 
-        with open(dam_dir + 'Initial_link.csv') as csv_file:
-            data = csv.reader(csv_file, delimiter=',')
-            next(data, None)  # skip the headers
-            for row in data:
-                raw_uv = row[-1]
-                raw_uv = raw_uv.split(',')
-                u = (int(raw_uv[0].strip(' )(')), int(raw_uv[1].strip(' )(')))
-                v = (int(raw_uv[2].strip(' )(')), int(raw_uv[3].strip(' )(')))
-                state = float(row[sample + 1])
-                if state == 0.0:
-                    G.G[u][v]['data']['inf_data'].functionality = state
-                    G.G[u][v]['data']['inf_data'].repaired = state
+        next(initial_link, None)  # skip the headers
+        for row in initial_link:
+            raw_uv = row[-1]
+            raw_uv = raw_uv.split(',')
+            u = (int(raw_uv[0].strip(' )(')), int(raw_uv[1].strip(' )(')))
+            v = (int(raw_uv[2].strip(' )(')), int(raw_uv[3].strip(' )(')))
+            state = float(row[sample + 1])
+            if state == 0.0:
+                G.G[u][v]['data']['inf_data'].functionality = state
+                G.G[u][v]['data']['inf_data'].repaired = state
 
-                    G.G[v][u]['data']['inf_data'].functionality = state
-                    G.G[v][u]['data']['inf_data'].repaired = state
+                G.G[v][u]['data']['inf_data'].functionality = state
+                G.G[v][u]['data']['inf_data'].repaired = state

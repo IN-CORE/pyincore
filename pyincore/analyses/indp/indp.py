@@ -130,8 +130,10 @@ class INDP(BaseAnalysis):
         arcs_damge_ratio = self.get_input_dataset("arcs_damge_ratio").get_dataframe_from_csv(low_memory=False)
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
 
-        # Set root directories
-        damage_dir = fail_sce_param['DAMAGE_DIR']
+        initial_node = self.get_input_dataset("initial_node").get_csv_reader()
+        initial_link = self.get_input_dataset("initial_link").get_csv_reader()
+
+        pop_dislocation = self.get_input_dataset("pop_dislocation").get_dataframe_from_csv(low_memeory=False)
 
         print('----Running for resources: ' + str(params['V']))
         for m in fail_sce_param['MAGS']:
@@ -153,11 +155,13 @@ class INDP(BaseAnalysis):
 
                 if params['DYNAMIC_PARAMS']:
                     print("Computing dynamic demand based on dislocation data...")
-                    dyn_dmnd = DislocationUtil.create_dynamic_param(params, N=params["N"], T=params["NUM_ITERATIONS"])
+                    dyn_dmnd = DislocationUtil.create_dynamic_param(params, pop_dislocation, N=params["N"],
+                                                                    T=params["NUM_ITERATIONS"])
                     params['DYNAMIC_PARAMS']['DEMAND_DATA'] = dyn_dmnd
 
                 if fail_sce_param['TYPE'] == 'from_csv':
-                    InfrastructureUtil.add_from_csv_failure_scenario(params["N"], sample=i, dam_dir=damage_dir)
+                    InfrastructureUtil.add_from_csv_failure_scenario(params["N"], sample=i, initial_node=initial_node,
+                                                                     initial_link=initial_link)
                 else:
                     raise ValueError('Wrong failure scenario data type.')
 
@@ -919,6 +923,12 @@ class INDP(BaseAnalysis):
                     "required": True,
                     "description": "initial link csv",
                     "type": "incore:InitialLink"
+                },
+                {
+                    "id": "pop_dislocation",
+                    "required": True,
+                    "description": "Population dislocation output",
+                    "type": "incore:popDislocation"
                 }
             ],
             'output_datasets': [

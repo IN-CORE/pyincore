@@ -126,7 +126,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
         """Executes mc failure probability analysis."""
 
         # read in file and parameters
-        damage = self.get_input_dataset("damage").get_csv_reader()
+        damage = self.get_input_dataset("damage").get_csv_dict_reader()
         damage_result = AnalysisUtil.get_csv_table_rows(damage, ignore_first_row=False)
 
         # setting number of cpus to use

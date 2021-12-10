@@ -252,7 +252,7 @@ class Dataset:
             return 0.0
         return numpy.asscalar(data[row, col])
 
-    def get_csv_reader(self):
+    def get_csv_dict_reader(self):
         """Utility method for reading different standard file formats: csv reader.
 
          Returns:
@@ -268,6 +268,25 @@ class Dataset:
 
             csvfile = open(filename, 'r')
             return csv.DictReader(csvfile)
+
+        return self.readers["csv"]
+
+    def get_csv_reader(self):
+        """Utility method for reading different standard file formats: csv reader.
+
+         Returns:
+             obj: CSV reader.
+
+         """
+        if "csv" not in self.readers:
+            filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.csv")
+                if len(files) > 0:
+                    filename = files[0]
+
+            csvfile = open(filename, 'r')
+            return csv.reader(csvfile)
 
         return self.readers["csv"]
 
