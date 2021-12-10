@@ -308,7 +308,7 @@ class Dataset:
 
         return filename
 
-    def get_dataframe_from_csv(self, low_memory=True):
+    def get_dataframe_from_csv(self, low_memory=True, delimiter=None):
         """Utility method for reading different standard file formats: Pandas DataFrame from csv.
 
         Args:
@@ -322,7 +322,7 @@ class Dataset:
         filename = self.get_file_path('csv')
         df = pd.DataFrame()
         if os.path.isfile(filename):
-            df = pd.read_csv(filename, header="infer", low_memory=low_memory)
+            df = pd.read_csv(filename, header="infer", low_memory=low_memory, delimiter=delimiter)
         return df
 
     def get_dataframe_from_shapefile(self):

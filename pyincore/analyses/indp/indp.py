@@ -127,13 +127,12 @@ class INDP(BaseAnalysis):
         water_arcs = self.get_input_dataset("water_arcs").get_dataframe_from_csv(low_memory=False)
         water_nodes = self.get_input_dataset("water_nodes").get_dataframe_from_csv(low_memory=False)
         pipeline_dmg = self.get_input_dataset("pipeline_dmg").get_dataframe_from_csv(low_memory=False)
-        arcs_damge_ratio = self.get_input_dataset("arcs_damge_ratio").get_dataframe_from_csv(low_memory=False)
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
 
         initial_node = self.get_input_dataset("initial_node").get_csv_reader()
         initial_link = self.get_input_dataset("initial_link").get_csv_reader()
 
-        pop_dislocation = self.get_input_dataset("pop_dislocation").get_dataframe_from_csv(low_memeory=False)
+        pop_dislocation = self.get_input_dataset("pop_dislocation").get_dataframe_from_csv(low_memory=False)
 
         print('----Running for resources: ' + str(params['V']))
         for m in fail_sce_param['MAGS']:
@@ -873,8 +872,8 @@ class INDP(BaseAnalysis):
                 {
                     "id": "dmg_sce_data",
                     "required": True,
-                    "description": "initial node ds",
-                    "type": "incore:InitialNodeDS"
+                    "description": "damage sce data",
+                    "type": "incore:DmgSceData"
                 },
                 {
                     "id": "power_arcs",

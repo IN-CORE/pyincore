@@ -4,12 +4,9 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
-import csv
-import os
-import pandas as pd
-
-from pyincore.analyses.indp import InfrastructureNode, InfrastructureArc, InfrastructureInterdepArc
+from pyincore.analyses.indp.infrastructurenode import InfrastructureNode
+from pyincore.analyses.indp.infrastructurearc import InfrastructureArc
+from pyincore.analyses.indp.infrastructureinterdeparc import InfrastructureInterdepArc
 from pyincore.analyses.indp.infrastructurenetwork import InfrastructureNetwork
 
 
@@ -113,7 +110,7 @@ class InfrastructureUtil:
                                 G.G[(a.source, a.layer)][(a.dest, a.layer)]['data']['inf_data'].extra_com[layer]
                             ext_com_data['flow_cost'] = float(v[1]['c_' + layer]) * cost_scale
 
-        for v in interdep.interrows():
+        for v in interdep.iterrows():
             if v[1]['Type'] == 'Physical':
                 i = int(v[1]['Dependee Node'])
                 net_i = net_names[v[1]['Dependee Network']]
