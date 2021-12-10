@@ -492,15 +492,15 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             self.solve_epsilon_model_6(model, model_solver_setting)
 
         if 7 not in inactive_submodels:
-            xresults_dfself, yresults_df = self.solve_epsilon_model_7(model, model_solver_setting, xresults_df,
+            xresults_df, yresults_df = self.solve_epsilon_model_7(model, model_solver_setting, xresults_df,
                                                                       yresults_df)
 
         if 8 not in inactive_submodels:
-            xresults_dfself, yresults_df = self.solve_epsilon_model_8(model, model_solver_setting, xresults_df,
+            xresults_df, yresults_df = self.solve_epsilon_model_8(model, model_solver_setting, xresults_df,
                                                                       yresults_df)
 
         if 9 not in inactive_submodels:
-            xresults_dfself, yresults_df = self.solve_epsilon_model_9(model, model_solver_setting, xresults_df,
+            xresults_df, yresults_df = self.solve_epsilon_model_9(model, model_solver_setting, xresults_df,
                                                                       yresults_df)
 
         return xresults_df, yresults_df
@@ -925,6 +925,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
 
                     # Append to local analysis result
+                    print(newx_df)
                     epsilon7_xresult_df = epsilon7_xresult_df.append(newx_df)
                     epsilon7_yresult_df = epsilon7_yresult_df.append(newy_df)
                 else:
@@ -963,6 +964,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         return xresults_df.append(epsilon7_xresult_df), yresults_df.append(epsilon7_yresult_df)
 
     def solve_epsilon_model_8(self, model, model_solver_setting, xresults_df, yresults_df):
+        print(xresults_df)
         starttime = time.time()
         print(
             "****OPTIMIZING POPULATION DISLOCATION SUBJECT TO "
@@ -1170,6 +1172,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         xresults_list: list = []
         yresults_list: list = []
+
+        print(xresults_df)
 
         for k in epsilon_models:
             if k not in inactive_submodels:
