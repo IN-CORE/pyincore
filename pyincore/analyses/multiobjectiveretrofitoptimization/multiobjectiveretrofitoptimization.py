@@ -73,20 +73,20 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         if self.get_parameter('scale_data'):
             scaling_factor = self.get_parameter('scaling_factor')
 
-        building_repairs_csv = self.get_input_dataset('building_repairs_data').get_dataframe_from_csv()
-        strategy_costs_csv = self.get_input_dataset('strategy_costs_data').get_dataframe_from_csv()
+        building_related_data = self.get_input_dataset('building_repairs_data').get_dataframe_from_csv()
+        strategy_costs = self.get_input_dataset('strategy_costs_data').get_dataframe_from_csv()
 
         # Convert Z columns to text in both datasets
-        building_repairs_csv['Z'] = building_repairs_csv['Z'].astype(str)
-        strategy_costs_csv['Z'] = strategy_costs_csv['Z'].astype(str)
+        building_related_data['Z'] = building_related_data['Z'].astype(str)
+        strategy_costs['Z'] = strategy_costs['Z'].astype(str)
 
         self.multiobjective_retrofit_optimization_model(model_solver, num_epsilon_steps, budget_available,
-                                                        scaling_factor, inactive_submodels, building_repairs_csv,
-                                                        strategy_costs_csv)
+                                                        scaling_factor, inactive_submodels, building_related_data,
+                                                        strategy_costs)
 
     def multiobjective_retrofit_optimization_model(self, model_solver, num_epsilon_steps, budget_available,
-                                                   scaling_factor, inactive_submodels, building_functionality_csv,
-                                                   strategy_costs_csv):
+                                                   scaling_factor, inactive_submodels, building_related_data,
+                                                   strategy_costs):
         """Performs the computation of the model.
 
         Args:
@@ -96,16 +96,16 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             budget_available (float): budget constraint of the optimization analysis
             scaling_factor (float): scaling factor for Q and Sc matrices
             inactive_submodels (list): submodels to avoid during the computation
-            building_functionality_csv (pd.DataFrame): building repairs after a disaster event
-            strategy_costs_csv (pd.DataFrame): strategy cost data per building
+            building_related_data (pd.DataFrame): building repairs after a disaster event
+            strategy_costs (pd.DataFrame): strategy cost data per building
 
         """
         # Setup the stream that will collect data
         self.ostr = open('pyincore.txt', 'w')
 
         # Setup the model
-        model, sum_sc = self.configure_model(budget_available, scaling_factor, building_functionality_csv,
-                                                  strategy_costs_csv)
+        model, sum_sc = self.configure_model(budget_available, scaling_factor, building_related_data,
+                                             strategy_costs)
         self.configure_model_objectives(model)
         print("With constraints model")
         self.configure_model_retrofit_costs(model) # Suspicious
@@ -133,15 +133,15 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                                  source="dataframe")
         return True
 
-    def configure_model(self, budget_available, scaling_factor, building_functionality_csv, strategy_costs_csv):
+    def configure_model(self, budget_available, scaling_factor, building_related_data, strategy_costs):
         """ Configure the base model to perform the multiobjective optimization.
 
         Args:
 
             budget_available (float): available budget
             scaling_factor (float): value to scale monetary input data
-            building_functionality_csv (DataFrame): table containing building functionality data
-            strategy_costs_csv (DataFrame): table containing retrofit strategy costs data
+            building_related_data (DataFrame): table containing building functionality data
+            strategy_costs (DataFrame): table containing retrofit strategy costs data
 
         Returns:
             ConcreteModel: a base, parameterized cost/functionality model
@@ -149,47 +149,47 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         """
         # Rescale data
         if scaling_factor != 1.0:
-            building_functionality_csv[self.__Q_col] = \
-                building_functionality_csv[self.__Q_col].map(lambda a: a/scaling_factor)
-            strategy_costs_csv[self.__SC_col] = strategy_costs_csv[self.__SC_col].map(lambda a: a/scaling_factor)
+            building_related_data[self.__Q_col] = \
+                building_related_data[self.__Q_col].map(lambda a: a / scaling_factor)
+            strategy_costs[self.__SC_col] = strategy_costs[self.__SC_col].map(lambda a: a / scaling_factor)
 
         # Setup pyomo
         model = ConcreteModel()
 
-        model.Z = Set(initialize=building_functionality_csv.Z.unique())
-        model.S = Set(initialize=building_functionality_csv.S.unique())
-        model.K = Set(initialize=building_functionality_csv.K.unique())
-        model.K_prime = Set(initialize=strategy_costs_csv["K'"].unique())
+        model.Z = Set(initialize=building_related_data.Z.unique())
+        model.S = Set(initialize=building_related_data.S.unique())
+        model.K = Set(initialize=building_related_data.K.unique())
+        model.K_prime = Set(initialize=strategy_costs["K'"].unique())
 
         zsk = []
-        for y in range(len(building_functionality_csv)):
-            i = building_functionality_csv.loc[y, 'Z']  # Identify the i ∈ Z value.
-            j = building_functionality_csv.loc[y, 'S']  # Identify the j ∈ S value.
-            k = building_functionality_csv.loc[y, 'K']  # Identify the k ∈ K value.
+        for y in range(len(building_related_data)):
+            i = building_related_data.loc[y, 'Z']  # Identify the i ∈ Z value.
+            j = building_related_data.loc[y, 'S']  # Identify the j ∈ S value.
+            k = building_related_data.loc[y, 'K']  # Identify the k ∈ K value.
             zsk.append((i, j, k))  # Add the combination to the list.
         zsk = sorted(set(zsk), key=zsk.index)  # Convert the list to an ordered set for Pyomo.
         model.ZSK = Set(initialize=zsk)  # Define and initialize the ZSK set in Pyomo.
 
         zs = []
-        for y in range(len(building_functionality_csv)):
-            i = building_functionality_csv.loc[y, 'Z']  # Identify the i ∈ Z value.
-            j = building_functionality_csv.loc[y, 'S']  # Identify the j ∈ S value.
+        for y in range(len(building_related_data)):
+            i = building_related_data.loc[y, 'Z']  # Identify the i ∈ Z value.
+            j = building_related_data.loc[y, 'S']  # Identify the j ∈ S value.
             zs.append((i, j))  # Add the combination to the list.
         zs = sorted(set(zs), key=zs.index)  # Convert the list to an ordered set for Pyomo.
         model.ZS = Set(initialize=zs)  # Define and initialize the ZS set in Pyomo.
 
         kk_prime = []
-        for y in range(len(strategy_costs_csv)):
-            k = strategy_costs_csv.loc[y, 'K']  # Identify the k ∈ K value.
-            k_prime = strategy_costs_csv.loc[y, "K'"]  # Identify the k ∈ K value.
+        for y in range(len(strategy_costs)):
+            k = strategy_costs.loc[y, 'K']  # Identify the k ∈ K value.
+            k_prime = strategy_costs.loc[y, "K'"]  # Identify the k ∈ K value.
             kk_prime.append((k, k_prime))  # Add the combination to the list.
         kk_prime = sorted(set(kk_prime), key=kk_prime.index)  # Convert the list to an ordered set for Pyomo.
         model.KK_prime = Set(initialize=kk_prime)  # Define and initialize the KK_prime set in Pyomo.
 
         k_primek = []
-        for y in range(len(strategy_costs_csv)):
-            k = strategy_costs_csv.loc[y, 'K']  # Identify the k ∈ K value.
-            k_prime = strategy_costs_csv.loc[y, "K'"]  # Identify the k ∈ K value.
+        for y in range(len(strategy_costs)):
+            k = strategy_costs.loc[y, 'K']  # Identify the k ∈ K value.
+            k_prime = strategy_costs.loc[y, "K'"]  # Identify the k ∈ K value.
             if k_prime <= k:
                 k_primek.append((k_prime, k))  # Add the combination to the list.
         k_primek = sorted(set(k_primek), key=k_primek.index)  # Convert the list to an ordered set for Pyomo.
@@ -197,11 +197,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Define the set of all ZSKK' combinations:
         zskk_prime = []
-        for y in range(len(strategy_costs_csv)):
-            i = strategy_costs_csv.loc[y, 'Z']  # Identify the i ∈ Z value.
-            j = strategy_costs_csv.loc[y, 'S']  # Identify the j ∈ S value.
-            k = strategy_costs_csv.loc[y, 'K']  # Identify the k ∈ K value.
-            k_prime = strategy_costs_csv.loc[y, "K'"]  # Identify the k ∈ K value.
+        for y in range(len(strategy_costs)):
+            i = strategy_costs.loc[y, 'Z']  # Identify the i ∈ Z value.
+            j = strategy_costs.loc[y, 'S']  # Identify the j ∈ S value.
+            k = strategy_costs.loc[y, 'K']  # Identify the k ∈ K value.
+            k_prime = strategy_costs.loc[y, "K'"]  # Identify the k ∈ K value.
             zskk_prime.append((i, j, k, k_prime))  # Add the combination to the list.
         zskk_prime = sorted(set(zskk_prime), key=zskk_prime.index)  # Convert the list to an ordered set for Pyomo.
         model.ZSKK_prime = Set(initialize=zskk_prime)  # Define and initialize the ZSKK_prime set in Pyomo.
@@ -220,44 +220,44 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Declare economic loss cost parameter l_ijk:
         model.l_ijk = Param(model.ZSK, within=NonNegativeReals, mutable=True)
-        for y in range(len(building_functionality_csv)):
-            i = building_functionality_csv.loc[y, 'Z']
-            j = building_functionality_csv.loc[y, 'S']
-            k = building_functionality_csv.loc[y, 'K']
-            model.l_ijk[i, j, k] = building_functionality_csv.loc[y, 'l']
+        for y in range(len(building_related_data)):
+            i = building_related_data.loc[y, 'Z']
+            j = building_related_data.loc[y, 'S']
+            k = building_related_data.loc[y, 'K']
+            model.l_ijk[i, j, k] = building_related_data.loc[y, 'l']
 
         # Declare dislocation parameter d_ijk:
         model.d_ijk = Param(model.ZSK, within=NonNegativeReals, mutable=True)
-        for y in range(len(building_functionality_csv)):
-            i = building_functionality_csv.loc[y, 'Z']
-            j = building_functionality_csv.loc[y, 'S']
-            k = building_functionality_csv.loc[y, 'K']
-            model.d_ijk[i, j, k] = building_functionality_csv.loc[y, 'd_ijk']
+        for y in range(len(building_related_data)):
+            i = building_related_data.loc[y, 'Z']
+            j = building_related_data.loc[y, 'S']
+            k = building_related_data.loc[y, 'K']
+            model.d_ijk[i, j, k] = building_related_data.loc[y, 'd_ijk']
 
         # Declare the number of buildings parameter b_ijk:
         model.b_ijk = Param(model.ZSK, within=NonNegativeReals, mutable=True)
-        for y in range(len(building_functionality_csv)):
-            i = building_functionality_csv.loc[y, 'Z']
-            j = building_functionality_csv.loc[y, 'S']
-            k = building_functionality_csv.loc[y, 'K']
-            model.b_ijk[i, j, k] = building_functionality_csv.loc[y, 'b']
+        for y in range(len(building_related_data)):
+            i = building_related_data.loc[y, 'Z']
+            j = building_related_data.loc[y, 'S']
+            k = building_related_data.loc[y, 'K']
+            model.b_ijk[i, j, k] = building_related_data.loc[y, 'b']
 
         # Declare the building functionality parameter Q_t_hat:
         model.Q_t_hat = Param(model.ZSK, within=NonNegativeReals, mutable=True)
-        for y in range(len(building_functionality_csv)):
-            i = building_functionality_csv.loc[y, 'Z']
-            j = building_functionality_csv.loc[y, 'S']
-            k = building_functionality_csv.loc[y, 'K']
-            model.Q_t_hat[i, j, k] = building_functionality_csv.loc[y, 'Q_t_hat']
+        for y in range(len(building_related_data)):
+            i = building_related_data.loc[y, 'Z']
+            j = building_related_data.loc[y, 'S']
+            k = building_related_data.loc[y, 'K']
+            model.Q_t_hat[i, j, k] = building_related_data.loc[y, 'Q_t_hat']
 
         # Declare the retrofit cost parameter Sc_ijkk':
         model.Sc_ijkk_prime = Param(model.ZSKK_prime, within=NonNegativeReals, mutable=True)
-        for y in range(len(strategy_costs_csv)):
-            i = strategy_costs_csv.loc[y, 'Z']
-            j = strategy_costs_csv.loc[y, 'S']
-            k = strategy_costs_csv.loc[y, 'K']
-            k_prime = strategy_costs_csv.loc[y, "K'"]
-            model.Sc_ijkk_prime[i, j, k, k_prime] = strategy_costs_csv.loc[y, 'Sc']
+        for y in range(len(strategy_costs)):
+            i = strategy_costs.loc[y, 'Z']
+            j = strategy_costs.loc[y, 'S']
+            k = strategy_costs.loc[y, 'K']
+            k_prime = strategy_costs.loc[y, "K'"]
+            model.Sc_ijkk_prime[i, j, k, k_prime] = strategy_costs.loc[y, 'Sc']
 
         ####################################################################################################
         # DECLARE THE TOTAL MAX BUDGET AND TOTAL AVAILABLE BUDGET:
@@ -917,15 +917,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                         model.econ_loss)
                     obj_1_23_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(model.dislocation)
 
-                    # Create a local dataframe to hold results
-                    x_df = pd.DataFrame()
-                    y_df = pd.DataFrame()
-                    newx_df = pd.DataFrame()
-                    newy_df = pd.DataFrame()
+                    # Extract results per each variable and convert to dataframe
+                    x_data: dict = model.x_ijk.extract_values()
+                    newx_df = self.assemble_dataframe_from_solution("x_ijk", x_data, counter)
 
-                    # Fill in the dataset
-                    # TODO
-                    # Add iteration number
+                    y_data: dict = model.y_ijkk_prime.extract_values()
+                    newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
 
                     # Append to local analysis result
                     epsilon7_xresult_df = epsilon7_xresult_df.append(newx_df)
@@ -1021,14 +1018,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                         model.econ_loss)
                     obj_2_13_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(model.dislocation)
 
-                    # Create a local dataframe to hold results
-                    x_df = pd.DataFrame()
-                    y_df = pd.DataFrame()
-                    newx_df = pd.DataFrame()
-                    newy_df = pd.DataFrame()
+                    # Extract results per each variable and convert to dataframe
+                    x_data: dict = model.x_ijk.extract_values()
+                    newx_df = self.assemble_dataframe_from_solution("x_ijk", x_data, counter)
 
-                    # Fill in the dataset
-                    # TODO
+                    y_data: dict = model.y_ijkk_prime.extract_values()
+                    newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
 
                     # Append to local analysis result
                     epsilon8_xresult_df = epsilon8_xresult_df.append(newx_df)
@@ -1124,14 +1119,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                         model.econ_loss)
                     obj_3_12_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(model.dislocation)
 
-                    # Create a local dataframe to hold results
-                    x_df = pd.DataFrame()
-                    y_df = pd.DataFrame()
-                    newx_df = pd.DataFrame()
-                    newy_df = pd.DataFrame()
+                    # Extract results per each variable and convert to dataframe
+                    x_data: dict = model.x_ijk.extract_values()
+                    newx_df = self.assemble_dataframe_from_solution("x_ijk", x_data, counter)
 
-                    # Fill in the dataset
-                    # TODO
+                    y_data: dict = model.y_ijkk_prime.extract_values()
+                    newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
 
                     # Append to local analysis result
                     epsilon9_xresult_df = epsilon9_xresult_df.append(newx_df)
@@ -1258,6 +1251,21 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             pyo.value(model.d_ijk[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
         model.functionality = quicksum(
             pyo.value(model.Q_t_hat[i, j, k]) * pyo.value(model.x_ijk[i, j, k]) for (i, j, k) in model.ZSK)
+
+    @staticmethod
+    def assemble_dataframe_from_solution(variable, sol_dict, iteration):
+        x_index_lists = list(map(list, zip(*sol_dict.keys())))
+        x_dict = {
+            "Z": x_index_lists[0],
+            "S": x_index_lists[1],
+            "K": x_index_lists[2],
+            "K'": x_index_lists[3],
+            variable: sol_dict.values()
+        }
+        df = pd.DataFrame(x_dict)
+        df['Iteration'] = iteration
+
+        return df
 
     @staticmethod
     def optimal_points(list_loss, list_dislocation, list_func):
@@ -1400,8 +1408,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 {
                     'id': 'building_repairs_data',
                     'required': True,
-                    'description': 'A csv file with building functionality data',
-                    'type': 'incore:multiobjectiveBuildingFunctionality'
+                    'description': 'A csv file with building related data required to evaluate retrofit strategies',
+                    'type': 'incore:multiobjectiveBuildingRelatedData'
                 },
                 {
                     'id': 'strategy_costs_data',
