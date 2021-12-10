@@ -1259,9 +1259,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             "Z": x_index_lists[0],
             "S": x_index_lists[1],
             "K": x_index_lists[2],
-            "K'": x_index_lists[3],
             variable: sol_dict.values()
         }
+
+        if variable == "y_ijkk_prime":
+            x_dict["K'"] = x_index_lists[3]
+
         df = pd.DataFrame(x_dict)
         df['Iteration'] = iteration
 
