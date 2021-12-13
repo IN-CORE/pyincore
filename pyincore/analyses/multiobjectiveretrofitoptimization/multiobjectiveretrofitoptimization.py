@@ -73,7 +73,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         if self.get_parameter('scale_data'):
             scaling_factor = self.get_parameter('scaling_factor')
 
-        building_related_data = self.get_input_dataset('building_repairs_data').get_dataframe_from_csv()
+        building_related_data = self.get_input_dataset('building_related_data').get_dataframe_from_csv()
         strategy_costs = self.get_input_dataset('strategy_costs_data').get_dataframe_from_csv()
 
         # Convert Z columns to text in both datasets
