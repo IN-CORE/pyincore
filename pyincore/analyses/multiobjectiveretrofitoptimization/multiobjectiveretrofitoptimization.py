@@ -1409,7 +1409,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'building_repairs_data',
+                    'id': 'building_related_data',
                     'required': True,
                     'description': 'A csv file with building related data required to evaluate retrofit strategies',
                     'type': 'incore:multiobjectiveBuildingRelatedData'
