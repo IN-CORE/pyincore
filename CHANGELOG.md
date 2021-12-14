@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Vacant household category to population dislocation output [#43](https://github.com/IN-CORE/pyincore/issues/43)
 - Input dataset with target functionality for Joplin empirical restoration [#56](https://github.com/IN-CORE/pyincore/issues/56)
+- Multi-objective retrofit optimization analysis [#19](https://github.com/IN-CORE/pyincore/issues/19)
 
 ### Fixed
 - EPFDamage to remove deprecated LS/DS code and properly handle liquefaction [#32](https://github.com/IN-CORE/pyincore/issues/32)
