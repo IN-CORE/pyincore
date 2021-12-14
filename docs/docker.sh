@@ -13,4 +13,4 @@ BRANCH=${BRANCH:-"$(git rev-parse --abbrev-ref HEAD)"}
 cd ../
 
 # Build docker image
-$DEBUG docker build -t incore/doc/pyincore -f Dockerfile.docs .
+$DEBUG docker build -t incore/doc/pyincore -f Dockerfile .

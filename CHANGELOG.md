@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - EPFDamage to remove deprecated LS/DS code and properly handle liquefaction [#32](https://github.com/IN-CORE/pyincore/issues/32)
+- Automatic build for pyincore documentation docker [#61](https://github.com/IN-CORE/pyincore/issues/61)
 
 ## [1.1.0] - 2021-10-27
 
