@@ -48,7 +48,7 @@ class DislocationUtil:
             return dynamic_params
         for net in dynamic_param_dict['MAPPING'].keys():
             nn = net_names[net]
-            mapping_data = pd.read_csv(dynamic_param_dict['MAPPING'][net], low_memory=False)
+            mapping_data = dynamic_param_dict['MAPPING'][net]
             dynamic_params[nn] = pd.DataFrame(columns=dp_dict_col)
             if net == 'POWER':
                 for n, d in N.G.nodes(data=True):

@@ -53,6 +53,11 @@ class INDP(BaseAnalysis):
             "RETURN": return_model,
             "TESTBED": testbed_name,
         }
+        bldgs2elec_dataset = self.get_input_dataset("bldgs2elec")
+        bldgs2wter_dataset = self.get_input_dataset("bldgs2wter")
+        if bldgs2elec_dataset is not None and bldgs2wter_dataset is not None:
+            dynamic_params['MAPPING'] = {'POWER': bldgs2elec_dataset.get_dataframe_from_csv(low_memory=False),
+                                         'WATER': bldgs2wter_dataset.get_dataframe_from_csv(low_memory=False)}
 
         extra_commodity = self.get_parameter("extra_commodity")
         time_resource = self.get_parameter("time_resource")
@@ -928,9 +933,63 @@ class INDP(BaseAnalysis):
                     "required": True,
                     "description": "Population dislocation output",
                     "type": "incore:popDislocation"
-                }
+                },
+                {
+                    "id": "bldgs2elec",
+                    "required": False,
+                    "description": "Power/bldgs2elec_Seaside.csv",
+                    "type": "incore:bldgs2elec"
+                },
+                {
+                    "id": "bldgs2wter",
+                    "required": False,
+                    "description": "Power/bldgs2wter_Seaside.csv",
+                    "type": "incore:bldgs2wter"
+                },
             ],
             'output_datasets': [
+                {
+                    'id': 'action',
+                    'parent_type': '',
+                    'description': '',
+                    'type': 'incore:indpAction'
+                },
+                {
+                    'id': 'cost',
+                    'parent_type': '',
+                    'description': '',
+                    'type': 'incore:indpCost'
+                },
+                {
+                    'id': 'runtime',
+                    'parent_type': '',
+                    'description': '',
+                    'type': 'incore:indpRuntime'
+                },
+                {
+                    'id': '',
+                    'parent_type': '',
+                    'description': '',
+                    'type': ''
+                },
+                {
+                    'id': '',
+                    'parent_type': '',
+                    'description': '',
+                    'type': ''
+                },
+                {
+                    'id': '',
+                    'parent_type': '',
+                    'description': '',
+                    'type': ''
+                },
+                {
+                    'id': '',
+                    'parent_type': '',
+                    'description': '',
+                    'type': ''
+                },
 
             ]
         }
