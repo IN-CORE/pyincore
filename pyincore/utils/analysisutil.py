@@ -11,7 +11,6 @@ import re
 from typing import List, Dict
 from collections import Counter
 
-from deprecated.sphinx import deprecated
 from decimal import getcontext, Decimal
 
 from pyincore import DataService
@@ -69,27 +68,6 @@ class AnalysisUtil:
     def float_dict_to_decimal(num_dict: dict):
         return {key: Decimal(str(num_dict[key])) for key in num_dict}
 
-    @staticmethod
-    @deprecated(version="0.9.0", reason="Use calculate_damage_interval in fragilitycurveset class instead.")
-    def calculate_damage_interval(damage):
-        output = collections.OrderedDict()
-
-        # convert damage to decimal dictionary
-        damage = AnalysisUtil.float_dict_to_decimal(damage)
-
-        if len(damage) == 4:
-            output['ds-none'] = 1 - damage['ls-slight']
-            output['ds-slight'] = damage['ls-slight'] - damage['ls-moderat']
-            output['ds-moderat'] = damage['ls-moderat'] - damage['ls-extensi']
-            output['ds-extensi'] = damage['ls-extensi'] - damage['ls-complet']
-            output['ds-complet'] = damage['ls-complet']
-        elif len(damage) == 3:
-            output['insignific'] = 1 - damage['immocc']
-            output['moderate'] = damage['immocc'] - damage['lifesfty']
-            output['heavy'] = damage['lifesfty'] - damage['collprev']
-            output['complete'] = damage['collprev']
-
-        return output
 
     @staticmethod
     def calculate_mean_damage(dmg_ratio_tbl, dmg_intervals,
@@ -251,12 +229,10 @@ class AnalysisUtil:
             adj_limit_states = collections.OrderedDict()
 
             for key, value in limit_states.items():
-                adj_limit_states[key] = limit_states[key] + pgd_limit_states[
-                    key] - \
-                                        (limit_states[key] * pgd_limit_states[
-                                            key])
+                adj_limit_states[key] = limit_states[key] + pgd_limit_states[key] - \
+                                        (limit_states[key] * pgd_limit_states[key])
 
-            return adj_limit_states
+            return AnalysisUtil.update_precision_of_dicts(adj_limit_states)
 
         except KeyError as e:
             print('Mismatched keys encountered in the limit states')
@@ -401,7 +377,10 @@ class AnalysisUtil:
         if hazard_type.lower() == "earthquake":
             num_stories = building[PROPERTIES][BLDG_STORIES]
             # Get building period from the fragility if possible
-            building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
+
+            building_args = fragility_set.construct_expression_args_from_inventory(building)
+            building_period = fragility_set.fragility_curves[0].get_building_period(
+                fragility_set.fragility_curve_parameters, **building_args)
 
             if fragility_hazard_type.endswith('sa') and fragility_hazard_type != 'sa':
                 # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
@@ -463,7 +442,9 @@ class AnalysisUtil:
                 demand_type = demand_type.lower()
                 num_stories = building[PROPERTIES][BLDG_STORIES]
                 # Get building period from the fragility if possible
-                building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
+                building_args = fragility_set.construct_expression_args_from_inventory(building)
+                building_period = fragility_set.fragility_curves[0].get_building_period(
+                    fragility_set.fragility_curve_parameters, **building_args)
 
                 # TODO: There might be a bug here as this is not handling SD
                 if demand_type.endswith('sa'):

@@ -106,6 +106,11 @@ analyses/montecarlofailureprobability
 ..  autoclass:: montecarlofailureprobability.montecarlofailureprobability.MonteCarloFailureProbability
     :members:
 
+analyses/multiobjectiveretrofitoptimization
+=====================================
+..  autoclass:: multiobjectiveretrofitoptimization.multiobjectiveretrofitoptimization.MultiObjectiveRetrofitOptimization
+    :members:
+
 analyses/nonstructbuildingdamage
 ================================
 ..  autoclass:: nonstructbuildingdamage.nonstructbuildingdamage.NonStructBuildingDamage
