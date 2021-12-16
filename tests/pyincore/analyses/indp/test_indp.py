@@ -9,7 +9,7 @@ def run_with_base_class():
     indp_analysis = INDP(client)
     indp_analysis.set_parameter("network_type", "from_csv")
     indp_analysis.set_parameter("MAGS", [1000])
-    indp_analysis.set_parameter("sample_range", range(0, 1))
+    indp_analysis.set_parameter("sample_range", range(0, 3))
     indp_analysis.set_parameter("dislocation_data_type", "incore")
     indp_analysis.set_parameter("return_model", "step_function")
     indp_analysis.set_parameter("testbed_name", "seaside")

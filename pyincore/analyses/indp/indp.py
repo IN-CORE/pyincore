@@ -316,9 +316,14 @@ class INDP(BaseAnalysis):
                                                                                         t, layers=controlled_layers))
         # Save results of current simulation.
         if save:
+
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             indp_results.to_csv(output_dir, params["SIM_NUMBER"], suffix=suffix)
+            # self.set_result_csv_data("action", ds_results, name="actions_0_.csv")
+            # self.set_result_csv_data("cost", ds_results, name="costs_0_.csv"))
+            # self.set_result_csv_data("runtime", ds_results, name="run_time_0_.csv")
+
             if not os.path.exists(output_dir + '/agents'):
                 os.makedirs(output_dir + '/agents')
             indp_results.to_csv_layer(output_dir + '/agents', params["SIM_NUMBER"], suffix=suffix)
@@ -968,31 +973,6 @@ class INDP(BaseAnalysis):
                     'parent_type': '',
                     'description': '',
                     'type': 'incore:indpRuntime'
-                },
-                {
-                    'id': '',
-                    'parent_type': '',
-                    'description': '',
-                    'type': ''
-                },
-                {
-                    'id': '',
-                    'parent_type': '',
-                    'description': '',
-                    'type': ''
-                },
-                {
-                    'id': '',
-                    'parent_type': '',
-                    'description': '',
-                    'type': ''
-                },
-                {
-                    'id': '',
-                    'parent_type': '',
-                    'description': '',
-                    'type': ''
-                },
-
+                }
             ]
         }
