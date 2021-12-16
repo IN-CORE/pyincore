@@ -45,19 +45,22 @@ class INDP(BaseAnalysis):
         if t_steps is None:
             t_steps = 10
 
+        dynamic_params = None
         dislocation_data_type = self.get_parameter("dislocation_data_type")
-        return_model = self.get_parameter("return")
+        return_model = self.get_parameter("return_model")
         testbed_name = self.get_parameter("testbed_name")
-        dynamic_params = {
-            "TYPE": dislocation_data_type,
-            "RETURN": return_model,
-            "TESTBED": testbed_name,
-        }
         bldgs2elec_dataset = self.get_input_dataset("bldgs2elec")
         bldgs2wter_dataset = self.get_input_dataset("bldgs2wter")
-        if bldgs2elec_dataset is not None and bldgs2wter_dataset is not None:
-            dynamic_params['MAPPING'] = {'POWER': bldgs2elec_dataset.get_dataframe_from_csv(low_memory=False),
-                                         'WATER': bldgs2wter_dataset.get_dataframe_from_csv(low_memory=False)}
+
+        if dislocation_data_type is not None and return_model is not None and testbed_name is not \
+                None and bldgs2elec_dataset is not None and bldgs2wter_dataset is not None:
+            dynamic_params = {
+                "TYPE": dislocation_data_type,
+                "RETURN": return_model,
+                "TESTBED": testbed_name,
+                "MAPPING": {'POWER': bldgs2elec_dataset.get_dataframe_from_csv(low_memory=False),
+                            'WATER': bldgs2wter_dataset.get_dataframe_from_csv(low_memory=False)}
+            }
 
         extra_commodity = self.get_parameter("extra_commodity")
         time_resource = self.get_parameter("time_resource")
@@ -779,20 +782,20 @@ class INDP(BaseAnalysis):
                 },
                 {
                     'id': 'dislocation_data_type',
-                    'required': True,
+                    'required': False,
                     'description': 'type of the dislocation data.',
                     'type': str
                 },
                 {
-                    'id': 'return',
-                    'required': True,
+                    'id': 'return_model',
+                    'required': False,
                     'description': 'type of the model for the return of the dislocated population. '
                                    'Options: *step_function* and *linear*.',
                     'type': str
                 },
                 {
                     'id': 'testbed_name',
-                    'required': True,
+                    'required': False,
                     'description': 'sets the name of the testbed in analysis',
                     'type': str
                 },

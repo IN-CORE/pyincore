@@ -39,8 +39,7 @@ class DislocationUtil:
         net_names = {'WATER': 1, 'GAS': 2, 'POWER': 3, 'TELECOME': 4}
         dynamic_params = {}
 
-        output_file = dynamic_param_dict['OUT_DIR'] + dynamic_param_dict['TESTBED'] + '_pop_dislocation_demands_' + str(
-            params['MAGNITUDE']) + 'yr.pkl'
+        output_file = dynamic_param_dict['TESTBED'] + '_pop_dislocation_demands_' + str(params['MAGNITUDE']) + 'yr.pkl'
         if os.path.exists(output_file):
             print("\nReading from file...")
             with open(output_file, 'rb') as f:

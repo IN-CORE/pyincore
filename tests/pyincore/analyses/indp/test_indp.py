@@ -11,7 +11,7 @@ def run_with_base_class():
     indp_analysis.set_parameter("MAGS", [1000])
     indp_analysis.set_parameter("sample_range", range(0, 1))
     indp_analysis.set_parameter("dislocation_data_type", "incore")
-    indp_analysis.set_parameter("return", "step_function")
+    indp_analysis.set_parameter("return_model", "step_function")
     indp_analysis.set_parameter("testbed_name", "seaside")
     indp_analysis.set_parameter("extra_commodity", {1: ["PW"], 3: []})
     indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 70}])
