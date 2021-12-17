@@ -11,7 +11,6 @@ import re
 from typing import List, Dict
 from collections import Counter
 
-from deprecated.sphinx import deprecated
 from decimal import getcontext, Decimal
 
 from pyincore import DataService
@@ -378,7 +377,10 @@ class AnalysisUtil:
         if hazard_type.lower() == "earthquake":
             num_stories = building[PROPERTIES][BLDG_STORIES]
             # Get building period from the fragility if possible
-            building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
+
+            building_args = fragility_set.construct_expression_args_from_inventory(building)
+            building_period = fragility_set.fragility_curves[0].get_building_period(
+                fragility_set.fragility_curve_parameters, **building_args)
 
             if fragility_hazard_type.endswith('sa') and fragility_hazard_type != 'sa':
                 # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
@@ -440,7 +442,9 @@ class AnalysisUtil:
                 demand_type = demand_type.lower()
                 num_stories = building[PROPERTIES][BLDG_STORIES]
                 # Get building period from the fragility if possible
-                building_period = fragility_set.fragility_curves[0].get_building_period(num_stories)
+                building_args = fragility_set.construct_expression_args_from_inventory(building)
+                building_period = fragility_set.fragility_curves[0].get_building_period(
+                    fragility_set.fragility_curve_parameters, **building_args)
 
                 # TODO: There might be a bug here as this is not handling SD
                 if demand_type.endswith('sa'):
