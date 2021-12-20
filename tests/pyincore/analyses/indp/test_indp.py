@@ -10,16 +10,22 @@ def run_with_base_class():
     indp_analysis.set_parameter("network_type", "from_csv")
     indp_analysis.set_parameter("MAGS", [1000])
     indp_analysis.set_parameter("sample_range", range(0, 3))
+    # indp_analysis.set_parameter("sample_range", range(0, 1)) # test just one sample
+
     indp_analysis.set_parameter("dislocation_data_type", "incore")
     indp_analysis.set_parameter("return_model", "step_function")
     indp_analysis.set_parameter("testbed_name", "seaside")
     indp_analysis.set_parameter("extra_commodity", {1: ["PW"], 3: []})
-    indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 70}])
+    indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 70}, {"budget": 300000, "time": 60}])
+    # indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 70}]) # test just one resource
+
     indp_analysis.set_parameter("layers", [1, 3])
     indp_analysis.set_parameter("method", "INDP")
     # indp_analysis.set_parameter("method", "TDINDP")
+
     indp_analysis.set_parameter("t_steps", 10)
     indp_analysis.set_parameter("time_resource", True)
+    indp_analysis.set_parameter("save_model", True)
 
     nodes_reptime_func = Dataset.from_file("data/repair_time_curves_nodes.csv", "incore:RepairTimeCurvesNodes")
     indp_analysis.set_input_dataset("nodes_reptime_func", nodes_reptime_func)

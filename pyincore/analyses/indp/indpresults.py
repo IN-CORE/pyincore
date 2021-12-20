@@ -244,54 +244,6 @@ class INDPResults:
         self.add_num_components(t, components.num_components)
         self.add_gc_size(t, components.gc_size)
 
-    def to_csv(self, out_dir, sample_num=1, suffix=""):
-        """
-        This function writes the results to file.
-
-        Parameters
-        ----------
-        out_dir : str
-            Output directory to which the results should be written
-        sample_num : int
-            The sample number corresponding to the results, The default is 1.
-        suffix : str
-            The suffix of the file that is being written. The default is "".
-
-        Returns
-        -------
-        None.
-
-        """
-        action_file = out_dir + "/actions_" + str(sample_num) + "_" + suffix + ".csv"
-        costs_file = out_dir + "/costs_" + str(sample_num) + "_" + suffix + ".csv"
-        run_time_file = out_dir + "/run_time_" + str(sample_num) + "_" + suffix + ".csv"
-        perc_file = out_dir + "/percolation_" + str(sample_num) + "_" + suffix + ".csv"
-        comp_file = out_dir + "/components_" + str(sample_num) + "_" + suffix + ".csv"
-        with open(action_file, 'w') as f:
-            f.write("t,action\n")
-            for t in self.results:
-                for a in self.results[t]['actions']:
-                    f.write(str(t) + "," + a + "\n")
-        with open(run_time_file, 'w') as f:
-            f.write("t,run_time\n")
-            for t in self.results:
-                f.write(str(t) + "," + str(self.results[t]['run_time']) + "\n")
-        with open(costs_file, 'w') as f:
-            f.write("t,Space Prep,Arc,Node,Over Supply,Under Supply,Flow,Total,Under Supply Perc\n")
-            for t in self.results:
-                costs = self.results[t]['costs']
-                f.write(str(t) + "," + str(costs["Space Prep"]) + "," + str(costs["Arc"]) + "," + str(
-                    costs["Node"]) + "," + str(costs["Over Supply"]) + "," + str(costs["Under Supply"]) + "," + str(
-                    costs["Flow"]) + "," + str(costs["Total"]) + "," + str(costs["Under Supply Perc"]) + "\n")
-
-    #        with open(perc_file,'w') as f:
-    #            f.write("t,gc_size,num_components\n")
-    #            for t in self.results:
-    #                f.write(str(t)+","+`self.results[t]['gc_size']`+","+`self.results[t]['num_components']`+"\n")
-    #        with open(comp_file,'w') as f:
-    #            f.write("t,components\n")
-    #            for t in self.results:
-    #                f.write(str(t)+","+self.results[t]['components'].to_csv_string()+"\n")
     def to_csv_layer(self, out_dir, sample_num=1, suffix=""):
         """
         This function writes the results to file for each layer. The file for each layer are distinguished by "_L" +

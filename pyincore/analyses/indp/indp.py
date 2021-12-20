@@ -67,12 +67,23 @@ class INDP(BaseAnalysis):
         if time_resource is None:
             time_resource = True
 
-        self.run_method(fail_sce_param, RC, layers, method=method, t_steps=t_steps,
-                        misc={'DYNAMIC_PARAMS': dynamic_params,
-                              'EXTRA_COMMODITY': extra_commodity,
-                              'TIME_RESOURCE': time_resource})
+        # save model or not; default to False
+        save_mode = self.get_parameter("save_model")
+        if save_mode is None:
+            save_mode = False
 
-    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None):
+        action_result, cost_result, runtime_result = self.run_method(fail_sce_param, RC, layers, method=method,
+                                                                     t_steps=t_steps,
+                                                                     misc={'DYNAMIC_PARAMS': dynamic_params,
+                                                                           'EXTRA_COMMODITY': extra_commodity,
+                                                                           'TIME_RESOURCE': time_resource},
+                                                                     save_mode=save_mode)
+
+        self.set_result_csv_data("action", action_result, name="actions.csv")
+        self.set_result_csv_data("cost", cost_result, name="costs.csv")
+        self.set_result_csv_data("runtime", runtime_result, name="run_time.csv")
+
+    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None, save_mode=False):
         """
         This function runs restoration analysis based on INDP or td-INDP for different numbers of resources.
 
@@ -86,12 +97,33 @@ class INDP(BaseAnalysis):
             method (str): Algorithm type.
             t_steps (int): Number of time steps of the analysis.
             misc (dict): A dictionary that contains miscellaneous data needed for the analysis
+            save_mode (bool): Flag indicates if the model should be saved or not
 
         Returns:
 
         """
 
-        for v in v_r:
+        # input files
+        nodes_reptime_func = self.get_input_dataset("nodes_reptime_func").get_dataframe_from_csv(low_memory=False)
+        nodes_damge_ratio = self.get_input_dataset("nodes_damge_ratio").get_dataframe_from_csv(low_memory=False)
+        arcs_reptime_func = self.get_input_dataset("arcs_reptime_func").get_dataframe_from_csv(low_memory=False)
+        arcs_damge_ratio = self.get_input_dataset("arcs_damge_ratio").get_dataframe_from_csv(low_memory=False)
+        dmg_sce_data = self.get_input_dataset("dmg_sce_data").get_dataframe_from_csv(low_memory=False)
+        power_arcs = self.get_input_dataset("power_arcs").get_dataframe_from_csv(low_memory=False)
+        power_nodes = self.get_input_dataset("power_nodes").get_dataframe_from_csv(low_memory=False)
+        water_arcs = self.get_input_dataset("water_arcs").get_dataframe_from_csv(low_memory=False)
+        water_nodes = self.get_input_dataset("water_nodes").get_dataframe_from_csv(low_memory=False)
+        pipeline_dmg = self.get_input_dataset("pipeline_dmg").get_dataframe_from_csv(low_memory=False)
+        interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
+        initial_node = self.get_input_dataset("initial_node").get_csv_reader()
+        initial_link = self.get_input_dataset("initial_link").get_csv_reader()
+        pop_dislocation = self.get_input_dataset("pop_dislocation").get_dataframe_from_csv(low_memory=False)
+
+        # results
+        action_result = []
+        cost_result = []
+        runtime_result = []
+        for v_i, v in enumerate(v_r):
             if method == 'INDP':
                 params = {"NUM_ITERATIONS": t_steps, "OUTPUT_DIR": 'indp_results', "V": v,
                           "T": 1, 'L': layers, "ALGORITHM": "INDP"}
@@ -110,73 +142,83 @@ class INDP(BaseAnalysis):
             if misc['DYNAMIC_PARAMS']:
                 params['OUTPUT_DIR'] = 'dp_' + params['OUTPUT_DIR']
 
-            self.batch_run(params, fail_sce_param)
+            print('----Running for resources: ' + str(params['V']))
+            for m in fail_sce_param['MAGS']:
+                for i in fail_sce_param['SAMPLE_RANGE']:
+                    params["SIM_NUMBER"] = i
+                    params["MAGNITUDE"] = m
 
-    def batch_run(self, params, fail_sce_param):
-        """
-        Batch run different methods for a given list of damage scenarios,
-        given global parameters.
+                    print('---Running Magnitude ' + str(m) + ' sample ' + str(i) + '...')
+                    if params['TIME_RESOURCE']:
+                        print('Computing repair times...')
+                        water_nodes, water_arcs, power_nodes, power_arcs = \
+                            INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
+                                                                pipeline_dmg, nodes_reptime_func, nodes_damge_ratio,
+                                                                arcs_reptime_func, arcs_damge_ratio, dmg_sce_data, i)
 
-        Args:
-            params (dict): Parameters that are needed to run the INDP optimization.
-            fail_sce_param (dict): Parameters concerning the failure scenarios.
+                    print("Initializing network...")
+                    params["N"] = INDPUtil.initialize_network(power_nodes, power_arcs, water_nodes, water_arcs,
+                                                              interdep, extra_commodity=params["EXTRA_COMMODITY"])
 
-        Returns:
+                    if params['DYNAMIC_PARAMS']:
+                        print("Computing dynamic demand based on dislocation data...")
+                        dyn_dmnd = DislocationUtil.create_dynamic_param(params, pop_dislocation, N=params["N"],
+                                                                        T=params["NUM_ITERATIONS"])
+                        params['DYNAMIC_PARAMS']['DEMAND_DATA'] = dyn_dmnd
 
-        """
-        # input files
-        nodes_reptime_func = self.get_input_dataset("nodes_reptime_func").get_dataframe_from_csv(low_memory=False)
-        nodes_damge_ratio = self.get_input_dataset("nodes_damge_ratio").get_dataframe_from_csv(low_memory=False)
-        arcs_reptime_func = self.get_input_dataset("arcs_reptime_func").get_dataframe_from_csv(low_memory=False)
-        arcs_damge_ratio = self.get_input_dataset("arcs_damge_ratio").get_dataframe_from_csv(low_memory=False)
-        dmg_sce_data = self.get_input_dataset("dmg_sce_data").get_dataframe_from_csv(low_memory=False)
-        power_arcs = self.get_input_dataset("power_arcs").get_dataframe_from_csv(low_memory=False)
-        power_nodes = self.get_input_dataset("power_nodes").get_dataframe_from_csv(low_memory=False)
-        water_arcs = self.get_input_dataset("water_arcs").get_dataframe_from_csv(low_memory=False)
-        water_nodes = self.get_input_dataset("water_nodes").get_dataframe_from_csv(low_memory=False)
-        pipeline_dmg = self.get_input_dataset("pipeline_dmg").get_dataframe_from_csv(low_memory=False)
-        interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
+                    if fail_sce_param['TYPE'] == 'from_csv':
+                        InfrastructureUtil.add_from_csv_failure_scenario(params["N"], sample=i,
+                                                                         initial_node=initial_node,
+                                                                         initial_link=initial_link)
+                    else:
+                        raise ValueError('Wrong failure scenario data type.')
 
-        initial_node = self.get_input_dataset("initial_node").get_csv_reader()
-        initial_link = self.get_input_dataset("initial_link").get_csv_reader()
+                    if params["ALGORITHM"] == "INDP":
+                        indp_results = self.run_indp(params, layers=params['L'], controlled_layers=params['L'],
+                                                     T=params["T"], save_model=save_mode, print_cmd_line=False,
+                                                     co_location=False)
+                        for t in indp_results.results:
+                            actions = indp_results[t]['actions']
+                            costs = indp_results[t]['costs']
+                            runtimes = indp_results[t]['run_time']
+                            for a in actions:
+                                action_result.append({
+                                    "RC": str(v_i),
+                                    "layers": 'L' + str(len(layers)),
+                                    "magnitude": 'm' + str(m),
+                                    "sample_num": str(i),
+                                    "t": str(t),
+                                    "action": a,
+                                })
 
-        pop_dislocation = self.get_input_dataset("pop_dislocation").get_dataframe_from_csv(low_memory=False)
+                            runtime_result.append({
+                                "RC": str(v_i),
+                                "layers": 'L' + str(len(layers)),
+                                "magnitude": 'm' + str(m),
+                                "sample_num": str(i),
+                                "t": str(t),
+                                "runtime": runtimes,
+                            })
 
-        print('----Running for resources: ' + str(params['V']))
-        for m in fail_sce_param['MAGS']:
-            for i in fail_sce_param['SAMPLE_RANGE']:
-                params["SIM_NUMBER"] = i
-                params["MAGNITUDE"] = m
+                            cost_result.append({
+                                "RC": str(v_i),
+                                "layers": 'L' + str(len(layers)),
+                                "magnitude": 'm' + str(m),
+                                "sample_num": str(i),
+                                "t": str(t),
+                                "Space Prep": str(costs["Space Prep"]),
+                                "Arc": str(costs["Arc"]),
+                                "Node": str(costs["Node"]),
+                                "Over Supply": str(costs["Over Supply"]),
+                                "Under Supply": str(costs["Under Supply"]),
+                                "Flow": str(costs["Flow"]),
+                                "Total": str(costs["Total"]),
+                                "Under Supply Perc": str(costs["Under Supply Perc"]),
+                            })
+                    else:
+                        raise ValueError('Wrong algorithm type.')
 
-                print('---Running Magnitude ' + str(m) + ' sample ' + str(i) + '...')
-                if params['TIME_RESOURCE']:
-                    print('Computing repair times...')
-                    water_nodes, water_arcs, power_nodes, power_arcs =\
-                        INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
-                                                            pipeline_dmg, nodes_reptime_func, nodes_damge_ratio,
-                                                            arcs_reptime_func, arcs_damge_ratio, dmg_sce_data, i)
-
-                print("Initializing network...")
-                params["N"] = INDPUtil.initialize_network(power_nodes, power_arcs, water_nodes, water_arcs, interdep,
-                                                          extra_commodity=params["EXTRA_COMMODITY"])
-
-                if params['DYNAMIC_PARAMS']:
-                    print("Computing dynamic demand based on dislocation data...")
-                    dyn_dmnd = DislocationUtil.create_dynamic_param(params, pop_dislocation, N=params["N"],
-                                                                    T=params["NUM_ITERATIONS"])
-                    params['DYNAMIC_PARAMS']['DEMAND_DATA'] = dyn_dmnd
-
-                if fail_sce_param['TYPE'] == 'from_csv':
-                    InfrastructureUtil.add_from_csv_failure_scenario(params["N"], sample=i, initial_node=initial_node,
-                                                                     initial_link=initial_link)
-                else:
-                    raise ValueError('Wrong failure scenario data type.')
-
-                if params["ALGORITHM"] == "INDP":
-                    self.run_indp(params, layers=params['L'], controlled_layers=params['L'], T=params["T"],
-                                  save_model=False, print_cmd_line=False, co_location=False)
-                else:
-                    raise ValueError('Wrong algorithm type.')
+        return action_result, cost_result, runtime_result
 
     def run_indp(self, params, layers=None, controlled_layers=None, functionality=None, T=1, save=True, suffix="",
                  forced_actions=False, save_model=False, print_cmd_line=True, co_location=True):
@@ -316,17 +358,10 @@ class INDP(BaseAnalysis):
                                                                                         t, layers=controlled_layers))
         # Save results of current simulation.
         if save:
-
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            indp_results.to_csv(output_dir, params["SIM_NUMBER"], suffix=suffix)
-            # self.set_result_csv_data("action", ds_results, name="actions_0_.csv")
-            # self.set_result_csv_data("cost", ds_results, name="costs_0_.csv"))
-            # self.set_result_csv_data("runtime", ds_results, name="run_time_0_.csv")
-
             if not os.path.exists(output_dir + '/agents'):
                 os.makedirs(output_dir + '/agents')
             indp_results.to_csv_layer(output_dir + '/agents', params["SIM_NUMBER"], suffix=suffix)
+
         return indp_results
 
     def indp(self, N, v_r, T=1, layers=None, controlled_layers=None, functionality=None, forced_actions=False,
@@ -854,6 +889,12 @@ class INDP(BaseAnalysis):
                     'description': 'if TIME_RESOURCE is True, then the repair time for each element is '
                                    'considered in devising the restoration plans',
                     'type': bool
+                },
+                {
+                    'id': 'save_model',
+                    'required': False,
+                    'description': 'If the Gurobi optimization model should be saved to file. The default is False.',
+                    'type': bool
                 }
 
             ],
@@ -959,19 +1000,19 @@ class INDP(BaseAnalysis):
                 {
                     'id': 'action',
                     'parent_type': '',
-                    'description': '',
+                    'description': 'Restoration action plans',
                     'type': 'incore:indpAction'
                 },
                 {
                     'id': 'cost',
                     'parent_type': '',
-                    'description': '',
+                    'description': 'Restoration cost plans',
                     'type': 'incore:indpCost'
                 },
                 {
                     'id': 'runtime',
                     'parent_type': '',
-                    'description': '',
+                    'description': 'Restoration runtime plans',
                     'type': 'incore:indpRuntime'
                 }
             ]
