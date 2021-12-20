@@ -903,55 +903,56 @@ class INDP(BaseAnalysis):
                     "id": "nodes_reptime_func",
                     "required": True,
                     "description": "repair time curves nodes",
-                    "type": "incore:RepairTimeCurvesNodes"
+                    "type": "incore:repairTimeCurvesNodes"
                 },
                 {
                     "id": "nodes_damge_ratio",
                     "required": True,
                     "description": "damage ratio nodes",
-                    "type": "incore:DamageRatioNodes"
+                    "type": "incore:damageRatioNodes"
                 },
                 {
                     "id": "arcs_reptime_func",
                     "required": True,
                     "description": "repair time curves arcs",
-                    "type": "incore:RepairTimeCurvesArcs"
+                    "type": "incore:repairTimeCurvesArcs"
                 },
                 {
                     "id": "arcs_damge_ratio",
                     "required": True,
                     "description": "damage ratio arcs",
-                    "type": "incore:DamageRatioArcs"
+                    "type": "incore:damageRatioArcs"
                 },
                 {
                     "id": "dmg_sce_data",
                     "required": True,
+                    # TODO needs explanation
                     "description": "damage sce data",
-                    "type": "incore:DmgSceData"
+                    "type": "incore:dmgSceData"
                 },
                 {
                     "id": "power_arcs",
                     "required": True,
                     "description": "Power Arcs",
-                    "type": "incore:PowerArcs"
+                    "type": "incore:powerArcs"
                 },
                 {
                     "id": "power_nodes",
                     "required": True,
                     "description": "Power Nodes",
-                    "type": "incore:PowerNodes"
+                    "type": "incore:powerNodes"
                 },
                 {
                     "id": "water_arcs",
                     "required": True,
                     "description": "Water Arcs",
-                    "type": "incore:WaterArcs"
+                    "type": "incore:waterArcs"
                 },
                 {
                     "id": "water_nodes",
                     "required": True,
                     "description": "Water Nodes",
-                    "type": "incore:WaterNodes"
+                    "type": "incore:waterNodes"
                 },
                 {
                     "id": "pipeline_dmg",
@@ -969,13 +970,13 @@ class INDP(BaseAnalysis):
                     "id": "initial_node",
                     "required": True,
                     "description": "initial node csv",
-                    "type": "incore:InitialNode"
+                    "type": "incore:initialNode"
                 },
                 {
                     "id": "initial_link",
                     "required": True,
                     "description": "initial link csv",
-                    "type": "incore:InitialLink"
+                    "type": "incore:initialLink"
                 },
                 {
                     "id": "pop_dislocation",
@@ -986,13 +987,15 @@ class INDP(BaseAnalysis):
                 {
                     "id": "bldgs2elec",
                     "required": False,
+                    # TODO need a better decription
                     "description": "Power/bldgs2elec_Seaside.csv",
                     "type": "incore:bldgs2elec"
                 },
                 {
                     "id": "bldgs2wter",
                     "required": False,
-                    "description": "Power/bldgs2wter_Seaside.csv",
+                    # TODO need a better decription
+                    "description": "Water/bldgs2wter_Seaside.csv",
                     "type": "incore:bldgs2wter"
                 },
             ],
