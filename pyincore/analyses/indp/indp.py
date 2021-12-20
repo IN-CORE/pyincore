@@ -964,7 +964,7 @@ class INDP(BaseAnalysis):
                     "id": "interdep",
                     "required": True,
                     "description": "Interdep.csv",
-                    "type": "incore:Interdep"
+                    "type": "incore:interdep"
                 },
                 {
                     "id": "initial_node",
