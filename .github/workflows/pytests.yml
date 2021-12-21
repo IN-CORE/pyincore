@@ -2,7 +2,7 @@ name: pytests
 
 # Runs unit tests on:
 #  - any push to any branch
-#  - when a PR is opened/reopened - this is just for additional safety and covers the case of master -> develop PRs without new pushes
+#  - when a PR is opened/reopened - this is just for additional safety and covers the case of main -> develop PRs without new pushes
 
 # TODO: Use mamba instead of conda for installing packages. Improves on ~5mins it takes to install requirements.
 #  https://github.com/mamba-org/provision-with-micromamba
