@@ -3,7 +3,7 @@ name: DOC
 on:
   push:
     branches:
-      - master
+      - main
       - develop
       - 'release/*'
 
@@ -12,7 +12,7 @@ on:
 
   pull_request:
     branches:
-      - master
+      - main
       - develop
       - 'release/*'
 
@@ -42,7 +42,7 @@ jobs:
             BRANCH=${GITHUB_REF##*/}
           fi
           echo "GITHUB_BRANCH=${BRANCH}" >> $GITHUB_ENV
-          if [ "$BRANCH" == "master" ]; then
+          if [ "$BRANCH" == "main" ]; then
             version=$(awk -F= '/^release/ { print $2}' docs/source/conf.py | sed "s/[ ']//g")
             tags="latest"
             oldversion=""
