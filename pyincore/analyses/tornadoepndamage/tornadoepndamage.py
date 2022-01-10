@@ -15,7 +15,7 @@ from shapely.geometry import shape
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, FragilityCurveSet
 from pyincore import GeoUtil, NetworkUtil
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class TornadoEpnDamage(BaseAnalysis):
@@ -305,7 +305,7 @@ class TornadoEpnDamage(BaseAnalysis):
                                         hval_dict[d] = tor_hazard_values[j]
                                         j += 1
                                     if isinstance(fragility_set_used.fragility_curves[0],
-                                                  FragilityCurve):
+                                                  DFR3Curve):
                                         inventory_args = fragility_set_used.construct_expression_args_from_inventory(
                                             tornado_feature)
                                         resistivity_probability = \

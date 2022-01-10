@@ -18,7 +18,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, \
     AnalysisUtil, GeoUtil
 from pyincore.analyses.pipelinedamagerepairrate.pipelineutil import \
     PipelineUtil
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class PipelineDamageRepairRate(BaseAnalysis):
@@ -226,7 +226,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
             fragility_curve = fragility_set.fragility_curves[0]
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
-            if isinstance(fragility_set.fragility_curves[0], FragilityCurve):
+            if isinstance(fragility_set.fragility_curves[0], DFR3Curve):
                 hazard_vals = AnalysisUtil.update_precision_of_lists(hazard_resp[i]["hazardValues"])
                 demand_types = hazard_resp[i]["demands"]
                 demand_units = hazard_resp[i]["units"]
@@ -239,7 +239,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                     pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
                     pgv_repairs = \
                         fragility_curve.calculate_limit_state_probability(
-                            hval_dict, fragility_set.fragility_curve_parameters, **pipeline_args)
+                            hval_dict, fragility_set.curve_parameters, **pipeline_args)
                     # Convert PGV repairs to SI units
                     pgv_repairs = PipelineUtil.convert_result_unit(fragility_curve.return_type["unit"], pgv_repairs)
 
@@ -254,7 +254,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                         liq_fragility_curve = fragility_set_liq.fragility_curves[0]
 
                         # TODO: Once all fragilities are migrated to new format, we can remove this condition
-                        if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurve):
+                        if isinstance(fragility_set_liq.fragility_curves[0], DFR3Curve):
                             liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
                             liq_demand_types = liquefaction_resp[i]["demands"]
                             liq_demand_units = liquefaction_resp[i]["units"]
@@ -268,7 +268,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                             pipeline_args = fragility_set_liq.construct_expression_args_from_inventory(pipeline)
                             pgd_repairs = \
                                 liq_fragility_curve.calculate_limit_state_probability(
-                                    liq_hval_dict, fragility_set_liq.fragility_curve_parameters, **pipeline_args)
+                                    liq_hval_dict, fragility_set_liq.curve_parameters, **pipeline_args)
                             # Convert PGD repairs to SI units
                             pgd_repairs = PipelineUtil.convert_result_unit(liq_fragility_curve.return_type["unit"],
                                                                            pgd_repairs)

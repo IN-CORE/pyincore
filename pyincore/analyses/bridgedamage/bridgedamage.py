@@ -13,7 +13,7 @@ import copy
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class BridgeDamage(BaseAnalysis):
@@ -175,7 +175,7 @@ class BridgeDamage(BaseAnalysis):
             dmg_intervals = dict()
             selected_fragility_set = fragility_set[bridge["id"]]
 
-            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurve):
+            if isinstance(selected_fragility_set.fragility_curves[0], DFR3Curve):
                 # Supports multiple demand types in same fragility
                 hazard_val = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
                 input_demand_types = hazard_vals[i]["demands"]

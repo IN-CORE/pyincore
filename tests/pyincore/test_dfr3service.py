@@ -95,7 +95,7 @@ def test_get_fragility_mapping(fragilitysvc):
 
 
 def test_create_and_delete_fragility_set(fragilitysvc):
-    with open(os.path.join(pyglobals.TEST_DATA_DIR, "refactored_fragility_curve.json"), 'r') as f:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "fragility_curve.json"), 'r') as f:
         fragility_set = json.load(f)
     created = fragilitysvc.create_dfr3_set(fragility_set)
     assert "id" in created.keys()
@@ -134,3 +134,4 @@ def test_get_repair_sets(repairsvc):
     metadata = repairsvc.get_dfr3_sets(hazard_type="earthquake", creator="incrtest")
 
     assert 'id' in metadata[0].keys()
+

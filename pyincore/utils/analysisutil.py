@@ -380,7 +380,7 @@ class AnalysisUtil:
 
             building_args = fragility_set.construct_expression_args_from_inventory(building)
             building_period = fragility_set.fragility_curves[0].get_building_period(
-                fragility_set.fragility_curve_parameters, **building_args)
+                fragility_set.curve_parameters, **building_args)
 
             if fragility_hazard_type.endswith('sa') and fragility_hazard_type != 'sa':
                 # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
@@ -444,7 +444,7 @@ class AnalysisUtil:
                 # Get building period from the fragility if possible
                 building_args = fragility_set.construct_expression_args_from_inventory(building)
                 building_period = fragility_set.fragility_curves[0].get_building_period(
-                    fragility_set.fragility_curve_parameters, **building_args)
+                    fragility_set.curve_parameters, **building_args)
 
                 # TODO: There might be a bug here as this is not handling SD
                 if demand_type.endswith('sa'):
@@ -460,7 +460,7 @@ class AnalysisUtil:
                                 building_period = building[PROPERTIES][BLDG_PERIOD]
                             else:
                                 # try to calculate the period from the expression
-                                for param in fragility_set.fragility_curve_parameters:
+                                for param in fragility_set.curve_parameters:
                                     if param["name"].lower() == "period":
                                         # TODO: This is a hack and expects a parameter with name "period" present.
                                         #  This can potentially cause naming conflicts in some fragilities

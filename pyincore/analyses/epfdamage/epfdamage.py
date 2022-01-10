@@ -9,7 +9,7 @@ from itertools import repeat
 
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class EpfDamage(BaseAnalysis):
@@ -199,7 +199,7 @@ class EpfDamage(BaseAnalysis):
             damage_result = dict()
             selected_fragility_set = fragility_set[epf["id"]]
 
-            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurve):
+            if isinstance(selected_fragility_set.fragility_curves[0], DFR3Curve):
                 hazard_val = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
                 input_demand_types = hazard_vals[i]["demands"]
                 input_demand_units = hazard_vals[i]["units"]
@@ -218,7 +218,7 @@ class EpfDamage(BaseAnalysis):
                 if liquefaction_resp is not None:
                     fragility_set_liq = fragility_sets_liq[epf["id"]]
 
-                    if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurve):
+                    if isinstance(fragility_set_liq.fragility_curves[0], DFR3Curve):
                         liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
                         liq_demand_types = liquefaction_resp[i]["demands"]
                         liq_demand_units = liquefaction_resp[i]["units"]

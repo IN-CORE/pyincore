@@ -12,7 +12,7 @@ from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, \
     FragilityCurveSet, AnalysisUtil, GeoUtil
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class PipelineDamage(BaseAnalysis):
@@ -162,7 +162,7 @@ class PipelineDamage(BaseAnalysis):
             fragility_set = fragility_sets[pipeline["id"]]
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
-            if isinstance(fragility_set.fragility_curves[0], FragilityCurve):
+            if isinstance(fragility_set.fragility_curves[0], DFR3Curve):
                 # Supports multiple demand types in same fragility
                 haz_vals = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
                 demand_types = hazard_vals[i]["demands"]

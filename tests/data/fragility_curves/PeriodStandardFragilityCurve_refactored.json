@@ -17,7 +17,6 @@
   "fragilityCurves": [
     {
       "description": "legacy - PeriodStandardFragilityCurve",
-      "className": "FragilityCurveRefactored",
       "returnType": {
         "type": "Limit State",
         "unit": "",
@@ -31,7 +30,6 @@
     },
     {
       "description": "legacy - PeriodStandardFragilityCurve",
-      "className": "FragilityCurveRefactored",
       "returnType": {
         "type": "Limit State",
         "unit": "",
@@ -45,7 +43,6 @@
     },
     {
       "description": "legacy - PeriodStandardFragilityCurve",
-      "className": "FragilityCurveRefactored",
       "returnType": {
         "type": "Limit State",
         "unit": "",
@@ -59,7 +56,7 @@
     }
   ],
   "creator": "incore",
-  "fragilityCurveParameters": [
+  "curveParameters": [
     {
       "name": "point_two_sec_SA",
       "fullName": "0.2 sec Sa",
@@ -78,6 +75,5 @@
       "description": "default building period",
       "expression": "1.08"
     }
-  ],
-  "id": "5b47b2d7337d4a36187c61c9"
+  ]
 }

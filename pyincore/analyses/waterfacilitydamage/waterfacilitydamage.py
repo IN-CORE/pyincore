@@ -14,7 +14,7 @@ from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, GeoUtil, \
     AnalysisUtil
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class WaterFacilityDamage(BaseAnalysis):
@@ -241,7 +241,7 @@ class WaterFacilityDamage(BaseAnalysis):
             if uncertainty:
                 hazard_std_dev = random.random()
 
-            if isinstance(fragility_set.fragility_curves[0], FragilityCurve):
+            if isinstance(fragility_set.fragility_curves[0], DFR3Curve):
                 hazard_vals = AnalysisUtil.update_precision_of_lists(hazard_resp[i]["hazardValues"])
                 demand_types = hazard_resp[i]["demands"]
                 demand_units = hazard_resp[i]["units"]
@@ -262,7 +262,7 @@ class WaterFacilityDamage(BaseAnalysis):
                     if liquefaction_resp is not None:
                         fragility_set_liq = fragility_sets_liq[facility["id"]]
 
-                        if isinstance(fragility_set_liq.fragility_curves[0], FragilityCurve):
+                        if isinstance(fragility_set_liq.fragility_curves[0], DFR3Curve):
                             liq_hazard_vals = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i]["pgdValues"])
                             liq_demand_types = liquefaction_resp[i]["demands"]
                             liq_demand_units = liquefaction_resp[i]["units"]

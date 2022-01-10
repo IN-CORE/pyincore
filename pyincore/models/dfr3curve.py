@@ -13,8 +13,8 @@ from pyincore.utils import evaluateexpression
 logger = pyglobals.LOGGER
 
 
-class FragilityCurve(ABC):
-    """A class to represent conditional standard fragility curve."""
+class DFR3Curve:
+    """A class to represent a DFR3 curve."""
 
     def __init__(self, curve_parameters):
         self.rules = curve_parameters['rules']
@@ -24,12 +24,12 @@ class FragilityCurve(ABC):
             rule["expression"] = rule["expression"].replace("^", "**")
         self.description = curve_parameters['description']
 
-    def calculate_limit_state_probability(self, hazard_values: dict, fragility_curve_parameters: dict, **kwargs):
+    def calculate_limit_state_probability(self, hazard_values: dict, curve_parameters: dict, **kwargs):
         """Computes limit state probabilities.
 
         Args:
             hazard_values (dict): Hazard values.
-            fragility_curve_parameters (dict): Fragility curve parameters.
+            curve_parameters (dict): Fragility curve parameters.
             **kwargs: Keyword arguments.
 
         Returns:
@@ -42,7 +42,7 @@ class FragilityCurve(ABC):
         # 1. Figure out if parameter name needs to be mapped (i.e. the name contains forbidden characters)
         # 2. Fetch all parameters listed in the curve from kwargs and if there are not in kwargs, use default values
         # from the curve.
-        for parameter in fragility_curve_parameters:
+        for parameter in curve_parameters:
             # if default exists, use default
             if "expression" in parameter and parameter["expression"] is not None:
                 parameters[parameter["name"]] = evaluateexpression.evaluate(parameter["expression"], parameters)
@@ -101,12 +101,12 @@ class FragilityCurve(ABC):
 
         return probability
 
-    def get_building_period(self, fragility_curve_parameters, **kwargs):
+    def get_building_period(self, curve_parameters, **kwargs):
         """
                 Get building period from the fragility curve.
 
         Args:
-            fragility_curve_parameters (dict): Fragility curve parameters.
+            curve_parameters (dict): Fragility curve parameters.
             **kwargs: Keyword arguments.
 
         Returns:
@@ -116,7 +116,7 @@ class FragilityCurve(ABC):
 
         period = 0.0
         num_stories = 1.0
-        for parameter in fragility_curve_parameters:
+        for parameter in curve_parameters:
             # if default exists, use default
             if parameter["name"] == "num_stories" and "expression" in parameter and parameter["expression"] is not None:
                 num_stories = evaluateexpression.evaluate(parameter["expression"])
