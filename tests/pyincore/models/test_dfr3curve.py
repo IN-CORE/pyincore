@@ -9,7 +9,7 @@ import numpy as np
 
 
 def test_fragility_set_small_overlap():
-    fragility_set = get_fragility_set("refactored_fragility_curve.json")
+    fragility_set = get_fragility_set("fragility_curve.json")
 
     # Test Case 1 - single overlap
     limit_states = collections.OrderedDict([("LS_0", 0.9692754643), ("LS_1", 0.0001444974), ("LS_2", 0.0004277083)])
@@ -44,15 +44,15 @@ def get_remote_fragility_set(fragility_id: str):
 
 
 def test_create_fragility_set():
-    fragility_set = get_fragility_set("refactored_fragility_curve.json")
+    fragility_set = get_fragility_set("fragility_curve.json")
     assert len(fragility_set.fragility_curves) != 0
 
 
 @pytest.mark.parametrize("fragility_set,hazard_values,args,expected", [
-    (get_fragility_set("refactored_fragility_curve.json"), {}, {}, 0.2619967240482869),
-    (get_fragility_set("refactored_fragility_curve.json"), {"surgeLevel": 6, "waveHeight": 4}, {}, 1.0),
-    (get_fragility_set("refactored_fragility_curve.json"), {"waveHeight": 4}, {}, 1.0),
-    (get_fragility_set("refactored_fragility_curve.json"), {"surgeLevel": 6}, {}, 0.9999999950124077),
+    (get_fragility_set("fragility_curve.json"), {}, {}, 0.2619967240482869),
+    (get_fragility_set("fragility_curve.json"), {"surgeLevel": 6, "waveHeight": 4}, {}, 1.0),
+    (get_fragility_set("fragility_curve.json"), {"waveHeight": 4}, {}, 1.0),
+    (get_fragility_set("fragility_curve.json"), {"surgeLevel": 6}, {}, 0.9999999950124077),
     (get_remote_fragility_set("606221fe618178207f6608a1"),
      {"waveHeight": 1.1111, "surgeLevel": 3},
      {"clearance": 4, "span_mass": 12, "g_elev": 0.2},
@@ -72,6 +72,7 @@ def test_create_fragility_set():
 ])
 def test_calculate_limit_state_probability(fragility_set, hazard_values, args, expected):
     result = fragility_set.calculate_limit_state(hazard_values, **args)
+    print(result)
     assert np.isclose(result["LS_0"], expected)
 
 

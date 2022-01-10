@@ -11,7 +11,7 @@ from itertools import repeat
 from pyincore import BaseAnalysis, HazardService, \
     FragilityService, AnalysisUtil, GeoUtil
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class BuildingDamage(BaseAnalysis):
@@ -171,7 +171,7 @@ class BuildingDamage(BaseAnalysis):
             selected_fragility_set = fragility_sets[b_id]
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
-            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurve):
+            if isinstance(selected_fragility_set.fragility_curves[0], DFR3Curve):
                 # Supports multiple demand types in same fragility
                 b_haz_vals = AnalysisUtil.update_precision_of_lists(hazard_vals[i]["hazardValues"])
                 b_demands = hazard_vals[i]["demands"]
@@ -190,7 +190,7 @@ class BuildingDamage(BaseAnalysis):
                     building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
 
                     building_period = selected_fragility_set.fragility_curves[0].get_building_period(
-                        selected_fragility_set.fragility_curve_parameters, **building_args)
+                        selected_fragility_set.curve_parameters, **building_args)
 
                     dmg_probability = selected_fragility_set.calculate_limit_state(
                         hval_dict, **building_args, period=building_period)
