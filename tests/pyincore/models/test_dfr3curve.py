@@ -4,7 +4,7 @@ import collections
 
 import pytest
 
-from pyincore import globals as pyglobals, FragilityCurveSet, AnalysisUtil
+from pyincore import globals as pyglobals, FragilityCurveSet, RepairCurveSet, AnalysisUtil
 import numpy as np
 
 
@@ -48,6 +48,19 @@ def test_create_fragility_set():
     assert len(fragility_set.fragility_curves) != 0
 
 
+def get_repair_set(repair_dir: str):
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, repair_dir), 'r', encoding='utf-8') as f:
+        repair_curveset = json.load(f)
+    repair_set = RepairCurveSet(repair_curveset)
+    return repair_set
+
+
+def get_remote_repair_set(repair_id: str):
+    dfr3svc = pytest.repairsvc
+    repair_set = RepairCurveSet(dfr3svc.get_dfr3_set(repair_id))
+    return repair_set
+
+
 @pytest.mark.parametrize("fragility_set,hazard_values,args,expected", [
     (get_fragility_set("fragility_curve.json"), {}, {}, 0.2619967240482869),
     (get_fragility_set("fragility_curve.json"), {"surgeLevel": 6, "waveHeight": 4}, {}, 1.0),
@@ -75,4 +88,12 @@ def test_calculate_limit_state_probability(fragility_set, hazard_values, args, e
     print(result)
     assert np.isclose(result["LS_0"], expected)
 
+
+@pytest.mark.parametrize("repair_set,args,expected", [
+    (get_repair_set("repairset.json"), {"rand_arr_size": 8}, 8),
+    (get_remote_repair_set("61dd0638903e515036cee001"), {"rand_arr_size": 10}, 10)
+])
+def test_calculate_repair_rates(repair_set, args, expected):
+    result = repair_set.calculate_repair_rates(**args)
+    assert len(result["LS_0"]) == expected
 

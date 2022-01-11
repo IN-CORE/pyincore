@@ -12,10 +12,8 @@
             "description": "weekly repair rate - Slight",
             "rules": [
                 {
-                    "condition": [
-                        "True"
-                    ],
-                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=10), s=0.159, scale=numpy.exp(0.8196))"
+                    "condition": null,
+                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=rand_arr_size), s=0.159, scale=numpy.exp(0.8196))"
                 }
             ],
             "returnType": {
@@ -29,10 +27,8 @@
             "description": "weekly repair rate - Moderate",
             "rules": [
                 {
-                    "condition": [
-                        "True"
-                    ],
-                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=10), s=10, scale=numpy.exp(0.8196))"
+                    "condition": null,
+                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=rand_arr_size), s=0.159, scale=numpy.exp(0.8196))"
                 }
             ],
             "returnType": {
@@ -46,10 +42,8 @@
             "description": "weekly repair rate - Extensive",
             "rules": [
                 {
-                    "condition": [
-                        "True"
-                    ],
-                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=10), s=20, scale=numpy.exp(0.8196))"
+                    "condition": null,
+                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=rand_arr_size), s=0.159, scale=numpy.exp(0.8196))"
                 }
             ],
             "returnType": {
@@ -63,10 +57,8 @@
             "description": "weekly repair rate - Complete",
             "rules": [
                 {
-                    "condition": [
-                        "True"
-                    ],
-                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=10), s=30, scale=numpy.exp(0.8196))"
+                    "condition": null,
+                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=rand_arr_size), s=0.159, scale=numpy.exp(0.8196))"
                 }
             ],
             "returnType": {
@@ -77,5 +69,13 @@
             "curveParameters": null
         }
     ],
-    "curveParameters": null
+     "curveParameters": [
+        {
+            "name": "rand_arr_size",
+            "unit": "",
+            "description": "Size of numpy random number generator",
+            "fullName": "rand_arr_size",
+            "expression": "10"
+        }
+    ]
 }

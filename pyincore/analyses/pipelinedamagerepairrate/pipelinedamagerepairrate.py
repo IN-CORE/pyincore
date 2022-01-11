@@ -238,7 +238,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp[i]["hazardValues"]):
                     pipeline_args = fragility_set.construct_expression_args_from_inventory(pipeline)
                     pgv_repairs = \
-                        fragility_curve.calculate_limit_state_probability(
+                        fragility_curve.solve_curve_expression(
                             hval_dict, fragility_set.curve_parameters, **pipeline_args)
                     # Convert PGV repairs to SI units
                     pgv_repairs = PipelineUtil.convert_result_unit(fragility_curve.return_type["unit"], pgv_repairs)
@@ -267,7 +267,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                             # no fragility is actually using liqProbability
                             pipeline_args = fragility_set_liq.construct_expression_args_from_inventory(pipeline)
                             pgd_repairs = \
-                                liq_fragility_curve.calculate_limit_state_probability(
+                                liq_fragility_curve.solve_curve_expression(
                                     liq_hval_dict, fragility_set_liq.curve_parameters, **pipeline_args)
                             # Convert PGD repairs to SI units
                             pgd_repairs = PipelineUtil.convert_result_unit(liq_fragility_curve.return_type["unit"],

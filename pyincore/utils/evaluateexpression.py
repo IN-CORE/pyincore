@@ -1,5 +1,6 @@
 import math
 import scipy
+import numpy
 
 INVALID_NAMES = ["exec", "func", "eval", "type", "isinstance", "getattr", "setattr", "repr",
                  "compile", "open"]
@@ -28,7 +29,8 @@ def evaluate(expression: str, parameters: dict = {}):
             raise NameError(f"Using '{parameter}' is not allowed.")
 
     # TODO figure out a better way of doing this. Can we import the packages here directly?
-    safe_globals = {"__builtins__": {"min": min, "max": max}, "scipy": globals()["scipy"], "math": globals()["math"]}
+    safe_globals = {"__builtins__": {"min": min, "max": max}, "scipy": globals()["scipy"], "numpy": globals()["numpy"],
+                    "math": globals()["math"]}
     try:
         return eval(code, safe_globals, parameters)
     except:
