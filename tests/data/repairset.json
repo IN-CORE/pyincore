@@ -20,8 +20,7 @@
                 "type": "Repair Rate",
                 "unit": "",
                 "description": "LS_0"
-            },
-            "curveParameters": null
+            }
         },
         {
             "description": "weekly repair rate - Moderate",
@@ -35,8 +34,7 @@
                 "type": "Repair Rate",
                 "unit": "",
                 "description": "LS_1"
-            },
-            "curveParameters": null
+            }
         },
         {
             "description": "weekly repair rate - Extensive",
@@ -50,8 +48,7 @@
                 "type": "Repair Rate",
                 "unit": "",
                 "description": "LS_2"
-            },
-            "curveParameters": null
+            }
         },
         {
             "description": "weekly repair rate - Complete",
@@ -65,8 +62,7 @@
                 "type": "Repair Rate",
                 "unit": "",
                 "description": "LS_3"
-            },
-            "curveParameters": null
+            }
         }
     ],
      "curveParameters": [
