@@ -536,9 +536,9 @@ class PopDislOutputProcess:
 
         no_pop_tot = {"population": None, "percent_of_population": None}
         pop_disl_tot = {}
-        hua_disl_tot["dislocated"] = no_pop_tot
-        hua_disl_tot["not_dislocated"] = no_pop_tot
-        hua_disl_tot["total"] = no_pop_tot
+        pop_disl_tot["dislocated"] = no_pop_tot
+        pop_disl_tot["not_dislocated"] = no_pop_tot
+        pop_disl_tot["total"] = no_pop_tot
         if pop_tot:
             pop_disl_tot["dislocated"] = {"population": pd_disl[1],
                                           "percent_of_population": 100 * (pd_disl[1]/pop_tot)}
