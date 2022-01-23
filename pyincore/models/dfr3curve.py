@@ -92,9 +92,7 @@ class DFR3Curve:
                     eval_result = evaluateexpression.evaluate(rule["expression"], parameters)
                     break
 
-        if isinstance(eval_result, numpy.ndarray):  # for repair curves etc.
-            return eval_result.tolist()
-        elif isinstance(eval_result, list):  # possible case for repair curves etc.
+        if isinstance(eval_result, numpy.ndarray) or isinstance(eval_result, list):  # for repair curves etc.
             return eval_result
         else:  # for fragility curves the return is a float
             if eval_result is None:

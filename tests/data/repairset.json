@@ -17,9 +17,9 @@
                 }
             ],
             "returnType": {
-                "type": "Repair Rate",
+                "type": "Percent of Functionality",
                 "unit": "",
-                "description": "LS_0"
+                "description": "PF_0"
             }
         },
         {
@@ -31,9 +31,9 @@
                 }
             ],
             "returnType": {
-                "type": "Repair Rate",
+                "type": "Percent of Functionality",
                 "unit": "",
-                "description": "LS_1"
+                "description": "PF_1"
             }
         },
         {
@@ -45,9 +45,9 @@
                 }
             ],
             "returnType": {
-                "type": "Repair Rate",
+                "type": "Percent of Functionality",
                 "unit": "",
-                "description": "LS_2"
+                "description": "PF_2"
             }
         },
         {
@@ -59,9 +59,9 @@
                 }
             ],
             "returnType": {
-                "type": "Repair Rate",
+                "type": "Percent of Functionality",
                 "unit": "",
-                "description": "LS_3"
+                "description": "PF_3"
             }
         }
     ],

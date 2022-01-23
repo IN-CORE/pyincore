@@ -91,9 +91,10 @@ def test_calculate_limit_state_probability(fragility_set, hazard_values, args, e
 
 @pytest.mark.parametrize("repair_set,args,expected", [
     (get_repair_set("repairset.json"), {"rand_arr_size": 8}, 8),
-    (get_remote_repair_set("61dd0638903e515036cee001"), {"rand_arr_size": 10}, 10)
+    (get_remote_repair_set("60edf9a4fc0f3a7af53a2194"), {"rand_arr_size": 10}, 10)
 ])
 def test_calculate_repair_rates(repair_set, args, expected):
     result = repair_set.calculate_repair_rates(**args)
-    assert len(result["LS_0"]) == expected
+    print(result)
+    assert len(result["PF_0"]) == expected
 

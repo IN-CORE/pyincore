@@ -421,12 +421,20 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             # Now, perform the two nested loops, using the indexing function to simplify the syntax.
             for i in range(0, num_samples):
                 state = samples_mcs_ds[i]
-                lognormal_mean = mapped_repair.repair_curves[state].alpha
-                lognormal_sdv = mapped_repair.repair_curves[state].beta
+                # repair_times = mapped_repair.calculate_repair_rates(**{"rand_arr_size": num_samples})
+                # repair_time = repair_times[state_name]
 
-                # Generate a vector of random values to use in the inner loop
-                rand_vals = np.random.random(num_samples)
-                repair_time = lognorm.ppf(rand_vals, lognormal_sdv, scale=np.exp(lognormal_mean)) / 7
+                # lognormal_mean = mapped_repair.repair_curves[state].alpha
+                # lognormal_sdv = mapped_repair.repair_curves[state].beta
+                #
+                # # Generate a vector of random values to use in the inner loop
+                # rand_vals = np.random.random(num_samples)
+                # repair_time = lognorm.ppf(rand_vals, lognormal_sdv, scale=np.exp(lognormal_mean)) / 7
+                repair_time = mapped_repair.repair_curves[state].solve_curve_expression(hazard_values={},
+                                                                                        curve_parameters=
+                                                                                        mapped_repair.curve_parameters,
+                                                                                        **{"rand_arr_size": num_samples}
+                                                                                        ) / 7
 
                 for j in range(0, num_samples):
                     samples_n1_n2[household, idx(i, j)] = round(samples_np[household, i] + repair_time[j], 1)

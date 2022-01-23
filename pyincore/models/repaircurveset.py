@@ -84,15 +84,14 @@ class RepairCurveSet:
         # TODO: This is currently hard-coded to 4 limit states, but must be specific to inventory type
         #  as implemented in FragilityCurveSet._initialize_limit_states. TBD:  should the current buildings repair
         #  curves on prod that have 4 LS be converted to 3 LS to match the fragility/damage calculations.
-        output = {"LS_0": [], "LS_1": [], "LS_2": [], "LS_3": []}
-        limit_state = list(output.keys())
+        output = {}
         index = 0
 
         if len(self.repair_curves) == 4:
             for repair_curve in self.repair_curves:
                 eval_value = repair_curve.solve_curve_expression(hazard_values={},
                                                                  curve_parameters=self.curve_parameters, **kwargs)
-                output[limit_state[index]] = eval_value
+                output[repair_curve.return_type['description']] = eval_value
                 index += 1
         else:
             raise ValueError("We can only handle repair curves with 4 limit states.")
