@@ -118,8 +118,10 @@ def test_create_repair_set(repairsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "repairset.json"), 'r') as f:
         repair_set = json.load(f)
     created = repairsvc.create_dfr3_set(repair_set)
-
     assert "id" in created.keys()
+
+    del_response = repairsvc.delete_dfr3_set(created["id"])
+    assert del_response["id"] is not None
 
 
 def test_create_repair_mapping(repairsvc):
@@ -131,7 +133,7 @@ def test_create_repair_mapping(repairsvc):
 
 
 def test_get_repair_sets(repairsvc):
-    metadata = repairsvc.get_dfr3_sets(hazard_type="earthquake", creator="incrtest")
+    metadata = repairsvc.get_dfr3_sets(hazard_type="tornado", creator="incrtest")
 
     assert 'id' in metadata[0].keys()
 

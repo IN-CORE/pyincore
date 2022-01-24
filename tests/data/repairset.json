@@ -1,5 +1,4 @@
 {
-    "className" : "edu.illinois.ncsa.incore.service.dfr3.models.RepairSet",
     "timeUnits" : "days",
     "repairCurves" : [
         {
@@ -59,13 +58,12 @@
             }
         }
     ],
-    "description" : "Mean structural repair cost probabilities for archetype T1-T5",
+    "description" : "pytest - sample repair curves",
     "authors" : [
         "Maria Koliou",
         "John W. van de Lindt"
     ],
     "paperReference" : {
-        "className" : "edu.illinois.ncsa.incore.service.dfr3.models.PaperReference",
         "name" : "Development of Building Restoration Functions for Use inCommunity Recovery Planning to Tornadoes",
         "doi" : "https://doi.org/10.1061/(ASCE)NH.1527-6996.0000361",
         "yearPublished" : "2020"
@@ -73,7 +71,6 @@
     "resultType" : "Percent of Functionality",
     "hazardType" : "tornado",
     "inventoryType" : "building",
-    "creator" : "vnarah2",
     "curveParameters" : [
         {
             "name" : "repair_time",

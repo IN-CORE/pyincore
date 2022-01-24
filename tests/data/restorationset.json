@@ -1,81 +1,76 @@
 {
-    "description": "test restoration curves",
-    "authors": [],
-    "paperReference": null,
-    "resultUnit": null,
-    "resultType": "restoration_rate",
-    "hazardType": "earthquake",
-    "inventoryType": "building",
-    "timeUnits": "weeks",
-   "restorationCurves": [
+    "timeUnits" : "days",
+    "restorationCurves" : [
         {
-            "description": "weekly restoration rate - Slight",
-            "rules": [
+            "description" : "Slight",
+            "rules" : [
                 {
-                    "condition": [
-                        "True"
-                    ],
-                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=10), s=0.159, scale=numpy.exp(0.8196))"
+                    "condition" : null,
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.51, scale=numpy.exp(3.09))"
                 }
             ],
-            "returnType": {
-                "type": "Restoration Rate",
-                "unit": "",
-                "description": "LS_0"
-            },
-            "curveParameters": null
+            "returnType" : {
+                "type" : "Percent of Functionality",
+                "unit" : "",
+                "description" : "PF_0"
+            }
         },
         {
-            "description": "weekly restoration rate - Moderate",
-            "rules": [
+            "description" : "Moderate",
+            "rules" : [
                 {
-                    "condition": [
-                        "True"
-                    ],
-                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=10), s=10, scale=numpy.exp(0.8196))"
+                    "condition" : null,
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.55, scale=numpy.exp(3.52))"
                 }
             ],
-            "returnType": {
-                "type": "Restoration Rate",
-                "unit": "",
-                "description": "LS_1"
-            },
-            "curveParameters": null
+            "returnType" : {
+                "type" : "Percent of Functionality",
+                "unit" : "",
+                "description" : "PF_1"
+            }
         },
         {
-            "description": "weekly restoration rate - Extensive",
-            "rules": [
+            "description" : "Extensive",
+            "rules" : [
                 {
-                    "condition": [
-                        "True"
-                    ],
-                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=10), s=20, scale=numpy.exp(0.8196))"
+                    "condition" : null,
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.55, scale=numpy.exp(4.62))"
                 }
             ],
-            "returnType": {
-                "type": "Restoration Rate",
-                "unit": "",
-                "description": "LS_2"
-            },
-            "curveParameters": null
+            "returnType" : {
+                "type" : "Percent of Functionality",
+                "unit" : "",
+                "description" : "PF_2"
+            }
         },
         {
-            "description": "weekly restoration rate - Complete",
-            "rules": [
+            "description" : "Complete",
+            "rules" : [
                 {
-                    "condition": [
-                        "True"
-                    ],
-                    "expression": "scipy.stats.lognorm.ppf(numpy.random.random(size=10), s=30, scale=numpy.exp(0.8196))"
+                    "condition" : null,
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.52, scale=numpy.exp(5.19))"
                 }
             ],
-            "returnType": {
-                "type": "Restoration Rate",
-                "unit": "",
-                "description": "LS_3"
-            },
-            "curveParameters": null
+            "returnType" : {
+                "type" : "Percent of Functionality",
+                "unit" : "",
+                "description" : "PF_3"
+            }
         }
     ],
-    "curveParameters": null
+    "description" : "pytest - sample restoration curves",
+    "authors" : [
+    ],
+    "resultType" : "Percent of Functionality",
+    "hazardType" : "tornado",
+    "inventoryType" : "building",
+    "curveParameters" : [
+        {
+            "name" : "time",
+            "unit" : "days",
+            "description" : "Can be a numpy ndarray or a numeric value.",
+            "fullName" : "time",
+            "expression" : null
+        }
+    ]
 }
