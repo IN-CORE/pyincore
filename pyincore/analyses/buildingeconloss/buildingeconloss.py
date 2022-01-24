@@ -23,6 +23,8 @@ class BuildingEconLoss(BaseAnalysis):
     """
 
     def __init__(self, incore_client):
+        self.occ_damage_multipliers = None
+        self.consumer_price_index = None
         # percentage
         self.infl_factor = 0.0
 
@@ -34,6 +36,12 @@ class BuildingEconLoss(BaseAnalysis):
         self.infl_factor = self.get_parameter("inflation_factor")
 
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
+        bldg_nsdmg_set = self.get_input_dataset("nsbuildings_dmg").get_inventory_reader()
+        # if bldg_nsdmg_set is not None:
+        #     if len(self.nsdmg_map) == 0:
+        #         self.populate_feature_map(self.nsdmg_map, bldg_nsdmg_set)
+        occ_damage_multipliers = self.get_input_dataset("building_occupancy").get_inventory_reader()
+
         try:
             prop_select = []
             for bldg_item in list(bldg_set):
@@ -76,6 +84,20 @@ class BuildingEconLoss(BaseAnalysis):
         """
         return (self.infl_factor / 100.0) + 1.0
 
+    # def get_non_structural_dmg(self, bldg_nsdmg_set):
+    def populate_feature_map(self, nsdmg_map, bldg_nsdmg_set):
+        """Get non-structural damage.
+
+        Args:
+            nsdmg_map (list): Multiple buildings from input inventory set.
+            bldg_nsdmg_set (list): Multiple buildings from input inventory set.
+
+        Returns:
+            float: Non structurall building multiplier.
+
+        """
+        return (self.infl_factor / 100.0) + 1.0
+
     def get_spec(self):
         """Get specifications of the building damage analysis.
 
@@ -114,6 +136,18 @@ class BuildingEconLoss(BaseAnalysis):
                     'required': True,
                     'description': 'Building mean damage results CSV file',
                     'type': ['ergo:meanDamage']
+                },
+                {
+                    'id': 'nsbuildings_dmg',
+                    'required': False,
+                    'description': 'CSV file of building non-structural damage',
+                    'type': ['ergo:nsBuildingInventoryDamage'],
+                },
+                {
+                    'id': 'building_occupancy',
+                    'required': True,
+                    'description': 'Building occupancy, use, efacility and multipliers',
+                    'type': ['incore:buildingOccupancyMultiplier']
                 }
             ],
             'output_datasets': [
