@@ -5,7 +5,7 @@ import collections
 import numpy
 import pytest
 
-from pyincore import globals as pyglobals, FragilityCurveSet, RepairCurveSet, AnalysisUtil
+from pyincore import globals as pyglobals, FragilityCurveSet, RepairCurveSet,  RestorationCurveSet, AnalysisUtil
 import numpy as np
 
 
@@ -55,12 +55,16 @@ def get_repair_set(repair_dir: str):
     repair_set = RepairCurveSet(repair_curveset)
     return repair_set
 
-
 def get_remote_repair_set(repair_id: str):
     dfr3svc = pytest.repairsvc
     repair_set = RepairCurveSet(dfr3svc.get_dfr3_set(repair_id))
     return repair_set
 
+def get_restoration_set(restoration_dir: str):
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, restoration_dir), 'r', encoding='utf-8') as f:
+        restoration_curveset = json.load(f)
+    restoration_set = RestorationCurveSet(restoration_curveset)
+    return restoration_set
 
 @pytest.mark.parametrize("fragility_set,hazard_values,args,expected", [
     (get_fragility_set("fragility_curve.json"), {}, {}, 0.2619967240482869),
@@ -119,3 +123,16 @@ def test_calculate_inverse_repair_rates(repair_set, args, expected):
     else:
         assert False
 
+
+@pytest.mark.parametrize("restoration_set,args,expected", [
+    (get_restoration_set("restorationset.json"), {"time": [3.5, 1.2]}, 2),
+    (get_restoration_set("restorationset.json"), {"time": 80}, 0.9943516689414926)
+])
+def test_calculate_restoration_rates(restoration_set, args, expected):
+    result = restoration_set.calculate_restoration_rates(**args)
+    if type(result["PF_0"]) == numpy.ndarray:
+        assert len(result["PF_0"]) == expected
+    elif type(result["PF_0"]) == numpy.float64:
+        assert result["PF_0"] == expected
+    else:
+        assert False
