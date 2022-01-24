@@ -68,7 +68,7 @@
         {
             "name" : "time",
             "unit" : "days",
-            "description" : "Can be a numpy ndarray or a numeric value.",
+            "description" : "Can be an array of numeric values or a single numeric value.",
             "fullName" : "time",
             "expression" : null
         }
