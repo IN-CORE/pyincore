@@ -84,14 +84,14 @@ class RepairCurveSet:
         output = {}
         index = 0
 
-        if len(self.repair_curves) == 4:
+        if len(self.repair_curves) <= 5:
             for repair_curve in self.repair_curves:
                 eval_value = repair_curve.solve_curve_expression(hazard_values={},
                                                                  curve_parameters=self.curve_parameters, **kwargs)
                 output[repair_curve.return_type['description']] = eval_value
                 index += 1
         else:
-            raise ValueError("We can only handle repair curves with 4 limit states.")
+            raise ValueError("We can only handle repair curves with less than 5 damage states.")
 
         return output
 
@@ -109,13 +109,13 @@ class RepairCurveSet:
         output = {}
         index = 0
 
-        if len(self.repair_curves) == 4:
+        if len(self.repair_curves) <= 5:
             for repair_curve in self.repair_curves:
                 eval_value = repair_curve.solve_curve_for_inverse(hazard_values={},
                                                                  curve_parameters=self.curve_parameters, **kwargs)
                 output[repair_curve.return_type['description']] = eval_value
                 index += 1
         else:
-            raise ValueError("We can only handle repair curves with 4 limit states.")
+            raise ValueError("We can only handle repair curves with less than 5 damage states.")
 
         return output

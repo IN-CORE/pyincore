@@ -84,14 +84,14 @@ class RestorationCurveSet:
         output = {}
         index = 0
 
-        if len(self.restoration_curves) == 4:
+        if len(self.restoration_curves) <= 5:
             for restoration_curve in self.restoration_curves:
                 eval_value = restoration_curve.solve_curve_expression(hazard_values={},
                                                                       curve_parameters=self.curve_parameters, **kwargs)
                 output[restoration_curve.return_type['description']] = eval_value
                 index += 1
         else:
-            raise ValueError("We can only handle restoration curves with 4 limit states.")
+            raise ValueError("We can only handle restoration curves with less than 5 damage states.")
 
         return output
 
@@ -109,13 +109,13 @@ class RestorationCurveSet:
         output = {}
         index = 0
 
-        if len(self.restoration_curves) == 4:
+        if len(self.restoration_curves) <= 5:
             for restoration_curve in self.restoration_curves:
                 eval_value = restoration_curve.solve_curve_for_inverse(hazard_values={},
                                                                        curve_parameters=self.curve_parameters, **kwargs)
                 output[restoration_curve.return_type['description']] = eval_value
                 index += 1
         else:
-            raise ValueError("We can only handle restoration curves with 4 limit states.")
+            raise ValueError("We can only handle restoration curves with less than 5 damage states.")
 
         return output
