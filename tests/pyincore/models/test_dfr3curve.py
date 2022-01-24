@@ -104,3 +104,18 @@ def test_calculate_repair_rates(repair_set, args, expected):
     else:
         assert False
 
+
+@pytest.mark.parametrize("repair_set,args,expected", [
+    (get_repair_set("repairset.json"), {"repair_time": [0.5, 0.2]}, 2),
+    (get_repair_set("repairset.json"), {"repair_time": 0.67}, 27.50466741611462)
+])
+def test_calculate_inverse_repair_rates(repair_set, args, expected):
+    result = repair_set.calculate_inverse_repair_rates(**args)
+    print(result)
+    if type(result["PF_0"]) == numpy.ndarray:
+        assert len(result["PF_0"]) == expected
+    elif type(result["PF_0"]) == numpy.float64:
+        assert result["PF_0"] == expected
+    else:
+        assert False
+

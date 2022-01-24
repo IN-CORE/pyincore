@@ -107,6 +107,33 @@ class DFR3Curve:
 
             return eval_result
 
+    def solve_curve_for_inverse(self, hazard_values: dict, curve_parameters: dict, **kwargs):
+        """Evaluates expression of the curve by calculating its inverse. Example, ppf for cdf. Only supports cdf() for
+         now. More inverse methods may be added in the future.
+
+        Args:
+            hazard_values (dict): Hazard values. Only applicable to fragilities
+            curve_parameters (dict): Curve parameters.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            any: Result of the evaluated inverse expression. Can be float, numpy.ndarray etc.
+
+        """
+        inverse_rules = []
+        actual_rules = self.rules
+        for rule in self.rules:
+            if ".cdf(" in rule['expression']:
+                new_exp = rule['expression'].replace(".cdf(", ".ppf(")
+                inverse_rules.append({'condition': rule['condition'], 'expression': new_exp})
+            else:
+                raise KeyError("Inverse does not exist for the provided expression. exiting..")
+
+        self.rules = inverse_rules
+        inverse = self.solve_curve_expression(hazard_values=hazard_values, curve_parameters=curve_parameters, **kwargs)
+        self.rules = actual_rules  # swap the original rules back so further calculations are not affected
+        return inverse
+
     def get_building_period(self, curve_parameters, **kwargs):
         """
                 Get building period from the fragility curve.

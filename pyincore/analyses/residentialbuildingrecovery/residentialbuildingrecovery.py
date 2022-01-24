@@ -421,19 +421,11 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             # Now, perform the two nested loops, using the indexing function to simplify the syntax.
             for i in range(0, num_samples):
                 state = samples_mcs_ds[i]
-                # repair_times = mapped_repair.calculate_repair_rates(**{"rand_arr_size": num_samples})
-                # repair_time = repair_times[state_name]
-
-                # lognormal_mean = mapped_repair.repair_curves[state].alpha
-                # lognormal_sdv = mapped_repair.repair_curves[state].beta
-                #
-                # # Generate a vector of random values to use in the inner loop
-                # rand_vals = np.random.random(num_samples)
-                # repair_time = lognorm.ppf(rand_vals, lognormal_sdv, scale=np.exp(lognormal_mean)) / 7
-                repair_time = mapped_repair.repair_curves[state].solve_curve_expression(hazard_values={},
-                                                                                        curve_parameters=
-                                                                                        mapped_repair.curve_parameters,
-                                                                                        **{"rand_arr_size": num_samples}
+                percent_func = np.random.random(num_samples)
+                # NOTE: Even though the kwarg name is "repair_time", it actually takes  percent of functionality. DFR3
+                # system currently doesn't have a way to represent the name correctly when calculating the inverse.
+                repair_time = mapped_repair.repair_curves[state].solve_curve_for_inverse(
+                    hazard_values={}, curve_parameters=mapped_repair.curve_parameters, **{"repair_time": percent_func}
                                                                                         ) / 7
 
                 for j in range(0, num_samples):
