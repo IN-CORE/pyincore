@@ -2,6 +2,7 @@ import json
 import os
 import collections
 
+import numpy
 import pytest
 
 from pyincore import globals as pyglobals, FragilityCurveSet, RepairCurveSet, AnalysisUtil
@@ -90,11 +91,16 @@ def test_calculate_limit_state_probability(fragility_set, hazard_values, args, e
 
 
 @pytest.mark.parametrize("repair_set,args,expected", [
-    (get_repair_set("repairset.json"), {"rand_arr_size": 8}, 8),
-    (get_remote_repair_set("60edf9a4fc0f3a7af53a2194"), {"rand_arr_size": 10}, 10)
+    (get_repair_set("repairset.json"), {"repair_time": [3.5, 1.2]}, 2),
+    (get_repair_set("repairset.json"), {"repair_time": 80}, 0.9943516689414926),
+    (get_remote_repair_set("60edf9a4fc0f3a7af53a2194"), {"repair_time": [3.5, 1.2]}, 2)
 ])
 def test_calculate_repair_rates(repair_set, args, expected):
     result = repair_set.calculate_repair_rates(**args)
-    print(result)
-    assert len(result["PF_0"]) == expected
+    if type(result["PF_0"]) == numpy.ndarray:
+        assert len(result["PF_0"]) == expected
+    elif type(result["PF_0"]) == numpy.float64:
+        assert result["PF_0"] == expected
+    else:
+        assert False
 
