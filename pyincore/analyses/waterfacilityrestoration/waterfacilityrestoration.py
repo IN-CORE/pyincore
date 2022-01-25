@@ -36,9 +36,6 @@ class WaterFacilityRestoration(BaseAnalysis):
         if restoration_key is None:
             restoration_key = "Restoration ID Code"
 
-        # Hazard type of the exposure
-        hazard_type = self.get_parameter("hazard_type")
-
         end_time = self.get_parameter("end_time")
         if end_time is None:
             end_time = 365.0
@@ -51,7 +48,7 @@ class WaterFacilityRestoration(BaseAnalysis):
         if pf_interval is None:
             pf_interval = 0.1  # 0.1
 
-        (pf_results, time_results) = self.waterfacility_restoration(mapping_set, restoration_key, hazard_type, end_time,
+        (pf_results, time_results) = self.waterfacility_restoration(mapping_set, restoration_key, end_time,
                                                                     time_interval, pf_interval)
 
         self.set_result_csv_data("pf_results", time_results, name="percentage_of_functionality_" +
@@ -60,21 +57,21 @@ class WaterFacilityRestoration(BaseAnalysis):
 
         return True
 
-    def waterfacility_restoration(self, mapping_set, restoration_key, hazard_type, end_time, time_interval,
+    def waterfacility_restoration(self, mapping_set, restoration_key, end_time, time_interval,
                                   pf_interval):
 
-        """Gets applicable restoration and calculates restoration time and functionality
+        """Gets applicable restoration curve set and calculates restoration time and functionality
 
         Args:
-            mapping_set (class):
-            restoration_key (str):
-            hazard_type (str): A hazard type of the hazard exposure (earthquake, tsunami, tornado, or hurricane).
-            end_time (float):
-            time_interval (float):
-            pf_interval (float):
+            mapping_set (class): Restoration Mapping Set
+            restoration_key (str): Restoration Key to determine which curve to use. E.g. Restoration ID Code
+            end_time (float): User specified end repair time
+            time_interval (float): Increment interval of repair time. Default to 1 (1 day)
+            pf_interval (float): Increment interval of percentage of functionality. Default 0.1 (10%)
 
         Returns:
-
+            time_results (list): Given Percentage of functionality, the change of repair time
+            pf_results (list): Given Repair time, change of the percentage of functionality
         """
 
         time_results = []
@@ -96,7 +93,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                 restoration_curve_set = RestorationCurveSet(self.restorationsvc.get_dfr3_set(restoration_curve_set))
 
             # given time calculate pf
-            time = np.arange(0, end_time, time_interval)
+            time = np.arange(0, end_time + time_interval, time_interval)
             for t in time:
                 pf_results.append({
                     "inventory_class": inventory_class,
@@ -105,7 +102,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                 })
 
             # given pf calculate time
-            pf = np.arange(0, 1, pf_interval, )
+            pf = np.arange(0, 1 + pf_interval, pf_interval)
             for p in pf:
                 new_dict = {}
                 t_res = restoration_curve_set.calculate_inverse_restoration_rates(time=p)
@@ -134,12 +131,6 @@ class WaterFacilityRestoration(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
-                    'type': str
-                },
-                {
-                    'id': 'hazard_type',
-                    'required': True,
-                    'description': 'hazard type',
                     'type': str
                 },
                 {
