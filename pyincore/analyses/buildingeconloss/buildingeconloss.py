@@ -32,15 +32,19 @@ class BuildingEconLoss(BaseAnalysis):
 
     def run(self):
         """Executes building economic damage analysis."""
+
         # Get inflation input in %
         self.infl_factor = self.get_parameter("inflation_factor")
 
+        # Building dataset
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
-        bldg_nsdmg_set = self.get_input_dataset("nsbuildings_dmg").get_inventory_reader()
-        # if bldg_nsdmg_set is not None:
-        #     if len(self.nsdmg_map) == 0:
-        #         self.populate_feature_map(self.nsdmg_map, bldg_nsdmg_set)
-        occ_damage_multipliers = self.get_input_dataset("building_occupancy").get_inventory_reader()
+
+        # Building occupancy multipliers for non structural and other losses
+        occ_dmg_multiplier = self.get_input_dataset("building_occupancy").get_inventory_reader()
+        if occ_dmg_multiplier is not None:
+            occ_dmg_multiplier = occ_dmg_multiplier.get_dataframe_from_csv(low_memory=False)
+        else:
+            occ_dmg_multiplier = None
 
         try:
             prop_select = []
@@ -60,6 +64,16 @@ class BuildingEconLoss(BaseAnalysis):
             bldg_results = dmg_set_df[["guid"]].copy()
             valloss = 0.0
             vallossdev = 0.0
+
+            accloss = 0.0
+            accloss = 0.0
+            driloss = 0.0
+            drilossdev = 0.0
+            conloss = 0.0
+            conlossdev = 0.0
+            totloss = 0.0
+            totlossdev = 0.0
+
             if "appr_bldg" in dmg_set_df:
                 valloss = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["meandamage"].astype(float) * infl_mult
                 vallossdev = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["mdamagedev"].astype(float) * infl_mult
@@ -116,6 +130,19 @@ class BuildingEconLoss(BaseAnalysis):
                     'type': str
                 },
                 {
+                    'id': 'occupancy_type',
+                    'required': False,
+                    'description': 'Type of building occupancy type. This variable defines the structural and '
+                                   'non-structural damages and the choice of corresponding occupancy multipliers. '
+                                   'Values are '
+                                   'LOSS, structural building damage'
+                                   'ASS, non-structural building damage,'
+                                   'DRI, non-structural building damage,'
+                                   'CON, non-structural building damage,'
+                                   'default is LOSS',
+                    'type': str
+                },
+                {
                     'id': 'inflation_factor',
                     'required': False,
                     'description': 'Inflation factor to adjust the appraisal values of buildings. Default 0.0',
@@ -138,14 +165,8 @@ class BuildingEconLoss(BaseAnalysis):
                     'type': ['ergo:meanDamage']
                 },
                 {
-                    'id': 'nsbuildings_dmg',
-                    'required': False,
-                    'description': 'CSV file of building non-structural damage',
-                    'type': ['ergo:nsBuildingInventoryDamage'],
-                },
-                {
                     'id': 'building_occupancy',
-                    'required': True,
+                    'required': False,
                     'description': 'Building occupancy, use, efacility and multipliers',
                     'type': ['incore:buildingOccupancyMultiplier']
                 }
