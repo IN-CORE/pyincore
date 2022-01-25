@@ -95,9 +95,9 @@ class FragilityCurveSet:
 
         if len(self.fragility_curves) <= 4:
             for fragility_curve in self.fragility_curves:
-                probability = fragility_curve.calculate_limit_state_probability(hazard_values,
-                                                                                self.curve_parameters,
-                                                                                **kwargs)
+                probability = fragility_curve.solve_curve_expression(hazard_values,
+                                                                     self.curve_parameters,
+                                                                     **kwargs)
                 output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
                 index += 1
         else:
@@ -126,7 +126,7 @@ class FragilityCurveSet:
 
         if len(self.fragility_curves) <= 4:
             for fragility_curve in self.fragility_curves:
-                probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
+                probability = fragility_curve.solve_curve_expression(hazard, period, std_dev, **kwargs)
                 output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
                 index += 1
         else:

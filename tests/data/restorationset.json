@@ -1,12 +1,12 @@
 {
     "timeUnits" : "days",
-    "repairCurves" : [
+    "restorationCurves" : [
         {
             "description" : "Slight",
             "rules" : [
                 {
                     "condition" : null,
-                    "expression" : "scipy.stats.lognorm.cdf(repair_time, s=0.51, scale=numpy.exp(3.09))"
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.51, scale=numpy.exp(3.09))"
                 }
             ],
             "returnType" : {
@@ -20,7 +20,7 @@
             "rules" : [
                 {
                     "condition" : null,
-                    "expression" : "scipy.stats.lognorm.cdf(repair_time, s=0.55, scale=numpy.exp(3.52))"
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.55, scale=numpy.exp(3.52))"
                 }
             ],
             "returnType" : {
@@ -34,7 +34,7 @@
             "rules" : [
                 {
                     "condition" : null,
-                    "expression" : "scipy.stats.lognorm.cdf(repair_time, s=0.55, scale=numpy.exp(4.62))"
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.55, scale=numpy.exp(4.62))"
                 }
             ],
             "returnType" : {
@@ -48,7 +48,7 @@
             "rules" : [
                 {
                     "condition" : null,
-                    "expression" : "scipy.stats.lognorm.cdf(repair_time, s=0.52, scale=numpy.exp(5.19))"
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.52, scale=numpy.exp(5.19))"
                 }
             ],
             "returnType" : {
@@ -58,25 +58,18 @@
             }
         }
     ],
-    "description" : "pytest - sample repair curves",
+    "description" : "pytest - sample restoration curves",
     "authors" : [
-        "Maria Koliou",
-        "John W. van de Lindt"
     ],
-    "paperReference" : {
-        "name" : "Development of Building Restoration Functions for Use inCommunity Recovery Planning to Tornadoes",
-        "doi" : "https://doi.org/10.1061/(ASCE)NH.1527-6996.0000361",
-        "yearPublished" : "2020"
-    },
     "resultType" : "Percent of Functionality",
     "hazardType" : "tornado",
     "inventoryType" : "building",
     "curveParameters" : [
         {
-            "name" : "repair_time",
+            "name" : "time",
             "unit" : "days",
             "description" : "Can be an array of numeric values or a single numeric value.",
-            "fullName" : "repair_time",
+            "fullName" : "time",
             "expression" : null
         }
     ]
