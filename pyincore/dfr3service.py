@@ -398,7 +398,7 @@ class Dfr3Service:
                     # Recursively parse and evaluate the rules with boolean
                     if isinstance(criterion, dict):
                         inventory_class.append(Dfr3Service.extract_inventory_class(criterion))
-                    # Base case: evaluate the rule and return match=true/false
+                    # Base case: get the rule value
                     elif isinstance(criterion, str):
                         inventory_class.append(criterion.split(" ")[3].strip('\'').strip('\"'))
                     else:
