@@ -7,7 +7,7 @@ from jose import jwt
 
 from pyincore import (
     globals as pyglobals,
-    IncoreClient, DataService, FragilityService, RepairService, HazardService, SpaceService
+    IncoreClient, DataService, FragilityService, RepairService, RestorationService, HazardService, SpaceService
 )
 
 
@@ -32,6 +32,7 @@ def pytest_sessionstart(session):
     pytest.datasvc = DataService(client)
     pytest.fragilitysvc = FragilityService(client)
     pytest.repairsvc = RepairService(client)
+    pytest.restorationsvc = RestorationService(client)
     pytest.hazardsvc = HazardService(client)
     pytest.spacesvc = SpaceService(client)
     print(f"Successfully initialized Incore client and services. Using {pyglobals.INCORE_API_DEV_URL}")

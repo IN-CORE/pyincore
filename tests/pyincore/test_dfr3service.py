@@ -27,6 +27,11 @@ def repairsvc(monkeypatch):
     return pytest.repairsvc
 
 
+@pytest.fixture
+def restorationsvc(monkeypatch):
+    return pytest.restorationsvc
+
+
 def test_get_fragility_sets(fragilitysvc):
     metadata = fragilitysvc.get_dfr3_sets(demand_type="PGA", creator="cwang138")
 
@@ -114,24 +119,53 @@ def test_create_and_delete_fragility_mapping(fragilitysvc):
     assert del_response["id"] is not None
 
 
-def test_create_repair_set(repairsvc):
+def test_create_and_delete_repair_set(repairsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "repairset.json"), 'r') as f:
         repair_set = json.load(f)
     created = repairsvc.create_dfr3_set(repair_set)
-
     assert "id" in created.keys()
 
+    del_response = repairsvc.delete_dfr3_set(created["id"])
+    assert del_response["id"] is not None
 
-def test_create_repair_mapping(repairsvc):
+
+def test_create_and_delete_repair_mapping(repairsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "repair_mappingset.json"), 'r') as f:
         mapping_set = json.load(f)
     created = repairsvc.create_mapping(mapping_set)
-
     assert "id" in created.keys()
+
+    del_response = repairsvc.delete_mapping(created["id"])
+    assert del_response["id"] is not None
 
 
 def test_get_repair_sets(repairsvc):
-    metadata = repairsvc.get_dfr3_sets(hazard_type="earthquake", creator="incrtest")
+    metadata = repairsvc.get_dfr3_sets(hazard_type="tornado", creator="incrtest")
 
     assert 'id' in metadata[0].keys()
 
+
+def test_create_and_delete_restoration_set(restorationsvc):
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "restorationset.json"), 'r') as f:
+        restoration_set = json.load(f)
+    created = restorationsvc.create_dfr3_set(restoration_set)
+    assert "id" in created.keys()
+
+    del_response = restorationsvc.delete_dfr3_set(created["id"])
+    assert del_response["id"] is not None
+
+
+def test_create_and_delete_restoration_mapping(restorationsvc):
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "restoration_mappingset.json"), 'r') as f:
+        mapping_set = json.load(f)
+    created = restorationsvc.create_mapping(mapping_set)
+    assert "id" in created.keys()
+
+    del_response = restorationsvc.delete_mapping(created["id"])
+    assert del_response["id"] is not None
+
+
+def test_get_restoration_sets(restorationsvc):
+    metadata = restorationsvc.get_dfr3_sets(hazard_type="tornado", creator="incrtest")
+
+    assert 'id' in metadata[0].keys()

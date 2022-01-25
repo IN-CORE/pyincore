@@ -7,6 +7,8 @@ import json
 import math
 from abc import ABC
 
+import numpy
+
 from pyincore import globals as pyglobals
 from pyincore.utils import evaluateexpression
 
@@ -24,16 +26,16 @@ class DFR3Curve:
             rule["expression"] = rule["expression"].replace("^", "**")
         self.description = curve_parameters['description']
 
-    def calculate_limit_state_probability(self, hazard_values: dict, curve_parameters: dict, **kwargs):
-        """Computes limit state probabilities.
+    def solve_curve_expression(self, hazard_values: dict, curve_parameters: dict, **kwargs):
+        """Evaluates expression of the curve.
 
         Args:
-            hazard_values (dict): Hazard values.
-            curve_parameters (dict): Fragility curve parameters.
+            hazard_values (dict): Hazard values. Only applicable to fragilities
+            curve_parameters (dict): Curve parameters.
             **kwargs: Keyword arguments.
 
         Returns:
-            float: A limit state probability.
+            any: Result of the evaluated expression. Can be float, numpy.ndarray etc.
 
         """
         parameters = {}
@@ -61,8 +63,6 @@ class DFR3Curve:
                 elif parameter["name"].lower() == kwargs_key.lower():
                     parameters[parameter["name"]] = kwargs_value
 
-        probability = 0.0
-
         # use hazard values if present
         # consider case insensitive situation
         for key, value in hazard_values.items():
@@ -74,11 +74,12 @@ class DFR3Curve:
                         parameters[parameter_key] = value
                     else:
                         # returning 0 even if a single demand value is None, assumes there is no hazard exposure. TBD
-                        return probability
+                        return 0.0
 
+        eval_result = None
         for rule in self.rules:
             if "condition" not in rule or rule["condition"] is None:
-                probability = evaluateexpression.evaluate(rule["expression"], parameters)
+                eval_result = evaluateexpression.evaluate(rule["expression"], parameters)
             else:
                 conditions_met = []
                 for condition in rule["condition"]:
@@ -88,18 +89,50 @@ class DFR3Curve:
                         conditions_met.append(False)
                         break
                 if all(conditions_met):
-                    probability = evaluateexpression.evaluate(rule["expression"], parameters)
+                    eval_result = evaluateexpression.evaluate(rule["expression"], parameters)
                     break
 
-        if math.isnan(probability):
-            error_msg = "Unable to calculate limit state."
-            if self.rules:
-                error_msg += " Evaluation failed for expression: \n" + json.dumps(self.rules) + "\n"
-                error_msg += "Provided Inputs: \n" + json.dumps(hazard_values) + "\n" + json.dumps(kwargs)
+        if isinstance(eval_result, numpy.ndarray) or isinstance(eval_result, list):  # for repair curves etc.
+            return eval_result
+        else:  # for fragility curves the return is a float
+            if eval_result is None:
+                eval_result = 0.0
+            if math.isnan(eval_result):
+                error_msg = "Unable to calculate limit state."
+                if self.rules:
+                    error_msg += " Evaluation failed for expression: \n" + json.dumps(self.rules) + "\n"
+                    error_msg += "Provided Inputs: \n" + json.dumps(hazard_values) + "\n" + json.dumps(kwargs)
 
-            raise ValueError(error_msg)
+                raise ValueError(error_msg)
 
-        return probability
+            return eval_result
+
+    def solve_curve_for_inverse(self, hazard_values: dict, curve_parameters: dict, **kwargs):
+        """Evaluates expression of the curve by calculating its inverse. Example, ppf for cdf. Only supports cdf() for
+         now. More inverse methods may be added in the future.
+
+        Args:
+            hazard_values (dict): Hazard values. Only applicable to fragilities
+            curve_parameters (dict): Curve parameters.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            any: Result of the evaluated inverse expression. Can be float, numpy.ndarray etc.
+
+        """
+        inverse_rules = []
+        actual_rules = self.rules
+        for rule in self.rules:
+            if ".cdf(" in rule['expression']:
+                new_exp = rule['expression'].replace(".cdf(", ".ppf(")
+                inverse_rules.append({'condition': rule['condition'], 'expression': new_exp})
+            else:
+                raise KeyError("Inverse does not exist for the provided expression. exiting..")
+
+        self.rules = inverse_rules
+        inverse = self.solve_curve_expression(hazard_values=hazard_values, curve_parameters=curve_parameters, **kwargs)
+        self.rules = actual_rules  # swap the original rules back so further calculations are not affected
+        return inverse
 
     def get_building_period(self, curve_parameters, **kwargs):
         """

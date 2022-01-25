@@ -8,14 +8,14 @@ import json
 from pyincore.models.dfr3curve import DFR3Curve
 
 
-class RepairCurveSet:
-    """class for repair curves.
+class RestorationCurveSet:
+    """class for restoration curves.
 
     Args:
-        metadata (dict): repair curve metadata.
+        metadata (dict): restoration curve metadata.
 
     Raises:
-        ValueError: Raised if there are unsupported number of repair curves
+        ValueError: Raised if there are unsupported number of restoration curves
         or if missing a key curve field.
     """
 
@@ -30,16 +30,16 @@ class RepairCurveSet:
         self.result_unit = metadata["resultUnit"] if "resultUnit" in metadata else ""
         self.hazard_type = metadata['hazardType']
         self.inventory_type = metadata['inventoryType']
-        self.repair_curves = []
+        self.restoration_curves = []
 
         if 'curveParameters' in metadata.keys():
             self.curve_parameters = metadata["curveParameters"]
 
-        if 'repairCurves' in metadata.keys():
-            for repair_curve in metadata["repairCurves"]:
-                self.repair_curves.append(DFR3Curve(repair_curve))
+        if 'restorationCurves' in metadata.keys():
+            for restoration_curve in metadata["restorationCurves"]:
+                self.restoration_curves.append(DFR3Curve(restoration_curve))
         else:
-            raise ValueError("Cannot create dfr3 curve object. Missing key field: repairCurves.")
+            raise ValueError("Cannot create dfr3 curve object. Missing key field: restorationCurves.")
 
     @classmethod
     def from_json_str(cls, json_str):
@@ -70,47 +70,47 @@ class RepairCurveSet:
 
         return instance
 
-    def calculate_repair_rates(self, **kwargs):
-        """Computation of repair rates.
+    def calculate_restoration_rates(self, **kwargs):
+        """Computation of restoration rates.
 
         Args:
             **kwargs: Keyword arguments.
 
         Returns:
-            OrderedDict: Limit state specific repair rates.
+            OrderedDict: Limit state specific restoration rates.
 
         """
 
         output = {}
-        if len(self.repair_curves) <= 5:
-            for repair_curve in self.repair_curves:
-                eval_value = repair_curve.solve_curve_expression(hazard_values={},
-                                                                 curve_parameters=self.curve_parameters, **kwargs)
-                output[repair_curve.return_type['description']] = eval_value
+
+        if len(self.restoration_curves) <= 5:
+            for restoration_curve in self.restoration_curves:
+                eval_value = restoration_curve.solve_curve_expression(hazard_values={},
+                                                                      curve_parameters=self.curve_parameters, **kwargs)
+                output[restoration_curve.return_type['description']] = eval_value
         else:
-            raise ValueError("We can only handle repair curves with less than 5 damage states.")
+            raise ValueError("We can only handle restoration curves with less than 5 damage states.")
 
         return output
 
-    def calculate_inverse_repair_rates(self, **kwargs):
-        """Computation of inverse repair rates example, inverse of cdf, that is, ppf.
+    def calculate_inverse_restoration_rates(self, **kwargs):
+        """Computation of inverse restoration rates example, inverse of cdf, that is, ppf.
 
         Args:
             **kwargs: Keyword arguments.
 
         Returns:
-            OrderedDict: Limit state specific repair rates.
+            OrderedDict: Limit state specific restoration rates.
 
         """
 
         output = {}
-
-        if len(self.repair_curves) <= 5:
-            for repair_curve in self.repair_curves:
-                eval_value = repair_curve.solve_curve_for_inverse(hazard_values={},
-                                                                 curve_parameters=self.curve_parameters, **kwargs)
-                output[repair_curve.return_type['description']] = eval_value
+        if len(self.restoration_curves) <= 5:
+            for restoration_curve in self.restoration_curves:
+                eval_value = restoration_curve.solve_curve_for_inverse(hazard_values={},
+                                                                       curve_parameters=self.curve_parameters, **kwargs)
+                output[restoration_curve.return_type['description']] = eval_value
         else:
-            raise ValueError("We can only handle repair curves with less than 5 damage states.")
+            raise ValueError("We can only handle restoration curves with less than 5 damage states.")
 
         return output
