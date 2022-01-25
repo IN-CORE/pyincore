@@ -60,7 +60,8 @@ class WaterFacilityRestoration(BaseAnalysis):
 
         return True
 
-    def waterfacility_restoration(self, mapping_set, restoration_key, hazard_type, end_time, time_interval, pf_interval):
+    def waterfacility_restoration(self, mapping_set, restoration_key, hazard_type, end_time, time_interval,
+                                  pf_interval):
 
         """Gets applicable restoration and calculates restoration time and functionality
 
@@ -80,20 +81,21 @@ class WaterFacilityRestoration(BaseAnalysis):
         pf_results = []
 
         for mapping in mapping_set.mappings:
-            # TODO parse rules to get inventory class. e.g. treatment plan, tank, pump etc
-            if mapping.rules == [[]] or mapping.rules == [] or mapping.rules == [None]:
-                inventory_class = "NA"
+            # parse rules to get inventory class. e.g. treatment plan, tank, pump etc
+            if isinstance(mapping.rules, list):
+                inventory_class = RestorationService.extract_inventory_class_legacy(mapping.rules)
+            elif isinstance(mapping.rules, dict):
+                inventory_class = RestorationService.extract_inventory_class(mapping.rules)
             else:
-                inventory_class = ""
-                for i, and_rules in enumerate(mapping.rules):
-                    for j, rule in enumerate(and_rules):
-                        inventory_class = rule.split(" ")[3].strip('\'').strip('\"')
+                raise ValueError("Unsupported mapping rules!")
 
-            restoration_curve_set = mapping.entry[restoration_key]
+            # get restoration curves
             # if it's string:id; then need to fetch it from remote and cast to restorationcurveset object
+            restoration_curve_set = mapping.entry[restoration_key]
             if isinstance(restoration_curve_set, str):
                 restoration_curve_set = RestorationCurveSet(self.restorationsvc.get_dfr3_set(restoration_curve_set))
 
+            # given time calculate pf
             time = np.arange(0, end_time, time_interval)
             for t in time:
                 pf_results.append({
@@ -102,6 +104,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                     **restoration_curve_set.calculate_restoration_rates(time=t)
                 })
 
+            # given pf calculate time
             pf = np.arange(0, 1, pf_interval, )
             for p in pf:
                 new_dict = {}

@@ -364,6 +364,53 @@ class Dfr3Service:
 
         return matched
 
+    @staticmethod
+    def extract_inventory_class_legacy(rules):
+        # legacy
+        if isinstance(rules, list):
+            if rules == [[]] or rules == [] or rules == [None]:
+                return "NA"
+            else:
+                inventory_class = ""
+                for i, and_rules in enumerate(rules):
+                    # or
+                    if i != 0:
+                        inventory_class += "/"
+
+                    for j, rule in enumerate(and_rules):
+                        # and
+                        if j != 0:
+                            inventory_class += "+"
+                        inventory_class += rule.split(" ")[3].strip('\'').strip('\"')
+                return inventory_class
+
+    @staticmethod
+    def extract_inventory_class(rules):
+        # new format
+        if isinstance(rules, dict):
+            if rules == {}:
+                return "NA"
+            else:
+                inventory_class = []
+                boolean = list(rules.keys())[0]  # AND or OR
+                criteria = rules[boolean]
+                for criterion in criteria:
+                    # Recursively parse and evaluate the rules with boolean
+                    if isinstance(criterion, dict):
+                        inventory_class.append(Dfr3Service.extract_inventory_class(criterion))
+                    # Base case: evaluate the rule and return match=true/false
+                    elif isinstance(criterion, str):
+                        inventory_class.append(criterion.split(" ")[3].strip('\'').strip('\"'))
+                    else:
+                        raise ValueError("Cannot evaluate criterion, unsupported format!")
+
+                if boolean.lower() == "and":
+                    return "+".join(inventory_class)
+                elif boolean.lower() == "or":
+                    return "/".join(inventory_class)
+                else:
+                    raise ValueError("boolean " + boolean + " not supported!")
+
     def create_mapping(self, mapping_set: dict):
         """Create DFR3 mapping on the server. POST API endpoint call.
 

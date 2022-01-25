@@ -19,12 +19,14 @@ def run_with_base_class():
     # fragility_service = FragilityService(client)
 
     entry_1 = {"Restoration ID Code": RestorationCurveSet.from_json_file("/Users/cwang138/Documents/INCORE-2.0/pyincore/tests/data/restorationset.json")}
+    # capable of handling multiple rules
     rules_1 = [["java.lang.String utilfcltyc EQUALS 'PWT2'"]]
+    # rules_1 = [["java.lang.String utilfcltyc EQUALS 'PWT2'", "java.lang.String utilfcltyc EQUALS 'PPP2'"]]
+    # rules_1 = {"AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'", "java.lang.String utilfcltyc EQUALS 'PPP2'"]}
+    # rules_1 = {"AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'", {"OR": ["java.lang.String utilfcltyc EQUALS "
+    #                                                                         "'PPP2'", "java.lang.String utilfcltyc EQUALS "
+    #                                                                         "'PPP1'"]}]}
     mapping_1 = Mapping(entry_1, rules_1)
-
-    entry_2 = {"Restoration ID Code": RestorationCurveSet.from_json_file("/Users/cwang138/Documents/INCORE-2.0/pyincore/tests/data/restorationset.json")}
-    rules_2 = [["java.lang.String utilfcltyc EQUALS 'PPP2'"]]
-    mapping_2 = Mapping(entry_2, rules_2)
     mapping_set = {
         'id': 'restoration mapping id',
         'name': 'testing local mapping object creation',
@@ -32,7 +34,6 @@ def run_with_base_class():
         'inventoryType': 'water_facility',
         'mappings': [
             mapping_1,
-            mapping_2,
         ],
         'mappingType': 'restoration'
     }
