@@ -9,9 +9,8 @@ Water Facility Restoration
 
 import numpy as np
 
-from pyincore import BaseAnalysis, RestorationService, GeoUtil, \
-    AnalysisUtil
-from pyincore.models.dfr3curve import DFR3Curve
+from pyincore import BaseAnalysis, RestorationService
+from pyincore.models.restorationcurveset import RestorationCurveSet
 
 
 class WaterFacilityRestoration(BaseAnalysis):
@@ -52,12 +51,12 @@ class WaterFacilityRestoration(BaseAnalysis):
         if pf_interval is None:
             pf_interval = 0.1  # 0.1
 
-        (time_results, pf_results) = self.waterfacility_restoration(mapping_set, restoration_key, hazard_type, end_time,
+        (pf_results, time_results) = self.waterfacility_restoration(mapping_set, restoration_key, hazard_type, end_time,
                                                                     time_interval, pf_interval)
 
-        self.set_result_csv_data("time_results", time_results, name=self.get_parameter("result_name") + "_repairtime")
-        self.set_result_csv_data("pf_result", pf_results, name=self.get_parameter("result_name") +
-                                                               "percentage_of_functionality")
+        self.set_result_csv_data("pf_results", time_results, name="percentage_of_functionality_" +
+                                                                  self.get_parameter("result_name"))
+        self.set_result_csv_data("time_results", pf_results, name="reptime_" + self.get_parameter("result_name"))
 
         return True
 
@@ -98,33 +97,28 @@ class WaterFacilityRestoration(BaseAnalysis):
         for mapping in mapping_set.mappings:
             # TODO parse rules to get inventory class. e.g. treatment plan, tank, pump etc
             inventory_class = "parse rules to get type"
-            restoration_set_id = mapping["entry"][restoration_key]
-            time = np.arange(0, end_time, time_interval)
-            pf = np.arange(0, 1, pf_interval, )
+            restoration_curve_set = mapping.entry[restoration_key]
+            # if it's string:id; then need to fetch it from remote and cast to restorationcurveset object
+            if isinstance(restoration_curve_set, str):
+                restoration_curve_set = RestorationCurveSet(self.restorationsvc.get_dfr3_set(restoration_curve_set))
 
-            # TODO pass time to the cdf curve and calculate pf
+            time = np.arange(0, end_time, time_interval)
             for t in time:
-                time_results.append({
+                pf_results.append({
                     "inventory_class": inventory_class,
                     "time": t,
-                    "pf (DS_0)": 0,
-                    "pf (DS_1)": 0,
-                    "pf (DS_2)": 0,
-                    "pf (DS_3)": 0
+                    **restoration_curve_set.calculate_restoration_rates(time=t)
                 })
 
-            # TODO pass pf to the ppf curve and calculate time
+            pf = np.arange(0, 1, pf_interval, )
             for p in pf:
                 time_results.append({
                     "inventory_class": inventory_class,
                     "percentage_of_functionality": p,
-                    "time (DS_0)": 0,
-                    "time (DS_1)": 0,
-                    "time (DS_2)": 0,
-                    "time (DS_3)": 0
+                    **restoration_curve_set.calculate_inverse_restoration_rates(time=p)
                 })
 
-        return time_results, pf_results
+        return pf_results, time_results
 
     def get_spec(self):
         return {
@@ -178,14 +172,14 @@ class WaterFacilityRestoration(BaseAnalysis):
             ],
             'output_datasets': [
                 {
-                    'id': 'pf_result',
+                    'id': 'pf_results',
                     'parent_type': '',
                     'description': 'A csv file recording functionality change with time for each class and limit '
                                    'state.',
                     'type': 'incore:waterFacilityRestorationFunc'
                 },
                 {
-                    'id': 'time_result',
+                    'id': 'time_results',
                     'parent_type': '',
                     'description': 'A csv file recording repair time at certain funcionality recovery for each class '
                                    'and limit state.',
