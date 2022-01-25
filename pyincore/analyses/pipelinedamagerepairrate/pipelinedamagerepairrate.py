@@ -18,7 +18,6 @@ from pyincore import BaseAnalysis, HazardService, FragilityService, \
     AnalysisUtil, GeoUtil
 from pyincore.analyses.pipelinedamagerepairrate.pipelineutil import \
     PipelineUtil
-from pyincore.models.dfr3curve import DFR3Curve
 
 
 class PipelineDamageRepairRate(BaseAnalysis):
@@ -200,7 +199,6 @@ class PipelineDamageRepairRate(BaseAnalysis):
         ds_results = []
         damage_results = []
         for i, pipeline in enumerate(mapped_pipelines):
-            print("removed dfr3curve check")
             # default
             pgv_repairs = None
             pgd_repairs = 0.0
