@@ -79,24 +79,16 @@ class WaterFacilityRestoration(BaseAnalysis):
         time_results = []
         pf_results = []
 
-        # Obtain the restoration set
-
-        '''
-            {
-              "entry": {
-                "Restoration ID Code": "xxxx"
-              },
-              "rules": [
-                [
-                  "java.lang.String utilfcltyc EQUALS 'PWT2'",
-                  # "java.lang.String utilfcltyc EQUALS 'PPP2'",
-                ]
-              ]
-            },
-        '''
         for mapping in mapping_set.mappings:
             # TODO parse rules to get inventory class. e.g. treatment plan, tank, pump etc
-            inventory_class = "parse rules to get type"
+            if mapping.rules == [[]] or mapping.rules == [] or mapping.rules == [None]:
+                inventory_class = "NA"
+            else:
+                inventory_class = ""
+                for i, and_rules in enumerate(mapping.rules):
+                    for j, rule in enumerate(and_rules):
+                        inventory_class = rule.split(" ")[3].strip('\'').strip('\"')
+
             restoration_curve_set = mapping.entry[restoration_key]
             # if it's string:id; then need to fetch it from remote and cast to restorationcurveset object
             if isinstance(restoration_curve_set, str):
@@ -112,10 +104,14 @@ class WaterFacilityRestoration(BaseAnalysis):
 
             pf = np.arange(0, 1, pf_interval, )
             for p in pf:
+                new_dict = {}
+                t_res = restoration_curve_set.calculate_inverse_restoration_rates(time=p)
+                for key, value in t_res.items():
+                    new_dict.update({"time_" + key: value})
                 time_results.append({
                     "inventory_class": inventory_class,
                     "percentage_of_functionality": p,
-                    **restoration_curve_set.calculate_inverse_restoration_rates(time=p)
+                    **new_dict
                 })
 
         return pf_results, time_results
