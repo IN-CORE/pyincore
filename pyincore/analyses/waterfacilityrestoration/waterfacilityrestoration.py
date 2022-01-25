@@ -30,7 +30,7 @@ class WaterFacilityRestoration(BaseAnalysis):
         Returns:
             bool: True if successful, False otherwise
         """
-        mapping_id = self.get_parameter("mapping_id")
+        mapping_set = self.get_input_dataset("dfr3_mapping_set")
 
         # Get Fragility key
         restoration_key = self.get_parameter("restoration_key")
@@ -48,11 +48,11 @@ class WaterFacilityRestoration(BaseAnalysis):
         if time_interval is None:
             time_interval = 1  # 1 day
 
-        pf_interval = self.get_parameter(" pf_interval")
+        pf_interval = self.get_parameter("pf_interval")
         if pf_interval is None:
             pf_interval = 0.1  # 0.1
 
-        (time_results, pf_results) = self.waterfacility_restoration(mapping_id, restoration_key, hazard_type, end_time,
+        (time_results, pf_results) = self.waterfacility_restoration(mapping_set, restoration_key, hazard_type, end_time,
                                                                     time_interval, pf_interval)
 
         self.set_result_csv_data("time_results", time_results, name=self.get_parameter("result_name") + "_repairtime")
@@ -61,12 +61,12 @@ class WaterFacilityRestoration(BaseAnalysis):
 
         return True
 
-    def waterfacility_restoration(self, mapping_id, restoration_key, hazard_type, end_time, time_interval, pf_interval):
+    def waterfacility_restoration(self, mapping_set, restoration_key, hazard_type, end_time, time_interval, pf_interval):
 
         """Gets applicable restoration and calculates restoration time and functionality
 
         Args:
-            mapping_id (str):
+            mapping_set (class):
             restoration_key (str):
             hazard_type (str): A hazard type of the hazard exposure (earthquake, tsunami, tornado, or hurricane).
             end_time (float):
@@ -89,14 +89,13 @@ class WaterFacilityRestoration(BaseAnalysis):
               },
               "rules": [
                 [
-                  "ava.lang.String utilfcltyc EQUALS 'PWT2'",
-                  # "ava.lang.String utilfcltyc EQUALS 'PPP2'",
+                  "java.lang.String utilfcltyc EQUALS 'PWT2'",
+                  # "java.lang.String utilfcltyc EQUALS 'PPP2'",
                 ]
               ]
             },
         '''
-        restoration_mapping = self.restorationsvc.get_mapping(mapping_id)
-        for mapping in restoration_mapping.mappings:
+        for mapping in mapping_set.mappings:
             # TODO parse rules to get inventory class. e.g. treatment plan, tank, pump etc
             inventory_class = "parse rules to get type"
             restoration_set_id = mapping["entry"][restoration_key]
@@ -132,12 +131,6 @@ class WaterFacilityRestoration(BaseAnalysis):
             'name': 'water-facility-restoration',
             'description': 'water facility restoration analysis',
             'input_parameters': [
-                {
-                  'id': 'mapping_id',
-                  'required': True,
-                  'description': 'resotration mapping id',
-                  'type': str,
-                },
                 {
                     'id': 'restoration_key',
                     'required': False,
