@@ -86,6 +86,19 @@ def test_match_fragilities_multiple_inventories_new_format(fragilitysvc):
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
 
 
+def test_extract_inventory_class(restorationsvc):
+    rules = [["java.lang.String utilfcltyc EQUALS 'PWT2'"]]
+    assert restorationsvc.extract_inventory_class_legacy(rules) == "PWT2"
+
+    rules = [["java.lang.String utilfcltyc EQUALS 'PWT2'"], ["java.lang.String utilfcltyc EQUALS 'PPP2'"]]
+    assert restorationsvc.extract_inventory_class_legacy(rules) == "PWT2/PPP2"
+
+    rules = {"AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'",
+                     {"OR": ["java.lang.String utilfcltyc EQUALS 'PPP2'", "java.lang.String utilfcltyc EQUALS 'PPP1'"]}]
+             }
+    assert restorationsvc.extract_inventory_class(rules) == "PWT2+PPP2/PPP1"
+
+
 def test_get_fragility_mappings(fragilitysvc):
     mappings = fragilitysvc.get_mappings(hazard_type="earthquake", creator="cwang138")
 
