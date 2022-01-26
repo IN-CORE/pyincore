@@ -31,7 +31,6 @@ class WaterFacilityRestoration(BaseAnalysis):
         """
         mapping_set = self.get_input_dataset("dfr3_mapping_set")
 
-        # Get Fragility key
         restoration_key = self.get_parameter("restoration_key")
         if restoration_key is None:
             restoration_key = "Restoration ID Code"
@@ -42,11 +41,11 @@ class WaterFacilityRestoration(BaseAnalysis):
 
         time_interval = self.get_parameter("time_interval")
         if time_interval is None:
-            time_interval = 1  # 1 day
+            time_interval = 1
 
         pf_interval = self.get_parameter("pf_interval")
         if pf_interval is None:
-            pf_interval = 0.1  # 0.1
+            pf_interval = 0.1
 
         (pf_results, time_results) = self.waterfacility_restoration(mapping_set, restoration_key, end_time,
                                                                     time_interval, pf_interval)
@@ -142,7 +141,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                 {
                     'id': 'time_interval',
                     'required': False,
-                    'description': 'incremental interval for time. Default to 1',
+                    'description': 'incremental interval for time in days. Default to 1',
                     'type': float
                 },
                 {
