@@ -15,7 +15,6 @@ def run_with_base_class():
 
     # Load restoration mapping
     restorationsvc = RestorationService(client)
-    # mapping_set = MappingSet(restorationsvc.get_mapping("61f075bf903e515036cee0a4"))
     mapping_set = MappingSet(restorationsvc.get_mapping("61f075ee903e515036cee0a5"))  # new format of mapping
     wf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
     wf_rest.set_parameter("result_name", "wf_restoration.csv")
