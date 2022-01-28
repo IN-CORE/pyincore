@@ -66,7 +66,7 @@ class BuildingEconLoss(BaseAnalysis):
                                   sort=True, copy=True)
             infl_mult = self.get_inflation_mult()
 
-            merged_inv = self.add_multiplies(dmg_set_df, occ_mult_df)
+            dmg_set_df = self.add_multiplies(dmg_set_df, occ_mult_df)
 
             bldg_results = dmg_set_df[["guid"]].copy()
             loss = 0.0
@@ -121,12 +121,12 @@ class BuildingEconLoss(BaseAnalysis):
 
         """
         if occ_mult_df is not None:
-            print(dmg_set_df.columns)
-            print(occ_mult_df.columns)
+            occ_mult_df = occ_mult_df.rename(columns={"Multiplier": "occ_type"})
+            dmg_set_df = pd.merge(dmg_set_df, occ_mult_df, how="left", left_on="occ_type", right_on="occ_type", sort=True, copy=True)
         else:
-            print(dmg_set_df.columns)
+            dmg_set_df = dmg_set_df["occ_type"] = 1
 
-        return 1
+        return dmg_set_df
 
     def get_spec(self):
         """Get specifications of the building damage analysis.
