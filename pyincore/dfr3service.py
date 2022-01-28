@@ -12,6 +12,7 @@ from typing import Dict
 from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.repaircurveset import RepairCurveSet
+from pyincore.models.restorationcurveset import RestorationCurveSet
 from pyincore.models.mappingset import MappingSet
 
 # add more types if needed
@@ -120,6 +121,8 @@ class Dfr3Service:
                 batch_dfr3_sets[id] = FragilityCurveSet(dfr3_set)
             elif instance == 'RepairService':
                 batch_dfr3_sets[id] = RepairCurveSet(dfr3_set)
+            elif instance == 'RestorationService':
+                batch_dfr3_sets[id] = RestorationCurveSet(dfr3_set)
             else:
                 raise ValueError("Only fragility and repair services are currently supported")
 

@@ -1,0 +1,56 @@
+{
+    "description" : "Restoration function for pipeline restoration for class a,b,c",
+    "authors" : [ "HAZUS"
+    ],
+    "resultType" : "Restoration Time",
+    "hazardType" : "earthquake",
+    "inventoryType" : "water_pipeline",
+    "timeUnits" : "days",
+    "restorationCurves" : [
+        {
+            "description" : "Time taken to repair a pipeline",
+            "rules" : [
+                {
+                    "condition" : null,
+                    "expression" : "(break_rate*0.33 + leak_rate*0.66)*pipe_length/num_workers"
+                }
+            ],
+            "returnType" : {
+                "type" : "Restoration Time",
+                "unit" : "days",
+                "description" : "RT"
+            }
+        }
+    ],
+
+    "curveParameters" : [
+        {
+            "name" : "break_rate",
+            "unit" : "",
+            "description" : "Break rate for pipelines",
+            "fullName" : "break_rate",
+            "expression" : null
+        },
+        {
+            "name" : "leak_rate",
+            "unit" : "",
+            "description" : "Leak rate for pipelines",
+            "fullName" : "leak_rate",
+            "expression" : null
+        },
+        {
+            "name" : "pipe_length",
+            "unit" : "??",
+            "description" : "Length of pipelines",
+            "fullName" : "pipe_length",
+            "expression" : null
+        },
+        {
+            "name" : "num_workers",
+            "unit" : "",
+            "description" : "Number of workers working on the repairs",
+            "fullName" : "num_workers",
+            "expression" : "4"
+        }
+    ]
+}
