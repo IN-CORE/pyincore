@@ -91,14 +91,13 @@ class PipelineRestoration(BaseAnalysis):
     def run(self):
         """Executes pipeline restoration analysis."""
 
-        pipelines_fiona_list = self.get_input_dataset("pipeline").get_inventory_reader()
         pipelines_df = self.get_input_dataset("pipeline").get_dataframe_from_shapefile()
 
         pipeline_dmg = self.get_input_dataset("pipeline_damage").get_csv_reader()
         pipelines_dmg_df = pd.DataFrame(list(pipeline_dmg))
 
         damage_result = pipelines_dmg_df.merge(pipelines_df, on='guid')
-        # damage_result = damage_result.to_dict()
+        damage_result = damage_result.to_dict(orient='records')
 
         # setting number of cpus to use
         user_defined_cpu = 1
@@ -165,36 +164,31 @@ class PipelineRestoration(BaseAnalysis):
         if restoration_key is None:
             restoration_key = "Restoration ID Code"
 
-        # HACK
-        damage_with_props = []
-        for idx, dmg in damage.iterrows():
-            damage_with_props.append({"properties": dmg})
-
-        # restoration_sets = self.restorationsvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"),
-        #                                                        damage_with_props, restoration_key)
+        restoration_sets = self.restorationsvc.match_list_of_dicts(self.get_input_dataset("dfr3_mapping_set"),
+                                                                   damage, restoration_key)
 
         i = 0
-        for idx, dmg in damage.iterrows():
-            res = self.restoration_time(dmg, num_available_workers)
+        for dmg in damage:
+            res = self.restoration_time(dmg, num_available_workers, restoration_sets[dmg['guid']])
             restoration_results.append(res)
             i += 1
 
         return restoration_results
 
-    def restoration_time(self, dmg, num_available_workers):
+    @staticmethod
+    def restoration_time(dmg, num_available_workers, restoration_set):
         """Calculates restoration time for a single pipeline.
 
         Args:
             dmg (obj): Pipeline damage analysis output for a single entry.
             num_available_workers (int): Number of available workers working on the repairs.
+            restoration_set(obj): Restoration curve(s) to be be used
 
         Returns:
             dict: A dictionary with id/guid and restoration time, along with some inventory metadata
         """
-        # failure state
         res_result = collections.OrderedDict()
 
-        # copying guid/id column to the sample damage failure table
         if 'guid' in dmg.keys():
             res_result['guid'] = dmg['guid']
 
@@ -203,6 +197,16 @@ class PipelineRestoration(BaseAnalysis):
         else:
             res_result['id'] = 'NA'
 
-        res_result['repair_time'] = "1.5"
+        res_result['breakrate'] = dmg['breakrate']
+        res_result['leakrate'] = dmg['leakrate']
+        res_result['diameter'] = dmg['diameter']
+
+        res_result['repair_time'] = restoration_set.calculate_restoration_rates(**{
+            "break_rate": float(dmg['breakrate'])*100,
+            "leak_rate": float(dmg['leakrate'])*100,
+            "pipe_length": dmg['length'],
+            "num_workers": num_available_workers})['RT']
+
+        res_result['haz_expose'] = dmg['haz_expose']
 
         return res_result

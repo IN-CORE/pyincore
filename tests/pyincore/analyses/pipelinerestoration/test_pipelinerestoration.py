@@ -26,7 +26,7 @@ def run_with_base_class():
 
     pipeline_restoration.set_parameter("restoration_key", "Restoration ID Code")
     pipeline_restoration.set_parameter("num_available_workers", 4)
-    pipeline_restoration.set_parameter("num_cpu", 1)
+    pipeline_restoration.set_parameter("num_cpu", 4)
 
     # Run pipeline damage analysis
     result = pipeline_restoration.run_analysis()
