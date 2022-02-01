@@ -410,10 +410,8 @@ class Dfr3Service:
             boolean = list(rules.keys())[0]  # AND or OR
             criteria = rules[boolean]
             for criterion in criteria:
-                # Recursively parse and evaluate rules
                 if isinstance(criterion, dict):
                     inventory_class.append(Dfr3Service.extract_inventory_class(criterion))
-                # Base case: get the rule value
                 elif isinstance(criterion, str):
                     inventory_class.append(criterion.split(" ")[3].strip('\'').strip('\"'))
                 else:
