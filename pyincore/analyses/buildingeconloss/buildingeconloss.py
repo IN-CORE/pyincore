@@ -38,11 +38,8 @@ class BuildingEconLoss(BaseAnalysis):
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
 
         # Occupancy type of the exposure
-        comp_type = self.get_parameter("component_type").lower()
-        occ_mult_df = None
-        if comp_type == "str" or comp_type == "as" or comp_type == "ds" or comp_type == "content":
-            occ_multiplier = self.get_input_dataset("occupancy_multiplier").get_csv_reader()
-            occ_mult_df = pd.DataFrame(occ_multiplier)
+        occ_multiplier = self.get_input_dataset("occupancy_multiplier").get_csv_reader()
+        occ_mult_df = pd.DataFrame(occ_multiplier)
 
         try:
             prop_select = []
@@ -61,7 +58,7 @@ class BuildingEconLoss(BaseAnalysis):
                                   sort=True, copy=True)
             infl_mult = self.get_inflation_mult()
 
-            dmg_set_df = self.add_multiplies(dmg_set_df, occ_mult_df)
+            dmg_set_df = self.add_multipliers(dmg_set_df, occ_mult_df)
 
             bldg_results = dmg_set_df[["guid"]].copy()
             loss = 0.0
@@ -75,18 +72,6 @@ class BuildingEconLoss(BaseAnalysis):
             bldg_results["loss_dev"] = lossdev.round(2)
 
             result_name = self.get_parameter("result_name")
-            if comp_type == "str":
-                # structural damage
-                result_name = result_name + "_str"
-            elif comp_type == "as":
-                # acceleration sensitive non-structural damage
-                result_name = result_name + "_as"
-            elif comp_type == "ds":
-                # drift sensitive non-structural damage
-                result_name = result_name + "_ds"
-            elif comp_type == "content":
-                # content damage
-                result_name = result_name + "_cnt"
 
             self.set_result_csv_data("result", bldg_results, result_name, "dataframe")
             return True
@@ -104,7 +89,7 @@ class BuildingEconLoss(BaseAnalysis):
         """
         return (self.infl_factor / 100.0) + 1.0
 
-    def add_multiplies(self, dmg_set_df, occ_mult_df):
+    def add_multipliers(self, dmg_set_df, occ_mult_df):
         """Add occupancy multipliers to damage dataset.
 
         Args:
@@ -138,20 +123,6 @@ class BuildingEconLoss(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
-                    'type': str
-                },
-                {
-                    'id': 'component_type',
-                    'required': False,
-                    'description': 'Type of building component. This variable defines the structural and '
-                                   'non-structural components of an inventory item (building) and the choice of '
-                                   'corresponding occupancy multipliers. '
-                                   'Values of the string are '
-                                   'STR: structural, '
-                                   'DS: drift-sensitive nonstructural, '
-                                   'AS: acceleration-sensitive nonstructural, '
-                                   'CONTENT: contents,'
-                                   'default is STR',
                     'type': str
                 },
                 {
