@@ -199,6 +199,7 @@ class Dfr3Service:
 
             for m in mapping.mappings:
                 # for old format rule matching [[]]
+                # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
                     if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
                         curve = m.entry[entry_key]
@@ -212,6 +213,7 @@ class Dfr3Service:
                         break
 
                 # for new format rule matching {"AND/OR":[]}
+                # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
                 elif isinstance(m.rules, dict):
                     if self._property_match(rules=m.rules, properties=inventory["properties"]):
                         curve = m.entry[entry_key]

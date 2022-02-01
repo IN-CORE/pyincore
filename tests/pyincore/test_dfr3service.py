@@ -93,10 +93,10 @@ def test_extract_inventory_class(restorationsvc):
     rules = [["java.lang.String utilfcltyc EQUALS 'PWT2'"], ["java.lang.String utilfcltyc EQUALS 'PPP2'"]]
     assert restorationsvc.extract_inventory_class_legacy(rules) == "PWT2/PPP2"
 
-    rules = {"AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'",
+    rules = {"AND": ["java.lang.String strctype EQUALS 'type2'",
                      {"OR": ["java.lang.String utilfcltyc EQUALS 'PPP2'", "java.lang.String utilfcltyc EQUALS 'PPP1'"]}]
              }
-    assert restorationsvc.extract_inventory_class(rules) == "PWT2+PPP2/PPP1"
+    assert restorationsvc.extract_inventory_class(rules) == "type2+PPP2/PPP1"
 
 
 def test_get_fragility_mappings(fragilitysvc):
