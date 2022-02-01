@@ -202,8 +202,8 @@ class PipelineRestoration(BaseAnalysis):
         res_result['diameter'] = dmg['diameter']
 
         res_result['repair_time'] = restoration_set.calculate_restoration_rates(**{
-            "break_rate": float(dmg['breakrate'])*100,
-            "leak_rate": float(dmg['leakrate'])*100,
+            "break_rate": float(dmg['breakrate']),
+            "leak_rate": float(dmg['leakrate']),
             "pipe_length": dmg['length'],
             "num_workers": num_available_workers})['RT']
 
