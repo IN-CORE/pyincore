@@ -12,6 +12,7 @@ from typing import Dict
 from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.repaircurveset import RepairCurveSet
+from pyincore.models.restorationcurveset import RestorationCurveSet
 from pyincore.models.mappingset import MappingSet
 
 # add more types if needed
@@ -120,6 +121,8 @@ class Dfr3Service:
                 batch_dfr3_sets[id] = FragilityCurveSet(dfr3_set)
             elif instance == 'RepairService':
                 batch_dfr3_sets[id] = RepairCurveSet(dfr3_set)
+            elif instance == 'RestorationService':
+                batch_dfr3_sets[id] = RestorationCurveSet(dfr3_set)
             else:
                 raise ValueError("Only fragility and repair services are currently supported")
 
@@ -168,7 +171,7 @@ class Dfr3Service:
 
         Args:
             mapping (obj): MappingSet Object that has the rules and entries.
-            inventories (list): A list of inventories.
+            inventories (list): A list of inventories. Each item is a casted fiona object
             entry_key (str): keys such as PGA, pgd, and etc.
             add_info (None, dict): additional information that used to match rules, e.g. retrofit strategy per building.
 
@@ -229,6 +232,66 @@ class Dfr3Service:
         # replace the curve id in dfr3_sets to the dfr3 curve
         for inventory_id, curve_item in dfr3_sets.items():
             if isinstance(curve_item, FragilityCurveSet):
+                pass
+            elif isinstance(curve_item, str):
+                dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]
+            else:
+                raise ValueError(
+                    "Cannot realize dfr3_set entry. The entry has to be either remote id string; or dfr3curve object!")
+
+        return dfr3_sets
+
+    def match_list_of_dicts(self, mapping: MappingSet, inventories: list, entry_key: str):
+        """This method is same as match_inventory, except it takes a simple list of dictionaries that contains the items
+        to be mapped in the rules. The match_inventory method takes a list of fiona objects
+
+        Args:
+            mapping (obj): MappingSet Object that has the rules and entries.
+            inventories (list): A list of inventories. Each item of the list is a simple dictionary
+            entry_key (str): keys such as PGA, pgd, and etc.
+
+        Returns:
+             dict: A dictionary of {"inventory id": FragilityCurveSet object}.
+
+        """
+        dfr3_sets = {}
+
+        # loop through inventory to match the rules
+        matched_curve_ids = []
+        for inventory in inventories:
+            for m in mapping.mappings:
+                # for old format rule matching [[]]
+                if isinstance(m.rules, list):
+                    if self._property_match_legacy(rules=m.rules, properties=inventory):
+                        curve = m.entry[entry_key]
+                        dfr3_sets[inventory['id']] = curve
+
+                        # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
+                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                            matched_curve_ids.append(curve)
+
+                        # use the first match
+                        break
+
+                # for new format rule matching {"AND/OR":[]}
+                elif isinstance(m.rules, dict):
+                    if self._property_match(rules=m.rules, properties=inventory):
+                        curve = m.entry[entry_key]
+                        dfr3_sets[inventory['guid']] = curve
+
+                        # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
+                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                            matched_curve_ids.append(curve)
+
+                        # use the first match
+                        break
+
+        batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
+
+        # replace the curve id in dfr3_sets to the dfr3 curve
+        for inventory_id, curve_item in dfr3_sets.items():
+            if isinstance(curve_item, FragilityCurveSet) or isinstance(curve_item, RepairCurveSet) \
+                    or isinstance(curve_item, RestorationCurveSet):
                 pass
             elif isinstance(curve_item, str):
                 dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]

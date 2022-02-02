@@ -136,3 +136,16 @@ def test_calculate_restoration_rates(restoration_set, args, expected):
         assert result["PF_0"] == expected
     else:
         assert False
+
+@pytest.mark.parametrize("restoration_set,args,expected", [
+    (get_restoration_set("pipe_restorationset.json"), {"break_rate": 0.2, "leak_rate": 0.4,
+                                                       "pipe_length": 80, "num_workers": 8}, 3.3000000000000003)
+])
+def test_calculate_pipeline_restoration_rates(restoration_set, args, expected):
+    result = restoration_set.calculate_restoration_rates(**args)
+    print(result)
+    if type(result["RT"]) == numpy.ndarray:
+        assert numpy.allclose(result["RT"], expected, rtol=1e-03, atol=1e-03)
+    else:
+        assert result["RT"] == expected
+
