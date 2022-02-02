@@ -200,9 +200,3 @@ def test_create_and_delete_restoration_mapping(restorationsvc):
 
     del_response = restorationsvc.delete_mapping(created["id"])
     assert del_response["id"] is not None
-
-
-def test_get_restoration_sets(restorationsvc):
-    metadata = restorationsvc.get_dfr3_sets(hazard_type="tornado", creator="incrtest")
-
-    assert 'id' in metadata[0].keys()

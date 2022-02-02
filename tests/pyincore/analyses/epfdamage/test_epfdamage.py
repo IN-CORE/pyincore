@@ -51,12 +51,10 @@ def run_with_base_class():
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     epf_dmg_eq.set_input_dataset('dfr3_mapping_set', mapping_set)
-    
     epf_dmg_eq.set_parameter("result_name", "seaside_eq_epf_dmg_result")
     epf_dmg_eq.set_parameter("hazard_type", hazard_type_eq)
     epf_dmg_eq.set_parameter("hazard_id", hazard_id_eq)
     epf_dmg_eq.set_parameter("num_cpu", 1)
-    # Run Analysis
     epf_dmg_eq.run_analysis()
 
     # ## Seaside Tsunami EPF Damage ##

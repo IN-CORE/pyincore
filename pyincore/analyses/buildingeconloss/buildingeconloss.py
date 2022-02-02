@@ -67,8 +67,13 @@ class BuildingEconLoss(BaseAnalysis):
             lossdev = 0.0
 
             if "appr_bldg" in dmg_set_df:
-                loss = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["meandamage"].astype(float) * dmg_set_df["Multiplier"].astype(float) * infl_mult
-                lossdev = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["mdamagedev"].astype(float) * dmg_set_df["Multiplier"].astype(float) * infl_mult
+                loss = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["meandamage"].astype(float) \
+                       * dmg_set_df["Multiplier"].astype(float) * infl_mult
+                lossdev = \
+                    dmg_set_df["appr_bldg"].astype(float) \
+                    * dmg_set_df["mdamagedev"].astype(float) \
+                    * dmg_set_df["Multiplier"].astype(float) \
+                    * infl_mult
 
             bldg_results["loss"] = loss.round(2)
             bldg_results["loss_dev"] = lossdev.round(2)
@@ -104,7 +109,8 @@ class BuildingEconLoss(BaseAnalysis):
         """
         if occ_mult_df is not None:
             occ_mult_df = occ_mult_df.rename(columns={"Occupancy": "occ_type"})
-            dmg_set_df = pd.merge(dmg_set_df, occ_mult_df, how="left", left_on="occ_type", right_on="occ_type", sort=True, copy=True)
+            dmg_set_df = pd.merge(dmg_set_df, occ_mult_df, how="left", left_on="occ_type",
+                                  right_on="occ_type", sort=True, copy=True)
         else:
             dmg_set_df = dmg_set_df["Multiplier"] = 1.0
 

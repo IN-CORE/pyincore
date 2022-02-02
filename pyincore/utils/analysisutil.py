@@ -68,7 +68,6 @@ class AnalysisUtil:
     def float_dict_to_decimal(num_dict: dict):
         return {key: Decimal(str(num_dict[key])) for key in num_dict}
 
-
     @staticmethod
     def calculate_mean_damage(dmg_ratio_tbl, dmg_intervals,
                               damage_interval_keys, is_bridge=False,

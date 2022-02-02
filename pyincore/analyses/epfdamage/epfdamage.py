@@ -134,8 +134,8 @@ class EpfDamage(BaseAnalysis):
                 geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
                 if geology_dataset_id is not None:
-                    fragility_sets_liq = self.fragilitysvc.match_inventory( self.get_input_dataset("dfr3_mapping_set"),
-                                                                            epfs, liquefaction_fragility_key)
+                    fragility_sets_liq = self.fragilitysvc.match_inventory(
+                        self.get_input_dataset("dfr3_mapping_set"), epfs, liquefaction_fragility_key)
 
                     if fragility_sets_liq is not None:
                         liquefaction_available = True
@@ -240,9 +240,8 @@ class EpfDamage(BaseAnalysis):
 
                     limit_states = AnalysisUtil.adjust_limit_states_for_pgd(limit_states, pgd_limit_states)
 
-                dmg_interval = selected_fragility_set.calculate_damage_interval(limit_states,
-                                                                       hazard_type=hazard_type,
-                                                                       inventory_type='electric_facility')
+                dmg_interval = selected_fragility_set.calculate_damage_interval(
+                    limit_states, hazard_type=hazard_type, inventory_type='electric_facility')
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
