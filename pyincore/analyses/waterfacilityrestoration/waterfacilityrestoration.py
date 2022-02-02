@@ -45,7 +45,7 @@ class WaterFacilityRestoration(BaseAnalysis):
 
         pf_interval = self.get_parameter("pf_interval")
         if pf_interval is None:
-            pf_interval = 0.1
+            pf_interval = 0.05
 
         (pf_results, time_results) = self.waterfacility_restoration(mapping_set, restoration_key, end_time,
                                                                     time_interval, pf_interval)
@@ -135,7 +135,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                 {
                     'id': 'end_time',
                     'required': False,
-                    'description': 'end time. Default to 365.',
+                    'description': 'end time in days. Default to 365.',
                     'type': float
                 },
                 {
@@ -147,7 +147,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                 {
                     'id': 'pf_interval',
                     'required': False,
-                    'description': 'incremental interval for percentage of functionality. Default to 0.1',
+                    'description': 'incremental interval for percentage of functionality. Default to 0.05',
                     'type': float
                 }
             ],
@@ -170,7 +170,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                 {
                     'id': 'time_results',
                     'parent_type': '',
-                    'description': 'A csv file recording repair time at certain funcionality recovery for each class '
+                    'description': 'A csv file recording repair time at certain functionality recovery for each class '
                                    'and limit state.',
                     'type': 'incore:waterFacilityRestorationTime'
                 },
