@@ -4,15 +4,7 @@ import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
-    # client = IncoreClient()
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
-
-    # Building Occupacy multipliers
-    # dev
-    # SD 61f3fa0cc53b3620b6b63668
-    # AS 61f3fad2c53b3620b6b6367c
-    # DS 61f3fb39c53b3620b6b654a0
-    # Content 61f3fbb4c53b3620b6b654e5
 
     # Building inventory shapefile, Seaside, OR
     # bldg_dataset_id = "5bcf2fcbf242fe047ce79dad"
@@ -23,7 +15,7 @@ def run_with_base_class():
     # original ERGO Building structural damage, csv file
     bldg_dmg_id = "5f5191763f9bbf5a2bbbb4a9"
 
-    # Building occupancy multipliers
+    # Building occupancy multipliers, structural damage
     bldg_occupancy_mult_id = "61f3fa0cc53b3620b6b63668"
 
     bldg_econ_dmg = BuildingEconLoss(client)

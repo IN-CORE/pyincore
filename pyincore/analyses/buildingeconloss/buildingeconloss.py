@@ -33,6 +33,8 @@ class BuildingEconLoss(BaseAnalysis):
 
         # Get inflation input in %
         self.infl_factor = self.get_parameter("inflation_factor")
+        if self.infl_factor is None:
+            self.infl_factor = 0.0
 
         # Building dataset
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
