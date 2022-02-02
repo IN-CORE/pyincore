@@ -191,9 +191,6 @@ class PipelineRestoration(BaseAnalysis):
         else:
             res_result['guid'] = 'NA'
 
-        res_result['breakrate'] = dmg['breakrate']
-        res_result['leakrate'] = dmg['leakrate']
-
         res_result['repair_time'] = restoration_set.calculate_restoration_rates(**{
             "break_rate": float(dmg['breakrate']),
             "leak_rate": float(dmg['leakrate']),
