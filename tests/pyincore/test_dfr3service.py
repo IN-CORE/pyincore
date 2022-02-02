@@ -87,17 +87,41 @@ def test_match_fragilities_multiple_inventories_new_format(fragilitysvc):
 
 
 def test_extract_inventory_class(restorationsvc):
-    rules = [["java.lang.String utilfcltyc EQUALS 'PWT2'"]]
-    assert restorationsvc.extract_inventory_class_legacy(rules) == "PWT2"
+    rules = [["java.lang.String utilfcltyc EQUALS 'EESL'"], ["java.lang.String utilfcltyc EQUALS 'ESSH'"]]
+    assert restorationsvc.extract_inventory_class_legacy(rules) == "EESL/ESSH"
 
-    rules = [["java.lang.String utilfcltyc EQUALS 'PWT2'"], ["java.lang.String utilfcltyc EQUALS 'PPP2'"]]
-    assert restorationsvc.extract_inventory_class_legacy(rules) == "PWT2/PPP2"
+    rules = [["java.lang.String utilfcltyc EQUALS 'EDC'"]]
+    assert restorationsvc.extract_inventory_class_legacy(rules) == "EDC"
 
-    rules = {"AND": ["java.lang.String strctype EQUALS 'type2'",
-                     {"OR": ["java.lang.String utilfcltyc EQUALS 'PPP2'", "java.lang.String utilfcltyc EQUALS 'PPP1'"]}]
+    rules = [["java.lang.String utilfcltyc EQUALS 'EDFLT'"],
+             ["java.lang.String utilfcltyc EQUALS 'EPPL'"],
+             ["java.lang.String utilfcltyc EQUALS 'EPPM'"],
+             ["java.lang.String utilfcltyc EQUALS 'EPPS'"]
+             ]
+    assert restorationsvc.extract_inventory_class_legacy(rules) == "EDFLT/EPPL/EPPM/EPPS"
+
+    rules = {"AND": [
+                    {"OR": [
+                        "java.lang.String utilfcltyc EQUALS 'EESL'",
+                        "java.lang.String utilfcltyc EQUALS 'ESSH'"
+                        ]
+                    },
+                    {
+                        "AND": [
+                            "java.lang.String utilfcltyc EQUALS 'EDC'"
+                        ]
+                    },
+                    {
+                        "OR": [
+                            "java.lang.String utilfcltyc EQUALS 'EDFLT'",
+                            "java.lang.String utilfcltyc EQUALS 'EPPL'",
+                            "java.lang.String utilfcltyc EQUALS 'EPPM'",
+                            "java.lang.String utilfcltyc EQUALS 'EPPS'"
+                        ]
+                    }
+                ]
              }
-    assert restorationsvc.extract_inventory_class(rules) == "type2+PPP2/PPP1"
-
+    assert restorationsvc.extract_inventory_class(rules) == "EESL/ESSH+EDC+EDFLT/EPPL/EPPM/EPPS"
 
 def test_get_fragility_mappings(fragilitysvc):
     mappings = fragilitysvc.get_mappings(hazard_type="earthquake", creator="cwang138")
