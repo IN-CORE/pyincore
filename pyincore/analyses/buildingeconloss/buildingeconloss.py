@@ -30,18 +30,29 @@ class BuildingEconLoss(BaseAnalysis):
 
     def run(self):
         """Executes building economic damage analysis."""
+
         # Get inflation input in %
         self.infl_factor = self.get_parameter("inflation_factor")
+        if self.infl_factor is None:
+            self.infl_factor = 0.0
 
+        # Building dataset
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
+
+        # Occupancy type of the exposure
+        occ_multiplier = self.get_input_dataset("occupancy_multiplier").get_csv_reader()
+        occ_mult_df = pd.DataFrame(occ_multiplier)
+
         try:
             prop_select = []
             for bldg_item in list(bldg_set):
                 guid = bldg_item["properties"]["guid"]
                 appr_bldg = bldg_item["properties"]["appr_bldg"]
-                prop_select.append([guid, appr_bldg])
+                year_built = bldg_item["properties"]["year_built"]
+                occ_type = bldg_item["properties"]["occ_type"]
+                prop_select.append([guid, year_built, occ_type, appr_bldg])
 
-            bldg_set_df = pd.DataFrame(prop_select, columns=["guid", "appr_bldg"])
+            bldg_set_df = pd.DataFrame(prop_select, columns=["guid", "year_built", "occ_type", "appr_bldg"])
             bldg_dmg_set = self.get_input_dataset("building_mean_dmg").get_csv_reader()
             bldg_dmg_df = pd.DataFrame(list(bldg_dmg_set))
 
@@ -49,17 +60,21 @@ class BuildingEconLoss(BaseAnalysis):
                                   sort=True, copy=True)
             infl_mult = self.get_inflation_mult()
 
-            bldg_results = dmg_set_df[["guid"]].copy()
-            valloss = 0.0
-            vallossdev = 0.0
-            if "appr_bldg" in dmg_set_df:
-                valloss = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["meandamage"].astype(float) * infl_mult
-                vallossdev = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["mdamagedev"].astype(float) * infl_mult
+            dmg_set_df = self.add_multipliers(dmg_set_df, occ_mult_df)
 
-            bldg_results["strloss"] = valloss.round(2)
-            bldg_results["strlossdev"] = vallossdev.round(2)
+            bldg_results = dmg_set_df[["guid"]].copy()
+            loss = 0.0
+            lossdev = 0.0
+
+            if "appr_bldg" in dmg_set_df:
+                loss = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["meandamage"].astype(float) * dmg_set_df["Multiplier"].astype(float) * infl_mult
+                lossdev = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["mdamagedev"].astype(float) * dmg_set_df["Multiplier"].astype(float) * infl_mult
+
+            bldg_results["loss"] = loss.round(2)
+            bldg_results["loss_dev"] = lossdev.round(2)
 
             result_name = self.get_parameter("result_name")
+
             self.set_result_csv_data("result", bldg_results, result_name, "dataframe")
             return True
         except Exception as e:
@@ -75,6 +90,25 @@ class BuildingEconLoss(BaseAnalysis):
 
         """
         return (self.infl_factor / 100.0) + 1.0
+
+    def add_multipliers(self, dmg_set_df, occ_mult_df):
+        """Add occupancy multipliers to damage dataset.
+
+        Args:
+            dmg_set_df (pd.DataFrame): Building inventory dataset with guid and mean damages.
+            occ_mult_df (pd.DataFrame): Occupation multiplier set.
+
+        Returns:
+            pd.DataFrame: Merged inventory.
+
+        """
+        if occ_mult_df is not None:
+            occ_mult_df = occ_mult_df.rename(columns={"Occupancy": "occ_type"})
+            dmg_set_df = pd.merge(dmg_set_df, occ_mult_df, how="left", left_on="occ_type", right_on="occ_type", sort=True, copy=True)
+        else:
+            dmg_set_df = dmg_set_df["Multiplier"] = 1.0
+
+        return dmg_set_df
 
     def get_spec(self):
         """Get specifications of the building damage analysis.
@@ -112,8 +146,19 @@ class BuildingEconLoss(BaseAnalysis):
                 {
                     'id': 'building_mean_dmg',
                     'required': True,
-                    'description': 'Building mean damage results CSV file',
+                    'description': 'A CSV file with building mean damage results for either Structural, '
+                                   'Drift-Sensitive Nonstructural, Acceleration-Sensitive Nonstructural '
+                                   'or Contents Damage component.',
                     'type': ['ergo:meanDamage']
+                },
+                {
+                    'id': 'occupancy_multiplier',
+                    'required': False,
+                    'description': 'Building occupancy damage multipliers. These multipliers account for the value '
+                                   'associated with different types of components (structural, '
+                                   'acceleration-sensitive nonstructural, '
+                                   'drift-sensitive nonstructural, contents).',
+                    'type': ['incore:buildingOccupancyMultiplier']
                 }
             ],
             'output_datasets': [
