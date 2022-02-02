@@ -99,7 +99,6 @@ class PipelineRestoration(BaseAnalysis):
         damage_result = pipelines_dmg_df.merge(pipelines_df, on='guid')
         damage_result = damage_result.to_dict(orient='records')
 
-        # setting number of cpus to use
         user_defined_cpu = 1
         if not self.get_parameter("num_cpu") is None and self.get_parameter(
                 "num_cpu") > 0:
@@ -167,11 +166,9 @@ class PipelineRestoration(BaseAnalysis):
         restoration_sets = self.restorationsvc.match_list_of_dicts(self.get_input_dataset("dfr3_mapping_set"),
                                                                    damage, restoration_key)
 
-        i = 0
         for dmg in damage:
             res = self.restoration_time(dmg, num_available_workers, restoration_sets[dmg['guid']])
             restoration_results.append(res)
-            i += 1
 
         return restoration_results
 
@@ -199,14 +196,11 @@ class PipelineRestoration(BaseAnalysis):
 
         res_result['breakrate'] = dmg['breakrate']
         res_result['leakrate'] = dmg['leakrate']
-        res_result['diameter'] = dmg['diameter']
 
         res_result['repair_time'] = restoration_set.calculate_restoration_rates(**{
             "break_rate": float(dmg['breakrate']),
             "leak_rate": float(dmg['leakrate']),
             "pipe_length": dmg['length'],
             "num_workers": num_available_workers})['RT']
-
-        res_result['haz_expose'] = dmg['haz_expose']
 
         return res_result

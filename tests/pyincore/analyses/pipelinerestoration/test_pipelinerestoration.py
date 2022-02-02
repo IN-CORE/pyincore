@@ -22,7 +22,7 @@ def run_with_base_class():
     mapping_set = MappingSet(fragility_service.get_mapping("61f35f09903e515036cee106"))
     pipeline_restoration.set_input_dataset('dfr3_mapping_set', mapping_set)
 
-    pipeline_restoration.set_parameter("result_name","pipeline_restoration_times")
+    pipeline_restoration.set_parameter("result_name", "pipeline_restoration_times")
 
     pipeline_restoration.set_parameter("restoration_key", "Restoration ID Code")
     pipeline_restoration.set_parameter("num_available_workers", 4)
