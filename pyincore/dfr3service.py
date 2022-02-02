@@ -202,6 +202,7 @@ class Dfr3Service:
 
             for m in mapping.mappings:
                 # for old format rule matching [[]]
+                # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
                     if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
                         curve = m.entry[entry_key]
@@ -215,6 +216,7 @@ class Dfr3Service:
                         break
 
                 # for new format rule matching {"AND/OR":[]}
+                # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
                 elif isinstance(m.rules, dict):
                     if self._property_match(rules=m.rules, properties=inventory["properties"]):
                         curve = m.entry[entry_key]
@@ -426,6 +428,70 @@ class Dfr3Service:
                                  + str(type(properties[rule_key])) + ". Please review the mapping being used.")
 
         return matched
+
+    @staticmethod
+    def extract_inventory_class_legacy(rules):
+        """
+        This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
+        Args:
+            rules (list): The outer list is applying "OR" rule and the inner list is applying an "AND" rule.
+            e.g.[
+            ["java.lang.String utilfcltyc EQUALS 'PWT2'"],
+            ["java.lang.String utilfcltyc EQUALS 'PPP1'"]
+            ]
+        Returns:
+            inventory_class (str): extracted inventory class name. "/" stands for or and "+" stands for and
+
+        """
+        if rules == [[]] or rules == [] or rules == [None]:
+            return "NA"
+        else:
+            inventory_class = ""
+            for i, and_rules in enumerate(rules):
+                # or
+                if i != 0:
+                    inventory_class += "/"
+
+                for j, rule in enumerate(and_rules):
+                    # and
+                    if j != 0:
+                        inventory_class += "+"
+                    inventory_class += rule.split(" ")[3].strip('\'').strip('\"')
+            return inventory_class
+
+    @staticmethod
+    def extract_inventory_class(rules):
+        """
+        This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
+        Args:
+            rules (dict): e.g.
+            { "AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'", "java.lang.String utilfcltyc EQUALS 'PPP1'"] }
+        Returns:
+            inventory_class (str): extracted inventory class name. "/" stands for or and "+" stands for and
+        """
+
+        if rules == {}:
+            return "NA"
+        else:
+            inventory_class = []
+            boolean = list(rules.keys())[0]  # AND or OR
+            criteria = rules[boolean]
+            for criterion in criteria:
+                # Recursively parse and evaluate the rules with boolean
+                if isinstance(criterion, dict):
+                    inventory_class.append(Dfr3Service.extract_inventory_class(criterion))
+                # Base case: get the rule value
+                elif isinstance(criterion, str):
+                    inventory_class.append(criterion.split(" ")[3].strip('\'').strip('\"'))
+                else:
+                    raise ValueError("Cannot evaluate criterion, unsupported format!")
+
+            if boolean.lower() == "and":
+                return "+".join(inventory_class)
+            elif boolean.lower() == "or":
+                return "/".join(inventory_class)
+            else:
+                raise ValueError("boolean " + boolean + " not supported!")
 
     def create_mapping(self, mapping_set: dict):
         """Create DFR3 mapping on the server. POST API endpoint call.
