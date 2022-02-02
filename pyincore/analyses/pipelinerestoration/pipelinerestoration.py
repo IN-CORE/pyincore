@@ -188,11 +188,8 @@ class PipelineRestoration(BaseAnalysis):
 
         if 'guid' in dmg.keys():
             res_result['guid'] = dmg['guid']
-
-        elif 'id' in dmg.keys():
-            res_result['id'] = dmg['id']
         else:
-            res_result['id'] = 'NA'
+            res_result['guid'] = 'NA'
 
         res_result['breakrate'] = dmg['breakrate']
         res_result['leakrate'] = dmg['leakrate']
