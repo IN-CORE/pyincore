@@ -67,13 +67,10 @@ class BuildingEconLoss(BaseAnalysis):
             lossdev = 0.0
 
             if "appr_bldg" in dmg_set_df:
-                loss = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["meandamage"].astype(float) \
-                       * dmg_set_df["Multiplier"].astype(float) * infl_mult
-                lossdev = \
-                    dmg_set_df["appr_bldg"].astype(float) \
-                    * dmg_set_df["mdamagedev"].astype(float) \
-                    * dmg_set_df["Multiplier"].astype(float) \
-                    * infl_mult
+                loss = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["meandamage"].astype(float) * dmg_set_df[
+                    "Multiplier"].astype(float) * infl_mult
+                lossdev = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["mdamagedev"].astype(float) * dmg_set_df[
+                    "Multiplier"].astype(float) * infl_mult
 
             bldg_results["loss"] = loss.round(2)
             bldg_results["loss_dev"] = lossdev.round(2)
