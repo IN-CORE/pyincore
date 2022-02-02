@@ -73,7 +73,6 @@ class ElectricPowerFacilityRestoration(BaseAnalysis):
         pf_results = []
 
         for mapping in mapping_set.mappings:
-            # parse rules to get inventory class. e.g. treatment plan, tank, pump etc
             if isinstance(mapping.rules, list):
                 inventory_class = RestorationService.extract_inventory_class_legacy(mapping.rules)
             elif isinstance(mapping.rules, dict):
@@ -161,14 +160,14 @@ class ElectricPowerFacilityRestoration(BaseAnalysis):
                     'parent_type': '',
                     'description': 'A csv file recording functionality change with time for each class and limit '
                                    'state.',
-                    'type': 'incore:electricPowerFacilityRestorationFunc'
+                    'type': 'incore:epfRestorationFunc'
                 },
                 {
                     'id': 'time_results',
                     'parent_type': '',
                     'description': 'A csv file recording repair time at certain funcionality recovery for each class '
                                    'and limit state.',
-                    'type': 'incore:electricPowerFacilityRestorationTime'
+                    'type': 'incore:epfRestorationTime'
                 },
             ]
         }

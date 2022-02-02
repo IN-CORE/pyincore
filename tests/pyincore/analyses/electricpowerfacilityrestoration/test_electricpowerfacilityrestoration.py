@@ -11,17 +11,17 @@ from pyincore.models.mapping import Mapping
 
 def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
-    wf_rest = ElectricPowerFacilityRestoration(client)
+    epf_rest = ElectricPowerFacilityRestoration(client)
     restorationsvc = RestorationService(client)
     mapping_set = MappingSet(restorationsvc.get_mapping("61f302e6e3a03e465500b3eb"))  # new format of mapping
-    wf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
-    wf_rest.set_parameter("result_name", "wf_restoration.csv")
-    wf_rest.set_parameter("restoration_key", "Restoration ID Code")
-    wf_rest.set_parameter("end_time", 100.0)
-    wf_rest.set_parameter("time_interval", 1.0)
-    wf_rest.set_parameter("pf_interval", 0.01)
+    epf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
+    epf_rest.set_parameter("result_name", "epf_restoration.csv")
+    epf_rest.set_parameter("restoration_key", "Restoration ID Code")
+    epf_rest.set_parameter("end_time", 100.0)
+    epf_rest.set_parameter("time_interval", 1.0)
+    epf_rest.set_parameter("pf_interval", 0.01)
 
-    wf_rest.run_analysis()
+    epf_rest.run_analysis()
 
 
 if __name__ == '__main__':
