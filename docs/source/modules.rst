@@ -135,6 +135,11 @@ analyses/pipelinedamagerepairrate
 ..  autoclass:: pipelinedamagerepairrate.pipelineutil.PipelineUtil
     :members:
 
+analyses/pipelinerestoration
+=================================
+..  autoclass:: pipelinerestoration.pipelinerestoration.PipelineRestoration
+    :members:
+
 analyses/populationdislocation
 ==============================
 ..  autoclass:: populationdislocation.populationdislocation.PopulationDislocation
