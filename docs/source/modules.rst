@@ -46,6 +46,11 @@ analyses/cumulativebuildingdamage
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
     :members:
 
+analyses/electricpowerfacilityrestoration
+=================================
+..  autoclass:: electricpowerfacilityrestoration.electricpowerfacilityrestoration.ElectricPowerFacilityRestoration
+    :members:
+
 analyses/epfdamage
 ==================
 ..  autoclass:: epfdamage.epfdamage.EpfDamage
@@ -191,6 +196,11 @@ analyses/transportationrecovery
 analyses/waterfacilitydamage
 ============================
 ..  autoclass:: waterfacilitydamage.waterfacilitydamage.WaterFacilityDamage
+    :members:
+
+analyses/waterfacilityrestoration
+============================
+..  autoclass:: waterfacilityrestoration.waterfacilityrestoration.WaterFacilityRestoration
     :members:
 
 models
