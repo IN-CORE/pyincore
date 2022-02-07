@@ -70,7 +70,7 @@ class PipelineRestoration(BaseAnalysis):
                     'id': 'pipeline_damage',
                     'required': True,
                     'description': 'pipeline damage results with repairs',
-                    'type': ['ergo:pipelineDamageVer2']
+                    'type': ['ergo:pipelineDamageVer3']
                 },
                 {
                     'id': 'dfr3_mapping_set',
