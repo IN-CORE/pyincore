@@ -7,14 +7,16 @@ import json
 import math
 from abc import ABC
 
+import numpy
+
 from pyincore import globals as pyglobals
 from pyincore.utils import evaluateexpression
 
 logger = pyglobals.LOGGER
 
 
-class FragilityCurve(ABC):
-    """A class to represent conditional standard fragility curve."""
+class DFR3Curve:
+    """A class to represent a DFR3 curve."""
 
     def __init__(self, curve_parameters):
         self.rules = curve_parameters['rules']
@@ -24,16 +26,16 @@ class FragilityCurve(ABC):
             rule["expression"] = rule["expression"].replace("^", "**")
         self.description = curve_parameters['description']
 
-    def calculate_limit_state_probability(self, hazard_values: dict, fragility_curve_parameters: dict, **kwargs):
-        """Computes limit state probabilities.
+    def solve_curve_expression(self, hazard_values: dict, curve_parameters: dict, **kwargs):
+        """Evaluates expression of the curve.
 
         Args:
-            hazard_values (dict): Hazard values.
-            fragility_curve_parameters (dict): Fragility curve parameters.
+            hazard_values (dict): Hazard values. Only applicable to fragilities
+            curve_parameters (dict): Curve parameters.
             **kwargs: Keyword arguments.
 
         Returns:
-            float: A limit state probability.
+            any: Result of the evaluated expression. Can be float, numpy.ndarray etc.
 
         """
         parameters = {}
@@ -42,7 +44,7 @@ class FragilityCurve(ABC):
         # 1. Figure out if parameter name needs to be mapped (i.e. the name contains forbidden characters)
         # 2. Fetch all parameters listed in the curve from kwargs and if there are not in kwargs, use default values
         # from the curve.
-        for parameter in fragility_curve_parameters:
+        for parameter in curve_parameters:
             # if default exists, use default
             if "expression" in parameter and parameter["expression"] is not None:
                 parameters[parameter["name"]] = evaluateexpression.evaluate(parameter["expression"], parameters)
@@ -61,8 +63,6 @@ class FragilityCurve(ABC):
                 elif parameter["name"].lower() == kwargs_key.lower():
                     parameters[parameter["name"]] = kwargs_value
 
-        probability = 0.0
-
         # use hazard values if present
         # consider case insensitive situation
         for key, value in hazard_values.items():
@@ -74,11 +74,12 @@ class FragilityCurve(ABC):
                         parameters[parameter_key] = value
                     else:
                         # returning 0 even if a single demand value is None, assumes there is no hazard exposure. TBD
-                        return probability
+                        return 0.0
 
+        eval_result = None
         for rule in self.rules:
             if "condition" not in rule or rule["condition"] is None:
-                probability = evaluateexpression.evaluate(rule["expression"], parameters)
+                eval_result = evaluateexpression.evaluate(rule["expression"], parameters)
             else:
                 conditions_met = []
                 for condition in rule["condition"]:
@@ -88,25 +89,57 @@ class FragilityCurve(ABC):
                         conditions_met.append(False)
                         break
                 if all(conditions_met):
-                    probability = evaluateexpression.evaluate(rule["expression"], parameters)
+                    eval_result = evaluateexpression.evaluate(rule["expression"], parameters)
                     break
 
-        if math.isnan(probability):
-            error_msg = "Unable to calculate limit state."
-            if self.rules:
-                error_msg += " Evaluation failed for expression: \n" + json.dumps(self.rules) + "\n"
-                error_msg += "Provided Inputs: \n" + json.dumps(hazard_values) + "\n" + json.dumps(kwargs)
+        if isinstance(eval_result, numpy.ndarray) or isinstance(eval_result, list):  # for repair curves etc.
+            return eval_result
+        else:  # for fragility curves the return is a float
+            if eval_result is None:
+                eval_result = 0.0
+            if math.isnan(eval_result):
+                error_msg = "Unable to calculate limit state."
+                if self.rules:
+                    error_msg += " Evaluation failed for expression: \n" + json.dumps(self.rules) + "\n"
+                    error_msg += "Provided Inputs: \n" + json.dumps(hazard_values) + "\n" + json.dumps(kwargs)
 
-            raise ValueError(error_msg)
+                raise ValueError(error_msg)
 
-        return probability
+            return eval_result
 
-    def get_building_period(self, fragility_curve_parameters, **kwargs):
+    def solve_curve_for_inverse(self, hazard_values: dict, curve_parameters: dict, **kwargs):
+        """Evaluates expression of the curve by calculating its inverse. Example, ppf for cdf. Only supports cdf() for
+         now. More inverse methods may be added in the future.
+
+        Args:
+            hazard_values (dict): Hazard values. Only applicable to fragilities
+            curve_parameters (dict): Curve parameters.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            any: Result of the evaluated inverse expression. Can be float, numpy.ndarray etc.
+
+        """
+        inverse_rules = []
+        actual_rules = self.rules
+        for rule in self.rules:
+            if ".cdf(" in rule['expression']:
+                new_exp = rule['expression'].replace(".cdf(", ".ppf(")
+                inverse_rules.append({'condition': rule['condition'], 'expression': new_exp})
+            else:
+                raise KeyError("Inverse does not exist for the provided expression. exiting..")
+
+        self.rules = inverse_rules
+        inverse = self.solve_curve_expression(hazard_values=hazard_values, curve_parameters=curve_parameters, **kwargs)
+        self.rules = actual_rules  # swap the original rules back so further calculations are not affected
+        return inverse
+
+    def get_building_period(self, curve_parameters, **kwargs):
         """
                 Get building period from the fragility curve.
 
         Args:
-            fragility_curve_parameters (dict): Fragility curve parameters.
+            curve_parameters (dict): Fragility curve parameters.
             **kwargs: Keyword arguments.
 
         Returns:
@@ -116,7 +149,7 @@ class FragilityCurve(ABC):
 
         period = 0.0
         num_stories = 1.0
-        for parameter in fragility_curve_parameters:
+        for parameter in curve_parameters:
             # if default exists, use default
             if parameter["name"] == "num_stories" and "expression" in parameter and parameter["expression"] is not None:
                 num_stories = evaluateexpression.evaluate(parameter["expression"])

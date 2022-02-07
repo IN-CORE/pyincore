@@ -6,7 +6,7 @@
 
 import json
 
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
 from pyincore.utils.analysisutil import AnalysisUtil
 
 
@@ -34,21 +34,17 @@ class FragilityCurveSet:
         self.result_unit = metadata["resultUnit"] if "resultUnit" in metadata else ""
         self.hazard_type = metadata['hazardType']
         self.inventory_type = metadata['inventoryType']
-        self.fragility_curve_parameters = {}
+        self.curve_parameters = {}
         self.fragility_curves = []
 
-        if 'fragilityCurveParameters' in metadata.keys():
-            self.fragility_curve_parameters = metadata["fragilityCurveParameters"]
+        if 'curveParameters' in metadata.keys():
+            self.curve_parameters = metadata["curveParameters"]
 
         if 'fragilityCurves' in metadata.keys():
             for fragility_curve in metadata["fragilityCurves"]:
-                self.fragility_curves.append(FragilityCurve(fragility_curve))
-        elif 'repairCurves' in metadata.keys():
-            self.repairCurves = metadata['repairCurves']
-        elif 'restorationCurves' in metadata.keys():
-            self.restorationCurves = metadata['restorationCurves']
+                self.fragility_curves.append(DFR3Curve(fragility_curve))
         else:
-            raise ValueError("Cannot create dfr3 curve object. Missing key field.")
+            raise ValueError("Cannot create dfr3 curve object. Missing key field: fragilityCurves.")
 
     @classmethod
     def from_json_str(cls, json_str):
@@ -99,9 +95,9 @@ class FragilityCurveSet:
 
         if len(self.fragility_curves) <= 4:
             for fragility_curve in self.fragility_curves:
-                probability = fragility_curve.calculate_limit_state_probability(hazard_values,
-                                                                                self.fragility_curve_parameters,
-                                                                                **kwargs)
+                probability = fragility_curve.solve_curve_expression(hazard_values,
+                                                                     self.curve_parameters,
+                                                                     **kwargs)
                 output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
                 index += 1
         else:
@@ -130,7 +126,7 @@ class FragilityCurveSet:
 
         if len(self.fragility_curves) <= 4:
             for fragility_curve in self.fragility_curves:
-                probability = fragility_curve.calculate_limit_state_probability(hazard, period, std_dev, **kwargs)
+                probability = fragility_curve.solve_curve_expression(hazard, period, std_dev, **kwargs)
                 output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
                 index += 1
         else:
@@ -224,7 +220,7 @@ class FragilityCurveSet:
 
         """
         kwargs_dict = {}
-        for parameters in self.fragility_curve_parameters:
+        for parameters in self.curve_parameters:
 
             if parameters['name'] == "age_group" and ('age_group' not in inventory_unit['properties'] or \
                                                       inventory_unit['properties']['age_group'] == ""):

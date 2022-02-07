@@ -9,7 +9,7 @@ import concurrent.futures
 from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, AnalysisUtil, GeoUtil
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class RoadDamage(BaseAnalysis):
@@ -191,7 +191,7 @@ class RoadDamage(BaseAnalysis):
             if use_hazard_uncertainty:
                 raise ValueError("Uncertainty Not Implemented Yet.")
 
-            if isinstance(selected_fragility_set.fragility_curves[0], FragilityCurve):
+            if isinstance(selected_fragility_set.fragility_curves[0], DFR3Curve):
                 hazard_vals = AnalysisUtil.update_precision_of_lists(hazard_resp[i]["hazardValues"])
                 demand_types = hazard_resp[i]["demands"]
                 demand_units = hazard_resp[i]["units"]

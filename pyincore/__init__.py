@@ -24,7 +24,9 @@ from pyincore.utils.popdisloutputprocess import PopDislOutputProcess
 from pyincore.utils.cgeoutputprocess import CGEOutputProcess
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
 from pyincore.models.fragilitycurveset import FragilityCurveSet
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore.models.repaircurveset import RepairCurveSet
+from pyincore.models.restorationcurveset import RestorationCurveSet
+from pyincore.models.dfr3curve import DFR3Curve
 from pyincore.models.mappingset import MappingSet
 from pyincore.models.mapping import Mapping
 from pyincore.networkdata import NetworkData

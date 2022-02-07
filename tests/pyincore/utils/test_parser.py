@@ -24,6 +24,12 @@ def test_exec_evaluator():
         evaluateexpression.evaluate("exec(program)", {"program": program})
 
 
+def test_exec_evaluator_repair():
+    expression = "scipy.stats.lognorm.ppf(numpy.random.random(size=rand_arr_size), s=0.159, scale=numpy.exp(0.8196))"
+    r = evaluateexpression.evaluate(expression, {"rand_arr_size": 10})
+    assert len(r) == 10
+
+
 def test_parser():
     parser = Parser()
 

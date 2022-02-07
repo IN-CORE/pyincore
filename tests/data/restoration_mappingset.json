@@ -1,12 +1,12 @@
 {
-  "name": "pytest - Tornado Building Repair Mapping",
+  "name": "pytest - Tornado Building Restoration Mapping",
   "hazardType": "tornado",
   "inventoryType": "building",
-  "mappingType": "repair",
+  "mappingType": "restoration",
   "mappings": [
     {
       "entry": {
-        "Repair ID Code": "5bbbaedfec2309046c2745c8"
+        "Restoration ID Code": "5bbbaedfec2309046c2745c8"
       },
       "rules": [
         [
@@ -16,7 +16,7 @@
     },
     {
       "entry": {
-        "Repair ID Code": "5bbbaf58ec2309046c2745c9"
+        "Restoration ID Code": "5bbbaf58ec2309046c2745c9"
       },
       "rules": [
         [
@@ -26,7 +26,7 @@
     },
     {
       "entry": {
-        "Repair ID Code": "5bbbafcdec2309046c2745ca"
+        "Restoration ID Code": "5bbbafcdec2309046c2745ca"
       },
       "rules": [
         [
