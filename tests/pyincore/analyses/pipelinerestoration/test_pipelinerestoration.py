@@ -3,7 +3,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore import IncoreClient, FragilityService, MappingSet
+from pyincore import IncoreClient, RestorationService, MappingSet
 from pyincore.analyses.pipelinerestoration import PipelineRestoration
 import pyincore.globals as pyglobals
 
@@ -18,8 +18,8 @@ def run_with_base_class():
     pipeline_restoration.load_remote_input_dataset("pipeline_damage", "61f36023c53b3620b6b614c6")
 
     # Load fragility mapping
-    fragility_service = FragilityService(client)
-    mapping_set = MappingSet(fragility_service.get_mapping("61f35f09903e515036cee106"))
+    restoration_service = RestorationService(client)
+    mapping_set = MappingSet(restoration_service.get_mapping("61f35f09903e515036cee106"))
     pipeline_restoration.set_input_dataset('dfr3_mapping_set', mapping_set)
 
     pipeline_restoration.set_parameter("result_name", "pipeline_restoration_times")
@@ -28,8 +28,8 @@ def run_with_base_class():
     pipeline_restoration.set_parameter("num_available_workers", 4)
     pipeline_restoration.set_parameter("num_cpu", 4)
 
-    # Run pipeline damage analysis
-    result = pipeline_restoration.run_analysis()
+    # Run pipeline restoration analysis
+    pipeline_restoration.run_analysis()
 
 
 if __name__ == "__main__":
