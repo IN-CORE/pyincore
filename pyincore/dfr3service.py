@@ -431,14 +431,11 @@ class Dfr3Service:
 
     @staticmethod
     def extract_inventory_class_legacy(rules):
-        """
-        This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
+        """This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
+
         Args:
-            rules (list): The outer list is applying "OR" rule and the inner list is applying an "AND" rule.
-            e.g.[
-            ["java.lang.String utilfcltyc EQUALS 'PWT2'"],
-            ["java.lang.String utilfcltyc EQUALS 'PPP1'"]
-            ]
+            rules (list): The outer list is applying "OR" rule and the inner list is applying an "AND" rule. e.g. list(["java.lang.String utilfcltyc EQUALS 'PWT2'"],["java.lang.String utilfcltyc EQUALS 'PPP1'"])
+
         Returns:
             inventory_class (str): extracted inventory class name. "/" stands for or and "+" stands for and
 
@@ -459,15 +456,15 @@ class Dfr3Service:
 
     @staticmethod
     def extract_inventory_class(rules):
-        """
-        This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
+        """This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
+
         Args:
-            rules (dict): e.g.
-            { "AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'", "java.lang.String utilfcltyc EQUALS 'PPP1'"] }
+            rules (dict): e.g. { "AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'", "java.lang.String utilfcltyc EQUALS 'PPP1'"]}
+
         Returns:
             inventory_class (str): extracted inventory class name. "/" stands for or and "+" stands for and
-        """
 
+        """
         if rules == {}:
             return "NA"
         else:

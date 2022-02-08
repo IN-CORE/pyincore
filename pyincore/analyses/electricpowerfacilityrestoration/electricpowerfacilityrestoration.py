@@ -14,8 +14,7 @@ from pyincore.models.restorationcurveset import RestorationCurveSet
 
 
 class ElectricPowerFacilityRestoration(BaseAnalysis):
-    """Computes electric power facility restoration for an earthquake exposure.
-        """
+    """Computes electric power facility restoration for an earthquake exposure."""
 
     def __init__(self, incore_client):
         self.restorationsvc = RestorationService(incore_client)
@@ -24,8 +23,10 @@ class ElectricPowerFacilityRestoration(BaseAnalysis):
     def run(self):
         """Performs Water facility restoration analysis by using the parameters from the spec
         and creates an output dataset in csv format
+
         Returns:
             bool: True if successful, False otherwise
+
         """
         mapping_set = self.get_input_dataset("dfr3_mapping_set")
 
@@ -56,17 +57,19 @@ class ElectricPowerFacilityRestoration(BaseAnalysis):
 
     def electricpowerfacility_restoration(self, mapping_set, restoration_key, end_time, time_interval,
                                           pf_interval):
-
         """Gets applicable restoration curve set and calculates restoration time and functionality
+
         Args:
             mapping_set (class): Restoration Mapping Set
             restoration_key (str): Restoration Key to determine which curve to use. E.g. Restoration ID Code
             end_time (float): User specified end repair time
             time_interval (float): Increment interval of repair time. Default to 1 (1 day)
             pf_interval (float): Increment interval of percentage of functionality. Default 0.1 (10%)
+
         Returns:
             time_results (list): Given Percentage of functionality, the change of repair time
             pf_results (list): Given Repair time, change of the percentage of functionality
+
         """
 
         time_results = []

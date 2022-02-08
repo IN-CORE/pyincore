@@ -5,15 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.3.0] - 2021-02-07
 
 ### Added
-- Support for Restoration curves in pyincore. Included pytests. [#71](https://github.com/IN-CORE/pyincore/issues/71)
-- A DFR3 method to calculate the inverse of cdf which can be used in repair curve calculation to calculate repair time when percent of functionality is provided as an input. [#71](https://github.com/IN-CORE/pyincore/issues/71)
+- Water facility restoration model [#76](https://github.com/IN-CORE/pyincore/issues/76)
+- Electric power facility model [#77](https://github.com/IN-CORE/pyincore/issues/77)
+- Water pipeline restoration model [#78](https://github.com/IN-CORE/pyincore/issues/78)
 
 ### Changed
+- Update building econ loss to include non structural and content damage [51](https://github.com/IN-CORE/pyincore/issues/51)
 - Rename master branch to main [#67](https://github.com/IN-CORE/pyincore/issues/67)
-- Changed the DFR3 expression evaluation method to also accept an array of numeric values, instead of a single value. This improves analyses performance where an array of x values can be evaluated together. [#71](https://github.com/IN-CORE/pyincore/issues/71)
+- update fragility specific functions so it deals with the service deprecations and using common DFR3Curve classes [#69](https://github.com/IN-CORE/pyincore/issues/69)
+- Support for Restoration curves in pyincore. Included pytests [#71](https://github.com/IN-CORE/pyincore/issues/71)
+
+### Fixed
+- Pipeline damage with repair rate only computes total repairs when including liquefaction [#63](https://github.com/IN-CORE/pyincore/issues/63)
+- Fix total population dislocation is Null [#72](https://github.com/IN-CORE/pyincore/issues/72)
+- Fixed PEP8 issues [#81](https://github.com/IN-CORE/pyincore/issues/81)
 
 ## [1.2.0] - 2021-12-15
 
