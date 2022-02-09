@@ -105,6 +105,8 @@ class BuildingEconLoss(BaseAnalysis):
 
         """
         if occ_mult_df is not None:
+            # Occupancy multipliers are in percentages, convert to multiplication factors
+            occ_mult_df["Multiplier"] = (occ_mult_df["Multiplier"].astype(float) / 100.0) + 1.0
             occ_mult_df = occ_mult_df.rename(columns={"Occupancy": "occ_type"})
             dmg_set_df = pd.merge(dmg_set_df, occ_mult_df, how="left", left_on="occ_type",
                                   right_on="occ_type", sort=True, copy=True)
@@ -157,8 +159,8 @@ class BuildingEconLoss(BaseAnalysis):
                 {
                     'id': 'occupancy_multiplier',
                     'required': False,
-                    'description': 'Building occupancy damage multipliers. These multipliers account for the value '
-                                   'associated with different types of components (structural, '
+                    'description': 'Building occupancy damage multipliers. These percentage multipliers account '
+                                   'for the value associated with different types of components (structural, '
                                    'acceleration-sensitive nonstructural, '
                                    'drift-sensitive nonstructural, contents).',
                     'type': ['incore:buildingOccupancyMultiplier']
