@@ -77,9 +77,7 @@ class HousingRecovery(BaseAnalysis):
         }
 
     def run(self):
-        """Merges Housing Unit Inventory, Address Point Inventory and Building Inventory.
-         The results of this analysis are aggregated per structure/building. Generates
-         one csv result per iteration.
+        """Merges Building damage, Population dislocation and Census data
 
         Returns:
             bool: True if successful, False otherwise
