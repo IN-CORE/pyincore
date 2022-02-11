@@ -72,10 +72,8 @@ class HousingUnitAllocation(BaseAnalysis):
         """Merges Housing Unit Inventory, Address Point Inventory and Building Inventory.
          The results of this analysis are aggregated per structure/building. Generates
          one csv result per iteration.
-
         Returns:
             bool: True if successful, False otherwise
-
         """
 
         # Get seed
@@ -109,14 +107,11 @@ class HousingUnitAllocation(BaseAnalysis):
 
     def prepare_housing_unit_inventory(self, housing_unit_inventory, seed):
         """Merge order to Building and Address inventories.
-
         Args:
             housing_unit_inventory (pd.DataFrame): Housing unit inventory.
             seed (int): Random number generator seed for reproducibility.
-
         Returns:
             pd.DataFrame: Sorted housing unit inventory.
-
         """
         size_row, size_col = housing_unit_inventory.shape
 
@@ -141,14 +136,11 @@ class HousingUnitAllocation(BaseAnalysis):
 
     def merge_infrastructure_inventory(self, address_point_inventory, building_inventory):
         """Merge order to Building and Address inventories.
-
         Args:
             address_point_inventory (pd.DataFrame): address point inventory
             building_inventory (pd.DataFrame): building inventory
-
         Returns:
             pd.DataFrame: merged address and building inventories
-
         """
         sorted_pnt_0 = address_point_inventory.sort_values(by=["strctid"])
         sorted_bld_0 = building_inventory.sort_values(by=["strctid"])
@@ -176,14 +168,11 @@ class HousingUnitAllocation(BaseAnalysis):
     def prepare_infrastructure_inventory(self, seed_i: int, critical_bld_inv: pd.DataFrame):
         """Assign Random merge order to Building and Address inventories. Use main
         seed value.
-
         Args:
             seed_i (int): random number generator seed for reproducibility
             critical_bld_inv (pd.DataFrame): Merged inventories
-
         Returns:
             pd.DataFrame: Sorted merged critical infrastructure
-
         """
         size_row, size_col = critical_bld_inv.shape
 
@@ -206,15 +195,12 @@ class HousingUnitAllocation(BaseAnalysis):
 
     def merge_inventories(self, sorted_housing_unit: pd.DataFrame, sorted_infrastructure: pd.DataFrame):
         """Merge (Sorted) Housing Unit Inventory and (Sorted) Infrastructure Inventory.
-
         Args:
             sorted_housing_unit (pd.DataFrame):  Sorted Housing Unit Inventory
             sorted_infrastructure (pd.DataFrame):  Sorted infrastructure inventory. This includes
                 Building inventory and Address point inventory.
-
         Returns:
             pd.DataFrame: Final merge of all four inventories
-
         """
         huap_inventory = pd.merge(sorted_infrastructure, sorted_housing_unit,
                                   how='outer', left_on=["blockid", "randommergeorder"],
@@ -234,16 +220,13 @@ class HousingUnitAllocation(BaseAnalysis):
     def get_iteration_probabilistic_allocation(self, housing_unit_inventory, address_point_inventory,
                                                building_inventory, seed):
         """Merge inventories
-
         Args:
             housing_unit_inventory (pd.DataFrame): Housing Unit Inventory
             address_point_inventory (pd.DataFrame): Address Point inventory
             building_inventory (pd.DataFrame): Building inventory
             seed (int): random number generator seed for reproducibility
-
             Returns:
                 pd.DataFrame: Merged table
-
         """
         sorted_housing_unit = self.prepare_housing_unit_inventory(housing_unit_inventory, seed)
 
@@ -257,15 +240,12 @@ class HousingUnitAllocation(BaseAnalysis):
     def compare_merges(self, table1_cols, table2_cols, table_merged):
         """Compare two lists of columns and run compare columns on columns in both lists.
         It assumes that suffixes are _x and _y
-
         Args:
             table1_cols (list):         columns in table 1
             table2_cols (list):         columns in table 2
             table_merged (pd.DataFrame):merged table
-
             Returns:
                 pd.DataFrame: Merged table
-
         """
         match_column = set(table1_cols).intersection(table2_cols)
         for col in match_column:
@@ -278,16 +258,13 @@ class HousingUnitAllocation(BaseAnalysis):
     def compare_columns(self, table, col1, col2, drop):
         """Compare two columns. If not equal create Tru/False column, if equal rename one of them
         with the base name and drop the other.
-
         Args:
             table (pd.DataFrame):      Data Frame table
             col1 (pd.Series):          Column 1
             col2 (pd.Series):          Column 2
             drop (bool):               rename and drop column
-
         Returns:
             pd.DataFrame: Table with True/False column
-
         """
         # Values in columns match or not, add True/False column
         table.loc[table[col1] == table[col2], col1 + "-" + col2] = True

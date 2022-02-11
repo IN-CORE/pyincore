@@ -58,7 +58,8 @@ paths = [
     os.path.join(PYINCORE_ROOT_FOLDER,
                  'tests/pyincore/analyses/joplinempiricalrestoration/test_joplinempiricalrestoration.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/populationdislocation/test_populationdislocation.py'),
-    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/utils/test_popdisloutputprocess.py')
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/utils/test_popdisloutputprocess.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/utils/test_housingrecovery.py')
 ]
 
 
