@@ -33,6 +33,7 @@ jobs:
         with:
           miniconda-version: "latest"
           mamba-version: "*"
+          conda-build-version: "*"
           use-mamba: true
           python-version: 3.8
           activate-environment: base
@@ -44,12 +45,12 @@ jobs:
           echo "${GITHUB_REF}"
           VERSION=${GITHUB_REF##*/}
           echo "$VERSION"
+          VERSION="1.3.0.rc.5"
           sed -i "s/\".*\"/\"${VERSION}\"/" recipes/meta.yaml
           grep 'version' recipes/meta.yaml
 
       - name: Build conda package
         run: |
-          $CONDA/bin/conda install conda-build
           $CONDA/bin/conda build recipes/
 
 #      - name: Publish conda package
