@@ -11,7 +11,7 @@ on:
     types: created
 
 jobs:
-  unit_test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
@@ -49,6 +49,7 @@ jobs:
 
       - name: Build conda package
         run: |
+          $CONDA/bin/conda install conda-build
           $CONDA/bin/conda build recipes/
 
 #      - name: Publish conda package
