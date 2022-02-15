@@ -1,0 +1,54 @@
+name: conda
+
+# Pushes conda build on tags
+
+# when tagging, make sure to update the recipes/meta.yaml/version
+
+on:
+  release:
+    types: created
+
+jobs:
+  unit_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Cache conda
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if environment.yml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
+            hashFiles('environment.yml') }}
+
+      - name: Install miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          mamba-version: "*"
+          use-mamba: true
+          python-version: 3.8
+          activate-environment: base
+          environment-file: environment.yml
+          use-only-tar-bz2: true
+
+      - name: Tag version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "$VERSION"
+          sed -i "s/\".*\"/\"${VERSION}\"/" recipes/meta.yaml
+          grep 'version' recipes/meta.yaml
+
+      - name: Build conda package
+        run: |
+          $CONDA/bin/conda build recipes/
+
+#      - name: Publish conda package
+#        run: |
+#          echo "${{secrets.PYTEST_USER_TOKEN}}" > tests/pyincore/.incorepw
+#          $CONDA/bin/python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
