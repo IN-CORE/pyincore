@@ -5,6 +5,8 @@ name: conda
 # when tagging, make sure to update the recipes/meta.yaml/version
 
 on:
+  push:
+
   release:
     types: created
 
@@ -39,7 +41,8 @@ jobs:
 
       - name: Tag version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
+          echo "${GITHUB_REF}"
+          VERSION=${GITHUB_REF##*/}
           echo "$VERSION"
           sed -i "s/\".*\"/\"${VERSION}\"/" recipes/meta.yaml
           grep 'version' recipes/meta.yaml
