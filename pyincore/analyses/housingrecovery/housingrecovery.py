@@ -47,10 +47,10 @@ class HousingRecovery(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'building_damage',
+                    'id': 'building_dmg',
                     'required': True,
                     'description': 'Structural building damage',
-                    'type': ['buildingDamageVer6'],
+                    'type': ['ergo:buildingDamageVer6'],
                 },
                 {
                     'id': 'population_dislocation',
