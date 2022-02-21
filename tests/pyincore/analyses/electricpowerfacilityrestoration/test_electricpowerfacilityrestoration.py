@@ -14,6 +14,7 @@ def run_with_base_class():
     epf_rest = ElectricPowerFacilityRestoration(client)
     restorationsvc = RestorationService(client)
     mapping_set = MappingSet(restorationsvc.get_mapping("61f302e6e3a03e465500b3eb"))  # new format of mapping
+    epf_rest.load_remote_input_dataset('epfs', '6189c103d5b02930aa3efc35')
     epf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
     epf_rest.set_parameter("result_name", "epf_restoration.csv")
     epf_rest.set_parameter("restoration_key", "Restoration ID Code")

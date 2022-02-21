@@ -82,7 +82,7 @@ class WaterFacilityRestoration(BaseAnalysis):
             pf_results (list): Given Repair time, change of the percentage of functionality
         """
 
-        # Obtain the restoration id for each building
+        # Obtain the restoration id for each water facility
         inventory_restoration_map = []
         restoration_sets = self.restorationsvc.match_inventory(
             self.get_input_dataset("dfr3_mapping_set"), inventory_list, restoration_key)
