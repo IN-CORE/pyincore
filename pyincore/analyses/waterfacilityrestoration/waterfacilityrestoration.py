@@ -98,14 +98,6 @@ class WaterFacilityRestoration(BaseAnalysis):
         pf_results = []
 
         for mapping in mapping_set.mappings:
-            # parse rules to get inventory class. e.g. treatment plan, tank, pump etc
-            if isinstance(mapping.rules, list):
-                inventory_class = RestorationService.extract_inventory_class_legacy(mapping.rules)
-            elif isinstance(mapping.rules, dict):
-                inventory_class = RestorationService.extract_inventory_class(mapping.rules)
-            else:
-                raise ValueError("Unsupported mapping rules!")
-
             # get restoration curves
             # if it's string:id; then need to fetch it from remote and cast to restorationcurveset object
             restoration_curve_set = mapping.entry[restoration_key]
@@ -116,7 +108,7 @@ class WaterFacilityRestoration(BaseAnalysis):
             time = np.arange(0, end_time + time_interval, time_interval)
             for t in time:
                 pf_results.append({
-                    "inventory_class": inventory_class,
+                    "restoration_id": restoration_curve_set.id,
                     "time": t,
                     **restoration_curve_set.calculate_restoration_rates(time=t)
                 })
@@ -129,7 +121,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                 for key, value in t_res.items():
                     new_dict.update({"time_" + key: value})
                 time_results.append({
-                    "inventory_class": inventory_class,
+                    "restoration_id": restoration_curve_set.id,
                     "percentage_of_functionality": p,
                     **new_dict
                 })
