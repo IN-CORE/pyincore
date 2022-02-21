@@ -13,7 +13,7 @@ def run_with_base_class():
     client.clear_cache()
     pipeline_restoration = PipelineRestoration(client)
 
-    # shelby county pipelines
+    # old county pipelines
     pipeline_restoration.load_remote_input_dataset("pipeline", "5a284f28c7d30d13bc081d14")
     pipeline_restoration.load_remote_input_dataset("pipeline_damage", "61f36023c53b3620b6b614c6")
 

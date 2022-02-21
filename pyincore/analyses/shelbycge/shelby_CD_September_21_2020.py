@@ -1,5 +1,4 @@
-from shelby.Equationlib import *
-from shelby.OutputFunctions import *
+from pyincore.analyses.shelbycge.Equationlib import *
 import os
 import pandas as pd
 from pyomo.environ import *
@@ -15,8 +14,8 @@ def _(x):
 # ----------------------------------------------------------------
 
 
-modelPath = os.path.join(os.getcwd(), 'shelby')
-filePath = os.path.join(modelPath, 'shelby')
+modelPath = os.path.join(os.getcwd(), 'old')
+filePath = os.path.join(modelPath, 'old')
 
 # filePath = './JOP_small/'
 
