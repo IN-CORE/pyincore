@@ -16,6 +16,7 @@ def run_with_base_class():
     # Load restoration mapping
     restorationsvc = RestorationService(client)
     mapping_set = MappingSet(restorationsvc.get_mapping("61f075ee903e515036cee0a5"))  # new format of mapping
+    wf_rest.load_remote_input_dataset("water_facilities", "5a284f2ac7d30d13bc081e52")  # water facility
     wf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
     wf_rest.set_parameter("result_name", "wf_restoration")
     wf_rest.set_parameter("restoration_key", "Restoration ID Code")
