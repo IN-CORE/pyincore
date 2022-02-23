@@ -3,10 +3,10 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore import IncoreClient, MappingSet, RestorationCurveSet, RestorationService
+from pyincore import IncoreClient, MappingSet, RestorationService
 from pyincore.analyses.waterfacilityrestoration import WaterFacilityRestoration
+from pyincore.analyses.waterfacilityrestoration import WaterFacilityRestorationUtil
 import pyincore.globals as pyglobals
-from pyincore.models.mapping import Mapping
 
 
 def run_with_base_class():
@@ -25,6 +25,13 @@ def run_with_base_class():
     wf_rest.set_parameter("pf_interval", 0.05)
 
     wf_rest.run_analysis()
+
+    # test utility function
+    wf_util = WaterFacilityRestorationUtil(wf_rest)
+    functionality = wf_util.get_percentage_func(guid="e1bce78d-00a1-4605-95f3-3776ff907f73",
+                                                damage_state="DS_0", time=2.0)
+    time = wf_util.get_restoration_time(guid="e1bce78d-00a1-4605-95f3-3776ff907f73", damage_state="DS_1", pf=0.81)
+    print(functionality, time)
 
 
 if __name__ == '__main__':
