@@ -136,10 +136,6 @@ def run_with_base_class():
     # Set up and run Housing Recovery analysis
     # *************************************************************
 
-    import requests
-    import numpy as np
-    import pandas as pd
-
     # bldg_damage_id = ""
     # Population dislocation
     # pop_disl_id = "60f098f502897f12fcda19ec" # dev (snunez)
@@ -156,38 +152,8 @@ def run_with_base_class():
     result_name = "building_values"
     housing_rec.set_parameter("result_name", result_name)
 
-    # Show list of column names in DataFrame.
-    print(pd_df.columns)
-    # How many observations are in the DataFrame?
-    print(pd_df.guid.describe())
-    # How many unique address point ids and structure ids are there in the population dislocation output file?
-    print(pd_df[["addrptid", "strctid"]].describe())
-
-    # crosstab ownership and vacancy prior to creating owner-occupied dummy variable
-    crosstab = pd.crosstab(index=pd_df["vacancy"].fillna("missing"), columns=pd_df["ownership"].fillna("missing"), margins=True, dropna=False)
-    # have to add .fillna() because .crosstab() won't include Nan as a value in tabulation
-    print(crosstab)
-
-    # create ownership dummy variable from pd_df.ownership
-    pd_df["d_ownerocc"] = np.where(pd_df["ownershp"] == 1, 1,
-                          np.where(pd_df["ownershp"] == 2, 0,
-                          np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 0, 1,
-                          np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 3, 1,
-                          np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 4, 1,
-                          np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 1, 0,
-                          np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 2, 0,
-                          np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 5, 0,
-                          np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 6, 0,
-                          np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 7, 0, np.nan))))))))))
-    # print(pd_df.d_ownerocc.describe())
-
-    crosstab = pd.crosstab(index=pd_df["vacancy"].fillna("missing"), columns=pd_df["d_ownerocc"].fillna("missing"), margins=True, dropna=False)
-    print(crosstab)
-
-
-
     # Run Analysis
-    # housing_rec.run_analysis()
+    housing_rec.run_analysis()
 
 
 if __name__ == '__main__':
