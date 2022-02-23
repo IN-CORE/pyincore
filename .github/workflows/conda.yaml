@@ -51,6 +51,8 @@ jobs:
 
       - name: Build conda package
         run: |
+          $CONDA/bin/conda update conda
+          $CONDA/bin/conda update conda-build
           $CONDA/bin/conda build recipes/
 
 #      - name: Publish conda package
