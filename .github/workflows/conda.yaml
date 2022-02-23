@@ -45,7 +45,7 @@ jobs:
           echo "${GITHUB_REF}"
           VERSION=${GITHUB_REF##*/}
           echo "$VERSION"
-          VERSION="1.3.0"
+          VERSION="1.3.0.rc.5"
           sed -i "s/\".*\"/\"${VERSION}\"/" recipes/meta.yaml
           grep 'version' recipes/meta.yaml
 
