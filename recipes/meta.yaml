@@ -18,14 +18,17 @@ build:
  
 requirements:
   build:
+    - python>=3.8
     - pip
     - numpy 1.16
  
   host:
+    - python>=3.6
     - pip
     - numpy 1.16
      
   run:
+    - python>=3.6
     - {{ pin_compatible('numpy') }}
     - boto3
     - deprecated
