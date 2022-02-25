@@ -140,6 +140,8 @@ def run_with_base_class():
     # Population dislocation
     # pop_disl_id = "60f098f502897f12fcda19ec" # dev (snunez)
     # Census appraisal file
+    bldg_sqft_id = "62193c19a42a3e546ae2d9f8"
+    census_bg_id = "62193b7ca42a3e546ae2d9f2"
     census_appr_id = "620eaa5f6ed6d70c7e8fd454" # dev
 
     housing_rec = HousingRecovery(client)
@@ -147,6 +149,9 @@ def run_with_base_class():
     housing_rec.set_input_dataset("building_dmg", building_dmg_result)
     # housing_rec.load_remote_input_dataset("population_dislocation", pop_disl_id)
     housing_rec.set_input_dataset("population_dislocation", pd_result)
+
+    housing_rec.load_remote_input_dataset("building_area", bldg_sqft_id)
+    housing_rec.load_remote_input_dataset("census_block_groups_data", census_bg_id)
     housing_rec.load_remote_input_dataset("census_appraisal_data", census_appr_id)
 
     result_name = "building_values"

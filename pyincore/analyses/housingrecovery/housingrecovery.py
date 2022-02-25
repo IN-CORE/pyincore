@@ -103,9 +103,14 @@ class HousingRecovery(BaseAnalysis):
         # Datasets
         bldg_dmg_df = self.get_input_dataset("building_dmg").get_dataframe_from_csv(low_memory=False)
         pd_df = self.get_input_dataset("population_dislocation").get_dataframe_from_csv(low_memory=False)
-        census_appraisal = self.get_input_dataset("census_appraisal_data").get_json_reader()
 
-        print(census_appraisal)
+        addl_structure_info_df = self.get_input_dataset("building_area").get_dataframe_from_csv(low_memory=False)
+        bg_mhhinc_df = self.get_input_dataset("census_block_groups_data").get_dataframe_from_csv(low_memory=False)
+        vac_status_df = self.get_input_dataset("census_appraisal_data").get_json_reader()
+
+        print(addl_structure_info_df)
+        print(bg_mhhinc_df)
+        print(vac_status_df)
 
         # Show list of column names in DataFrame.
         print(pd_df.columns)
@@ -213,5 +218,104 @@ class HousingRecovery(BaseAnalysis):
         print(studyarea_sf[["guid", "addrptid", "strctid", "tractid", "studyarea_code_orig", "studyarea_desc_orig",
                       "DS_0", "DS_1", "DS_2", "DS_3", "rploss_0", "rploss_1", "rploss_2", "rploss_3",
                       "bgid", "d_ownerocc","pblackbg", "phispbg","d_sf"]].head())
+        # add tractid variable
+        vac_status_df["tractid"] = vac_status_df.state.str.cat(others=[vac_status_df.county, vac_status_df.tract])
+
+        print(vac_status_df.head())
+        print(vac_status_df.describe())
+
+        # Convert variables from dtype object to integer
+        int_vars = ["B25002_001E","B25002_001M","B25004_001E","B25004_001M","B25004_006E","B25004_006M","tractid"]
+
+        for var in int_vars:
+            vac_status_df[var] = vac_status_df[var].astype(int)
+
+        print(vac_status_df.info())
+
+        # Calculate the percent vacation or seasonal housing of all housing units within a census tract
+        vac_status_df["pvacationct"] = 100 * vac_status_df["B25004_006E"] / vac_status_df["B25002_001E"]
+        vac_status_df["pvacationct_moe"] = 100 * (1 / vac_status_df["B25002_001E"]) * \
+                                           ((vac_status_df["B25004_006M"]**(2)) -
+                                            ((vac_status_df['B25004_006E'] / vac_status_df['B25002_001E'])**(2)
+                                             * (vac_status_df['B25002_001M']**(2))))**(.5)
+
+        # dummy variable for census tract as a seasonal/vacation housing submarket
+        vac_status_df["d_vacationct"] = np.where(vac_status_df["pvacationct"] >= 50, 1, 0)
+
+        pd.set_option("display.max_rows", None)
+        pd.set_option("display.max_columns", None)
+        pd.set_option("display.max_colwidth", None)
+        vac_status_df.sort_values(by="pvacationct", inplace=True, ascending=False)
+        vac_status_df.head(len(vac_status_df.index))
+
+        # Read in & clean block group level median household income
+        bg_mhhinc_df["mhhinck"] = bg_mhhinc_df["mhhinc"] / 1000
+        print(bg_mhhinc_df.head())
+
+        # Read in & clean additional building information
+        addl_structure_info_df = pd.read_csv('HAMETAL2018_addl_structure_info.csv')
+
+        # Create structure id for merging data
+        addl_structure_info_df["strctid"] = addl_structure_info_df["xref"].apply(lambda x : "XREF"+x)
+
+        # show list of columns in dataframe
+        print(addl_structure_info_df.head())
+
+        # Merge population dislocation result, Hamideh et al (2018) dataset,
+        # and seasonal/vacation housing Census ACS data datasets
+        hse_recov_df = studyarea_sf
+
+        # add separater prior to merging
+        hse_recov_df["addl_structure_info_df>>>>>"] = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
+        # merge studyarea_sf & addl_structure_info_df
+        hse_recov_df =  pd.merge(hse_recov_df, addl_structure_info_df,left_on="strctid", right_on="strctid", how="inner")
+        # keep only matched observations [how="inner"]
+
+        print(hse_recov_df.strctid.describe())
+        print(hse_recov_df.columns)
+
+        # merge with seasonal/vacation housing data
+        # add separater prior to merging
+        hse_recov_df["vac_status_df>>>>>"] = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
+        # merge with seasonal/vacation housing Census ACS data
+        hse_recov_df =  pd.merge(hse_recov_df, vac_status_df,left_on="tractid", right_on="tractid", how="inner")
+        hse_recov_df.strctid.describe()
+
+        # show list of columns in dataframe
+        print(hse_recov_df.columns)
+
+        # merge with BG median HH income
+        # add separater prior to merging
+        hse_recov_df["bg_mhhinc_df>>>>>"] = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
+        # merge with block group level median household income
+        hse_recov_df =  pd.merge(hse_recov_df, bg_mhhinc_df, left_on="bgidstr", right_on="bgidstr", how="inner")
+
+        print(hse_recov_df.strctid.describe())
+        print(hse_recov_df.columns)
+        print(hse_recov_df["FIPScounty"].describe())
+
+        # enerate minority variable
+
+        # add separater prior to merging
+        hse_recov_df["minority variable>>>>>"] = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
+        # create minority variable by adding hispanic and black at block group level
+        hse_recov_df["pminoritybg"] = hse_recov_df["phispbg"] + hse_recov_df["pblackbg"]
+        print(hse_recov_df.head())
+
+        # Estimate value_loss for each parcel
+        # estimate value loss based on parameters from Bai, Hueste, & Gardoni (2009)
+        hse_recov_df["value_loss"] = 100 * (hse_recov_df.DS_0 * hse_recov_df.rploss_0 +
+                                            hse_recov_df.DS_1 * hse_recov_df.rploss_1 +
+                                            hse_recov_df.DS_2 * hse_recov_df.rploss_2 +
+                                            hse_recov_df.DS_3 * hse_recov_df.rploss_3)
+
+        print(hse_recov_df[["strctid", "bv_2008", "DS_0", "DS_1", "DS_2", "DS_3", "rploss_0", "rploss_1", "rploss_2", "rploss_3","value_loss",'dmg']].head())
+
+        # compare value_loss and dmg
+        print(hse_recov_df[["dmg", "value_loss", "DS_0", "DS_1", "DS_2", "DS_3", "rploss_0", "rploss_1", "rploss_2", "rploss_3"]].describe())
 
         return True
