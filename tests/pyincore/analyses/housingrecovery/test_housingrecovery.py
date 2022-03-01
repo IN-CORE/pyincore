@@ -51,7 +51,7 @@ def run_with_base_class():
 
     # Display top 5 rows of output data
     # bdmg_df.head()
-    print(bdmg_df[["guid", "DS_0", "DS_1", "DS_2", "DS_3", "haz_expose"]])
+    # print(bdmg_df[["guid", "DS_0", "DS_1", "DS_2", "DS_3", "haz_expose"]])
 
     # *************************************************************
     # Set up and run Housing Unit Allocation (HUA) analysis
@@ -93,7 +93,7 @@ def run_with_base_class():
 
     # Display top 5 rows of output data
     # hua_df[['guid', 'numprec', 'incomegroup']].head()
-    print(hua_df[["guid", "numprec", "incomegroup"]].head())
+    # print(hua_df[["guid", "numprec", "incomegroup"]].head())
 
     # *************************************************************
     # Set up and run Population Dislocation analysis
@@ -130,7 +130,7 @@ def run_with_base_class():
 
     # Display top 5 rows of output data
     #  pd_df.head()
-    print(pd_df[["guid", "dislocated"]].head())
+    # print(pd_df[["guid", "dislocated"]].head())
 
     # *************************************************************
     # Set up and run Housing Recovery analysis

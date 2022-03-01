@@ -6,6 +6,7 @@ import requests
 import numpy as np
 import pandas as pd
 from pyincore import BaseAnalysis
+from pyincore.analyses.housingrecovery.housingrecoveryutil import HousingRecoveryUtil
 
 
 class HousingRecovery(BaseAnalysis):
@@ -68,15 +69,15 @@ class HousingRecovery(BaseAnalysis):
                 {
                    "id":"census_block_groups_data",
                    "required": True,
-                   "description":"Census ACS data, 2010 5yr data for block groups available at IPUMS NHGIS "
+                   "description":"Census ACS data, 2010 5yr data for block groups available at IPUMS NHGIS"
                                  "web site.",
                    "type": ["incore:censusBlockGroupsData"]
                 },
                 {
                    "id":"census_appraisal_data",
                    "required": False,
-                   "description":"Census tax data, 2010 Decennial Census and Galveston County Appraisal"
-                                  "District (GCAD) tax assessor data",
+                   "description":"Census data, 2010 Decennial Census"
+                                  "District (GCAD) Census data",
                    "type": ["incore:censusAppraisalData"]
                 }
             ],
@@ -106,26 +107,27 @@ class HousingRecovery(BaseAnalysis):
 
         addl_structure_info_df = self.get_input_dataset("building_area").get_dataframe_from_csv(low_memory=False)
         bg_mhhinc_df = self.get_input_dataset("census_block_groups_data").get_dataframe_from_csv(low_memory=False)
-        vac_status_df = self.get_input_dataset("census_appraisal_data").get_json_reader()
+        vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
+        vac_status_df = pd.DataFrame(vac_status[1:], columns = vac_status[0])
 
-        print(addl_structure_info_df)
-        print(bg_mhhinc_df)
-        print(vac_status_df)
+        # print(addl_structure_info_df)
+        # print(bg_mhhinc_df)
+        # print(vac_status_df)
 
         # Show list of column names in DataFrame.
-        print(pd_df.columns)
+        # print(pd_df.columns)
         # How many observations are in the DataFrame?
-        print(pd_df.guid.describe())
+        # print(pd_df.guid.describe())
         # How many unique address point ids and structure ids are there in the population dislocation output file?
-        print(pd_df.columns)
-        print(pd_df[["addrptid", "strctid"]].describe())
+        # print(pd_df.columns)
+        # print(pd_df[["addrptid", "strctid"]].describe())
 
         # crosstab ownership and vacancy prior to creating owner-occupied dummy variable
         # Add .fillna() because .crosstab() won't include Nan as a value in tabulation
         crosstab = pd.crosstab(index=pd_df["vacancy"].fillna("missing"),
                                columns=pd_df["ownershp"].fillna("missing"),
                                margins=True, dropna=False)
-        print(crosstab)
+        # print(crosstab)
 
         # Almost 12,670 of 32,501 housing units are considered vacant. 13 of these are actually not vacant,
         # but are not assinged as renter- or owner-occupied.
@@ -145,39 +147,35 @@ class HousingRecovery(BaseAnalysis):
                               np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 5, 0,
                               np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 6, 0,
                               np.where(pd_df["ownershp"].isnull() & pd_df["vacancy"] == 7, 0, np.nan))))))))))
-        print(pd_df.d_ownerocc.describe())
+        # print(pd_df.d_ownerocc.describe())
 
         crosstab = pd.crosstab(index=pd_df["vacancy"].fillna("missing"), columns=pd_df["d_ownerocc"].fillna("missing"), margins=True, dropna=False)
-        print(crosstab)
+        # print(crosstab)
 
         # from the population dislocation result dataset, keep only parcels with 1 building
         building_level = pd_df.loc[(pd_df.bldgobs == 1)]
-        print("building_level")
-        print(building_level.strctid.describe())
+        # print("building_level")
+        # print(building_level.strctid.describe())
         # keep buildings that are single-family
         single_family = building_level.loc[(building_level.d_sf == 1)]
-        print("single_family")
-        print(single_family.strctid.describe())
-        print(single_family)
+        # print("single_family")
+        # print(single_family.strctid.describe())
+        # print(single_family)
 
         # single_family.drop("Unnamed: 0", axis=1, inplace=True)
-        print(single_family.columns)
+        # print(single_family.columns)
 
         # Identify housing submarkets
         # In Galveston
-        # - Urban Core is the considered the primary housing market. This is where those who live and work
-        #   in Galveston year round reside.
+        # - Urban Core is the considered the primary housing market.
         # - Galveston Island and Bolivar Island both have seasonal/vacation housing markets for secondary
         #   homes or vacation rentals. Bolivar Island is considered vacation  entirely.
-        #
+
         # lists of census tracts according to Hamideh et al 2018
-        urban_core_tracts = [48167724000, 48167724200, 48167724300, 48167724400, 48167724500, 48167724600,
-                             48167724700, 48167724800, 48167724900, 48167725000, 48167725100, 48167725200,
-                             48167725300, 48167725400, 48167725500, 48167725600, 48167725700, 48167725800,
-                             48167725900]
-        galveston_island_vacation_tracts_east = [48167724100]
-        galveston_island_vacation_tracts_west = [48167726000, 48167726100]
-        bolivar_island_vacation_tracts = [48167723900 ]
+        urban_core_tracts = HousingRecoveryUtil.urban_core_tracts
+        galveston_island_vacation_tracts_east = HousingRecoveryUtil.galveston_island_vacation_tracts_east
+        galveston_island_vacation_tracts_west = HousingRecoveryUtil.galveston_island_vacation_tracts_west
+        bolivar_island_vacation_tracts = HousingRecoveryUtil.bolivar_island_vacation_tracts
         #
         # For application in other communities, a seasonal/vacation submarket is determined
         # when the percentage of homes designated as "For seasonal, recreational, or occasional use" within
@@ -194,53 +192,47 @@ class HousingRecovery(BaseAnalysis):
         urban_core_sf.loc[:, "studyarea_code_orig"] = 2
         urban_core_sf.loc[:, "studyarea_desc_orig"] = "Galveston - Urban Core"
 
-        galveston_island_vacation_east_sf.loc[:, "studyarea_code_orig"] = 1
-        galveston_island_vacation_east_sf.loc[:, "studyarea_desc_orig"] = "Galveston - East End"
-        galveston_island_vacation_west_sf.loc[:, "studyarea_code_orig"] = 3
-        galveston_island_vacation_west_sf.loc[:, "studyarea_desc_orig"] = "Galveston - West End"
-        bolivar_island_vacation_sf.loc[:, "studyarea_code_orig"] = 3
-        bolivar_island_vacation_sf.loc[:, "studyarea_desc_orig"] = "Bolivar Island Vacation"
+        galveston_island_vacation_east_sf.loc["studyarea_code_orig"] = 1
+        galveston_island_vacation_east_sf.loc["studyarea_desc_orig"] = "Galveston - East End"
+        galveston_island_vacation_west_sf.loc["studyarea_code_orig"] = 3
+        galveston_island_vacation_west_sf.loc["studyarea_desc_orig"] = "Galveston - West End"
+        bolivar_island_vacation_sf.loc["studyarea_code_orig"] = 3
+        bolivar_island_vacation_sf.loc["studyarea_desc_orig"] = "Bolivar Island Vacation"
 
         # append study area dataframes together
         studyarea_sf = urban_core_sf.append(galveston_island_vacation_east_sf, ignore_index=True).\
             append(galveston_island_vacation_west_sf, ignore_index=True).\
             append(bolivar_island_vacation_sf, ignore_index=True)
-        print(studyarea_sf.strctid.describe())
+        # print(studyarea_sf.strctid.describe())
 
-        print(studyarea_sf["studyarea_code_orig"].value_counts())
+        # print(studyarea_sf["studyarea_code_orig"].value_counts())
 
         crosstab = pd.crosstab(index=studyarea_sf["studyarea_code_orig"], 
                                columns=studyarea_sf["studyarea_desc_orig"],
                                margins=True)
-        print(crosstab)
+        # print(crosstab)
 
         # show relevant data from population dislocation result
-        print(studyarea_sf[["guid", "addrptid", "strctid", "tractid", "studyarea_code_orig", "studyarea_desc_orig",
-                      "DS_0", "DS_1", "DS_2", "DS_3", "rploss_0", "rploss_1", "rploss_2", "rploss_3",
-                      "bgid", "d_ownerocc","pblackbg", "phispbg","d_sf"]].head())
+        # print(studyarea_sf[["guid", "addrptid", "strctid", "tractid", "studyarea_code_orig", "studyarea_desc_orig",
+        #               "DS_0", "DS_1", "DS_2", "DS_3", "rploss_0", "rploss_1", "rploss_2", "rploss_3",
+        #               "bgid", "d_ownerocc","pblackbg", "phispbg","d_sf"]].head())
         # add tractid variable
-        vac_status_df["tractid"] = vac_status_df.state.str.cat(others=[vac_status_df.county, vac_status_df.tract])
+        # print(vac_status_df)
+        urban_core_sf["tractid"] = vac_status_df.state.str.cat(others=[vac_status_df.county, vac_status_df.tract])
 
-        print(vac_status_df.head())
-        print(vac_status_df.describe())
-
-        # Convert variables from dtype object to integer
-        int_vars = ["B25002_001E","B25002_001M","B25004_001E","B25004_001M","B25004_006E","B25004_006M","tractid"]
-
-        for var in int_vars:
-            vac_status_df[var] = vac_status_df[var].astype(int)
-
-        print(vac_status_df.info())
+        # print(vac_status_df.head())
+        # print(vac_status_df.describe())
 
         # Calculate the percent vacation or seasonal housing of all housing units within a census tract
-        vac_status_df["pvacationct"] = 100 * vac_status_df["B25004_006E"] / vac_status_df["B25002_001E"]
-        vac_status_df["pvacationct_moe"] = 100 * (1 / vac_status_df["B25002_001E"]) * \
-                                           ((vac_status_df["B25004_006M"]**(2)) -
-                                            ((vac_status_df['B25004_006E'] / vac_status_df['B25002_001E'])**(2)
-                                             * (vac_status_df['B25002_001M']**(2))))**(.5)
+        vac_status_df["pvacationct"] = vac_status_df["B25004_006E"].astype(int) / vac_status_df["B25002_001E"].astype(int)
+        vac_status_df["pvacationct_moe"] = (1 / vac_status_df["B25002_001E"].astype(int)) * \
+                                           (vac_status_df["B25004_006M"].astype(int) ** 2 - (
+                                                   vac_status_df["pvacationct"] ** 2 *
+                                                   vac_status_df["B25002_001M"].astype(int) ** 2))
+        vac_status_df["pvacationct_moe"] = 100 * vac_status_df["pvacationct_moe"] ** 0.5
 
         # dummy variable for census tract as a seasonal/vacation housing submarket
-        vac_status_df["d_vacationct"] = np.where(vac_status_df["pvacationct"] >= 50, 1, 0)
+        vac_status_df["d_vacationct"] = np.where(vac_status_df["pvacationct"] >= 0.5, 1, 0)
 
         pd.set_option("display.max_rows", None)
         pd.set_option("display.max_columns", None)
@@ -250,41 +242,42 @@ class HousingRecovery(BaseAnalysis):
 
         # Read in & clean block group level median household income
         bg_mhhinc_df["mhhinck"] = bg_mhhinc_df["mhhinc"] / 1000
-        print(bg_mhhinc_df.head())
+        # print(bg_mhhinc_df.head())
 
-        # Read in & clean additional building information
-        addl_structure_info_df = pd.read_csv('HAMETAL2018_addl_structure_info.csv')
+        # Read in & clean additional building information, NOTE add to building inventory
 
         # Create structure id for merging data
         addl_structure_info_df["strctid"] = addl_structure_info_df["xref"].apply(lambda x : "XREF"+x)
 
         # show list of columns in dataframe
-        print(addl_structure_info_df.head())
+        # print(addl_structure_info_df.head())
 
         # Merge population dislocation result, Hamideh et al (2018) dataset,
         # and seasonal/vacation housing Census ACS data datasets
         hse_recov_df = studyarea_sf
-
         # add separater prior to merging
         hse_recov_df["addl_structure_info_df>>>>>"] = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
         # merge studyarea_sf & addl_structure_info_df
-        hse_recov_df =  pd.merge(hse_recov_df, addl_structure_info_df,left_on="strctid", right_on="strctid", how="inner")
+        hse_recov_df =  pd.merge(hse_recov_df, addl_structure_info_df, left_on="strctid", right_on="strctid", how="inner")
         # keep only matched observations [how="inner"]
 
-        print(hse_recov_df.strctid.describe())
-        print(hse_recov_df.columns)
+        # print(hse_recov_df.strctid.describe())
+        # print(hse_recov_df.columns)
 
         # merge with seasonal/vacation housing data
         # add separater prior to merging
         hse_recov_df["vac_status_df>>>>>"] = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
         # merge with seasonal/vacation housing Census ACS data
-        hse_recov_df =  pd.merge(hse_recov_df, vac_status_df,left_on="tractid", right_on="tractid", how="inner")
+        vac_status_df["tractid"] = vac_status_df["tract"].astype(int)
+        # print(vac_status_df.columns)
+
+        hse_recov_df =  pd.merge(hse_recov_df, vac_status_df, left_on="tractid", right_on="tractid", how="inner")
         hse_recov_df.strctid.describe()
 
         # show list of columns in dataframe
-        print(hse_recov_df.columns)
+        # print(hse_recov_df.columns)
 
         # merge with BG median HH income
         # add separater prior to merging
@@ -319,3 +312,64 @@ class HousingRecovery(BaseAnalysis):
         print(hse_recov_df[["dmg", "value_loss", "DS_0", "DS_1", "DS_2", "DS_3", "rploss_0", "rploss_1", "rploss_2", "rploss_3"]].describe())
 
         return True
+
+    def merge_add_inv(self, hse_rec, addl_structure_info):
+        """Merge study area and additional structure information
+.
+        Args:
+            hse_rec (pd.DataFrame):  Area inventory
+            addl_structure_info (pd.DataFrame):  Additional infrastructure inventory.
+
+        Returns:
+            pd.DataFrame: Final merge of two inventories
+
+        """
+        hse_rec_merged =  pd.merge(hse_rec, addl_structure_info, left_on="strctid", right_on="strctid", how="inner")
+        return hse_rec_merged
+
+    def merge_seasonal_data(self, hse_rec, vac_status):
+        """Merge study area and with seasonal/vacation housing Census ACS data
+.
+        Args:
+            hse_rec (pd.DataFrame): Area inventory.
+            vac_status (pd.DataFrame): Seasonal/vacation housing Census ACS data.
+
+        Returns:
+            pd.DataFrame: Final merge of two inventories
+
+        """
+        vac_status["tractid"] = vac_status["tract"].astype(int)
+
+        hse_rec_merged =  pd.merge(hse_rec, vac_status, left_on="tractid", right_on="tractid", how="inner")
+
+        return hse_rec_merged
+
+    def merge_block_data(self, hse_rec, bg_mhhinc):
+        """Merge block group level median household income
+.
+        Args:
+            hse_rec (pd.DataFrame):  Area inventory
+            bg_mhhinc (pd.DataFrame):  Block data.
+
+        Returns:
+            pd.DataFrame: Final merge of two inventories
+
+        """
+        hse_rec_merged = pd.merge(hse_rec, bg_mhhinc, left_on="bgidstr", right_on="bgidstr", how="inner")
+
+        return hse_rec_merged
+
+    def add_minority(self, hse_recov):
+        """ Generate minority variable
+.
+        Args:
+            hse_recov (pd.DataFrame):  hse_recov
+
+        Returns:
+            pd.DataFrame: Final merge of two inventories
+
+        """
+        # create minority variable by adding hispanic and black at block group level
+        hse_recov["pminoritybg"] = hse_recov["phispbg"] + hse_recov["pblackbg"]
+
+        return hse_recov

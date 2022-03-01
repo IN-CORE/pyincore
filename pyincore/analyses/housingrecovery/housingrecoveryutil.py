@@ -344,3 +344,19 @@ class HousingRecoveryUtil:
     B_SVHM_inc_year[4]  = -0.020789 + B_SVHM_inc_year[-1]
     B_SVHM_inc_year[5]  = -0.021555 + B_SVHM_inc_year[-1]
     B_SVHM_inc_year[6]  = -0.019781 + B_SVHM_inc_year[-1]
+
+    # Identify housing submarkets
+    # In Galveston
+    # - Urban Core is the considered the primary housing market. This is where those who live and work
+    #   in Galveston year round reside.
+    # - Galveston Island and Bolivar Island both have seasonal/vacation housing markets for secondary
+    #   homes or vacation rentals. Bolivar Island is considered vacation  entirely.
+    #
+    # lists of census tracts according to Hamideh et al 2018
+    urban_core_tracts = [48167724000, 48167724200, 48167724300, 48167724400, 48167724500, 48167724600,
+                         48167724700, 48167724800, 48167724900, 48167725000, 48167725100, 48167725200,
+                         48167725300, 48167725400, 48167725500, 48167725600, 48167725700, 48167725800,
+                         48167725900]
+    galveston_island_vacation_tracts_east = [48167724100]
+    galveston_island_vacation_tracts_west = [48167726000, 48167726100]
+    bolivar_island_vacation_tracts = [48167723900]
