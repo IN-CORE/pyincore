@@ -4,3 +4,4 @@
 
 
 from pyincore.analyses.waterfacilityrestoration.waterfacilityrestoration import WaterFacilityRestoration
+from pyincore.analyses.waterfacilityrestoration.waterfacilityrestorationutil import WaterFacilityRestorationUtil
