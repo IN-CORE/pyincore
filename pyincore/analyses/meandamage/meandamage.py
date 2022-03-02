@@ -57,18 +57,9 @@ class MeanDamage(BaseAnalysis):
                              'ergo:bridgeDamage',
                              'ergo:bridgeDamageVer2',
                              'ergo:bridgeDamageVer3',
-                             'ergo:waterFacilityDamageVer4',
-                             'ergo:waterFacilityDamageVer5',
-                             'ergo:waterFacilityDamageVer6',
                              'ergo:roadDamage',
                              'ergo:roadDamageVer2',
-                             'ergo:roadDamageVer3',
-                             'incore:epfDamage',
-                             'incore:epfDamageVer2',
-                             'incore:epfDamageVer3',
-                             'incore:pipelineDamage',
-                             'incore:pipelineDamageVer2',
-                             'incore:pipelineDamageVer3']
+                             'ergo:roadDamageVer3']
                 },
                 {
                     'id': 'dmg_ratios',
@@ -79,7 +70,7 @@ class MeanDamage(BaseAnalysis):
                              'ergo:buildingContentDamageRatios',
                              'ergo:buildingASDamageRatios',
                              'ergo:buildingDSDamageRatios',
-                             'ergo:roadDamageRatios'],
+                             'ergo:roadDamageRatios']
                 },
 
             ],
