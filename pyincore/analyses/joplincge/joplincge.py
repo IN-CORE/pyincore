@@ -537,10 +537,9 @@ class JoplinCGEModel(BaseAnalysis):
 
         out.loc[G, G] = IOUT.loc[G, G]
 
-        BETA = pd.concat([MISC.loc[I, ['ETAY']]] * len(H), axis=1)
+        BETA = pd.append([MISC.loc[I, ['ETAY']]] * len(H), axis=1)
         BETA.columns = H
 
-        # LAMBDA = pd.concat([MISC.loc[I, ['ETAOP']]]*len(I), axis=1)
         LAMBDA.columns = I
         for i in I:
             LAMBDA.loc[[i], [i]] = MISC.at[i, 'ETAOP']
@@ -584,7 +583,7 @@ class JoplinCGEModel(BaseAnalysis):
         ETAL = LANDCAP.loc[IG, ['ETAL1']].T
         ETAL.index = LA
 
-        ETALB = pd.concat([ETALB1] * len(L), axis=1)
+        ETALB = pd.append([ETALB1] * len(L), axis=1)
         ETALB.columns = L
 
         # average consumption taxes:
