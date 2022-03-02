@@ -183,7 +183,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
                 # Now reassemble into Pandas DataFrame
                 group['sample_{}'.format(i)] = group_samples[i, :]
 
-            prediction_results = prediction_results.append(group, ignore_index=True)
+            prediction_results = prediction_results.concat(group, ignore_index=True)
 
         return prediction_results
 
@@ -228,7 +228,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
             group_new = pd.DataFrame(no_guids_maxima, columns=colnames, index=group.index)
             group_new.insert(0, 'guid', local_guids)
-            new_groups.append(group_new.head(1))
+            new_groups.concat(group_new.head(1))
 
         # Construct a new DataFrame
         household_aggregation_results = pd.concat(new_groups).reset_index(drop=True)
