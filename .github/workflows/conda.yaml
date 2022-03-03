@@ -50,9 +50,12 @@ jobs:
           grep 'version' recipes/meta.yaml
           echo "$VERSION"
 
+      - name: Conda info
+        run: conda info
+        
       - name: Build conda package
         run: |
-          $CONDA/bin/conda build recipes/
+          $CONDA/bin/conda build  --debug recipes/
 
 #      - name: Publish conda package
 #        run: |
