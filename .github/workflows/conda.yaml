@@ -51,13 +51,16 @@ jobs:
           echo "$VERSION"
 
       - name: Conda info
+        shell: bash -l {0}
         run: conda info
         
       - name: Build conda package
+        shell: bash -l {0}
         run: |
           $CONDA/bin/conda build  --debug recipes/
 
 #      - name: Publish conda package
+#        shell: bash -l {0}
 #        run: |
 #          echo "${{secrets.PYTEST_USER_TOKEN}}" > tests/pyincore/.incorepw
 #          $CONDA/bin/python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
