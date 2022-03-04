@@ -57,7 +57,7 @@ jobs:
       - name: Build conda package
         shell: bash -l {0}
         run: |
-          $CONDA/bin/conda build  --debug recipes/
+          $CONDA/bin/conda build recipes || cat /usr/share/miniconda3/conda-bld/1.3.0.rc.5_*/work/conda_build.sh
 
 #      - name: Publish conda package
 #        shell: bash -l {0}
