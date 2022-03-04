@@ -6,7 +6,7 @@ package:
   version: {{ version }}
  
 source:
-  path: ..
+  path: ../
   # PR: https://opensource.ncsa.illinois.edu/bitbucket/projects/INCORE1/repos/pyincore/pull-requests/12/overview
  
 build:
