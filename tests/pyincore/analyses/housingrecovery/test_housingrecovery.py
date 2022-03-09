@@ -145,8 +145,10 @@ def run_with_base_class():
     census_appr_id = "620eaa5f6ed6d70c7e8fd454" # dev
 
     housing_rec = HousingRecovery(client)
+    # not needed
     # housing_rec.load_remote_input_dataset("building_dmg", bldg_damage_id)
-    housing_rec.set_input_dataset("building_dmg", building_dmg_result)
+    # housing_rec.set_input_dataset("building_dmg", building_dmg_result)
+
     # housing_rec.load_remote_input_dataset("population_dislocation", pop_disl_id)
     housing_rec.set_input_dataset("population_dislocation", pd_result)
 

@@ -3,6 +3,8 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 class HousingRecoveryUtil:
+    BASEYEAR = 2008
+
     # The models here are as they were originally in Hamideh et al.(2018)
 
     # Urban Core (GUC) model coefficients
