@@ -176,7 +176,7 @@ class MeanDamage(BaseAnalysis):
         """Calculates mean damage based on damage probabilities and damage ratios
 
         Args:
-            dmg (obj): dmg analysis output for a single building.
+            dmg (obj): dmg analysis output for a single entity in the built environment
             dmg_ratio_tbl (list): dmg ratio table.
             damage_interval_keys (list): damage interval keys
             is_bridge (bool): a boolean to indicate if the inventory type is bridge.
