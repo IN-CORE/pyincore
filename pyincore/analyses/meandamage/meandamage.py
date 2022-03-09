@@ -173,10 +173,10 @@ class MeanDamage(BaseAnalysis):
         return result
 
     def mean_damage(self, dmg, dmg_ratio_tbl, damage_interval_keys, is_bridge):
-        """Calculates building damage results for a single building.
+        """Calculates mean damage based on damage probabilities and damage ratios
 
         Args:
-            dmg (obj): dmg analysis output for a single entry.
+            dmg (obj): dmg analysis output for a single building.
             dmg_ratio_tbl (list): dmg ratio table.
             damage_interval_keys (list): damage interval keys
             is_bridge (bool): a boolean to indicate if the inventory type is bridge.
