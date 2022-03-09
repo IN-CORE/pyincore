@@ -4,3 +4,4 @@
 
 
 from pyincore.analyses.epfrestoration.epfrestoration import EpfRestoration
+from pyincore.analyses.epfrestoration.epfrestorationutil import EpfRestorationUtil
