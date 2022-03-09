@@ -3,10 +3,9 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore import IncoreClient, MappingSet, RestorationCurveSet, RestorationService
+from pyincore import IncoreClient, MappingSet, RestorationService
 from pyincore.analyses.epfrestoration import EpfRestoration, EpfRestorationUtil
 import pyincore.globals as pyglobals
-from pyincore.models.mapping import Mapping
 
 
 def run_with_base_class():
