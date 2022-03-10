@@ -537,7 +537,7 @@ class JoplinCGEModel(BaseAnalysis):
 
         out.loc[G, G] = IOUT.loc[G, G]
 
-        BETA = pd.append([MISC.loc[I, ['ETAY']]] * len(H), axis=1)
+        BETA = pd.concat([MISC.loc[I, ['ETAY']]] * len(H), axis=1)
         BETA.columns = H
 
         LAMBDA.columns = I
@@ -583,7 +583,7 @@ class JoplinCGEModel(BaseAnalysis):
         ETAL = LANDCAP.loc[IG, ['ETAL1']].T
         ETAL.index = LA
 
-        ETALB = pd.append([ETALB1] * len(L), axis=1)
+        ETALB = pd.concat([ETALB1] * len(L), axis=1)
         ETALB.columns = L
 
         # average consumption taxes:
@@ -785,7 +785,7 @@ class JoplinCGEModel(BaseAnalysis):
 
         # create data frame for factor taxes by sector
         a = pd.Series(index=I, dtype='float64').fillna(0.0)
-        a = SAM.loc[USSOCL, I].append(a, ignore_index=True).append(SAM.loc[GL, I])  # labor, land, capital
+        a = SAM.loc[USSOCL, I].concat(a, ignore_index=True).append(SAM.loc[GL, I])  # labor, land, capital
         a.index = F
 
         ALPHA.loc[F, I] = (SAM.loc[F, I] + a.loc[F, I]) / (SAM.loc[F, I].sum(0) + SAM.loc[GF, I].sum(0))

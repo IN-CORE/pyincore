@@ -876,7 +876,7 @@ class SeasideCGEModel(BaseAnalysis):
         # create data frame for factor taxes by sector
 
         a = pd.Series(index=I, dtype='float64').fillna(0.0)
-        a = SAM.loc[USSOCL, I].append(a, ignore_index=True).append(SAM.loc[GL, I])  # labor, land, capital
+        a = SAM.loc[USSOCL, I].concat(a, ignore_index=True).append(SAM.loc[GL, I])  # labor, land, capital
         a.index = F
 
         ALPHA.loc[F, I] = (SAM.loc[F, I] + a.loc[F, I]) / (SAM.loc[F, I].sum(0) + SAM.loc[GF, I].sum(0))
