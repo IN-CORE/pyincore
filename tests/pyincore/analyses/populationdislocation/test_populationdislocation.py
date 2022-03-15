@@ -26,7 +26,7 @@ def run_with_base_class():
     pop_dis.load_remote_input_dataset("building_dmg", building_dmg)
     pop_dis.load_remote_input_dataset("housing_unit_allocation", housing_unit_alloc)
     pop_dis.load_remote_input_dataset("block_group_data", bg_data)
-    pop_dis.load_remote_input_dataset("value_poss_param", value_loss)
+    pop_dis.load_remote_input_dataset("value_loss_param", value_loss)
 
     pop_dis.set_parameter("result_name", result_name)
     pop_dis.set_parameter("seed", seed)
