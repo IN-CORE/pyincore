@@ -14,7 +14,7 @@ def run_with_base_class():
     # incore-dev
     building_dmg = "602d96e4b1db9c28aeeebdce"  # dev Joplin
     # building_dmg = "602d975db1db9c28aeeebe35" # 15 guids test - dev Joplin
-    housing_unit_alloc = "61563545483ecb19e4304c2a"  # dev Joplin
+    housing_unit_alloc = "5df7c989425e0b00092c5eb4"  # dev Joplin
     bg_data = "5df7cb0b425e0b00092c9464"  # Joplin 2ev2
     value_loss = "602d508fb1db9c28aeedb2a5"
 
