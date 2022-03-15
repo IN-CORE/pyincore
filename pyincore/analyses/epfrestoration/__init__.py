@@ -3,5 +3,5 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.electricpowerfacilityrestoration.electricpowerfacilityrestoration import \
-    ElectricPowerFacilityRestoration
+from pyincore.analyses.epfrestoration.epfrestoration import EpfRestoration
+from pyincore.analyses.epfrestoration.epfrestorationutil import EpfRestorationUtil

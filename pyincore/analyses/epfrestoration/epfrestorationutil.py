@@ -1,19 +1,19 @@
-from pyincore.analyses.waterfacilityrestoration import WaterFacilityRestoration
+from pyincore.analyses.epfrestoration import EpfRestoration
 
 
-class WaterFacilityRestorationUtil:
-    def __init__(self, wfr: WaterFacilityRestoration):
+class EpfRestorationUtil:
+    def __init__(self, epfr: EpfRestoration):
 
         # merge inventory_restoration_map with pf and time tables
-        inventory_restoration_map = wfr.get_output_dataset("inventory_restoration_map").get_dataframe_from_csv()
-        pf_results = wfr.get_output_dataset("pf_results").get_dataframe_from_csv()
-        time_results = wfr.get_output_dataset("time_results").get_dataframe_from_csv()
+        inventory_restoration_map = epfr.get_output_dataset("inventory_restoration_map").get_dataframe_from_csv()
+        pf_results = epfr.get_output_dataset("pf_results").get_dataframe_from_csv()
+        time_results = epfr.get_output_dataset("time_results").get_dataframe_from_csv()
         self.pf_results = inventory_restoration_map.merge(pf_results, on="restoration_id").set_index('guid')
         self.time_results = inventory_restoration_map.merge(time_results, on="restoration_id").set_index('guid')
 
-        self.time_interval = wfr.get_parameter("time_interval")
-        self.pf_interval = wfr.get_parameter("pf_interval")
-        self.end_time = wfr.get_parameter("end_time")
+        self.time_interval = epfr.get_parameter("time_interval")
+        self.pf_interval = epfr.get_parameter("pf_interval")
+        self.end_time = epfr.get_parameter("end_time")
 
     def get_restoration_time(self, guid, damage_state="DS_0", pf=0.99):
         if pf > 1:

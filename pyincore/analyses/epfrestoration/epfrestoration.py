@@ -13,12 +13,12 @@ from pyincore import BaseAnalysis, RestorationService
 from pyincore.models.restorationcurveset import RestorationCurveSet
 
 
-class ElectricPowerFacilityRestoration(BaseAnalysis):
+class EpfRestoration(BaseAnalysis):
     """Computes electric power facility restoration for an earthquake exposure."""
 
     def __init__(self, incore_client):
         self.restorationsvc = RestorationService(incore_client)
-        super(ElectricPowerFacilityRestoration, self).__init__(incore_client)
+        super(EpfRestoration, self).__init__(incore_client)
 
     def run(self):
         """Performs Water facility restoration analysis by using the parameters from the spec
