@@ -5,6 +5,8 @@
 class HousingRecoveryUtil:
     BASEYEAR = 2008
 
+    DMG_YEARS = [-1, 0, 1, 2, 3, 4, 5, 6]
+
     # The models here are as they were originally in Hamideh et al.(2018)
 
     # Urban Core (GUC) model coefficients
