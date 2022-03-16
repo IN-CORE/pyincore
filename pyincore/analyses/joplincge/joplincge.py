@@ -784,8 +784,12 @@ class JoplinCGEModel(BaseAnalysis):
         # RA0.loc[F] = 1.0
 
         # create data frame for factor taxes by sector
-        a = pd.Series(index=I, dtype='float64').fillna(0.0)
-        a = SAM.loc[USSOCL, I].concat(a, ignore_index=True).append(SAM.loc[GL, I])  # labor, land, capital
+        a = SAM.loc[USSOCL, I].reset_index(drop=True)
+        # add a row with zeros
+        a.loc[len(a)] =  [0.0] * len(I)
+        # add a row with PTAXJop data
+        a = pd.concat([a, SAM.loc[GL, I]])
+
         a.index = F
 
         ALPHA.loc[F, I] = (SAM.loc[F, I] + a.loc[F, I]) / (SAM.loc[F, I].sum(0) + SAM.loc[GF, I].sum(0))
@@ -1818,15 +1822,17 @@ class JoplinCGEModel(BaseAnalysis):
         households = ["HH1", "HH2", "HH3", "HH4", "HH5"]
         labor_groups = ["L1", "L2", "L3", "L4", "L5"]
         sectors = ["Goods", "Trades", "Others", "HS1", "HS2", "HS3"]
+        # note TRADE vs TRADES, OTHERS vs OTHER in capitalized sectors
+        sectors_cap = ["GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"]
 
         FD0.insert(loc=0, column="Labor Group", value=labor_groups)
         FDL.insert(loc=0, column="Labor Group", value=labor_groups)
-        gross_income = {"Household Group": households, "Y0": Y0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index(),
-                        "YL": YL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index()}
-        hh = {"Household Group": households[:5], "HH0": HH0.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index(),
-              "HHL": HHL.loc[{"HH1", "HH2", "HH3", "HH4", "HH5"}].sort_index()}
-        ds = {"Sectors": sectors, "DS0": DS0.loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}].sort_index(),
-              "DSL": vars.get('DS', result[-1]).loc[{"GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"}].sort_index()}
+        gross_income = {"Household Group": households, "Y0": Y0.loc[households].sort_index(),
+                        "YL": YL.loc[households].sort_index()}
+        hh = {"Household Group": households[:5], "HH0": HH0.loc[households].sort_index(),
+              "HHL": HHL.loc[households].sort_index()}
+        ds = {"Sectors": sectors, "DS0": DS0.loc[sectors_cap].sort_index(),
+              "DSL": vars.get('DS', result[-1]).loc[sectors_cap].sort_index()}
 
         self.set_result_csv_data("domestic-supply", pd.DataFrame(ds), name="domestic-supply",
                                  source="dataframe")
