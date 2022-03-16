@@ -186,13 +186,7 @@ class HousingRecovery(BaseAnalysis):
         # Adjust year column to original -n to +n range by subtracting neg_count
         hse_recov_rsh["year"] = hse_recov_rsh["year"] - neg_count
 
-        print(hse_recov_rsh[["strctid", "d_vacationct", "year", "p_bv_yr", "index_yr"]].head(15))
-
-        # Aggregate building values by year
-        # hse_recov_collapse = hse_recov_rsh.groupby(["d_vacationct", "year"]).aggregate({"p_bv_yr": np.sum})
-        # hse_recov_collapse.reset_index(inplace=True)
-        # hse_recov_collapse.style.format({"p_bv_yr": "{:>,.0f}"})
-        # print(hse_recov_collapse.head(15))
+        # print(hse_recov_rsh[["strctid", "d_vacationct", "year", "p_bv_yr", "index_yr"]].head(15))
 
         # Returns dataframe
         self.set_result_csv_data("result", hse_recov_rsh[["strctid", "d_vacationct", "year", "p_bv_yr", "index_yr"]], result_name, "dataframe")
