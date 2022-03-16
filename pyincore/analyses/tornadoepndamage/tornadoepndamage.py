@@ -11,7 +11,7 @@ import sys
 import networkx as nx
 import numpy
 from pyincore.utils.analysisutil import AnalysisUtil
-from shapely.geometry import shape
+from shapely.geometry import shape, LineString, MultiLineString
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, FragilityCurveSet
 from pyincore import GeoUtil, NetworkUtil
@@ -262,12 +262,12 @@ class TornadoEpnDamage(BaseAnalysis):
                                         # calculate the length of intersected line
                                         # since this is a geographic, it has to be projected to meters to be calcuated
                                         inter_length_meter = GeoUtil.calc_geog_distance_from_linestring(intersection)
-                                        if intersection.__class__.__name__ == "MultiLineString":
+                                        if isinstance(intersection, MultiLineString):
                                             intersection_list.append(intersection)
-                                            for inter_line in intersection:
+                                            for inter_line in intersection.geoms:
                                                 any_point = inter_line.centroid
                                                 break
-                                        elif intersection.__class__.__name__ == "LineString":
+                                        elif isinstance(intersection, LineString):
                                             intersection_list.append(intersection)
                                             any_point = intersection.centroid
 

@@ -11,7 +11,7 @@ import sys
 import pyproj
 
 from rtree import index
-from shapely.geometry import shape, Point
+from shapely.geometry import shape, Point, MultiLineString, LineString
 
 import fiona
 import uuid
@@ -156,7 +156,7 @@ class GeoUtil:
         """Calculate geometric matric from line string segment.
 
         Args:
-            line_segment (obj):  A multi line string with coordinates of segments.
+            line_segment (Shapely.geometry):  A multi line string with coordinates of segments.
             unit (int, optional (Defaults to 1)): Unit selector, 1: meter, 2: km, 3: mile.
 
         Returns:
@@ -164,11 +164,11 @@ class GeoUtil:
 
         """
         dist = 0
-        if (line_segment.__class__.__name__) == "MultiLineString":
-            for line in line_segment:
+        if isinstance(line_segment, MultiLineString):
+            for line in line_segment.geoms:
                 dist = dist + float(
                     GeoUtil.calc_geog_distance_between_points(Point(line.coords[0]), Point(line.coords[1]), unit))
-        elif (line_segment.__class__.__name__) == "LineString":
+        elif isinstance(line_segment, LineString):
             dist = float(
                 GeoUtil.calc_geog_distance_between_points(Point(line_segment.coords[0]), Point(line_segment.coords[1]),
                                                           unit))
