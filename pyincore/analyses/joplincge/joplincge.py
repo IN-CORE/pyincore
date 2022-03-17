@@ -788,7 +788,7 @@ class JoplinCGEModel(BaseAnalysis):
         # add a row with zeros
         a.loc[len(a)] =  [0.0] * len(I)
         # add a row with PTAXJop data
-        a = pd.concat([a, SAM.loc[GL, I]])
+        a = pd.concat([a, SAM.loc[GL, I]])  # labor, land, capital
 
         a.index = F
 

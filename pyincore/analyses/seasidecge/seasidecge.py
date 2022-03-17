@@ -870,13 +870,15 @@ class SeasideCGEModel(BaseAnalysis):
         PVA0.loc[I] = PD0.loc[I] - (
             AD.loc[I, I].mul(P0.loc[I], axis='index').mul(1.0 + TAUQ.loc[GS, I].sum(0).T, axis='index').sum(0).T)
 
-        RHO.loc[I] = (1 - SIGMA.loc[I]) / SIGMA.loc[I];
+        RHO.loc[I] = (1 - SIGMA.loc[I]) / SIGMA.loc[I]
         # RA0.loc[F] = 1.0
 
         # create data frame for factor taxes by sector
-
-        a = pd.Series(index=I, dtype='float64').fillna(0.0)
-        a = SAM.loc[USSOCL, I].concat(a, ignore_index=True).append(SAM.loc[GL, I])  # labor, land, capital
+        a = SAM.loc[USSOCL, I].reset_index(drop=True)
+        # add a row with zeros
+        a.loc[len(a)] =  [0.0] * len(I)
+        # add a row with PROPTX data
+        a = pd.concat([a, SAM.loc[GL, I]])  # labor, land, capital
         a.index = F
 
         ALPHA.loc[F, I] = (SAM.loc[F, I] + a.loc[F, I]) / (SAM.loc[F, I].sum(0) + SAM.loc[GF, I].sum(0))
