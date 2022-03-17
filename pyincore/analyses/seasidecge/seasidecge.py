@@ -1976,10 +1976,10 @@ class SeasideCGEModel(BaseAnalysis):
         TAX_total_original = LOCTAX_original + PROPTX_original + ACCTAX_original
         TAX_total_percentage = TAX_total_change / TAX_total_original
 
-        cge_output = pd.DataFrame({'Seaside': ['Total Employment', 'Domestic Supply(mil of $)',
-                                               'Real Household Income(mil of $)', 'HH1', 'HH2', 'HH3', 'HH4', 'HH5',
+        cge_output = pd.DataFrame({'Seaside': ['Total Employment', 'Domestic Supply($)',
+                                               'Real Household Income($)', 'HH1', 'HH2', 'HH3', 'HH4', 'HH5',
                                                'Total',
-                                               'Local Tax Revenue(mil of $)', 'LOCTAX', 'PROPTX', 'ACCTAX',
+                                               'Local Tax Revenue($)', 'LOCTAX', 'PROPTX', 'ACCTAX',
                                                'Total'],
                                    'Amount of Change': ['{:.2f}'.format(total_employment_change),
                                                         '{:.2f}'.format(domestic_supply_change), '',
