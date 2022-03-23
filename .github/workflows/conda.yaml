@@ -65,7 +65,8 @@ jobs:
       - name: Publish to conda channel
         #if: github.event_name != 'release'
         run: |
-          ls ${CONDA_BLD_PATH}/noarch/
+          env
+          # ls ${CONDA_BLD_PATH}/noarch/
           # anaconda -t ${{ secrets.CONDA_INCORE_TOKEN }} upload --user IN-CORE --label ${LABEL} ${CONDA_BLD_PATH}/noarch/pyincore-${VERSION}-0.tar.bz2
 
 #      - name: Publish conda package
