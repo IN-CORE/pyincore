@@ -43,22 +43,25 @@ jobs:
       - name: Tag version
         run: |
           VERSION=${GITHUB_REF##*/}
-          VERSION="1.3.0.rc.5"
+          if [ ${{ github.event.release.prerelease }} ]; then
+            LABEL="rc"
+          else
+            LABEL="main"
+          fi
           sed -i -e "s/ version = \".*\"/ version = \"${VERSION}\"/" recipes/meta.yaml
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "LABEL=${LABEL}" >> $GITHUB_ENV
 
       - name: Build conda package
         run: |
           conda build recipes
-          
-      - uses: actions/checkout@v1
+
       - name: Publish to conda channel
-        uses: MichaelsJP/conda-package-publish-action@v1.0.0
-        with:
-          subDir: '.conda'
-          AnacondaToken: ${{ secrets.CONDA_INCORE_TOKEN }}
-          platforms: 'all'
-          override: true
-          dry_run: true
+        #if: github.event_name != 'release'
+        run: |
+          ls ${CONDA_BLD_PATH}/noarch/
+          echo "$LABEL"
+          # anaconda -t ${{ secrets.CONDA_INCORE_TOKEN }} upload --user IN-CORE --label ${LABEL} ${CONDA_BLD_PATH}/noarch/pyincore-${VERSION}-0.tar.bz2
 
 #      - name: Publish conda package
 #        shell: bash -l {0}
