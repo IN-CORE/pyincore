@@ -65,12 +65,4 @@ jobs:
       - name: Publish to conda channel
         #if: github.event_name != 'release'
         run: |
-          ls -l ${CONDA}/conda-bld/noarch/pyincore-${VERSION}-py_0.tar.bz2
-          # ls ${CONDA_BLD_PATH}/noarch/
-          # anaconda -t ${{ secrets.CONDA_INCORE_TOKEN }} upload --user IN-CORE --label ${LABEL} ${CONDA_BLD_PATH}/noarch/pyincore-${VERSION}-0.tar.bz2
-
-#      - name: Publish conda package
-#        shell: bash -l {0}
-#        run: |
-#          echo "${{secrets.PYTEST_USER_TOKEN}}" > tests/pyincore/.incorepw
-#          $CONDA/bin/python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
+          anaconda -t ${{ secrets.CONDA_INCORE_TOKEN }} upload --user IN-CORE --label ${LABEL} ${CONDA}/conda-bld/noarch/pyincore-${VERSION}-py_0.tar.bz2
