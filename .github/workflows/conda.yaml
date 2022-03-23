@@ -42,7 +42,7 @@ jobs:
 
       - name: Tag version
         run: |
-          if [ "${{ github.event_name }} != "release" ]; then
+          if [ "${{ github.event_name }}" == "release" ]; then
             VERSION=${GITHUB_REF##*/}
             if [ "${{ github.event.release.prerelease }}" == "" ]; then
               LABEL="main"
