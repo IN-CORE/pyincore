@@ -65,5 +65,5 @@ jobs:
       - name: Publish to conda channel
         #if: github.event_name != 'release'
         run: |
-          conda install -y anacondo-client
+          conda install -y anaconda-client
           anaconda -t ${{ secrets.CONDA_INCORE_TOKEN }} upload --user IN-CORE --label ${LABEL} ${CONDA}/conda-bld/noarch/pyincore-${VERSION}-py_0.tar.bz2
