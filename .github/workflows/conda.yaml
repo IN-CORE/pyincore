@@ -42,15 +42,21 @@ jobs:
 
       - name: Tag version
         run: |
-          VERSION=${GITHUB_REF##*/}
-          if [ ${{ github.event.release.prerelease }} ]; then
-            LABEL="rc"
+          if [ "${{ github.event_name }} != "release" ]; then
+            VERSION=${GITHUB_REF##*/}
+            if [ "${{ github.event.release.prerelease }}" == "" ]; then
+              LABEL="main"
+            else
+              LABEL="rc"
+            fi
           else
-            LABEL="main"
+            VERSION="0.0.0.rc.${{ github.run_number }}"
+            LABEL="test"
           fi
           sed -i -e "s/ version = \".*\"/ version = \"${VERSION}\"/" recipes/meta.yaml
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "LABEL=${LABEL}" >> $GITHUB_ENV
+          echo "${VERSION} ${LABEL}"
 
       - name: Build conda package
         run: |
@@ -60,7 +66,6 @@ jobs:
         #if: github.event_name != 'release'
         run: |
           ls ${CONDA_BLD_PATH}/noarch/
-          echo "$LABEL"
           # anaconda -t ${{ secrets.CONDA_INCORE_TOKEN }} upload --user IN-CORE --label ${LABEL} ${CONDA_BLD_PATH}/noarch/pyincore-${VERSION}-0.tar.bz2
 
 #      - name: Publish conda package
