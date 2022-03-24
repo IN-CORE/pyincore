@@ -78,5 +78,6 @@ jobs:
                       --user IN-CORE \
                       --label ${LABELS} \
                       --no-force-upload \
+                      --debug \
                       ${PYPI} \
                       recipes
