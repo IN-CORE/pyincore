@@ -6,6 +6,11 @@ name: conda
 
 on:
   push:
+    branches:
+      - main
+      - '*'
+
+  pull_request:
 
   release:
     types: created
@@ -44,26 +49,34 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "release" ]; then
             VERSION=${GITHUB_REF##*/}
+            UPLOAD="yes"
             if [ "${{ github.event.release.prerelease }}" == "" ]; then
-              LABEL="main"
+              LABELS="main"
             else
-              LABEL="rc"
+              LABELS="rc"
             fi
+            PYPI=""
           else
             VERSION="0.0.0.rc.${{ github.run_number }}"
-            LABEL="test"
+            UPLOAD="no"
+            LABELS="test"
+            PYPI=""
           fi
+          PYPI=""
+          UPLOAD="no"
           sed -i -e "s/ version = \".*\"/ version = \"${VERSION}\"/" recipes/meta.yaml
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "LABEL=${LABEL}" >> $GITHUB_ENV
-          echo "${VERSION} ${LABEL}"
+          echo "LABELS=${LABELS}" >> $GITHUB_ENV
+          echo "PYPI=${PYPI}" >> $GITHUB_ENV
+          echo "UPLOAD=${UPLOAD}" >> $GITHUB_ENV
 
       - name: Build conda package
         run: |
-          conda build recipes
-
-      - name: Publish to conda channel
-        #if: github.event_name != 'release'
-        run: |
-          conda install -y anaconda-client
-          anaconda -t ${{ secrets.CONDA_INCORE_TOKEN }} upload --user IN-CORE --label ${LABEL} ${CONDA}/conda-bld/noarch/pyincore-${VERSION}-py_0.tar.bz2
+          conda config --set anaconda_upload ${UPLOAD}
+          conda build --keep-going \
+                      --token ${{ secrets.CONDA_INCORE_TOKEN }} \
+                      --user IN-CORE \
+                      --label ${LABELS} \
+                      --no-force-upload \
+                      ${PYPI} \
+                      recipes
