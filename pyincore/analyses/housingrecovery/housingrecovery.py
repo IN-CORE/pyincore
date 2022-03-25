@@ -100,7 +100,8 @@ class HousingRecovery(BaseAnalysis):
                 {
                    "id": "result",
                    "description": "A csv file with the building values for the 6 years following the disaster"
-                                  "event (with year 0 being the impact year)",
+                                  "event (year -1 denotes pre-impact conditions and 0 being the impact year). "
+                                  "Index year values represent building values against a base, pre-impact value.",
                    "type": "incore:buildingValues"
                 }
             ]
@@ -185,6 +186,7 @@ class HousingRecovery(BaseAnalysis):
         hse_rec_fin = np.where(d_vac_np == 0, np.exp(hse_rec_phm), np.NaN)
         hse_rec_fin = np.where(d_vac_np == 1, np.exp(hse_rec_svhm), hse_rec_fin)
 
+        # Index building values against a pre-impact (-1) value
         hse_rec_fin_index = hse_rec_fin / hse_rec_fin[:, 0:1]
 
         # Name columns, use list of damage years (range from -1 to n).
