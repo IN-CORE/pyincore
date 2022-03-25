@@ -67,6 +67,8 @@ analyses/housingrecovery
 ========================
 ..  autoclass:: housingrecovery.housingrecovery.HousingRecovery
     :members:
+..  autoclass:: housingrecovery.housingrecoveryutil.HousingRecoveryUtil
+    :members:
 
 analyses/housingrecoverysequential
 ==================================

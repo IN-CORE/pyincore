@@ -2,8 +2,12 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+import sys
 import numpy as np
 import pandas as pd
+
+from pyincore_data.censusutil import CensusUtil
+
 from pyincore import BaseAnalysis
 from pyincore.analyses.housingrecovery.housingrecoveryutil import HousingRecoveryUtil
 
@@ -52,6 +56,12 @@ class HousingRecovery(BaseAnalysis):
                     "type": int
                 },
                 {
+                    "id": "fips",
+                    "required": False,
+                    "description": "A county FIPS Code is a five-digit number used to designate a specific county.",
+                    "type": str
+                },
+                {
                    "id": "result_name",
                    "required": True,
                    "description": "Result CSV dataset name",
@@ -68,7 +78,8 @@ class HousingRecovery(BaseAnalysis):
                 {
                    "id": "building_area",
                    "required": True,
-                   "description": "Building square footage, temporary",
+                   "description": "Building square footage and damage. Damage is the actual building value loss "
+                                  "in percentage terms observed through the County Appraisal District (GCAD) data",
                    "type": ["incore:buildingInventoryArea"]
                 },
                 {
@@ -113,10 +124,25 @@ class HousingRecovery(BaseAnalysis):
 
         # Datasets
         pop_disl = self.get_input_dataset("population_dislocation").get_dataframe_from_csv(low_memory=False)
-
         addl_structure_info = self.get_input_dataset("building_area").get_dataframe_from_csv(low_memory=False)
         bg_mhhinc = self.get_input_dataset("census_block_groups_data").get_dataframe_from_csv(low_memory=False)
-        vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
+
+        # Census API using pyincore_data method
+        columns_api = "GEO_ID,NAME,B25002_001E,B25002_001M,B25004_006E,B25004_006M"
+        fips = self.get_parameter("fips")
+        if fips is None:
+            if self.get_input_dataset("census_appraisal_data") is None:
+                sys.exit("Census data is required!.")
+            else:
+                vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
+        else:
+            try:
+                vac_status, creq = CensusUtil.get_census_data(state=fips[0:2], county=fips[2:5], year="2009",
+                                                              data_source="acs/acs5",
+                                                              columns=columns_api,
+                                                              geo_type="tract:*")
+            except:
+                sys.exit("Failed to download the data from Census API. Please check your parameters!")
 
         # Calculate the percent vacation or seasonal housing of all housing units within a census tract
         vac_status = self.get_vac_season_housing(vac_status)
@@ -136,7 +162,6 @@ class HousingRecovery(BaseAnalysis):
         addl_structure_info["strctid"] = addl_structure_info["xref"].apply(lambda x: "XREF"+x)
 
         hse_recov = self.merge_add_inv(single_family, addl_structure_info)
-        hse_recov["FIPScounty"] = hse_recov["FIPScounty"].astype(str)
 
         # Merge with seasonal/vacation housing Census ACS data
         hse_recov = self.merge_seasonal_data(hse_recov, vac_status)
@@ -152,44 +177,26 @@ class HousingRecovery(BaseAnalysis):
 
         # Primary Housing Market (PHM)
         hse_rec_phm = self.assemble_phm_coefs(hru, hse_recov)
-
         # Seasonal/Vacation housing market (SVHM)
         hse_rec_svhm = self.assemble_svhm_coefs(hru, hse_recov)
 
-        hse_rec_phm_index = hse_rec_phm / hse_rec_phm[:, 0:1]
-        hse_rec_svhm_index = hse_rec_svhm / hse_rec_svhm[:, 0:1]
+        d_vac_np = np.tile(hse_recov["d_vacationct"], (8, 1)).T
+        # Vacation condition for all years
+        hse_rec_fin = np.where(d_vac_np == 0, np.exp(hse_rec_phm), np.NaN)
+        hse_rec_fin = np.where(d_vac_np == 1, np.exp(hse_rec_svhm), hse_rec_fin)
 
-        # Count how many negative years are in the years list, to be used for adjusting column names
-        neg_count = len(list(filter(lambda x: (x < 0), hru.DMG_YEARS)))
+        hse_rec_fin_index = hse_rec_fin / hse_rec_fin[:, 0:1]
 
-        # Reversing year order using slicing technique
-        dmg_years_rev = hru.DMG_YEARS
-        dmg_years_rev = dmg_years_rev[::-1]
+        # Name columns, use list of damage years (range from -1 to n).
+        bval_yr = ["value_{0}".format(i) for i in hru.DMG_YEARS]
+        index_yr = ["index_{0}".format(i) for i in hru.DMG_YEARS]
 
-        # Rename column names to range from 0 to n.
-        p_bv_yr = ["p_bv_yr{0}".format(i) for i in range(len(hru.DMG_YEARS))]
-        index_yr = ["index_yr{0}".format(i) for i in range(len(hru.DMG_YEARS))]
+        hse_rec_fin1 = pd.DataFrame(hse_rec_fin, columns=bval_yr)
+        hse_rec_fin2 = pd.DataFrame(hse_rec_fin_index, columns=index_yr)
+        hse_recov = pd.concat([hse_recov, hse_rec_fin1, hse_rec_fin2], axis=1)
 
-        hse_rec_phm1 = pd.DataFrame(hse_rec_phm, columns=p_bv_yr)
-        hse_rec_phm2 = pd.DataFrame(hse_rec_phm_index, columns=index_yr)
-        hse_recov = pd.concat([hse_recov, hse_rec_phm1, hse_rec_phm2], axis=1)
-
-        # Reshape dataframe from wide to long
-        hse_recov_rsh = pd.wide_to_long(hse_recov, ["p_bv_yr", "index_yr"], i="strctid", j="year")
-
-        # Shift dataframe multiindex to columns
-        hse_recov_rsh.reset_index(inplace=True)
-
-        # Sort dataframe
-        hse_recov_rsh.sort_values(by=["strctid", "year"], inplace=True)
-
-        # Adjust year column to original -n to +n range by subtracting neg_count
-        hse_recov_rsh["year"] = hse_recov_rsh["year"] - neg_count
-
-        # print(hse_recov_rsh[["strctid", "d_vacationct", "year", "p_bv_yr", "index_yr"]].head(15))
-
-        # Returns dataframe
-        self.set_result_csv_data("result", hse_recov_rsh[["strctid", "d_vacationct", "year", "p_bv_yr", "index_yr"]], result_name, "dataframe")
+        column_to_save = ["guid", "d_vacationct", "mhhinck", "pminoritybg", "dmg", "value_loss"] + bval_yr + index_yr
+        hse_recov[column_to_save].to_csv(result_name + ".csv", index=False, float_format="%.2f")
 
         return True
 
@@ -233,7 +240,7 @@ class HousingRecovery(BaseAnalysis):
             pd.DataFrame: Seasonal/vacation housing data.
 
         """
-        vac_status = pd.DataFrame(vacation_status[1:], columns=vacation_status[0])
+        vac_status = pd.DataFrame(data=vacation_status[1:], columns=vacation_status[0])
 
         vac_status["B25004_006E"] = vac_status["B25004_006E"].astype(int)
         vac_status["B25004_006M"] = vac_status["B25004_006M"].astype(int)
@@ -325,7 +332,7 @@ class HousingRecovery(BaseAnalysis):
             hse_rec (pd.DataFrame):  Area inventory including losses.
 
         Returns:
-            pd.DataFrame: Final coefficients for all damage years.
+            np.array: Final coefficients for all damage years.
 
         """
         dmg_years = np.array(hru.DMG_YEARS)
@@ -342,22 +349,16 @@ class HousingRecovery(BaseAnalysis):
         # Square meters, use vector (1x8) with B_PHM_sqm
         sqmeter = np.full((1, dmg_years_size), hru.B_PHM_sqm) * hse_rec["sqmeter"].to_numpy()[:, np.newaxis]
 
-        valloss = np.fromiter(hru.B_PHM_dmg_year.values(), dtype=float) + \
-                  hse_rec["value_loss"].to_numpy()[:, np.newaxis]
-        d_owner = np.fromiter(hru.B_PHM_own_year.values(), dtype=float) + \
+        dmg_loss = np.fromiter(hru.B_PHM_dmg_year.values(), dtype=float) * \
+                  hse_rec["dmg"].to_numpy()[:, np.newaxis]
+        d_owner = np.fromiter(hru.B_PHM_own_year.values(), dtype=float) * \
                   hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
-        mhhinck = np.fromiter(hru.B_PHM_inc_year.values(), dtype=float) + \
+        mhhinck = np.fromiter(hru.B_PHM_inc_year.values(), dtype=float) * \
                   hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
-        pminrbg = np.fromiter(hru.B_PHM_min_year.values(), dtype=float) + \
+        pminrbg = np.fromiter(hru.B_PHM_min_year.values(), dtype=float) * \
                   hse_rec["pminoritybg"].to_numpy()[:, np.newaxis]
 
-        coef_fin = coef_fin + yrbuilt + sqmeter + valloss + d_owner + mhhinck + pminrbg
-
-        d_vac_np = np.tile(hse_rec["d_vacationct"], (8, 1)).T
-        # Vacation condition for all years
-        hse_rec_fin = np.where(d_vac_np == 0, np.exp(coef_fin), coef_fin)
-
-        return hse_rec_fin
+        return coef_fin + yrbuilt + sqmeter + d_owner + dmg_loss + mhhinck + pminrbg
 
     def assemble_svhm_coefs(self, hru, hse_rec):
         """ Assemble Seasonal/Vacation housing market (SVHM) data for full inventory and all damage-related years.
@@ -367,7 +368,7 @@ class HousingRecovery(BaseAnalysis):
             hse_rec (pd.DataFrame):  Area inventory including losses.
 
         Returns:
-            pd.DataFrame: Final coefficients for all damage years.
+            np.array: Final coefficients for all damage years.
 
         """
         dmg_years = np.array(hru.DMG_YEARS)
@@ -384,17 +385,12 @@ class HousingRecovery(BaseAnalysis):
         # Square meters, use vector (1x8) with B_PHM_sqm
         sqmeter = np.full((1, dmg_years_size), hru.B_SVHM_sqm) * hse_rec["sqmeter"].to_numpy()[:, np.newaxis]
 
-        valloss = np.fromiter(hru.B_SVHM_dmg_year.values(), dtype=float) + \
-                  hse_rec["value_loss"].to_numpy()[:, np.newaxis]
+        dmg_loss = np.fromiter(hru.B_SVHM_dmg_year.values(), dtype=float) + \
+                  hse_rec["dmg"].to_numpy()[:, np.newaxis]
         d_owner = np.fromiter(hru.B_SVHM_own_year.values(), dtype=float) + \
                   hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
         mhhinck = np.fromiter(hru.B_SVHM_inc_year.values(), dtype=float) + \
                   hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
 
-        coef_fin = coef_fin + yrbuilt + sqmeter + valloss + d_owner + mhhinck
+        return coef_fin + yrbuilt + sqmeter + dmg_loss + d_owner + mhhinck
 
-        d_vac_np = np.tile(hse_rec["d_vacationct"], (8, 1)).T
-        # Vacation condition for all years
-        hse_rec_fin = np.where(d_vac_np == 1, np.exp(coef_fin), coef_fin)
-
-        return hse_rec_fin
