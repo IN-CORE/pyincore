@@ -181,6 +181,6 @@ def run_with_base_class(chained):
 
 
 if __name__ == '__main__':
-    chained = True
+    chained = False
 
     run_with_base_class(chained)

@@ -138,7 +138,7 @@ class HousingRecovery(BaseAnalysis):
                 vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
         else:
             try:
-                vac_status, creq = CensusUtil.get_census_data(state=fips[0:2], county=fips[2:5], year="2009",
+                vac_status, creq = CensusUtil.get_census_data(state=fips[0:2], county=fips[2:5], year="2010",
                                                               data_source="acs/acs5",
                                                               columns=columns_api,
                                                               geo_type="tract:*")
@@ -161,7 +161,6 @@ class HousingRecovery(BaseAnalysis):
         # Read in and clean additional building information, NOTE add to building inventory
         # Create structure id for merging data
         addl_structure_info["strctid"] = addl_structure_info["xref"].apply(lambda x: "XREF"+x)
-
         hse_recov = self.merge_add_inv(single_family, addl_structure_info)
 
         # Merge with seasonal/vacation housing Census ACS data
@@ -183,6 +182,9 @@ class HousingRecovery(BaseAnalysis):
 
         d_vac_np = np.tile(hse_recov["d_vacationct"], (8, 1)).T
         # Vacation condition for all years
+
+        hse_rec_fin = np.empty(hse_recov.shape)
+        hse_rec_fin[:] = np.NaN
         hse_rec_fin = np.where(d_vac_np == 0, np.exp(hse_rec_phm), np.NaN)
         hse_rec_fin = np.where(d_vac_np == 1, np.exp(hse_rec_svhm), hse_rec_fin)
 
@@ -293,7 +295,7 @@ class HousingRecovery(BaseAnalysis):
         vac_status["tractid"] = vac_status["state"].astype(str) + vac_status["county"].astype(str) + \
                                 vac_status["tract"].astype(str)
 
-        hse_rec_merged = pd.merge(hse_rec, vac_status, on="tractid", how="inner")
+        hse_rec_merged = pd.merge(hse_rec, vac_status, left_on="tractid", right_on="tractid", how='inner')
         return hse_rec_merged
 
     def merge_block_data(self, hse_rec, bg_mhhinc):
@@ -351,8 +353,12 @@ class HousingRecovery(BaseAnalysis):
         # Square meters, use vector (1x8) with B_PHM_sqm
         sqmeter = np.full((1, dmg_years_size), hru.B_PHM_sqm) * hse_rec["sqmeter"].to_numpy()[:, np.newaxis]
 
-        dmg_loss = np.fromiter(hru.B_PHM_dmg_year.values(), dtype=float) * \
-                  hse_rec["dmg"].to_numpy()[:, np.newaxis]
+        if "dmg" in hse_rec.columns:
+            dmg_loss = np.fromiter(hru.B_PHM_dmg_year.values(), dtype=float) * \
+                       hse_rec["dmg"].to_numpy()[:, np.newaxis]
+        else:
+            dmg_loss = np.fromiter(hru.B_PHM_dmg_year.values(), dtype=float) * \
+                       hse_rec["value_loss"].to_numpy()[:, np.newaxis]
         d_owner = np.fromiter(hru.B_PHM_own_year.values(), dtype=float) * \
                   hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
         mhhinck = np.fromiter(hru.B_PHM_inc_year.values(), dtype=float) * \
@@ -387,11 +393,15 @@ class HousingRecovery(BaseAnalysis):
         # Square meters, use vector (1x8) with B_PHM_sqm
         sqmeter = np.full((1, dmg_years_size), hru.B_SVHM_sqm) * hse_rec["sqmeter"].to_numpy()[:, np.newaxis]
 
-        dmg_loss = np.fromiter(hru.B_SVHM_dmg_year.values(), dtype=float) + \
-                  hse_rec["dmg"].to_numpy()[:, np.newaxis]
-        d_owner = np.fromiter(hru.B_SVHM_own_year.values(), dtype=float) + \
+        if "dmg" in hse_rec.columns:
+            dmg_loss = np.fromiter(hru.B_SVHM_dmg_year.values(), dtype=float) * \
+                       hse_rec["dmg"].to_numpy()[:, np.newaxis]
+        else:
+            dmg_loss = np.fromiter(hru.B_SVHM_dmg_year.values(), dtype=float) * \
+                       hse_rec["value_loss"].to_numpy()[:, np.newaxis]
+        d_owner = np.fromiter(hru.B_SVHM_own_year.values(), dtype=float) * \
                   hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
-        mhhinck = np.fromiter(hru.B_SVHM_inc_year.values(), dtype=float) + \
+        mhhinck = np.fromiter(hru.B_SVHM_inc_year.values(), dtype=float) * \
                   hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
 
         return coef_fin + yrbuilt + sqmeter + dmg_loss + d_owner + mhhinck
