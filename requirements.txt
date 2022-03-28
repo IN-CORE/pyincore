@@ -1,5 +1,4 @@
 boto3
-CensusData==1.15
 deprecated
 fiona>=1.8.4
 geopandas>=0.6.1
