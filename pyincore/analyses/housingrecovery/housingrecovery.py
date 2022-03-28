@@ -56,12 +56,6 @@ class HousingRecovery(BaseAnalysis):
                     "type": int
                 },
                 {
-                    "id": "fips",
-                    "required": False,
-                    "description": "A county FIPS Code is a five-digit number used to designate a specific county.",
-                    "type": str
-                },
-                {
                    "id": "result_name",
                    "required": True,
                    "description": "Result CSV dataset name",
@@ -91,7 +85,7 @@ class HousingRecovery(BaseAnalysis):
                 },
                 {
                    "id": "census_appraisal_data",
-                   "required": False,
+                   "required": True,
                    "description": "Census data, 2010 Decennial Census District (GCAD) Census data",
                    "type": ["incore:censusAppraisalData"]
                 }
@@ -128,22 +122,15 @@ class HousingRecovery(BaseAnalysis):
         addl_structure_info = self.get_input_dataset("building_area").get_dataframe_from_csv(low_memory=False)
         bg_mhhinc = self.get_input_dataset("census_block_groups_data").get_dataframe_from_csv(low_memory=False)
 
-        # Census API using pyincore_data method
-        columns_api = "GEO_ID,NAME,B25002_001E,B25002_001M,B25004_006E,B25004_006M"
-        fips = self.get_parameter("fips")
-        if fips is None:
-            if self.get_input_dataset("census_appraisal_data") is None:
+        # Census data
+        if self.get_input_dataset("census_appraisal_data") is None:
                 sys.exit("Census data is required!.")
-            else:
-                vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
         else:
             try:
-                vac_status, creq = CensusUtil.get_census_data(state=fips[0:2], county=fips[2:5], year="2010",
-                                                              data_source="acs/acs5",
-                                                              columns=columns_api,
-                                                              geo_type="tract:*")
+                vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
+
             except:
-                sys.exit("Failed to download the data from Census API. Please check your parameters!")
+                sys.exit("Failed to download the data from Census. Please check your json file format!")
 
         # Calculate the percent vacation or seasonal housing of all housing units within a census tract
         vac_status = self.get_vac_season_housing(vac_status)
@@ -192,7 +179,7 @@ class HousingRecovery(BaseAnalysis):
         hse_rec_fin_index = hse_rec_fin / hse_rec_fin[:, 0:1]
 
         # Name columns, use list of damage years (range from -1 to n).
-        bval_yr = ["value_{0}".format(i) for i in hru.DMG_YEARS]
+        bval_yr = ["bval_year_{0}".format(i) for i in hru.DMG_YEARS]
         index_yr = ["index_{0}".format(i) for i in hru.DMG_YEARS]
 
         hse_rec_fin1 = pd.DataFrame(hse_rec_fin, columns=bval_yr)

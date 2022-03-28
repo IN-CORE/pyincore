@@ -134,9 +134,8 @@ def run_with_base_class(chained):
         # Census block groups data (required)
         census_bg_id = "62193b7ca42a3e546ae2d9f2"
 
-        # Census appraisal file; id of external Census json is required if not fips for API request
-        fips = "48167"
-        # census_appr_id = "" # dev
+        # Census appraisal file; id of external Census json is required
+        census_appr_id = "6241fbd153302c512d685181" # dev
         result_name = "Galveston_building_values_chained"
 
         housing_rec = HousingRecovery(client)
@@ -145,9 +144,8 @@ def run_with_base_class(chained):
         housing_rec.load_remote_input_dataset("building_area", bldg_sqft_id)
         housing_rec.load_remote_input_dataset("census_block_groups_data", census_bg_id)
         # Census appraisal data
-        # housing_rec.load_remote_input_dataset("census_appraisal_data", census_appr_id)
+        housing_rec.load_remote_input_dataset("census_appraisal_data", census_appr_id)
 
-        housing_rec.set_parameter("fips", fips)
         housing_rec.set_parameter("result_name", result_name)
 
         housing_rec.run_analysis()
@@ -156,25 +154,23 @@ def run_with_base_class(chained):
         # Run Housing Recovery analysis without chaining
 
         # Additional inventory data (assesed damage, square area)
-        bldg_sqft_id = "62193c19a42a3e546ae2d9f8"
+        bldg_add_id = "62193c19a42a3e546ae2d9f8"
         # Census block groups data (required)
         census_bg_id = "62193b7ca42a3e546ae2d9f2"
 
         # Census appraisal file; id of external Census json is required if not fips for API request
-        fips = "48167"
-        # census_appr_id = "" # dev
+        census_appr_id = "6241fbd153302c512d685181"
         result_name = "Galveston_building_values"
 
         housing_rec = HousingRecovery(client)
 
-        pop_disl_id = "623d1e1ca42a3e546aeba25f"  # dev (mondrejc)
+        pop_disl_id = "623d1e1ca42a3e546aeba25f"  # dev
         housing_rec.load_remote_input_dataset("population_dislocation", pop_disl_id)
-        housing_rec.load_remote_input_dataset("building_area", bldg_sqft_id)
+        housing_rec.load_remote_input_dataset("building_area", bldg_add_id)
         housing_rec.load_remote_input_dataset("census_block_groups_data", census_bg_id)
         # Census appraisal data
-        # housing_rec.load_remote_input_dataset("census_appraisal_data", census_appr_id)
+        housing_rec.load_remote_input_dataset("census_appraisal_data", census_appr_id)
 
-        housing_rec.set_parameter("fips", fips)
         housing_rec.set_parameter("result_name", result_name)
 
         housing_rec.run_analysis()
