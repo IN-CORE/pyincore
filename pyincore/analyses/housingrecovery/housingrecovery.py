@@ -6,8 +6,6 @@ import sys
 import numpy as np
 import pandas as pd
 
-from pyincore_data.censusutil import CensusUtil
-
 from pyincore import BaseAnalysis
 from pyincore.analyses.housingrecovery.housingrecoveryutil import HousingRecoveryUtil
 
