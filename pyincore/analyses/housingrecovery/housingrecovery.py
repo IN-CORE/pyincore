@@ -121,14 +121,7 @@ class HousingRecovery(BaseAnalysis):
         bg_mhhinc = self.get_input_dataset("census_block_groups_data").get_dataframe_from_csv(low_memory=False)
 
         # Census data
-        if self.get_input_dataset("census_appraisal_data") is None:
-                sys.exit("Census data is required!.")
-        else:
-            try:
-                vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
-
-            except:
-                sys.exit("Failed to download the data from Census. Please check your json file format!")
+        vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
 
         # Calculate the percent vacation or seasonal housing of all housing units within a census tract
         vac_status = self.get_vac_season_housing(vac_status)
