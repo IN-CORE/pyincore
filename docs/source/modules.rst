@@ -173,7 +173,7 @@ analyses/seasidecge
     :members:
 
 analyses/socialvulnerability
-===================
+============================
 ..  autoclass:: socialvulnerability.socialvulnerability.SocialVulnerability
     :members:
 
