@@ -179,6 +179,11 @@ analyses/seasidecge
 ..  autoclass:: seasidecge.solverconstants.equationlib.ExprM
     :members:
 
+analyses/socialvulnerability
+============================
+..  autoclass:: socialvulnerability.socialvulnerability.SocialVulnerability
+    :members:
+
 analyses/tornadoepndamage
 =========================
 ..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
