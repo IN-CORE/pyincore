@@ -63,6 +63,13 @@ analyses/example
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
     :members:
 
+analyses/housingrecovery
+========================
+..  autoclass:: housingrecovery.housingrecovery.HousingRecovery
+    :members:
+..  autoclass:: housingrecovery.housingrecoveryutil.HousingRecoveryUtil
+    :members:
+
 analyses/housingrecoverysequential
 ==================================
 ..  autoclass:: housingrecoverysequential.housingrecoverysequential.HousingRecoverySequential
