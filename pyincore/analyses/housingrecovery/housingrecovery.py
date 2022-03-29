@@ -78,7 +78,7 @@ class HousingRecovery(BaseAnalysis):
                    "id": "census_block_groups_data",
                    "required": True,
                    "description": "Census ACS data, 2010 5yr data for block groups available at IPUMS NHGIS "
-                                  "web site.",
+                                  "website.",
                    "type": ["incore:censusBlockGroupsData"]
                 },
                 {
