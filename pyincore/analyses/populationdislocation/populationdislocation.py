@@ -73,7 +73,7 @@ class PopulationDislocation(BaseAnalysis):
                     'type': ['incore:blockGroupData']
                 },
                 {
-                    'id': 'value_poss_param',
+                    'id': 'value_loss_param',
                     'required': True,
                     'description': 'A table with value loss beta distribution parameters based on Bai et al. 2009',
                     'type': ['incore:valuLossParam']
@@ -113,7 +113,7 @@ class PopulationDislocation(BaseAnalysis):
         bg_data = self.get_input_dataset("block_group_data").get_dataframe_from_csv(low_memory=False)
 
         # Get value loss parameters
-        value_loss = self.get_input_dataset("value_poss_param").get_dataframe_from_csv(low_memory=False)
+        value_loss = self.get_input_dataset("value_loss_param").get_dataframe_from_csv(low_memory=False)
         value_loss.set_index('damagestate', inplace=True)
 
         merged_block_inv = PopulationDislocationUtil.merge_damage_housing_block(
