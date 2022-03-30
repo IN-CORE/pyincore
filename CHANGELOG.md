@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Add check to mean damage analysis to verify damage keys match inventory type and remove unsupported types [#53](https://github.com/IN-CORE/pyincore/issues/53)
+- Housing recovery model analysis [#99](https://github.com/IN-CORE/pyincore/issues/99)
 - Social vulnerability analysis [#106](https://github.com/IN-CORE/pyincore/issues/106)
+
 ### Changed
 - Rewrite the EPF and WF restoration model [#100](https://github.com/IN-CORE/pyincore/issues/100)
 - Index and improve the performance of restoration util [#113](https://github.com/IN-CORE/pyincore/issues/113)
@@ -18,7 +20,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Fix shapely deprecation error with tornadoepn analysis [#40](https://github.com/IN-CORE/pyincore/issues/40)
 - Fix Building economic loss multipliers [#91](https://github.com/IN-CORE/pyincore/issues/91)
-- Fix Housing recovery model analysis [#99](https://github.com/IN-CORE/pyincore/issues/99)
 - Fix Pandas future warning: dtype in Series [#96](https://github.com/IN-CORE/pyincore/issues/96)
 - Fix Pandas future warning: append method [#97](https://github.com/IN-CORE/pyincore/issues/96)
 - Fix Population dislocation typo [#112](https://github.com/IN-CORE/pyincore/issues/112)
