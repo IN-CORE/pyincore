@@ -129,12 +129,12 @@ def run_with_base_class(chained):
         # Set up and run Housing Recovery analysis
         # *************************************************************
 
-        # Additional inventory data (assesed damage, square area)
+        # Additional inventory data (assessed damage, square area)
         bldg_sqft_id = "62193c19a42a3e546ae2d9f8"
         # Census block groups data (required)
         census_bg_id = "62193b7ca42a3e546ae2d9f2"
 
-        # Census appraisal file; id of external Census json is required
+        # Census appraisal file; id of external Census json
         census_appr_id = "6241fbd153302c512d685181" # dev
         result_name = "Galveston_building_values_chained"
 
@@ -153,12 +153,13 @@ def run_with_base_class(chained):
     else:
         # Run Housing Recovery analysis without chaining
 
-        # Additional inventory data (assesed damage, square area)
+        # Additional inventory data (assessed damage, square area)
         bldg_add_id = "62193c19a42a3e546ae2d9f8"
+        # bldg_add_id = "6243638e89dbb809c6432501" # no dmg, uses value_loss
         # Census block groups data (required)
         census_bg_id = "62193b7ca42a3e546ae2d9f2"
 
-        # Census appraisal file; id of external Census json is required if not fips for API request
+        # Census appraisal file; id of external Census json
         census_appr_id = "6241fbd153302c512d685181"
         result_name = "Galveston_building_values"
 
