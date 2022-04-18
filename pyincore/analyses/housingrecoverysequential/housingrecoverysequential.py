@@ -90,7 +90,7 @@ class HousingRecoverySequential(BaseAnalysis):
         households_df = (pd.DataFrame(households_csv))[pop_dis_selectors]
 
         # Perform  conversions across the dataset from object type into the appropriate type
-        households_df['blockid'] = households_df['blockid'].astype(int)
+        households_df['blockid'] = households_df['blockid'].astype('int64')
         households_df['numprec'] = households_df['numprec'].astype(int)
         households_df['race'] = pd.to_numeric(households_df['race'])
         households_df['hispan'] = pd.to_numeric(households_df['hispan'])
