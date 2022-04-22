@@ -176,12 +176,17 @@ class HousingRecovery(BaseAnalysis):
         hse_rec_fin2 = pd.DataFrame(hse_rec_fin_index, columns=index_yr)
         hse_recov = pd.concat([hse_recov, hse_rec_fin1, hse_rec_fin2], axis=1)
 
+<<<<<<< HEAD
+        column_to_save = ["guid", "d_vacationct", "mhhinck", "pminoritybg", "dmg", "value_loss"] + bval_yr + index_yr
+        hse_recov[column_to_save].to_csv(result_name + ".csv", index=False, float_format="%.2f")
+=======
         if "dmg" in hse_recov.columns:
             columns_to_save = ["guid", "d_vacationct", "mhhinck", "pminoritybg", "dmg"] + bval_yr + index_yr
         else:
             columns_to_save = ["guid", "d_vacationct", "mhhinck", "pminoritybg", "value_loss"] + bval_yr + index_yr
 
         self.set_result_csv_data("result", hse_recov[columns_to_save], result_name, "dataframe")
+>>>>>>> main
 
         return True
 

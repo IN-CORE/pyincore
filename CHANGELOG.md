@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.1] - 2022-04-22
+
+### Fixed
+- Fix issue with data type conversion for `blockid` [#129](https://github.com/IN-CORE/pyincore/issues/129)
+
 ## [1.4.0] - 2022-03-30
 
 ### Added
