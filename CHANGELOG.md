@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Fix issue with data type conversion for `blockid` [#129](https://github.com/IN-CORE/pyincore/issues/129)
+- Fix indentation bug at DataService [#135](https://github.com/IN-CORE/pyincore/issues/135)
 
 ## [1.4.0] - 2022-03-30
 
