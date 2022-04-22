@@ -179,7 +179,6 @@ class HousingRecovery(BaseAnalysis):
         columns_to_save = ["guid", "d_vacationct", "mhhinck", "pminoritybg", "dmg", "value_loss"] + bval_yr + index_yr
         self.set_result_csv_data("result", hse_recov[columns_to_save], result_name, "dataframe")
 
-
         return True
 
     def get_owneship(self, popd):
