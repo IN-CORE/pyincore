@@ -84,7 +84,7 @@ class VarContainer:
             if 'nrows' in info and 'ncols' in info:
                 values = pd.DataFrame(index=info['rows'], columns=info['cols']).fillna(values)
             elif 'nrows' in info and 'ncols' not in info:
-                values = pd.Series(index=info['rows']).fillna(values)
+                values = pd.Series(index=info['rows'], dtype='float64').fillna(values)
 
         if type(values) == pd.DataFrame:
             rows = values.index.tolist()
@@ -197,7 +197,7 @@ class VarContainer:
                 for j in info['cols']:
                     ret.at[i, j] = x[self.getIndex(name, row=i, col=j)]
         elif 'nrows' in info and 'ncols' not in info:
-            ret = pd.Series(index=info['rows']).fillna(0.0)
+            ret = pd.Series(index=info['rows'], dtype='float64').fillna(0.0)
             for i in info['rows']:
                 ret.at[i] = x[self.getIndex(name, row=i)]
         elif 'nrows' not in info and 'ncols' not in info:

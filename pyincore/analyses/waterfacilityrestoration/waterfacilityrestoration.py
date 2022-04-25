@@ -29,6 +29,7 @@ class WaterFacilityRestoration(BaseAnalysis):
         Returns:
             bool: True if successful, False otherwise
         """
+        inventory_list = list(self.get_input_dataset("water_facilities").get_inventory_reader())
         mapping_set = self.get_input_dataset("dfr3_mapping_set")
 
         restoration_key = self.get_parameter("restoration_key")
@@ -47,21 +48,28 @@ class WaterFacilityRestoration(BaseAnalysis):
         if pf_interval is None:
             pf_interval = 0.05
 
-        (pf_results, time_results) = self.waterfacility_restoration(mapping_set, restoration_key, end_time,
-                                                                    time_interval, pf_interval)
+        (inventory_restoration_map, pf_results, time_results) = self.waterfacility_restoration(inventory_list,
+                                                                                               mapping_set,
+                                                                                               restoration_key,
+                                                                                               end_time,
+                                                                                               time_interval,
+                                                                                               pf_interval)
 
+        self.set_result_csv_data("inventory_restoration_map", inventory_restoration_map,
+                                 name="inventory_restoration_map_" + self.get_parameter("result_name"))
         self.set_result_csv_data("pf_results", time_results, name="percentage_of_functionality_" +
                                                                   self.get_parameter("result_name"))
         self.set_result_csv_data("time_results", pf_results, name="reptime_" + self.get_parameter("result_name"))
 
         return True
 
-    def waterfacility_restoration(self, mapping_set, restoration_key, end_time, time_interval,
+    def waterfacility_restoration(self, inventory_list, mapping_set, restoration_key, end_time, time_interval,
                                   pf_interval):
 
         """Gets applicable restoration curve set and calculates restoration time and functionality
 
         Args:
+            inventory_list (list): Multiple water facilities from input inventory set.
             mapping_set (class): Restoration Mapping Set
             restoration_key (str): Restoration Key to determine which curve to use. E.g. Restoration ID Code
             end_time (float): User specified end repair time
@@ -69,22 +77,27 @@ class WaterFacilityRestoration(BaseAnalysis):
             pf_interval (float): Increment interval of percentage of functionality. Default 0.1 (10%)
 
         Returns:
+            inventory_restoration_map (list): A map between inventory and restoration being applied
             time_results (list): Given Percentage of functionality, the change of repair time
             pf_results (list): Given Repair time, change of the percentage of functionality
         """
+
+        # Obtain the restoration id for each water facility
+        inventory_restoration_map = []
+        restoration_sets = self.restorationsvc.match_inventory(
+            self.get_input_dataset("dfr3_mapping_set"), inventory_list, restoration_key)
+        for inventory in inventory_list:
+            if inventory["id"] in restoration_sets.keys():
+                restoration_set_id = restoration_sets[inventory["id"]].id
+            else:
+                restoration_set_id = None
+            inventory_restoration_map.append({"guid": inventory['properties']['guid'],
+                                             "restoration_id": restoration_set_id})
 
         time_results = []
         pf_results = []
 
         for mapping in mapping_set.mappings:
-            # parse rules to get inventory class. e.g. treatment plan, tank, pump etc
-            if isinstance(mapping.rules, list):
-                inventory_class = RestorationService.extract_inventory_class_legacy(mapping.rules)
-            elif isinstance(mapping.rules, dict):
-                inventory_class = RestorationService.extract_inventory_class(mapping.rules)
-            else:
-                raise ValueError("Unsupported mapping rules!")
-
             # get restoration curves
             # if it's string:id; then need to fetch it from remote and cast to restorationcurveset object
             restoration_curve_set = mapping.entry[restoration_key]
@@ -95,7 +108,7 @@ class WaterFacilityRestoration(BaseAnalysis):
             time = np.arange(0, end_time + time_interval, time_interval)
             for t in time:
                 pf_results.append({
-                    "inventory_class": inventory_class,
+                    "restoration_id": restoration_curve_set.id,
                     "time": t,
                     **restoration_curve_set.calculate_restoration_rates(time=t)
                 })
@@ -108,12 +121,12 @@ class WaterFacilityRestoration(BaseAnalysis):
                 for key, value in t_res.items():
                     new_dict.update({"time_" + key: value})
                 time_results.append({
-                    "inventory_class": inventory_class,
+                    "restoration_id": restoration_curve_set.id,
                     "percentage_of_functionality": p,
                     **new_dict
                 })
 
-        return pf_results, time_results
+        return inventory_restoration_map, pf_results, time_results
 
     def get_spec(self):
         return {
@@ -153,6 +166,12 @@ class WaterFacilityRestoration(BaseAnalysis):
             ],
             'input_datasets': [
                 {
+                    'id': 'water_facilities',
+                    'required': True,
+                    'description': 'Water Facility Inventory',
+                    'type': ['ergo:waterFacilityTopo'],
+                },
+                {
                     'id': 'dfr3_mapping_set',
                     'required': True,
                     'description': 'DFR3 Mapping Set Object',
@@ -160,6 +179,13 @@ class WaterFacilityRestoration(BaseAnalysis):
                 }
             ],
             'output_datasets': [
+                {
+                    'id': "inventory_restoration_map",
+                    'parent_type': '',
+                    'description': 'A csv file recording the mapping relationship between GUID and restoration id '
+                                   'applicable.',
+                    'type': 'incore:inventoryRestorationMap'
+                },
                 {
                     'id': 'pf_results',
                     'parent_type': '',

@@ -63,6 +63,13 @@ analyses/example
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
     :members:
 
+analyses/housingrecovery
+========================
+..  autoclass:: housingrecovery.housingrecovery.HousingRecovery
+    :members:
+..  autoclass:: housingrecovery.housingrecoveryutil.HousingRecoveryUtil
+    :members:
+
 analyses/housingrecoverysequential
 ==================================
 ..  autoclass:: housingrecoverysequential.housingrecoverysequential.HousingRecoverySequential
@@ -170,6 +177,11 @@ analyses/seasidecge
 ..  autoclass:: seasidecge.solverconstants.equationlib.Expr
     :members:
 ..  autoclass:: seasidecge.solverconstants.equationlib.ExprM
+    :members:
+
+analyses/socialvulnerability
+============================
+..  autoclass:: socialvulnerability.socialvulnerability.SocialVulnerability
     :members:
 
 analyses/tornadoepndamage
