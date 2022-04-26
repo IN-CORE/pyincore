@@ -45,6 +45,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
     __Q_rs_col = 'Q_t_hat_rs'
     __SC_col = 'Sc'
     __SC_rs_col = 'Sc_rs'
+    __L_brd_col = 'l'
 
     __budget_default = 0.2
 
@@ -67,11 +68,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         if in_subm is not None:
             inactive_submodels = in_subm
-
-        # Perform code scaling
-        scaling_factor = 1.0
-        if self.get_parameter('scale_data'):
-            scaling_factor = self.get_parameter('scaling_factor')
 
         building_related_data = self.get_input_dataset('building_related_data').get_dataframe_from_csv()
         strategy_costs = self.get_input_dataset('strategy_costs_data').get_dataframe_from_csv()
@@ -148,10 +144,22 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         """
         # Rescale data
-        if scaling_factor != 1.0:
+        print(building_related_data.columns)
+
+        # Scaling strategy:
+        #
+        # Only scale if investment budget exceeds $1 million
+        # Rescale: strategy cost, budget, economic loss
+
+        scaling_factor = 1000000
+
+        if budget_available >= scaling_factor:
+            strategy_costs[self.__SC_col] = strategy_costs[self.__SC_col]/scaling_factor
+            print(building_related_data)
             building_related_data[self.__Q_col] = \
-                building_related_data[self.__Q_col].map(lambda a: a / scaling_factor)
-            strategy_costs[self.__SC_col] = strategy_costs[self.__SC_col].map(lambda a: a / scaling_factor)
+                building_related_data[self.__L_brd_col] = building_related_data[self.__L_brd_col]/scaling_factor
+            strategy_costs[self.__SC_col] = strategy_costs[self.__SC_col]/scaling_factor
+            budget_available = budget_available/scaling_factor
 
         # Setup pyomo
         model = ConcreteModel()
@@ -1393,19 +1401,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     'required': False,
                     'description': 'Identifier of submodels to inactivate during analysis',
                     'type': [int]
-                },
-                {
-                    'id': 'scale_data',
-                    'required': True,
-                    'description': 'Choice for scaling data',
-                    'type': bool
-                },
-                {
-                    'id': 'scaling_factor',
-                    'required': False,
-                    'description': 'Custom scaling factor',
-                    'type': float
-                },
+                }
             ],
             'input_datasets': [
                 {
