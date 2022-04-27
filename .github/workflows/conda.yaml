@@ -72,7 +72,7 @@ jobs:
 
       - name: Build conda package
         run: |
-          conda config --set anaconda_upload ${UPLOAD}
+          #conda config --set anaconda_upload ${UPLOAD}
           conda build --keep-going \
                       --token ${{ secrets.CONDA_INCORE_TOKEN }} \
                       --user IN-CORE \
