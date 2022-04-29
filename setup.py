@@ -10,7 +10,7 @@ pkg_resources.extern.packaging.version.Version = pkg_resources.SetuptoolsLegacyV
 
 setup(
     name='pyincore',
-    version='1.4.1.rc.1',
+    version='1.4.1',
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     package_data={
