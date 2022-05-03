@@ -7,6 +7,8 @@ import json
 import os
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx import DiGraph, Graph
+from typing import Union
 
 from pyincore.dataservice import DataService
 
@@ -155,10 +157,7 @@ class NetworkDataset:
     def get_graph_table(self):
         return self.graph.get_csv_reader()
 
-    def get_networkx_network(self):
-        pass
-
-    def create_networkx_graph(self, fromnode_fldname="fromnode", tonode_fldname="tonode", is_directed=False):
+    def get_networkx_graph(self, fromnode_fldname="fromnode", tonode_fldname="tonode", is_directed=False):
         """Create network graph from field.
 
         Args:
@@ -180,12 +179,35 @@ class NetworkDataset:
         for row in self.graph.get_csv_reader():
             graph.add_edge(row[fromnode_fldname], row[tonode_fldname])
 
-        return graph
+        # TODO coordination part is so messy
+        # TODO the node name shouldn't be hard coded integers from 0 to len(node)
+        # initialize coords dictionary
+        node_length = len(list(self.node.get_inventory_reader()))
+        coords = dict((str(i), None) for i in range(1, node_length))
 
-    # def plot_network_graph(self):
-    #     nx.draw_networkx_nodes(self.graph, coords, cmap=plt.get_cmap('jet'), node_size=100, node_color='g',
-    #                            with_lables=True,
-    #                            font_weithg='bold')
-    #     nx.draw_networkx_labels(self.graph, coords)
-    #     nx.draw_networkx_edges(self.graph, coords, edge_color='r', arrows=True)
-    #     plt.show()
+        # create coordinates
+        for line_feature in list(self.link.get_inventory_reader()):
+            if fromnode_fldname in line_feature["properties"]:
+                from_node_val = line_feature['properties'][fromnode_fldname]
+            elif fromnode_fldname.lower() in line_feature["properties"]:
+                from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            if tonode_fldname in line_feature["properties"]:
+                to_node_val = line_feature['properties'][tonode_fldname]
+            elif tonode_fldname.lower() in line_feature["properties"]:
+                to_node_val = line_feature['properties'][tonode_fldname.lower()]
+            line_geom = (line_feature['geometry'])
+            coords_list = line_geom.get('coordinates')
+            from_coord = coords_list[0]
+            to_coord = coords_list[1]
+            coords[str(from_node_val)] = from_coord
+            coords[str(to_node_val)] = to_coord
+
+        return graph, coords
+
+    @staticmethod
+    def plot_network_graph(graph: Union[Graph, DiGraph], coords: dict):
+        nx.draw_networkx_nodes(graph, coords, cmap=plt.get_cmap('jet'), node_size=100, node_color='g')
+        nx.draw_networkx_labels(graph, coords)
+        nx.draw_networkx_edges(graph, coords, edge_color='r', arrows=True)
+        plt.show()
+        return plt
