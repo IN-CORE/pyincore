@@ -5,6 +5,8 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import json
 import os
+import networkx as nx
+import matplotlib.pyplot as plt
 
 from pyincore.dataservice import DataService
 
@@ -144,14 +146,46 @@ class NetworkDataset:
 
         return network_component
 
-    # @staticmethod
-    # def get_inventory_reader(self):
-    #     """ getter """
-    #     filename = self.file_path
-    #     if os.path.isdir(filename):
-    #         layers = fiona.listlayers(filename)
-    #         if len(layers) > 0:
-    #             # for now, open the first shapefile
-    #             return fiona.open(filename, layer=layers[0])
-    #     else:
-    #         return fiona.open(filename)
+    def get_node_inventory(self):
+        return self.node.get_inventory_reader()
+
+    def get_link_inventory(self):
+        return self.link.get_inventory_reader()
+
+    def get_graph_table(self):
+        return self.graph.get_csv_reader()
+
+    def get_networkx_network(self):
+        pass
+
+    def create_networkx_graph(self, fromnode_fldname="fromnode", tonode_fldname="tonode", is_directed=False):
+        """Create network graph from field.
+
+        Args:
+            fromnode_fldname (str): Line feature, from node field name.
+            tonode_fldname (str): Line feature, to node field name.
+            is_directed (bool, optional (Defaults to False)): Graph type. True for directed Graph,
+                False for Graph.
+
+        Returns:
+            obj: A graph from field.
+            dict: Coordinates.
+
+        """
+        if is_directed:
+            graph = nx.DiGraph()
+        else:
+            graph = nx.Graph()
+
+        for row in self.graph.get_csv_reader():
+            graph.add_edge(row[fromnode_fldname], row[tonode_fldname])
+
+        return graph
+
+    # def plot_network_graph(self):
+    #     nx.draw_networkx_nodes(self.graph, coords, cmap=plt.get_cmap('jet'), node_size=100, node_color='g',
+    #                            with_lables=True,
+    #                            font_weithg='bold')
+    #     nx.draw_networkx_labels(self.graph, coords)
+    #     nx.draw_networkx_edges(self.graph, coords, edge_color='r', arrows=True)
+    #     plt.show()

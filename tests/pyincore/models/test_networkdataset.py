@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from networkx import DiGraph
 
 from pyincore import Dataset, NetworkDataset
 
@@ -63,3 +64,35 @@ def test_from_files():
     assert network.node.local_file_path.find("epn_nodes.shp") != -1
     assert network.link.local_file_path.find("epn_links.shp") != -1
     assert network.graph.local_file_path.find("graph.csv") != -1
+
+
+def test_get_node_inventory(datasvc):
+    dataset_id = "62719fc857f1d94b047447e6"
+    network = NetworkDataset.from_data_service(dataset_id, datasvc)
+    nodes = list(network.get_node_inventory())
+    assert nodes[0]['properties']["guid"] == "9c39623d-920e-49e6-b272-83b2ec954b84"
+
+
+def test_get_link_inventory(datasvc):
+    dataset_id = "62719fc857f1d94b047447e6"
+    network = NetworkDataset.from_data_service(dataset_id, datasvc)
+    links = list(network.get_link_inventory())
+    assert links[0]['properties']["guid"] == "a4f63126-bb4b-45e7-9029-47984155f859"
+
+
+def test_get_graph_table(datasvc):
+    dataset_id = "62719fc857f1d94b047447e6"
+    network = NetworkDataset.from_data_service(dataset_id, datasvc)
+    graph = list(network.get_graph_table())
+    assert graph[0]["linkid"] == "1"
+    assert graph[0]["fromnode"] == "1"
+    assert graph[0]["tonode"] == "2"
+
+
+def test_create_networkx_graph(datasvc):
+    dataset_id = "62719fc857f1d94b047447e6"
+    network = NetworkDataset.from_data_service(dataset_id, datasvc)
+    networkx_graph = network.create_networkx_graph(fromnode_fldname="fromnode", tonode_fldname="tonode",
+                                                   is_directed=True)
+    assert isinstance(networkx_graph, DiGraph)
+
