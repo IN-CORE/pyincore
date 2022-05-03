@@ -130,11 +130,10 @@ class NetworkDataset:
         }
         network_component = Dataset(network_component_metadata)
         try:
-            link_file_path = os.path.join(dataset.local_file_path,
-                                          )
+            file_path = os.path.join(dataset.local_file_path, network_component_filename)
         except FileNotFoundError:
             raise FileNotFoundError("Invalid local file path.")
-        network_component.local_file_path = link_file_path
+        network_component.local_file_path = file_path
 
         return network_component
 
