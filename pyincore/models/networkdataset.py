@@ -49,7 +49,7 @@ class NetworkDataset:
         return cls(dataset)
 
     @classmethod
-    def from_json_str(cls, json_str, data_service: DataService = None, file_path=None):
+    def from_json_str(cls, json_str, data_service: DataService = None, folder_path=None):
         """Get Dataset from json string.
 
         Args:
@@ -67,15 +67,16 @@ class NetworkDataset:
         if data_service is not None:
             dataset.cache_files(data_service)
         # if there is local files associates with the dataset
-        elif file_path is not None:
-            dataset.local_file_path = file_path
+        elif folder_path is not None:
+            dataset.local_file_path = folder_path
         else:
             raise ValueError("You have to either use data services, or given pass local file path.")
 
         return cls(dataset)
 
     @classmethod
-    def from_files(cls, node_file_path, link_file_path, graph_file_path, link_data_type, node_data_type,
+    def from_files(cls, node_file_path, link_file_path, graph_file_path, link_data_type,
+                   node_data_type,
                    graph_data_type):
         """Create Dataset from the file.
 
@@ -91,20 +92,26 @@ class NetworkDataset:
             obj: Dataset from file.
 
         """
-        metadata = {"networkDataset": {
-            "link": {
-                "networkType": link_data_type,
-                "fileName": link_file_path
+        metadata = {
+            "id": "",
+            "dataType": "",
+            "fileDescriptors": [],
+            "networkDataset": {
+                "link": {
+                    "networkType": link_data_type,
+                    "fileName": link_file_path
+                },
+                "node": {
+                    "networkType": node_data_type,
+                    "fileName": node_file_path
+                },
+                "graph": {
+                    "networkType": graph_data_type,
+                    "fileName": graph_file_path
+                }
             },
-            "node": {
-                "networkType": node_data_type,
-                "fileName": node_file_path
-            },
-            "graph": {
-                "networkType": graph_data_type,
-                "fileName": graph_file_path
-            }
-        }}
+            "format": "shp-network"
+        }
         dataset = Dataset(metadata)
         dataset.local_file_path = ""
         return cls(dataset)
