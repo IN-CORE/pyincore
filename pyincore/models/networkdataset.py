@@ -75,13 +75,17 @@ class NetworkDataset:
         return cls(dataset)
 
     @classmethod
-    def from_files(cls, node_file_path, link_file_path, graph_file_path):
+    def from_files(cls, node_file_path, link_file_path, graph_file_path, link_data_type, node_data_type,
+                   graph_data_type):
         """Create Dataset from the file.
 
         Args:
             node_file_path (str): File path.
             link_file_path (str): File path.
             graph_file_path (str): File path.
+            link_data_type (str): Link data type.
+            node_data_type (str): Node data type.
+            graph_data_type (str): Graph data type.
 
         Returns:
             obj: Dataset from file.
@@ -89,16 +93,16 @@ class NetworkDataset:
         """
         metadata = {"networkDataset": {
             "link": {
-                "networkType": "pipeline",
+                "networkType": link_data_type,
                 "fileName": link_file_path
             },
             "node": {
-                "networkType": "water facility",
+                "networkType": node_data_type,
                 "fileName": node_file_path
             },
             "graph": {
-                "networkType": "table",
-                "fileName": link_file_path
+                "networkType": graph_data_type,
+                "fileName": graph_file_path
             }
         }}
         dataset = Dataset(metadata)
