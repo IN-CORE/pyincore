@@ -116,28 +116,32 @@ class NetworkDataset:
         Returns: network component in dataset object
 
         """
+        network_component_filename = dataset.metadata['networkDataset'][network_type]["fileName"]
         network_component_metadata = {
             "dataType": dataset.metadata['networkDataset'][network_type]["networkType"],
-            "format": f"shp-{network_type}"
+            "format": f"shp-{network_type}",
+            "id": f"{dataset.id}-{network_type}",
+            "fileDescriptors": [fd for fd in dataset.file_descriptors if fd["filename"].find(
+                network_component_filename.split(".")[0]) != -1]
         }
         network_component = Dataset(network_component_metadata)
         try:
             link_file_path = os.path.join(dataset.local_file_path,
-                                          dataset.metadata['networkDataset'][network_type]["fileName"])
+                                          )
         except FileNotFoundError:
             raise FileNotFoundError("Invalid local file path.")
         network_component.local_file_path = link_file_path
 
         return network_component
 
-    @staticmethod
-    def get_inventory_reader(self):
-        """ getter """
-        filename = self.file_path
-        if os.path.isdir(filename):
-            layers = fiona.listlayers(filename)
-            if len(layers) > 0:
-                # for now, open the first shapefile
-                return fiona.open(filename, layer=layers[0])
-        else:
-            return fiona.open(filename)
+    # @staticmethod
+    # def get_inventory_reader(self):
+    #     """ getter """
+    #     filename = self.file_path
+    #     if os.path.isdir(filename):
+    #         layers = fiona.listlayers(filename)
+    #         if len(layers) > 0:
+    #             # for now, open the first shapefile
+    #             return fiona.open(filename, layer=layers[0])
+    #     else:
+    #         return fiona.open(filename)
