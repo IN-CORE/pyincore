@@ -1,10 +1,8 @@
 import json
 
 import pytest
-from networkx import DiGraph
 
 from pyincore import Dataset, NetworkDataset
-import os
 
 
 @pytest.fixture
@@ -88,23 +86,3 @@ def test_get_graph_table(datasvc):
     assert graph[0]["linkid"] == "1"
     assert graph[0]["fromnode"] == "1"
     assert graph[0]["tonode"] == "2"
-
-
-def test_get_networkx_graph(datasvc):
-    dataset_id = "62719fc857f1d94b047447e6"
-    network = NetworkDataset.from_data_service(dataset_id, datasvc)
-    networkx_graph, networkx_coords = network.get_networkx_graph(fromnode_fldname="fromnode",
-                                                                    tonode_fldname="tonode", is_directed=True)
-    assert isinstance(networkx_graph, DiGraph)
-    assert networkx_coords[0] == (-97.4814000203988, 35.26650000753716)
-
-
-def test_plot_network_graph(datasvc):
-    dataset_id = "62719fc857f1d94b047447e6"
-    network = NetworkDataset.from_data_service(dataset_id, datasvc)
-    networkx_graph, networkx_coords = network.get_networkx_graph(fromnode_fldname="fromnode",
-                                                                 tonode_fldname="tonode", is_directed=True)
-    graph_png_fname = "test_graph.png"
-    plt = NetworkDataset.plot_network_graph(networkx_graph, networkx_coords)
-    plt.savefig(graph_png_fname)
-    assert os.path.exists(graph_png_fname)

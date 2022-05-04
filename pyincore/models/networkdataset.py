@@ -24,12 +24,12 @@ class NetworkDataset:
     """
 
     def __init__(self, dataset: Dataset):
+        # TODO need to pass in datatype or make networkdataset an inheritance of Dataset object
         if dataset.format == 'shp-network' and dataset.metadata['networkDataset'] is not None:
             self.node = NetworkDataset._network_component_from_dataset(dataset, "node")
             self.link = NetworkDataset._network_component_from_dataset(dataset, "link")
             self.graph = NetworkDataset._network_component_from_dataset(dataset, "graph")
         else:
-            self._network_data = None
             self._link = None
             self._node = None
             self._graph = None
@@ -156,58 +156,3 @@ class NetworkDataset:
 
     def get_graph_table(self):
         return self.graph.get_csv_reader()
-
-    def get_networkx_graph(self, fromnode_fldname="fromnode", tonode_fldname="tonode", is_directed=False):
-        """Create network graph from field.
-
-        Args:
-            fromnode_fldname (str): Line feature, from node field name.
-            tonode_fldname (str): Line feature, to node field name.
-            is_directed (bool, optional (Defaults to False)): Graph type. True for directed Graph,
-                False for Graph.
-
-        Returns:
-            obj: A graph from field.
-            dict: Coordinates.
-
-        """
-        if is_directed:
-            graph = nx.DiGraph()
-        else:
-            graph = nx.Graph()
-
-        for row in self.graph.get_csv_reader():
-            graph.add_edge(row[fromnode_fldname], row[tonode_fldname])
-
-        # TODO coordination part is so messy
-        # TODO the node name shouldn't be hard coded integers from 0 to len(node)
-        # initialize coords dictionary
-        node_length = len(list(self.node.get_inventory_reader()))
-        coords = dict((str(i), None) for i in range(1, node_length))
-
-        # create coordinates
-        for line_feature in list(self.link.get_inventory_reader()):
-            if fromnode_fldname in line_feature["properties"]:
-                from_node_val = line_feature['properties'][fromnode_fldname]
-            elif fromnode_fldname.lower() in line_feature["properties"]:
-                from_node_val = line_feature['properties'][fromnode_fldname.lower()]
-            if tonode_fldname in line_feature["properties"]:
-                to_node_val = line_feature['properties'][tonode_fldname]
-            elif tonode_fldname.lower() in line_feature["properties"]:
-                to_node_val = line_feature['properties'][tonode_fldname.lower()]
-            line_geom = (line_feature['geometry'])
-            coords_list = line_geom.get('coordinates')
-            from_coord = coords_list[0]
-            to_coord = coords_list[1]
-            coords[str(from_node_val)] = from_coord
-            coords[str(to_node_val)] = to_coord
-
-        return graph, coords
-
-    @staticmethod
-    def plot_network_graph(graph: Union[Graph, DiGraph], coords: dict):
-        nx.draw_networkx_nodes(graph, coords, cmap=plt.get_cmap('jet'), node_size=100, node_color='g')
-        nx.draw_networkx_labels(graph, coords)
-        nx.draw_networkx_edges(graph, coords, edge_color='r', arrows=True)
-        plt.show()
-        return plt
