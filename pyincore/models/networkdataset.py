@@ -5,14 +5,12 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import json
 import os
-import networkx as nx
-import matplotlib.pyplot as plt
-from networkx import DiGraph, Graph
-from typing import Union
+
 
 from pyincore.dataservice import DataService
 
 from pyincore import Dataset
+import networkx as nx
 
 
 class NetworkDataset:
@@ -24,14 +22,18 @@ class NetworkDataset:
     """
 
     def __init__(self, dataset: Dataset):
-        # TODO need to pass in datatype or make networkdataset an inheritance of Dataset object
         if dataset.format == 'shp-network' and dataset.metadata['networkDataset'] is not None:
-            self.node = NetworkDataset._network_component_from_dataset(dataset, "node")
-            self.link = NetworkDataset._network_component_from_dataset(dataset, "link")
+            self.metadata = dataset.metadata
+            self.data_type = dataset.metadata["dataType"]
+            self.nodes = NetworkDataset._network_component_from_dataset(dataset, "node")
+            self.links = NetworkDataset._network_component_from_dataset(dataset, "link")
             self.graph = NetworkDataset._network_component_from_dataset(dataset, "graph")
         else:
-            self._link = None
-            self._node = None
+            # TODO why do we need those
+            self._metadata = None
+            self._data_type = None
+            self._links = None
+            self._nodes = None
             self._graph = None
 
     @classmethod
@@ -79,7 +81,7 @@ class NetworkDataset:
         return cls(dataset)
 
     @classmethod
-    def from_files(cls, node_file_path, link_file_path, graph_file_path, link_data_type,
+    def from_files(cls, node_file_path, link_file_path, graph_file_path, network_data_type, link_data_type,
                    node_data_type,
                    graph_data_type):
         """Create Dataset from the file.
@@ -98,7 +100,7 @@ class NetworkDataset:
         """
         metadata = {
             "id": "",
-            "dataType": "",
+            "dataType": network_data_type,
             "fileDescriptors": [],
             "networkDataset": {
                 "link": {
@@ -148,11 +150,21 @@ class NetworkDataset:
 
         return network_component
 
-    def get_node_inventory(self):
-        return self.node.get_inventory_reader()
+    def get_nodes(self):
+        return self.nodes.get_inventory_reader()
 
-    def get_link_inventory(self):
-        return self.link.get_inventory_reader()
+    def get_links(self):
+        return self.links.get_inventory_reader()
 
-    def get_graph_table(self):
+    def get_graph(self):
         return self.graph.get_csv_reader()
+
+    def get_graph_networkx(self, from_node_fld="fromnode", to_node_fld="tonode", directed=False):
+        if directed:
+            G = nx.DiGraph()
+        else:
+            G = nx.Graph()
+        for edge in list(self.get_graph()):
+            G.add_edge(edge[from_node_fld], edge[to_node_fld])
+
+        return G
