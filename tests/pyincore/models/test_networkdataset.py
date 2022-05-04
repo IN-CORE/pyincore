@@ -3,12 +3,17 @@ import json
 import pytest
 from networkx import Graph
 
-from pyincore import Dataset, NetworkDataset
+from pyincore import Dataset, NetworkDataset, BaseAnalysis
 
 
 @pytest.fixture
 def datasvc():
     return pytest.datasvc
+
+
+@pytest.fixture
+def client():
+    return pytest.client
 
 
 def test_from_data_service(datasvc):
@@ -95,3 +100,16 @@ def test_get_graph_networkx(datasvc):
     network = NetworkDataset.from_data_service(dataset_id, datasvc)
     graph_nx = network.get_graph_networkx()
     assert isinstance(graph_nx, Graph)
+
+
+def test_set_input_dataset(datasvc, client):
+    dataset_id = "62719fc857f1d94b047447e6"
+    network = NetworkDataset.from_data_service(dataset_id, datasvc)
+    base_analysis = BaseAnalysis(client)
+    base_analysis.input_datasets = {"network": {"spec": {
+                    'id': 'network',
+                    'required': True,
+                    'description': 'network',
+                    'type': ['incore:epnNetwork'],
+                }, "value": None}}
+    assert base_analysis.set_input_dataset("network", network) is True
