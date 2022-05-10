@@ -29,8 +29,8 @@ from pyincore.models.restorationcurveset import RestorationCurveSet
 from pyincore.models.dfr3curve import DFR3Curve
 from pyincore.models.mappingset import MappingSet
 from pyincore.models.mapping import Mapping
+from pyincore.models.networkdataset import NetworkDataset
 from pyincore.networkdata import NetworkData
-from pyincore.networkdataset import NetworkDataset
 from pyincore.baseanalysis import BaseAnalysis
 import pyincore.globals
 
