@@ -5,6 +5,8 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 from setuptools import setup, find_packages
+import pkg_resources
+pkg_resources.extern.packaging.version.Version = pkg_resources.SetuptoolsLegacyVersion
 
 setup(
     name='pyincore',
