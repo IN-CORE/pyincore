@@ -163,7 +163,7 @@ def test_get_file_blob(datasvc):
 
 
 def test_create_network_dataset(datasvc):
-    with open(pyglobals.TEST_DATA_DIR + '/network_dataset.json', 'r') as file:
+    with open(pyglobals.TEST_DATA_DIR + '/network/network_dataset.json', 'r') as file:
         dataset_prop = ast.literal_eval(file.read())
     response = datasvc.create_dataset(dataset_prop)
     if 'id' not in response:
