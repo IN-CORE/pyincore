@@ -1,9 +1,12 @@
 import json
+import os
+from pathlib import Path
 
 import pytest
 from networkx import Graph
 
 from pyincore import Dataset, NetworkDataset, BaseAnalysis
+from pyincore.globals import PYINCORE_ROOT_FOLDER
 
 
 @pytest.fixture
@@ -35,7 +38,8 @@ def test_from_data_service(datasvc):
 
 
 def test_from_json_str():
-    with open("/Users/cwang138/Documents/INCORE-2.0/pyincore/tests/data/network/network_dataset.json", "r") as f:
+    print(PYINCORE_ROOT_FOLDER)
+    with open(os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/network_dataset.json"), "r") as f:
         json_dict = json.load(f)
     network = NetworkDataset.from_json_str(json.dumps(json_dict), folder_path="../data/network/")
     assert network.nodes is not None
