@@ -162,6 +162,7 @@ def test_get_file_blob(datasvc):
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
 
+@pytest.mark.skip(reason="service currently in refactoring...")
 def test_create_network_dataset(datasvc):
     with open(pyglobals.TEST_DATA_DIR + '/network/network_dataset.json', 'r') as file:
         dataset_prop = ast.literal_eval(file.read())
