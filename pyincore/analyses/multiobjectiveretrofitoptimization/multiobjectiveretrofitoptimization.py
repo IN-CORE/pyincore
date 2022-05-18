@@ -1392,7 +1392,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 },
                 {
                     'id': 'budget_available',
-                    'required': False,
+                    'required': True,
                     'description': 'Custom budget value',
                     'type': float
                 },
