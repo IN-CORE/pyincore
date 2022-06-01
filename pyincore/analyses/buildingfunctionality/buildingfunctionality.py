@@ -86,14 +86,15 @@ class BuildingFunctionality(BaseAnalysis):
 
     def run(self):
         """Executes building functionality analysis"""
+
+        # enable index on "guid" column
+        buildings_df = self.get_input_dataset("building_damage_mcs_samples").get_dataframe_from_csv().set_index("guid")
+
         interdependency_dataset = self.get_input_dataset("interdependency_dictionary")
         if interdependency_dataset is not None:
             interdependency_dict = interdependency_dataset.get_json_reader()
         else:
             interdependency_dict = None
-
-        # enable index on "guid" column
-        buildings_df = self.get_input_dataset("building_damage_mcs_samples").get_dataframe_from_csv().set_index("guid")
 
         substations_dataset = self.get_input_dataset("substations_damage_mcs_samples")
         if substations_dataset is not None:
@@ -106,6 +107,13 @@ class BuildingFunctionality(BaseAnalysis):
             poles_df = poles_dataset.get_dataframe_from_csv().set_index("guid")
         else:
             poles_df = None
+
+        # All three above needs to be present at the same time or none
+        if not all(epf is None for epf in [interdependency_dict, substations_df, poles_df]) \
+                and not all(epf is not None for epf in [interdependency_dict, substations_df, poles_df]):
+            raise ValueError("If you need to consider electric power availability in the analysis, please provide "
+                             "complete datasets include: pole damage samples, substation damage samples, and "
+                             "interdependency.")
 
         functionality_probabilities = []
         functionality_samples = []
