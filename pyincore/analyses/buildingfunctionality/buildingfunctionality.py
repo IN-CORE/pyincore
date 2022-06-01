@@ -53,19 +53,19 @@ class BuildingFunctionality(BaseAnalysis):
                 },
                 {
                     'id': 'substations_damage_mcs_samples',
-                    'required': True,
+                    'required': False,
                     'description': 'substations damage samples',
                     'type': ['incore:sampleFailureState'],
                 },
                 {
                     'id': 'poles_damage_mcs_samples',
-                    'required': True,
+                    'required': False,
                     'description': 'poles damage samples',
                     'type': ['incore:sampleFailureState'],
                 },
                 {
                     'id': 'interdependency_dictionary',
-                    'required': True,
+                    'required': False,
                     'description': 'JSON file of interdependency between buildings and substations and poles',
                     'type': ['incore:buildingInterdependencyDict'],
                 },
@@ -86,13 +86,26 @@ class BuildingFunctionality(BaseAnalysis):
 
     def run(self):
         """Executes building functionality analysis"""
-        interdependency_dict = self.get_input_dataset("interdependency_dictionary").get_json_reader()
+        interdependency_dataset = self.get_input_dataset("interdependency_dictionary")
+        if interdependency_dataset is not None:
+            interdependency_dict = interdependency_dataset.get_json_reader()
+        else:
+            interdependency_dict = None
 
         # enable index on "guid" column
         buildings_df = self.get_input_dataset("building_damage_mcs_samples").get_dataframe_from_csv().set_index("guid")
-        substations_df = self.get_input_dataset("substations_damage_mcs_samples").get_dataframe_from_csv().set_index(
-            "guid")
-        poles_df = self.get_input_dataset("poles_damage_mcs_samples").get_dataframe_from_csv().set_index("guid")
+
+        substations_dataset = self.get_input_dataset("substations_damage_mcs_samples")
+        if substations_dataset is not None:
+            substations_df = substations_dataset.get_dataframe_from_csv().set_index("guid")
+        else:
+            substations_df = None
+
+        poles_dataset = self.get_input_dataset("poles_damage_mcs_samples")
+        if poles_dataset is not None:
+            poles_df = poles_dataset.get_dataframe_from_csv().set_index("guid")
+        else:
+            poles_df = None
 
         functionality_probabilities = []
         functionality_samples = []
@@ -134,51 +147,59 @@ class BuildingFunctionality(BaseAnalysis):
             str: A probability [0,1] of building being functional.
 
         """
+
+        building_mc_samples = buildings.loc[building_guid]
+        building_list = []
+        try:
+            building_list = building_mc_samples["failure"].split(",")
+        except IndexError:
+            print("error with buildings")
+            print(building_mc_samples)
+            return {building_guid: -1}
+
         # if building is defined in the interdependency lookup table
-        if building_guid in interdependency.keys():
-            building_mc_samples = buildings.loc[building_guid]
-            substations_mc_samples = substations.loc[interdependency[building_guid]["substations_guid"]]
-            poles_mc_samples = poles.loc[interdependency[building_guid]["poles_guid"]]
+        if interdependency is not None:
 
-            building_list = []
-            try:
-                # building_list = list(building_mc_samples.iloc[0])[1].split(",")
-                building_list = building_mc_samples["failure"].split(",")
-            except IndexError:
-                print("error with buildings")
-                print(building_mc_samples)
-                return {building_guid: -1}
+            if building_guid in interdependency.keys():
+                substations_mc_samples = substations.loc[interdependency[building_guid]["substations_guid"]]
+                poles_mc_samples = poles.loc[interdependency[building_guid]["poles_guid"]]
 
-            substation_list = []
-            try:
-                substation_list = substations_mc_samples["failure"].split(",")
-            except IndexError:
-                print("error with substations")
-                print(interdependency[building_guid]["substations_guid"])
-                return {building_guid: -1}
+                substation_list = []
+                try:
+                    substation_list = substations_mc_samples["failure"].split(",")
+                except IndexError:
+                    print("error with substations")
+                    print(interdependency[building_guid]["substations_guid"])
+                    return {building_guid: -1}
 
-            pole_list = []
-            try:
-                pole_list = poles_mc_samples["failure"].split(",")
-            except IndexError:
-                print("error with poles")
-                print(interdependency[building_guid]["poles_guid"])
-                return {building_guid: -1}
+                pole_list = []
+                try:
+                    pole_list = poles_mc_samples["failure"].split(",")
+                except IndexError:
+                    print("error with poles")
+                    print(interdependency[building_guid]["poles_guid"])
+                    return {building_guid: -1}
 
-            functionality_samples = [self.functionality_probability(building_sample, substation_sample, pole_sample)
-                                     for building_sample, substation_sample, pole_sample in
-                                     zip(building_list, substation_list, pole_list)]
-            functionality_sum = np.sum(functionality_samples)
-            num_samples = len(functionality_samples)
-            probability = 0.0
-            if functionality_sum > 0:
-                probability = (functionality_sum / num_samples)
+                functionality_samples = [BuildingFunctionality._calc_functionality_samples(building_sample,
+                                                                                           substation_sample,
+                                                                                           pole_sample)
+                                         for building_sample, substation_sample, pole_sample in
+                                         zip(building_list, substation_list, pole_list)]
+                probability = BuildingFunctionality._calc_functionality_probability(functionality_samples)
+                return building_guid, ",".join([str(sample) for sample in functionality_samples]), probability
+
+            else:
+                return building_guid, "NA", "NA"
+
+        # else if only building MC failure is available
+        else:
+            functionality_samples = [BuildingFunctionality._calc_functionality_samples(building_sample) for
+                                     building_sample in building_list]
+            probability = BuildingFunctionality._calc_functionality_probability(functionality_samples)
             return building_guid, ",".join([str(sample) for sample in functionality_samples]), probability
 
-        else:
-            return building_guid, "NA", "NA"
-
-    def functionality_probability(self, building_sample, substation_sample, pole_sample):
+    @staticmethod
+    def _calc_functionality_samples(building_sample, substation_sample=None, pole_sample=None):
         """ This function is subject to change. For now, buildings have a 1-to-1 relationship with
         substations and poles, so it suffices to check that the poles and substations are up.
 
@@ -191,7 +212,18 @@ class BuildingFunctionality(BaseAnalysis):
             int: 1 if building is functional, 0 otherwise
 
         """
-        if building_sample == "1" and substation_sample == "1" and pole_sample == "1":
+        if building_sample == "1" and (substation_sample == "1" or substation_sample is None) \
+                and (pole_sample == "1" or pole_sample is None):
             return 1
         else:
             return 0
+
+    @staticmethod
+    def _calc_functionality_probability(functionality_samples):
+        functionality_sum = np.sum(functionality_samples)
+        num_samples = len(functionality_samples)
+        probability = 0.0
+        if functionality_sum > 0:
+            probability = (functionality_sum / num_samples)
+
+        return probability
