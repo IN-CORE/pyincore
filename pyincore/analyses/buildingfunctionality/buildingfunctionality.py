@@ -111,9 +111,8 @@ class BuildingFunctionality(BaseAnalysis):
         # All three above needs to be present at the same time or none
         if not all(epf is None for epf in [interdependency_dict, substations_df, poles_df]) \
                 and not all(epf is not None for epf in [interdependency_dict, substations_df, poles_df]):
-            raise ValueError("If you need to consider electric power availability in the analysis, please provide "
-                             "complete datasets include: pole damage samples, substation damage samples, and "
-                             "interdependency.")
+            raise ValueError("To consider electric power availability in the analysis, please provide pole damage "
+                             "samples, substation damage samples, and interdependency.")
 
         functionality_probabilities = []
         functionality_samples = []
