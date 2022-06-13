@@ -80,7 +80,7 @@ class HousingRecoveryUtil:
     B_SVHM_intercept = 11.125636
 
     # Year indicator dummy variables
-    B_SVHM_year =  {}
+    B_SVHM_year = {}
     B_SVHM_year[-1] = 0.000000  # year -1, tax assessment immediately before disaster
     B_SVHM_year[0] = 1.489008  # year  0, tax assessment immediately after disaster, damage year
     B_SVHM_year[1] = 1.858770  # year +1
