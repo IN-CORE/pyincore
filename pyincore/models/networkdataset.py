@@ -104,15 +104,15 @@ class NetworkDataset:
             "fileDescriptors": [],
             "networkDataset": {
                 "link": {
-                    "networkType": link_data_type,
+                    "dataType": link_data_type,
                     "fileName": link_file_path
                 },
                 "node": {
-                    "networkType": node_data_type,
+                    "dataType": node_data_type,
                     "fileName": node_file_path
                 },
                 "graph": {
-                    "networkType": graph_data_type,
+                    "dataType": graph_data_type,
                     "fileName": graph_file_path
                 }
             },
@@ -135,7 +135,7 @@ class NetworkDataset:
         """
         network_component_filename = dataset.metadata['networkDataset'][network_type]["fileName"]
         network_component_metadata = {
-            "dataType": dataset.metadata['networkDataset'][network_type]["networkType"],
+            "dataType": dataset.metadata['networkDataset'][network_type]["dataType"],
             "format": f"shp-{network_type}",
             "id": f"{dataset.id}-{network_type}",
             "fileDescriptors": [fd for fd in dataset.file_descriptors if fd["filename"].find(

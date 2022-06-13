@@ -6,15 +6,15 @@
   "fileDescriptors": [],
   "networkDataset": {
     "link": {
-      "networkType": "incore:epnLinkVer1",
+      "dataType": "incore:epnLinkVer1",
       "fileName": "epn_links.shp"
     },
     "node": {
-      "networkType": "incore:epnNodeVer1",
+      "dataType": "incore:epnNodeVer1",
       "fileName": "epn_nodes.shp"
     },
     "graph": {
-      "networkType": "incore:epnGraph",
+      "dataType": "incore:epnGraph",
       "fileName": "graph.csv"
     }
   }

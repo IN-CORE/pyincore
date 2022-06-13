@@ -46,9 +46,9 @@ def test_from_json_str():
     assert network.graph is not None
     assert network.links is not None
     assert isinstance(network.nodes, Dataset)
-    assert network.nodes.data_type == json_dict["networkDataset"]["node"]["networkType"]
-    assert network.links.data_type == json_dict["networkDataset"]["link"]["networkType"]
-    assert network.graph.data_type == json_dict["networkDataset"]["graph"]["networkType"]
+    assert network.nodes.data_type == json_dict["networkDataset"]["node"]["dataType"]
+    assert network.links.data_type == json_dict["networkDataset"]["link"]["dataType"]
+    assert network.graph.data_type == json_dict["networkDataset"]["graph"]["dataType"]
     assert network.nodes.local_file_path.find("epn_nodes.shp") != -1
     assert network.links.local_file_path.find("epn_links.shp") != -1
     assert network.graph.local_file_path.find("graph.csv") != -1
