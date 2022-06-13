@@ -14,7 +14,7 @@ from pyincore.utils.analysisutil import AnalysisUtil
 from shapely.geometry import shape, LineString, MultiLineString
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, FragilityCurveSet
-from pyincore import GeoUtil, NetworkUtil
+from pyincore import GeoUtil, NetworkUtil, NetworkDataset
 from pyincore.models.dfr3curve import DFR3Curve
 
 
@@ -88,8 +88,9 @@ class TornadoEpnDamage(BaseAnalysis):
         super(TornadoEpnDamage, self).__init__(incore_client)
 
     def run(self):
-        node_dataset = self.get_input_dataset("epn_node").get_inventory_reader()
-        link_dataset = self.get_input_dataset("epn_link").get_inventory_reader()
+        network_dataset = self.get_input_dataset("epn_network")
+        link_dataset = NetworkDataset._network_component_from_dataset(network_dataset, "link").get_inventory_reader()
+        node_dataset = NetworkDataset._network_component_from_dataset(network_dataset, "node").get_inventory_reader()
         tornado_id = self.get_parameter('tornado_id')
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
         self.load_remote_input_dataset("tornado", tornado_metadata["datasetId"])
@@ -527,16 +528,10 @@ class TornadoEpnDamage(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'epn_node',
+                    'id': 'epn_network',
                     'required': True,
-                    'description': 'EPN Node',
-                    'type': ['incore:epnNodeVer1'],
-                },
-                {
-                    'id': 'epn_link',
-                    'required': True,
-                    'description': 'EPN Link',
-                    'type': ['incore:epnLinkeVer1'],
+                    'description': 'EPN Network Dataset',
+                    'type': ['incore:epnNetwork'],
                 },
                 {
                     'id': 'tornado',
@@ -548,13 +543,13 @@ class TornadoEpnDamage(BaseAnalysis):
             'output_datasets': [
                 {
                     'id': 'result',
-                    'parent_type': 'epn_node',
+                    'parent_type': 'epn_network',
                     'description': 'CSV file of damages for electric power network by tornado',
                     'type': 'incore:tornadoEPNDamageVer3'
                 },
                 {
                     'id': 'metadata',
-                    'parent_type': 'epn_node',
+                    'parent_type': 'epn_network',
                     'description': 'Json file with information about applied hazard value and fragility',
                     'type': 'incore:tornadoEPNDamageSupplement'
                 }
