@@ -4,7 +4,7 @@ from pyincore import IncoreClient
 import pyincore.globals as pyglobals
 
 
-def test_run_with_base_class():
+def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     ted = TornadoEpnDamage(client)
@@ -23,4 +23,4 @@ def test_run_with_base_class():
 
 
 if __name__ == '__main__':
-    test_run_with_base_class()
+    run_with_base_class()
