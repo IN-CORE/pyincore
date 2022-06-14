@@ -11,7 +11,7 @@ from fiona.crs import from_epsg
 
 class NetworkUtil:
     @staticmethod
-    def build_dataset_by_node(node_filename, graph_filename, id_field, out_filename):
+    def build_link_by_node(node_filename, graph_filename, id_field, out_filename):
         """Create line dataset based on node shapefile and graph file graph should be in csv format.
 
         Args:
@@ -100,13 +100,13 @@ class NetworkUtil:
         return True
 
     @staticmethod
-    def build_dataset_by_line(line_filename, line_id_field, fromnode_field, tonode_field, out_node_filename,
-                              out_graph_filename):
+    def build_node_by_link(link_filename, link_id_field, fromnode_field, tonode_field, out_node_filename,
+                           out_graph_filename):
         """Create node dataset based on line shapefile and graph file graph should be in csv format
 
         Args:
-            line_filename (string):  line shapefile file name pull path with *.shp file extension.
-            line_id_field (string): line shapefile unique id field
+            link_filename (string):  line shapefile file name pull path with *.shp file extension.
+            link_id_field (string): line shapefile unique id field
             fromnode_field (string): field name for fromnode in line shapefile
             tonode_field (string): field name for tonode in line shapefile
             out_node_filename (string): output node shapefile name with *.shp extension
@@ -117,7 +117,7 @@ class NetworkUtil:
 
         """
         # read line shapefile
-        linefile = fiona.open(line_filename)
+        linefile = fiona.open(link_filename)
 
         node_list = []
         node_id_list = []
@@ -132,7 +132,7 @@ class NetworkUtil:
                 print("The line shapefile is a multiline string. The process will be aborted")
                 return False
 
-            line_id = str(line['properties'][line_id_field])
+            line_id = str(line['properties'][link_id_field])
             fromnode_id = str(line['properties'][fromnode_field])
             tonode_id = str(line['properties'][tonode_field])
             fromnode_coord = seg_coord_list[0]
@@ -184,7 +184,7 @@ class NetworkUtil:
 
         with open(out_graph_filename, "w", newline='') as f:
             writer = csv.writer(f)
-            writer.writerows([[line_id_field, fromnode_field, tonode_field]])
+            writer.writerows([[link_id_field, fromnode_field, tonode_field]])
             writer.writerows(graph_list)
 
         return True
