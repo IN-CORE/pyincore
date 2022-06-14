@@ -11,10 +11,12 @@ import pypandoc
 
 pkg_resources.extern.packaging.version.Version = pkg_resources.SetuptoolsLegacyVersion
 
-# Parse the version from the rasterio module.
+# use the version from the rasterio module.
 version = pyglobals.PACKAGE_VERSION
+# use this line for manual versioning like rc version
+#version = '1.4.1.rc.4'
 
-with open("README.md", encoding="utf-8") as f:
+with open("README.rst", encoding="utf-8") as f:
     readme = f.read()
 
 setup_args = dict(
