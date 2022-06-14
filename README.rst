@@ -16,7 +16,7 @@ Prerequisites
    Jupyter notebook.
 
 Please read through the
-`Prerequisites <https://incore.ncsa.illinois.edu/doc/incore/prerequisites.html>`__
+`Prerequisites <https://incore.ncsa.illinois.edu/doc/incore/pyincore/prerequisites.html>`__
 section at IN-CORE manual at least once completely before actually
 following them to avoid any installation problems!
 
@@ -24,7 +24,7 @@ Installation
 ------------
 
 You can find this information at the
-`Installation <https://incore.ncsa.illinois.edu/doc/incore/install_pyincore.html>`__
+`Installation <https://incore.ncsa.illinois.edu/doc/incore/pyincore/install_pyincore.html>`__
 section at IN-CORE manual.
 
 1. From the Terminal (Mac/Linux) or Command Prompt (Windows) add
@@ -54,7 +54,7 @@ Testing and Running
 -------------------
 
 Please read the `Testing and
-Running <https://incore.ncsa.illinois.edu/doc/incore/running.html>`__
+Running <https://incore.ncsa.illinois.edu/doc/incore/pyincore/running.html>`__
 section at IN-CORE manual.
 
 Documentation
