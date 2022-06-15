@@ -190,11 +190,11 @@ class NetworkUtil:
         return True
 
     @staticmethod
-    def create_network_graph_from_field(indataset, fromnode_fldname, tonode_fldname, is_directed=False):
+    def create_network_graph_from_link(link_file, fromnode_fldname, tonode_fldname, is_directed=False):
         """Create network graph from field.
 
         Args:
-            indataset (str):  A name of a geo dataset resource recognized by Fiona package.
+            link_file (str):  A name of a geo dataset resource recognized by Fiona package.
             fromnode_fldname (str): Line feature, from node field name.
             tonode_fldname (str): Line feature, to node field name.
             is_directed (bool, optional (Defaults to False)): Graph type. True for directed Graph,
@@ -210,6 +210,8 @@ class NetworkUtil:
         tonode_list = []
         node_list = []
         size = 0
+
+        indataset = fiona.open(link_file)
 
         for line_feature in indataset:
             if fromnode_fldname in line_feature["properties"]:
