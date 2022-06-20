@@ -7,8 +7,8 @@ from networkx import Graph
 
 from pyincore.utils.networkutil import NetworkUtil as networkutil
 from pyincore import Dataset, NetworkDataset, BaseAnalysis
-from pyincore.globals import PYINCORE_ROOT_FOLDER
-
+from pyincore import IncoreClient
+import pyincore.globals as pyglobals
 
 
 @pytest.fixture
@@ -22,9 +22,9 @@ def client():
 
 
 def test_build_link_by_node():
-    node_file_path = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/epn_nodes.shp")
-    graph_file_path = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/graph.csv")
-    out_link_file_path = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/out_links.shp")
+    node_file_path = os.path.join(pyglobals.PYINCORE_ROOT_FOLDER, "tests/data/network/epn_nodes.shp")
+    graph_file_path = os.path.join(pyglobals.PYINCORE_ROOT_FOLDER, "tests/data/network/graph.csv")
+    out_link_file_path = os.path.join(pyglobals.PYINCORE_ROOT_FOLDER, "tests/data/network/out_links.shp")
 
     node_id = "NODENWID"
 
@@ -34,9 +34,9 @@ def test_build_link_by_node():
 
 
 def test_build_node_by_link():
-    link_file_path = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/epn_links.shp")
-    out_node_file_path = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/out_nodes.shp")
-    out_graph_file_path = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/out_graph.csv")
+    link_file_path = os.path.join(pyglobals.PYINCORE_ROOT_FOLDER, "tests/data/network/epn_links.shp")
+    out_node_file_path = os.path.join(pyglobals.PYINCORE_ROOT_FOLDER, "tests/data/network/out_nodes.shp")
+    out_graph_file_path = os.path.join(pyglobals.PYINCORE_ROOT_FOLDER, "tests/data/network/out_graph.csv")
 
     link_id = "linknwid"
     fromnode = "fromnode"
@@ -49,7 +49,7 @@ def test_build_node_by_link():
 
 
 def test_create_network_graph_from_link():
-    link_file_path = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/epn_links.shp")
+    link_file_path = os.path.join(pyglobals.PYINCORE_ROOT_FOLDER, "tests/data/network/epn_links.shp")
 
     fromnode = "fromnode"
     tonode = "tonode"
@@ -60,11 +60,17 @@ def test_create_network_graph_from_link():
         assert True
 
 
-def test_validate_network_node_ids():
-    node_id = "NODENWID"
-    fromnode = "fromnode"
-    tonode = "tonode"
-    networkutil.validate_network_node_ids(network_dataset, fromnode, tonode, node_id)
+# def test_validate_network_node_ids():
+    # dataset_id = "62719fc857f1d94b047447e6"
+    # network = NetworkDataset.from_data_service(dataset_id, datasvc)
+    # nodes = list(network.get_nodes())
+    # assert nodes[0]['properties']["guid"] == "9c39623d-920e-49e6-b272-83b2ec954b84"
+    # epn_network_id = "62719fc857f1d94b047447e6"
+    # network_dataset = NetworkDataset.from_data_service(epn_network_id, datasvc)
+    # node_id = "NODENWID"
+    # fromnode = "fromnode"
+    # tonode = "tonode"
+    # networkutil.validate_network_node_ids(network_dataset, fromnode, tonode, node_id)
 
     # network_data_type = "incore:network"
     # link_data_type = "incore:epnLinkVer1"
@@ -85,3 +91,4 @@ def test_validate_network_node_ids():
 
 if __name__ == '__main__':
     test_create_network_graph_from_link()
+    # test_validate_network_node_ids()()
