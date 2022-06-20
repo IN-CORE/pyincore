@@ -55,6 +55,20 @@ class NetworkDataset:
         return cls(dataset)
 
     @classmethod
+    def from_dataset(cls, dataset: Dataset):
+        """Turn Dataset into network component
+
+        Args:
+            dataset (obj): Dataset Object.
+
+        Returns:
+            obj: network dataset
+
+        """
+
+        return cls(dataset)
+
+    @classmethod
     def from_json_str(cls, json_str, data_service: DataService = None, folder_path=None):
         """Get Dataset from json string.
 

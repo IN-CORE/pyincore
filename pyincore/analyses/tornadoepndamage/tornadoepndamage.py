@@ -88,9 +88,9 @@ class TornadoEpnDamage(BaseAnalysis):
         super(TornadoEpnDamage, self).__init__(incore_client)
 
     def run(self):
-        network_dataset = self.get_input_dataset("epn_network")
-        link_dataset = NetworkDataset._network_component_from_dataset(network_dataset, "link").get_inventory_reader()
-        node_dataset = NetworkDataset._network_component_from_dataset(network_dataset, "node").get_inventory_reader()
+        network_dataset = NetworkDataset.from_dataset(self.get_input_dataset("epn_network"))
+        link_dataset = network_dataset.links.get_inventory_reader()
+        node_dataset = network_dataset.nodes.get_inventory_reader()
         tornado_id = self.get_parameter('tornado_id')
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
         self.load_remote_input_dataset("tornado", tornado_metadata["datasetId"])
