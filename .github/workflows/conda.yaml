@@ -65,7 +65,7 @@ jobs:
           PYPI=""
           UPLOAD="no"
           sed -e "s/ version = \".*\"/ version = \"${VERSION}\"/" \
-              -e "s/  path: .*/  path: ${PWD}/" \
+              -e "s#  path: .*#  path: ${PWD}#" \
               -i recipes/meta.yaml
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "LABELS=${LABELS}" >> $GITHUB_ENV
