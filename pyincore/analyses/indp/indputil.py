@@ -7,6 +7,7 @@
 import os
 
 import pyomo.environ as pyo
+from pyomo.core import value
 
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 from pyincore.analyses.indp.indpresults import INDPResults
@@ -157,12 +158,12 @@ class INDPUtil:
     @staticmethod
     def save_indp_model_to_file(model, out_model_dir, t, layer=0, suffix=''):
         """
-        This function saves Gurobi optimization model to file.
+        This function saves pyomo optimization model to file.
 
         Parameters
         ----------
-        model : gurobipy.Model
-            Gurobi optimization model
+        model : Pyomo.Model
+            Pyomo optimization model
         out_model_dir : str
             Directory to which the models should be written
         t : int
@@ -179,16 +180,20 @@ class INDPUtil:
         """
         if not os.path.exists(out_model_dir):
             os.makedirs(out_model_dir)
-        # Write models to file
-        l_name = "/Model_t%d_l%d_%s.lp" % (t, layer, suffix)
-        model.write(out_model_dir + l_name)
-        model.update()
+            # Write models to file
+        l_name = "/Model_t%d_l%d_%s.txt" % (t, layer, suffix)
+        file_id = open(out_model_dir + l_name, 'w')
+        model.pprint(ostream=file_id)
+        file_id.close()
         # Write solution to file
         s_name = "/Solution_t%d_l%d_%s.txt" % (t, layer, suffix)
         file_id = open(out_model_dir + s_name, 'w')
-        for vv in model.getVars():
-            file_id.write('%s %g\n' % (vv.varName, vv.x))
-        file_id.write('Obj: %g' % model.objVal)
+        for vv in model.component_data_objects(pyo.Var):
+            if vv.value:
+                file_id.write('%s %g\n' % (str(vv), vv.value))
+            else:
+                file_id.write('%s NONE\n' % (str(vv)))
+        file_id.write('Obj: %g' % value(model.Obj))
         file_id.close()
 
     @staticmethod
@@ -341,7 +346,7 @@ class INDPUtil:
                                    over_supp_cost_layer[layer] + under_supp_cost_layer[layer] + \
                                    space_prep_cost_layer[layer]
                 total_nd_lyr[layer] = space_prep_cost_layer[layer] + arc_cost_layer[layer] + flow_cost \
-                    + node_cost_layer[layer]
+                                      + node_cost_layer[layer]
             indp_results.add_cost(t, "Total", flow_cost + arc_cost + node_cost + over_supp_cost + under_supp_cost +
                                   space_prep_cost, total_lyr)
             indp_results.add_cost(t, "Total no disconnection", space_prep_cost + arc_cost + flow_cost + node_cost,
