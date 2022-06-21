@@ -2,53 +2,59 @@ pyincore
 ========
 
 **pyIncore** is a component of IN-CORE. It is a python package
-consisting of three primary components: 1) a set of service classes to
-interact with the IN-CORE web services described below, 2) IN-CORE
-analyses and 3) visualization. The pyIncore allows users to apply
-various hazards to infrastructure in selected areas, propagating the
-effect of physical infrastructure damage and loss of functionality to
-social and economic impacts.
+consisting of two primary components: 1) a set of service classes to
+interact with the IN-CORE web services described below, and 2) IN-CORE
+analyses. The pyIncore allows users to apply various hazards to infrastructure 
+in selected areas, propagating the effect of physical infrastructure damage 
+and loss of functionality to social and economic impacts.
 
-Prerequisites
--------------
+Installation with conda
+-----------------------
 
--  Requirements: IN-CORE account, Python 3.6-3.8, Anaconda or Miniconda,
-   Jupyter notebook.
+Installing **pyincore** with Conda is officially supported by IN-CORE development team. 
 
-Please read through the
-`Prerequisites <https://incore.ncsa.illinois.edu/doc/incore/pyincore/prerequisites.html>`__
-section at IN-CORE manual at least once completely before actually
-following them to avoid any installation problems!
+To add `conda-forge <https://conda-forge.org/>`__  channel to your environment, run
 
-Installation
-------------
+.. code-block:: console
 
-You can find this information at the
+   conda config –-add channels conda-forge
+
+To install **pyincore** package, run
+
+.. code-block:: console
+
+   conda install -c in-core pyincore
+
+
+To update **pyIncore**, run
+
+.. code-block:: console
+
+   conda update -c in-core pyincore
+
+You can find detail information at the
 `Installation <https://incore.ncsa.illinois.edu/doc/incore/pyincore/install_pyincore.html>`__
 section at IN-CORE manual.
 
-1. From the Terminal (Mac/Linux) or Command Prompt (Windows) add
-   `conda-forge <https://conda-forge.org/>`__ package repository/channel
-   to your environment: ``conda config –-add channels conda-forge``
+Installation with pip
+-----------------------
 
-2. To install pyIncore, navigate to the directory you want to use for
-   running Jupyter Notebooks and run the following command:
-   ``conda install -c in-core pyincore``
+Installing **pyincore** with pip is **NOT supported** by IN-CORE development team.
+Please use pip for installing pyincore at your discretion. 
 
-To check that the package is installed. run
+**Installing pyincore with pip is only tested on linux environment.**
 
-::
+**Prerequisite**
 
-   conda list
+* GDAL C library must be installed to install pyincore. (for Ubuntu, **gdal-bin** and **libgdal-dev**)
+* ipopt executable must be installed to run some analyses such as seaside CGE, joplin CGE, etc. 
 
-It will list all packages currently installed. You can check if pyincore
-exists in the list.
+To install **pyincore** package, run
 
-To update pyIncore run
+.. code-block:: console
 
-::
+   pip install pyincore
 
-   conda update -c in-core pyincore
 
 Testing and Running
 -------------------
