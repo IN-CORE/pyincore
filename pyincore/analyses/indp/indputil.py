@@ -6,7 +6,7 @@
 
 import os
 
-import pandas as pd
+import pyomo.environ as pyo
 
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 from pyincore.analyses.indp.indpresults import INDPResults
@@ -250,7 +250,7 @@ class INDPUtil:
         indp_results = INDPResults(layers)
         # compute total demand of all layers and each layer
         total_demand = 0.0
-        total_demand_layer = {l: 0.0 for l in layers}
+        total_demand_layer = {layer: 0.0 for layer in layers}
         for n, d in model.n_hat.nodes(data=True):
             demand_value = d['data']['inf_data'].demand
             if demand_value < 0:
@@ -264,13 +264,13 @@ class INDPUtil:
             under_supp_cost = 0.0
             under_supp = 0.0
             space_prep_cost = 0.0
-            node_cost_layer = {l: 0.0 for l in layers}
-            arc_cost_layer = {l: 0.0 for l in layers}
-            flow_cost_layer = {l: 0.0 for l in layers}
-            over_supp_cost_layer = {l: 0.0 for l in layers}
-            under_supp_cost_layer = {l: 0.0 for l in layers}
-            under_supp_layer = {l: 0.0 for l in layers}
-            space_prep_cost_layer = {l: 0.0 for l in layers}  # !!! populate this for each layer
+            node_cost_layer = {layer: 0.0 for layer in layers}
+            arc_cost_layer = {layer: 0.0 for layer in layers}
+            flow_cost_layer = {layer: 0.0 for layer in layers}
+            over_supp_cost_layer = {layer: 0.0 for layer in layers}
+            under_supp_cost_layer = {layer: 0.0 for layer in layers}
+            under_supp_layer = {layer: 0.0 for layer in layers}
+            space_prep_cost_layer = {layer: 0.0 for layer in layers}  # !!! populate this for each layer
             # Record node recovery actions.
             for n in model.n_hat_prime_nodes:
                 if model.T == 1:
@@ -336,11 +336,13 @@ class INDPUtil:
             # Calculate total costs.
             total_lyr = {}
             total_nd_lyr = {}
-            for l in layers:
-                total_lyr[l] = flow_cost_layer[l] + arc_cost_layer[l] + node_cost_layer[l] + over_supp_cost_layer[l] + \
-                               under_supp_cost_layer[l] + space_prep_cost_layer[l]
-                total_nd_lyr[l] = space_prep_cost_layer[l] + arc_cost_layer[l] + flow_cost + node_cost_layer[l]
-            indp_results.add_cost(t, "Total", flow_cost + arc_cost + node_cost + over_supp_cost + under_supp_cost + \
+            for layer in layers:
+                total_lyr[layer] = flow_cost_layer[layer] + arc_cost_layer[layer] + node_cost_layer[layer] + \
+                                   over_supp_cost_layer[layer] + under_supp_cost_layer[layer] + \
+                                   space_prep_cost_layer[layer]
+                total_nd_lyr[layer] = space_prep_cost_layer[layer] + arc_cost_layer[layer] + flow_cost \
+                    + node_cost_layer[layer]
+            indp_results.add_cost(t, "Total", flow_cost + arc_cost + node_cost + over_supp_cost + under_supp_cost +
                                   space_prep_cost, total_lyr)
             indp_results.add_cost(t, "Total no disconnection", space_prep_cost + arc_cost + flow_cost + node_cost,
                                   total_nd_lyr)
@@ -359,14 +361,14 @@ class INDPUtil:
         if t > 0:
             return sum(model.w_tilde[i, k, t_p] for t_p in range(1, t + 1) if t > 0) >= model.w[i, k, t]
         else:
-            return Constraint.Skip
+            return pyo.Constraint.Skip
 
     @staticmethod
     def time_dependent_arc_rule(model, i, k, j, kb, t):
         if t > 0:
             return sum(model.y_tilde[i, k, j, kb, t_p] for t_p in range(1, t + 1) if t > 0) >= model.y[i, k, j, kb, t]
         else:
-            return Constraint.Skip
+            return pyo.Constraint.Skip
 
     @staticmethod
     def arc_equality_rule(model, i, k, j, kb, t):
@@ -377,25 +379,26 @@ class INDPUtil:
                 return model.y[i, k, j, kb, t] == model.y[j, kb, i, k, t], \
                        model.y_tilde[i, k, j, kb, t] == model.y_tilde[j, kb, i, k, t]
         except KeyError:
-            return Constraint.Skip
+            return pyo.Constraint.Skip
 
     @staticmethod
-    def flow_conserv_node_rule(model, i, k, l, t):
+    def flow_conserv_node_rule(model, i, k, layer, t):
         d = model.n_hat.nodes[(i, k)]
         out_flow_constr = 0
         in_flow_constr = 0
         demand_constr = 0
         for u, v, a in model.n_hat.out_edges((i, k), data=True):
-            if l == 'b' or l in a['data']['inf_data'].extra_com.keys():
-                out_flow_constr += model.x[u, v, l, t]
+            if layer == 'b' or layer in a['data']['inf_data'].extra_com.keys():
+                out_flow_constr += model.x[u, v, layer, t]
         for u, v, a in model.n_hat.in_edges((i, k), data=True):
-            if l == 'b' or l in a['data']['inf_data'].extra_com.keys():
-                in_flow_constr += model.x[u, v, l, t]
-        if l == 'b':
-            demand_constr += d['data']['inf_data'].demand - model.delta_p[i, k, l, t] + model.delta_m[i, k, l, t]
+            if layer == 'b' or layer in a['data']['inf_data'].extra_com.keys():
+                in_flow_constr += model.x[u, v, layer, t]
+        if layer == 'b':
+            demand_constr += d['data']['inf_data'].demand - model.delta_p[i, k, layer, t] \
+                             + model.delta_m[i, k, layer, t]
         else:
-            demand_constr += d['data']['inf_data'].extra_com[l]['demand'] - model.delta_p[i, k, l, t] + \
-                             model.delta_m[i, k, l, t]
+            demand_constr += d['data']['inf_data'].extra_com[layer]['demand'] - model.delta_p[i, k, layer, t] + \
+                             model.delta_m[i, k, layer, t]
         return out_flow_constr - in_flow_constr == demand_constr
 
     @staticmethod
@@ -406,8 +409,8 @@ class INDPUtil:
             interdep_nodes_list = model.interdep_nodes[t].keys()  # Interdependent nodes with a damaged dependee node
         a = model.n_hat[i, k][j, kb]['data']['inf_data']
         lhs = model.x[i, k, j, kb, 'b', t]
-        for l in a.extra_com.keys():
-            lhs += model.x[i, k, j, kb, l, t]
+        for layer in a.extra_com.keys():
+            lhs += model.x[i, k, j, kb, layer, t]
         if ((i, k) in model.n_hat_prime_nodes) | ((i, k) in interdep_nodes_list):
             return lhs <= a.capacity * model.w[i, k, t]
         else:
@@ -421,8 +424,8 @@ class INDPUtil:
             interdep_nodes_list = model.interdep_nodes[t].keys()  # Interdependent nodes with a damaged dependee node
         a = model.n_hat[i, k][j, kb]['data']['inf_data']
         lhs = model.x[i, k, j, kb, 'b', t]
-        for l in a.extra_com.keys():
-            lhs += model.x[i, k, j, kb, l, t]
+        for layer in a.extra_com.keys():
+            lhs += model.x[i, k, j, kb, layer, t]
         if ((j, kb) in model.n_hat_prime_nodes) | ((j, kb) in interdep_nodes_list):
             return lhs <= a.capacity * model.w[j, kb, t]
         else:
@@ -436,8 +439,8 @@ class INDPUtil:
             interdep_nodes_list = model.interdep_nodes[t].keys()  # Interdependent nodes with a damaged dependee node
         a = model.n_hat[i, k][j, kb]['data']['inf_data']
         lhs = model.x[i, k, j, kb, 'b', t]
-        for l in a.extra_com.keys():
-            lhs += model.x[i, k, j, kb, l, t]
+        for layer in a.extra_com.keys():
+            lhs += model.x[i, k, j, kb, layer, t]
         if (i, k, j, kb) in model.a_hat_prime:
             return lhs <= a.capacity * model.y[i, k, j, kb, t]
         else:
@@ -488,7 +491,7 @@ class INDPUtil:
                 return resource_left_constr <= total_resource, [res_left_constr_sep[key] <= lval for key, lval in
                                                                 resource_dict]
         else:
-            return Constraint.Skip
+            return pyo.Constraint.Skip
 
     @staticmethod
     def interdependency_rule(model, i, k, t):
@@ -520,7 +523,7 @@ class INDPUtil:
                         interdep_l_constr += model.w[src, t] * gamma
                 interdep_r_constr += model.w[i, k, t]
                 return interdep_l_constr >= interdep_r_constr
-        return Constraint.Skip
+        return pyo.Constraint.Skip
 
     @staticmethod
     def node_geographic_space_rule(model, s, i, k, t):
@@ -530,7 +533,7 @@ class INDPUtil:
                 return model.w[(i, k), t] * d.in_space(s) <= model.z[s, t]
             else:
                 return model.w_tilde[(i, k), t] * d.in_space(s) <= model.z[s, t]
-        return Constraint.Skip
+        return pyo.Constraint.Skip
 
     @staticmethod
     def arc_geographic_space_rule(model, s, i, k, j, kb, t):
@@ -540,7 +543,7 @@ class INDPUtil:
                 return model.y[i, k, j, kb, t] * a.in_space(s) <= model.z[s, t]
             else:
                 return model.y_tilde[i, k, j, kb, t] * a.in_space(s) <= model.z[s, t]
-        return Constraint.Skip
+        return pyo.Constraint.Skip
 
     @staticmethod
     def collect_solution_pool(m, T, n_hat_prime, a_hat_prime):

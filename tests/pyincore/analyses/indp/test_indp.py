@@ -26,6 +26,7 @@ def run_with_base_class():
     indp_analysis.set_parameter("t_steps", 10)
     indp_analysis.set_parameter("time_resource", True)
     indp_analysis.set_parameter("save_model", True)
+    indp_analysis.set_parameter("solver", "glpk")
 
     # input datasets
     indp_analysis.load_remote_input_dataset("nodes_reptime_func", "61c0f82a837ac508f9a16d79")

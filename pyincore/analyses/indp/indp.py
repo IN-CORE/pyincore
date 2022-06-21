@@ -16,7 +16,6 @@ from pyomo.util.infeasible import log_infeasible_constraints
 
 from pyincore import BaseAnalysis
 from pyincore.analyses.indp.dislocationutils import DislocationUtil
-from pyincore.analyses.indp.indpcomponents import INDPComponents
 from pyincore.analyses.indp.indpresults import INDPResults
 from pyincore.analyses.indp.indputil import INDPUtil
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
@@ -75,18 +74,23 @@ class INDP(BaseAnalysis):
         if save_mode is None:
             save_mode = False
 
+        solver = self.get_parameter("solver")
+        if solver is None:
+            solver = "glpk"
+
         action_result, cost_result, runtime_result = self.run_method(fail_sce_param, RC, layers, method=method,
                                                                      t_steps=t_steps,
                                                                      misc={'DYNAMIC_PARAMS': dynamic_params,
                                                                            'EXTRA_COMMODITY': extra_commodity,
                                                                            'TIME_RESOURCE': time_resource},
-                                                                     save_mode=save_mode)
+                                                                     save_mode=save_mode,
+                                                                     solver=solver)
 
         self.set_result_csv_data("action", action_result, name="actions.csv")
         self.set_result_csv_data("cost", cost_result, name="costs.csv")
         self.set_result_csv_data("runtime", runtime_result, name="run_time.csv")
 
-    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None, save_mode=False):
+    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None, save_mode=False, solver="glpk"):
         """
         This function runs restoration analysis based on INDP or td-INDP for different numbers of resources.
 
@@ -101,7 +105,7 @@ class INDP(BaseAnalysis):
             t_steps (int): Number of time steps of the analysis.
             misc (dict): A dictionary that contains miscellaneous data needed for the analysis
             save_mode (bool): Flag indicates if the model should be saved or not
-
+            solver (str): Either glpk or Gurobi
         Returns:
 
         """
@@ -129,7 +133,7 @@ class INDP(BaseAnalysis):
         for v_i, v in enumerate(v_r):
             if method == 'INDP':
                 params = {"NUM_ITERATIONS": t_steps, "OUTPUT_DIR": 'indp_results', "V": v,
-                          "T": 1, 'L': layers, "ALGORITHM": "INDP"}
+                          "T": 1, 'L': layers, "ALGORITHM": "INDP", "SOLVER": solver}
             elif method == 'TDINDP':
                 params = {"OUTPUT_DIR": 'tdindp_results', "V": v, "T": t_steps, 'L': layers,
                           "ALGORITHM": "INDP"}
@@ -288,24 +292,23 @@ class INDP(BaseAnalysis):
                                                    params['DYNAMIC_PARAMS']['DEMAND_DATA'])
             v_0 = {x: 0 for x in params["V"].keys()}
             results = self.indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
-                                functionality=functionality, co_location=co_location)
+                                functionality=functionality, co_location=co_location, solver_engine=params['SOLVER'])
             indp_results = results[1]
-            indp_results.add_components(0, INDPComponents.calculate_components(results[0], interdependent_net,
-                                                                               layers=controlled_layers))
+            if save_model:
+                INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", 0)
             for i in range(params["NUM_ITERATIONS"]):
                 print("-Time Step (iINDP)", i + 1, "/", params["NUM_ITERATIONS"])
                 if params['DYNAMIC_PARAMS']:
                     DislocationUtil.dynamic_parameters(interdependent_net, original_N, i + 1,
                                                        params['DYNAMIC_PARAMS']['DEMAND_DATA'])
                 results = self.indp(interdependent_net, params["V"], T, layers, controlled_layers=controlled_layers,
-                                    forced_actions=forced_actions, co_location=co_location)
+                                    co_location=co_location, functionality=functionality,
+                                    solver_engine=params['SOLVER'])
                 indp_results.extend(results[1], t_offset=i + 1)
                 if save_model:
                     INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", i + 1)
                 # Modify network to account for recovery and calculate components.
                 INDPUtil.apply_recovery(interdependent_net, indp_results, i + 1)
-                indp_results.add_components(i + 1, INDPComponents.calculate_components(results[0], interdependent_net,
-                                                                                       layers=controlled_layers))
         else:
             # td-INDP formulations. Includes "DELTA_T" parameter for sliding windows to increase efficiency.
             # Edit 2/8/16: "Sliding window" now overlaps.
@@ -321,10 +324,10 @@ class INDP(BaseAnalysis):
             # Initial percolation calculations.
             v_0 = {x: 0 for x in params["V"].keys()}
             results = self.indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
-                                functionality=functionality, co_location=co_location)
+                                functionality=functionality, co_location=co_location, solver_engine=params['SOLVER'])
             indp_results = results[1]
-            indp_results.add_components(0, INDPComponents.calculate_components(results[0], interdependent_net,
-                                                                               layers=controlled_layers))
+            if save_model:
+                INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", 0)
             for n in range(num_time_windows):
                 print("-Time window (td-INDP)", n + 1, "/", num_time_windows)
                 functionality_t = {}
@@ -341,24 +344,18 @@ class INDP(BaseAnalysis):
                 # Run td-INDP.
                 results = self.indp(interdependent_net, params["V"], time_window_length + 1, layers,
                                     controlled_layers=controlled_layers, functionality=functionality_t,
-                                    forced_actions=forced_actions, co_location=co_location)
+                                    co_location=co_location, solver_engine=params['SOLVER'])
                 if save_model:
                     INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", n + 1)
                 if "WINDOW_LENGTH" in params:
                     indp_results.extend(results[1], t_offset=n + 1, t_start=1, t_end=2)
                     # Modify network for recovery actions and calculate components.
                     INDPUtil.apply_recovery(interdependent_net, results[1], 1)
-                    indp_results.add_components(n + 1,
-                                                INDPComponents.calculate_components(results[0], interdependent_net,
-                                                                                    1, layers=controlled_layers))
                 else:
                     indp_results.extend(results[1], t_offset=0)
                     for t in range(1, T):
                         # Modify network to account for recovery actions.
                         INDPUtil.apply_recovery(interdependent_net, indp_results, t)
-                        indp_results.add_components(1,
-                                                    INDPComponents.calculate_components(results[0], interdependent_net,
-                                                                                        t, layers=controlled_layers))
         # Save results of current simulation.
         if save:
             if not os.path.exists(output_dir + '/agents'):
@@ -715,6 +712,13 @@ class INDP(BaseAnalysis):
                     'required': False,
                     'description': 'If the Gurobi optimization model should be saved to file. The default is False.',
                     'type': bool
+                },
+                {
+                    'id': 'solver',
+                    'required': False,
+                    'description': "Solver to use for optimization model. Can choose between opensourced glpk vs "
+                                   "commercialized Gurobi",
+                    'type': str
                 }
 
             ],
