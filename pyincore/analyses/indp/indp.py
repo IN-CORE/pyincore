@@ -7,9 +7,12 @@
 
 import copy
 import os
+import sys
 import time
 
-from gurobipy import GRB, Model, LinExpr
+import pyomo.environ as pyo
+from pyomo.opt import SolverFactory, TerminationCondition
+from pyomo.util.infeasible import log_infeasible_constraints
 
 from pyincore import BaseAnalysis
 from pyincore.analyses.indp.dislocationutils import DislocationUtil
@@ -364,10 +367,10 @@ class INDP(BaseAnalysis):
 
         return indp_results
 
-    def indp(self, N, v_r, T=1, layers=None, controlled_layers=None, functionality=None, forced_actions=False,
-             fixed_nodes=None, print_cmd=True, time_limit=None, co_location=True, solution_pool=None):
+    def indp(self, N, v_r, T=1, layers=None, controlled_layers=None, functionality=None, fixed_nodes=None,
+             print_cmd=True, time_limit=None, co_location=True, solver_engine='glpk'):
         """
-        INDP optimization problem. It also solves td-INDP if T > 1.
+        INDP optimization problem in Pyomo. It also solves td-INDP if T > 1.
 
         Parameters
         ----------
@@ -388,8 +391,6 @@ class INDP(BaseAnalysis):
         functionality : dict, optional
             Dictionary of nodes to functionality values for non-controlled nodes.
             Used for decentralized optimization. The default is None.
-        forced_actions : bool, optional
-            If true, it forces the optimizer to repair at least one element. The default is False.
         fixed_nodes : dict, optional
             It fixes the functionality of given elements to a given value. The default is None.
         print_cmd : bool, optional
@@ -398,10 +399,9 @@ class INDP(BaseAnalysis):
             Time limit for the optimizer to stop. The default is None.
         co_location : bool, optional
             If false, exclude geographical interdependency from the optimization. The default is True.
-        solution_pool : int, optional
-            The number of solutions that should be retrieved from the optimizer in addition to the optimal one.
-            The default is None.
-
+        solver_engine : str, optional
+            Name of the solver engine. Options are 'Gurobi' (commercial optimizer) and 'glpk' (open-source optimizer).
+            The default is 'glpk'.
         Returns
         -------
         : list
@@ -412,8 +412,6 @@ class INDP(BaseAnalysis):
             addition to the optimal one collected using :func:`collect_solution_pool`.
 
         """
-        if fixed_nodes is None:
-            fixed_nodes = {}
         if functionality is None:
             functionality = {}
         if layers is None:
@@ -422,379 +420,201 @@ class INDP(BaseAnalysis):
             controlled_layers = layers
 
         start_time = time.time()
-        m = Model('indp')
-        m.setParam('OutputFlag', False)
-        if time_limit:
-            m.setParam('TimeLimit', time_limit)
+
+        m = pyo.ConcreteModel()
+        m.T = T
+        m.N = N
+        m.v_r = v_r
+        m.functionality = functionality
+
+        '''Sets and Dictionaries'''
         g_prime_nodes = [n[0] for n in N.G.nodes(data=True) if n[1]['data']['inf_data'].net_id in layers]
         g_prime = N.G.subgraph(g_prime_nodes)
-        # Damaged nodes in whole network
-        n_prime = [n for n in g_prime.nodes(data=True) if n[1]['data']['inf_data'].repaired == 0.0]
         # Nodes in controlled network.
-        n_hat_nodes = [n[0] for n in g_prime.nodes(data=True) if n[1]['data']['inf_data'].net_id in controlled_layers]
-        n_hat = g_prime.subgraph(n_hat_nodes)
+        m.n_hat_nodes = pyo.Set(
+            initialize=[n[0] for n in g_prime.nodes(data=True) if n[1]['data']['inf_data'].net_id in controlled_layers])
+        m.n_hat = g_prime.subgraph(m.n_hat_nodes.ordered_data())
         # Damaged nodes in controlled network.
-        n_hat_prime = [n for n in n_hat.nodes(data=True) if n[1]['data']['inf_data'].repaired == 0.0]
+        m.n_hat_prime_nodes = pyo.Set(
+            initialize=[n[0] for n in m.n_hat.nodes(data=True) if n[1]['data']['inf_data'].repaired == 0.0])
+        n_hat_prime = [n for n in m.n_hat.nodes(data=True) if n[1]['data']['inf_data'].repaired == 0.0]
+        # Arcs in controlled network.
+        m.a_hat = pyo.Set(
+            initialize=[(u, v) for u, v, a in g_prime.edges(data=True) if
+                        a['data']['inf_data'].layer in controlled_layers])
         # Damaged arcs in whole network
+        m.a_prime = pyo.Set(
+            initialize=[(u, v) for u, v, a in g_prime.edges(data=True) if a['data']['inf_data'].functionality == 0.0])
         a_prime = [(u, v, a) for u, v, a in g_prime.edges(data=True) if a['data']['inf_data'].functionality == 0.0]
         # Damaged arcs in controlled network.
-        a_hat_prime = [(u, v, a) for u, v, a in a_prime if n_hat.has_node(u) and n_hat.has_node(v)]
-        S = N.S
+        m.a_hat_prime = pyo.Set(initialize=[(u, v) for u, v, _ in a_prime if m.n_hat.has_node(u)
+                                            and m.n_hat.has_node(v)])
+        a_hat_prime = [(u, v, a) for u, v, a in a_prime if m.n_hat.has_node(u) and m.n_hat.has_node(v)]
+        # Sub-spaces
+        m.S = pyo.Set(initialize=N.S)
+
         # Populate interdependencies. Add nodes to N' if they currently rely on a non-functional node.
-        interdep_nodes = {}
+        m.interdep_nodes = {}
         for u, v, a in g_prime.edges(data=True):
             if not functionality:
                 if a['data']['inf_data'].is_interdep and g_prime.nodes[u]['data']['inf_data'].functionality == 0.0:
                     # print "Dependency edge goes from:",u,"to",v
-                    if v not in interdep_nodes:
-                        interdep_nodes[v] = []
-                    interdep_nodes[v].append((u, a['data']['inf_data'].gamma))
+                    if v not in m.interdep_nodes:
+                        m.interdep_nodes[v] = []
+                    m.interdep_nodes[v].append((u, a['data']['inf_data'].gamma))
             else:
-                # Should populate n_hat with layers that are controlled. Then go through n_hat.edges(data=True)
+                # Should populate m.n_hat with layers that are controlled. Then go through m.n_hat.edges(data=True)
                 # to find interdependencies.
                 for t in range(T):
-                    if t not in interdep_nodes:
-                        interdep_nodes[t] = {}
-                    if n_hat.has_node(v) and a['data']['inf_data'].is_interdep:
+                    if t not in m.interdep_nodes:
+                        m.interdep_nodes[t] = {}
+                    if m.n_hat.has_node(v) and a['data']['inf_data'].is_interdep:
                         if functionality[t][u] == 0.0:
-                            if v not in interdep_nodes[t]:
-                                interdep_nodes[t][v] = []
-                            interdep_nodes[t][v].append((u, a['data']['inf_data'].gamma))
+                            if v not in m.interdep_nodes[t]:
+                                m.interdep_nodes[t][v] = []
+                            m.interdep_nodes[t][v].append((u, a['data']['inf_data'].gamma))
 
-        for t in range(T):
-            # Add geographical space variables.
-            if co_location:
-                for s in S:
-                    m.addVar(name='z_' + str(s.id) + "," + str(t), vtype=GRB.BINARY)
-            # Add over/under-supply variables for each node.
-            for n, d in n_hat.nodes(data=True):
-                m.addVar(name='delta+_' + str(n) + "," + str(t), lb=0.0)
-                m.addVar(name='delta-_' + str(n) + "," + str(t), lb=0.0)
-                for layer in d['data']['inf_data'].extra_com.keys():
-                    m.addVar(name='delta+_' + str(n) + "," + str(t) + "," + str(layer), lb=0.0)
-                    m.addVar(name='delta-_' + str(n) + "," + str(t) + "," + str(layer), lb=0.0)
-            # Add functionality binary variables for each node in N'.
-            for n, d in n_hat.nodes(data=True):
-                m.addVar(name='w_' + str(n) + "," + str(t), vtype=GRB.BINARY)
-                if T > 1:
-                    m.addVar(name='w_tilde_' + str(n) + "," + str(t), vtype=GRB.BINARY)
-                    # Fix node values (only for iINDP)
-            m.update()
-            for key, val in fixed_nodes.items():
-                m.getVarByName('w_' + str(key) + "," + str(0)).lb = val
-                m.getVarByName('w_' + str(key) + "," + str(0)).ub = val
-            # Add flow variables for each arc. (main commodity)
-            for u, v, a in n_hat.edges(data=True):
-                m.addVar(name='x_' + str(u) + "," + str(v) + "," + str(t), lb=0.0)
-                for layer in a['data']['inf_data'].extra_com.keys():
-                    m.addVar(name='x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer), lb=0.0)
-            # Add functionality binary variables for each arc in A'.
-            for u, v, a in a_hat_prime:
-                m.addVar(name='y_' + str(u) + "," + str(v) + "," + str(t), vtype=GRB.BINARY)
-                if T > 1:
-                    m.addVar(name='y_tilde_' + str(u) + "," + str(v) + "," + str(t), vtype=GRB.BINARY)
-        m.update()
-
-        # Populate objective function.
-        obj_func = LinExpr()
-        for t in range(T):
-            if co_location:
-                for s in S:
-                    obj_func += s.cost * m.getVarByName('z_' + str(s.id) + "," + str(t))
-            for u, v, a in a_hat_prime:
-                if T == 1:
-                    obj_func += (float(a['data']['inf_data'].reconstruction_cost) / 2.0) * m.getVarByName(
-                        'y_' + str(u) + "," + str(v) + "," + str(t))
-                else:
-                    obj_func += (float(a['data']['inf_data'].reconstruction_cost) / 2.0) * m.getVarByName(
-                        'y_tilde_' + str(u) + "," + str(v) + "," + str(t))
-            for n, d in n_hat_prime:
-                if T == 1:
-                    obj_func += d['data']['inf_data'].reconstruction_cost * m.getVarByName('w_' + str(n) + "," + str(t))
-                else:
-                    obj_func += d['data']['inf_data'].reconstruction_cost * m.getVarByName(
-                        'w_tilde_' + str(n) + "," + str(t))
-            for n, d in n_hat.nodes(data=True):
-                obj_func += d['data']['inf_data'].oversupply_penalty * m.getVarByName('delta+_' + str(n) + "," + str(t))
-                obj_func += d['data']['inf_data'].undersupply_penalty * m.getVarByName(
-                    'delta-_' + str(n) + "," + str(t))
-                for layer, val in d['data']['inf_data'].extra_com.items():
-                    obj_func += val['oversupply_penalty'] * m.getVarByName(
-                        'delta+_' + str(n) + "," + str(t) + "," + str(layer))
-                    obj_func += val['undersupply_penalty'] * m.getVarByName(
-                        'delta-_' + str(n) + "," + str(t) + "," + str(layer))
-
-            for u, v, a in n_hat.edges(data=True):
-                obj_func += a['data']['inf_data'].flow_cost * m.getVarByName(
-                    'x_' + str(u) + "," + str(v) + "," + str(t))
-                for layer, val in a['data']['inf_data'].extra_com.items():
-                    obj_func += val['flow_cost'] * m.getVarByName(
-                        'x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer))
-
-        m.setObjective(obj_func, GRB.MINIMIZE)
-        m.update()
-
-        # Constraints.
-        # Time-dependent constraints.
+        '''Variables'''
+        m.time_step = pyo.Set(initialize=range(T))
+        # Add geographical space variables.
+        if co_location:
+            m.S_ids = pyo.Set(initialize=[s.id for s in m.S.value])
+            m.z = pyo.Var(m.S_ids, m.time_step, domain=pyo.Binary)
+        # Add functionality binary variables for each node in N'.
+        m.w = pyo.Var(m.n_hat_nodes, m.time_step, domain=pyo.Binary)
         if T > 1:
-            for n, d in n_hat_prime:
-                m.addConstr(m.getVarByName('w_' + str(n) + ",0"), GRB.EQUAL, 0,
-                            "Initial state at node " + str(n) + "," + str(0))
-            for u, v, a in a_hat_prime:
-                m.addConstr(m.getVarByName('y_' + str(u) + "," + str(v) + ",0"), GRB.EQUAL, 0,
-                            "Initial state at arc " + str(u) + "," + str(v) + "," + str(0))
+            m.w_tilde = pyo.Var(m.n_hat_nodes, m.time_step, domain=pyo.Binary)
+        # Add functionality binary variables for each arc in A'.
+        m.y = pyo.Var(m.a_hat_prime, m.time_step, domain=pyo.Binary)
+        if T > 1:
+            m.y_tilde = pyo.Var(m.a_hat_prime, m.time_step, domain=pyo.Binary)
+        # Add variables considering extra commodity in addition to the base one
+        node_com_idx = []
+        for n, d in m.n_hat.nodes(data=True):
+            node_com_idx.append((n, 'b'))
+            for key, val in d['data']['inf_data'].extra_com.items():
+                node_com_idx.append((n, key))
+        arc_com_idx = []
+        for u, v, a in m.n_hat.edges(data=True):
+            arc_com_idx.append((u, v, 'b'))
+            for key, val in a['data']['inf_data'].extra_com.items():
+                arc_com_idx.append((u, v, key))
+        # Add over/under-supply variables for each node.
+        m.delta_p = pyo.Var(node_com_idx, m.time_step, domain=pyo.NonNegativeReals)
+        m.delta_m = pyo.Var(node_com_idx, m.time_step, domain=pyo.NonNegativeReals)
+        # Add flow variables for each arc. (main commodity)
+        m.x = pyo.Var(arc_com_idx, m.time_step, domain=pyo.NonNegativeReals)
 
-        for t in range(T):
-            # Time-dependent constraint.
-            for n, d in n_hat_prime:
-                if t > 0:
-                    w_tilde_sum = LinExpr()
-                    for t_prime in range(1, t + 1):
-                        w_tilde_sum += m.getVarByName('w_tilde_' + str(n) + "," + str(t_prime))
-                    m.addConstr(m.getVarByName('w_' + str(n) + "," + str(t)), GRB.LESS_EQUAL, w_tilde_sum,
-                                "Time dependent recovery constraint at node " + str(n) + "," + str(t))
-            for u, v, a in a_hat_prime:
-                if t > 0:
-                    y_tilde_sum = LinExpr()
-                    for t_prime in range(1, t + 1):
-                        y_tilde_sum += m.getVarByName('y_tilde_' + str(u) + "," + str(v) + "," + str(t_prime))
-                    m.addConstr(m.getVarByName('y_' + str(u) + "," + str(v) + "," + str(t)), GRB.LESS_EQUAL,
-                                y_tilde_sum,
-                                "Time dependent recovery constraint at arc " + str(u) + "," + str(v) + "," + str(t))
-            # Enforce a_i,j to be fixed if a_j,i is fixed (and vice versa).
-            for u, v, a in a_hat_prime:
-                # print u,",",v
-                m.addConstr(m.getVarByName('y_' + str(u) + "," + str(v) + "," + str(t)), GRB.EQUAL,
-                            m.getVarByName('y_' + str(v) + "," + str(u) + "," + str(t)),
-                            "Arc reconstruction equality (" + str(u) + "," + str(v) + "," + str(t) + ")")
-                if T > 1:
-                    m.addConstr(m.getVarByName('y_tilde_' + str(u) + "," + str(v) + "," + str(t)), GRB.EQUAL,
-                                m.getVarByName('y_tilde_' + str(v) + "," + str(u) + "," + str(t)),
-                                "Arc reconstruction equality (" + str(u) + "," + str(v) + "," + str(t) + ")")
-            # Conservation of flow constraint. (2) in INDP paper.
-            for n, d in n_hat.nodes(data=True):
-                out_flow_constr = LinExpr()
-                in_flow_constr = LinExpr()
-                demand_constr = LinExpr()
-                for u, v, a in n_hat.out_edges(n, data=True):
-                    out_flow_constr += m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t))
-                for u, v, a in n_hat.in_edges(n, data=True):
-                    in_flow_constr += m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t))
-                demand_constr += d['data']['inf_data'].demand - m.getVarByName(
-                    'delta+_' + str(n) + "," + str(t)) + m.getVarByName('delta-_' + str(n) + "," + str(t))
-                m.addConstr(out_flow_constr - in_flow_constr, GRB.EQUAL, demand_constr,
-                            "Flow conservation constraint " + str(n) + "," + str(t))
-                for layer, val in d['data']['inf_data'].extra_com.items():
-                    out_flow_constr = LinExpr()
-                    in_flow_constr = LinExpr()
-                    demand_constr = LinExpr()
-                    for u, v, a in n_hat.out_edges(n, data=True):
-                        out_flow_constr += m.getVarByName(
-                            'x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer))
-                    for u, v, a in n_hat.in_edges(n, data=True):
-                        in_flow_constr += m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer))
-                    demand_constr += val['demand'] - m.getVarByName(
-                        'delta+_' + str(n) + "," + str(t) + "," + str(layer)) + m.getVarByName(
-                        'delta-_' + str(n) + "," + str(t) + "," + str(layer))
-                    m.addConstr(out_flow_constr - in_flow_constr, GRB.EQUAL, demand_constr,
-                                "Flow conservation constraint " + str(n) + "," + str(t) + "," + str(layer))
-
-            # Flow functionality constraints.
-            if not functionality:
-                interdep_nodes_list = interdep_nodes.keys()  # Interdependent nodes with a damaged dependee node
-            else:
-                interdep_nodes_list = interdep_nodes[t].keys()  # Interdependent nodes with a damaged dependee node
-            for u, v, a in n_hat.edges(data=True):
-                lhs = m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t)) + \
-                      sum([m.getVarByName('x_' + str(u) + "," + str(v) + "," + str(t) + "," + str(layer)) for layer in
-                           a['data']['inf_data'].extra_com.keys()])
-                if (u in [n for (n, d) in n_hat_prime]) | (u in interdep_nodes_list):
-                    m.addConstr(lhs, GRB.LESS_EQUAL,
-                                a['data']['inf_data'].capacity * m.getVarByName('w_' + str(u) + "," + str(t)),
-                                "Flow in functionality constraint(" + str(u) + "," + str(v) + "," + str(t) + ")")
+        # Fix node values
+        if fixed_nodes:
+            for key, val in fixed_nodes.items():
+                if m.T == 1:
+                    m.w[key].fix(val)
                 else:
-                    m.addConstr(lhs, GRB.LESS_EQUAL,
-                                a['data']['inf_data'].capacity * N.G.nodes[u]['data']['inf_data'].functionality,
-                                "Flow in functionality constraint (" + str(u) + "," + str(v) + "," + str(t) + ")")
-                if (v in [n for (n, d) in n_hat_prime]) | (v in interdep_nodes_list):
-                    m.addConstr(lhs, GRB.LESS_EQUAL,
-                                a['data']['inf_data'].capacity * m.getVarByName('w_' + str(v) + "," + str(t)),
-                                "Flow out functionality constraint(" + str(u) + "," + str(v) + "," + str(t) + ")")
-                else:
-                    m.addConstr(lhs, GRB.LESS_EQUAL,
-                                a['data']['inf_data'].capacity * N.G.nodes[v]['data']['inf_data'].functionality,
-                                "Flow out functionality constraint (" + str(u) + "," + str(v) + "," + str(t) + ")")
-                if (u, v, a) in a_hat_prime:
-                    m.addConstr(lhs, GRB.LESS_EQUAL,
-                                a['data']['inf_data'].capacity * m.getVarByName(
-                                    'y_' + str(u) + "," + str(v) + "," + str(t)),
-                                "Flow arc functionality constraint (" + str(u) + "," + str(v) + "," + str(t) + ")")
-                else:
-                    m.addConstr(lhs, GRB.LESS_EQUAL,
-                                a['data']['inf_data'].capacity * N.G[u][v]['data']['inf_data'].functionality,
-                                "Flow arc functionality constraint(" + str(u) + "," + str(v) + "," + str(t) + ")")
+                    m.w_tilde[key].fix(val)
 
-            # Resource availability constraints.
-            for rc, val in v_r.items():
-                is_sep_res = False
-                if isinstance(val, int):
-                    total_resource = val
-                else:
-                    is_sep_res = True
-                    total_resource = sum([lval for _, lval in val.items()])
-                    assert len(val.keys()) == len(layers), "The number of resource \
-                        values does not match the number of layers."
-
-                resource_left_constr = LinExpr()
-                if is_sep_res:
-                    res_left_constr_sep = {key: LinExpr() for key in val.keys()}
-
-                for u, v, a in a_hat_prime:
-                    idx_lyr = a['data']['inf_data'].layer
-                    res_use = 0.5 * a['data']['inf_data'].resource_usage['h_' + rc]
-                    if T == 1:
-                        resource_left_constr += res_use * m.getVarByName('y_' + str(u) + "," + str(v) + "," + str(t))
-                        if is_sep_res:
-                            res_left_constr_sep[idx_lyr] += res_use * m.getVarByName(
-                                'y_' + str(u) + "," + str(v) + "," + str(t))
-                    else:
-                        resource_left_constr += res_use * m.getVarByName(
-                            'y_tilde_' + str(u) + "," + str(v) + "," + str(t))
-                        if is_sep_res:
-                            res_left_constr_sep[idx_lyr] += res_use * m.getVarByName(
-                                'y_tilde_' + str(u) + "," + str(v) + "," + str(t))
-
-                for n, d in n_hat_prime:
-                    idx_lyr = n[1]
-                    res_use = d['data']['inf_data'].resource_usage['p_' + rc]
-                    if T == 1:
-                        resource_left_constr += res_use * m.getVarByName('w_' + str(n) + "," + str(t))
-                        if is_sep_res:
-                            res_left_constr_sep[idx_lyr] += res_use * m.getVarByName('w_' + str(n) + "," + str(t))
-                    else:
-                        resource_left_constr += res_use * m.getVarByName('w_tilde_' + str(n) + "," + str(t))
-                        if is_sep_res:
-                            res_left_constr_sep[idx_lyr] += res_use * m.getVarByName('w_tilde_' + str(n) + "," + str(t))
-
-                m.addConstr(resource_left_constr, GRB.LESS_EQUAL, total_resource, "Resource availability constraint "
-                                                                                  "for " + rc + " at " + str(t) + ".")
-                if is_sep_res:
-                    for k, lval in val.items():
-                        m.addConstr(res_left_constr_sep[k], GRB.LESS_EQUAL, lval, "Resource availability constraint "
-                                                                                  "for " + rc + " at " + str(
-                            t) + " for layer " + str(k) + ".")
-
-            # Interdependency constraints
-            infeasible_actions = []
-            for n, d in n_hat.nodes(data=True):
-                if not functionality:
-                    if n in interdep_nodes:
-                        interdep_l_constr = LinExpr()
-                        interdep_r_constr = LinExpr()
-                        for interdep in interdep_nodes[n]:
-                            src = interdep[0]
-                            gamma = interdep[1]
-                            if not n_hat.has_node(src):
-                                infeasible_actions.append(n)
-                                interdep_l_constr += 0
-                            else:
-                                interdep_l_constr += m.getVarByName('w_' + str(src) + "," + str(t)) * gamma
-                        interdep_r_constr += m.getVarByName('w_' + str(n) + "," + str(t))
-                        m.addConstr(interdep_l_constr, GRB.GREATER_EQUAL, interdep_r_constr,
-                                    "Interdependency constraint for node " + str(n) + "," + str(t))
-                else:
-                    if n in interdep_nodes[t]:
-                        # print interdep_nodes[t]
-                        interdep_l_constr = LinExpr()
-                        interdep_r_constr = LinExpr()
-                        for interdep in interdep_nodes[t][n]:
-                            src = interdep[0]
-                            gamma = interdep[1]
-                            if not n_hat.has_node(src):
-                                if print_cmd:
-                                    print("Forcing", str(n), "to be 0 (dep. on", str(src), ")")
-                                infeasible_actions.append(n)
-                                interdep_l_constr += 0
-                            else:
-                                interdep_l_constr += m.getVarByName('w_' + str(src) + "," + str(t)) * gamma
-                        interdep_r_constr += m.getVarByName('w_' + str(n) + "," + str(t))
-                        m.addConstr(interdep_l_constr, GRB.GREATER_EQUAL, interdep_r_constr,
-                                    "Interdependency constraint for node " + str(n) + "," + str(t))
-
-            # Forced actions (if applicable)
-            if forced_actions:
-                recovery_sum = LinExpr()
-                feasible_nodes = [(n, d) for n, d in n_hat_prime if n not in infeasible_actions]
-                if len(feasible_nodes) + len(a_hat_prime) > 0:
-                    for n, d in feasible_nodes:
-                        if T == 1:
-                            recovery_sum += m.getVarByName('w_' + str(n) + "," + str(t))
-                        else:
-                            recovery_sum += m.getVarByName('w_tilde_' + str(n) + "," + str(t))
-                    for u, v, a in a_hat_prime:
-                        if T == 1:
-                            recovery_sum += m.getVarByName('y_' + str(u) + "," + str(v) + "," + str(t))
-                        else:
-                            recovery_sum += m.getVarByName('y_tilde_' + str(u) + "," + str(v) + "," + str(t))
-                    m.addConstr(recovery_sum, GRB.GREATER_EQUAL, 1, "Forced action constraint")
-
-            # Geographic space constraints
+        '''Populate objective function'''
+        obj_func = 0
+        for t in range(m.T):
             if co_location:
-                for s in S:
-                    for n, d in n_hat_prime:
-                        if d['data']['inf_data'].in_space(s.id):
-                            if T == 1:
-                                m.addConstr(
-                                    m.getVarByName('w_' + str(n) + "," + str(t)) * d['data']['inf_data'].in_space(s.id),
-                                    GRB.LESS_EQUAL, m.getVarByName('z_' + str(s.id) + "," + str(t)),
-                                    "Geographical space constraint for node " + str(n) + "," + str(t))
-                            else:
-                                m.addConstr(
-                                    m.getVarByName('w_tilde_' + str(n) + "," + str(t)) * d['data']['inf_data'].in_space(
-                                        s.id), GRB.LESS_EQUAL, m.getVarByName('z_' + str(s.id) + "," + str(t)),
-                                    "Geographical space constraint for node " + str(n) + "," + str(t))
-                    for u, v, a in a_hat_prime:
-                        if a['data']['inf_data'].in_space(s.id):
-                            if T == 1:
-                                m.addConstr(m.getVarByName('y_' + str(u) + "," + str(v) + "," + str(t)) * a['data'][
-                                    'inf_data'].in_space(s.id), GRB.LESS_EQUAL,
-                                            m.getVarByName('z_' + str(s.id) + "," + str(t)),
-                                            "Geographical space constraint for arc (" + str(u) + "," + str(v) + ")")
-                            else:
-                                m.addConstr(
-                                    m.getVarByName('y_tilde_' + str(u) + "," + str(v) + "," + str(t)) * a['data'][
-                                        'inf_data'].in_space(s.id), GRB.LESS_EQUAL,
-                                    m.getVarByName('z_' + str(s.id) + "," + str(t)),
-                                    "Geographical space constraint for arc (" + str(u) + "," + str(v) + ")")
-        m.update()
-        # print("Solving... (%d vars)" % m.NumVars)
-        if solution_pool:
-            m.setParam('PoolSearchMode', 1)
-            m.setParam('PoolSolutions', 10000)
-            m.setParam('PoolGap', solution_pool)
-        m.optimize()
+                for s in N.S:
+                    obj_func += s.cost * m.z[s.id, t]
+            for u, v, a in a_hat_prime:
+                if T == 1:
+                    obj_func += (float(a['data']['inf_data'].reconstruction_cost) / 2.0) * m.y[u, v, t]
+                else:
+                    obj_func += (float(a['data']['inf_data'].reconstruction_cost) / 2.0) * m.y_tilde[u, v, t]
+            for n, d in n_hat_prime:
+                if T == 1:
+                    obj_func += d['data']['inf_data'].reconstruction_cost * m.w[n, t]
+                else:
+                    obj_func += d['data']['inf_data'].reconstruction_cost * m.w_tilde[n, t]
+            for n, d in m.n_hat.nodes(data=True):
+                obj_func += d['data']['inf_data'].oversupply_penalty * m.delta_p[n, 'b', t]
+                obj_func += d['data']['inf_data'].undersupply_penalty * m.delta_m[n, 'b', t]
+                for layer, val in d['data']['inf_data'].extra_com.items():
+                    obj_func += val['oversupply_penalty'] * m.delta_p[n, layer, t]
+                    obj_func += val['undersupply_penalty'] * m.delta_m[n, layer, t]
+            for u, v, a in m.n_hat.edges(data=True):
+                obj_func += a['data']['inf_data'].flow_cost * m.x[u, v, 'b', t]
+                for layer, val in a['data']['inf_data'].extra_com.items():
+                    obj_func += val['flow_cost'] * m.x[u, v, layer, t]
+        m.Obj = pyo.Objective(rule=obj_func, sense=pyo.minimize)
+
+        '''Constraints'''
+        # Time-dependent constraints.
+        if m.T > 1:
+            m.initial_state_node = pyo.Constraint(m.n_hat_prime_nodes,
+                                                  rule=INDPUtil.initial_state_node_rule,
+                                                  doc='Initialstate at node')
+            m.initial_state_arc = pyo.Constraint(m.a_hat_prime, rule=INDPUtil.initial_state_arc_rule,
+                                                 doc='Initial state at arc')
+        m.time_dependent_node = pyo.Constraint(m.n_hat_prime_nodes,
+                                               m.time_step,
+                                               rule=INDPUtil.time_dependent_node_rule,
+                                               doc='Time dependent recovery constraint at node')
+        m.time_dependent_arc = pyo.Constraint(m.a_hat_prime,
+                                              m.time_step,
+                                              rule=INDPUtil.time_dependent_arc_rule,
+                                              doc='Time dependent recovery constraint at arc')
+        # Enforce a_i,j to be fixed if a_j,i is fixed (and vice versa).
+        m.arc_equality = pyo.Constraint(m.a_hat_prime,
+                                        m.time_step,
+                                        rule=INDPUtil.arc_equality_rule,
+                                        doc='Arc reconstruction equality')
+
+        # Conservation of flow constraint. (2) in INDP paper.
+        m.flow_conserv_node = pyo.Constraint(m.delta_p_index_0,
+                                             m.time_step,
+                                             rule=INDPUtil.flow_conserv_node_rule,
+                                             doc='Flow conservation')
+        # Flow functionality constraints.
+        m.flow_in_functionality = pyo.Constraint(m.a_hat, m.time_step, rule=INDPUtil.flow_in_functionality_rule,
+                                                 doc='Flow In Functionality')
+        m.flow_out_functionality = pyo.Constraint(m.a_hat, m.time_step, rule=INDPUtil.flow_out_functionality_rule,
+                                                  doc='Flow Out Functionality')
+        m.flow_arc_functionality = pyo.Constraint(m.a_hat, m.time_step, rule=INDPUtil.flow_arc_functionality_rule,
+                                                  doc='Flow Arc Functionality')
+        # Resource availability constraints.
+        m.resource = pyo.Constraint(list(m.v_r.keys()), m.time_step, rule=INDPUtil.resource_rule,
+                                    doc='Resource availability')
+        # Interdependency constraints
+        m.interdependency = pyo.Constraint(m.n_hat_nodes, m.time_step, rule=INDPUtil.interdependency_rule,
+                                           doc='Interdependency')
+        # Geographic space constraints
+        if co_location:
+            m.node_geographic_space = pyo.Constraint(m.S_ids, m.n_hat_prime_nodes, m.time_step,
+                                                     rule=INDPUtil.node_geographic_space_rule,
+                                                     doc='Node Geographic space')
+            m.arc_geographic_space = pyo.Constraint(m.S_ids, m.a_hat_prime, m.time_step,
+                                                    rule=INDPUtil.arc_geographic_space_rule,
+                                                    doc='Arc Geographic space')
+
+        '''Solve'''
+        num_cont_vars = len([v for v in m.component_data_objects(pyo.Var) if v.domain == pyo.NonNegativeReals])
+        num_integer_vars = len([v for v in m.component_data_objects(pyo.Var) if v.domain == pyo.Binary])
+        print(
+            "Solving... using %s solver (%d cont. vars, %d binary vars)" %
+            (solver_engine, num_cont_vars, num_integer_vars))
+        solver = SolverFactory('glpk', timelimit=time_limit)
+        if solver_engine == 'Gurobi':
+            solver = SolverFactory('gurobi', solver_io="python", timelimit=time_limit)
+        solution = solver.solve(m)
         run_time = time.time() - start_time
+
         # Save results.
-        if m.getAttr("Status") == GRB.OPTIMAL or m.status == 9:
-            if m.status == 9:
-                print('\nOptimizer time limit, gap = %1.3f\n' % m.MIPGap)
-            results = INDPUtil.collect_results(m, controlled_layers, T, n_hat, n_hat_prime, a_hat_prime, S,
-                                               coloc=co_location)
+        if solution.solver.termination_condition in [TerminationCondition.optimal, TerminationCondition.maxTimeLimit]:
+            if solution.solver.termination_condition == TerminationCondition.maxTimeLimit:
+                print('\nOptimizer time limit, gap = %1.3f\n' % solution.a.solution(0).gap)
+            results = INDPUtil.collect_results(m, controlled_layers, coloc=co_location)
             results.add_run_time(t, run_time)
-            if solution_pool:
-                sol_pool_results = INDPUtil.collect_solution_pool(m, T, n_hat_prime, a_hat_prime)
-                return [m, results, sol_pool_results]
             return [m, results]
         else:
-            m.computeIIS()
-            if m.status == 3:
-                m.write("model.ilp")
-                print(m.getAttr("Status"), ": SOLUTION NOT FOUND. (Check data and/or violated constraints).")
-                print('\nThe following constraint(s) cannot be satisfied:')
-                for c in m.getConstrs():
-                    if c.IISConstr:
-                        print('%s' % c.constrName)
-            return None
+            log_infeasible_constraints(m, log_expression=True, log_variables=True)
+            if solution.solver.termination_condition == TerminationCondition.infeasible:
+                print(solution.solver.termination_condition, ": SOLUTION NOT FOUND. (Check data and/or violated "
+                                                             "constraints in the infeasible_model.log).")
+            sys.exit()
 
     def get_spec(self):
         return {
