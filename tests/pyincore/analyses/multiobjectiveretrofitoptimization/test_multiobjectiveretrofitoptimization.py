@@ -12,8 +12,7 @@ def run_base_analysis():
 
     retrofit_optimization.set_parameter("model_solver", "ipopt")
     retrofit_optimization.set_parameter("num_epsilon_steps", 3)
-    retrofit_optimization.set_parameter("max_budget", "default")
-    retrofit_optimization.set_parameter("scale_data", False)
+    retrofit_optimization.set_parameter("budget_available", 2000.0)
 
     retrofit_optimization.load_remote_input_dataset("building_related_data", building_related_data)
     retrofit_optimization.load_remote_input_dataset("strategy_costs_data", strategy_costs_data)

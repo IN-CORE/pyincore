@@ -48,6 +48,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
     __L_brd_col = 'l'
 
     __budget_default = 0.2
+    __scaling_factor = 1000000
 
     def __init__(self, incore_client):
         super(MultiObjectiveRetrofitOptimization, self).__init__(incore_client)
@@ -59,7 +60,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         num_epsilon_steps = self.get_parameter('num_epsilon_steps')
 
         budget_available = self.__budget_default
-        if self.get_parameter('max_budget') != 'default':
+        if self.get_parameter('budget_available') != 'default':
             budget_available = self.get_parameter('budget_available')
 
         inactive_submodels = []
@@ -77,11 +78,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         strategy_costs['Z'] = strategy_costs['Z'].astype(str)
 
         self.multiobjective_retrofit_optimization_model(model_solver, num_epsilon_steps, budget_available,
-                                                        scaling_factor, inactive_submodels, building_related_data,
+                                                        inactive_submodels, building_related_data,
                                                         strategy_costs)
 
     def multiobjective_retrofit_optimization_model(self, model_solver, num_epsilon_steps, budget_available,
-                                                   scaling_factor, inactive_submodels, building_related_data,
+                                                   inactive_submodels, building_related_data,
                                                    strategy_costs):
         """Performs the computation of the model.
 
@@ -90,7 +91,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             model_solver (str): model solver to use for analysis
             num_epsilon_steps (int): number of epsilon values for the multistep optimization algorithm
             budget_available (float): budget constraint of the optimization analysis
-            scaling_factor (float): scaling factor for Q and Sc matrices
             inactive_submodels (list): submodels to avoid during the computation
             building_related_data (pd.DataFrame): building repairs after a disaster event
             strategy_costs (pd.DataFrame): strategy cost data per building
@@ -100,8 +100,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         self.ostr = open('pyincore.txt', 'w')
 
         # Setup the model
-        model, sum_sc = self.configure_model(budget_available, scaling_factor, building_related_data,
-                                             strategy_costs)
+        model = self.configure_model(budget_available, building_related_data, strategy_costs)
         self.configure_model_objectives(model)
         print("With constraints model")
         self.configure_model_retrofit_costs(model) # Suspicious
@@ -114,7 +113,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Solve each model individually
         print("With individual model")
-        obj_list = self.solve_individual_models(model, model_solver_setting, sum_sc)
+        obj_list = self.solve_individual_models(model, model_solver_setting)
         print("Epsilon values")
         self.configure_min_max_epsilon_values(model, obj_list, num_epsilon_steps)
 
@@ -129,13 +128,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                                  source="dataframe")
         return True
 
-    def configure_model(self, budget_available, scaling_factor, building_related_data, strategy_costs):
+    def configure_model(self, budget_available, building_related_data, strategy_costs):
         """ Configure the base model to perform the multiobjective optimization.
 
         Args:
 
             budget_available (float): available budget
-            scaling_factor (float): value to scale monetary input data
             building_related_data (DataFrame): table containing building functionality data
             strategy_costs (DataFrame): table containing retrofit strategy costs data
 
@@ -150,16 +148,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         #
         # Only scale if investment budget exceeds $1 million
         # Rescale: strategy cost, budget, economic loss
-
-        scaling_factor = 1000000
-
-        if budget_available >= scaling_factor:
-            strategy_costs[self.__SC_col] = strategy_costs[self.__SC_col]/scaling_factor
-            print(building_related_data)
+        if budget_available >= self.__scaling_factor:
+            strategy_costs[self.__SC_col] = strategy_costs[self.__SC_col]/self.__scaling_factor
             building_related_data[self.__Q_col] = \
-                building_related_data[self.__L_brd_col] = building_related_data[self.__L_brd_col]/scaling_factor
-            strategy_costs[self.__SC_col] = strategy_costs[self.__SC_col]/scaling_factor
-            budget_available = budget_available/scaling_factor
+                building_related_data[self.__L_brd_col] = building_related_data[self.__L_brd_col]/self.__scaling_factor
+            budget_available = budget_available/self.__scaling_factor
 
         # Setup pyomo
         model = ConcreteModel()
@@ -271,17 +264,9 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # DECLARE THE TOTAL MAX BUDGET AND TOTAL AVAILABLE BUDGET:
         ####################################################################################################
         # Define the total max budget based on user's input:
-        model.B = Param(mutable=True, within=NonNegativeReals)
+        model.B = budget_available
 
-        if budget_available == self.__budget_default:
-            sumSc = quicksum(
-                pyo.value(model.Sc_ijkk_prime[i, j, k, 3]) * pyo.value(model.b_ijk[i, j, k]) for i, j, k in model.ZSK)
-        else:
-            sumSc = budget_available
-        # Define the total available budget based on user's input:
-        model.B = sumSc * budget_available
-
-        return model, sumSc
+        return model
 
     def configure_model_objectives(self, model):
         """ Configure the model by adding objectives
@@ -309,8 +294,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.c = Param(mutable=True)
         model.building_level_constraint = Constraint(model.ZSK, rule=self.building_level_rule)
 
-    def solve_individual_models(self, model, model_solver_setting, sum_sc):
-        print("Max Budget: $", sum_sc)
+    def solve_individual_models(self, model, model_solver_setting):
         print("Available Budget: $", pyo.value(model.B))
         print("")
 
@@ -318,10 +302,10 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         rlist_obj_2 = self.solve_model_2(model, model_solver_setting)
         rlist_obj_3 = self.solve_model_3(model, model_solver_setting)
 
-        values_list = [sum_sc, pyo.value(model.B)] + rlist_obj_1 + rlist_obj_2 + rlist_obj_3
+        values_list = [pyo.value(model.B)] + rlist_obj_1 + rlist_obj_2 + rlist_obj_3
 
         no_epsilon_constr_init_results = pd.DataFrame(data={
-            "Label": ["Max Budget: $", "Budget (20% of max)", "Economic loss min epsilon (optimal value)",
+            "Label": ["Available budget: $", "Economic loss min epsilon (optimal value)",
                       "Dislocation when optimizing Economic Loss", "Functionality when optimizing Economic Loss",
                       "Dislocation min epsilon (optimal value)", "Economic Loss when optimizing Dislocation",
                       "Functionality when optimizing Dislocation", "Functionality max epsilon (optimal value)",
@@ -965,8 +949,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        epsilon7_xresult_df['Epsilon'] = 7
-        epsilon7_yresult_df['Epsilon'] = 7
+        epsilon7_xresult_df['Submodel'] = 7
+        epsilon7_yresult_df['Submodel'] = 7
 
         return xresults_df.append(epsilon7_xresult_df), yresults_df.append(epsilon7_yresult_df)
 
@@ -1066,8 +1050,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        epsilon8_xresult_df['Epsilon'] = 8
-        epsilon8_yresult_df['Epsilon'] = 8
+        epsilon8_xresult_df['Submodel'] = 8
+        epsilon8_yresult_df['Submodel'] = 8
 
         return xresults_df.append(epsilon8_xresult_df), yresults_df.append(epsilon8_yresult_df)
 
@@ -1167,14 +1151,14 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-        epsilon9_xresult_df['Epsilon'] = 9
-        epsilon9_yresult_df['Epsilon'] = 9
+        epsilon9_xresult_df['Submodel'] = 9
+        epsilon9_yresult_df['Submodel'] = 9
 
         return xresults_df.append(epsilon9_xresult_df), yresults_df.append(epsilon9_yresult_df)
 
     def compute_optimal_results(self, inactive_submodels, xresults_df, yresults_df):
         # Fixed for the moment, will be expanded to the full model set in later iterations
-        epsilon_models = [7, 8, 9]
+        epsilon_models = [7]
 
         xresults_list: list = []
         yresults_list: list = []
@@ -1193,8 +1177,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                                                              'Dislocation Value', 'Functionality Value'])
 
                 # Select only results corresponding to current epsilon step
-                epsilon_xresults_df = xresults_df[xresults_df['Epsilon'] == k]
-                epsilon_yresults_df = yresults_df[yresults_df['Epsilon'] == k]
+                epsilon_xresults_df = xresults_df[xresults_df['Submodel'] == k]
+                epsilon_yresults_df = yresults_df[yresults_df['Submodel'] == k]
 
                 # Filter results depending on optimal epsilon model
                 opt_xresults_df = epsilon_xresults_df[epsilon_xresults_df['Iteration'].isin(optimal['Iteration'])]
@@ -1383,12 +1367,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     'required': True,
                     'description': 'Number of epsilon values to evaluate',
                     'type': int
-                },
-                {
-                    'id': 'max_budget',
-                    'required': True,
-                    'description': 'Selection of maximum possible budget',
-                    'type': str
                 },
                 {
                     'id': 'budget_available',
