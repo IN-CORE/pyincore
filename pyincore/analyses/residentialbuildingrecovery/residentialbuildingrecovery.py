@@ -9,6 +9,8 @@ import pandas as pd
 from scipy.stats import lognorm
 import time
 
+import warnings
+
 from pyincore import BaseAnalysis, RepairService
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 
@@ -154,16 +156,22 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             group_size = group.shape[0]
             group_hhinc_values = group['hhinc'].values
 
-            # Compute normal ddistribution parameters from group data
-            mean = np.nanmean(group_hhinc_values)
-            std = np.nanstd(group_hhinc_values)
+            # Compute normal distribution parameters from group data
+
+            # suppress nan warnings.
+            # 1. Mean of nans - https://stackoverflow.com/questions/29688168/
+            # mean-nanmean-and-warning-mean-of-empty-slice
+            # 2. Mean of empty slice - https://stackoverflow.com/questions/43301112/
+            # mean-of-empty-slice-and-degrees-of-freedom-0
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                mean = np.nanmean(group_hhinc_values)
+                std = np.nanstd(group_hhinc_values)
 
             if np.isnan(mean):
                 mean = 3
-
             if np.isnan(std):
                 std = 0
-
             # Directly compute the indices of NaN values in the hhinc vector
             group_nan_idx = np.where(np.isnan(group_hhinc_values))
             number_nan = len(group_nan_idx[0])
@@ -183,7 +191,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
                 # Now reassemble into Pandas DataFrame
                 group['sample_{}'.format(i)] = group_samples[i, :]
 
-            prediction_results = prediction_results.append(group, ignore_index=True)
+            prediction_results = pd.concat([prediction_results, group], ignore_index=True)
 
         return prediction_results
 
@@ -421,12 +429,12 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             # Now, perform the two nested loops, using the indexing function to simplify the syntax.
             for i in range(0, num_samples):
                 state = samples_mcs_ds[i]
-                lognormal_mean = mapped_repair.repair_curves[state].alpha
-                lognormal_sdv = mapped_repair.repair_curves[state].beta
-
-                # Generate a vector of random values to use in the inner loop
-                rand_vals = np.random.random(num_samples)
-                repair_time = lognorm.ppf(rand_vals, lognormal_sdv, scale=np.exp(lognormal_mean)) / 7
+                percent_func = np.random.random(num_samples)
+                # NOTE: Even though the kwarg name is "repair_time", it actually takes  percent of functionality. DFR3
+                # system currently doesn't have a way to represent the name correctly when calculating the inverse.
+                repair_time = mapped_repair.repair_curves[state].solve_curve_for_inverse(
+                    hazard_values={}, curve_parameters=mapped_repair.curve_parameters, **{"repair_time": percent_func}
+                                                                                        ) / 7
 
                 for j in range(0, num_samples):
                     samples_n1_n2[household, idx(i, j)] = round(samples_np[household, i] + repair_time[j], 1)

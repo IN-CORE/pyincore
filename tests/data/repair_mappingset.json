@@ -1,13 +1,12 @@
 {
-  "name": "pytest - Tsunami Building Repair Mapping",
-  "hazardType": "tsunami",
+  "name": "pytest - Tornado Building Repair Mapping",
+  "hazardType": "tornado",
   "inventoryType": "building",
   "mappingType": "repair",
   "mappings": [
     {
       "entry": {
-        "Non-Retrofit Inundation Fragility ID Code": "5bbbaedfec2309046c2745c8",
-        "Non-Retrofit MomentumFlux Fragility ID Code": "5bbbae19ec2309046c2745c6"
+        "Repair ID Code": "5bbbaedfec2309046c2745c8"
       },
       "rules": [
         [
@@ -17,8 +16,7 @@
     },
     {
       "entry": {
-        "Non-Retrofit Inundation Fragility ID Code": "5bbbaf58ec2309046c2745c9",
-        "Non-Retrofit MomentumFlux Fragility ID Code": "5bbbae5eec2309046c2745c7"
+        "Repair ID Code": "5bbbaf58ec2309046c2745c9"
       },
       "rules": [
         [
@@ -28,8 +26,7 @@
     },
     {
       "entry": {
-        "Non-Retrofit Inundation Fragility ID Code": "5bbbafcdec2309046c2745ca",
-        "Non-Retrofit MomentumFlux Fragility ID Code": "5bbbba6bec2309046c2745d8"
+        "Repair ID Code": "5bbbafcdec2309046c2745ca"
       },
       "rules": [
         [

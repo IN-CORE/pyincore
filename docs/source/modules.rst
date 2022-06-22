@@ -46,6 +46,11 @@ analyses/cumulativebuildingdamage
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
     :members:
 
+analyses/electricpowerfacilityrestoration
+=========================================
+..  autoclass:: electricpowerfacilityrestoration.electricpowerfacilityrestoration.ElectricPowerFacilityRestoration
+    :members:
+
 analyses/epfdamage
 ==================
 ..  autoclass:: epfdamage.epfdamage.EpfDamage
@@ -56,6 +61,13 @@ analyses/epfdamage
 analyses/example
 ================
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
+    :members:
+
+analyses/housingrecovery
+========================
+..  autoclass:: housingrecovery.housingrecovery.HousingRecovery
+    :members:
+..  autoclass:: housingrecovery.housingrecoveryutil.HousingRecoveryUtil
     :members:
 
 analyses/housingrecoverysequential
@@ -106,6 +118,11 @@ analyses/montecarlofailureprobability
 ..  autoclass:: montecarlofailureprobability.montecarlofailureprobability.MonteCarloFailureProbability
     :members:
 
+analyses/multiobjectiveretrofitoptimization
+===========================================
+..  autoclass:: multiobjectiveretrofitoptimization.multiobjectiveretrofitoptimization.MultiObjectiveRetrofitOptimization
+    :members:
+
 analyses/nonstructbuildingdamage
 ================================
 ..  autoclass:: nonstructbuildingdamage.nonstructbuildingdamage.NonStructBuildingDamage
@@ -123,6 +140,11 @@ analyses/pipelinedamagerepairrate
 ..  autoclass:: pipelinedamagerepairrate.pipelinedamagerepairrate.PipelineDamageRepairRate
     :members:
 ..  autoclass:: pipelinedamagerepairrate.pipelineutil.PipelineUtil
+    :members:
+
+analyses/pipelinerestoration
+============================
+..  autoclass:: pipelinerestoration.pipelinerestoration.PipelineRestoration
     :members:
 
 analyses/populationdislocation
@@ -157,6 +179,11 @@ analyses/seasidecge
 ..  autoclass:: seasidecge.solverconstants.equationlib.ExprM
     :members:
 
+analyses/socialvulnerability
+============================
+..  autoclass:: socialvulnerability.socialvulnerability.SocialVulnerability
+    :members:
+
 analyses/tornadoepndamage
 =========================
 ..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
@@ -188,27 +215,17 @@ analyses/waterfacilitydamage
 ..  autoclass:: waterfacilitydamage.waterfacilitydamage.WaterFacilityDamage
     :members:
 
+analyses/waterfacilityrestoration
+=================================
+..  autoclass:: waterfacilityrestoration.waterfacilityrestoration.WaterFacilityRestoration
+    :members:
+
 models
 ^^^^^^
 
-models/conditionalstandardfragilitycurve
-========================================
-..  autoclass:: models.conditionalstandardfragilitycurve.ConditionalStandardFragilityCurve
-    :members:
-
-models/customexpressionfragilitycurve
-=====================================
-..  autoclass:: models.customexpressionfragilitycurve.CustomExpressionFragilityCurve
-    :members:
-
-models/fragilitycurve
-=====================
-..  autoclass:: models.fragilitycurve.FragilityCurve
-    :members:
-
-models/fragilitycurverefactored
-===============================
-..  autoclass:: models.fragilitycurve.FragilityCurveRefactored
+models/dfr3curve.py
+===================
+..  autoclass:: models.dfr3curve.DFR3Curve
     :members:
 
 models/fragilitycurveset
@@ -226,29 +243,14 @@ models/mappingset
 ..  autoclass:: models.mappingset.MappingSet
     :members:
 
-models/parametricfragilitycurve
-===============================
-..  autoclass:: models.parametricfragilitycurve.ParametricFragilityCurve
-    :members:
-
-models/periodbuildingfragilitycurve
-===================================
-..  autoclass:: models.periodbuildingfragilitycurve.PeriodBuildingFragilityCurve
-    :members:
-
-models/periodstandardfragilitycurve
-===================================
-..  autoclass:: models.periodstandardfragilitycurve.PeriodStandardFragilityCurve
-    :members:
-
 models/repaircurveset
 =====================
 ..  autoclass:: models.repaircurveset.RepairCurveSet
     :members:
 
-models/standardfragilitycurve
-=============================
-..  autoclass:: models.standardfragilitycurve.StandardFragilityCurve
+models/restorationcurveset
+==========================
+..  autoclass:: models.restorationcurveset.RestorationCurveSet
     :members:
 
 utilities
@@ -284,15 +286,16 @@ utils/geoutil
 ..  autoclass:: utils.geoutil.GeoUtil
     :members:
 
+utils/networkutil
+=================
+..  autoclass:: utils.networkutil.NetworkUtil
+    :members:
+
 utils/popdisloutputprocess.py
 =============================
 ..  autoclass:: utils.popdisloutputprocess.PopDislOutputProcess
     :members:
 
-utils/networkutil
-=================
-..  autoclass:: utils.networkutil.NetworkUtil
-    :members:
 
 
 services

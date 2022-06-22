@@ -27,6 +27,11 @@ def repairsvc(monkeypatch):
     return pytest.repairsvc
 
 
+@pytest.fixture
+def restorationsvc(monkeypatch):
+    return pytest.restorationsvc
+
+
 def test_get_fragility_sets(fragilitysvc):
     metadata = fragilitysvc.get_dfr3_sets(demand_type="PGA", creator="cwang138")
 
@@ -81,6 +86,43 @@ def test_match_fragilities_multiple_inventories_new_format(fragilitysvc):
     assert (inventories[0]['id'] in frag_set.keys()) and (len(frag_set) == len(inventories))
 
 
+def test_extract_inventory_class(restorationsvc):
+    rules = [["java.lang.String utilfcltyc EQUALS 'EESL'"], ["java.lang.String utilfcltyc EQUALS 'ESSH'"]]
+    assert restorationsvc.extract_inventory_class_legacy(rules) == "EESL/ESSH"
+
+    rules = [["java.lang.String utilfcltyc EQUALS 'EDC'"]]
+    assert restorationsvc.extract_inventory_class_legacy(rules) == "EDC"
+
+    rules = [["java.lang.String utilfcltyc EQUALS 'EDFLT'"],
+             ["java.lang.String utilfcltyc EQUALS 'EPPL'"],
+             ["java.lang.String utilfcltyc EQUALS 'EPPM'"],
+             ["java.lang.String utilfcltyc EQUALS 'EPPS'"]
+             ]
+    assert restorationsvc.extract_inventory_class_legacy(rules) == "EDFLT/EPPL/EPPM/EPPS"
+
+    rules = {"AND": [
+                    {"OR": [
+                        "java.lang.String utilfcltyc EQUALS 'EESL'",
+                        "java.lang.String utilfcltyc EQUALS 'ESSH'"
+                        ]
+                    },
+                    {
+                        "AND": [
+                            "java.lang.String utilfcltyc EQUALS 'EDC'"
+                        ]
+                    },
+                    {
+                        "OR": [
+                            "java.lang.String utilfcltyc EQUALS 'EDFLT'",
+                            "java.lang.String utilfcltyc EQUALS 'EPPL'",
+                            "java.lang.String utilfcltyc EQUALS 'EPPM'",
+                            "java.lang.String utilfcltyc EQUALS 'EPPS'"
+                        ]
+                    }
+                ]
+             }
+    assert restorationsvc.extract_inventory_class(rules) == "EESL/ESSH+EDC+EDFLT/EPPL/EPPM/EPPS"
+
 def test_get_fragility_mappings(fragilitysvc):
     mappings = fragilitysvc.get_mappings(hazard_type="earthquake", creator="cwang138")
 
@@ -95,7 +137,7 @@ def test_get_fragility_mapping(fragilitysvc):
 
 
 def test_create_and_delete_fragility_set(fragilitysvc):
-    with open(os.path.join(pyglobals.TEST_DATA_DIR, "refactored_fragility_curve.json"), 'r') as f:
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "fragility_curve.json"), 'r') as f:
         fragility_set = json.load(f)
     created = fragilitysvc.create_dfr3_set(fragility_set)
     assert "id" in created.keys()
@@ -114,23 +156,47 @@ def test_create_and_delete_fragility_mapping(fragilitysvc):
     assert del_response["id"] is not None
 
 
-def test_create_repair_set(repairsvc):
+def test_create_and_delete_repair_set(repairsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "repairset.json"), 'r') as f:
         repair_set = json.load(f)
     created = repairsvc.create_dfr3_set(repair_set)
-
     assert "id" in created.keys()
 
+    del_response = repairsvc.delete_dfr3_set(created["id"])
+    assert del_response["id"] is not None
 
-def test_create_repair_mapping(repairsvc):
+
+def test_create_and_delete_repair_mapping(repairsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "repair_mappingset.json"), 'r') as f:
         mapping_set = json.load(f)
     created = repairsvc.create_mapping(mapping_set)
-
     assert "id" in created.keys()
+
+    del_response = repairsvc.delete_mapping(created["id"])
+    assert del_response["id"] is not None
 
 
 def test_get_repair_sets(repairsvc):
-    metadata = repairsvc.get_dfr3_sets(hazard_type="earthquake", creator="incrtest")
+    metadata = repairsvc.get_dfr3_sets(hazard_type="tornado", creator="incrtest")
 
     assert 'id' in metadata[0].keys()
+
+
+def test_create_and_delete_restoration_set(restorationsvc):
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "restorationset.json"), 'r') as f:
+        restoration_set = json.load(f)
+    created = restorationsvc.create_dfr3_set(restoration_set)
+    assert "id" in created.keys()
+
+    del_response = restorationsvc.delete_dfr3_set(created["id"])
+    assert del_response["id"] is not None
+
+
+def test_create_and_delete_restoration_mapping(restorationsvc):
+    with open(os.path.join(pyglobals.TEST_DATA_DIR, "restoration_mappingset.json"), 'r') as f:
+        mapping_set = json.load(f)
+    created = restorationsvc.create_mapping(mapping_set)
+    assert "id" in created.keys()
+
+    del_response = restorationsvc.delete_mapping(created["id"])
+    assert del_response["id"] is not None

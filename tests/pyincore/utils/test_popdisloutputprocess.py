@@ -40,7 +40,7 @@ def run_convert_pd_json_chained(client):
     # incore-dev
     building_dmg = "602d96e4b1db9c28aeeebdce"  # dev Joplin
     # building_dmg = "602d975db1db9c28aeeebe35" # 15 guids test - dev Joplin
-    housing_unit_alloc = "61563545483ecb19e4304c2a"  # dev Joplin 2ev3
+    housing_unit_alloc = "6177089781ce0838fbacd6a8"  # dev Joplin 2ev3
     bg_data = "5df7cb0b425e0b00092c9464"  # Joplin 2ev2
     value_loss = "602d508fb1db9c28aeedb2a5"
 
@@ -52,7 +52,7 @@ def run_convert_pd_json_chained(client):
     pop_dis.load_remote_input_dataset("building_dmg", building_dmg)
     pop_dis.load_remote_input_dataset("housing_unit_allocation", housing_unit_alloc)
     pop_dis.load_remote_input_dataset("block_group_data", bg_data)
-    pop_dis.load_remote_input_dataset("value_poss_param", value_loss)
+    pop_dis.load_remote_input_dataset("value_loss_param", value_loss)
 
     pop_dis.set_parameter("result_name", result_name)
     pop_dis.set_parameter("seed", seed)
@@ -70,6 +70,10 @@ if __name__ == '__main__':
     pd_result = run_convert_pd_json_chained(client)
 
     pd_process = PopDislOutputProcess(pd_result)
+    # pd_process = PopDislOutputProcess(pd_result,
+    #                                   filter_name="Joplin",
+    #                                   filter_guid=False,
+    #                                   vacant_disl=False)
 
     pd_process.pd_by_race("PD_by_race.json")
     pd_process.pd_by_income("PD_by_income.json")
@@ -86,7 +90,11 @@ if __name__ == '__main__':
     # testpath = "/Users/<user>/<path_to_pyincore>/pyincore/tests/pyincore/utils"
     if testpath:
         pd_process = PopDislOutputProcess(None, os.path.join(testpath, "joplin-pop-disl-results.csv"))
-
+        # pd_process = PopDislOutputProcess(None,
+        #                                   os.path.join(testpath, "joplin-pop-disl-results.csv"),
+        #                                   filter_name="Joplin",
+        #                                   filter_guid=True,
+        #                                   vacant_disl=True)
         pd_process.pd_by_race("PD_by_race.json")
         pd_process.pd_by_income("PD_by_income.json")
         pd_process.pd_by_tenure("PD_by_tenure.json")

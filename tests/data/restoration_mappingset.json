@@ -1,0 +1,38 @@
+{
+  "name": "pytest - Tornado Building Restoration Mapping",
+  "hazardType": "tornado",
+  "inventoryType": "building",
+  "mappingType": "restoration",
+  "mappings": [
+    {
+      "entry": {
+        "Restoration ID Code": "5bbbaedfec2309046c2745c8"
+      },
+      "rules": [
+        [
+          "java.lang.String struct_typ EQUALS W1"
+        ]
+      ]
+    },
+    {
+      "entry": {
+        "Restoration ID Code": "5bbbaf58ec2309046c2745c9"
+      },
+      "rules": [
+        [
+          "java.lang.String struct_typ EQUALS W2"
+        ]
+      ]
+    },
+    {
+      "entry": {
+        "Restoration ID Code": "5bbbafcdec2309046c2745ca"
+      },
+      "rules": [
+        [
+          "java.lang.String struct_typ EQUALS RC"
+        ]
+      ]
+    }
+  ]
+}

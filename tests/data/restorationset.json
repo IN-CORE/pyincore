@@ -1,0 +1,76 @@
+{
+    "timeUnits" : "days",
+    "restorationCurves" : [
+        {
+            "description" : "Slight",
+            "rules" : [
+                {
+                    "condition" : null,
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.51, scale=numpy.exp(3.09))"
+                }
+            ],
+            "returnType" : {
+                "type" : "Percent of Functionality",
+                "unit" : "",
+                "description" : "PF_0"
+            }
+        },
+        {
+            "description" : "Moderate",
+            "rules" : [
+                {
+                    "condition" : null,
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.55, scale=numpy.exp(3.52))"
+                }
+            ],
+            "returnType" : {
+                "type" : "Percent of Functionality",
+                "unit" : "",
+                "description" : "PF_1"
+            }
+        },
+        {
+            "description" : "Extensive",
+            "rules" : [
+                {
+                    "condition" : null,
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.55, scale=numpy.exp(4.62))"
+                }
+            ],
+            "returnType" : {
+                "type" : "Percent of Functionality",
+                "unit" : "",
+                "description" : "PF_2"
+            }
+        },
+        {
+            "description" : "Complete",
+            "rules" : [
+                {
+                    "condition" : null,
+                    "expression" : "scipy.stats.lognorm.cdf(time, s=0.52, scale=numpy.exp(5.19))"
+                }
+            ],
+            "returnType" : {
+                "type" : "Percent of Functionality",
+                "unit" : "",
+                "description" : "PF_3"
+            }
+        }
+    ],
+    "description" : "pytest - sample restoration curves",
+    "authors" : [
+    ],
+    "resultType" : "Percent of Functionality",
+    "hazardType" : "tornado",
+    "inventoryType" : "building",
+    "curveParameters" : [
+        {
+            "name" : "time",
+            "unit" : "days",
+            "description" : "Can be an array of numeric values or a single numeric value.",
+            "fullName" : "time",
+            "expression" : null
+        }
+    ]
+}

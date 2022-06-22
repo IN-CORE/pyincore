@@ -33,9 +33,9 @@ project = 'pyIncore'
 author = ''
 
 # The short X.Y version
-version = '1.1'
+version = '1.4'
 # The full version, including alpha/beta/rc tags
-release = '1.1.0'
+release = '1.4.1'
 
 # -- General configuration ---------------------------------------------------
 

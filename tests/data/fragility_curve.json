@@ -19,7 +19,6 @@
   ],
   "fragilityCurves": [
     {
-      "className": "FragilityCurveRefactored",
       "description": "new schema proposed for parametric fragility curves",
       "rules": [
         {
@@ -40,10 +39,10 @@
         "unit": "",
         "description": "NA"
       },
-      "fragilityCurveParameters": null
+      "curveParameters": null
     }
   ],
-  "fragilityCurveParameters": [
+  "curveParameters": [
     {
       "name": "surgeLevel",
       "unit": "m",

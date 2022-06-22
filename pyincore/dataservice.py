@@ -420,7 +420,7 @@ class DataService:
         """
         # dataset
         request_str = self.base_tornado_url + fileid
-        r = r = self.client.get(request_str)
+        r = self.client.get(request_str)
 
         return r.json()['tornadoDatasetId']
 
@@ -443,6 +443,6 @@ class DataService:
         if limit is not None:
             payload['limit'] = limit
 
-            r = self.client.get(url, params=payload)
+        r = self.client.get(url, params=payload)
 
         return r.json()

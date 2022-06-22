@@ -5,6 +5,71 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Made pyincore build with legacy naming for pypi publish [#138](https://github.com/IN-CORE/pyincore/issues/138)
+- Network dataset's sub category's dataType has been changed from networkType to dataType [#145](https://github.com/IN-CORE/pyincore/issues/145)
+- Tornado EPN damage analysis uses network dataset instead of link, node, graph datasets [#147](https://github.com/IN-CORE/pyincore/issues/147)
+
+## [1.4.1] - 2022-04-22
+
+### Fixed
+- Fix issue with data type conversion for `blockid` [#129](https://github.com/IN-CORE/pyincore/issues/129)
+- Fix indentation bug at DataService [#135](https://github.com/IN-CORE/pyincore/issues/135)
+
+## [1.4.0] - 2022-03-30
+
+### Added
+- Check to mean damage analysis to verify damage keys match inventory type and remove unsupported types [#53](https://github.com/IN-CORE/pyincore/issues/53)
+- Housing recovery model analysis [#99](https://github.com/IN-CORE/pyincore/issues/99)
+- Social vulnerability analysis [#106](https://github.com/IN-CORE/pyincore/issues/106)
+
+### Changed
+- Rewrite the EPF and WF restoration model [#100](https://github.com/IN-CORE/pyincore/issues/100)
+- Index and improve the performance of restoration util [#113](https://github.com/IN-CORE/pyincore/issues/113)
+- Update house unit allocation id [#116](https://github.com/IN-CORE/pyincore/issues/116)
+
+### Fixed
+- Fix shapely deprecation error with tornadoepn analysis [#40](https://github.com/IN-CORE/pyincore/issues/40)
+- Fix Building economic loss multipliers [#91](https://github.com/IN-CORE/pyincore/issues/91)
+- Fix Pandas future warning: dtype in Series [#96](https://github.com/IN-CORE/pyincore/issues/96)
+- Fix Pandas future warning: append method [#97](https://github.com/IN-CORE/pyincore/issues/96)
+- Fix Population dislocation typo [#112](https://github.com/IN-CORE/pyincore/issues/112)
+- Seaside cge displays wrong units in the output [#118](https://github.com/IN-CORE/pyincore/issues/118)
+- Fix csv save in Housing recovery analysis [#124](https://github.com/IN-CORE/pyincore/issues/124)
+
+
+## [1.3.0] - 2022-02-07
+
+### Added
+- Water facility restoration model [#76](https://github.com/IN-CORE/pyincore/issues/76)
+- Electric power facility model [#77](https://github.com/IN-CORE/pyincore/issues/77)
+- Water pipeline restoration model [#78](https://github.com/IN-CORE/pyincore/issues/78)
+
+### Changed
+- Update building econ loss to include non structural and content damage [51](https://github.com/IN-CORE/pyincore/issues/51)
+- Rename master branch to main [#67](https://github.com/IN-CORE/pyincore/issues/67)
+- update fragility specific functions so it deals with the service deprecations and using common DFR3Curve classes [#69](https://github.com/IN-CORE/pyincore/issues/69)
+- Support for Restoration curves in pyincore. Included pytests [#71](https://github.com/IN-CORE/pyincore/issues/71)
+
+### Fixed
+- Pipeline damage with repair rate only computes total repairs when including liquefaction [#63](https://github.com/IN-CORE/pyincore/issues/63)
+- Fix total population dislocation is Null [#72](https://github.com/IN-CORE/pyincore/issues/72)
+- Fixed PEP8 issues [#81](https://github.com/IN-CORE/pyincore/issues/81)
+
+## [1.2.0] - 2021-12-15
+
+### Added
+- Vacant household category to population dislocation output [#43](https://github.com/IN-CORE/pyincore/issues/43)
+- Input dataset with target functionality for Joplin empirical restoration [#56](https://github.com/IN-CORE/pyincore/issues/56)
+- Multi-objective retrofit optimization analysis [#19](https://github.com/IN-CORE/pyincore/issues/19)
+
+### Fixed
+- EPFDamage to remove deprecated LS/DS code and properly handle liquefaction [#32](https://github.com/IN-CORE/pyincore/issues/32)
+- Automatic build for pyincore documentation docker [#61](https://github.com/IN-CORE/pyincore/issues/61)
+- Fix get_building_period() method to work with new-format Fragility curves [#15](https://github.com/IN-CORE/pyincore/issues/15)
+
 ## [1.1.0] - 2021-10-27
 
 ### Added

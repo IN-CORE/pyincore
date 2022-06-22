@@ -11,11 +11,11 @@ import sys
 import networkx as nx
 import numpy
 from pyincore.utils.analysisutil import AnalysisUtil
-from shapely.geometry import shape
+from shapely.geometry import shape, LineString, MultiLineString
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, FragilityCurveSet
-from pyincore import GeoUtil, NetworkUtil
-from pyincore.models.fragilitycurve import FragilityCurve
+from pyincore import GeoUtil, NetworkUtil, NetworkDataset
+from pyincore.models.dfr3curve import DFR3Curve
 
 
 class TornadoEpnDamage(BaseAnalysis):
@@ -88,8 +88,9 @@ class TornadoEpnDamage(BaseAnalysis):
         super(TornadoEpnDamage, self).__init__(incore_client)
 
     def run(self):
-        node_dataset = self.get_input_dataset("epn_node").get_inventory_reader()
-        link_dataset = self.get_input_dataset("epn_link").get_inventory_reader()
+        network_dataset = NetworkDataset.from_dataset(self.get_input_dataset("epn_network"))
+        link_dataset = network_dataset.links.get_inventory_reader()
+        node_dataset = network_dataset.nodes.get_inventory_reader()
         tornado_id = self.get_parameter('tornado_id')
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
         self.load_remote_input_dataset("tornado", tornado_metadata["datasetId"])
@@ -262,12 +263,12 @@ class TornadoEpnDamage(BaseAnalysis):
                                         # calculate the length of intersected line
                                         # since this is a geographic, it has to be projected to meters to be calcuated
                                         inter_length_meter = GeoUtil.calc_geog_distance_from_linestring(intersection)
-                                        if intersection.__class__.__name__ == "MultiLineString":
+                                        if isinstance(intersection, MultiLineString):
                                             intersection_list.append(intersection)
-                                            for inter_line in intersection:
+                                            for inter_line in intersection.geoms:
                                                 any_point = inter_line.centroid
                                                 break
-                                        elif intersection.__class__.__name__ == "LineString":
+                                        elif isinstance(intersection, LineString):
                                             intersection_list.append(intersection)
                                             any_point = intersection.centroid
 
@@ -305,7 +306,7 @@ class TornadoEpnDamage(BaseAnalysis):
                                         hval_dict[d] = tor_hazard_values[j]
                                         j += 1
                                     if isinstance(fragility_set_used.fragility_curves[0],
-                                                  FragilityCurve):
+                                                  DFR3Curve):
                                         inventory_args = fragility_set_used.construct_expression_args_from_inventory(
                                             tornado_feature)
                                         resistivity_probability = \
@@ -527,16 +528,10 @@ class TornadoEpnDamage(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'epn_node',
+                    'id': 'epn_network',
                     'required': True,
-                    'description': 'EPN Node',
-                    'type': ['incore:epnNodeVer1'],
-                },
-                {
-                    'id': 'epn_link',
-                    'required': True,
-                    'description': 'EPN Link',
-                    'type': ['incore:epnLinkeVer1'],
+                    'description': 'EPN Network Dataset',
+                    'type': ['incore:epnNetwork'],
                 },
                 {
                     'id': 'tornado',
@@ -548,13 +543,13 @@ class TornadoEpnDamage(BaseAnalysis):
             'output_datasets': [
                 {
                     'id': 'result',
-                    'parent_type': 'epn_node',
+                    'parent_type': 'epn_network',
                     'description': 'CSV file of damages for electric power network by tornado',
                     'type': 'incore:tornadoEPNDamageVer3'
                 },
                 {
                     'id': 'metadata',
-                    'parent_type': 'epn_node',
+                    'parent_type': 'epn_network',
                     'description': 'Json file with information about applied hazard value and fragility',
                     'type': 'incore:tornadoEPNDamageSupplement'
                 }

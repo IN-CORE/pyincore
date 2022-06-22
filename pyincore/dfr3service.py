@@ -12,6 +12,7 @@ from typing import Dict
 from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.repaircurveset import RepairCurveSet
+from pyincore.models.restorationcurveset import RestorationCurveSet
 from pyincore.models.mappingset import MappingSet
 
 # add more types if needed
@@ -120,6 +121,8 @@ class Dfr3Service:
                 batch_dfr3_sets[id] = FragilityCurveSet(dfr3_set)
             elif instance == 'RepairService':
                 batch_dfr3_sets[id] = RepairCurveSet(dfr3_set)
+            elif instance == 'RestorationService':
+                batch_dfr3_sets[id] = RestorationCurveSet(dfr3_set)
             else:
                 raise ValueError("Only fragility and repair services are currently supported")
 
@@ -168,7 +171,7 @@ class Dfr3Service:
 
         Args:
             mapping (obj): MappingSet Object that has the rules and entries.
-            inventories (list): A list of inventories.
+            inventories (list): A list of inventories. Each item is a casted fiona object
             entry_key (str): keys such as PGA, pgd, and etc.
             add_info (None, dict): additional information that used to match rules, e.g. retrofit strategy per building.
 
@@ -199,6 +202,7 @@ class Dfr3Service:
 
             for m in mapping.mappings:
                 # for old format rule matching [[]]
+                # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
                     if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
                         curve = m.entry[entry_key]
@@ -212,6 +216,7 @@ class Dfr3Service:
                         break
 
                 # for new format rule matching {"AND/OR":[]}
+                # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
                 elif isinstance(m.rules, dict):
                     if self._property_match(rules=m.rules, properties=inventory["properties"]):
                         curve = m.entry[entry_key]
@@ -229,6 +234,66 @@ class Dfr3Service:
         # replace the curve id in dfr3_sets to the dfr3 curve
         for inventory_id, curve_item in dfr3_sets.items():
             if isinstance(curve_item, FragilityCurveSet):
+                pass
+            elif isinstance(curve_item, str):
+                dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]
+            else:
+                raise ValueError(
+                    "Cannot realize dfr3_set entry. The entry has to be either remote id string; or dfr3curve object!")
+
+        return dfr3_sets
+
+    def match_list_of_dicts(self, mapping: MappingSet, inventories: list, entry_key: str):
+        """This method is same as match_inventory, except it takes a simple list of dictionaries that contains the items
+        to be mapped in the rules. The match_inventory method takes a list of fiona objects
+
+        Args:
+            mapping (obj): MappingSet Object that has the rules and entries.
+            inventories (list): A list of inventories. Each item of the list is a simple dictionary
+            entry_key (str): keys such as PGA, pgd, and etc.
+
+        Returns:
+             dict: A dictionary of {"inventory id": FragilityCurveSet object}.
+
+        """
+        dfr3_sets = {}
+
+        # loop through inventory to match the rules
+        matched_curve_ids = []
+        for inventory in inventories:
+            for m in mapping.mappings:
+                # for old format rule matching [[]]
+                if isinstance(m.rules, list):
+                    if self._property_match_legacy(rules=m.rules, properties=inventory):
+                        curve = m.entry[entry_key]
+                        dfr3_sets[inventory['id']] = curve
+
+                        # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
+                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                            matched_curve_ids.append(curve)
+
+                        # use the first match
+                        break
+
+                # for new format rule matching {"AND/OR":[]}
+                elif isinstance(m.rules, dict):
+                    if self._property_match(rules=m.rules, properties=inventory):
+                        curve = m.entry[entry_key]
+                        dfr3_sets[inventory['guid']] = curve
+
+                        # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
+                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                            matched_curve_ids.append(curve)
+
+                        # use the first match
+                        break
+
+        batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
+
+        # replace the curve id in dfr3_sets to the dfr3 curve
+        for inventory_id, curve_item in dfr3_sets.items():
+            if isinstance(curve_item, FragilityCurveSet) or isinstance(curve_item, RepairCurveSet) \
+                    or isinstance(curve_item, RestorationCurveSet):
                 pass
             elif isinstance(curve_item, str):
                 dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]
@@ -363,6 +428,63 @@ class Dfr3Service:
                                  + str(type(properties[rule_key])) + ". Please review the mapping being used.")
 
         return matched
+
+    @staticmethod
+    def extract_inventory_class_legacy(rules):
+        """This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
+
+        Args:
+            rules (list): The outer list is applying "OR" rule and the inner list is applying an "AND" rule. e.g. list(["java.lang.String utilfcltyc EQUALS 'PWT2'"],["java.lang.String utilfcltyc EQUALS 'PPP1'"])
+
+        Returns:
+            inventory_class (str): extracted inventory class name. "/" stands for or and "+" stands for and
+
+        """
+        if rules == [[]] or rules == [] or rules == [None]:
+            return "NA"
+        else:
+            inventory_class = ""
+            for i, and_rules in enumerate(rules):
+                if i != 0:
+                    inventory_class += "/"
+
+                for j, rule in enumerate(and_rules):
+                    if j != 0:
+                        inventory_class += "+"
+                    inventory_class += rule.split(" ")[3].strip('\'').strip('\"')
+            return inventory_class
+
+    @staticmethod
+    def extract_inventory_class(rules):
+        """This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
+
+        Args:
+            rules (dict): e.g. { "AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'", "java.lang.String utilfcltyc EQUALS 'PPP1'"]}
+
+        Returns:
+            inventory_class (str): extracted inventory class name. "/" stands for or and "+" stands for and
+
+        """
+        if rules == {}:
+            return "NA"
+        else:
+            inventory_class = []
+            boolean = list(rules.keys())[0]  # AND or OR
+            criteria = rules[boolean]
+            for criterion in criteria:
+                if isinstance(criterion, dict):
+                    inventory_class.append(Dfr3Service.extract_inventory_class(criterion))
+                elif isinstance(criterion, str):
+                    inventory_class.append(criterion.split(" ")[3].strip('\'').strip('\"'))
+                else:
+                    raise ValueError("Cannot evaluate criterion, unsupported format!")
+
+            if boolean.lower() == "and":
+                return "+".join(inventory_class)
+            elif boolean.lower() == "or":
+                return "/".join(inventory_class)
+            else:
+                raise ValueError("boolean " + boolean + " not supported!")
 
     def create_mapping(self, mapping_set: dict):
         """Create DFR3 mapping on the server. POST API endpoint call.
