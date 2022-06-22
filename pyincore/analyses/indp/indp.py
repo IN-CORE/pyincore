@@ -74,9 +74,9 @@ class INDP(BaseAnalysis):
         if save_mode is None:
             save_mode = False
 
-        solver = self.get_parameter("solver")
-        if solver is None:
-            solver = "glpk"
+        solver_engine = self.get_parameter("solver_engine")
+        if solver_engine is None:
+            solver_engine = "glpk"
 
         action_result, cost_result, runtime_result = self.run_method(fail_sce_param, RC, layers, method=method,
                                                                      t_steps=t_steps,
@@ -84,13 +84,14 @@ class INDP(BaseAnalysis):
                                                                            'EXTRA_COMMODITY': extra_commodity,
                                                                            'TIME_RESOURCE': time_resource},
                                                                      save_mode=save_mode,
-                                                                     solver=solver)
+                                                                     solver_engine=solver_engine)
 
         self.set_result_csv_data("action", action_result, name="actions.csv")
         self.set_result_csv_data("cost", cost_result, name="costs.csv")
         self.set_result_csv_data("runtime", runtime_result, name="run_time.csv")
 
-    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None, save_mode=False, solver="glpk"):
+    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None, save_mode=False,
+                   solver_engine="glpk"):
         """
         This function runs restoration analysis based on INDP or td-INDP for different numbers of resources.
 
@@ -105,7 +106,7 @@ class INDP(BaseAnalysis):
             t_steps (int): Number of time steps of the analysis.
             misc (dict): A dictionary that contains miscellaneous data needed for the analysis
             save_mode (bool): Flag indicates if the model should be saved or not
-            solver (str): Either glpk or Gurobi
+            solver_engine (str): glpk, ipopt, gurobi
         Returns:
 
         """
@@ -133,7 +134,7 @@ class INDP(BaseAnalysis):
         for v_i, v in enumerate(v_r):
             if method == 'INDP':
                 params = {"NUM_ITERATIONS": t_steps, "OUTPUT_DIR": 'indp_results', "V": v,
-                          "T": 1, 'L': layers, "ALGORITHM": "INDP", "SOLVER": solver}
+                          "T": 1, 'L': layers, "ALGORITHM": "INDP", "SOLVER": solver_engine}
             elif method == 'TDINDP':
                 params = {"OUTPUT_DIR": 'tdindp_results', "V": v, "T": t_steps, 'L': layers,
                           "ALGORITHM": "INDP"}
@@ -250,7 +251,7 @@ class INDP(BaseAnalysis):
             forced_actions (bool): If True, the optimizer is forced to repair at least one element in each time step.
             The default is False.
             TODO expose this parameter
-            save_model (bool): If the Gurobi optimization model should be saved to file. The default is False.
+            save_model (bool): If the optimization model should be saved to file. The default is False.
             TODO expose this parameter
             print_cmd_line (bool): If full information about the analysis should be written to the console. The default
             is True.
@@ -397,12 +398,13 @@ class INDP(BaseAnalysis):
         co_location : bool, optional
             If false, exclude geographical interdependency from the optimization. The default is True.
         solver_engine : str, optional
-            Name of the solver engine. Options are 'Gurobi' (commercial optimizer) and 'glpk' (open-source optimizer).
+            Name of the solver engine. Options are 'gurobi' (commercial optimizer), 'glpk' or 'ipopt'(open-source
+            optimizer).
             The default is 'glpk'.
         Returns
         -------
         : list
-        A list of the form ``[m, results]`` for a successful optimization where m is the Gurobi  optimization model and
+        A list of the form ``[m, results]`` for a successful optimization where m is the optimization model and
             results is a :class:`~indputils.INDPResults` object generated using  :func:`collect_results`.
             If :envvar:`solution_pool` is set to a number, the function returns ``[m, results,  sol_pool_results]``
             where `sol_pool_results` is dictionary of solution that should be retrieved from the optimizer in
@@ -593,9 +595,7 @@ class INDP(BaseAnalysis):
         print(
             "Solving... using %s solver (%d cont. vars, %d binary vars)" %
             (solver_engine, num_cont_vars, num_integer_vars))
-        solver = SolverFactory('glpk', timelimit=time_limit)
-        if solver_engine == 'Gurobi':
-            solver = SolverFactory('gurobi', solver_io="python", timelimit=time_limit)
+        solver = SolverFactory(solver_engine, solver_io="python", timelimit=time_limit)
         solution = solver.solve(m)
         run_time = time.time() - start_time
 
@@ -710,14 +710,13 @@ class INDP(BaseAnalysis):
                 {
                     'id': 'save_model',
                     'required': False,
-                    'description': 'If the Gurobi optimization model should be saved to file. The default is False.',
+                    'description': 'If the optimization model should be saved to file. The default is False.',
                     'type': bool
                 },
                 {
-                    'id': 'solver',
+                    'id': 'solver_engine',
                     'required': False,
-                    'description': "Solver to use for optimization model. Can choose between opensourced glpk vs "
-                                   "commercialized Gurobi",
+                    'description': "Solver to use for optimization model. Such as ipopt/gurobi/glpk",
                     'type': str
                 }
 
