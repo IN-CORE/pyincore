@@ -1188,8 +1188,19 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 xresults_list.append(opt_xresults_df)
                 yresults_list.append(opt_yresults_df)
 
+        x_dataframe = pd.concat(xresults_list)
+        y_dataframe = pd.concat(yresults_list)
+
+        # Clamp all values below 0.01 to 0
+        x_dataframe[x_dataframe['x_ijk'] < 0.01] = 0
+        y_dataframe[y_dataframe['y_ijkk_prime'] < 0.01] = 0
+
+        # Round all values up to two significant figures
+        x_dataframe['x_ijk'] = np.around(x_dataframe['x_ijk'], decimals=2)
+        y_dataframe['y_ijkk_prime'] = np.around(y_dataframe['y_ijkk_prime'], decimals=2)
+
         # Construct the final dataframe per variable
-        return [pd.concat(xresults_list), pd.concat(yresults_list)]
+        return [x_dataframe, y_dataframe]
 
     # Objective functions
     @staticmethod
