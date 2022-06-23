@@ -10,6 +10,16 @@ from pyincore import Dataset, NetworkDataset, BaseAnalysis
 from pyincore import IncoreClient
 import pyincore.globals as pyglobals
 
+import json
+import os
+from pathlib import Path
+
+import pytest
+from networkx import Graph
+
+from pyincore import DataService, NetworkDataset, BaseAnalysis
+from pyincore.globals import PYINCORE_ROOT_FOLDER
+
 
 @pytest.fixture
 def datasvc():
@@ -60,17 +70,15 @@ def test_create_network_graph_from_link():
         assert True
 
 
-# def test_validate_network_node_ids():
-    # dataset_id = "62719fc857f1d94b047447e6"
-    # network = NetworkDataset.from_data_service(dataset_id, datasvc)
-    # nodes = list(network.get_nodes())
-    # assert nodes[0]['properties']["guid"] == "9c39623d-920e-49e6-b272-83b2ec954b84"
-    # epn_network_id = "62719fc857f1d94b047447e6"
-    # network_dataset = NetworkDataset.from_data_service(epn_network_id, datasvc)
-    # node_id = "NODENWID"
-    # fromnode = "fromnode"
-    # tonode = "tonode"
-    # networkutil.validate_network_node_ids(network_dataset, fromnode, tonode, node_id)
+def test_validate_network_node_ids():
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
+    datasvc = DataService(client)
+    epn_network_id = "62719fc857f1d94b047447e6"
+    network_dataset = NetworkDataset.from_data_service(epn_network_id, datasvc)
+    node_id = "NODENWID"
+    fromnode = "fromnode"
+    tonode = "tonode"
+    networkutil.validate_network_node_ids(network_dataset, fromnode, tonode, node_id)
 
     # network_data_type = "incore:network"
     # link_data_type = "incore:epnLinkVer1"
@@ -90,5 +98,5 @@ def test_create_network_graph_from_link():
     # assert network.graph.local_file_path.find("graph.csv") != -1
 
 if __name__ == '__main__':
-    test_create_network_graph_from_link()
-    # test_validate_network_node_ids()()
+    # test_create_network_graph_from_link()
+    test_validate_network_node_ids()()

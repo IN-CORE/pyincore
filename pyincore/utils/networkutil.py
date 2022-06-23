@@ -314,12 +314,11 @@ class NetworkUtil:
         return graph, node_coords
 
     @staticmethod
-    def validate_network_node_ids(nodedataset, linkdataset, fromnode_fldname, tonode_fldname, nodeid_fldname):
+    def validate_network_node_ids(network_dataset, fromnode_fldname, tonode_fldname, nodeid_fldname):
         """Check if the node id in from or to node exist in the real node id.
 
         Args:
-            nodedataset (str):  A name of a node geo dataset resource recognized by Fiona package.
-            linkdataset (str): A name of a link geo dataset resource recognized by Fiona package.
+            network_dataset (str):  A name of a network dataset
             fromnode_fldname (str): Line feature, from node field name.
             tonode_fldname (str): Line feature, to node field name.
             nodeid_fldname (str): Node field id name.
@@ -328,10 +327,13 @@ class NetworkUtil:
             bool: Validation of node existence.
 
         """
+        # get link and node dataset
+        link_dataset = network_dataset._network_component_from_dataset(network_dataset, "link").get_inventory_reader()
+        node_dataset = network_dataset._network_component_from_dataset(network_dataset, "node").get_inventory_reader()
         validate = True
         # iterate link
         link_node_list = []
-        for line_feature in linkdataset:
+        for line_feature in link_dataset:
             if fromnode_fldname in line_feature["properties"]:
                 from_node_val = line_feature['properties'][fromnode_fldname]
             elif fromnode_fldname.lower() in line_feature["properties"]:
@@ -345,7 +347,7 @@ class NetworkUtil:
 
         # iterate node
         node_list = []
-        for node_feature in nodedataset:
+        for node_feature in node_dataset:
             if nodeid_fldname in node_feature["properties"]:
                 node_val = node_feature['properties'][nodeid_fldname]
             elif nodeid_fldname.lower() in node_feature["properties"]:
