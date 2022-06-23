@@ -82,7 +82,7 @@ setup(
         ],
     },
 
-    project_urls={  # Optional
+    project_urls={ 
         'Bug Reports': 'https://github.com/IN-CORE/pyincore/issues',
         'Source': 'https://github.com/IN-CORE/pyincore',
     },
