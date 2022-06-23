@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Made pyincore build with legacy naming for pypi publish [#138](https://github.com/IN-CORE/pyincore/issues/138)
 - Network dataset's sub category's dataType has been changed from networkType to dataType [#145](https://github.com/IN-CORE/pyincore/issues/145)
+- Tornado EPN damage analysis uses network dataset instead of link, node, graph datasets [#147](https://github.com/IN-CORE/pyincore/issues/147)
 
 ## [1.4.1] - 2022-04-22
 
