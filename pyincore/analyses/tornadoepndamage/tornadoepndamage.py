@@ -1,8 +1,9 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import collections
 import math
 import os
 import random
@@ -89,13 +90,11 @@ class TornadoEpnDamage(BaseAnalysis):
 
     def run(self):
         network_dataset = NetworkDataset.from_dataset(self.get_input_dataset("epn_network"))
-        link_dataset = network_dataset.links.get_inventory_reader()
-        node_dataset = network_dataset.nodes.get_inventory_reader()
         tornado_id = self.get_parameter('tornado_id')
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
         self.load_remote_input_dataset("tornado", tornado_metadata["datasetId"])
         tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
-        ds_results, damage_results = self.get_damage(node_dataset, link_dataset, tornado_dataset, tornado_id)
+        ds_results, damage_results = self.get_damage(network_dataset, tornado_dataset, tornado_id)
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
         self.set_result_json_data(
@@ -103,16 +102,17 @@ class TornadoEpnDamage(BaseAnalysis):
 
         return True
 
-    def get_damage(self, node_dataset, link_dataset, tornado_dataset, tornado_id):
+    def get_damage(self, network_dataset, tornado_dataset, tornado_id):
         """
 
         Args:
-            node_dataset (obj): Node dataset.
-            link_dataset (obj): Link dataset.
+            network_dataset_dataset (obj): Network dataset.
             tornado_dataset (obj): Tornado dataset.
             tornado_id (str): Tornado id.
 
         """
+        link_dataset = network_dataset.links.get_inventory_reader()
+        node_dataset = network_dataset.nodes.get_inventory_reader()
         self.set_tornado_variables(tornado_dataset)
         self.set_node_variables(node_dataset)
 
@@ -124,16 +124,17 @@ class TornadoEpnDamage(BaseAnalysis):
 
         # network test
         node_id_validation = NetworkUtil.validate_network_node_ids(
-            node_dataset, link_dataset, self.fromnode_fld_name, self.tonode_fld_name, self.nodenwid_fld_name)
+            network_dataset, self.fromnode_fld_name, self.tonode_fld_name, self.nodenwid_fld_name)
         if node_id_validation is False:
             print("ID in from or to node field doesn't exist in the node dataset")
             os.exit(0)
 
         # getting network graph and node coordinates
         is_directed_graph = True
+        link_filepath = link_dataset.path
 
-        graph, node_coords = NetworkUtil.create_network_graph_from_field(
-            link_dataset, self.fromnode_fld_name, self.tonode_fld_name, is_directed_graph)
+        graph, node_coords = NetworkUtil.create_network_graph_from_link(
+            link_filepath, self.fromnode_fld_name, self.tonode_fld_name, is_directed_graph)
 
         # reverse the graph to acculate the damage to next to node
         graph = nx.DiGraph.reverse(graph, copy=True)

@@ -1,24 +1,14 @@
-import json
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+import pyincore.globals as pyglobals
 import os
-from pathlib import Path
-
 import pytest
-from networkx import Graph
 
 from pyincore.utils.networkutil import NetworkUtil as networkutil
-from pyincore import Dataset, NetworkDataset, BaseAnalysis
-from pyincore import IncoreClient
-import pyincore.globals as pyglobals
-
-import json
-import os
-from pathlib import Path
-
-import pytest
-from networkx import Graph
-
-from pyincore import DataService, NetworkDataset, BaseAnalysis
-from pyincore.globals import PYINCORE_ROOT_FOLDER
+from pyincore import NetworkDataset
 
 
 @pytest.fixture
@@ -70,33 +60,12 @@ def test_create_network_graph_from_link():
         assert True
 
 
-def test_validate_network_node_ids():
-    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
-    datasvc = DataService(client)
+def test_validate_network_node_ids(datasvc):
     epn_network_id = "62719fc857f1d94b047447e6"
     network_dataset = NetworkDataset.from_data_service(epn_network_id, datasvc)
     node_id = "NODENWID"
     fromnode = "fromnode"
     tonode = "tonode"
-    networkutil.validate_network_node_ids(network_dataset, fromnode, tonode, node_id)
+    validate = networkutil.validate_network_node_ids(network_dataset, fromnode, tonode, node_id)
 
-    # network_data_type = "incore:network"
-    # link_data_type = "incore:epnLinkVer1"
-    # node_data_type = "incore:epnNodeVer1"
-    # graph_data_type = "incore:epnGraph"
-    # network = NetworkDataset.from_files(node_file_path, link_file_path, graph_file_path, network_data_type,
-    #                                     link_data_type, node_data_type, graph_data_type)
-    # assert network.nodes is not None
-    # assert network.graph is not None
-    # assert network.links is not None
-    # assert isinstance(network.nodes, Dataset)
-    # assert network.nodes.data_type == node_data_type
-    # assert network.links.data_type == link_data_type
-    # assert network.graph.data_type == graph_data_type
-    # assert network.nodes.local_file_path.find("epn_nodes.shp") != -1
-    # assert network.links.local_file_path.find("epn_links.shp") != -1
-    # assert network.graph.local_file_path.find("graph.csv") != -1
-
-if __name__ == '__main__':
-    # test_create_network_graph_from_link()
-    test_validate_network_node_ids()()
+    assert validate

@@ -1,3 +1,8 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import fiona
 import csv
 import copy
@@ -328,8 +333,8 @@ class NetworkUtil:
 
         """
         # get link and node dataset
-        link_dataset = network_dataset._network_component_from_dataset(network_dataset, "link").get_inventory_reader()
-        node_dataset = network_dataset._network_component_from_dataset(network_dataset, "node").get_inventory_reader()
+        link_dataset = network_dataset.links.get_inventory_reader()
+        node_dataset = network_dataset.nodes.get_inventory_reader()
         validate = True
         # iterate link
         link_node_list = []
