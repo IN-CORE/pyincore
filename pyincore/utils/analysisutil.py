@@ -223,6 +223,28 @@ class AnalysisUtil:
         return result_dataset_id
 
     @staticmethod
+    def adjust_limit_states_for_liquefaction(limit_state_prob, ground_failure_prob):
+        """Adjust limit state probabilities for liquefaction using Hazus methodology.
+
+            Args:
+                limit_state_prob: limit state probabilities
+                ground_failure_prob: probability of ground failure
+
+            Returns:
+                dict: limit state probabilities adjusted to include liquefaction
+
+        """
+        # Assumes 3 Limit states, 4 Damage States
+        limit_state_prob['LS_0'] = limit_state_prob.get('LS_0') + ground_failure_prob[0] - limit_state_prob.get(
+            'LS_0') * ground_failure_prob[0]
+        limit_state_prob['LS_1'] = limit_state_prob.get('LS_1') + ground_failure_prob[1] - limit_state_prob.get(
+            'LS_1') * ground_failure_prob[1]
+        limit_state_prob['LS_2'] = limit_state_prob.get('LS_2') + ground_failure_prob[2] - limit_state_prob.get(
+            'LS_2') * ground_failure_prob[2]
+
+        return AnalysisUtil.update_precision_of_dicts(limit_state_prob)
+
+    @staticmethod
     def adjust_limit_states_for_pgd(limit_states, pgd_limit_states):
         try:
             adj_limit_states = collections.OrderedDict()
