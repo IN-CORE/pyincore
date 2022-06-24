@@ -223,26 +223,46 @@ class AnalysisUtil:
         return result_dataset_id
 
     @staticmethod
-    def adjust_limit_states_for_liquefaction(limit_state_prob, ground_failure_prob):
-        """Adjust limit state probabilities for liquefaction using Hazus methodology.
+    def adjust_damage_for_liquefaction(limit_state_probabilities, ground_failure_probabilities):
+        """Adjusts building damage probability based on liquefaction ground failure probability
+        with the liq_dmg, we know that it is 3 values, the first two are the same.
+        The 3rd might be different.
+        We always want to apply the first two to all damage states except the highest.
 
-            Args:
-                limit_state_prob: limit state probabilities
-                ground_failure_prob: probability of ground failure
+        Args:
+            limit_state_probabilities (obj): Limit state probabilities.
+            ground_failure_probabilities (list): Ground failure probabilities.
 
-            Returns:
-                dict: limit state probabilities adjusted to include liquefaction
+        Returns:
+            OrderedDict: Adjusted limit state probability.
 
         """
-        # Assumes 3 Limit states, 4 Damage States
-        limit_state_prob['LS_0'] = limit_state_prob.get('LS_0') + ground_failure_prob[0] - limit_state_prob.get(
-            'LS_0') * ground_failure_prob[0]
-        limit_state_prob['LS_1'] = limit_state_prob.get('LS_1') + ground_failure_prob[1] - limit_state_prob.get(
-            'LS_1') * ground_failure_prob[1]
-        limit_state_prob['LS_2'] = limit_state_prob.get('LS_2') + ground_failure_prob[2] - limit_state_prob.get(
-            'LS_2') * ground_failure_prob[2]
+        keys = list(limit_state_probabilities.keys())
+        adjusted_limit_state_probabilities = collections.OrderedDict()
 
-        return AnalysisUtil.update_precision_of_dicts(limit_state_prob)
+        for i in range(len(keys)):
+            # check and see...if we are trying to use the last ground failure
+            # number for something other than the
+            # last limit-state-probability, then we should use the
+            # second-to-last probability of ground failure instead.
+
+            if i > len(ground_failure_probabilities) - 1:
+                prob_ground_failure = ground_failure_probabilities[len(ground_failure_probabilities) - 2]
+            else:
+                prob_ground_failure = ground_failure_probabilities[i]
+
+            adjusted_limit_state_probabilities[keys[i]] = \
+                limit_state_probabilities[keys[i]] + prob_ground_failure \
+                - limit_state_probabilities[keys[i]] * prob_ground_failure
+
+        # the final one is the last of limitStates should match with the last of ground failures
+        j = len(limit_state_probabilities) - 1
+        prob_ground_failure = ground_failure_probabilities[-1]
+        adjusted_limit_state_probabilities[keys[j]] = \
+            limit_state_probabilities[keys[j]] \
+            + prob_ground_failure - limit_state_probabilities[keys[j]] * prob_ground_failure
+
+        return adjusted_limit_state_probabilities
 
     @staticmethod
     def adjust_limit_states_for_pgd(limit_states, pgd_limit_states):

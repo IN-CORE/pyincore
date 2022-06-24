@@ -220,8 +220,8 @@ class BuildingDamage(BaseAnalysis):
 
                     if use_liquefaction and geology_dataset_id is not None and liquefaction_resp is not None:
                         ground_failure_prob = liquefaction_resp[i][BuildingUtil.GROUND_FAILURE_PROB]
-                        dmg_probability = AnalysisUtil.adjust_limit_states_for_liquefaction(dmg_probability,
-                                                                                            ground_failure_prob)
+                        dmg_probability = AnalysisUtil.update_precision_of_dicts(
+                            AnalysisUtil.adjust_damage_for_liquefaction(dmg_probability, ground_failure_prob))
 
                     dmg_interval = selected_fragility_set.calculate_damage_interval(
                         dmg_probability, hazard_type=hazard_type, inventory_type="building")
