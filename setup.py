@@ -5,11 +5,11 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 from setuptools import setup, find_packages
-import pkg_resources
+# import pkg_resources
 #from pyincore import globals as pyglobals
-import pypandoc
+# import pypandoc
 
-pkg_resources.extern.packaging.version.Version = pkg_resources.SetuptoolsLegacyVersion
+# pkg_resources.extern.packaging.version.Version = pkg_resources.SetuptoolsLegacyVersion
 
 # use the version from the rasterio module.
 # version = pyglobals.PACKAGE_VERSION
