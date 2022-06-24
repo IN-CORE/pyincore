@@ -53,7 +53,7 @@ requirements:
     - rtree==1.0.0
     - scipy==1.8.1
     - shapely==1.8.2
-    - wntr==0.4.2
+    - wntr==v0.4.2
 
 test:
   # Python imports

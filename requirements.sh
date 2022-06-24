@@ -92,7 +92,7 @@ for x in $(cat requirements.pyincore | egrep -v '(ipopt|numpy)'); do
   if ! grep "    - $x==" recipes/meta.yaml >/dev/null ; then
     echo "NEW IMPORT $x"
   fi
-  version=$(grep "^$x==" requirements.ver)
+  version=$(grep "^$x==" requirements.ver | sed 's/wntr==/wntr==v/')
   sed -i~ "s/    - $x==.*/    - $version/" recipes/meta.yaml
 done
 for x in $(cat requirements.testing | egrep -v '(pytest)'); do
