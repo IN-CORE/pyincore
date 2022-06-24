@@ -60,29 +60,34 @@ setup(
     python_requires=">=3.6, <3.9",
 
     install_requires=[
-        'fiona',
-        'geopandas',
-        'jsonpickle',
-        'matplotlib',
-        'networkx',
-        'pandas',
-        'pyomo',
-        'pyproj',
-        'rasterio',
-        'requests',
-        'scipy',
-        'wntr',
+        'fiona==1.8.21',
+        'geopandas==0.11.0',
+        'matplotlib==3.5.2',
+        'networkx==2.8.4',
+        'numpy==1.23.0',
+        'pandas==1.4.3',
+        'pyomo==6.4.1',
+        'pyproj==3.3.1',
+        'rasterio==1.2.10',
+        'requests==2.28.0',
+        'rtree==1.0.0',
+        'scipy==1.8.1',
+        'shapely==1.8.2',
+        'wntr==0.4.2',
     ],
 
     extras_require={
         'test': [
-            'folium',
-            'python-jose',
-            'rtree'
+            'pycodestyle==2.8.0',
+            'pytest==7.1.2',
+            'python-jose==3.3.0',
         ],
+        'notebook': [
+            'folium==0.12.1.post1',
+        ]
     },
 
-    project_urls={ 
+    project_urls={
         'Bug Reports': 'https://github.com/IN-CORE/pyincore/issues',
         'Source': 'https://github.com/IN-CORE/pyincore',
     },
