@@ -6,13 +6,14 @@
 
 from setuptools import setup, find_packages
 import pkg_resources
-from pyincore import globals as pyglobals
+#from pyincore import globals as pyglobals
 import pypandoc
 
 pkg_resources.extern.packaging.version.Version = pkg_resources.SetuptoolsLegacyVersion
 
 # use the version from the rasterio module.
-version = pyglobals.PACKAGE_VERSION
+# version = pyglobals.PACKAGE_VERSION
+version = '1.5.0'
 # use this line for manual versioning like rc version
 #version = '1.4.1.rc.4'
 
@@ -59,3 +60,4 @@ setup_args = dict(
 )
 
 setup(**setup_args)
+
