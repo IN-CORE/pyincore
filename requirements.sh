@@ -92,7 +92,7 @@ for x in $(cat requirements.pyincore | egrep -v '(ipopt|numpy)'); do
   if ! grep "    - $x==" recipes/meta.yaml >/dev/null ; then
     echo "NEW IMPORT $x"
   fi
-  version=$(grep "^$x==" requirements.ver | sed 's/wntr==/wntr==v/')
+  version=$(grep "^$x==" requirements.ver)
   sed -i~ "s/    - $x==.*/    - $version/" recipes/meta.yaml
 done
 for x in $(cat requirements.testing | egrep -v '(pytest)'); do
@@ -125,6 +125,10 @@ for x in $(cat requirements.notebooks); do
   version=$(grep "^$x==" requirements.ver)
   sed -i~ "s/'$x==.*'/'$version'/" setup.py
 done
+
+# wntr conda fixes
+sed -i~ 's/wntr==/wntr==v/' environment.yml
+sed -i~ 's/wntr==/wntr==v/' recipes/meta.yaml
 
 # cleanup
 rm -f requirements.pyincore requirements.testing requirements.notebooks requirements.tmp requirements.ver

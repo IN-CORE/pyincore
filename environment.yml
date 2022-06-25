@@ -52,4 +52,4 @@ dependencies:
   - snuggs==1.4.7
   - tomli==2.0.1
   - urllib3==1.26.9
-  - wntr==0.4.2
+  - wntr==v0.4.2
