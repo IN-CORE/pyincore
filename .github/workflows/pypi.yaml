@@ -3,7 +3,7 @@ name: Publish Python package
 on:
   release:
     types:
-      - created
+      - published
 
   pull_request:
 
