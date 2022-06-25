@@ -62,7 +62,7 @@ setup(
         'numpy==1.23.0',
         'pandas==1.4.3',
         'pyomo==6.4.1',
-        'pyproj==3.3.1',
+        'pyproj==3.2.1',
         'rasterio==1.2.10',
         'requests==2.28.0',
         'rtree==1.0.0',

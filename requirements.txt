@@ -112,7 +112,7 @@ pyparsing==3.0.9
     #   matplotlib
     #   packaging
     #   snuggs
-pyproj==3.3.1
+pyproj==3.2.1
     # via
     #   -r requirements.in
     #   geopandas
@@ -129,9 +129,7 @@ pytz==2022.1
 rasterio==1.2.10
     # via -r requirements.in
 requests==2.28.0
-    # via
-    #   -r requirements.in
-    #   folium
+    # via folium
 rsa==4.8
     # via python-jose
 rtree==1.0.0

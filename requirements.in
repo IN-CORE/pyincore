@@ -5,9 +5,8 @@ networkx
 numpy
 pandas
 pyomo
-pyproj
+pyproj<3.3.0
 rasterio
-requests
 rtree
 scipy
 shapely

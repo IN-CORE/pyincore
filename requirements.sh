@@ -69,6 +69,9 @@ sort -u requirements.tmp > requirements.notebooks
 # combine pyincore and testing
 cat requirements.pyincore requirements.testing requirements.notebooks > requirements.in
 
+# some tweaks for other packages
+sed -i~ -e 's/pyproj/pyproj<3.3.0/' requirements.in
+
 # create the requirements.txt file for pip. This is intended to setup a virtualenv for
 # development on pyincore.
 pip-compile --quiet --upgrade --rebuild --output-file requirements.txt requirements.in

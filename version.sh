@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=${1:-1.4.2-rc99}
+VERSION=${1:-9.9.9rc99}
 MAJOR=${VERSION%.*}
 
 if [ -e CHANGELOG.md ]; then
