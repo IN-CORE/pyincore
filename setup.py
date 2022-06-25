@@ -5,12 +5,9 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 from setuptools import setup, find_packages
-from pyincore import globals as pyglobals
 
-# use the version from the rasterio module.
-version = pyglobals.PACKAGE_VERSION
-# use this line for manual versioning like rc version
-#version = '1.4.1.rc.4'
+# version number of pyincore
+version = '1.4.1'
 
 with open("README.rst", encoding="utf-8") as f:
     readme = f.read()
