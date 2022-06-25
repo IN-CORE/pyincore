@@ -70,3 +70,12 @@ jobs:
         with:
           password: ${{ env.TOKEN }}
           repository_url: ${{ env.REPO_URL }}
+
+      - name: Upload binaries to release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/pyincore-${{ env.VERSION }}*
+          file_glob: true
+          overwrite: true
