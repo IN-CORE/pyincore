@@ -1,10 +1,10 @@
 name: Publish Python package
 
 on:
-  push:
-    branches:
-      - '*'
-      - main
+  release:
+    types:
+      - created
+
   pull_request:
 
 jobs:
@@ -18,8 +18,23 @@ jobs:
       - name: get release info
         id: release_info
         run: |
-          version="$(awk '/^## / { print tolower($2) }' CHANGELOG.md | head -1)"
-          echo "::set-output name=version::$version"
+          if [ "${{ github.event.release.tag_name }}" != "" ]; then
+            version=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          else
+            version="$(awk -F= '/^PACKAGE_VERSION/ { print $2}' pyincore/globals.py | sed 's/[ "]//g').${{ github.run_number }}"
+          fi
+          echo "VERSION=${version}" >> $GITHUB_ENV
+          echo "VERSION=${version}"
+          ./version ${VERSION}
+
+          testing=$(echo $version | sed 's/[0-9\.]//')
+          if [ "$testing" == "" ]; then
+            echo "REPO_URL=" >> $GITHUB_ENV
+            echo "TOKEN=${{ secrets.PYPI_API_TOKEN }}" >> $GITHUB_ENV
+          else
+            echo "REPO_URL=https://test.pypi.org/legacy/" >> $GITHUB_ENV
+            echo "TOKEN=${{ secrets.TEST_PYPI_API_TOKEN }}" >> $GITHUB_ENV
+          fi
 
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -50,7 +65,8 @@ jobs:
           python setup.py sdist bdist_wheel
 
       - name: Publish distribution to PyPI
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && steps.release_info.outputs.version != 'unreleased'
+        if: github.event_name == 'release'
         uses: pypa/gh-action-pypi-publish@master
         with:
-          password: ${{ secrets.pypi_password }}
+          password: ${{ env.TOKEN }}
+          repository_url: ${{ env.REPO_URL }}
