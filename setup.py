@@ -17,6 +17,7 @@ setup(
     version=version,
     description='IN-CORE analysis tool python package',
     long_description=readme,
+    long_description_content_type='text/x-rst',
 
     url='https://incore.ncsa.illinois.edu',
 
