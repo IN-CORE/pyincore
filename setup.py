@@ -57,7 +57,7 @@ setup(
     install_requires=[
         'fiona>=1.8.4',
         'geopandas>=0.6.1',
-        'matplotlib',
+        'matplotlib>=2.1.0',
         'networkx>=2.2',
         'numpy>=1.16.6,<2.0a0',
         'pandas>=0.24.1',
