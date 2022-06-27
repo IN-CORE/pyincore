@@ -66,7 +66,7 @@ setup(
         'rasterio>=1.0.18',
         'rtree>=0.8.3',
         'scipy>=1.2.0',
-        'shapely>=1.6.4.post1wntr',
+        'shapely>=1.6.4.post1',
         'wntr>=0.1.6',
     ],
 
