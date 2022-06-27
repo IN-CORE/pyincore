@@ -6,7 +6,6 @@ set -o noglob
 #TESTPYPI="--index-url http://localhost:3141/incore/dev"
 
 MODULE="pyincore"
-EXTRA_CONDA="ipopt>=3.11"
 
 # setup pip-compile to resolve dependencies, also is minimal version of python
 if [ ! -d /tmp/pyincore-requirements ]; then
@@ -18,7 +17,7 @@ else
 fi
 
 # all requirements in pyincore_viz files
-rm requirements.imports
+rm -f requirements.imports
 for x in ${MODULE} tests notebooks; do
   case $x in
     notebooks)
