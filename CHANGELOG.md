@@ -10,8 +10,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - PyPi description and README.rst [#150](https://github.com/IN-CORE/pyincore/issues/150)
 - Earthquake liquefaction to building damage analysis [#155](https://github.com/IN-CORE/pyincore/issues/155)
-
-### Added
 - When releases are made, now push builds to pypi (or testpypi) automatically
 
 ### Changed
