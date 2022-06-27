@@ -55,30 +55,29 @@ setup(
     python_requires=">=3.6",
 
     install_requires=[
-        'fiona==1.8.21',
-        'geopandas==0.11.0',
-        'matplotlib==3.5.2',
-        'networkx==2.8.4',
-        'numpy==1.23.0',
-        'pandas==1.4.3',
-        'pyomo==6.4.1',
-        'pyproj==3.2.1',
-        'rasterio==1.2.10',
-        'requests==2.28.0',
-        'rtree==1.0.0',
-        'scipy==1.8.1',
-        'shapely==1.8.2',
-        'wntr==0.4.2',
+        'fiona>=1.8.4',
+        'geopandas>=0.6.1',
+        'matplotlib',
+        'networkx>=2.2',
+        'numpy>=1.16.6,<2.0a0',
+        'pandas>=0.24.1',
+        'pyomo>=5.6',
+        'pyproj>=1.9.6',
+        'rasterio>=1.0.18',
+        'rtree>=0.8.3',
+        'scipy>=1.2.0',
+        'shapely>=1.6.4.post1wntr',
+        'wntr>=0.1.6',
     ],
 
     extras_require={
         'test': [
-            'pycodestyle==2.8.0',
-            'pytest==7.1.2',
-            'python-jose==3.3.0',
+            'pycodestyle>=2.6.0',
+            'pytest>=3.9.0',
+            'python-jose>=3.0',
         ],
         'notebook': [
-            'folium==0.12.1.post1',
+            'folium',
         ]
     },
 

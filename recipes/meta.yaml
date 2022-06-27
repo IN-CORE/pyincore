@@ -30,42 +30,42 @@ requirements:
   build:
     - python>=3.8
     - pip
-    - numpy>=1.16
+    - numpy>=1.16.6,<2.0a0
  
   host:
     - python>=3.6
     - pip
-    - numpy>=1.16
+    - numpy>=1.16.6,<2.0a0
 
   run:
     - python>=3.6
     - ipopt>=3.11
     - {{ pin_compatible('numpy') }}
-    - fiona==1.8.21
-    - geopandas==0.11.0
-    - matplotlib==3.5.2
-    - networkx==2.8.4
-    - pandas==1.4.3
-    - pyomo==6.4.1
-    - pyproj==3.2.1
-    - rasterio==1.2.10
-    - requests==2.28.0
-    - rtree==1.0.0
-    - scipy==1.8.1
-    - shapely==1.8.2
-    - wntr==v0.4.2
+    - fiona>=1.8.4
+    - geopandas>=0.6.1
+    - matplotlib
+    - networkx>=2.2
+    - pandas>=0.24.1
+    - pyomo>=5.6
+    - pyproj>=1.9.6
+    - rasterio>=1.0.18
+    - requests=2.28.0
+    - rtree>=0.8.3
+    - scipy>=1.2.0
+    - shapely>=1.6.4.post1wntr
+    - wntr>=0.1.6
 
 test:
   # Python imports
   imports:
     - pyincore
-    - pyomo
+    - pyomo>=5.6
    
   requires:
     # Put any additional test requirements here.  For example
-    - pytest>=3.9
-    - pycodestyle==2.8.0
-    - python-jose==3.3.0
+    - pytest>=3.9.0
+    - pycodestyle>=2.6.0
+    - python-jose>=3.0
 
   commands:
     # You can put built-in test commands to be run here.  Use this to test that the entry points work.
