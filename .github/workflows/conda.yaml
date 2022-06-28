@@ -1,0 +1,80 @@
+name: Publish Python package
+
+on:
+  release:
+    types:
+      - published
+
+  pull_request:
+
+jobs:
+  publish:
+    name: Build and publish python packages
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: get release info
+        id: release_info
+        run: |
+          if [ "${{ github.event.release.tag_name }}" != "" ]; then
+            version=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          else
+            version="$(awk -F= '/^PACKAGE_VERSION/ { print $2}' pyincore/globals.py | sed 's/[ "]//g').${{ github.run_number }}"
+          fi
+          echo "VERSION=${version}" >> $GITHUB_ENV
+          echo "VERSION=${version}"
+
+          sed -e "s/ version = \".*\"/ version = \"${VERSION}\"/" \
+              -e "s#  path: .*#  path: ${PWD}#" \
+              -i recipes/meta.yaml
+
+          testing=$(echo $version | sed 's/[0-9\.]//')
+          if [ "$testing" == "" ]; then
+            echo "LABELS=main" >> $GITHUB_ENV
+          else
+            echo "LABELS=rc" >> $GITHUB_ENV
+          fi
+
+          echo "UPLOAD=--no-anaconda-upload" >> $GITHUB_ENV
+
+      - name: Cache conda
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if environment.yml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
+
+      - name: Install miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          mamba-version: "*"
+          conda-build-version: "*"
+          use-mamba: true
+          python-version: 3.8
+          activate-environment: base
+          environment-file: environment.yml
+          use-only-tar-bz2: true
+
+      - name: Build conda package
+        run: |
+          conda build --keep-going ${{ env.UPLOAD }} \
+                      --token ${{ secrets.CONDA_INCORE_TOKEN }} \
+                      --user IN-CORE \
+                      --no-force-upload \
+                      --label ${{ env.LABELS }} \
+                      recipes
+
+#      - name: Upload binaries to release
+#        if: github.event_name == 'release'
+#        uses: svenstaro/upload-release-action@v2
+#        with:
+#          repo_token: ${{ secrets.GITHUB_TOKEN }}
+#          file: dist/pyincore-${{ env.VERSION }}*
+#          file_glob: true
+#          overwrite: true
