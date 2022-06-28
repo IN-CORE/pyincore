@@ -1,4 +1,4 @@
-name: pyclowder
+name: requirements
 
 # This will check to see if there are new requirements and will
 # automatically create a pull request.
