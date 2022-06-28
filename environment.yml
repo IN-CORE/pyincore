@@ -5,7 +5,6 @@ channels:
 dependencies:
   - ipopt>=3.11
   - fiona>=1.8.4
-  - folium
   - geopandas>=0.6.1
   - matplotlib>=2.1.0
   - networkx>=2.2

@@ -6,7 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  path: /Users/kooper/git/incore/pyincore
+  path: /path/to/pyincore
 
 about:
   home: https://incore.ncsa.illinois.edu

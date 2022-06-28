@@ -15,4 +15,3 @@ wntr
 pycodestyle
 pytest
 python-jose
-folium
