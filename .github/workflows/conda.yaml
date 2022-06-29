@@ -62,6 +62,7 @@ jobs:
 
       - name: Print information about conda
         run: |
+          conda env list
           conda info
           conda list
           conda config --show-sources
