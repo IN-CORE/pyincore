@@ -61,6 +61,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          conda config --add channels conda-forge
           conda env update --file environment.yml --name base
           conda install conda-build
 
