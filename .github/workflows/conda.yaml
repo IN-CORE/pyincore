@@ -30,7 +30,7 @@ jobs:
               -e "s#  path: .*#  path: ${PWD}#" \
               -i~ recipes/meta.yaml
 
-          testing=$(echo $version | sed 's/[0-9\.]//')
+          testing=$(echo $version | sed 's/[0-9\.]//g')
           if [ "$testing" == "" ]; then
             echo "LABELS=main" >> $GITHUB_ENV
           else
@@ -52,16 +52,16 @@ jobs:
       - name: Install miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          miniconda-version: "latest"
+          #miniconda-version: "latest"
           python-version: 3.8
-          use-mamba: true
-          mamba-version: "*"
+          conda-build-version: "*"
+          #mamba-version: "*"
+          #use-mamba: true
           channels: conda-forge
           use-only-tar-bz2: true
-          auto-activate-base: false
           environment-file: environment.yml
+          auto-activate-base: false
           activate-environment: pyincore
-          conda-build-version: "*"
 
       - name: Print information about conda
         run: |
