@@ -27,7 +27,7 @@ jobs:
           echo "VERSION=${version}"
           ./version.sh ${version}
 
-          testing=$(echo $version | sed 's/[0-9\.]//')
+          testing=$(echo $version | sed 's/[0-9\.]//g')
           if [ "$testing" == "" ]; then
             echo "REPO_URL=" >> $GITHUB_ENV
             echo "TOKEN=${{ secrets.PYPI_API_TOKEN }}" >> $GITHUB_ENV
