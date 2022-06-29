@@ -26,9 +26,9 @@ jobs:
           echo "VERSION=${version}" >> $GITHUB_ENV
           echo "VERSION=${version}"
 
-          sed -e "s/ version = \".*\"/ version = \"${VERSION}\"/" \
+          sed -e "s/ version = \".*\"/ version = \"${version}\"/" \
               -e "s#  path: .*#  path: ${PWD}#" \
-              -i recipes/meta.yaml
+              -i~ recipes/meta.yaml
 
           testing=$(echo $version | sed 's/[0-9\.]//')
           if [ "$testing" == "" ]; then
@@ -52,7 +52,10 @@ jobs:
       - name: Install miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
+          miniconda-version: "latest"
           python-version: 3.8
+          use-mamba: true
+          mamba-version: "*"
           channels: conda-forge
           use-only-tar-bz2: true
           auto-activate-base: false
