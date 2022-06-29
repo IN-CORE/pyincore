@@ -71,6 +71,10 @@ jobs:
           conda config --show-sources
           conda config --show
 
+      - name: Print pyincore recipe
+        run: |
+          cat recipes/meta.yaml
+
       - name: Build conda package
         run: |
           conda build --keep-going ${{ env.UPLOAD }} \
