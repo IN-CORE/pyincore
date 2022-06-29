@@ -52,14 +52,20 @@ jobs:
       - name: Install miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          miniconda-version: "latest"
-          #mamba-version: "*"
-          conda-build-version: "*"
-          use-mamba: false
           python-version: 3.8
-          activate-environment: pyincore
-          environment-file: environment.yml
+          channels: conda-forge
           use-only-tar-bz2: true
+          auto-activate-base: false
+          environment-file: environment.yml
+          activate-environment: pyincore
+          conda-build-version: "*"
+
+      - name: Print information about conda
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
 
       - name: Build conda package
         run: |
