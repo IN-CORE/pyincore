@@ -50,6 +50,9 @@ jobs:
 
       - name: Print information about conda
         run: |
+          echo "$VERSION"
+          cat recipes/meta.yaml
+          cat ~/.condarc
           conda env list
           conda info
           conda list
