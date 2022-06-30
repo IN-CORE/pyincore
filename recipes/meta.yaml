@@ -1,12 +1,12 @@
 {% set name = "pyincore" %}
-{% set version = "1.5.0" %}
+{% set version = "9.9.9.9" %}
  
 package:
   name: {{ name|lower }}
   version: {{ version }}
  
 source:
-  path: /path/to/pyincore
+  path: /home/runner/work/pyincore/pyincore
   # PR: https://opensource.ncsa.illinois.edu/bitbucket/projects/INCORE1/repos/pyincore/pull-requests/12/overview
  
 build:

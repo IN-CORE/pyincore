@@ -18,27 +18,8 @@ jobs:
       - name: get release info
         id: release_info
         run: |
-          #if [ "${{ github.event.release.tag_name }}" != "" ]; then
-          #  version=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
-          #else
-          #  version="$(awk -F= '/^PACKAGE_VERSION/ { print $2}' pyincore/globals.py | sed 's/[ "]//g').${{ github.run_number }}"
-          #fi
-          version="999.999.999.${{ github.run_number }}"
-          echo "VERSION=${version}" >> $GITHUB_ENV
-          echo "VERSION=${version}"
-
-          sed -e "s/ version = \".*\"/ version = \"${version}\"/" \
-              -e "s#  path: .*#  path: ${PWD}#" \
-              -i~ recipes/meta.yaml
-
-          testing=$(echo $version | sed 's/[0-9\.]//g')
-          #if [ "$testing" == "" ]; then
-          #  echo "LABELS=main" >> $GITHUB_ENV
-          #else
-          #  echo "LABELS=rc" >> $GITHUB_ENV
-          #fi
+          echo "VERSION=9.9.9.9" >> $GITHUB_ENV
           echo "LABELS=rc" >> $GITHUB_ENV
-
           echo "UPLOAD=--no-anaconda-upload" >> $GITHUB_ENV
 
       - name: Set up Python 3.8
