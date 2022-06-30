@@ -5,34 +5,24 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 from setuptools import setup, find_packages
-import pkg_resources
-from pyincore import globals as pyglobals
-import pypandoc
 
-pkg_resources.extern.packaging.version.Version = pkg_resources.SetuptoolsLegacyVersion
-
-# use the version from the rasterio module.
-version = pyglobals.PACKAGE_VERSION
-# use this line for manual versioning like rc version
-#version = '1.4.1.rc.4'
+# version number of pyincore
+version = '1.5.0'
 
 with open("README.rst", encoding="utf-8") as f:
     readme = f.read()
 
-setup_args = dict(
+setup(
     name='pyincore',
     version=version,
-    packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
-    include_package_data=True,
-    package_data={
-        '': ['*.ini']
-    },
     description='IN-CORE analysis tool python package',
     long_description=readme,
-    # TODO need to figure out what are the dependency requirements
-    # TODO this is a hack, really should only be packages needed to run
-    install_requires=[line.strip() for line in open("requirements.txt").readlines()],
-    python_requires=">=3.6, <3.9",
+    long_description_content_type='text/x-rst',
+
+    url='https://incore.ncsa.illinois.edu',
+
+    license="Mozilla Public License v2.0",
+
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
@@ -42,6 +32,7 @@ setup_args = dict(
         "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering"
     ],
+
     keywords=[
         "infrastructure",
         "resilience",
@@ -54,8 +45,41 @@ setup_args = dict(
         "hurricane",
         "dislocation"
     ],
-    license="Mozilla Public License v2.0",
-    url="https://opensource.ncsa.illinois.edu/bitbucket/projects/INCORE1/repos/pyincore/"
-)
 
-setup(**setup_args)
+    packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    include_package_data=True,
+    package_data={
+        '': ['*.ini']
+    },
+
+    python_requires=">=3.6",
+
+    install_requires=[
+        'fiona>=1.8.4',
+        'geopandas>=0.6.1',
+        'matplotlib>=2.1.0',
+        'networkx>=2.2',
+        'numpy>=1.16.6,<2.0a0',
+        'pandas>=0.24.1',
+        'pyomo>=5.6',
+        'pyproj>=1.9.6',
+        'rasterio>=1.0.18',
+        'rtree>=0.8.3',
+        'scipy>=1.2.0',
+        'shapely>=1.6.4.post1',
+        'wntr>=0.1.6',
+    ],
+
+    extras_require={
+        'test': [
+            'pycodestyle>=2.6.0',
+            'pytest>=3.9.0',
+            'python-jose>=3.0',
+        ]
+    },
+
+    project_urls={
+        'Bug Reports': 'https://github.com/IN-CORE/pyincore/issues',
+        'Source': 'https://github.com/IN-CORE/pyincore',
+    },
+)
