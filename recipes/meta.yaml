@@ -4,70 +4,10 @@
 package:
   name: {{ name|lower }}
   version: {{ version }}
- 
+
 source:
   path: /home/runner/work/pyincore/pyincore
-  # PR: https://opensource.ncsa.illinois.edu/bitbucket/projects/INCORE1/repos/pyincore/pull-requests/12/overview
- 
-build:
-  # If this is a new build for the same version, increment the build
-  # number. If you do not include this key, it defaults to 0.
-  #number: 1
-  noarch: python
-  script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed -vv . " # verbose
- 
-requirements:
-  build:
-    - python>=3.8
-    - pip
-    - numpy 1.16
- 
-  host:
-    - python>=3.6
-    - pip
-    - numpy 1.16
-     
-  run:
-    - python>=3.6
-    - {{ pin_compatible('numpy') }}
-    - boto3
-    - deprecated
-    - fiona>=1.8.4
-    - geopandas>=0.6.1
-    - jsonpickle>=1.1
-    - libspatialindex>=1.9.0
-    - networkx>=2.2
-    - numpy>=1.16.1
-    - pytest>=3.9.0
-    - python-jose>=3.0
-    - pyproj>=1.9.6
-    - pyyaml>=3.13
-    - pycodestyle>=2.6.0
-    - pyomo>=5.6
-    - owslib>=0.17.1
-    - pandas>=0.24.1
-    - rasterio>=1.0.18
-    - requests>=2.21.0
-    - rtree>=0.8.3
-    - scipy>=1.2.0
-    - shapely>=1.6.4.post1
-    - wntr>=0.1.6
-    - ipopt>=3.11
- 
-test:
-  # Python imports
-  imports:
-    - pyincore
-    - pyomo
-   
-  requires:
-    # Put any additional test requirements here.  For example
-    - pytest>=3.9
-  commands:
-    # You can put built-in test commands to be run here.  Use this to test that the entry points work.
-    python -c "import pyincore; print('SUCCESS')" #; pyincore.test_client()"
-    # You can also put a file called run_test.py in the recipe that will be run at test time.
- 
+
 about:
   home: https://incore.ncsa.illinois.edu
   license: MPL-2.0
@@ -79,3 +19,54 @@ about:
   dev_url: https://github.com/IN-CORE/pyincore
   doc_url: https://incore.ncsa.illinois.edu/doc/incore
 
+build:
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  #number: 1
+  noarch: python
+  script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed -vv . " # verbose
+ 
+requirements:
+  build:
+    - python>=3.8
+    - pip
+    - numpy>=1.16.6,<2.0a0
+ 
+  host:
+    - python>=3.6
+    - pip
+    - numpy>=1.16.6,<2.0a0
+
+  run:
+    - python>=3.6
+    - ipopt>=3.11
+    - {{ pin_compatible('numpy') }}
+    - fiona>=1.8.4
+    - geopandas>=0.6.1
+    - matplotlib>=2.1.0
+    - networkx>=2.2
+    - pandas>=0.24.1
+    - pyomo>=5.6
+    - pyproj>=1.9.6
+    - rasterio>=1.0.18
+    - requests=2.28.0
+    - rtree>=0.8.3
+    - scipy>=1.2.0
+    - shapely>=1.6.4.post1
+    - wntr>=0.1.6
+
+test:
+  # Python imports
+  imports:
+    - pyincore
+   
+  requires:
+    # Put any additional test requirements here.  For example
+    - pytest>=3.9.0
+    - pycodestyle>=2.6.0
+    - python-jose>=3.0
+
+  commands:
+    # You can put built-in test commands to be run here.  Use this to test that the entry points work.
+    python -c "import pyincore; print('SUCCESS')" #; pyincore.test_client()"
+    # You can also put a file called run_test.py in the recipe that will be run at test time.
