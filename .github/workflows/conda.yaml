@@ -18,11 +18,12 @@ jobs:
       - name: get release info
         id: release_info
         run: |
-          if [ "${{ github.event.release.tag_name }}" != "" ]; then
-            version=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
-          else
-            version="$(awk -F= '/^PACKAGE_VERSION/ { print $2}' pyincore/globals.py | sed 's/[ "]//g').${{ github.run_number }}"
-          fi
+#          if [ "${{ github.event.release.tag_name }}" != "" ]; then
+#            version=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+#          else
+#            version="$(awk -F= '/^PACKAGE_VERSION/ { print $2}' pyincore/globals.py | sed 's/[ "]//g').${{ github.run_number }}"
+#          fi
+          version="999.999.999.${{ github.run_number }}"
           echo "VERSION=${version}" >> $GITHUB_ENV
           echo "VERSION=${version}"
 
@@ -31,11 +32,12 @@ jobs:
               -i~ recipes/meta.yaml
 
           testing=$(echo $version | sed 's/[0-9\.]//g')
-          if [ "$testing" == "" ]; then
-            echo "LABELS=main" >> $GITHUB_ENV
-          else
-            echo "LABELS=rc" >> $GITHUB_ENV
-          fi
+#          if [ "$testing" == "" ]; then
+#            echo "LABELS=main" >> $GITHUB_ENV
+#          else
+#            echo "LABELS=rc" >> $GITHUB_ENV
+#          fi
+#          echo "LABELS=rc" >> $GITHUB_ENV
 
           echo "UPLOAD=--no-anaconda-upload" >> $GITHUB_ENV
 
@@ -80,7 +82,7 @@ jobs:
                       --user IN-CORE \
                       --no-force-upload \
                       --label ${{ env.LABELS }} \
-                      recipes
+                      recipes/meta.yaml
 
 #      - name: Upload binaries to release
 #        if: github.event_name == 'release'
