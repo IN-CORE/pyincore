@@ -5,6 +5,10 @@ on:
     types:
       - published
 
+  repository_dispatch:
+    types:
+      - build
+
   pull_request:
 
 jobs:
