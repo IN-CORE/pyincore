@@ -74,7 +74,10 @@ jobs:
       - name: Upload conda package
         run: |
           conda install -y anaconda-client
-          which anaconda
+          echo "INSTALLED"
+          anaconda --help
+
+
 #          anaconda upload --user kooper \
 #                          --token ${{ secrets.CONDA_INCORE_TOKEN }} \
 #                          --label ${{ env.LABEL }} \
