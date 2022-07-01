@@ -5,10 +5,6 @@ on:
     types:
       - published
 
-  repository_dispatch:
-    types:
-      - build
-
   pull_request:
 
 jobs:
@@ -32,7 +28,6 @@ jobs:
           else
             version="$(awk -F= '/^PACKAGE_VERSION/ { print $2}' pyincore/globals.py | sed 's/[ "]//g').${{ github.run_number }}"
           fi
-          version="0.0.9.${{ github.run_number }}"
           echo "VERSION=${version}" >> $GITHUB_ENV
           echo "VERSION=${version}"
           ./version.sh ${version}
@@ -73,7 +68,7 @@ jobs:
                       recipes
 
       - name: Upload conda package
-        #if: github.event_name == 'release'
+        if: github.event_name == 'release'
         run: |
           conda install -y anaconda-client
           anaconda --token ${{ secrets.CONDA_INCORE_TOKEN }} upload \
