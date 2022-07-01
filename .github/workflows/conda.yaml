@@ -16,6 +16,11 @@ jobs:
     name: Build and publish conda packages
     runs-on: ubuntu-latest
 
+    # need for activated env
+    defaults:
+      run:
+        shell: bash -l {0}
+
     steps:
       - uses: actions/checkout@v2
 
@@ -74,8 +79,12 @@ jobs:
           conda install -y anaconda-client
           echo "INSTALLED"
           echo ${PATH}
+          echo ""
           ls -l /usr/share/miniconda3/bin
+          echo ""
           ls -l /usr/share/miniconda3/envs/test/bin
+          echo ""
+          ls -l /usr/share/miniconda3/condabin
           env | grep -i conda
           /usr/share/miniconda3/bin/anaconda --help
 
