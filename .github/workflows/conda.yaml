@@ -58,9 +58,6 @@ jobs:
           mamba-version: "*"
           channels: conda-forge
           use-only-tar-bz2: true
-          auto-activate-base: false
-          environment-file: ""
-          activate-environment: pyincore
           conda-build-version: "*"
 
 #      - name: Build conda package
@@ -73,6 +70,7 @@ jobs:
 
       - name: Upload conda package
         run: |
+          conda env list
           conda install -y anaconda-client
           echo "INSTALLED"
           anaconda --help
