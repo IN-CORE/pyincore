@@ -34,9 +34,9 @@ jobs:
 
           testing=$(echo $version | sed 's/[0-9\.]//g')
           if [ "$testing" == "" ]; then
-            echo "LABELS=main" >> $GITHUB_ENV
+            echo "LABEL=main" >> $GITHUB_ENV
           else
-            echo "LABELS=rc" >> $GITHUB_ENV
+            echo "LABEL=rc" >> $GITHUB_ENV
           fi
 
       - name: Cache conda
@@ -59,27 +59,26 @@ jobs:
           channels: conda-forge
           use-only-tar-bz2: true
           auto-activate-base: false
-          environment-file: environment.yml
+          environment-file: ""
           activate-environment: pyincore
           conda-build-version: "*"
 
-      - name: Build conda package
-        run: |
-          mkdir dist
-          which anaconda
-          conda install -y anaconda-client
-          which anaconda
-#          conda build --user kooper \
-#                      --token ${{ secrets.CONDA_INCORE_TOKEN }} \
-#                      --output-folder dist \
+#      - name: Build conda package
+#        run: |
+#          mkdir dist
+#          conda build --output-folder dist \
 #                      --label ${{ env.LABELS }} \
 #                      recipes
 #          ls -lR dist
 
-
-
-#
-#                      --no-force-upload \
+      - name: Upload conda package
+        run: |
+          conda install -y anaconda-client
+          which anaconda
+#          anaconda upload --user kooper \
+#                          --token ${{ secrets.CONDA_INCORE_TOKEN }} \
+#                          --label ${{ env.LABEL }} \
+#                          dist/*/pyincore-${{ env.VERSION }}-*.tar.bz2
 
 #      - name: Upload binaries to release
 #        if: github.event_name == 'release'
