@@ -80,10 +80,10 @@ jobs:
           mkdir dist
           conda build ${{ env.CONDA_UPLOAD }} \
                       --output-folder dist \
-                      --no-force-upload \
-                      --label ${{ env.LABELS }} \
-                      --no-force-upload \
                       recipes
+          ls -lR dist
+#                      --label ${{ env.LABELS }} \
+#                      --no-force-upload \
 
 #      - name: Upload binaries to release
 #        if: github.event_name == 'release'
