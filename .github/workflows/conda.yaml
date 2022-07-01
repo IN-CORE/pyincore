@@ -32,7 +32,8 @@ jobs:
           sed -e "s/ version = \".*\"/ version = \"${version}\"/" \
               -e "s#  path: .*#  path: ${PWD}#" \
               -i~ recipes/meta.yaml
-          testing=$(echo $version | sed 's/[0-9\.]//')
+
+          testing=$(echo $version | sed 's/[0-9\.]//g')
           if [ "$testing" == "" ]; then
             echo "LABELS=main" >> $GITHUB_ENV
           else
@@ -46,7 +47,8 @@ jobs:
             echo "CONDA_UPLOAD=" >> $GITHUB_ENV
           else
             echo "TESTING"
-            echo "CONDA_UPLOAD=" >> $GITHUB_ENV
+            echo "CONDA_UPLOAD=--user kooper --token ${{ secrets.CONDA_INCORE_TOKEN }}" >> $GITHUB_ENV
+            #echo "CONDA_UPLOAD=" >> $GITHUB_ENV
           fi
 
       - name: Cache conda
