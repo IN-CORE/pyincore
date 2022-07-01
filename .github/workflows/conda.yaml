@@ -71,13 +71,13 @@ jobs:
           conda build --output-folder dist \
                       --label ${{ env.LABEL }} \
                       recipes
-          ls -lR dist
 
       - name: Upload conda package
+        #if: github.event_name == 'release'
         run: |
           conda install -y anaconda-client
-          anaconda upload --user kooper \
-                          --token ${{ secrets.CONDA_INCORE_TOKEN }} \
+          anaconda --token ${{ secrets.CONDA_INCORE_TOKEN }} upload \
+                          --user kooper \
                           --label ${{ env.LABEL }} \
                           dist/*/pyincore-${{ env.VERSION }}-*.tar.bz2
 
