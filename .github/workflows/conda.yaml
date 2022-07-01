@@ -73,7 +73,11 @@ jobs:
           conda env list
           conda install -y anaconda-client
           echo "INSTALLED"
-          anaconda --help
+          echo ${PATH}
+          ls -l /usr/share/miniconda3/bin
+          ls -l /usr/share/miniconda3/envs/test/bin
+          env | grep -i conda
+          /usr/share/miniconda3/bin/anaconda --help
 
 
 #          anaconda upload --user kooper \
