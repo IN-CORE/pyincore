@@ -66,12 +66,18 @@ jobs:
       - name: Build conda package
         run: |
           mkdir dist
-          conda build --user kooper \
-                      --token ${{ secrets.CONDA_INCORE_TOKEN }} \
-                      --output-folder dist \
-                      --label ${{ env.LABELS }} \
-                      recipes
-          ls -lR dist
+          which anaconda
+          conda install -y anaconda-client
+          which anaconda
+#          conda build --user kooper \
+#                      --token ${{ secrets.CONDA_INCORE_TOKEN }} \
+#                      --output-folder dist \
+#                      --label ${{ env.LABELS }} \
+#                      recipes
+#          ls -lR dist
+
+
+
 #
 #                      --no-force-upload \
 
