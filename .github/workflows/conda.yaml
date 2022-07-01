@@ -65,40 +65,27 @@ jobs:
           use-only-tar-bz2: true
           conda-build-version: "*"
 
-#      - name: Build conda package
-#        run: |
-#          mkdir dist
-#          conda build --output-folder dist \
-#                      --label ${{ env.LABELS }} \
-#                      recipes
-#          ls -lR dist
+      - name: Build conda package
+        run: |
+          mkdir dist
+          conda build --output-folder dist \
+                      --label ${{ env.LABELS }} \
+                      recipes
+          ls -lR dist
 
       - name: Upload conda package
         run: |
-          conda env list
           conda install -y anaconda-client
-          echo "INSTALLED"
-          echo ${PATH}
-          echo ""
-          ls -l /usr/share/miniconda3/bin
-          echo ""
-          ls -l /usr/share/miniconda3/envs/test/bin
-          echo ""
-          ls -l /usr/share/miniconda3/condabin
-          env | grep -i conda
-          /usr/share/miniconda3/bin/anaconda --help
+          anaconda upload --user kooper \
+                          --token ${{ secrets.CONDA_INCORE_TOKEN }} \
+                          --label ${{ env.LABEL }} \
+                          dist/*/pyincore-${{ env.VERSION }}-*.tar.bz2
 
-
-#          anaconda upload --user kooper \
-#                          --token ${{ secrets.CONDA_INCORE_TOKEN }} \
-#                          --label ${{ env.LABEL }} \
-#                          dist/*/pyincore-${{ env.VERSION }}-*.tar.bz2
-
-#      - name: Upload binaries to release
-#        if: github.event_name == 'release'
-#        uses: svenstaro/upload-release-action@v2
-#        with:
-#          repo_token: ${{ secrets.GITHUB_TOKEN }}
-#          file: dist/pyincore-${{ env.VERSION }}*
-#          file_glob: true
-#          overwrite: true
+      - name: Upload binaries to release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/pyincore-${{ env.VERSION }}*
+          file_glob: true
+          overwrite: true
