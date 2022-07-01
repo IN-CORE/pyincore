@@ -22,9 +22,32 @@ jobs:
       - name: get release info
         id: release_info
         run: |
-          echo "VERSION=9.9.9.9" >> $GITHUB_ENV
-          echo "LABELS=rc" >> $GITHUB_ENV
-          echo "UPLOAD=--no-anaconda-upload" >> $GITHUB_ENV
+          if [ "${{ github.event.release.tag_name }}" != "" ]; then
+            version=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          else
+            version="$(awk -F= '/^PACKAGE_VERSION/ { print $2}' pyincore/globals.py | sed 's/[ "]//g').${{ github.run_number }}"
+          fi
+          echo "VERSION=${version}" >> $GITHUB_ENV
+          echo "VERSION=${version}"
+          sed -e "s/ version = \".*\"/ version = \"${version}\"/" \
+              -e "s#  path: .*#  path: ${PWD}#" \
+              -i~ recipes/meta.yaml
+          testing=$(echo $version | sed 's/[0-9\.]//')
+          if [ "$testing" == "" ]; then
+            echo "LABELS=main" >> $GITHUB_ENV
+          else
+            echo "LABELS=rc" >> $GITHUB_ENV
+          fi
+          
+          # only set if we want to upload, if either is set it will try to upload and fail
+          if [ "${{ github.event_name }}" == "release" ]; then
+            #echo "CONDA_UPLOAD=--user IN-CORE --token ${{ secrets.CONDA_INCORE_TOKEN }}" >> $GITHUB_ENV
+            echo "RELEASE"
+            echo "CONDA_UPLOAD=" >> $GITHUB_ENV
+          else
+            echo "TESTING"
+            echo "CONDA_UPLOAD=" >> $GITHUB_ENV
+          fi
 
       - name: Cache conda
         uses: actions/cache@v2
@@ -50,23 +73,15 @@ jobs:
           activate-environment: pyincore
           conda-build-version: "*"
 
-      - name: Print information about conda
-        run: |
-          conda env list
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
-
       - name: Build conda package
         run: |
-          conda build recipes
-#          conda build --keep-going ${{ env.UPLOAD }} \
-#                      --token ${{ secrets.CONDA_INCORE_TOKEN }} \
-#                      --user IN-CORE \
-#                      --no-force-upload \
-#                      --label ${{ env.LABELS }} \
-#                      recipes/meta.yaml
+          mkdir dist
+          conda build ${{ env.CONDA_UPLOAD }} \
+                      --output-folder dist \
+                      --no-force-upload \
+                      --label ${{ env.LABELS }} \
+                      --no-force-upload \
+                      recipes
 
 #      - name: Upload binaries to release
 #        if: github.event_name == 'release'
