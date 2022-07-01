@@ -27,28 +27,16 @@ jobs:
           else
             version="$(awk -F= '/^PACKAGE_VERSION/ { print $2}' pyincore/globals.py | sed 's/[ "]//g').${{ github.run_number }}"
           fi
+          version="0.0.9.${{ github.run_number }}"
           echo "VERSION=${version}" >> $GITHUB_ENV
           echo "VERSION=${version}"
-          sed -e "s/ version = \".*\"/ version = \"${version}\"/" \
-              -e "s#  path: .*#  path: ${PWD}#" \
-              -i~ recipes/meta.yaml
+          ./version ${version}
 
           testing=$(echo $version | sed 's/[0-9\.]//g')
           if [ "$testing" == "" ]; then
             echo "LABELS=main" >> $GITHUB_ENV
           else
             echo "LABELS=rc" >> $GITHUB_ENV
-          fi
-          
-          # only set if we want to upload, if either is set it will try to upload and fail
-          if [ "${{ github.event_name }}" == "release" ]; then
-            #echo "CONDA_UPLOAD=--user IN-CORE --token ${{ secrets.CONDA_INCORE_TOKEN }}" >> $GITHUB_ENV
-            echo "RELEASE"
-            echo "CONDA_UPLOAD=" >> $GITHUB_ENV
-          else
-            echo "TESTING"
-            echo "CONDA_UPLOAD=--user kooper --token ${{ secrets.CONDA_INCORE_TOKEN }}" >> $GITHUB_ENV
-            #echo "CONDA_UPLOAD=" >> $GITHUB_ENV
           fi
 
       - name: Cache conda
@@ -78,11 +66,13 @@ jobs:
       - name: Build conda package
         run: |
           mkdir dist
-          conda build ${{ env.CONDA_UPLOAD }} \
+          conda build --user kooper \
+                      --token ${{ secrets.CONDA_INCORE_TOKEN }} \
                       --output-folder dist \
+                      --label ${{ env.LABELS }} \
                       recipes
           ls -lR dist
-#                      --label ${{ env.LABELS }} \
+#
 #                      --no-force-upload \
 
 #      - name: Upload binaries to release

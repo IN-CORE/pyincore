@@ -6,7 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  path: /path/to/pyincore
+  path: ..
 
 about:
   home: https://incore.ncsa.illinois.edu
