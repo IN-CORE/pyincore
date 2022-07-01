@@ -30,7 +30,7 @@ jobs:
           version="0.0.9.${{ github.run_number }}"
           echo "VERSION=${version}" >> $GITHUB_ENV
           echo "VERSION=${version}"
-          ./version ${version}
+          ./version.sh ${version}
 
           testing=$(echo $version | sed 's/[0-9\.]//g')
           if [ "$testing" == "" ]; then
