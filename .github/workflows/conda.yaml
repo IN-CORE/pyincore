@@ -72,7 +72,7 @@ jobs:
         run: |
           conda install -y anaconda-client
           anaconda --token ${{ secrets.CONDA_INCORE_TOKEN }} upload \
-                          --user kooper \
+                          --user IN-CORE \
                           --label ${{ env.LABEL }} \
                           dist/*/pyincore-${{ env.VERSION }}-*.tar.bz2
 
