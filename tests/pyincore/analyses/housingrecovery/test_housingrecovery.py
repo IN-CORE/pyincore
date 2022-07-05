@@ -160,7 +160,7 @@ def run_with_base_class(chained):
         census_bg_id = "62193b7ca42a3e546ae2d9f2"
 
         # Census appraisal file; id of external Census json
-        census_appr_id = "6241fbd153302c512d685181"
+        census_appr_id = "62c4956d861e370172c5578b"
         result_name = "Galveston_building_values"
 
         housing_rec = HousingRecovery(client)
