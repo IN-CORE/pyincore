@@ -1,10 +1,23 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+import pytest
+
+from pyincore import globals as pyglobals
 from pyincore.analyses.tornadoepndamage.tornadoepndamage import \
     TornadoEpnDamage
 from pyincore import IncoreClient
-import pyincore.globals as pyglobals
 
 
-def run_with_base_class():
+@pytest.fixture
+def datasvc():
+    return pytest.datasvc
+
+
+def test_tornado_epn_damage_analysis(datasvc):
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     ted = TornadoEpnDamage(client)
@@ -20,7 +33,3 @@ def run_with_base_class():
     ted.set_parameter('seed', 1001)
 
     ted.run_analysis()
-
-
-if __name__ == '__main__':
-    run_with_base_class()

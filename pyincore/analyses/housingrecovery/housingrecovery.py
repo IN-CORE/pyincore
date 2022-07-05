@@ -269,8 +269,8 @@ class HousingRecovery(BaseAnalysis):
         """
         hse_rec["tractid"] = hse_rec["tractid"].astype(str)
         # Add county and state to trac to match hse_rec tracid (Galveston - 723900 to 48167723900)
-        vac_status["tractid"] = vac_status["state"].astype(str) + vac_status["county"].astype(str) + \
-                                vac_status["tract"].astype(str)
+        vac_status["tractid"] = \
+            vac_status["state"].astype(str) + vac_status["county"].astype(str) + vac_status["tract"].astype(str)
 
         hse_rec_merged = pd.merge(hse_rec, vac_status, left_on="tractid", right_on="tractid", how='inner')
         return hse_rec_merged
@@ -336,12 +336,12 @@ class HousingRecovery(BaseAnalysis):
         else:
             dmg_loss = np.fromiter(hru.B_PHM_dmg_year.values(), dtype=float) * \
                        hse_rec["value_loss"].to_numpy()[:, np.newaxis]
-        d_owner = np.fromiter(hru.B_PHM_own_year.values(), dtype=float) * \
-                  hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
-        mhhinck = np.fromiter(hru.B_PHM_inc_year.values(), dtype=float) * \
-                  hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
-        pminrbg = np.fromiter(hru.B_PHM_min_year.values(), dtype=float) * \
-                  hse_rec["pminoritybg"].to_numpy()[:, np.newaxis]
+        d_owner = \
+            np.fromiter(hru.B_PHM_own_year.values(), dtype=float) * hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
+        mhhinck = \
+            np.fromiter(hru.B_PHM_inc_year.values(), dtype=float) * hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
+        pminrbg = \
+            np.fromiter(hru.B_PHM_min_year.values(), dtype=float) * hse_rec["pminoritybg"].to_numpy()[:, np.newaxis]
 
         return coef_fin + yrbuilt + sqmeter + d_owner + dmg_loss + mhhinck + pminrbg
 
@@ -376,10 +376,9 @@ class HousingRecovery(BaseAnalysis):
         else:
             dmg_loss = np.fromiter(hru.B_SVHM_dmg_year.values(), dtype=float) * \
                        hse_rec["value_loss"].to_numpy()[:, np.newaxis]
-        d_owner = np.fromiter(hru.B_SVHM_own_year.values(), dtype=float) * \
-                  hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
-        mhhinck = np.fromiter(hru.B_SVHM_inc_year.values(), dtype=float) * \
-                  hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
+        d_owner = \
+            np.fromiter(hru.B_SVHM_own_year.values(), dtype=float) * hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
+        mhhinck = \
+            np.fromiter(hru.B_SVHM_inc_year.values(), dtype=float) * hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
 
         return coef_fin + yrbuilt + sqmeter + dmg_loss + d_owner + mhhinck
-
