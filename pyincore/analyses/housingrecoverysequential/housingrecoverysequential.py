@@ -150,7 +150,6 @@ class HousingRecoverySequential(BaseAnalysis):
         # Obtain a social vulnerability score stochastically per household
         # We use them later to construct the final output dataset
         sv_scores = self.compute_social_vulnerability_values(sv_result, households_df)
-        # sv_scores = self.compute_social_vulnerability_values(households_df, num_households, rng)
 
         # We store Markov states as a list of numpy arrays for convenience and add each one by one
         markov_stages = np.zeros((stages, num_households))
