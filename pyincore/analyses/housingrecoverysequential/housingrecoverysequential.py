@@ -4,6 +4,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore import BaseAnalysis
+import re
 
 import numpy as np
 import pandas as pd
@@ -145,7 +146,8 @@ class HousingRecoverySequential(BaseAnalysis):
 
         # Obtain a social vulnerability score stochastically per household
         # We use them later to construct the final output dataset
-        sv_scores = self.compute_social_vulnerability_values(households_df, num_households, rng)
+        sv_result = self.get_input_dataset("sv_result").get_dataframe_from_csv(low_memory=False)
+        sv_scores = self.compute_social_vulnerability_values(sv_result, households_df)
 
         # We store Markov states as a list of numpy arrays for convenience and add each one by one
         markov_stages = np.zeros((stages, num_households))
@@ -282,34 +284,29 @@ class HousingRecoverySequential(BaseAnalysis):
         households_df['Zone'] = quantile.map(zone_map)
         return households_df[households_df['Zone'] != 'missing']
 
-    def compute_social_vulnerability_values(self, households_df, num_households, rng):
+    def compute_social_vulnerability_values(self, sv_result, households_df):
         """
         Compute the social vulnerability score of a household depending on its zone
 
         Args:
+            sv_result (pd.DataFrame): Social Vulnerability Score calculated from social vulnerability analysis
             households_df (pd.DataFrame): Information about household zones.
-            num_households (int): Number of households.
-            rng (np.RandomState): Random state to draw pseudo-random numbers from.
 
         Returns:
             pd.Series: social vulnerability scores.
 
         """
-        # Social vulnerability zone generator: this generalizes the code in the first version
-        sv_scores = np.zeros(num_households)
-        zones = households_df['Zone'].to_numpy()
-
-        for household in range(0, num_households):
-            spin = rng.rand()
-            zone = zones[household]
-
-            if spin < self.__sv_generator[zone]['threshold']:
-                sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['below_lower'],
-                                                         self.__sv_generator[zone]['below_upper']), 3)
-            else:
-                sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['above_lower'],
-                                                         self.__sv_generator[zone]['above_upper']), 3)
-
+        # merge sv result based on FIPS and blockfips into households df and construct a sv_scores dataframe
+        households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:12]).astype(np.int64)
+        tmp = households_df.merge(sv_result, left_on="blockfips", right_on="FIPS")
+        sv_scores = tmp["svs"].T.to_numpy()
+        # num_households = households_df.shape[1]
+        #
+        # sv_scores = np.zeros(num_households)
+        #
+        # for household in range(0, num_households):
+        #     sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['below_lower'],
+        #                                              self.__sv_generator[zone]['below_upper']), 3)
         return sv_scores
 
     @staticmethod
@@ -394,6 +391,19 @@ class HousingRecoverySequential(BaseAnalysis):
                     'required': True,
                     'description': 'initial mass probability function for stage 0 of the Markov Chain',
                     'type': 'incore:houseRecInitialStageProbability'
+                },
+                {
+                    'id': 'initial_stage_probabilities',
+                    'required': True,
+                    'description': 'initial mass probability function for stage 0 of the Markov Chain',
+                    'type': 'incore:houseRecInitialStageProbability'
+                },
+                {
+                    'id': 'sv_result',
+                    'required': True,
+                    'description': 'A csv file with zones containing demographic factors'
+                                   'qualified by a social vulnerability score',
+                    'type': 'incore:socialVulnerabilityScore'
                 }
             ],
             'output_datasets': [
