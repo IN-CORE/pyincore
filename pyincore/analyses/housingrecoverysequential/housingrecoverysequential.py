@@ -131,9 +131,10 @@ class HousingRecoverySequential(BaseAnalysis):
         """
         seed = self.get_parameter('seed')
         rng = np.random.RandomState(seed)
+        sv_result = self.get_input_dataset("sv_result").get_dataframe_from_csv(low_memory=False)
 
         # Compute the social vulnerability zone using known factors
-        households_df = self.compute_social_vulnerability_zones(households_df)
+        households_df = self.compute_social_vulnerability_zones(sv_result, households_df)
 
         # Set the number of Markov chain stages
         stages = int(t_final / t_delta)
@@ -146,7 +147,6 @@ class HousingRecoverySequential(BaseAnalysis):
 
         # Obtain a social vulnerability score stochastically per household
         # We use them later to construct the final output dataset
-        sv_result = self.get_input_dataset("sv_result").get_dataframe_from_csv(low_memory=False)
         sv_scores = self.compute_social_vulnerability_values(sv_result, households_df)
 
         # We store Markov states as a list of numpy arrays for convenience and add each one by one
@@ -265,26 +265,33 @@ class HousingRecoverySequential(BaseAnalysis):
         self.set_result_csv_data("ds_result", result, name=result_name, source="dataframe")
 
     @staticmethod
-    def compute_social_vulnerability_zones(households_df):
+    def compute_social_vulnerability_zones(sv_result, households_df):
         """
         Compute the social vulnerability score based on dislocation attributes. Updates the dislocation dataset
         by adding a new `Zone` column and removing values with missing Zone.
 
         Args:
+            sv_result (pd.DataFrame): output from social vulnerability analysis
             households_df (pd.DataFrame): Vector position of a household.
 
         Returns:
             pd.DataFrame: Social vulnerability score.
 
         """
-        zone_map = {0: 'Z5', 1: 'Z4', 2: 'Z3', 3: 'Z2', 4: 'Z1', np.nan: 'missing'}
+        # if FIPS has 11 digits (Tract level)
+        if len(sv_result["FIPS"].iloc[0]) == 11:
+            households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:11]).astype(str)
+        # if FIPS has 12 digits (Block Group level)
+        elif len(sv_result["FIPS"].iloc[0]) == 12:
+            households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:12]).astype(str)
 
-        # TODO: to be replaced in next release by more comprehensive algorithm
-        quantile = pd.qcut(households_df['randincome'], 5, labels=False)
-        households_df['Zone'] = quantile.map(zone_map)
+        households_df = households_df.merge(sv_result[["FIPS", "zone"]], left_on="blockfips", right_on="FIPS")
+        households_df["Zone"] = households_df["zone"].apply(lambda row: "Z"+re.findall("[0-9]", row)[0])
+
         return households_df[households_df['Zone'] != 'missing']
 
-    def compute_social_vulnerability_values(self, sv_result, households_df):
+    @staticmethod
+    def compute_social_vulnerability_values(sv_result, households_df):
         """
         Compute the social vulnerability score of a household depending on its zone
 
@@ -297,9 +304,17 @@ class HousingRecoverySequential(BaseAnalysis):
 
         """
         # merge sv result based on FIPS and blockfips into households df and construct a sv_scores dataframe
-        households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:12]).astype(np.int64)
+        sv_result["FIPS"] = sv_result["FIPS"].astype(str)
+
+        # if FIPS has 11 digits (Tract level)
+        if len(sv_result["FIPS"].iloc[0]) == 11:
+            households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:11]).astype(str)
+        # if FIPS has 12 digits (Block Group level)
+        elif len(sv_result["FIPS"].iloc[0]) == 12:
+            households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:12]).astype(str)
+
         tmp = households_df.merge(sv_result, left_on="blockfips", right_on="FIPS")
-        sv_scores = tmp["svs"].T.to_numpy()
+        sv_scores = tmp["SVS"].T.to_numpy()
         # num_households = households_df.shape[1]
         #
         # sv_scores = np.zeros(num_households)
