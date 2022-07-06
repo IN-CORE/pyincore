@@ -39,38 +39,38 @@ class HousingRecoverySequential(BaseAnalysis):
     __sv_generator = {
         'Z1': {
             'threshold': 0.95,
-            'below_lower': 0.01,
-            'below_upper': 0.15,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'below_lower': 0.00,
+            'below_upper': 0.20,
+            'above_lower': 0.20,
+            'above_upper': 1.00
         },
         'Z2': {
             'threshold': 0.85,
-            'below_lower': 0.10,
-            'below_upper': 0.50,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'below_lower': 0.20,
+            'below_upper': 0.40,
+            'above_lower': 0.40,
+            'above_upper': 1.00
         },
         'Z3': {
             'threshold': 0.80,
-            'below_lower': 0.30,
-            'below_upper': 0.70,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'below_lower': 0.40,
+            'below_upper': 0.60,
+            'above_lower': 0.60,
+            'above_upper': 1.00
         },
         'Z4': {
             'threshold': 0.85,
-            'below_lower': 0.50,
-            'below_upper': 0.90,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'below_lower': 0.60,
+            'below_upper': 0.80,
+            'above_lower': 0.80,
+            'above_upper': 1.00
         },
         'Z5': {
             'threshold': 0.95,
-            'below_lower': 0.85,
-            'below_upper': 0.99,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'below_lower': 0.80,
+            'below_upper': 1.00,
+            'above_lower': 0.00,
+            'above_upper': 0.80
         }
     }
 
@@ -149,8 +149,8 @@ class HousingRecoverySequential(BaseAnalysis):
 
         # Obtain a social vulnerability score stochastically per household
         # We use them later to construct the final output dataset
-        # sv_scores = self.compute_social_vulnerability_values(sv_result, households_df)
-        sv_scores = self.compute_social_vulnerability_values(households_df, num_households, rng)
+        sv_scores = self.compute_social_vulnerability_values(sv_result, households_df)
+        # sv_scores = self.compute_social_vulnerability_values(households_df, num_households, rng)
 
         # We store Markov states as a list of numpy arrays for convenience and add each one by one
         markov_stages = np.zeros((stages, num_households))
@@ -293,60 +293,33 @@ class HousingRecoverySequential(BaseAnalysis):
 
         return households_df[households_df['Zone'] != 'missing']
 
-    def compute_social_vulnerability_values(self, households_df, num_households, rng):
+    @staticmethod
+    def compute_social_vulnerability_values(sv_result, households_df):
         """
         Compute the social vulnerability score of a household depending on its zone
+
         Args:
+            sv_result (pd.DataFrame): Social Vulnerability Score calculated from social vulnerability analysis
             households_df (pd.DataFrame): Information about household zones.
-            num_households (int): Number of households.
-            rng (np.RandomState): Random state to draw pseudo-random numbers from.
+
         Returns:
             pd.Series: social vulnerability scores.
+
         """
-        # Social vulnerability zone generator: this generalizes the code in the first version
-        sv_scores = np.zeros(num_households)
-        zones = households_df['Zone'].to_numpy()
+        # merge sv result based on FIPS and blockfips into households df and construct a sv_scores dataframe
+        sv_result["FIPS"] = sv_result["FIPS"].astype(str)
 
-        for household in range(0, num_households):
-            spin = rng.rand()
-            zone = zones[household]
+        # if FIPS has 11 digits (Tract level)
+        if len(sv_result["FIPS"].iloc[0]) == 11:
+            households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:11]).astype(str)
+        # if FIPS has 12 digits (Block Group level)
+        elif len(sv_result["FIPS"].iloc[0]) == 12:
+            households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:12]).astype(str)
 
-            if spin < self.__sv_generator[zone]['threshold']:
-                sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['below_lower'],
-                                                         self.__sv_generator[zone]['below_upper']), 3)
-            else:
-                sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['above_lower'],
-                                                         self.__sv_generator[zone]['above_upper']), 3)
+        tmp = households_df.merge(sv_result, left_on="blockfips", right_on="FIPS")
+        sv_scores = tmp["SVS"].round(decimals=3).T.to_numpy()
 
         return sv_scores
-
-    # @staticmethod
-    # def compute_social_vulnerability_values(sv_result, households_df):
-    #     """
-    #     Compute the social vulnerability score of a household depending on its zone
-    #
-    #     Args:
-    #         sv_result (pd.DataFrame): Social Vulnerability Score calculated from social vulnerability analysis
-    #         households_df (pd.DataFrame): Information about household zones.
-    #
-    #     Returns:
-    #         pd.Series: social vulnerability scores.
-    #
-    #     """
-    #     # merge sv result based on FIPS and blockfips into households df and construct a sv_scores dataframe
-    #     sv_result["FIPS"] = sv_result["FIPS"].astype(str)
-    #
-    #     # if FIPS has 11 digits (Tract level)
-    #     if len(sv_result["FIPS"].iloc[0]) == 11:
-    #         households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:11]).astype(str)
-    #     # if FIPS has 12 digits (Block Group level)
-    #     elif len(sv_result["FIPS"].iloc[0]) == 12:
-    #         households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:12]).astype(str)
-    #
-    #     tmp = households_df.merge(sv_result, left_on="blockfips", right_on="FIPS")
-    #     sv_scores = tmp["SVS"].T.to_numpy()
-    #
-    #     return sv_scores
 
     @staticmethod
     def compute_regressions(markov_stages, household, lower, upper):
