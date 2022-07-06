@@ -132,6 +132,8 @@ class HousingRecoverySequential(BaseAnalysis):
         seed = self.get_parameter('seed')
         rng = np.random.RandomState(seed)
         sv_result = self.get_input_dataset("sv_result").get_dataframe_from_csv(low_memory=False)
+        # turn fips code to string for ease of matching
+        sv_result["FIPS"] = sv_result["FIPS"].astype(str)
 
         # Compute the social vulnerability zone using known factors
         households_df = self.compute_social_vulnerability_zones(sv_result, households_df)
@@ -290,6 +292,33 @@ class HousingRecoverySequential(BaseAnalysis):
 
         return households_df[households_df['Zone'] != 'missing']
 
+    # def compute_social_vulnerability_values(self, households_df, num_households, rng):
+    #     """
+    #     Compute the social vulnerability score of a household depending on its zone
+    #     Args:
+    #         households_df (pd.DataFrame): Information about household zones.
+    #         num_households (int): Number of households.
+    #         rng (np.RandomState): Random state to draw pseudo-random numbers from.
+    #     Returns:
+    #         pd.Series: social vulnerability scores.
+    #     """
+    #     # Social vulnerability zone generator: this generalizes the code in the first version
+    #     sv_scores = np.zeros(num_households)
+    #     zones = households_df['Zone'].to_numpy()
+    # 
+    #     for household in range(0, num_households):
+    #         spin = rng.rand()
+    #         zone = zones[household]
+    # 
+    #         if spin < self.__sv_generator[zone]['threshold']:
+    #             sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['below_lower'],
+    #                                                      self.__sv_generator[zone]['below_upper']), 3)
+    #         else:
+    #             sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['above_lower'],
+    #                                                      self.__sv_generator[zone]['above_upper']), 3)
+    # 
+    #     return sv_scores
+
     @staticmethod
     def compute_social_vulnerability_values(sv_result, households_df):
         """
@@ -315,13 +344,7 @@ class HousingRecoverySequential(BaseAnalysis):
 
         tmp = households_df.merge(sv_result, left_on="blockfips", right_on="FIPS")
         sv_scores = tmp["SVS"].T.to_numpy()
-        # num_households = households_df.shape[1]
-        #
-        # sv_scores = np.zeros(num_households)
-        #
-        # for household in range(0, num_households):
-        #     sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['below_lower'],
-        #                                              self.__sv_generator[zone]['below_upper']), 3)
+
         return sv_scores
 
     @staticmethod
