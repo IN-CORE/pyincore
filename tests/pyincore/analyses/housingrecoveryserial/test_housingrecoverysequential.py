@@ -13,7 +13,8 @@ def run_with_base_class():
     population_dislocation = "60f098f502897f12fcda19ec"  # dev Galveston testbed
     transition_probability_matrix = "60ef513802897f12fcd9765c"
     initial_probability_vector = "60ef532e02897f12fcd9ac63"
-    sv_result = "62c5be23861e370172c5e412"
+    # sv_result = "62c5be23861e370172c5e412"  # dev tract level
+    sv_result = "62c70445861e370172c6eaab"  # dev block group level
 
     seed = 1234
     t_delta = 1.0
