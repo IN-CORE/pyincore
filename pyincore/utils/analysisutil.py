@@ -601,13 +601,11 @@ class AnalysisUtil:
     def get_discretized_restoration(restoration_table):
         """Converts discretized restoration times into a dictionary
 
-        :param restoration_table:
-        :return: For each different classification, this returns discretized restoration in the form of
-            rest_dict = {day1: [100, 50, 9, 4, 3],
-                         day3: [100, 100, 50, 13, 4],
-                         day7: [100, 100, 100, 50, 7],
-                        day30: [100, 100, 100, 100, 50],
-                        day90: [100, 100, 100, 100, 100]}
+        Args:
+            restoration_table(list):
+        Returns:
+            dict: Grouped discretized restoration by inventory class { 'EPPL': {day1: [100, 50, 9, 4, 3], day3: [100,
+            100, 50, 13, 4], etc }
         """
 
         restoration_map = {}
