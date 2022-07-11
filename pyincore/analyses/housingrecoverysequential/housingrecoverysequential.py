@@ -4,11 +4,9 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore import BaseAnalysis
-import re
 
 import numpy as np
 import pandas as pd
-import collections as cl
 
 
 class HousingRecoverySequential(BaseAnalysis):
@@ -297,7 +295,8 @@ class HousingRecoverySequential(BaseAnalysis):
             households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:12]).astype(str)
 
         households_df = households_df.merge(sv_result[["FIPS", "zone"]], left_on="blockfips", right_on="FIPS")
-        households_df["Zone"] = households_df["zone"].apply(lambda row: "Z"+re.findall("[0-9]", row)[0])
+        # e.g.Medium Vulnerable (zone3) extract the number 3 to construct Z3
+        households_df["Zone"] = households_df["zone"].apply(lambda row: "Z"+row[-2])
 
         return households_df[households_df['Zone'] != 'missing']
 
