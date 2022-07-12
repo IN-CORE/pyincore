@@ -29,12 +29,11 @@ class PipelineFunctionality(BaseAnalysis):
 
     def run(self):
         """Execute pipeline functionality analysis """
-        # pipeline damage
         pipeline_dmg_df = self.get_input_dataset("pipeline_repair_rate_damage").get_dataframe_from_csv()
 
         num_samples = self.get_parameter("num_samples")
 
-        (fs_results, fp_results) = self.pipeline_functionality(pipeline_dmg_df, edges_gdf, num_samples)
+        (fs_results, fp_results) = self.pipeline_functionality(pipeline_dmg_df, num_samples)
         self.set_result_csv_data("sample_failure_state",
                                  fs_results, name=self.get_parameter("result_name") + "_failure_state",
                                  source="dataframe")
@@ -46,7 +45,7 @@ class PipelineFunctionality(BaseAnalysis):
         return True
 
     def pipeline_functionality(self, pipeline_dmg_df, num_samples):
-        """Run pipeline damage analysis for multiple pipelines.
+        """Run pipeline functionality analysis for multiple pipelines.
 
         Args:
             pipeline_dmg_df (dataframe): dataframe of pipeline damage values and other data/metadata
@@ -57,23 +56,39 @@ class PipelineFunctionality(BaseAnalysis):
 
         """
 
+        pipeline_dmg_df['pgv_pf'] = 1 - poisson.pmf(0, pipeline_dmg_df.loc[:, 'numpgvrpr'].values)
+
         # todo there is more efficient pandas manipulation
         sampcols = ['s' + samp for samp in np.arange(num_samples).astype(str)]
 
-        pipeline_dmg_df['pgv_pf'] = 1 - poisson.pmf(0, pipeline_dmg_df.loc[:, 'numpgvrpr'].values)
         fs_results = pd.DataFrame(
             bernoulli.rvs(1 - pipeline_dmg_df.loc[:, 'pgv_pf'].values, size=(num_samples, pipeline_dmg_df.shape[0])).T,
             index=pipeline_dmg_df.guid.values, columns=sampcols)
+        fp_results = fs_results.copy(deep=True)
 
-        fs_results =
+        # calculate sample failure
+        # concatenate all columns into one failure column
+        fs_results['failure'] = fs_results.astype(str).apply(','.join, axis=1)
+        fs_results = fs_results.filter(['failure'])
+        # set guid column
+        fs_results.reset_index(inplace=True)
+        fs_results = fs_results.rename(columns={'index': 'guid'})
+
+        # calculate failure probability
+        # count of 0s divided by sample size
+        fp_results["failure_probability"] = (num_samples - fp_results.sum(axis=1).astype(int)) / num_samples
+        fp_results = fp_results.filter(['failure_probability'])
+        # set guid column
+        fp_results.reset_index(inplace=True)
+        fp_results = fp_results.rename(columns={'index': 'guid'})
 
         return fs_results, fp_results
 
     def get_spec(self):
-        """Get specifications of the pipeline damage analysis.
+        """Get specifications of the pipeline functionality analysis.
 
         Returns:
-            obj: A JSON object of specifications of the pipeline damage analysis.
+            obj: A JSON object of specifications of the pipeline functionality analysis.
 
         """
         return {
