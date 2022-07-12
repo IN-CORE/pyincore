@@ -32,7 +32,7 @@ class NetworkUtil:
         graph_list.pop(0)
 
         # read node shapefile and make it as a list so it can be accessed for the building line file
-        # also, add uuid in the field
+        # also, add guid in the field
         innode = fiona.open(node_filename)
 
         # create list of each shapefile entry
@@ -44,7 +44,7 @@ class NetworkUtil:
             'geometry': 'LineString',
             'properties': {
                 'linkid': 'str:10',
-                'uuid': 'str:30',
+                'guid': 'str:30',
                 'from_node': 'str:10',
                 'to_node': 'str:10'
             }
@@ -53,7 +53,7 @@ class NetworkUtil:
         for in_feature in innode:
             # build shape feature
             tmp_feature = copy.deepcopy(in_feature)
-            tmp_feature['properties']['uuid'] = str(uuid.uuid4())
+            tmp_feature['properties']['guid'] = str(uuid.uuid4())
             node_id = str(tmp_feature['properties'][id_field])
             node_list.append(tmp_feature)
             node_id_list.append(node_id)
@@ -91,7 +91,7 @@ class NetworkUtil:
                 # filling schema
                 schema['geometry'] = mapping(line_geom_list[i])
                 schema['properties']['linkid'] = line_id_list[i]
-                schema['properties']['uuid'] = str(uuid.uuid4())
+                schema['properties']['guid'] = str(uuid.uuid4())
                 schema['properties']['from_node'] = line_from_list[i]
                 schema['properties']['to_node'] = line_to_list[i]
 
@@ -168,7 +168,7 @@ class NetworkUtil:
             'geometry': 'Point',
             'properties': {
                 'nodeid': 'str:10',
-                'uuid': 'str:30'
+                'guid': 'str:30'
             }
         }
 
@@ -178,7 +178,7 @@ class NetworkUtil:
                 # filling schema
                 schema['geometry'] = mapping(node_list[i])
                 schema['properties']['nodeid'] = node_id_list[i]
-                schema['properties']['uuid'] = str(uuid.uuid4())
+                schema['properties']['guid'] = str(uuid.uuid4())
 
                 layer.write(schema)
 
