@@ -20,7 +20,7 @@ def test_pipeline_functionality():
 
     # Set analysis parameters
     pipline_func.set_parameter("result_name", "mmsa_pipeline_functionality")
-    pipline_func.set_parameter("num_samples", 100)
+    pipline_func.set_parameter("num_samples", 20000)
 
     # Run pipeline analysis
     result = pipline_func.run_analysis()
