@@ -11,7 +11,7 @@ import pyincore.globals as pyglobals
 def test_pipeline_functionality():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
-    # Create pipeline damage
+    # Create pipeline functionality
     pipline_func = PipelineFunctionality(client)
 
     # Load input datasets
