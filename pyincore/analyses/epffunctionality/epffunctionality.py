@@ -24,10 +24,19 @@ class EpfFunctionality(BaseAnalysis):
 
     def run(self):
         """Execute eletric power facility functionality analysis """
+        nodes_epf_gdf = self.get_input_dataset("").powerfacility_dataset.get_dataframe_from_shapefile()
+        edges_epl_gdf = self.get_input_dataset("").get_dataframe_from_shapefile()
+        edges_epl_gdf['weight'] = edges_epl_gdf.loc[:, 'length_km']
+        G_ep = EpfFunctionalityUtil.gdf_to_nx(nodes_epf_gdf,edges_epl_gdf)
 
         num_samples = self.get_parameter("num_samples")
+        gatestation_nodes = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        distributionsub_nodes = list(set(list(G_ep.nodes)) - set(gatestation_nodes))
+        epf_sample_df1 =
 
-        (fs_results, fp_results) = self.epf_functionality(distributionsub_nodes, num_samples)
+
+        (fs_results, fp_results) = self.epf_functionality(distributionsub_nodes, gatestation_nodes,
+                                                          num_samples, epf_sample_df1, G_ep)
         self.set_result_csv_data("sample_failure_state",
                                  fs_results, name=self.get_parameter("result_name") + "_failure_state",
                                  source="dataframe")

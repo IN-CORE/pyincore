@@ -25,3 +25,23 @@ class EpfFunctionalityUtil:
     @staticmethod
     def network_shortest_paths(G, sources, sinks, weightcol='weight'):
         return pd.Series(nx.multi_source_dijkstra_path_length(G, sources, cutoff=None, weight=weightcol))[sinks]
+
+    @staticmethod
+    def gdf_to_nx(gdf_nodes, gdf_edges):
+        # generate graph from GeoDataFrame of LineStrings
+        net = nx.Graph()
+        net.graph['crs'] = gdf_nodes.crs
+        node_fields = list(gdf_nodes.columns)
+        for index, row in gdf_nodes.iterrows():
+            node_data = [row[f] for f in node_fields]
+            node_attributes = dict(zip(node_fields, node_data))
+            nodeid = row.nodenwid
+            net.add_node(nodeid, **node_attributes)
+        edge_fields = list(gdf_edges.columns)
+        for index, row in gdf_edges.iterrows():
+            first = row.fromnode
+            last = row.tonode
+            edge_data = [row[f] for f in edge_fields]
+            edge_attributes = dict(zip(edge_fields, edge_data))
+            net.add_edge(first, last, **edge_attributes)
+        return net
