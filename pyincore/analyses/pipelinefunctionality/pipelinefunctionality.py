@@ -17,10 +17,22 @@ from pyincore import BaseAnalysis
 
 
 class PipelineFunctionality(BaseAnalysis):
-    """Computes pipeline functionality.
+    """
+    This analysis computes pipeline functionality using repair rate calculations from pipeline damage analysis.
+    The computation operates by computing Monte Carlo samples derived from Poisson sample deviates from the damage
+    analysis as input to Bernoulli experiments, later used to determine average functionality.
+
+    Contributors
+        | Science: Neetesh Sharma, Armin Tabandeh, Paolo Gardoni
+        | Implementation: Neetesh Sharma, Chen Wang, and NCSA IN-CORE Dev Team
+
+    Related publications
+        Sharma, N., Tabandeh, A., & Gardoni, P. (2019). Regional resilience analysis: A multi-scale approach to model the recovery of interdependent infrastructure. In P. Gardoni (Ed.), Handbook of sustainable and resilient infrastructure (pp. 521–544). New York, NY: Routledge.
+        Sharma, N., Tabandeh, A., & Gardoni, P. (2020). Regional resilience analysis: A multi-scale approach to optimize the resilience of interdependent infrastructure. Computer‐Aided Civil and Infrastructure Engineering, 35(12), 1315-1330.
+        Sharma, N., & Gardoni, P. (2022). Mathematical modeling of interdependent infrastructure: An object-oriented approach for generalized network-system analysis. Reliability Engineering & System Safety, 217, 108042.
 
     Args:
-        incore_client: Service client with authentication info
+    incore_client (IncoreClient): Service authentication.
 
     """
 
@@ -28,7 +40,6 @@ class PipelineFunctionality(BaseAnalysis):
         super(PipelineFunctionality, self).__init__(incore_client)
 
     def run(self):
-        """Execute pipeline functionality analysis """
         pipeline_dmg_df = self.get_input_dataset("pipeline_repair_rate_damage").get_dataframe_from_csv()
 
         num_samples = self.get_parameter("num_samples")
