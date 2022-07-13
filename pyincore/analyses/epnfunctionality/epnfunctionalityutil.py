@@ -8,7 +8,7 @@ import pandas as pd
 import networkx as nx
 
 
-class EpfFunctionalityUtil:
+class EpnFunctionalityUtil:
 
     @staticmethod
     def get_bad_edges(G, nodestate, linkstate=None, scol='s0'):

@@ -10,24 +10,24 @@ import pandas as pd
 import networkx as nx
 
 from pyincore import BaseAnalysis
-from pyincore.analyses.epffunctionality import EpfFunctionalityUtil
+from pyincore.analyses.epnfunctionality import EpnFunctionalityUtil
 
 
-class EpfFunctionality(BaseAnalysis):
+class EpnFunctionality(BaseAnalysis):
     """Computes electric power infrastructure functionality.
     Args:
         incore_client: Service client with authentication info
     """
 
     def __init__(self, incore_client):
-        super(EpfFunctionality, self).__init__(incore_client)
+        super(EpnFunctionality, self).__init__(incore_client)
 
     def run(self):
         """Execute eletric power facility functionality analysis """
         nodes_epf_gdf = self.get_input_dataset("").powerfacility_dataset.get_dataframe_from_shapefile()
         edges_epl_gdf = self.get_input_dataset("").get_dataframe_from_shapefile()
         edges_epl_gdf['weight'] = edges_epl_gdf.loc[:, 'length_km']
-        G_ep = EpfFunctionalityUtil.gdf_to_nx(nodes_epf_gdf,edges_epl_gdf)
+        G_ep = EpnFunctionalityUtil.gdf_to_nx(nodes_epf_gdf,edges_epl_gdf)
 
         num_samples = self.get_parameter("num_samples")
         gatestation_nodes = [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -64,11 +64,11 @@ class EpfFunctionality(BaseAnalysis):
         for si, scol in enumerate(sampcols):
             nodestate_ep = epf_sample_df1.loc[:, ['nodenwid', scol]]
             linkstate_ep = None
-            badlinks_ep = EpfFunctionalityUtil.get_bad_edges(G_ep, nodestate_ep, linkstate_ep, scol)
+            badlinks_ep = EpnFunctionalityUtil.get_bad_edges(G_ep, nodestate_ep, linkstate_ep, scol)
             badlinkdict_ep = {k: {'weight': M} for k in badlinks_ep}
             G1_ep = copy.deepcopy(G_ep)
             nx.set_edge_attributes(G1_ep, badlinkdict_ep)
-            res_ep = EpfFunctionalityUtil.network_shortest_paths(G1_ep, gatestation_nodes, distributionsub_nodes)
+            res_ep = EpnFunctionalityUtil.network_shortest_paths(G1_ep, gatestation_nodes, distributionsub_nodes)
             func_ep_df.loc[distributionsub_nodes, scol] = (res_ep < M) * 1
 
         return fs_results, fp_results

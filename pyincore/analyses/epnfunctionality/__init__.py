@@ -4,5 +4,5 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore.analyses.epffunctionality.epffunctionality import EpfFunctionality
-from pyincore.analyses.epffunctionality.epffunctionalityutil import EpfFunctionalityUtil
+from pyincore.analyses.epnfunctionality.epnfunctionality import EpnFunctionality
+from pyincore.analyses.epnfunctionality.epnfunctionalityutil import EpnFunctionalityUtil
