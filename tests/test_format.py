@@ -61,7 +61,11 @@ paths = [
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/utils/test_popdisloutputprocess.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/housingrecovery/housingrecovery.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/housingrecovery/housingrecoveryutil.py'),
-    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/housingrecovery/test_housingrecovery.py')
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/housingrecovery/test_housingrecovery.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/waterfacilityrestoration/waterfacilityrestoration.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/waterfacilityrestoration/waterfacilityrestorationutil.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER,
+                 'tests/pyincore/analyses/waterfacilityrestoration/test_waterfacilityrestoration.py')
 ]
 
 
