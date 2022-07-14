@@ -64,7 +64,7 @@ paths = [
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/housingrecovery/test_housingrecovery.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/utils/test_networkutil.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/models/test_networkdataset.py'),
-    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/test_analysis.py')
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/test_analysis.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/waterfacilityrestoration/waterfacilityrestoration.py'),
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/waterfacilityrestoration/waterfacilityrestorationutil.py'),
     os.path.join(PYINCORE_ROOT_FOLDER,
