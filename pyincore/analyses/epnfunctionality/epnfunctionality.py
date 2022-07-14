@@ -10,7 +10,7 @@ import pandas as pd
 import networkx as nx
 
 from pyincore import BaseAnalysis, NetworkDataset
-from pyincore.analyses.epnfunctionality import EpnFunctionalityUtil
+from pyincore.analyses.epnfunctionality.epnfunctionalityutil import EpnFunctionalityUtil
 
 
 class EpnFunctionality(BaseAnalysis):
@@ -35,10 +35,14 @@ class EpnFunctionality(BaseAnalysis):
 
         # get epf sample
         num_samples = self.get_parameter("num_samples")
+        # TODO: there must be more elegant way to handle this
+        sampcols = ['s' + samp for samp in np.arange(num_samples).astype(str)]
         epf_dmg_fs = self.get_input_dataset('epf_sample_failure_state').get_dataframe_from_csv()
-        epf_sample_df = pd.DataFrame(np.array(
-            [np.array(epf_dmg_fs.failure.values[i].split(',')).astype('int') for i in np.arange(epf_dmg_fs.shape[0])]),
-                                     index=epf_dmg_fs.guid.values, columns=num_samples)
+
+        epf_sample_df = pd.DataFrame(
+            np.array([np.array(epf_dmg_fs.failure.values[i].split(',')).astype('int')
+                      for i in np.arange(epf_dmg_fs.shape[0])]),
+            index=epf_dmg_fs.guid.values, columns=sampcols)
         epf_sample_df1 = nodes_epf_gdf.loc[:, ['guid', 'nodenwid']].set_index('guid').join(epf_sample_df)
 
         # get gate station nodes
@@ -56,8 +60,9 @@ class EpnFunctionality(BaseAnalysis):
         # (fs_results, fp_results) = self.epf_functionality(distributionsub_nodes, gate_station_nodes,
         #                                                   num_samples, epf_sample_df1, G_ep)
 
-        func_ep_df = self.epf_functionality(distributionsub_nodes, gate_station_nodes, num_samples, epf_sample_df1,
-                                            G_ep)
+        func_ep_df = self.epf_functionality(distributionsub_nodes, gate_station_nodes, num_samples,
+                                            sampcols, epf_sample_df1, G_ep)
+
         # self.set_result_csv_data("sample_failure_state",
         #                          fs_results, name=self.get_parameter("result_name") + "_failure_state",
         #                          source="dataframe")
@@ -68,7 +73,7 @@ class EpnFunctionality(BaseAnalysis):
 
         return True
 
-    def epf_functionality(self, distributionsub_nodes, gate_station_nodes, num_samples, epf_sample_df1, G_ep):
+    def epf_functionality(self, distributionsub_nodes, gate_station_nodes, num_samples, sampcols, epf_sample_df1, G_ep):
         """Run pipeline functionality analysis for multiple pipelines.
         Args:
         Returns:
@@ -77,8 +82,6 @@ class EpnFunctionality(BaseAnalysis):
 
         # a distance of M denotes disconnection
         M = 9999
-        sampcols = ['s' + samp for samp in np.arange(num_samples).astype(str)]
-
         func_ep_df = pd.DataFrame(np.zeros((len(distributionsub_nodes), num_samples)), index=distributionsub_nodes,
                                   columns=sampcols)
 
@@ -128,7 +131,7 @@ class EpnFunctionality(BaseAnalysis):
                     'id': 'epn_network',
                     'required': True,
                     'description': 'EPN Network Dataset',
-                    'type': ['incore:epnNetwork'],
+                    'type': ['incore:network'],
                 },
                 {
                     'id': 'epf_sample_failure_state',
