@@ -1,12 +1,12 @@
 {% set name = "pyincore" %}
 {% set version = "1.5.0" %}
- 
+
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  path: /path/to/pyincore
+  path: ..
 
 about:
   home: https://incore.ncsa.illinois.edu
