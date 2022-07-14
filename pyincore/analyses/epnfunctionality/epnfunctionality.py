@@ -31,7 +31,7 @@ class EpnFunctionality(BaseAnalysis):
         nodes_epf_gdf = network_dataset.nodes.get_dataframe_from_shapefile()
         edges_epl_gdf['weight'] = edges_epl_gdf.loc[:, 'length_km']
         # TODO: replace this with network construction
-        G_ep = EpnFunctionalityUtil.gdf_to_nx(nodes_epf_gdf,edges_epl_gdf)
+        G_ep = EpnFunctionalityUtil.gdf_to_nx(nodes_epf_gdf, edges_epl_gdf)
 
         # get epf sample
         num_samples = self.get_parameter("num_samples")
@@ -51,25 +51,22 @@ class EpnFunctionality(BaseAnalysis):
             # default to EPPL
             gatestation_nodes_class = 'EPPL'
 
-        # get the nodenwid from the matching class
+        # get the guid from the matching class
         gate_station_nodes = nodes_epf_gdf[nodes_epf_gdf["utilfcltyc"] == gatestation_nodes_class]["nodenwid"].to_list()
 
         # calculate the distribution nodes
         distributionsub_nodes = list(set(list(G_ep.nodes)) - set(gate_station_nodes))
 
-        # (fs_results, fp_results) = self.epf_functionality(distributionsub_nodes, gate_station_nodes,
-        #                                                   num_samples, epf_sample_df1, G_ep)
+        (fs_results, fp_results) = self.epf_functionality(distributionsub_nodes, gate_station_nodes, num_samples,
+                                                          sampcols, epf_sample_df1, G_ep)
 
-        func_ep_df = self.epf_functionality(distributionsub_nodes, gate_station_nodes, num_samples,
-                                            sampcols, epf_sample_df1, G_ep)
-
-        # self.set_result_csv_data("sample_failure_state",
-        #                          fs_results, name=self.get_parameter("result_name") + "_failure_state",
-        #                          source="dataframe")
-        # self.set_result_csv_data("failure_probability",
-        #                          fp_results,
-        #                          name=self.get_parameter("result_name") + "_failure_probability",
-        #                          source="dataframe")
+        self.set_result_csv_data("sample_failure_state",
+                                 fs_results, name=self.get_parameter("result_name") + "_failure_state",
+                                 source="dataframe")
+        self.set_result_csv_data("failure_probability",
+                                 fp_results,
+                                 name=self.get_parameter("result_name") + "_failure_probability",
+                                 source="dataframe")
 
         return True
 
@@ -95,8 +92,25 @@ class EpnFunctionality(BaseAnalysis):
             res_ep = EpnFunctionalityUtil.network_shortest_paths(G1_ep, gate_station_nodes, distributionsub_nodes)
             func_ep_df.loc[distributionsub_nodes, scol] = (res_ep < M) * 1
 
-        return func_ep_df
-        # return fs_results, fp_results
+        # use nodenwid index to get its guid
+        fs_temp = pd.merge(func_ep_df, epf_sample_df1["nodenwid"], left_index=True, right_on="nodenwid",
+                           how='left').drop(columns=["nodenwid"])
+        fp_temp = fs_temp.copy(deep=True)
+
+        # shape the dataframe into failure probability and failure samples
+        fs_temp['failure'] = fs_temp.astype(str).apply(','.join, axis=1)
+        fs_results = fs_temp.filter(['failure'])
+        fs_results.reset_index(inplace=True)
+        fs_results = fs_results.rename(columns={'index': 'guid'})
+
+        # calculate failure probability
+        # count of 0s divided by sample size
+        fp_temp["failure_probability"] = (num_samples - fp_temp.sum(axis=1).astype(int)) / num_samples
+        fp_results = fp_temp.filter(['failure_probability'])
+        fp_results.reset_index(inplace=True)
+        fp_results = fp_results.rename(columns={'index': 'guid'})
+
+        return fs_results, fp_results
 
     def get_spec(self):
         """Get specifications of the pipeline functionality analysis.
