@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 
-from pyincore import BaseAnalysis
+from pyincore import BaseAnalysis, NetworkDataset
 from pyincore.analyses.epnfunctionality import EpnFunctionalityUtil
 
 
@@ -24,30 +24,51 @@ class EpnFunctionality(BaseAnalysis):
 
     def run(self):
         """Execute eletric power facility functionality analysis """
-        nodes_epf_gdf = self.get_input_dataset("").powerfacility_dataset.get_dataframe_from_shapefile()
-        edges_epl_gdf = self.get_input_dataset("").get_dataframe_from_shapefile()
+
+        # get network dataset
+        network_dataset = NetworkDataset.from_dataset(self.get_input_dataset("epn_network"))
+        edges_epl_gdf = network_dataset.links.get_dataframe_from_shapefile()
+        nodes_epf_gdf = network_dataset.nodes.get_dataframe_from_shapefile()
         edges_epl_gdf['weight'] = edges_epl_gdf.loc[:, 'length_km']
+        # TODO: replace this with network construction
         G_ep = EpnFunctionalityUtil.gdf_to_nx(nodes_epf_gdf,edges_epl_gdf)
 
+        # get epf sample
         num_samples = self.get_parameter("num_samples")
-        gatestation_nodes = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        distributionsub_nodes = list(set(list(G_ep.nodes)) - set(gatestation_nodes))
-        epf_sample_df1 =
+        epf_dmg_fs = self.get_input_dataset('epf_sample_failure_state').get_dataframe_from_csv()
+        epf_sample_df = pd.DataFrame(np.array(
+            [np.array(epf_dmg_fs.failure.values[i].split(',')).astype('int') for i in np.arange(epf_dmg_fs.shape[0])]),
+                                     index=epf_dmg_fs.guid.values, columns=num_samples)
+        epf_sample_df1 = nodes_epf_gdf.loc[:, ['guid', 'nodenwid']].set_index('guid').join(epf_sample_df)
 
+        # get gate station nodes
+        gatestation_nodes_class = self.get_parameter("gate_station_node_class")
+        if gatestation_nodes_class is None:
+            # default to EPPL
+            gatestation_nodes_class = 'EPPL'
 
-        (fs_results, fp_results) = self.epf_functionality(distributionsub_nodes, gatestation_nodes,
-                                                          num_samples, epf_sample_df1, G_ep)
-        self.set_result_csv_data("sample_failure_state",
-                                 fs_results, name=self.get_parameter("result_name") + "_failure_state",
-                                 source="dataframe")
-        self.set_result_csv_data("failure_probability",
-                                 fp_results,
-                                 name=self.get_parameter("result_name") + "_failure_probability",
-                                 source="dataframe")
+        # get the nodenwid from the matching class
+        gate_station_nodes = nodes_epf_gdf[nodes_epf_gdf["utilfcltyc"] == gatestation_nodes_class]["nodenwid"].to_list()
+
+        # calculate the distribution nodes
+        distributionsub_nodes = list(set(list(G_ep.nodes)) - set(gate_station_nodes))
+
+        # (fs_results, fp_results) = self.epf_functionality(distributionsub_nodes, gate_station_nodes,
+        #                                                   num_samples, epf_sample_df1, G_ep)
+
+        func_ep_df = self.epf_functionality(distributionsub_nodes, gate_station_nodes, num_samples, epf_sample_df1,
+                                            G_ep)
+        # self.set_result_csv_data("sample_failure_state",
+        #                          fs_results, name=self.get_parameter("result_name") + "_failure_state",
+        #                          source="dataframe")
+        # self.set_result_csv_data("failure_probability",
+        #                          fp_results,
+        #                          name=self.get_parameter("result_name") + "_failure_probability",
+        #                          source="dataframe")
 
         return True
 
-    def epf_functionality(self, distributionsub_nodes, gatestation_nodes, num_samples, epf_sample_df1, G_ep):
+    def epf_functionality(self, distributionsub_nodes, gate_station_nodes, num_samples, epf_sample_df1, G_ep):
         """Run pipeline functionality analysis for multiple pipelines.
         Args:
         Returns:
@@ -68,10 +89,11 @@ class EpnFunctionality(BaseAnalysis):
             badlinkdict_ep = {k: {'weight': M} for k in badlinks_ep}
             G1_ep = copy.deepcopy(G_ep)
             nx.set_edge_attributes(G1_ep, badlinkdict_ep)
-            res_ep = EpnFunctionalityUtil.network_shortest_paths(G1_ep, gatestation_nodes, distributionsub_nodes)
+            res_ep = EpnFunctionalityUtil.network_shortest_paths(G1_ep, gate_station_nodes, distributionsub_nodes)
             func_ep_df.loc[distributionsub_nodes, scol] = (res_ep < M) * 1
 
-        return fs_results, fp_results
+        return func_ep_df
+        # return fs_results, fp_results
 
     def get_spec(self):
         """Get specifications of the pipeline functionality analysis.
@@ -94,13 +116,25 @@ class EpnFunctionality(BaseAnalysis):
                     'description': 'Number of MC samples',
                     'type': int
                 },
+                {
+                    'id': 'gate_station_node_class',
+                    'required': False,
+                    'description': "class of the gate station nodes. Default to EPPL",
+                    'type': str
+                }
             ],
             'input_datasets': [
                 {
-                    'id': 'pipeline_repair_rate_damage',
+                    'id': 'epn_network',
                     'required': True,
-                    'description': 'Output of pipelinedamagerepairrate analysis',
-                    'type': ['ergo:pipelineDamageVer3'],
+                    'description': 'EPN Network Dataset',
+                    'type': ['incore:epnNetwork'],
+                },
+                {
+                    'id': 'epf_sample_failure_state',
+                    'required': True,
+                    'description': 'CSV file of failure state for each sample. Output from MCS analysis',
+                    'type': 'incore:sampleFailureState'
                 },
             ],
             'output_datasets': [
