@@ -30,8 +30,7 @@ class EpnFunctionality(BaseAnalysis):
         edges_epl_gdf = network_dataset.links.get_dataframe_from_shapefile()
         nodes_epf_gdf = network_dataset.nodes.get_dataframe_from_shapefile()
         edges_epl_gdf['weight'] = edges_epl_gdf.loc[:, 'length_km']
-        # TODO: replace this with network construction
-        G_ep = EpnFunctionalityUtil.gdf_to_nx(nodes_epf_gdf, edges_epl_gdf)
+        G_ep = network_dataset.get_graph_networkx()
 
         # get epf sample
         num_samples = self.get_parameter("num_samples")
