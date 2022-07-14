@@ -120,7 +120,7 @@ class HousingRecovery(BaseAnalysis):
         bg_mhhinc = self.get_input_dataset("census_block_groups_data").get_dataframe_from_csv(low_memory=False)
 
         # Census data
-        vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
+        vac_status = self.get_input_dataset("census_appraisal_data").get_dataframe_from_csv(low_memory=False)
 
         # Calculate the percent vacation or seasonal housing of all housing units within a census tract
         vac_status = self.get_vac_season_housing(vac_status)
@@ -210,7 +210,7 @@ class HousingRecovery(BaseAnalysis):
 
         return own
 
-    def get_vac_season_housing(self, vacation_status):
+    def get_vac_season_housing(self, vac_status):
         """ Calculate the percent vacation or seasonal housing of all housing units within a census tract and
         add dummy variable for census tract as a seasonal/vacation housing submarket.
 .
@@ -221,8 +221,6 @@ class HousingRecovery(BaseAnalysis):
             pd.DataFrame: Seasonal/vacation housing data.
 
         """
-        vac_status = pd.DataFrame(data=vacation_status[1:], columns=vacation_status[0])
-
         vac_status["B25004_006E"] = vac_status["B25004_006E"].astype(int)
         vac_status["B25004_006M"] = vac_status["B25004_006M"].astype(int)
         vac_status["B25002_001E"] = vac_status["B25002_001E"].astype(int)

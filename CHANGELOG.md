@@ -5,13 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.5.0] - 2022-06-29
+
+### Added
+- PyPi description and README.rst [#150](https://github.com/IN-CORE/pyincore/issues/150)
+- Earthquake liquefaction to building damage analysis [#155](https://github.com/IN-CORE/pyincore/issues/155)
+- When releases are made, now push builds to pypi (or testpypi) automatically
 
 ### Changed
 - Made pyincore build with legacy naming for pypi publish [#138](https://github.com/IN-CORE/pyincore/issues/138)
 - Network dataset's sub category's dataType has been changed from networkType to dataType [#145](https://github.com/IN-CORE/pyincore/issues/145)
 - Tornado EPN damage analysis uses network dataset instead of link, node, graph datasets [#147](https://github.com/IN-CORE/pyincore/issues/147)
 - Network utils refactored to use network dataset [#149](https://github.com/IN-CORE/pyincore/issues/149)
+- Building functionality to compute functionality without power network [#143](https://github.com/IN-CORE/pyincore/issues/143)
 
 ## [1.4.1] - 2022-04-22
 

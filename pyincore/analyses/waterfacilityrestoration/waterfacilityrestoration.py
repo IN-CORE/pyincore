@@ -9,7 +9,7 @@ Water Facility Restoration
 
 import numpy as np
 
-from pyincore import BaseAnalysis, RestorationService
+from pyincore import BaseAnalysis, RestorationService, AnalysisUtil
 from pyincore.models.restorationcurveset import RestorationCurveSet
 
 
@@ -48,33 +48,40 @@ class WaterFacilityRestoration(BaseAnalysis):
         if pf_interval is None:
             pf_interval = 0.05
 
-        (inventory_restoration_map, pf_results, time_results) = self.waterfacility_restoration(inventory_list,
-                                                                                               mapping_set,
-                                                                                               restoration_key,
-                                                                                               end_time,
-                                                                                               time_interval,
-                                                                                               pf_interval)
+        restoration_table_dataset = self.get_input_dataset("restoration_table").get_csv_reader()
+        restoration_table = AnalysisUtil.get_csv_table_rows(restoration_table_dataset, ignore_first_row=False)
+
+        damage = self.get_input_dataset("damage").get_csv_reader()
+        damage_result = AnalysisUtil.get_csv_table_rows(damage, ignore_first_row=False)
+
+        (inventory_restoration_map, pf_results, time_results, func_results) = self.waterfacility_restoration(
+            inventory_list, damage_result, mapping_set, restoration_key, end_time, time_interval, pf_interval,
+            restoration_table)
 
         self.set_result_csv_data("inventory_restoration_map", inventory_restoration_map,
                                  name="inventory_restoration_map_" + self.get_parameter("result_name"))
         self.set_result_csv_data("pf_results", time_results, name="percentage_of_functionality_" +
                                                                   self.get_parameter("result_name"))
         self.set_result_csv_data("time_results", pf_results, name="reptime_" + self.get_parameter("result_name"))
+        self.set_result_csv_data("func_results", func_results,
+                                 name=self.get_parameter("result_name") + "_discretized_restoration")
 
         return True
 
-    def waterfacility_restoration(self, inventory_list, mapping_set, restoration_key, end_time, time_interval,
-                                  pf_interval):
+    def waterfacility_restoration(self, inventory_list, damage_result, mapping_set, restoration_key, end_time,
+                                  time_interval, pf_interval, restoration_table):
 
         """Gets applicable restoration curve set and calculates restoration time and functionality
 
         Args:
             inventory_list (list): Multiple water facilities from input inventory set.
+            damage_result (list): Water facility damage
             mapping_set (class): Restoration Mapping Set
             restoration_key (str): Restoration Key to determine which curve to use. E.g. Restoration ID Code
             end_time (float): User specified end repair time
             time_interval (float): Increment interval of repair time. Default to 1 (1 day)
             pf_interval (float): Increment interval of percentage of functionality. Default 0.1 (10%)
+            restoration_table (list): Discretized restoration by classification
 
         Returns:
             inventory_restoration_map (list): A map between inventory and restoration being applied
@@ -84,6 +91,10 @@ class WaterFacilityRestoration(BaseAnalysis):
 
         # Obtain the restoration id for each water facility
         inventory_restoration_map = []
+
+        # Obtain classification for each water facility component, used to lookup discretized functionality
+        inventory_class_map = {}
+
         restoration_sets = self.restorationsvc.match_inventory(
             self.get_input_dataset("dfr3_mapping_set"), inventory_list, restoration_key)
         for inventory in inventory_list:
@@ -91,8 +102,14 @@ class WaterFacilityRestoration(BaseAnalysis):
                 restoration_set_id = restoration_sets[inventory["id"]].id
             else:
                 restoration_set_id = None
+
+            if "utilfcltyc" in inventory["properties"]:
+                classification = inventory["properties"]["utilfcltyc"]
+            else:
+                classification = None
             inventory_restoration_map.append({"guid": inventory['properties']['guid'],
                                              "restoration_id": restoration_set_id})
+            inventory_class_map[inventory['properties']['guid']] = classification
 
         time_results = []
         pf_results = []
@@ -125,8 +142,30 @@ class WaterFacilityRestoration(BaseAnalysis):
                     "percentage_of_functionality": p,
                     **new_dict
                 })
+        # Compute discretized restoration
+        func_result = []
+        restoration_class_dict = AnalysisUtil.get_discretized_restoration(restoration_table)
 
-        return inventory_restoration_map, pf_results, time_results
+        for dmg in damage_result:
+            guid = dmg['guid']
+            classification = inventory_class_map[guid]
+            if classification in restoration_class_dict:
+                rest_dict = restoration_class_dict[classification]
+
+                ds_0, ds_1, ds_2, ds_3, ds_4 = dmg['DS_0'], dmg['DS_1'], dmg['DS_2'], dmg['DS_3'], dmg['DS_4']
+                result_dict = {}
+                for key in rest_dict:
+                    c0, c1, c2, c3, c4 = rest_dict[key][0], rest_dict[key][1], rest_dict[key][2], rest_dict[key][3], \
+                                         rest_dict[key][4]
+                    # Only compute if we have damage
+                    if ds_0:
+                        functionality = (c0 * float(ds_0) + c1 * float(ds_1) + c2 * float(ds_2) + c3 * float(ds_3) +
+                                         c4 * float(ds_4)) / 100.0
+                        result_dict.update({str(key): functionality})
+
+                func_result.append({"guid": guid, **result_dict})
+
+        return inventory_restoration_map, pf_results, time_results, func_result
 
     def get_spec(self):
         return {
@@ -176,6 +215,20 @@ class WaterFacilityRestoration(BaseAnalysis):
                     'required': True,
                     'description': 'DFR3 Mapping Set Object',
                     'type': ['incore:dfr3MappingSet'],
+                },
+                {
+
+                    'id': 'restoration_table',
+                    'required': True,
+                    'description': 'CSV of discretized restoration values',
+                    'type': ['incore:waterFacilityDiscretizedRestoration'],
+                },
+                {
+
+                    'id': 'damage',
+                    'required': True,
+                    'description': 'damage result that has damage intervals in it',
+                    'type': ['ergo:waterFacilityDamageVer6']
                 }
             ],
             'output_datasets': [
@@ -200,5 +253,11 @@ class WaterFacilityRestoration(BaseAnalysis):
                                    'and limit state.',
                     'type': 'incore:waterFacilityRestorationTime'
                 },
+                {
+                    'id': 'func_results',
+                    'parent_type': '',
+                    'description': 'A csv file recording discretized functionality over time',
+                    'type': 'incore:waterFacilityDiscretizedRestorationFunc'
+                }
             ]
         }
