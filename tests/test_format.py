@@ -66,6 +66,8 @@ paths = [
     os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/waterfacilityrestoration/waterfacilityrestorationutil.py'),
     os.path.join(PYINCORE_ROOT_FOLDER,
                  'tests/pyincore/analyses/waterfacilityrestoration/test_waterfacilityrestoration.py')
+    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/analyses/socialvulnerability/socialvulnerability.py'),
+    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/pyincore/analyses/socialvulnerability/test_socialvulnerability.py')
 ]
 
 
