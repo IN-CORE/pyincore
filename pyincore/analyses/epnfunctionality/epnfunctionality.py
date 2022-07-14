@@ -33,15 +33,17 @@ class EpnFunctionality(BaseAnalysis):
         G_ep = network_dataset.get_graph_networkx()
 
         # get epf sample
-        num_samples = self.get_parameter("num_samples")
-        # TODO: there must be more elegant way to handle this
-        sampcols = ['s' + samp for samp in np.arange(num_samples).astype(str)]
         epf_dmg_fs = self.get_input_dataset('epf_sample_failure_state').get_dataframe_from_csv()
-
         epf_sample_df = pd.DataFrame(
             np.array([np.array(epf_dmg_fs.failure.values[i].split(',')).astype('int')
                       for i in np.arange(epf_dmg_fs.shape[0])]),
-            index=epf_dmg_fs.guid.values, columns=sampcols)
+            index=epf_dmg_fs.guid.values)
+        # get the sample number
+        num_samples = epf_sample_df.shape[1]
+        sampcols = ['s' + samp for samp in np.arange(num_samples).astype(str)]
+
+        # add column
+        epf_sample_df.columns = sampcols
         epf_sample_df1 = nodes_epf_gdf.loc[:, ['guid', 'nodenwid']].set_index('guid').join(epf_sample_df)
 
         # get gate station nodes
@@ -54,9 +56,9 @@ class EpnFunctionality(BaseAnalysis):
         gate_station_nodes = nodes_epf_gdf[nodes_epf_gdf["utilfcltyc"] == gatestation_nodes_class]["nodenwid"].to_list()
 
         # calculate the distribution nodes
-        distributionsub_nodes = list(set(list(G_ep.nodes)) - set(gate_station_nodes))
+        distribution_sub_nodes = list(set(list(G_ep.nodes)) - set(gate_station_nodes))
 
-        (fs_results, fp_results) = self.epf_functionality(distributionsub_nodes, gate_station_nodes, num_samples,
+        (fs_results, fp_results) = self.epf_functionality(distribution_sub_nodes, gate_station_nodes, num_samples,
                                                           sampcols, epf_sample_df1, G_ep)
 
         self.set_result_csv_data("sample_failure_state",
@@ -69,16 +71,28 @@ class EpnFunctionality(BaseAnalysis):
 
         return True
 
-    def epf_functionality(self, distributionsub_nodes, gate_station_nodes, num_samples, sampcols, epf_sample_df1, G_ep):
-        """Run pipeline functionality analysis for multiple pipelines.
+    def epf_functionality(self, distribution_sub_nodes, gate_station_nodes, num_samples, sampcols, epf_sample_df1,
+                          G_ep):
+        """
+        Run EPN functionality analysis.
+
         Args:
+            distribution_sub_nodes (list): distribution nodes
+            gate_station_nodes (list): gate station nodes
+            num_samples (int): number of simulations
+            sampcols (list): list of number samples. e.g. "s0, s1,..."
+            epf_sample_df1 (dataframe): epf mcs failure sample dataframe with added field "weight"
+            G_ep (networkx object): constructed network
+
         Returns:
+            fs_results (list): A list of dictionary with id/guid and failure state for N samples
+            fp_results (list): A list dictionary with failure probability and other data/metadata.
 
         """
 
         # a distance of M denotes disconnection
         M = 9999
-        func_ep_df = pd.DataFrame(np.zeros((len(distributionsub_nodes), num_samples)), index=distributionsub_nodes,
+        func_ep_df = pd.DataFrame(np.zeros((len(distribution_sub_nodes), num_samples)), index=distribution_sub_nodes,
                                   columns=sampcols)
 
         for si, scol in enumerate(sampcols):
@@ -88,8 +102,8 @@ class EpnFunctionality(BaseAnalysis):
             badlinkdict_ep = {k: {'weight': M} for k in badlinks_ep}
             G1_ep = copy.deepcopy(G_ep)
             nx.set_edge_attributes(G1_ep, badlinkdict_ep)
-            res_ep = EpnFunctionalityUtil.network_shortest_paths(G1_ep, gate_station_nodes, distributionsub_nodes)
-            func_ep_df.loc[distributionsub_nodes, scol] = (res_ep < M) * 1
+            res_ep = EpnFunctionalityUtil.network_shortest_paths(G1_ep, gate_station_nodes, distribution_sub_nodes)
+            func_ep_df.loc[distribution_sub_nodes, scol] = (res_ep < M) * 1
 
         # use nodenwid index to get its guid
         fs_temp = pd.merge(func_ep_df, epf_sample_df1["nodenwid"], left_index=True, right_on="nodenwid",
@@ -112,25 +126,19 @@ class EpnFunctionality(BaseAnalysis):
         return fs_results, fp_results
 
     def get_spec(self):
-        """Get specifications of the pipeline functionality analysis.
+        """Get specifications of the EPN functionality analysis.
         Returns:
-            obj: A JSON object of specifications of the pipeline functionality analysis.
+            obj: A JSON object of specifications of the EPN functionality analysis.
         """
         return {
-            'name': 'pipeline-functionlaity',
-            'description': 'buried pipeline functionality analysis',
+            'name': 'epn-functionlaity',
+            'description': 'electric power network functionality analysis',
             'input_parameters': [
                 {
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
                     'type': str
-                },
-                {
-                    'id': 'num_samples',
-                    'required': True,
-                    'description': 'Number of MC samples',
-                    'type': int
                 },
                 {
                     'id': 'gate_station_node_class',

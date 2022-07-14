@@ -14,7 +14,6 @@ def run_with_base_class():
     epn_func.load_remote_input_dataset("epf_sample_failure_state", "62d03711861e370172cb0a37")
 
     epn_func.set_parameter("result_name", "mmsa_epn_functionality")
-    epn_func.set_parameter("num_samples", 1000)
     epn_func.set_parameter("gate_station_node_class", "EPPL")
 
     # Run Analysis
