@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Network utils refactored to use network dataset [#149](https://github.com/IN-CORE/pyincore/issues/149)
+
 ## [1.5.0] - 2022-06-29
 
 ### Added
