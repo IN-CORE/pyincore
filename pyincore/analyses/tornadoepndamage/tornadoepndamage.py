@@ -106,7 +106,7 @@ class TornadoEpnDamage(BaseAnalysis):
         """
 
         Args:
-            network_dataset_dataset (obj): Network dataset.
+            network_dataset (obj): Network dataset.
             tornado_dataset (obj): Tornado dataset.
             tornado_id (str): Tornado id.
 
