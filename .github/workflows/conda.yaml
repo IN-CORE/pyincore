@@ -1,0 +1,86 @@
+name: Publish Conda package
+
+on:
+  release:
+    types:
+      - published
+
+  pull_request:
+
+jobs:
+  publish:
+    name: Build and publish conda packages
+    runs-on: ubuntu-latest
+
+    # need for activated env
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: get release info
+        id: release_info
+        run: |
+          if [ "${{ github.event.release.tag_name }}" != "" ]; then
+            version=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          else
+            version="$(awk -F= '/^PACKAGE_VERSION/ { print $2}' pyincore/globals.py | sed 's/[ "]//g').${{ github.run_number }}"
+          fi
+          echo "VERSION=${version}" >> $GITHUB_ENV
+          echo "VERSION=${version}"
+          ./version.sh ${version}
+
+          testing=$(echo $version | sed 's/[0-9\.]//g')
+          if [ "$testing" == "" ]; then
+            echo "LABEL=main" >> $GITHUB_ENV
+          else
+            echo "LABEL=rc" >> $GITHUB_ENV
+          fi
+
+      - name: Cache conda
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if environment.yml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
+
+      - name: Install miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          python-version: 3.8
+          use-mamba: true
+          mamba-version: "*"
+          channels: conda-forge
+          use-only-tar-bz2: true
+          conda-build-version: "*"
+
+      - name: Build conda package
+        run: |
+          mkdir dist
+          conda build --output-folder dist \
+                      --label ${{ env.LABEL }} \
+                      recipes
+
+      - name: Upload conda package
+        if: github.event_name == 'release'
+        run: |
+          conda install -y anaconda-client
+          anaconda --token ${{ secrets.CONDA_INCORE_TOKEN }} upload \
+                          --user IN-CORE \
+                          --label ${{ env.LABEL }} \
+                          dist/*/pyincore-${{ env.VERSION }}-*.tar.bz2
+
+      - name: Upload binaries to release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/*/pyincore-${{ env.VERSION }}-*.tar.bz2
+          file_glob: true
+          overwrite: true
