@@ -106,7 +106,7 @@ class PipelineFunctionality(BaseAnalysis):
 
         """
         return {
-            'name': 'pipeline-functionlaity',
+            'name': 'pipeline-functionality',
             'description': 'buried pipeline functionality analysis',
             'input_parameters': [
                 {
