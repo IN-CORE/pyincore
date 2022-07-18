@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
-- Pipeline functionality analysis working with MMSA Shelby buried pipelines [#176](https://github.com/IN-CORE/pyincore/pull/176)
+- Pipeline functionality analysis working with MMSA Shelby buried pipelines [#175](https://github.com/IN-CORE/pyincore/issues/175)
 
 ### Changed
 - Network utils refactored to use network dataset [#149](https://github.com/IN-CORE/pyincore/issues/149)
