@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [1.6.0] - Unreleased
+
+### Added
+- Pipeline functionality analysis working with MMSA Shelby buried pipelines [#176](https://github.com/IN-CORE/pyincore/pull/176)
+
+
 ## [1.5.0] - 2022-06-29
 
 ### Added
