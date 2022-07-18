@@ -1,13 +1,9 @@
-# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+# Copyright (c) 2022 University of Illinois and others. All rights reserved.
 #
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
-"""Buried Pipeline Damage Analysis with Repair Rate Calculation
-
-"""
 
 import numpy as np
 import pandas as pd
@@ -18,18 +14,25 @@ from pyincore import BaseAnalysis
 
 class PipelineFunctionality(BaseAnalysis):
     """
-    This analysis computes pipeline functionality using repair rate calculations from pipeline damage analysis.
+    This analysis computes pipeline functionality using repair rate calculations from pipeline damage analysis
+    (earthquake).
     The computation operates by computing Monte Carlo samples derived from Poisson sample deviates from the damage
     analysis as input to Bernoulli experiments, later used to determine average functionality.
+    The output of the computation is the average pipeline functionality.
 
     Contributors
         | Science: Neetesh Sharma, Armin Tabandeh, Paolo Gardoni
         | Implementation: Neetesh Sharma, Chen Wang, and NCSA IN-CORE Dev Team
 
     Related publications
-        Sharma, N., Tabandeh, A., & Gardoni, P. (2019). Regional resilience analysis: A multi-scale approach to model the recovery of interdependent infrastructure. In P. Gardoni (Ed.), Handbook of sustainable and resilient infrastructure (pp. 521–544). New York, NY: Routledge.
-        Sharma, N., Tabandeh, A., & Gardoni, P. (2020). Regional resilience analysis: A multi-scale approach to optimize the resilience of interdependent infrastructure. Computer‐Aided Civil and Infrastructure Engineering, 35(12), 1315-1330.
-        Sharma, N., & Gardoni, P. (2022). Mathematical modeling of interdependent infrastructure: An object-oriented approach for generalized network-system analysis. Reliability Engineering & System Safety, 217, 108042.
+        Sharma, N., Tabandeh, A., & Gardoni, P. (2019). Regional resilience analysis: A multi-scale approach to model
+        the recovery of interdependent infrastructure. In P. Gardoni (Ed.), Handbook of sustainable and resilient
+        infrastructure (pp. 521–544). New York, NY: Routledge.
+        Sharma, N., Tabandeh, A., & Gardoni, P. (2020). Regional resilience analysis: A multi-scale approach to
+        optimize the resilience of interdependent infrastructure. Computer‐Aided Civil and Infrastructure Engineering,
+        35(12), 1315-1330.
+        Sharma, N., & Gardoni, P. (2022). Mathematical modeling of interdependent infrastructure: An object-oriented
+        approach for generalized network-system analysis. Reliability Engineering & System Safety, 217, 108042.
 
     Args:
     incore_client (IncoreClient): Service authentication.
@@ -60,7 +63,7 @@ class PipelineFunctionality(BaseAnalysis):
 
         Args:
             pipeline_dmg_df (dataframe): dataframe of pipeline damage values and other data/metadata
-
+            num_samples (int): number of samples
         Returns:
             fs_results (list): A list of dictionary with id/guid and failure state for N samples
             fp_results (list): A list dictionary with failure probability and other data/metadata.
