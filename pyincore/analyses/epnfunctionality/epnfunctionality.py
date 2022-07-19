@@ -1,4 +1,4 @@
-# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+# Copyright (c) 2022 University of Illinois and others. All rights reserved.
 #
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
@@ -23,7 +23,7 @@ class EpnFunctionality(BaseAnalysis):
         super(EpnFunctionality, self).__init__(incore_client)
 
     def run(self):
-        """Execute eletric power facility functionality analysis """
+        """Execute electric power facility functionality analysis """
 
         # get network dataset
         network_dataset = NetworkDataset.from_dataset(self.get_input_dataset("epn_network"))
