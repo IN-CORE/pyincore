@@ -15,7 +15,7 @@ env:
   MAIN_REPO: IN-CORE/pyincore
 
 jobs:
-  pyclowder:
+  requirements:
     runs-on: ubuntu-latest
 
     steps:
