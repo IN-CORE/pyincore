@@ -5,10 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
 ## [Unreleased]
+
+### Added
+- Pipeline functionality analysis working with MMSA Shelby buried pipelines [#175](https://github.com/IN-CORE/pyincore/issues/175)
 
 ### Changed
 - Network utils refactored to use network dataset [#149](https://github.com/IN-CORE/pyincore/issues/149)
+
 
 ## [1.5.0] - 2022-06-29
 
