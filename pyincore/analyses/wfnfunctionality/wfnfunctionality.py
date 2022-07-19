@@ -67,8 +67,10 @@ class WfnFunctionality(BaseAnalysis):
         pp_sample_df.columns = sampcols
         pp_sample_df1 = edges_wfl_gdf.loc[:, ['guid', 'fromnode', 'tonode']].set_index('guid').join(pp_sample_df)
 
+        # Obtain distribution nodes based on user input, converting to string to match types in G
+        tank_nodes = list(map(str, tank_nodes))
+        pumpstation_nodes = list(map(str, pumpstation_nodes))
 
-        # Obtain distribution nodes based on user input
         distribution_nodes = list(set(list(G_wfn.nodes)) - set(tank_nodes) - set(pumpstation_nodes))
 
         (fs_results, fp_results) = self.wfn_functionality(distribution_nodes, pumpstation_nodes, num_samples,
@@ -96,7 +98,7 @@ class WfnFunctionality(BaseAnalysis):
             num_samples (int): number of simulations
             sampcols (list): list of number samples. e.g. "s0, s1,..."
             wf_sample_df1 (dataframe): water facility mcs failure sample dataframe
-            pp_sample_df1 (dataframe): pipeline mcs failure sample dataframe with added field "weight"
+            pp_sample_df1 (dataframe): pipeline mcs failure sample dataframe
             G_wfn (networkx object): constructed network
 
         Returns:
@@ -107,6 +109,7 @@ class WfnFunctionality(BaseAnalysis):
 
         # a distance of M denotes disconnection
         M = 9999
+
         func_wf_df = pd.DataFrame(np.zeros((len(distribution_nodes), num_samples)), index=distribution_nodes,
                                   columns=sampcols)
 
@@ -114,16 +117,22 @@ class WfnFunctionality(BaseAnalysis):
             nodestate_wfn = wf_sample_df1.loc[:, ['nodenwid', scol]]
             linkstate_wfn = pp_sample_df1.loc[:, ['fromnode', 'tonode', scol]]
             badlinks_wfn = WfnFunctionalityUtil.get_bad_edges(G_wfn, nodestate_wfn, linkstate_wfn, scol)
+            print(badlinks_wfn)
             badlinkdict_wfn = {k: {'weight': M} for k in badlinks_wfn}
             G1_wfn = copy.deepcopy(G_wfn)
             nx.set_edge_attributes(G1_wfn, badlinkdict_wfn)
             res_ep = WfnFunctionalityUtil.network_shortest_paths(G1_wfn, pumpstation_nodes, distribution_nodes)
+            print(res_ep)
             func_wf_df.loc[distribution_nodes, scol] = (res_ep < M) * 1
 
-        # use nodenwid index to get its guid
+        # Use nodenwid index to get its guid
+        func_wf_df.index = func_wf_df.index.map(np.int64)
+
         fs_temp = pd.merge(func_wf_df, wf_sample_df1["nodenwid"], left_index=True, right_on="nodenwid",
                            how='left').drop(columns=["nodenwid"])
         fp_temp = fs_temp.copy(deep=True)
+
+        print(fs_temp.head(10))
 
         # shape the dataframe into failure probability and failure samples
         fs_temp['failure'] = fs_temp.astype(str).apply(','.join, axis=1)
@@ -185,7 +194,7 @@ class WfnFunctionality(BaseAnalysis):
                     'id': 'pp_sample_failure_state',
                     'required': True,
                     'description': 'CSV file of failure state for each sample. Output from MCS analysis',
-                    'type': 'ergo:pipelineDamageVer3'
+                    'type': 'incore:sampleFailureState'
                 }
             ],
             'output_datasets': [
