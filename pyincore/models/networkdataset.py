@@ -9,7 +9,7 @@ import os
 
 from pyincore.dataservice import DataService
 
-from pyincore import Dataset
+from pyincore import Dataset, AnalysisUtil
 import networkx as nx
 
 
@@ -173,12 +173,17 @@ class NetworkDataset:
     def get_graph(self):
         return self.graph.get_csv_reader()
 
-    def get_graph_networkx(self, from_node_fld="fromnode", to_node_fld="tonode", directed=False):
+    def get_graph_networkx(self, from_node_fld="fromnode", to_node_fld="tonode", directed=False, numeric=True):
         if directed:
             G = nx.DiGraph()
         else:
             G = nx.Graph()
         for edge in list(self.get_graph()):
-            G.add_edge(edge[from_node_fld], edge[to_node_fld])
+            # the csv_reader in the get_graph turns integer into string; sometimes the network needs to be
+            # constructed with integer as node id
+            if numeric:
+                G.add_edge(int(edge[from_node_fld]), int(edge[to_node_fld]))
+            else:
+                G.add_edge(edge[from_node_fld], edge[to_node_fld])
 
         return G
