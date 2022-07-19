@@ -27,9 +27,9 @@ class EpnFunctionality(BaseAnalysis):
 
         # get network dataset
         network_dataset = NetworkDataset.from_dataset(self.get_input_dataset("epn_network"))
-        edges_epl_gdf = network_dataset.links.get_dataframe_from_shapefile()
+        links_epl_gdf = network_dataset.links.get_dataframe_from_shapefile()
         nodes_epf_gdf = network_dataset.nodes.get_dataframe_from_shapefile()
-        edges_epl_gdf['weight'] = edges_epl_gdf.loc[:, 'length_km']
+        links_epl_gdf['weight'] = links_epl_gdf.loc[:, 'length_km']
         G_ep = network_dataset.get_graph_networkx()
 
         # get epf sample
@@ -131,7 +131,7 @@ class EpnFunctionality(BaseAnalysis):
             obj: A JSON object of specifications of the EPN functionality analysis.
         """
         return {
-            'name': 'epn-functionlaity',
+            'name': 'epn-functionality',
             'description': 'electric power network functionality analysis',
             'input_parameters': [
                 {
