@@ -82,7 +82,7 @@ def run_with_base_class():
     pipeline_dmg_w_rr_ds = pipeline_dmg_w_rr.get_output_dataset("result")
 
     # Using water facility damage, run a Monte Carlo analysis
-    nsamp = 20 #20000
+    nsamp = 20000
 
     print("Run Monte Carlo failure")
     mc = MonteCarloFailureProbability(client)

@@ -110,6 +110,9 @@ class WfnFunctionality(BaseAnalysis):
         # a distance of M denotes disconnection
         M = 9999
 
+        pp_sample_df1['fromnode'] = pp_sample_df1['fromnode'].astype(str)
+        pp_sample_df1['tonode'] = pp_sample_df1['tonode'].astype(str)
+
         func_wf_df = pd.DataFrame(np.zeros((len(distribution_nodes), num_samples)), index=distribution_nodes,
                                   columns=sampcols)
 
@@ -117,12 +120,10 @@ class WfnFunctionality(BaseAnalysis):
             nodestate_wfn = wf_sample_df1.loc[:, ['nodenwid', scol]]
             linkstate_wfn = pp_sample_df1.loc[:, ['fromnode', 'tonode', scol]]
             badlinks_wfn = WfnFunctionalityUtil.get_bad_edges(G_wfn, nodestate_wfn, linkstate_wfn, scol)
-            print(badlinks_wfn)
             badlinkdict_wfn = {k: {'weight': M} for k in badlinks_wfn}
             G1_wfn = copy.deepcopy(G_wfn)
             nx.set_edge_attributes(G1_wfn, badlinkdict_wfn)
             res_ep = WfnFunctionalityUtil.network_shortest_paths(G1_wfn, pumpstation_nodes, distribution_nodes)
-            print(res_ep)
             func_wf_df.loc[distribution_nodes, scol] = (res_ep < M) * 1
 
         # Use nodenwid index to get its guid
@@ -131,8 +132,6 @@ class WfnFunctionality(BaseAnalysis):
         fs_temp = pd.merge(func_wf_df, wf_sample_df1["nodenwid"], left_index=True, right_on="nodenwid",
                            how='left').drop(columns=["nodenwid"])
         fp_temp = fs_temp.copy(deep=True)
-
-        print(fs_temp.head(10))
 
         # shape the dataframe into failure probability and failure samples
         fs_temp['failure'] = fs_temp.astype(str).apply(','.join, axis=1)
