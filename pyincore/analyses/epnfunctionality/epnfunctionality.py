@@ -47,18 +47,18 @@ class EpnFunctionality(BaseAnalysis):
         epf_sample_df1 = nodes_epf_gdf.loc[:, ['guid', 'nodenwid']].set_index('guid').join(epf_sample_df)
 
         # get gate station nodes
-        gatestation_nodes_class = self.get_parameter("gate_station_node_class")
-        if gatestation_nodes_class is None:
+        gate_station_node_list = self.get_parameter("gate_station_node_list")
+        if gate_station_node_list is None:
             # default to EPPL
             gatestation_nodes_class = 'EPPL'
-
-        # get the guid from the matching class
-        gate_station_nodes = nodes_epf_gdf[nodes_epf_gdf["utilfcltyc"] == gatestation_nodes_class]["nodenwid"].to_list()
+            # get the guid from the matching class
+            gate_station_node_list = nodes_epf_gdf[nodes_epf_gdf["utilfcltyc"] == gatestation_nodes_class]["nodenwid"]\
+                .to_list()
 
         # calculate the distribution nodes
-        distribution_sub_nodes = list(set(list(G_ep.nodes)) - set(gate_station_nodes))
+        distribution_sub_nodes = list(set(list(G_ep.nodes)) - set(gate_station_node_list))
 
-        (fs_results, fp_results) = self.epf_functionality(distribution_sub_nodes, gate_station_nodes, num_samples,
+        (fs_results, fp_results) = self.epf_functionality(distribution_sub_nodes, gate_station_node_list, num_samples,
                                                           sampcols, epf_sample_df1, G_ep)
 
         self.set_result_csv_data("sample_failure_state",
@@ -71,14 +71,14 @@ class EpnFunctionality(BaseAnalysis):
 
         return True
 
-    def epf_functionality(self, distribution_sub_nodes, gate_station_nodes, num_samples, sampcols, epf_sample_df1,
+    def epf_functionality(self, distribution_sub_nodes, gate_station_node_list, num_samples, sampcols, epf_sample_df1,
                           G_ep):
         """
         Run EPN functionality analysis.
 
         Args:
             distribution_sub_nodes (list): distribution nodes
-            gate_station_nodes (list): gate station nodes
+            gate_station_node_list (list): gate station nodes
             num_samples (int): number of simulations
             sampcols (list): list of number samples. e.g. "s0, s1,..."
             epf_sample_df1 (dataframe): epf mcs failure sample dataframe with added field "weight"
@@ -102,7 +102,7 @@ class EpnFunctionality(BaseAnalysis):
             badlinkdict_ep = {k: {'weight': M} for k in badlinks_ep}
             G1_ep = copy.deepcopy(G_ep)
             nx.set_edge_attributes(G1_ep, badlinkdict_ep)
-            res_ep = EpnFunctionalityUtil.network_shortest_paths(G1_ep, gate_station_nodes, distribution_sub_nodes)
+            res_ep = EpnFunctionalityUtil.network_shortest_paths(G1_ep, gate_station_node_list, distribution_sub_nodes)
             func_ep_df.loc[distribution_sub_nodes, scol] = (res_ep < M) * 1
 
         # use nodenwid index to get its guid
@@ -141,11 +141,11 @@ class EpnFunctionality(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'gate_station_node_class',
+                    'id': 'gate_station_node_list',
                     'required': False,
-                    'description': "class of the gate station nodes. Default to EPPL",
-                    'type': str
-                }
+                    'description': "list of gate station nodes",
+                    'type': list
+                },
             ],
             'input_datasets': [
                 {
