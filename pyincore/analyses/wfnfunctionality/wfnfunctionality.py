@@ -71,8 +71,8 @@ class WfnFunctionality(BaseAnalysis):
         # Obtain distribution nodes based on user input
         distribution_nodes = list(set(list(G_wfn.nodes)) - set(tank_nodes) - set(pumpstation_nodes))
 
-        (fs_results, fp_results) = self.wfn_functionality(distribution_nodes, tank_nodes, pumpstation_nodes,
-                                                          num_samples, sampcols, wf_sample_df1, pp_sample_df1, G_wfn)
+        (fs_results, fp_results) = self.wfn_functionality(distribution_nodes, pumpstation_nodes, num_samples,
+                                                          sampcols, wf_sample_df1, pp_sample_df1, G_wfn)
 
         self.set_result_csv_data("sample_failure_state",
                                  fs_results, name=self.get_parameter("result_name") + "_failure_state",
@@ -84,8 +84,8 @@ class WfnFunctionality(BaseAnalysis):
 
         return True
 
-    def wfn_functionality(self, distribution_nodes, tank_nodes, pumpstation_nodes, num_samples, sampcols,
-                          wf_sample_df1, pp_sample_df1, G_wfn):
+    def wfn_functionality(self, distribution_nodes, pumpstation_nodes, num_samples, sampcols, wf_sample_df1,
+                          pp_sample_df1, G_wfn):
         """
         Run Water facility network functionality analysis.
 
@@ -185,7 +185,7 @@ class WfnFunctionality(BaseAnalysis):
                     'id': 'pp_sample_failure_state',
                     'required': True,
                     'description': 'CSV file of failure state for each sample. Output from MCS analysis',
-                    'type': 'incore:sampleFailureState'
+                    'type': 'ergo:pipelineDamageVer3'
                 }
             ],
             'output_datasets': [

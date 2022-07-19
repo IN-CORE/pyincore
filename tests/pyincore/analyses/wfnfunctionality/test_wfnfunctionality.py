@@ -2,7 +2,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import IncoreClient, FragilityService, MappingSet, NetworkDataset, DataService
+from pyincore import IncoreClient, FragilityService, MappingSet, NetworkDataset, DataService, Dataset
 from pyincore.analyses.montecarlofailureprobability import MonteCarloFailureProbability
 from pyincore.analyses.wfnfunctionality import WfnFunctionality
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
@@ -20,6 +20,7 @@ def run_with_base_class():
 
     # Water facility damage configuration
     wfn_dataset_id = "62d586120b99e237881b0519"  # MMSA wft network
+    wf_dataset_id = "62cdd5371cca614f5242e635"
     wf_mapping_id = "5b47c383337d4a387669d592"
     fragility_key = "pga"
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
@@ -28,6 +29,7 @@ def run_with_base_class():
     uncertainty = False
 
     # First, call water facility damage for existing data
+    print("Run water facility damage")
     wf_dmg = WaterFacilityDamage(client)
 
     result_name = "wf_dmg_results"
@@ -44,19 +46,16 @@ def run_with_base_class():
 
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(wf_mapping_id))
-
-    wfn_dataset = NetworkDataset.from_data_service(wfn_dataset_id, data_service)
-    wf_dataset = wfn_dataset.nodes.get_inventory_reader()
-    wf_filepath = wf_dataset.path
-    wf_df = gpd.read_file(wf_filepath)
     wf_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
-    wf_dmg.set_input_dataset("water_facilities", wf_df)
+    wf_dmg.load_remote_input_dataset("water_facilities", wf_dataset_id)
 
     wf_dmg.run_analysis()
 
     wf_dmg_result = wf_dmg.get_output_dataset("result")
 
     # Run pipeline damage
+    print("Run pipeline damage")
+
     pipeline_dataset_id = "5a284f28c7d30d13bc081d14"
     pp_mapping_id = "5b47c227337d4a38464efea8"
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
@@ -80,9 +79,10 @@ def run_with_base_class():
 
     pipeline_dmg_w_rr.run_analysis()
 
-    pipeline_dmg_fs = pipeline_dmg_w_rr.get_output_dataset("sample_failure_state")
+    pipeline_dmg_fs = pipeline_dmg_w_rr.get_output_dataset("result")
 
     # Using water facility damage, run a Monte Carlo analysis
+    print("Run Monte Carlo failure probability")
     mc = MonteCarloFailureProbability(client)
 
     mc.set_input_dataset("damage", wf_dmg_result)
@@ -98,6 +98,7 @@ def run_with_base_class():
     wf_dmg_fs = mc.get_output_dataset("sample_failure_state")
 
     # Run wfn functionality
+    print("Run water facility network functionality analysis")
     wfn_func = WfnFunctionality(client)
 
     wfn_func.load_remote_input_dataset("wfn_network", wfn_dataset_id)
