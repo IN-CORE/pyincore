@@ -232,6 +232,12 @@ analyses/waterfacilityrestoration
 ..  autoclass:: waterfacilityrestoration.waterfacilityrestoration.WaterFacilityRestoration
     :members:
 
+analyses/wfnfunctionality
+=================================
+..  autoclass:: wfnfunctionality.wfnfunctionality.WfnFunctionality
+    :members:
+
+
 models
 ^^^^^^
 

@@ -4,12 +4,13 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+import os
 import copy
 import numpy as np
 import pandas as pd
 import networkx as nx
 
-from pyincore import BaseAnalysis, NetworkDataset
+from pyincore import BaseAnalysis, NetworkDataset, NetworkUtil
 from pyincore.analyses.wfnfunctionality.wfnfunctionalityutil import WfnFunctionalityUtil
 
 
@@ -41,6 +42,17 @@ class WfnFunctionality(BaseAnalysis):
 
         G_wfn = network_dataset.get_graph_networkx()
 
+        # network test
+        fromnode_fld_name = 'fromnode'
+        tonode_fld_name = 'tonode'
+        nodenwid_fld_name = 'nodenwid'
+
+        node_id_validation = NetworkUtil.validate_network_node_ids(
+            network_dataset, fromnode_fld_name, tonode_fld_name, nodenwid_fld_name)
+        if node_id_validation is False:
+            print("ID in from or to node field doesn't exist in the node dataset")
+            os.exit(0)
+
         # Get water facility damage states
         wf_dmg_fs = self.get_input_dataset('wf_sample_failure_state').get_dataframe_from_csv()
         wf_sample_df = pd.DataFrame(
@@ -67,10 +79,7 @@ class WfnFunctionality(BaseAnalysis):
         pp_sample_df.columns = sampcols
         pp_sample_df1 = edges_wfl_gdf.loc[:, ['guid', 'fromnode', 'tonode']].set_index('guid').join(pp_sample_df)
 
-        # Obtain distribution nodes based on user input, converting to string to match types in G
-        tank_nodes = list(map(str, tank_nodes))
-        pumpstation_nodes = list(map(str, pumpstation_nodes))
-
+        # Obtain distribution nodes based on user input
         distribution_nodes = list(set(list(G_wfn.nodes)) - set(tank_nodes) - set(pumpstation_nodes))
 
         (fs_results, fp_results) = self.wfn_functionality(distribution_nodes, pumpstation_nodes, num_samples,
@@ -109,9 +118,6 @@ class WfnFunctionality(BaseAnalysis):
 
         # a distance of M denotes disconnection
         M = 9999
-
-        pp_sample_df1['fromnode'] = pp_sample_df1['fromnode'].astype(str)
-        pp_sample_df1['tonode'] = pp_sample_df1['tonode'].astype(str)
 
         func_wf_df = pd.DataFrame(np.zeros((len(distribution_nodes), num_samples)), index=distribution_nodes,
                                   columns=sampcols)
@@ -181,7 +187,7 @@ class WfnFunctionality(BaseAnalysis):
                     'id': 'wfn_network',
                     'required': True,
                     'description': 'Water Facility Network Dataset',
-                    'type': ['incore:network'],
+                    'type': ['incore:waterNetwork'],
                 },
                 {
                     'id': 'wf_sample_failure_state',
