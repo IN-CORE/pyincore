@@ -9,9 +9,11 @@ from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
 from pyincore.analyses.pipelinefunctionality import PipelineFunctionality
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
 
+import pyincore.globals as pyglobals
+
 
 def run_with_base_class():
-    client = IncoreClient()
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     data_service = DataService(client)
 
     # Top-level hazard type
@@ -19,8 +21,8 @@ def run_with_base_class():
     hazard_id = "5b902cb273c3371e1236b36b"
 
     # Water facility damage configuration
-    wfn_dataset_id = "62d586120b99e237881b0519"  # MMSA wft network
-    wf_dataset_id = "62cdd5371cca614f5242e635"
+    wfn_dataset_id = "62d584e8861e370172cd2eca"
+    wf_dataset_id = "62d85363861e370172d11ed0"
     wf_mapping_id = "5b47c383337d4a387669d592"
     fragility_key = "pga"
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
