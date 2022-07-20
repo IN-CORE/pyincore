@@ -2,7 +2,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import IncoreClient, FragilityService, MappingSet, NetworkDataset, DataService, Dataset
+from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.montecarlofailureprobability import MonteCarloFailureProbability
 from pyincore.analyses.wfnfunctionality import WfnFunctionality
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
@@ -14,7 +14,6 @@ import pyincore.globals as pyglobals
 
 def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
-    data_service = DataService(client)
 
     # Top-level hazard type
     hazard_type = "earthquake"
