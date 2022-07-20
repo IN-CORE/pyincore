@@ -152,7 +152,7 @@ class EpnFunctionality(BaseAnalysis):
                     'id': 'epn_network',
                     'required': True,
                     'description': 'EPN Network Dataset',
-                    'type': ['incore: epnNetwork'],
+                    'type': ['incore:epnNetwork'],
                 },
                 {
                     'id': 'epf_sample_failure_state',
