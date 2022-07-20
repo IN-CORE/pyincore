@@ -237,7 +237,6 @@ analyses/wfnfunctionality
 ..  autoclass:: wfnfunctionality.wfnfunctionality.WfnFunctionality
     :members:
 
-
 models
 ^^^^^^
 

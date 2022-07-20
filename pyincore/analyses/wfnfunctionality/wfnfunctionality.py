@@ -49,9 +49,10 @@ class WfnFunctionality(BaseAnalysis):
 
         node_id_validation = NetworkUtil.validate_network_node_ids(
             network_dataset, fromnode_fld_name, tonode_fld_name, nodenwid_fld_name)
+
         if node_id_validation is False:
             print("ID in from or to node field doesn't exist in the node dataset")
-            os.exit(0)
+            return False
 
         # Get water facility damage states
         wf_dmg_fs = self.get_input_dataset('wf_sample_failure_state').get_dataframe_from_csv()
@@ -102,7 +103,6 @@ class WfnFunctionality(BaseAnalysis):
 
         Args:
             distribution_nodes (list): distribution nodes
-            tank_nodes (list): tank nodes
             pumpstation_nodes (list): pump station nodes
             num_samples (int): number of simulations
             sampcols (list): list of number samples. e.g. "s0, s1,..."
