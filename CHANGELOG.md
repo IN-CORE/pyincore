@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Pipeline functionality analysis working with MMSA Shelby buried pipelines [#175](https://github.com/IN-CORE/pyincore/issues/175)
 - Electric power network functionality analysis working with MMSA Shelby [#178](https://github.com/IN-CORE/pyincore/issues/178)
+- Water facility network functionality analysis working with MMSA Shelby [#103](https://github.com/IN-CORE/pyincore/issues/103)
 
 ### Changed
 - Network utils refactored to use network dataset [#149](https://github.com/IN-CORE/pyincore/issues/149)

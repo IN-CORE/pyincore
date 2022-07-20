@@ -126,7 +126,7 @@ class PipelineFunctionality(BaseAnalysis):
                 {
                     'id': 'pipeline_repair_rate_damage',
                     'required': True,
-                    'description': 'Output of pipelinedamagerepairrate analysis',
+                    'description': 'Output of pipeline damage repair rate analysis',
                     'type': ['ergo:pipelineDamageVer3'],
                 },
             ],
