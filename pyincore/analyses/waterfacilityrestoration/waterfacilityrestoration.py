@@ -48,15 +48,16 @@ class WaterFacilityRestoration(BaseAnalysis):
         if pf_interval is None:
             pf_interval = 0.05
 
-        restoration_table_dataset = self.get_input_dataset("restoration_table").get_csv_reader()
-        restoration_table = AnalysisUtil.get_csv_table_rows(restoration_table_dataset, ignore_first_row=False)
+        discretized_days = self.get_parameter("discretized_days")
+        if discretized_days is None:
+            discretized_days = [1, 3, 7, 30, 90]
 
         damage = self.get_input_dataset("damage").get_csv_reader()
         damage_result = AnalysisUtil.get_csv_table_rows(damage, ignore_first_row=False)
 
         (inventory_restoration_map, pf_results, time_results, func_results) = self.waterfacility_restoration(
             inventory_list, damage_result, mapping_set, restoration_key, end_time, time_interval, pf_interval,
-            restoration_table)
+            discretized_days)
 
         self.set_result_csv_data("inventory_restoration_map", inventory_restoration_map,
                                  name="inventory_restoration_map_" + self.get_parameter("result_name"))
@@ -69,7 +70,7 @@ class WaterFacilityRestoration(BaseAnalysis):
         return True
 
     def waterfacility_restoration(self, inventory_list, damage_result, mapping_set, restoration_key, end_time,
-                                  time_interval, pf_interval, restoration_table):
+                                  time_interval, pf_interval, discretized_days):
 
         """Gets applicable restoration curve set and calculates restoration time and functionality
 
@@ -81,7 +82,7 @@ class WaterFacilityRestoration(BaseAnalysis):
             end_time (float): User specified end repair time
             time_interval (float): Increment interval of repair time. Default to 1 (1 day)
             pf_interval (float): Increment interval of percentage of functionality. Default 0.1 (10%)
-            restoration_table (list): Discretized restoration by classification
+            discretized_days (list): Days to compute discretized restoration (e.g. 1, 3, 7, 30, 90)
 
         Returns:
             inventory_restoration_map (list): A map between inventory and restoration being applied
@@ -103,13 +104,13 @@ class WaterFacilityRestoration(BaseAnalysis):
             else:
                 restoration_set_id = None
 
-            if "utilfcltyc" in inventory["properties"]:
-                classification = inventory["properties"]["utilfcltyc"]
-            else:
-                classification = None
             inventory_restoration_map.append({"guid": inventory['properties']['guid'],
-                                             "restoration_id": restoration_set_id})
-            inventory_class_map[inventory['properties']['guid']] = classification
+                                              "restoration_id": restoration_set_id})
+            restoration_curve_set = restoration_sets[inventory["id"]]
+
+            # For each facility, get the discretized restoration from the continuous curve
+            discretized_restoration = AnalysisUtil.get_discretized_restoration(restoration_curve_set, discretized_days)
+            inventory_class_map[inventory['properties']['guid']] = discretized_restoration
 
         time_results = []
         pf_results = []
@@ -144,26 +145,24 @@ class WaterFacilityRestoration(BaseAnalysis):
                 })
         # Compute discretized restoration
         func_result = []
-        restoration_class_dict = AnalysisUtil.get_discretized_restoration(restoration_table)
 
         for dmg in damage_result:
             guid = dmg['guid']
-            classification = inventory_class_map[guid]
-            if classification in restoration_class_dict:
-                rest_dict = restoration_class_dict[classification]
 
-                ds_0, ds_1, ds_2, ds_3, ds_4 = dmg['DS_0'], dmg['DS_1'], dmg['DS_2'], dmg['DS_3'], dmg['DS_4']
-                result_dict = {}
-                for key in rest_dict:
-                    c0, c1, c2, c3, c4 = rest_dict[key][0], rest_dict[key][1], rest_dict[key][2], rest_dict[key][3], \
-                                         rest_dict[key][4]
-                    # Only compute if we have damage
-                    if ds_0:
-                        functionality = (c0 * float(ds_0) + c1 * float(ds_1) + c2 * float(ds_2) + c3 * float(ds_3) +
-                                         c4 * float(ds_4)) / 100.0
-                        result_dict.update({str(key): functionality})
+            # Dictionary of discretized restoration functionality
+            rest_dict = inventory_class_map[guid]
 
-                func_result.append({"guid": guid, **result_dict})
+            ds_0, ds_1, ds_2, ds_3, ds_4 = dmg['DS_0'], dmg['DS_1'], dmg['DS_2'], dmg['DS_3'], dmg['DS_4']
+            result_dict = {}
+            for time in discretized_days:
+                key = "day" + str(time)
+                # Only compute if we have damage
+                if ds_0:
+                    functionality = (rest_dict[key][0] * float(ds_0) + rest_dict[key][1] * float(ds_1) + rest_dict[
+                        key][2] * float(ds_2) + rest_dict[key][3] * float(ds_3) + rest_dict[key][4] * float(ds_4))
+                    result_dict.update({str(key): functionality})
+
+            func_result.append({"guid": guid, **result_dict})
 
         return inventory_restoration_map, pf_results, time_results, func_result
 
@@ -201,7 +200,14 @@ class WaterFacilityRestoration(BaseAnalysis):
                     'required': False,
                     'description': 'incremental interval for percentage of functionality. Default to 0.05',
                     'type': float
+                },
+                {
+                    'id': 'discretized_days',
+                    'required': False,
+                    'description': 'Discretized days to compute functionality',
+                    'type': list
                 }
+
             ],
             'input_datasets': [
                 {
@@ -215,13 +221,6 @@ class WaterFacilityRestoration(BaseAnalysis):
                     'required': True,
                     'description': 'DFR3 Mapping Set Object',
                     'type': ['incore:dfr3MappingSet'],
-                },
-                {
-
-                    'id': 'restoration_table',
-                    'required': True,
-                    'description': 'CSV of discretized restoration values',
-                    'type': ['incore:waterFacilityDiscretizedRestoration'],
                 },
                 {
 

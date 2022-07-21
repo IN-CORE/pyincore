@@ -54,7 +54,7 @@ def run_with_base_class():
     wf_rest.load_remote_input_dataset("water_facilities", "5a284f2ac7d30d13bc081e52")  # water facility
     wf_rest.set_input_dataset("damage", wf_dmg.get_output_dataset("result"))
     wf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
-    wf_rest.load_remote_input_dataset("restoration_table", "62cc7e62861e370172c7e2f1")
+    wf_rest.set_parameter("discretized_days", [1, 3, 7, 30, 90])
     wf_rest.set_parameter("result_name", "shelby-water-facility")
     wf_rest.set_parameter("restoration_key", "Restoration ID Code")
     wf_rest.set_parameter("end_time", 100.0)
