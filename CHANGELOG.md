@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Network utils refactored to use network dataset [#149](https://github.com/IN-CORE/pyincore/issues/149)
+- EPF restoration uses damage to compute discretized functionality [#169](https://github.com/IN-CORE/pyincore/issues/169)
+- Water facility restoration uses damage to compute discretized functionality [#170](https://github.com/IN-CORE/pyincore/issues/170)
 
 
 ## [1.5.0] - 2022-06-29

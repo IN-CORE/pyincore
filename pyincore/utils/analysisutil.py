@@ -598,29 +598,26 @@ class AnalysisUtil:
         return any("-9999" in str(val) for val in hazard_vals)
 
     @staticmethod
-    def get_discretized_restoration(restoration_table):
-        """Converts discretized restoration times into a dictionary
+    def get_discretized_restoration(restoration_curve_set, discretized_days):
+        """Converts discretized restoration times into a dictionary from continuous curve
 
         Args:
-            restoration_table(list):
+            restoration_curve_set(obj):
+            discretized_days(list):
         Returns:
-            dict: Grouped discretized restoration by inventory class { 'EPPL': {day1: [100, 50, 9, 4, 3], day3: [100,
+            dict: discretized restoration for each day {day1: [100, 50, 9, 4, 3], day3: [100,
             100, 50, 13, 4], etc }
         """
 
-        restoration_map = {}
-        for restoration_row in restoration_table:
-            classification = restoration_row['Classification']
-            if classification in restoration_map:
-                class_restoration = restoration_map[classification]
-            else:
-                class_restoration = {"day1": [], "day3": [], "day7": [], "day30": [], "day90": []}
-                restoration_map[classification] = class_restoration
+        class_restoration = {}
+        for time in discretized_days:
+            restoration_times = restoration_curve_set.calculate_restoration_rates(time=time)
+            # Key (e.g. day1, day3)
+            time_key = "day"+str(time)
 
-            class_restoration["day1"].append(float(restoration_row["day1"]))
-            class_restoration["day3"].append(float(restoration_row["day3"]))
-            class_restoration["day7"].append(float(restoration_row["day7"]))
-            class_restoration["day30"].append(float(restoration_row["day30"]))
-            class_restoration["day90"].append(float(restoration_row["day90"]))
+            restoration = [1, restoration_times['PF_0'], restoration_times['PF_1'], restoration_times['PF_2'],
+                           restoration_times['PF_3']]
 
-        return restoration_map
+            class_restoration[time_key] = restoration
+
+        return class_restoration
