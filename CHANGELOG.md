@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Water facility restoration uses damage to compute discretized functionality [#170](https://github.com/IN-CORE/pyincore/issues/170)
 - Household-level housing sequential recovery uses social vulnerability analysis result [#168](https://github.com/IN-CORE/pyincore/issues/168)
 - Social vulnerability no longer requires year, state, county and census tract as input parameters [#152](https://github.com/IN-CORE/pyincore/pull/156)
+- Update minimum fiona version [#182](https://github.com/IN-CORE/pyincore/issues/182)
 
 ### Fixed
 - Fix data type of Census input dataset to CSV [#166](https://github.com/IN-CORE/pyincore/issues/166)
