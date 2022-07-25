@@ -41,7 +41,7 @@ requirements:
     - python>=3.6
     - ipopt>=3.11
     - {{ pin_compatible('numpy') }}
-    - fiona>=1.8.4
+    - fiona>=1.8.21
     - geopandas>=0.6.1
     - matplotlib>=2.1.0
     - networkx>=2.2
