@@ -155,4 +155,4 @@ for r in $(cat requirements.ver); do
 done
 
 ## cleanup
-rm -f requirements.${MODULE} requirements.tests requirements.notebooks requirements.tmp requirements.ver  requirements.in
+rm -f requirements.${MODULE} requirements.tests requirements.notebooks requirements.tmp requirements.ver  requirements.in *~

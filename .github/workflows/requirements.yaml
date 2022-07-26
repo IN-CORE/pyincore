@@ -15,9 +15,8 @@ env:
   MAIN_REPO: IN-CORE/pyincore
 
 jobs:
-  pyclowder:
+  requirements:
     runs-on: ubuntu-latest
-    if: github.repository == env.MAIN_REPO
 
     steps:
       - uses: actions/checkout@v3
@@ -29,6 +28,7 @@ jobs:
 
       # try and create a PR
       - name: create PR if needed
+        if: github.repository == env.MAIN_REPO
         uses: peter-evans/create-pull-request@v3
         with:
           commit-message: "Updated requirements"

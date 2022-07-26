@@ -596,3 +596,28 @@ class AnalysisUtil:
 
         """
         return any("-9999" in str(val) for val in hazard_vals)
+
+    @staticmethod
+    def get_discretized_restoration(restoration_curve_set, discretized_days):
+        """Converts discretized restoration times into a dictionary from continuous curve
+
+        Args:
+            restoration_curve_set(obj):
+            discretized_days(list):
+        Returns:
+            dict: discretized restoration for each day {day1: [100, 50, 9, 4, 3], day3: [100,
+            100, 50, 13, 4], etc }
+        """
+
+        class_restoration = {}
+        for time in discretized_days:
+            restoration_times = restoration_curve_set.calculate_restoration_rates(time=time)
+            # Key (e.g. day1, day3)
+            time_key = "day"+str(time)
+
+            restoration = [1, restoration_times['PF_0'], restoration_times['PF_1'], restoration_times['PF_2'],
+                           restoration_times['PF_3']]
+
+            class_restoration[time_key] = restoration
+
+        return class_restoration

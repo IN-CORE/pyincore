@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [1.6.0] - 2022-07-27
+
+### Added
+- Pipeline functionality analysis working with MMSA Shelby buried pipelines [#175](https://github.com/IN-CORE/pyincore/issues/175)
+- Electric power network functionality analysis working with MMSA Shelby [#178](https://github.com/IN-CORE/pyincore/issues/178)
+- Water facility network functionality analysis working with MMSA Shelby [#103](https://github.com/IN-CORE/pyincore/issues/103)
+
+### Changed
+- Network utils refactored to use network dataset [#149](https://github.com/IN-CORE/pyincore/issues/149)
+- EPF restoration uses damage to compute discretized functionality [#169](https://github.com/IN-CORE/pyincore/issues/169)
+- Water facility restoration uses damage to compute discretized functionality [#170](https://github.com/IN-CORE/pyincore/issues/170)
+- Household-level housing sequential recovery uses social vulnerability analysis result [#168](https://github.com/IN-CORE/pyincore/issues/168)
+- Social vulnerability no longer requires year, state, county and census tract as input parameters [#152](https://github.com/IN-CORE/pyincore/pull/156)
+
+### Fixed
+- Fix data type of Census input dataset to CSV [#166](https://github.com/IN-CORE/pyincore/issues/166)
+
 ## [1.5.0] - 2022-06-29
 
 ### Added
