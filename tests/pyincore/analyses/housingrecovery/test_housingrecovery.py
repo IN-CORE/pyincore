@@ -24,7 +24,7 @@ def run_with_base_class(chained):
         bldg_inv_id = "602eba8bb1db9c28aef01358"
 
         # Hurricane building mapping (with equation)
-        mapping_id = "602c381a1d85547cdc9f0675" # dev & prod
+        mapping_id = "602c381a1d85547cdc9f0675"  # dev & prod
         fragility_service = FragilityService(client)
         mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
 
@@ -135,7 +135,7 @@ def run_with_base_class(chained):
         census_bg_id = "62193b7ca42a3e546ae2d9f2"
 
         # Census appraisal file; id of external Census json
-        census_appr_id = "6241fbd153302c512d685181" # dev
+        census_appr_id = "6241fbd153302c512d685181"  # dev
         result_name = "Galveston_building_values_chained"
 
         housing_rec = HousingRecovery(client)
@@ -160,7 +160,7 @@ def run_with_base_class(chained):
         census_bg_id = "62193b7ca42a3e546ae2d9f2"
 
         # Census appraisal file; id of external Census json
-        census_appr_id = "6241fbd153302c512d685181"
+        census_appr_id = "62c4956d861e370172c5578b"
         result_name = "Galveston_building_values"
 
         housing_rec = HousingRecovery(client)

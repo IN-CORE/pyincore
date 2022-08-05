@@ -11,6 +11,9 @@ def run_with_base_class():
     hazard_type = "earthquake"
     hazard_id = "5b902cb273c3371e1236b36b"
 
+    # Geology dataset
+    liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
+
     # Building dataset
     # 5a284f0bc7d30d13bc081a28  5kb
     # 5bcf2fcbf242fe047ce79dad 300kb
@@ -31,6 +34,8 @@ def run_with_base_class():
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
+    bldg_dmg.set_parameter("use_liquefaction", True)
+    bldg_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
 
     # Run Analysis
     bldg_dmg.run_analysis()

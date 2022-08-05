@@ -1,3 +1,8 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
 import fiona
 import csv
 import copy
@@ -11,7 +16,7 @@ from fiona.crs import from_epsg
 
 class NetworkUtil:
     @staticmethod
-    def build_dataset_by_node(node_filename, graph_filename, id_field, out_filename):
+    def build_link_by_node(node_filename, graph_filename, id_field, out_filename):
         """Create line dataset based on node shapefile and graph file graph should be in csv format.
 
         Args:
@@ -32,7 +37,7 @@ class NetworkUtil:
         graph_list.pop(0)
 
         # read node shapefile and make it as a list so it can be accessed for the building line file
-        # also, add uuid in the field
+        # also, add guid in the field
         innode = fiona.open(node_filename)
 
         # create list of each shapefile entry
@@ -44,7 +49,7 @@ class NetworkUtil:
             'geometry': 'LineString',
             'properties': {
                 'linkid': 'str:10',
-                'uuid': 'str:30',
+                'guid': 'str:30',
                 'from_node': 'str:10',
                 'to_node': 'str:10'
             }
@@ -53,7 +58,7 @@ class NetworkUtil:
         for in_feature in innode:
             # build shape feature
             tmp_feature = copy.deepcopy(in_feature)
-            tmp_feature['properties']['uuid'] = str(uuid.uuid4())
+            tmp_feature['properties']['guid'] = str(uuid.uuid4())
             node_id = str(tmp_feature['properties'][id_field])
             node_list.append(tmp_feature)
             node_id_list.append(node_id)
@@ -91,7 +96,7 @@ class NetworkUtil:
                 # filling schema
                 schema['geometry'] = mapping(line_geom_list[i])
                 schema['properties']['linkid'] = line_id_list[i]
-                schema['properties']['uuid'] = str(uuid.uuid4())
+                schema['properties']['guid'] = str(uuid.uuid4())
                 schema['properties']['from_node'] = line_from_list[i]
                 schema['properties']['to_node'] = line_to_list[i]
 
@@ -100,13 +105,13 @@ class NetworkUtil:
         return True
 
     @staticmethod
-    def build_dataset_by_line(line_filename, line_id_field, fromnode_field, tonode_field, out_node_filename,
-                              out_graph_filename):
+    def build_node_by_link(link_filename, link_id_field, fromnode_field, tonode_field, out_node_filename,
+                           out_graph_filename):
         """Create node dataset based on line shapefile and graph file graph should be in csv format
 
         Args:
-            line_filename (string):  line shapefile file name pull path with *.shp file extension.
-            line_id_field (string): line shapefile unique id field
+            link_filename (string):  line shapefile file name pull path with *.shp file extension.
+            link_id_field (string): line shapefile unique id field
             fromnode_field (string): field name for fromnode in line shapefile
             tonode_field (string): field name for tonode in line shapefile
             out_node_filename (string): output node shapefile name with *.shp extension
@@ -117,7 +122,7 @@ class NetworkUtil:
 
         """
         # read line shapefile
-        linefile = fiona.open(line_filename)
+        linefile = fiona.open(link_filename)
 
         node_list = []
         node_id_list = []
@@ -132,7 +137,7 @@ class NetworkUtil:
                 print("The line shapefile is a multiline string. The process will be aborted")
                 return False
 
-            line_id = str(line['properties'][line_id_field])
+            line_id = str(line['properties'][link_id_field])
             fromnode_id = str(line['properties'][fromnode_field])
             tonode_id = str(line['properties'][tonode_field])
             fromnode_coord = seg_coord_list[0]
@@ -168,7 +173,7 @@ class NetworkUtil:
             'geometry': 'Point',
             'properties': {
                 'nodeid': 'str:10',
-                'uuid': 'str:30'
+                'guid': 'str:30'
             }
         }
 
@@ -178,23 +183,23 @@ class NetworkUtil:
                 # filling schema
                 schema['geometry'] = mapping(node_list[i])
                 schema['properties']['nodeid'] = node_id_list[i]
-                schema['properties']['uuid'] = str(uuid.uuid4())
+                schema['properties']['guid'] = str(uuid.uuid4())
 
                 layer.write(schema)
 
         with open(out_graph_filename, "w", newline='') as f:
             writer = csv.writer(f)
-            writer.writerows([[line_id_field, fromnode_field, tonode_field]])
+            writer.writerows([[link_id_field, fromnode_field, tonode_field]])
             writer.writerows(graph_list)
 
         return True
 
     @staticmethod
-    def create_network_graph_from_field(indataset, fromnode_fldname, tonode_fldname, is_directed=False):
+    def create_network_graph_from_link(link_file, fromnode_fldname, tonode_fldname, is_directed=False):
         """Create network graph from field.
 
         Args:
-            indataset (str):  A name of a geo dataset resource recognized by Fiona package.
+            link_file (str):  A name of a geo dataset resource recognized by Fiona package.
             fromnode_fldname (str): Line feature, from node field name.
             tonode_fldname (str): Line feature, to node field name.
             is_directed (bool, optional (Defaults to False)): Graph type. True for directed Graph,
@@ -210,6 +215,8 @@ class NetworkUtil:
         tonode_list = []
         node_list = []
         size = 0
+
+        indataset = fiona.open(link_file)
 
         for line_feature in indataset:
             if fromnode_fldname in line_feature["properties"]:
@@ -312,12 +319,11 @@ class NetworkUtil:
         return graph, node_coords
 
     @staticmethod
-    def validate_network_node_ids(nodedataset, linkdataset, fromnode_fldname, tonode_fldname, nodeid_fldname):
+    def validate_network_node_ids(network_dataset, fromnode_fldname, tonode_fldname, nodeid_fldname):
         """Check if the node id in from or to node exist in the real node id.
 
         Args:
-            nodedataset (str):  A name of a node geo dataset resource recognized by Fiona package.
-            linkdataset (str): A name of a link geo dataset resource recognized by Fiona package.
+            network_dataset (str):  A name of a network dataset
             fromnode_fldname (str): Line feature, from node field name.
             tonode_fldname (str): Line feature, to node field name.
             nodeid_fldname (str): Node field id name.
@@ -326,10 +332,13 @@ class NetworkUtil:
             bool: Validation of node existence.
 
         """
+        # get link and node dataset
+        link_dataset = network_dataset.links.get_inventory_reader()
+        node_dataset = network_dataset.nodes.get_inventory_reader()
         validate = True
         # iterate link
         link_node_list = []
-        for line_feature in linkdataset:
+        for line_feature in link_dataset:
             if fromnode_fldname in line_feature["properties"]:
                 from_node_val = line_feature['properties'][fromnode_fldname]
             elif fromnode_fldname.lower() in line_feature["properties"]:
@@ -343,7 +352,7 @@ class NetworkUtil:
 
         # iterate node
         node_list = []
-        for node_feature in nodedataset:
+        for node_feature in node_dataset:
             if nodeid_fldname in node_feature["properties"]:
                 node_val = node_feature['properties'][nodeid_fldname]
             elif nodeid_fldname.lower() in node_feature["properties"]:

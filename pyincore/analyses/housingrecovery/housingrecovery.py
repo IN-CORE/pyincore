@@ -120,7 +120,7 @@ class HousingRecovery(BaseAnalysis):
         bg_mhhinc = self.get_input_dataset("census_block_groups_data").get_dataframe_from_csv(low_memory=False)
 
         # Census data
-        vac_status = self.get_input_dataset("census_appraisal_data").get_json_reader()
+        vac_status = self.get_input_dataset("census_appraisal_data").get_dataframe_from_csv(low_memory=False)
 
         # Calculate the percent vacation or seasonal housing of all housing units within a census tract
         vac_status = self.get_vac_season_housing(vac_status)
@@ -210,7 +210,7 @@ class HousingRecovery(BaseAnalysis):
 
         return own
 
-    def get_vac_season_housing(self, vacation_status):
+    def get_vac_season_housing(self, vac_status):
         """ Calculate the percent vacation or seasonal housing of all housing units within a census tract and
         add dummy variable for census tract as a seasonal/vacation housing submarket.
 .
@@ -221,8 +221,6 @@ class HousingRecovery(BaseAnalysis):
             pd.DataFrame: Seasonal/vacation housing data.
 
         """
-        vac_status = pd.DataFrame(data=vacation_status[1:], columns=vacation_status[0])
-
         vac_status["B25004_006E"] = vac_status["B25004_006E"].astype(int)
         vac_status["B25004_006M"] = vac_status["B25004_006M"].astype(int)
         vac_status["B25002_001E"] = vac_status["B25002_001E"].astype(int)
@@ -269,8 +267,8 @@ class HousingRecovery(BaseAnalysis):
         """
         hse_rec["tractid"] = hse_rec["tractid"].astype(str)
         # Add county and state to trac to match hse_rec tracid (Galveston - 723900 to 48167723900)
-        vac_status["tractid"] = vac_status["state"].astype(str) + vac_status["county"].astype(str) + \
-                                vac_status["tract"].astype(str)
+        vac_status["tractid"] = \
+            vac_status["state"].astype(str) + vac_status["county"].astype(str) + vac_status["tract"].astype(str)
 
         hse_rec_merged = pd.merge(hse_rec, vac_status, left_on="tractid", right_on="tractid", how='inner')
         return hse_rec_merged
@@ -336,12 +334,12 @@ class HousingRecovery(BaseAnalysis):
         else:
             dmg_loss = np.fromiter(hru.B_PHM_dmg_year.values(), dtype=float) * \
                        hse_rec["value_loss"].to_numpy()[:, np.newaxis]
-        d_owner = np.fromiter(hru.B_PHM_own_year.values(), dtype=float) * \
-                  hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
-        mhhinck = np.fromiter(hru.B_PHM_inc_year.values(), dtype=float) * \
-                  hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
-        pminrbg = np.fromiter(hru.B_PHM_min_year.values(), dtype=float) * \
-                  hse_rec["pminoritybg"].to_numpy()[:, np.newaxis]
+        d_owner = \
+            np.fromiter(hru.B_PHM_own_year.values(), dtype=float) * hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
+        mhhinck = \
+            np.fromiter(hru.B_PHM_inc_year.values(), dtype=float) * hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
+        pminrbg = \
+            np.fromiter(hru.B_PHM_min_year.values(), dtype=float) * hse_rec["pminoritybg"].to_numpy()[:, np.newaxis]
 
         return coef_fin + yrbuilt + sqmeter + d_owner + dmg_loss + mhhinck + pminrbg
 
@@ -376,10 +374,9 @@ class HousingRecovery(BaseAnalysis):
         else:
             dmg_loss = np.fromiter(hru.B_SVHM_dmg_year.values(), dtype=float) * \
                        hse_rec["value_loss"].to_numpy()[:, np.newaxis]
-        d_owner = np.fromiter(hru.B_SVHM_own_year.values(), dtype=float) * \
-                  hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
-        mhhinck = np.fromiter(hru.B_SVHM_inc_year.values(), dtype=float) * \
-                  hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
+        d_owner = \
+            np.fromiter(hru.B_SVHM_own_year.values(), dtype=float) * hse_rec["d_ownerocc"].to_numpy()[:, np.newaxis]
+        mhhinck = \
+            np.fromiter(hru.B_SVHM_inc_year.values(), dtype=float) * hse_rec["mhhinck"].to_numpy()[:, np.newaxis]
 
         return coef_fin + yrbuilt + sqmeter + dmg_loss + d_owner + mhhinck
-

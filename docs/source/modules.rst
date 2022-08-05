@@ -58,6 +58,13 @@ analyses/epfdamage
 ..  autoclass:: epfdamage.epfutil.EpfUtil
     :members:
 
+analyses/epnfunctionality
+=========================
+..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionality
+    :members:
+..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionalityUtil
+    :members:
+
 analyses/example
 ================
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
@@ -142,6 +149,11 @@ analyses/pipelinedamagerepairrate
 ..  autoclass:: pipelinedamagerepairrate.pipelineutil.PipelineUtil
     :members:
 
+analyses/pipelinefunctionality
+=========================
+..  autoclass:: pipelinefunctionality.pipelinefunctionality.PipelineFunctionality
+    :members:
+
 analyses/pipelinerestoration
 ============================
 ..  autoclass:: pipelinerestoration.pipelinerestoration.PipelineRestoration
@@ -218,6 +230,11 @@ analyses/waterfacilitydamage
 analyses/waterfacilityrestoration
 =================================
 ..  autoclass:: waterfacilityrestoration.waterfacilityrestoration.WaterFacilityRestoration
+    :members:
+
+analyses/wfnfunctionality
+=================================
+..  autoclass:: wfnfunctionality.wfnfunctionality.WfnFunctionality
     :members:
 
 models

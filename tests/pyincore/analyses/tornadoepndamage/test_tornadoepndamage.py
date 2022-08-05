@@ -9,12 +9,10 @@ def run_with_base_class():
 
     ted = TornadoEpnDamage(client)
 
-    epn_node_id = '5b1fdb50b1cf3e336d7cecb1'
-    epn_link_id = '5b1fdc2db1cf3e336d7cecc9'
+    epn_network_id = "62719fc857f1d94b047447e6"
     tornado_id = '5df913b83494fe000861a743'
 
-    ted.load_remote_input_dataset("epn_node", epn_node_id)
-    ted.load_remote_input_dataset("epn_link", epn_link_id)
+    ted.load_remote_input_dataset("epn_network", epn_network_id)
 
     result_name = "tornado_dmg_result"
     ted.set_parameter("result_name", result_name)
