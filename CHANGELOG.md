@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+##[Unreleased]
+
+### Changed
+- Format test for the code simplified to included all the paths [#189](https://github.com/IN-CORE/pyincore/issues/189)
+
 ## [1.6.0] - 2022-07-27
 
 ### Added
