@@ -46,8 +46,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
     __SC_col = 'Sc'
     __SC_rs_col = 'Sc_rs'
     __L_brd_col = 'l'
-
-    __budget_default = 0.2
     __scaling_factor = 1000000
 
     def __init__(self, incore_client):
@@ -58,10 +56,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Read parameters
         model_solver = self.get_parameter('model_solver')
         num_epsilon_steps = self.get_parameter('num_epsilon_steps')
-
-        budget_available = self.__budget_default
-        if self.get_parameter('budget_available') != 'default':
-            budget_available = self.get_parameter('budget_available')
+        budget_available = self.get_parameter('budget_available')
 
         inactive_submodels = []
 
@@ -69,6 +64,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         if in_subm is not None:
             inactive_submodels = in_subm
+
+        single_obj = self.get_parameter('single_objective')
+
+        single_objective = False
+
+        if single_obj is not None:
+            single_objective = single_obj
 
         building_related_data = self.get_input_dataset('building_related_data').get_dataframe_from_csv()
         strategy_costs = self.get_input_dataset('strategy_costs_data').get_dataframe_from_csv()
@@ -78,11 +80,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         strategy_costs['Z'] = strategy_costs['Z'].astype(str)
 
         self.multiobjective_retrofit_optimization_model(model_solver, num_epsilon_steps, budget_available,
-                                                        inactive_submodels, building_related_data,
+                                                        inactive_submodels, single_objective, building_related_data,
                                                         strategy_costs)
 
     def multiobjective_retrofit_optimization_model(self, model_solver, num_epsilon_steps, budget_available,
-                                                   inactive_submodels, building_related_data,
+                                                   inactive_submodels, single_objective, building_related_data,
                                                    strategy_costs):
         """Performs the computation of the model.
 
@@ -92,6 +94,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             num_epsilon_steps (int): number of epsilon values for the multistep optimization algorithm
             budget_available (float): budget constraint of the optimization analysis
             inactive_submodels (list): submodels to avoid during the computation
+            single_objective (bool): only execute single objective models (no epsilon steps)
             building_related_data (pd.DataFrame): building repairs after a disaster event
             strategy_costs (pd.DataFrame): strategy cost data per building
 
@@ -114,18 +117,25 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Solve each model individually
         print("With individual model")
         obj_list = self.solve_individual_models(model, model_solver_setting)
-        print("Epsilon values")
-        self.configure_min_max_epsilon_values(model, obj_list, num_epsilon_steps)
 
-        print("Epsilon model")
-        xresults_df, yresults_df = self.solve_epsilon_models(model, model_solver_setting, inactive_submodels)
+        if single_objective:
+            # TODO: extract the X, Y solutions in the same format
+            pass
+        else:
+            print("Epsilon values")
 
-        df_list = self.compute_optimal_results(inactive_submodels, xresults_df, yresults_df)
+            self.configure_min_max_epsilon_values(model, obj_list, num_epsilon_steps)
 
-        self.set_result_csv_data("optimal_solution_dv_x", df_list[0], name="optimal_solution_dv_x",
-                                 source="dataframe")
-        self.set_result_csv_data("optimal_solution_dv_y", df_list[1], name="optimal_solution_dv_y",
-                                 source="dataframe")
+            print("Epsilon model")
+            xresults_df, yresults_df = self.solve_epsilon_models(model, model_solver_setting, inactive_submodels)
+
+            df_list = self.compute_optimal_results(inactive_submodels, xresults_df, yresults_df)
+
+            # TODO: Submodel 0 = all is zero
+            self.set_result_csv_data("optimal_solution_dv_x", df_list[0], name="optimal_solution_dv_x",
+                                     source="dataframe")
+            self.set_result_csv_data("optimal_solution_dv_y", df_list[1], name="optimal_solution_dv_y",
+                                     source="dataframe")
         return True
 
     def configure_model(self, budget_available, building_related_data, strategy_costs):
@@ -150,8 +160,6 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Rescale: strategy cost, budget, economic loss
         if budget_available >= self.__scaling_factor:
             strategy_costs[self.__SC_col] = strategy_costs[self.__SC_col]/self.__scaling_factor
-            building_related_data[self.__Q_col] = \
-                building_related_data[self.__L_brd_col] = building_related_data[self.__L_brd_col]/self.__scaling_factor
             budget_available = budget_available/self.__scaling_factor
 
         # Setup pyomo
@@ -466,22 +474,28 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         yresults_df = pd.DataFrame()
 
         if 1 not in inactive_submodels:
-           self.solve_epsilon_model_1(model, model_solver_setting)
+            xresults_df, yresults_df =  self.solve_epsilon_model_1(model, model_solver_setting, xresults_df,
+                                                                      yresults_df)
 
         if 2 not in inactive_submodels:
-            self.solve_epsilon_model_2(model, model_solver_setting)
+            xresults_df, yresults_df = self.solve_epsilon_model_2(model, model_solver_setting, xresults_df,
+                                                                      yresults_df)
 
         if 3 not in inactive_submodels:
-            self.solve_epsilon_model_3(model, model_solver_setting)
+            xresults_df, yresults_df = self.solve_epsilon_model_3(model, model_solver_setting, xresults_df,
+                                                                      yresults_df)
 
         if 4 not in inactive_submodels:
-            self.solve_epsilon_model_4(model, model_solver_setting)
+            xresults_df, yresults_df = self.solve_epsilon_model_4(model, model_solver_setting, xresults_df,
+                                                                      yresults_df)
 
         if 5 not in inactive_submodels:
-            self.solve_epsilon_model_5(model, model_solver_setting)
+            xresults_df, yresults_df = self.solve_epsilon_model_5(model, model_solver_setting, xresults_df,
+                                                                      yresults_df)
 
         if 6 not in inactive_submodels:
-            self.solve_epsilon_model_6(model, model_solver_setting)
+            xresults_df, yresults_df = self.solve_epsilon_model_6(model, model_solver_setting, xresults_df,
+                                                                      yresults_df)
 
         if 7 not in inactive_submodels:
             xresults_df, yresults_df = self.solve_epsilon_model_7(model, model_solver_setting, xresults_df,
@@ -497,7 +511,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         return xresults_df, yresults_df
 
-    def solve_epsilon_model_1(self, model, model_solver_setting):
+    def solve_epsilon_model_1(self, model, model_solver_setting, xresults_df, yresults_df):
         starttime = time.time()
         print("****OPTIMIZING ECONOMIC LOSS SUBJECT TO POPULATION DISLOCATION EPSILON CONSTRAINTS****")
         # Activate objective function 1 and deactivate others:
@@ -513,6 +527,10 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         # Parameter for objective 2 (dislocation) epsilon value:
         model.obj_2_e = Param(mutable=True, within=NonNegativeReals)
         # For each dislocation epsilon value (starting at min) set as constraint and solve model:
+
+        epsilon1_xresult_df = pd.DataFrame()
+        epsilon1_yresult_df = pd.DataFrame()
+
         counter = 0
         for e in np.arange(pyo.value(model.dislocation_min), pyo.value(model.dislocation_max) + 0.000001,
                            pyo.value(model.dislocation_step)):
@@ -537,6 +555,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     model.dislocation)  # Save the resulting dislocation value.
                 obj_1_2_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
                     model.functionality)  # Save the resulting functionality value.
+
+                # Extract results per each variable and convert to dataframe
+                x_data: dict = model.x_ijk.extract_values()
+                newx_df = self.assemble_dataframe_from_solution("x_ijk", x_data, counter)
+
+                y_data: dict = model.y_ijkk_prime.extract_values()
+                newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
+
+                # Append to local analysis result
+                epsilon1_xresult_df = epsilon1_xresult_df.append(newx_df)
+                epsilon1_yresult_df = epsilon1_yresult_df.append(newy_df)
             else:
                 print(results.solver.termination_condition)
                 log_infeasible_constraints(model)
@@ -555,7 +584,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-    def solve_epsilon_model_2(self, model, model_solver_setting):
+        epsilon1_xresult_df['Submodel'] = 1
+        epsilon1_yresult_df['Submodel'] = 1
+
+        return xresults_df.append(epsilon1_xresult_df), yresults_df.append(epsilon1_yresult_df)
+
+    def solve_epsilon_model_2(self, model, model_solver_setting, xresults_df, yresults_df):
         starttime = time.time()
         print("****OPTIMIZING ECONOMIC LOSS SUBJECT TO BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
         # Activate objective function 1 and deactivate others:
@@ -570,6 +604,10 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         # Parameter for objective 3 (functionality) epsilon value:
         model.obj_3_e = Param(mutable=True, within=NonNegativeReals)
+
+        epsilon2_xresult_df = pd.DataFrame()
+        epsilon2_yresult_df = pd.DataFrame()
+
         counter = 0
         # For each functionality epsilon value (starting at min) set as constraint and solve model:
         # Adding 0.0000000000001 to the maximum value allows np.arange() to include the maximum functionality.
@@ -597,6 +635,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     model.dislocation)  # Save the resulting dislocation value.
                 obj_1_3_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
                     model.functionality)  # Save the resulting functionality value.
+
+                # Extract results per each variable and convert to dataframe
+                x_data: dict = model.x_ijk.extract_values()
+                newx_df = self.assemble_dataframe_from_solution("x_ijk", x_data, counter)
+
+                y_data: dict = model.y_ijkk_prime.extract_values()
+                newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
+
+                # Append to local analysis result
+                epsilon2_xresult_df = epsilon2_xresult_df.append(newx_df)
+                epsilon2_yresult_df = epsilon2_yresult_df.append(newy_df)
             else:
                 print(results.solver.termination_condition)
                 log_infeasible_constraints(model)
@@ -615,7 +664,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-    def solve_epsilon_model_3(self, model, model_solver_setting):
+        epsilon2_xresult_df['Submodel'] = 2
+        epsilon2_yresult_df['Submodel'] = 2
+
+        return xresults_df.append(epsilon2_xresult_df), yresults_df.append(epsilon2_yresult_df)
+
+    def solve_epsilon_model_3(self, model, model_solver_setting, xresults_df, yresults_df):
         starttime = time.time()
         print("****OPTIMIZING POPULATION DISLOCATION SUBJECT TO ECONOMIC LOSS EPSILON CONSTRAINTS****")
         # Activate objective function 2 and deactivate others:
@@ -632,6 +686,10 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.obj_1_e = Param(mutable=True, within=NonNegativeReals)
         # For each economic loss epsilon value (starting at min) set as constraint and solve model:
         # Adding 1 to the maximum value allows np.arange() to include the maximum economic loss.
+
+        epsilon3_xresult_df = pd.DataFrame()
+        epsilon3_yresult_df = pd.DataFrame()
+
         counter = 0
         for e in np.arange(pyo.value(model.econ_loss_min), pyo.value(model.econ_loss_max) + 0.1,
                            pyo.value(model.econ_loss_step)):
@@ -656,6 +714,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     model.econ_loss)  # Save the resulting economic loss value.
                 obj_2_1_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
                     model.functionality)  # Save the resulting functionality value.
+
+                # Extract results per each variable and convert to dataframe
+                x_data: dict = model.x_ijk.extract_values()
+                newx_df = self.assemble_dataframe_from_solution("x_ijk", x_data, counter)
+
+                y_data: dict = model.y_ijkk_prime.extract_values()
+                newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
+
+                # Append to local analysis result
+                epsilon3_xresult_df = epsilon3_xresult_df.append(newx_df)
+                epsilon3_yresult_df = epsilon3_yresult_df.append(newy_df)
             else:
                 print(results.solver.termination_condition)
                 log_infeasible_constraints(model)
@@ -674,7 +743,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-    def solve_epsilon_model_4(self, model, model_solver_setting):
+        epsilon3_xresult_df['Submodel'] = 3
+        epsilon3_yresult_df['Submodel'] = 3
+
+        return xresults_df.append(epsilon3_xresult_df), yresults_df.append(epsilon3_yresult_df)
+
+    def solve_epsilon_model_4(self, model, model_solver_setting, xresults_df, yresults_df):
         starttime = time.time()
         print("****OPTIMIZING POPULATION DISLOCATION SUBJECT TO BUILDING FUNCTIONALITY EPSILON CONSTRAINTS****")
         # Activate objective function 2 and deactivate others:
@@ -691,6 +765,10 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.obj_3_e = Param(mutable=True, within=NonNegativeReals)
         # For each functionality epsilon value (starting at min) set as constraint and solve model:
         # Adding 0.0000000000001 to the maximum value allows np.arange() to include the maximum functionality.
+
+        epsilon4_xresult_df = pd.DataFrame()
+        epsilon4_yresult_df = pd.DataFrame()
+
         counter = 0
         for e in np.arange(pyo.value(model.functionality_min), pyo.value(model.functionality_max) + 0.0000000000001,
                            pyo.value(model.functionality_step)):
@@ -715,6 +793,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     model.econ_loss)  # Save the resulting economic loss value.
                 obj_2_3_epsilon_results.loc[counter - 1, 'Functionality Value'] = pyo.value(
                     model.functionality)  # Save the resulting functionality value.
+
+                # Extract results per each variable and convert to dataframe
+                x_data: dict = model.x_ijk.extract_values()
+                newx_df = self.assemble_dataframe_from_solution("x_ijk", x_data, counter)
+
+                y_data: dict = model.y_ijkk_prime.extract_values()
+                newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
+
+                # Append to local analysis result
+                epsilon4_xresult_df = epsilon4_xresult_df.append(newx_df)
+                epsilon4_yresult_df = epsilon4_yresult_df.append(newy_df)
             else:
                 print(results.solver.termination_condition)
                 log_infeasible_constraints(model)
@@ -733,7 +822,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-    def solve_epsilon_model_5(self, model, model_solver_setting):
+        epsilon4_xresult_df['Submodel'] = 4
+        epsilon4_yresult_df['Submodel'] = 4
+
+        return xresults_df.append(epsilon4_xresult_df), yresults_df.append(epsilon4_yresult_df)
+
+    def solve_epsilon_model_5(self, model, model_solver_setting, xresults_df, yresults_df):
         starttime = time.time()
         print("****OPTIMIZING BUILDING FUNCTIONALITY SUBJECT TO ECONOMIC LOSS EPSILON CONSTRAINTS****")
         # Activate objective function 3 and deactivate others:
@@ -750,6 +844,10 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.obj_1_e = Param(mutable=True, within=NonNegativeReals)
         # For each economic loss epsilon value (starting at min) set as constraint and solve model:
         # Adding 1 to the maximum value allows np.arange() to include the maximum economic loss.
+
+        epsilon5_xresult_df = pd.DataFrame()
+        epsilon5_yresult_df = pd.DataFrame()
+
         counter = 0
         for e in np.arange(pyo.value(model.econ_loss_min), pyo.value(model.econ_loss_max) + 0.000001,
                            pyo.value(model.econ_loss_step)):
@@ -774,6 +872,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     model.econ_loss)  # Save the resulting economic loss value.
                 obj_3_1_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
                     model.dislocation)  # Save the resulting dislocation value.
+
+                # Extract results per each variable and convert to dataframe
+                x_data: dict = model.x_ijk.extract_values()
+                newx_df = self.assemble_dataframe_from_solution("x_ijk", x_data, counter)
+
+                y_data: dict = model.y_ijkk_prime.extract_values()
+                newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
+
+                # Append to local analysis result
+                epsilon5_xresult_df = epsilon5_xresult_df.append(newx_df)
+                epsilon5_yresult_df = epsilon5_yresult_df.append(newy_df)
             else:
                 print(results.solver.termination_condition)
                 log_infeasible_constraints(model)
@@ -792,7 +901,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
 
-    def solve_epsilon_model_6(self, model, model_solver_setting):
+        epsilon5_xresult_df['Submodel'] = 5
+        epsilon5_yresult_df['Submodel'] = 5
+
+        return xresults_df.append(epsilon5_xresult_df), yresults_df.append(epsilon5_yresult_df)
+
+    def solve_epsilon_model_6(self, model, model_solver_setting, xresults_df, yresults_df):
         starttime = time.time()
         print("****OPTIMIZING BUILDING FUNCTIONALITY SUBJECT TO POPULATION DISLOCATION EPSILON CONSTRAINTS****")
         # Activate objective function 3 (functionality) and deactivate others:
@@ -809,6 +923,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         model.obj_2_e = Param(mutable=True, within=NonNegativeReals)
         # For each dislocation epsilon value (starting at min) set as constraint and solve model:
         # Adding 1 to the maximum value allows np.arange() to include the maximum dislocation.
+        # Generate datasets for this epsilon analysis
+
+        epsilon6_xresult_df = pd.DataFrame()
+        epsilon6_yresult_df = pd.DataFrame()
+
         counter = 0
         for e in np.arange(pyo.value(model.dislocation_min), pyo.value(model.dislocation_max) + 0.000001,
                            pyo.value(model.dislocation_step)):
@@ -833,6 +952,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     model.econ_loss)  # Save the resulting economic loss value.
                 obj_3_2_epsilon_results.loc[counter - 1, 'Dislocation Value'] = pyo.value(
                     model.dislocation)  # Save the resulting dislocation value.
+
+                # Extract results per each variable and convert to dataframe
+                x_data: dict = model.x_ijk.extract_values()
+                newx_df = self.assemble_dataframe_from_solution("x_ijk", x_data, counter)
+
+                y_data: dict = model.y_ijkk_prime.extract_values()
+                newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
+
+                # Append to local analysis result
+                epsilon6_xresult_df = epsilon6_xresult_df.append(newx_df)
+                epsilon6_yresult_df = epsilon6_yresult_df.append(newy_df)
             else:
                 print(results.solver.termination_condition)
                 log_infeasible_constraints(model)
@@ -850,6 +980,11 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         endtime = time.time()
         elapsedtime = endtime - starttime
         print("Elapsed time: ", elapsedtime)
+
+        epsilon6_xresult_df['Submodel'] = 6
+        epsilon6_yresult_df['Submodel'] = 6
+
+        return xresults_df.append(epsilon6_xresult_df), yresults_df.append(epsilon6_yresult_df)
 
     def solve_epsilon_model_7(self, model, model_solver_setting, xresults_df, yresults_df):
         starttime = time.time()
@@ -1157,7 +1292,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         return xresults_df.append(epsilon9_xresult_df), yresults_df.append(epsilon9_yresult_df)
 
     def compute_optimal_results(self, inactive_submodels, xresults_df, yresults_df):
-        # Fixed for the moment, will be expanded to the full model set in later iterations
+        # TODO: Fixed for the moment, will be expanded to the full model set in later iterations
         epsilon_models = [7]
 
         xresults_list: list = []
@@ -1389,7 +1524,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     'id': 'inactive_submodels',
                     'required': False,
                     'description': 'Identifier of submodels to inactivate during analysis',
-                    'type': [int]
+                    'type': list
+                },
+                {
+                    'id': 'single_objective',
+                    'required': False,
+                    'description': 'Only solve single objective models (no epsilon steps)',
+                    'type': bool
                 }
             ],
             'input_datasets': [
