@@ -22,4 +22,5 @@ def test_conformance(paths=paths):
     result = style.check_files(paths)
     assert result.total_errors == 0
 
+
 test_conformance()
