@@ -177,8 +177,7 @@ class EpfDamage(BaseAnalysis):
         elif hazard_type == 'tornado':
             hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
         elif hazard_type == 'hurricane':
-            # TODO: implement hurricane
-            raise ValueError('Hurricane hazard has not yet been implemented!')
+            hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
         elif hazard_type == 'tsunami':
             hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
         else:
@@ -375,7 +374,10 @@ class EpfDamage(BaseAnalysis):
                     'id': 'epfs',
                     'required': True,
                     'description': 'Electric Power Facility Inventory',
-                    'type': ['incore:epf', 'ergo:epf'],
+                    'type': ['incore:epf',
+                             'ergo:epf',
+                             'incore:epfVer2'
+                             ],
                 },
                 {
                     'id': 'dfr3_mapping_set',
