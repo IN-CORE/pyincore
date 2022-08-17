@@ -372,7 +372,7 @@ class NetworkUtil:
 
     @staticmethod
     def merge_labeled_networks(graph_a, graph_b, edges_ab, directed=False):
-        """
+        """Merges two networks, each distinguished by a label
 
         Args:
             graph_a (obj): labeled network a
