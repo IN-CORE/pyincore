@@ -143,6 +143,25 @@ class BaseAnalysis:
             # TODO handle error message
             return False
 
+    def validate_parameter_nested(self, parameter, parameter_spec):
+        is_valid = True
+        err_msg = ''
+
+        if type(parameter_spec['type']) is tuple:
+            # Check that the first part of the type corresponds to a valid container
+            if not (type(parameter) is parameter_spec['type'][0]):
+                is_valid = False
+                err_msg = 'container parameter type does not match - spec: ' + str(parameter_spec)
+            elif not (all(isinstance(s, parameter_spec['type'][1]) for s in parameter)):
+                is_valid = False
+                err_msg = 'element parameter type does not match - spec: ' + str(parameter_spec)
+        else:
+            if not type(parameter) is parameter_spec['type']:
+                is_valid = False
+                err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)
+
+        return is_valid, err_msg
+
     def validate_parameter(self, parameter_spec, parameter):
         """Match parameter by type.
 
@@ -156,16 +175,16 @@ class BaseAnalysis:
         """
         is_valid = True
         err_msg = ''
+
         if parameter_spec['required']:
             if parameter is None:
                 is_valid = False
                 err_msg = 'required parameter is missing - spec: ' + str(parameter_spec)
-            elif not type(parameter) is parameter_spec['type']:
-                is_valid = False
-                err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)
-        elif not isinstance(parameter, type(None)) and not (type(parameter) is parameter_spec['type']):
-            is_valid = False
-            err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)
+            else:
+                is_valid, err_msg = self.validate_parameter_nested(parameter, parameter_spec)
+        else:
+            if not parameter is None:
+                is_valid, err_msg = self.validate_parameter_nested(parameter, parameter_spec)
 
         return is_valid, err_msg
 
@@ -182,6 +201,7 @@ class BaseAnalysis:
         """
         is_valid = True
         err_msg = ''
+
         if not isinstance(dataset, type(None)):
             # if dataset is not none, check data type
             if not (dataset.data_type in dataset_spec['type']):

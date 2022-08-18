@@ -31,16 +31,16 @@ class MeanDamage(BaseAnalysis):
                     'type': str
                 },
                 {
+                    'id': 'damage_interval_keys',
+                    'required': True,
+                    'description': 'Column name of the damage interval must be four and ranged in order',
+                    'type': (list, str)
+                },
+                {
                     'id': 'num_cpu',
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
-                },
-                {
-                    'id': 'damage_interval_keys',
-                    'required': True,
-                    'description': 'Column name of the damage interval must be four and ranged in order',
-                    'type': list
                 }
             ],
             'input_datasets': [
