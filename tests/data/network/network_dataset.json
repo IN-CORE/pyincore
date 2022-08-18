@@ -1,0 +1,21 @@
+{
+  "id": "5f454c6fef0df52132b65b0b",
+  "title": "Test epn network",
+  "dataType": "incore:network",
+  "format": "shp-network",
+  "fileDescriptors": [],
+  "networkDataset": {
+    "link": {
+      "dataType": "incore:epnLinkVer1",
+      "fileName": "epn_links.shp"
+    },
+    "node": {
+      "dataType": "incore:epnNodeVer1",
+      "fileName": "epn_nodes.shp"
+    },
+    "graph": {
+      "dataType": "incore:epnGraph",
+      "fileName": "graph.csv"
+    }
+  }
+}

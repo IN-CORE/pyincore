@@ -6,27 +6,23 @@
 
 from setuptools import setup, find_packages
 
+# version number of pyincore
+version = '1.6.0'
+
+with open("README.rst", encoding="utf-8") as f:
+    readme = f.read()
+
 setup(
     name='pyincore',
-    version='1.4.1',
-    packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
-    include_package_data=True,
-    package_data={
-        '': ['*.ini']
-    },
+    version=version,
     description='IN-CORE analysis tool python package',
-    long_description=("pyIncore is a Python package to analyze and visualize various hazard "
-                      "(earthquake, tornado, hurricane etc.) scenarios developed "
-                      "by the Center for Risk-Based Community Resilience Planning team from NCSA. "
-                      "The development is part of NIST sponsored IN-CORE (Interdependent Networked Community "
-                      "Resilience Modeling Environment) initiative. "
-                      "pyIncore allows users to apply hazards on infrastructure in selected areas. "
-                      "Python framework accesses underlying data through local or remote services "
-                      "and facilitates moving and synthesizing results."),
-    # TODO need to figure out what are the dependency requirements
-    # TODO this is a hack, really should only be packages needed to run
-    install_requires=[line.strip() for line in open("requirements.txt").readlines()],
-    python_requires=">=3.6, <3.9",
+    long_description=readme,
+    long_description_content_type='text/x-rst',
+
+    url='https://incore.ncsa.illinois.edu',
+
+    license="Mozilla Public License v2.0",
+
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
@@ -36,6 +32,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering"
     ],
+
     keywords=[
         "infrastructure",
         "resilience",
@@ -48,6 +45,41 @@ setup(
         "hurricane",
         "dislocation"
     ],
-    license="Mozilla Public License v2.0",
-    url="https://opensource.ncsa.illinois.edu/bitbucket/projects/INCORE1/repos/pyincore/"
+
+    packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    include_package_data=True,
+    package_data={
+        '': ['*.ini']
+    },
+
+    python_requires=">=3.6",
+
+    install_requires=[
+        'fiona>=1.8.4',
+        'geopandas>=0.6.1',
+        'matplotlib>=2.1.0',
+        'networkx>=2.2',
+        'numpy>=1.16.6,<2.0a0',
+        'pandas>=0.24.1',
+        'pyomo>=5.6',
+        'pyproj>=1.9.6',
+        'rasterio>=1.0.18',
+        'rtree>=0.8.3',
+        'scipy>=1.2.0',
+        'shapely>=1.6.4.post1',
+        'wntr>=0.1.6',
+    ],
+
+    extras_require={
+        'test': [
+            'pycodestyle>=2.6.0',
+            'pytest>=3.9.0',
+            'python-jose>=3.0',
+        ]
+    },
+
+    project_urls={
+        'Bug Reports': 'https://github.com/IN-CORE/pyincore/issues',
+        'Source': 'https://github.com/IN-CORE/pyincore',
+    },
 )
