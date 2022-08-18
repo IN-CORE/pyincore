@@ -53,48 +53,54 @@ class NciFunctionality(BaseAnalysis):
             obj: A JSON object of specifications of the NCI functionality analysis.
         """
         return {
-            'name': 'wfn-functionality',
-            'description': 'water facility network functionality analysis',
+            'name': 'network-cascading-interdepedency-functionality',
+            'description': 'Network cascading interdepedency functionality analysis',
             'input_parameters': [
                 {
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
                     'type': str
+                },
+                {
+                    'id': 'target_network_prefix',
+                    'required': True,
+                    'description': 'Prefix of the network for outcomes are obtained',
+                    'type': str
                 }
             ],
             'input_datasets': [
                 {
-                    'id': 'network_a',
+                    'id': 'network_epn',
                     'required': True,
-                    'description': 'Network A to merge via dependencies',
+                    'description': 'EPN network to merge via dependencies',
+                    'type': ['incore:epnNetwork'],
+                },
+                {
+                    'id': 'network_wds',
+                    'required': True,
+                    'description': 'WDS network to merge via dependencies',
                     'type': ['incore:epnNetwork', 'incore:waterNetwork'],
                 },
                 {
-                    'id': 'network_b',
+                    'id': 'interdenpency_table',
                     'required': True,
-                    'description': 'Network B to merge via dependencies',
-                    'type': ['incore:epnNetwork', 'incore:waterNetwork'],
-                },
-                {
-                    'id': 'interdepency_ab_table',
-                    'required': True,
-                    'description': 'Table containing interdependency information between networks A and B',
+                    'description': 'Table containing interdependency information between EPN na WDS networks',
                     'type': 'incore:networkInterdependencyTable'
                 },
                 {
 
-                    'id': 'func_results_a',
+                    'id': 'epn_func_results',
                     'parent_type': '',
-                    'description': 'A csv file recording discretized functionality over time',
-                    'type': ['incore:epfDiscretizedRestorationFunc', 'incore:waterFacilityDiscretizedRestorationFunc']
+                    'description': 'A csv file recording discretized EPN functionality over time',
+                    'type': ['incore:epfDiscretizedRestorationFunc']
                 },
                 {
 
-                    'id': 'func_results_b',
+                    'id': 'wds_func_results',
                     'parent_type': '',
-                    'description': 'A csv file recording discretized functionality over time',
-                    'type': ['incore:epfDiscretizedRestorationFunc', 'incore:waterFacilityDiscretizedRestorationFunc']
+                    'description': 'A csv file recording discretized WDS functionality over time',
+                    'type': ['incore:waterFacilityDiscretizedRestorationFunc']
                 }
             ],
             'output_datasets': [
