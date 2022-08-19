@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ##[Unreleased]
 
 ### Changed
+- Improved validation of list types with nested sub-types in get_spec [#180](https://github.com/IN-CORE/pyincore/issues/180)
 - Format test for the code simplified to include all the paths [#193](https://github.com/IN-CORE/pyincore/issues/193)
 
 ## [1.6.0] - 2022-07-27
