@@ -44,7 +44,7 @@ class NciFunctionality(BaseAnalysis):
     def run(self):
         pass
 
-    def nci_functionality(self):
+    def network_cascading_interdependency_functionality(self):
         pass
 
     def get_spec(self):
