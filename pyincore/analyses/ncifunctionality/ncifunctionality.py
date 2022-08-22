@@ -47,6 +47,21 @@ class NciFunctionality(BaseAnalysis):
     def network_cascading_interdependency_functionality(self):
         pass
 
+    def integrate_epf_wds(self):
+        pass
+
+    def assemble_epf_discretized_func(self):
+        pass
+
+    def assemble_wds_discretized_func(selfs):
+        pass
+
+    def solve_leontief_equation(self):
+        pass
+
+    def get_discretized_days_cols(self, epf_restoration_results):
+        pass
+
     def get_spec(self):
         """Get specifications of the network cascading interdependency functionality analysis.
         Returns:
@@ -60,12 +75,6 @@ class NciFunctionality(BaseAnalysis):
                     'id': 'result_name',
                     'required': True,
                     'description': 'result dataset name',
-                    'type': str
-                },
-                {
-                    'id': 'target_network_prefix',
-                    'required': True,
-                    'description': 'Prefix of the network for outcomes are obtained',
                     'type': str
                 }
             ],
@@ -83,7 +92,7 @@ class NciFunctionality(BaseAnalysis):
                     'type': ['incore:epnNetwork', 'incore:waterNetwork'],
                 },
                 {
-                    'id': 'interdenpency_table',
+                    'id': 'interdependency_table',
                     'required': True,
                     'description': 'Table containing interdependency information between EPN na WDS networks',
                     'type': 'incore:networkInterdependencyTable'
@@ -91,28 +100,42 @@ class NciFunctionality(BaseAnalysis):
                 {
 
                     'id': 'epn_func_results',
-                    'parent_type': '',
+                    'required': True,
                     'description': 'A csv file recording discretized EPN functionality over time',
                     'type': ['incore:epfDiscretizedRestorationFunc']
                 },
                 {
 
+                    'id': 'epn_time_results',
+                    'required': True,
+                    'description': 'A csv file recording repair time for EPF per class and limit state',
+                    'type': ['incore:epfRestorationTime']
+                },
+                {
+
                     'id': 'wds_func_results',
-                    'parent_type': '',
+                    'required': True,
                     'description': 'A csv file recording discretized WDS functionality over time',
                     'type': ['incore:waterFacilityDiscretizedRestorationFunc']
+                },
+                {
+
+                    'id': 'wds_time_results',
+                    'required': True,
+                    'description': 'A csv file recording repair time for WDS per class and limit state',
+                    'type': ['incore:waterFacilityRestorationTime']
                 }
             ],
             'output_datasets': [
                 {
-                    'id': 'failure_probability',
-                    'description': 'CSV file of failure probability',
-                    'type': 'incore:failureProbability'
+                    'id': 'epf_cascading_functionality',
+                    'description': 'CSV file of interdependent cascading network functionality for EPF',
+                    'type': 'incore:epfDiscretizedCascadingFunc'
                 },
                 {
-                    'id': 'sample_failure_state',
-                    'description': 'CSV file of failure state for each sample',
-                    'type': 'incore:sampleFailureState'
-                },
+                    'id': 'wds_cascading_functionality',
+                    'description': 'CSV file of interdependent cascading network functionality for WDS',
+                    'type': 'incore:waterFacilityDiscretizedCascadingFunc'
+                }
             ]
         }
