@@ -68,17 +68,17 @@ class NciFunctionality(BaseAnalysis):
         wds_func_results = self.get_input_dataset('wds_func_results').get_dataframe_from_csv()
         wds_time_results = self.get_input_dataset('wds_time_results').get_dataframe_from_csv()
 
-        (epf_cascading_functionality, wds_cascading_functionality) =  self.nci_functionality(epf_network_nodes,
-                                                                                             epf_network_links,
-                                                                                             epf_graph,
-                                                                                             wds_network_nodes,
-                                                                                             wds_network_links,
-                                                                                             wds_graph,
-                                                                                             interdependency_table,
-                                                                                             epf_func_results,
-                                                                                             epf_time_results,
-                                                                                             wds_func_results,
-                                                                                             wds_time_results)
+        (epf_cascading_functionality, wds_cascading_functionality) = self.nci_functionality(epf_network_nodes,
+                                                                                            epf_network_links,
+                                                                                            epf_graph,
+                                                                                            wds_network_nodes,
+                                                                                            wds_network_links,
+                                                                                            wds_graph,
+                                                                                            interdependency_table,
+                                                                                            epf_func_results,
+                                                                                            epf_time_results,
+                                                                                            wds_func_results,
+                                                                                            wds_time_results)
 
         self.set_result_csv_data("epf_cascading_functionality",
                                  epf_cascading_functionality, name=self.get_parameter("epf_cascading_functionality"),
@@ -113,6 +113,9 @@ class NciFunctionality(BaseAnalysis):
             (pd.DataFrame, pd.DataFrame): results for EPF and WDS networks
         """
         return None, None
+
+    def add_properties(self):
+        pass
 
     def integrate_epf_wds(self):
         pass
