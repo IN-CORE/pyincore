@@ -88,21 +88,21 @@ def run_with_base_class():
     #############################################################################
     # Galveston EPF damage
     # Run epf damage
-    epf_dmg_eq_memphis = EpfDamage(client)
-    epf_dmg_eq_memphis.load_remote_input_dataset("epfs", "62fd437b18e50067942b679a")
+    epf_dmg_hurricane_galveston = EpfDamage(client)
+    epf_dmg_hurricane_galveston.load_remote_input_dataset("epfs", "62fd437b18e50067942b679a")
 
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping("62fac92ecef2881193f22613"))
-    epf_dmg_eq_memphis.set_input_dataset('dfr3_mapping_set', mapping_set)
+    epf_dmg_hurricane_galveston.set_input_dataset('dfr3_mapping_set', mapping_set)
 
-    epf_dmg_eq_memphis.set_parameter("result_name", "galveston_hurricane_epf_damage")
-    epf_dmg_eq_memphis.set_parameter("hazard_type", "hurricane")
-    epf_dmg_eq_memphis.set_parameter("hazard_id", "5fa472033c1f0c73fe81461a")
-    epf_dmg_eq_memphis.set_parameter("fragility_key", "Non-Retrofit Fragility ID Code")
-    epf_dmg_eq_memphis.set_parameter("num_cpu", 8)
+    epf_dmg_hurricane_galveston.set_parameter("result_name", "galveston_hurricane_epf_damage")
+    epf_dmg_hurricane_galveston.set_parameter("hazard_type", "hurricane")
+    epf_dmg_hurricane_galveston.set_parameter("hazard_id", "5fa472033c1f0c73fe81461a")
+    epf_dmg_hurricane_galveston.set_parameter("fragility_key", "Non-Retrofit Fragility ID Code")
+    epf_dmg_hurricane_galveston.set_parameter("num_cpu", 8)
     # Run Analysis
-    epf_dmg_eq_memphis.run_analysis()
+    epf_dmg_hurricane_galveston.run_analysis()
 
 
 if __name__ == '__main__':
