@@ -6,6 +6,7 @@
 
 from pyincore import BaseAnalysis, AnalysisUtil
 from itertools import repeat
+from typing import List
 import concurrent.futures
 import collections
 
@@ -20,6 +21,12 @@ class MeanDamage(BaseAnalysis):
         super(MeanDamage, self).__init__(incore_client)
 
     def get_spec(self):
+        """Get specifications of the mean damage calculation.
+
+        Returns:
+            obj: A JSON object of specifications of the mean damage calculation.
+
+        """
         return {
             'name': 'mean-damage',
             'description': 'calculate the mean and expected damage using damage ratio table',
@@ -34,7 +41,7 @@ class MeanDamage(BaseAnalysis):
                     'id': 'damage_interval_keys',
                     'required': True,
                     'description': 'Column name of the damage interval must be four and ranged in order',
-                    'type': (list, str)
+                    'type': List[str]
                 },
                 {
                     'id': 'num_cpu',
@@ -82,12 +89,6 @@ class MeanDamage(BaseAnalysis):
                 }
             ]
         }
-        """Get specifications of the mean damage calculation.
-
-        Returns:
-            obj: A JSON object of specifications of the mean damage calculation.
-
-        """
 
     def run(self):
         """Executes mean damage calculation."""

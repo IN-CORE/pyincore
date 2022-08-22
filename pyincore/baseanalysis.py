@@ -7,7 +7,7 @@
 # TODO: exception handling for validation and set methods
 from pyincore import DataService, AnalysisUtil
 from pyincore.dataset import Dataset
-
+import typing
 
 class BaseAnalysis:
     """Superclass that defines the specification for an IN-CORE analysis.
@@ -147,12 +147,11 @@ class BaseAnalysis:
         is_valid = True
         err_msg = ''
 
-        if type(parameter_spec['type']) is tuple:
-            # Check that the first part of the type corresponds to a valid container
-            if not (type(parameter) is parameter_spec['type'][0]):
+        if type(parameter_spec['type']) is typing._GenericAlias:
+            if not (type(parameter) is parameter_spec['type'].__origin__):
                 is_valid = False
                 err_msg = 'container parameter type does not match - spec: ' + str(parameter_spec)
-            elif not (all(isinstance(s, parameter_spec['type'][1]) for s in parameter)):
+            elif not (all(isinstance(s, parameter_spec['type'].__args__[0]) for s in parameter)):
                 is_valid = False
                 err_msg = 'element parameter type does not match - spec: ' + str(parameter_spec)
         else:
