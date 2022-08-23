@@ -158,8 +158,10 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         #
         # Only scale if investment budget exceeds $1 million
         # Rescale: strategy cost, budget, economic loss
+
         if budget_available >= self.__scaling_factor:
             strategy_costs[self.__SC_col] = strategy_costs[self.__SC_col]/self.__scaling_factor
+            building_related_data.l = building_related_data.l / self.__scaling_factor
             budget_available = budget_available/self.__scaling_factor
 
         # Setup pyomo
@@ -355,6 +357,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
             results_list = [obj_1_min_epsilon, obj_2_value_1, obj_3_value_1]
         else:
             print("Not Optimal")
+            # TODO: check if this is the culprit and how it should be handled
             results_list = [0, 0, 0]
 
         endtime = time.time()
