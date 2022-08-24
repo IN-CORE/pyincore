@@ -95,6 +95,7 @@ class BaseAnalysis:
 
     def set_parameter(self, id, parameter):
         result = self.validate_parameter(self.parameters[id]['spec'], parameter)
+
         if result[0]:
             self.parameters[id]['value'] = parameter
             return True
@@ -269,6 +270,7 @@ class BaseAnalysis:
         for dataset_spec in self.spec['input_datasets']:
             id = dataset_spec["id"]
             result = self.validate_input_dataset(dataset_spec, self.input_datasets[id]["value"])
+
             if not result[0]:
                 print("Error reading dataset: " + result[1])
                 return result
@@ -276,6 +278,7 @@ class BaseAnalysis:
         for parameter_spec in self.spec['input_parameters']:
             id = parameter_spec["id"]
             result = self.validate_parameter(parameter_spec, self.get_parameter(id))
+
             if not result[0]:
                 print("Error reading parameter: " + result[1])
                 return result

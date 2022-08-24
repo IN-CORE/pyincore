@@ -51,7 +51,7 @@ def run_with_base_class():
     epf_rest.set_input_dataset("dfr3_mapping_set", mapping_set)
     epf_rest.set_input_dataset('damage', epf_dmg_eq_memphis.get_output_dataset("result"))
     epf_rest.set_parameter("result_name", "memphis-epf")
-    epf_rest.set_parameter("discretized_days", [1, 3, 7, 30, 90])
+    epf_rest.set_parameter("discretized_days", ['1', '3', '7', 30, 90])
     epf_rest.set_parameter("restoration_key", "Restoration ID Code")
     epf_rest.set_parameter("end_time", 100.0)
     epf_rest.set_parameter("time_interval", 1.0)
