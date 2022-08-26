@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Format test for the code simplified to include all the paths [#193](https://github.com/IN-CORE/pyincore/issues/193)
-- Refactored caching mechanism to use separate datasets by specifying repository name [#196](https://github.com/IN-CORE/pyincore/issues/196)
+- Refactored caching mechanism to separate datasets by specifying hashed repository names. [#196](https://github.com/IN-CORE/pyincore/issues/196)
 
 ## [1.6.0] - 2022-07-27
 

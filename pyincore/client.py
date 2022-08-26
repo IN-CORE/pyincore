@@ -5,6 +5,8 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import getpass
+import hashlib
+import json
 import os
 import shutil
 import urllib.parse
@@ -132,6 +134,40 @@ class Client:
         return None
 
 
+def add_hash_entry(hashed_url, service_url):
+    """
+    Helper function to add the hashed url to service.json file to keep track of
+    the data coming from various repositories.
+
+    Args:
+        hashed_url (str): String value of the Hashed Service URL
+        service_url (str): Actual Service URL value
+
+    Returns: None
+
+    """
+    service_json = {}
+    entry = {
+                "service-name": "",
+                "service-url": service_url,
+                "hash": hashed_url,
+                "description": ""
+            }
+    if not os.path.exists(pyglobals.PYINCORE_SERVICE_JSON):
+        with open(pyglobals.PYINCORE_SERVICE_JSON, "w") as f:
+            service_json[hashed_url] = entry
+            json.dump(service_json, f, indent=4)
+            return
+
+    with open(pyglobals.PYINCORE_SERVICE_JSON, "r") as f:
+        service_json = json.load(f)
+
+    with open(pyglobals.PYINCORE_SERVICE_JSON, "w") as f:
+        if hashed_url not in service_json:
+            service_json[hashed_url] = entry
+        json.dump(service_json, f, indent=4)
+
+
 class IncoreClient(Client):
     """IN-CORE service client class. It contains token and service root url.
 
@@ -148,9 +184,27 @@ class IncoreClient(Client):
         self.service_url = service_url
         self.token_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_AUTH_PATH)
 
+        # hashlib requires bytes array for hash operations
+        byte_url_string = str.encode(self.service_url)
+        hashed_service_url = hashlib.sha256(byte_url_string).hexdigest()
+
+        # add the hash entry to service.json file if not present.
+        add_hash_entry(hashed_service_url, service_url)
+
+        # construct local directory and filename
+        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
+        if not os.path.exists(cache_data):
+            os.makedirs(cache_data)
+
+        self.hashed_svc_data_dir = os.path.join(cache_data, hashed_service_url)
+
+        if not os.path.exists(self.hashed_svc_data_dir):
+            os.makedirs(self.hashed_svc_data_dir)
+
+        # store the token file in the respective repository's directory
         if token_file_name is None or len(token_file_name.strip()) == 0:
-            token_file_name = pyglobals.TOKEN_FILE_NAME
-        self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
+            token_file_name = "." + self.service_url.split("//")[-1].replace(".","_") + "_token"
+        self.token_file = os.path.join(self.hashed_svc_data_dir, token_file_name)
 
         authorization = self.retrieve_token_from_file()
         if authorization is not None:

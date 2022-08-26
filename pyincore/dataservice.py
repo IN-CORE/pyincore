@@ -90,20 +90,8 @@ class DataService:
         """
         local_filename = None
 
-        # construct local directory and filename
-        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
-        if not os.path.exists(cache_data):
-            os.makedirs(cache_data)
-
-        # remove https:// from the start as it messes up os.path.join operation and creates
-        # multi level directories.
-        repo_name = self.client.service_url.split("//")[-1]
-
-        # add repository url to segregate various sources of datasets
-        cache_data_repo = os.path.join(cache_data, repo_name)
-
         # add another layer of dataset id folder to differentiate datasets with the same filename
-        cache_data_dir = os.path.join(cache_data_repo, dataset_id)
+        cache_data_dir = os.path.join(self.client.hashed_svc_data_dir, dataset_id)
 
         # if cache_data_dir doesn't exist create one
         if not os.path.exists(cache_data_dir):
