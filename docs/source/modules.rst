@@ -58,9 +58,23 @@ analyses/epfdamage
 ..  autoclass:: epfdamage.epfutil.EpfUtil
     :members:
 
+analyses/epnfunctionality
+=========================
+..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionality
+    :members:
+..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionalityUtil
+    :members:
+
 analyses/example
 ================
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
+    :members:
+
+analyses/housingrecovery
+========================
+..  autoclass:: housingrecovery.housingrecovery.HousingRecovery
+    :members:
+..  autoclass:: housingrecovery.housingrecoveryutil.HousingRecoveryUtil
     :members:
 
 analyses/housingrecoverysequential
@@ -135,6 +149,11 @@ analyses/pipelinedamagerepairrate
 ..  autoclass:: pipelinedamagerepairrate.pipelineutil.PipelineUtil
     :members:
 
+analyses/pipelinefunctionality
+=========================
+..  autoclass:: pipelinefunctionality.pipelinefunctionality.PipelineFunctionality
+    :members:
+
 analyses/pipelinerestoration
 ============================
 ..  autoclass:: pipelinerestoration.pipelinerestoration.PipelineRestoration
@@ -172,6 +191,11 @@ analyses/seasidecge
 ..  autoclass:: seasidecge.solverconstants.equationlib.ExprM
     :members:
 
+analyses/socialvulnerability
+============================
+..  autoclass:: socialvulnerability.socialvulnerability.SocialVulnerability
+    :members:
+
 analyses/tornadoepndamage
 =========================
 ..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
@@ -206,6 +230,11 @@ analyses/waterfacilitydamage
 analyses/waterfacilityrestoration
 =================================
 ..  autoclass:: waterfacilityrestoration.waterfacilityrestoration.WaterFacilityRestoration
+    :members:
+
+analyses/wfnfunctionality
+=================================
+..  autoclass:: wfnfunctionality.wfnfunctionality.WfnFunctionality
     :members:
 
 models

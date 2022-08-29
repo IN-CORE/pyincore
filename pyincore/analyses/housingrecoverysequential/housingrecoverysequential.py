@@ -7,7 +7,6 @@ from pyincore import BaseAnalysis
 
 import numpy as np
 import pandas as pd
-import collections as cl
 
 
 class HousingRecoverySequential(BaseAnalysis):
@@ -37,39 +36,48 @@ class HousingRecoverySequential(BaseAnalysis):
     # Social vulnerability value generators per zone
     __sv_generator = {
         'Z1': {
-            'threshold': 0.95,
-            'below_lower': 0.01,
-            'below_upper': 0.15,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'threshold_0': 0.95,
+            'below_lower': 0.00,
+            'below_upper': 0.20,
+            'above_lower': 0.20,
+            'above_upper': 1.00
         },
         'Z2': {
-            'threshold': 0.85,
-            'below_lower': 0.10,
-            'below_upper': 0.50,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'threshold_0': 0.85,
+            'below_lower': 0.20,
+            'below_upper': 0.40,
+            'threshold_1': 0.90,
+            'middle_lower': 0.00,
+            'middle_upper': 0.20,
+            'above_lower': 0.40,
+            'above_upper': 1.00
         },
         'Z3': {
-            'threshold': 0.80,
-            'below_lower': 0.30,
-            'below_upper': 0.70,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'threshold_0': 0.80,
+            'below_lower': 0.40,
+            'below_upper': 0.60,
+            'threshold_1': 0.90,
+            'middle_lower': 0.00,
+            'middle_upper': 0.40,
+            'above_lower': 0.60,
+            'above_upper': 1.00
         },
         'Z4': {
-            'threshold': 0.85,
-            'below_lower': 0.50,
-            'below_upper': 0.90,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'threshold_0': 0.85,
+            'below_lower': 0.60,
+            'below_upper': 0.80,
+            'threshold_1': 0.95,
+            'middle_lower': 0.00,
+            'middle_upper': 0.40,
+            'above_lower': 0.80,
+            'above_upper': 1.00
         },
         'Z5': {
-            'threshold': 0.95,
-            'below_lower': 0.85,
-            'below_upper': 0.99,
-            'above_lower': 0.10,
-            'above_upper': 0.90
+            'threshold_0': 0.95,
+            'below_lower': 0.80,
+            'below_upper': 1.00,
+            'above_lower': 0.00,
+            'above_upper': 0.80
         }
     }
 
@@ -90,7 +98,7 @@ class HousingRecoverySequential(BaseAnalysis):
         households_df = (pd.DataFrame(households_csv))[pop_dis_selectors]
 
         # Perform  conversions across the dataset from object type into the appropriate type
-        households_df['blockid'] = households_df['blockid'].astype(int)
+        households_df['blockid'] = households_df['blockid'].astype('int64')
         households_df['numprec'] = households_df['numprec'].astype(int)
         households_df['race'] = pd.to_numeric(households_df['race'])
         households_df['hispan'] = pd.to_numeric(households_df['hispan'])
@@ -130,9 +138,12 @@ class HousingRecoverySequential(BaseAnalysis):
         """
         seed = self.get_parameter('seed')
         rng = np.random.RandomState(seed)
+        sv_result = self.get_input_dataset("sv_result").get_dataframe_from_csv(low_memory=False)
+        # turn fips code to string for ease of matching
+        sv_result["FIPS"] = sv_result["FIPS"].astype(str)
 
         # Compute the social vulnerability zone using known factors
-        households_df = self.compute_social_vulnerability_zones(households_df)
+        households_df = self.compute_social_vulnerability_zones(sv_result, households_df)
 
         # Set the number of Markov chain stages
         stages = int(t_final / t_delta)
@@ -263,37 +274,41 @@ class HousingRecoverySequential(BaseAnalysis):
         self.set_result_csv_data("ds_result", result, name=result_name, source="dataframe")
 
     @staticmethod
-    def compute_social_vulnerability_zones(households_df):
+    def compute_social_vulnerability_zones(sv_result, households_df):
         """
         Compute the social vulnerability score based on dislocation attributes. Updates the dislocation dataset
         by adding a new `Zone` column and removing values with missing Zone.
 
         Args:
+            sv_result (pd.DataFrame): output from social vulnerability analysis
             households_df (pd.DataFrame): Vector position of a household.
 
         Returns:
             pd.DataFrame: Social vulnerability score.
 
         """
-        zone_map = {0: 'Z5', 1: 'Z4', 2: 'Z3', 3: 'Z2', 4: 'Z1', np.nan: 'missing'}
+        # if FIPS has 11 digits (Tract level)
+        if len(sv_result["FIPS"].iloc[0]) == 11:
+            households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:11]).astype(str)
+        # if FIPS has 12 digits (Block Group level)
+        elif len(sv_result["FIPS"].iloc[0]) == 12:
+            households_df['blockfips'] = households_df['blockid'].apply(lambda x: str(x)[:12]).astype(str)
 
-        # TODO: to be replaced in next release by more comprehensive algorithm
-        quantile = pd.qcut(households_df['randincome'], 5, labels=False)
-        households_df['Zone'] = quantile.map(zone_map)
+        households_df = households_df.merge(sv_result[["FIPS", "zone"]], left_on="blockfips", right_on="FIPS")
+        # e.g.Medium Vulnerable (zone3) extract the number 3 to construct Z3
+        households_df["Zone"] = households_df["zone"].apply(lambda row: "Z"+row[-2])
+
         return households_df[households_df['Zone'] != 'missing']
 
     def compute_social_vulnerability_values(self, households_df, num_households, rng):
         """
         Compute the social vulnerability score of a household depending on its zone
-
         Args:
             households_df (pd.DataFrame): Information about household zones.
             num_households (int): Number of households.
             rng (np.RandomState): Random state to draw pseudo-random numbers from.
-
         Returns:
             pd.Series: social vulnerability scores.
-
         """
         # Social vulnerability zone generator: this generalizes the code in the first version
         sv_scores = np.zeros(num_households)
@@ -303,9 +318,15 @@ class HousingRecoverySequential(BaseAnalysis):
             spin = rng.rand()
             zone = zones[household]
 
-            if spin < self.__sv_generator[zone]['threshold']:
+            if spin < self.__sv_generator[zone]['threshold_0']:
                 sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['below_lower'],
                                                          self.__sv_generator[zone]['below_upper']), 3)
+
+            # for zone 2, 3, 4 there is additional middle range
+            elif 'threshold_1' in self.__sv_generator[zone].keys() \
+                    and spin < self.__sv_generator[zone]['threshold_1']:
+                sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['middle_lower'],
+                                                         self.__sv_generator[zone]['middle_upper']), 3)
             else:
                 sv_scores[household] = round(rng.uniform(self.__sv_generator[zone]['above_lower'],
                                                          self.__sv_generator[zone]['above_upper']), 3)
@@ -394,6 +415,19 @@ class HousingRecoverySequential(BaseAnalysis):
                     'required': True,
                     'description': 'initial mass probability function for stage 0 of the Markov Chain',
                     'type': 'incore:houseRecInitialStageProbability'
+                },
+                {
+                    'id': 'initial_stage_probabilities',
+                    'required': True,
+                    'description': 'initial mass probability function for stage 0 of the Markov Chain',
+                    'type': 'incore:houseRecInitialStageProbability'
+                },
+                {
+                    'id': 'sv_result',
+                    'required': True,
+                    'description': 'A csv file with zones containing demographic factors'
+                                   'qualified by a social vulnerability score',
+                    'type': 'incore:socialVulnerabilityScore'
                 }
             ],
             'output_datasets': [

@@ -159,7 +159,7 @@ class BaseAnalysis:
         if parameter_spec['required']:
             if parameter is None:
                 is_valid = False
-                err_msg = 'required paramter is missing - spec: ' + str(parameter_spec)
+                err_msg = 'required parameter is missing - spec: ' + str(parameter_spec)
             elif not type(parameter) is parameter_spec['type']:
                 is_valid = False
                 err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)

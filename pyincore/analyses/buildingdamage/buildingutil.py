@@ -14,3 +14,4 @@ class BuildingUtil:
     BLDG_STORIES = "no_stories"
     PROPERTIES = "properties"
     BLDG_PERIOD = "period"
+    GROUND_FAILURE_PROB = "groundFailureProb"
