@@ -52,9 +52,11 @@ class ShelbyCGEModel(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'value_tests',
+                    'id': 'is_cd_model',
                     'required': False,
-                    'description': 'Boolean for testing the values',
+                    'description': 'Boolean for running either CD (Cobb Douglas) or CES. If it is true, '
+                                   'it will be CD other wise CES will be selected. '
+                                   'The default is True so it will run CD as a default.',
                     'type': bool
                 }
             ],
@@ -118,8 +120,11 @@ class ShelbyCGEModel(BaseAnalysis):
         }
 
     def run(self):
-        test_values=False
+        # decide if the model is CD or CES
         is_cd=True
+        if self.get_parameter("is_cd_model") is not None:
+            is_cd = self.get_parameter("is_cd_model")
+
         def _(x):
             return ExprM(vars, m=x)
 
@@ -1418,8 +1423,7 @@ class ShelbyCGEModel(BaseAnalysis):
                      (Y.loc(K) + KPFOR.loc(K)) * ExprM(vars, m=1 - TAUFK.loc[G, K].sum(0))).sum(K)
 
             YEQ = ((line1 + line2 + line4) - Y.loc(H))
-            if test_values:
-                YEQ.test(vars.initialVals)
+            logger.debug(YEQ.test(vars.initialVals))
             YEQ.write(count, filename)
 
 
@@ -1713,8 +1717,7 @@ class ShelbyCGEModel(BaseAnalysis):
 
             YGEQ2 = (line - Y.loc(GT))
             YGEQ2.write(count, filename)
-            if test_values:
-                YGEQ2.test(vars.initialVals)
+            logger.debug(YGEQ2.test(vars.initialVals))
 
             logger.debug('YGEQM(GNLM)')
             line = ExprM(vars, m=TAXS1.loc[GNLM]) * Y.loc(['CYGFM'])
