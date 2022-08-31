@@ -9,6 +9,7 @@ from pyincore import DataService, AnalysisUtil
 from pyincore.dataset import Dataset
 import typing
 
+
 class BaseAnalysis:
     """Superclass that defines the specification for an IN-CORE analysis.
     Implementations of BaseAnalysis should implement get_spec and return their own
@@ -88,16 +89,16 @@ class BaseAnalysis:
             param[key] = self.parameters[key]['value']
         return param
 
-    def get_parameter(self, id):
+    def get_parameter(self, par_id):
         """Get or set the analysis parameter value. Setting a parameter to a new value
         will return True or False on error."""
-        return self.parameters[id]['value']
+        return self.parameters[par_id]['value']
 
-    def set_parameter(self, id, parameter):
-        result = self.validate_parameter(self.parameters[id]['spec'], parameter)
+    def set_parameter(self, par_id, parameter):
+        result = self.validate_parameter(self.parameters[par_id]['spec'], parameter)
 
         if result[0]:
-            self.parameters[id]['value'] = parameter
+            self.parameters[par_id]['value'] = parameter
             return True
         else:
             print("Error setting parameter: " + result[1])
@@ -110,15 +111,15 @@ class BaseAnalysis:
             inputs[key] = self.input_datasets[key]['value']
         return inputs
 
-    def get_input_dataset(self, id):
+    def get_input_dataset(self, ds_id):
         """Get or set the analysis dataset. Setting the dataset to a new value
         will return True or False on error."""
-        return self.input_datasets[id]['value']
+        return self.input_datasets[ds_id]['value']
 
-    def set_input_dataset(self, id, dataset):
-        result = self.validate_input_dataset(self.input_datasets[id]['spec'], dataset)
+    def set_input_dataset(self, ds_id, dataset):
+        result = self.validate_input_dataset(self.input_datasets[ds_id]['spec'], dataset)
         if result[0]:
-            self.input_datasets[id]['value'] = dataset
+            self.input_datasets[ds_id]['value'] = dataset
             return True
         else:
             print(result[1])
@@ -131,20 +132,21 @@ class BaseAnalysis:
             outputs[key] = self.output_datasets[key]['value']
         return outputs
 
-    def get_output_dataset(self, id):
+    def get_output_dataset(self, ds_id):
         """Get or set the output dataset. Setting the output dataset to a new value
         will return True or False on error."""
-        return self.output_datasets[id]['value']
+        return self.output_datasets[ds_id]['value']
 
-    def set_output_dataset(self, id, dataset):
-        if self.validate_output_dataset(self.output_datasets[id]['spec'], dataset)[0]:
-            self.output_datasets[id]['value'] = dataset
+    def set_output_dataset(self, ds_id, dataset):
+        if self.validate_output_dataset(self.output_datasets[ds_id]['spec'], dataset)[0]:
+            self.output_datasets[ds_id]['value'] = dataset
             return True
         else:
             # TODO handle error message
             return False
 
-    def validate_parameter_nested(self, parameter, parameter_spec):
+    @staticmethod
+    def validate_parameter_nested(parameter, parameter_spec):
         is_valid = True
         err_msg = ''
 
@@ -183,12 +185,13 @@ class BaseAnalysis:
             else:
                 is_valid, err_msg = self.validate_parameter_nested(parameter, parameter_spec)
         else:
-            if not parameter is None:
+            if parameter is not None:
                 is_valid, err_msg = self.validate_parameter_nested(parameter, parameter_spec)
 
         return is_valid, err_msg
 
-    def validate_input_dataset(self, dataset_spec, dataset):
+    @staticmethod
+    def validate_input_dataset(dataset_spec, dataset):
         """Match input dataset by type.
 
         Args:
@@ -217,7 +220,8 @@ class BaseAnalysis:
                 err_msg = 'required dataset is missing - spec: ' + str(dataset_spec)
         return is_valid, err_msg
 
-    def validate_output_dataset(self, dataset_spec, dataset):
+    @staticmethod
+    def validate_output_dataset(dataset_spec, dataset):
         """Match output dataset by type.
 
         Args:
@@ -245,6 +249,8 @@ class BaseAnalysis:
             name = name + ".csv"
 
         dataset_type = self.output_datasets[result_id]["spec"]["type"]
+        dataset = None
+
         if source == 'file':
             dataset = Dataset.from_csv_data(result_data, name, dataset_type)
         elif source == 'dataframe':
@@ -268,16 +274,16 @@ class BaseAnalysis:
     def run_analysis(self):
         """ Validates and runs the analysis."""
         for dataset_spec in self.spec['input_datasets']:
-            id = dataset_spec["id"]
-            result = self.validate_input_dataset(dataset_spec, self.input_datasets[id]["value"])
+            ds_id = dataset_spec["id"]
+            result = self.validate_input_dataset(dataset_spec, self.input_datasets[ds_id]["value"])
 
             if not result[0]:
                 print("Error reading dataset: " + result[1])
                 return result
 
         for parameter_spec in self.spec['input_parameters']:
-            id = parameter_spec["id"]
-            result = self.validate_parameter(parameter_spec, self.get_parameter(id))
+            par_id = parameter_spec["id"]
+            result = self.validate_parameter(parameter_spec, self.get_parameter(par_id))
 
             if not result[0]:
                 print("Error reading parameter: " + result[1])
