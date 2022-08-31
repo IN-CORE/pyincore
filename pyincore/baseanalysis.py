@@ -71,7 +71,7 @@ class BaseAnalysis:
         """
         dataset = Dataset.from_data_service(remote_id, self.data_service)
 
-        # TODO: Need to handle failing to set input dataset
+        # TODO: Need to handle failing to set input dataset.
         self.set_input_dataset(analysis_param_id, dataset)
 
     def get_name(self):
