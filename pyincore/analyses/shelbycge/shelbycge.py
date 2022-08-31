@@ -5,14 +5,13 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import os
-import pandas as pd
+import tempfile
 
 from pyincore import BaseAnalysis
 from pyincore import globals as pyglobals
-from equationlib import *
+from pyincore.analyses.shelbycge.equationlib import *
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
-
 
 logger = pyglobals.LOGGER
 
@@ -51,6 +50,12 @@ class ShelbyCGEModel(BaseAnalysis):
                     'description': 'Path to ipopt package. If none is provided, it will default to your environment\'ts'
                                    'path to the package.',
                     'type': str
+                },
+                {
+                    'id': 'value_tests',
+                    'required': False,
+                    'description': 'Boolean for testing the values',
+                    'type': bool
                 }
             ],
             'input_datasets': [
@@ -60,7 +65,7 @@ class ShelbyCGEModel(BaseAnalysis):
                     'description': 'Social accounting matrix (SAM) contains data for firms, '
                                    'households and government which are organized in a way to '
                                    'represent the interactions of all three entities in a typical economy.',
-                    'type': ['incore:SeasideCGEsam']
+                    'type': ['incore:ShelbyCGEsam']
                 },
                 {
                     'id': 'BB',
@@ -68,57 +73,53 @@ class ShelbyCGEModel(BaseAnalysis):
                     'description': 'BB is a matrix which describes how investment in physical infrastructure is'
                                    ' transformed into functioning capital such as commercial and residential buildings.'
                                    ' These data are collected from the Bureau of Economic Analysis (BEA).',
-                    'type': ['incore:SeasideCGEbb']
+                    'type': ['incore:ShelbyCGEbb']
                 },
                 {
                     'id': 'HHTABLE',
                     'required': True,
                     'description': 'HH Table.',
-                    'type': ['incore:SeasideCGEhhtable']
+                    'type': ['incore:ShelbyCGEhhtable']
                 },
                 {
                     'id': 'EMPLOY',
                     'required': True,
                     'description': 'EMPLOY is a table name containing data for commercial sector employment.',
-                    'type': ['incore:SeasideCGEemploy']
+                    'type': ['incore:ShelbyCGEemploy']
                 },
                 {
                     'id': 'JOBCR',
                     'required': True,
                     'description': 'JOBCR is a matrix describing the supply of workers'
                                    ' coming from each household group in the economy.',
-                    'type': ['incore:SeasideCGEjobcr']
+                    'type': ['incore:ShelbyCGEjobcr']
                 },
                 {
                     'id': 'SIMS',
                     'required': True,
                     'description': 'Random numbers for the change of capital stocks in the CGE model.',
-                    'type': ['incore:SeasideCGEsim']
-                },
-                {
-                    'id': 'sector_shocks',
-                    'required': True,
-                    'description': 'Aggregation of building functionality states to capital shocks per sector',
-                    'type': ['incore:capitalShocks']
+                    'type': ['incore:ShelbyCGEsim']
                 }
             ],
             'output_datasets': [
                 {
-                    'id': 'Seaside_Sims',
+                    'id': 'Shelby_sims',
                     'parent_type': '',
                     'description': 'CSV file of Seaside cge simulations',
-                    'type': 'incore:SeasideCGEsims'
+                    'type': 'incore:ShelbyCGEsims'
                 },
                 {
-                    'id': 'Seaside_output',
+                    'id': 'Shelby_output',
                     'parent_type': '',
                     'description': 'CSV file of output of Seaside cge, containing changes in employment and supply.',
-                    'type': 'incore:SeasideCGEEmployDS'
+                    'type': 'incore:ShelbyCGEEmployDS'
                 }
             ]
         }
 
-    def run(is_cd=True, test_values=False):
+    def run(self):
+        test_values=False
+        is_cd=True
         def _(x):
             return ExprM(vars, m=x)
 
@@ -325,9 +326,6 @@ class ShelbyCGEModel(BaseAnalysis):
 
         L3 = ['L3A', 'L3B', 'L3C', 'L3D', 'L3E', 'L3F', 'L3G', 'L3H']
 
-        # LAND
-        # LA(F) = ['LAND']
-
         # CAPITAL
         K = ['KAP']
 
@@ -494,7 +492,6 @@ class ShelbyCGEModel(BaseAnalysis):
         # ----------------------------------------------------------------
         # SET ALIASES
         # ----------------------------------------------------------------
-
         # ALIAS
         J = I
         I1 = I
@@ -521,16 +518,12 @@ class ShelbyCGEModel(BaseAnalysis):
         # ----------------------------------------------------------------
 
         # SAM
-        SAM = pd.read_csv(os.path.join(filePath, 'SAM Shelby(1202).csv'), index_col=0)
+        SAM = pd.read_csv(self.get_input_dataset("SAM").get_file_path('csv'), index_col=0)
 
         # CAPITAL COMP
-        BB = pd.read_csv(os.path.join(filePath, 'capcomshelby.csv'), index_col=0)
+        BB = pd.read_csv(self.get_input_dataset("BB").get_file_path('csv'), index_col=0)
 
         # MISC TABLES
-        '''
-        
-        '''
-
         TPC = pd.DataFrame(index=H, columns=G).fillna(0.0)
         IGTD = pd.DataFrame(index=G, columns=G1).fillna(0.0)
         TAUFF = pd.DataFrame(index=G, columns=F).fillna(0.0)
@@ -539,17 +532,13 @@ class ShelbyCGEModel(BaseAnalysis):
         MISC = pd.DataFrame(index=Z, columns=ETAMISC).fillna(0.0)
         MISCH = pd.DataFrame(index=H, columns=ETAMISCH).fillna(0.0)
 
-        # EMPLOY0 = pd.read_csv(os.path.join(miscPath, 'EMPLOY0(Z,F).csv'), index_col=0)
-        EMPLOY = pd.read_csv(os.path.join(miscPath, 'EMPLOY(Z,F).csv'), index_col=0)
-        JOBCR = pd.read_csv(os.path.join(miscPath, 'JOBCR(H,L).csv'), index_col=0)
-        # JOBCR1 = pd.read_csv(os.path.join(miscPath, 'JOBCR1(H,L).csv'), index_col=0)
-        HHTABLE = pd.read_csv(os.path.join(miscPath, 'HHTABLE(H,).csv'), index_col=0)
-        # OUTCR = pd.read_csv(os.path.join(miscPath, 'OUTCR(H,CM).csv'), index_col=0)
+        EMPLOY = pd.read_csv(self.get_input_dataset("EMPLOY").get_file_path('csv'), index_col=0)
+        JOBCR = pd.read_csv(self.get_input_dataset("JOBCR").get_file_path('csv'), index_col=0)
+        HHTABLE = pd.read_csv(self.get_input_dataset("HHTABLE").get_file_path('csv'), index_col=0)
 
         # ----------------------------------------------------------------
         # PARAMETER DECLARATION
         # ----------------------------------------------------------------
-
         # these are data frames with zeros to be filled during calibration
         A = pd.DataFrame(index=Z, columns=Z).fillna(0.0)
         AD = pd.DataFrame(index=Z, columns=Z).fillna(0.0)
@@ -592,7 +581,6 @@ class ShelbyCGEModel(BaseAnalysis):
         TAXS2 = pd.Series(index=GNLO, dtype=float).fillna(0.0)
 
         # ELASTICITIES AND TAX DATA IMPOSED
-
         BETA = pd.DataFrame(index=I, columns=H).fillna(0.0)
         BETAH = pd.DataFrame(index=HSD, columns=H).fillna(0.0)
         ETAD = pd.Series(index=I, dtype=float).fillna(0.0)
@@ -619,23 +607,18 @@ class ShelbyCGEModel(BaseAnalysis):
         ECOMO = pd.Series(index=CM, dtype=float).fillna(0.0)
         HOUSECOR = pd.DataFrame(index=H, columns=HSD).fillna(0.0)
         JOBCOR = pd.DataFrame(index=H, columns=L).fillna(0.0)
-
         LAMBDA = pd.DataFrame(index=I, columns=I).fillna(0.0)
         LAMBDAH = pd.DataFrame(index=HSD, columns=HSD1).fillna(0.0)
-
         NRPG = pd.Series(index=H, dtype=float).fillna(0.0)
         RHO = pd.Series(index=I, dtype=float).fillna(0.0)
         TT = pd.DataFrame(index=Z, columns=IG).fillna(0.0)
-
         depr = pd.Series(index=IG, dtype=float).fillna(0.1)
 
         # ARRAYS BUILT TO EXPORT RESULTS TO SEPARATE FILE
-
         R1 = pd.DataFrame(index=R1H, columns=SM).fillna(0.0)
         R2 = pd.DataFrame(index=R2H, columns=SM).fillna(0.0)
 
         # INITIAL VALUES OF ENDOGENOUS VARIABLES
-
         CG0 = pd.DataFrame(index=I, columns=G).fillna(0.0)
         CG0T = pd.DataFrame(index=I, columns=G).fillna(0.0)
         CH0 = pd.DataFrame(index=I, columns=H).fillna(0.0)
@@ -652,7 +635,6 @@ class ShelbyCGEModel(BaseAnalysis):
         DD0 = pd.Series(index=Z, dtype=float).fillna(0.0)
         DS0 = pd.Series(index=Z, dtype=float).fillna(0.0)
         DQ0 = pd.Series(index=Z, dtype=float).fillna(0.0)
-
         FD0 = pd.DataFrame(index=F, columns=Z).fillna(0.0)
         IGT0 = pd.DataFrame(index=G, columns=GX).fillna(0.0)
         KS0 = pd.DataFrame(index=K, columns=IG).fillna(0.0)
@@ -669,7 +651,6 @@ class ShelbyCGEModel(BaseAnalysis):
         N0 = pd.DataFrame(index=K, columns=IG).fillna(0.0)
 
         # NKIO
-
         KPFOR01 = pd.Series(index=K, dtype=float).fillna(0.0)
         KPFOR0 = pd.Series(index=K, dtype=float).fillna(0.0)
         # LNFOR0 = pd.Series(index=LA, dtype=float).fillna(0.0)
@@ -688,14 +669,12 @@ class ShelbyCGEModel(BaseAnalysis):
         S0 = pd.Series(index=Z, dtype=float).fillna(0.0)
 
         # SPIO
-
         V0 = pd.Series(index=I, dtype=float).fillna(0.0)
         V0T = pd.Series(index=I, dtype=float).fillna(0.0)
         V10 = pd.DataFrame(index=I, columns=I).fillna(0.0)
         TP = pd.DataFrame(index=H, columns=G).fillna(0.0)
 
         # TAUF0 = Table(G,F,Z)
-
         YD0 = pd.Series(index=H, dtype=float).fillna(0.0)
         Y0 = pd.Series(index=Z, dtype=float).fillna(0.0)
         Y01 = pd.Series(index=H, dtype=float).fillna(0.0)
@@ -703,7 +682,6 @@ class ShelbyCGEModel(BaseAnalysis):
         GCP10 = pd.Series(index=I, dtype=float).fillna(0.0)
 
         # GCP0
-
         DDCX = pd.Series(index=I, dtype=float).fillna(0.0)
 
         TESTA1 = None
@@ -714,10 +692,9 @@ class ShelbyCGEModel(BaseAnalysis):
             TESTA2 = pd.DataFrame(index=F, columns=I).fillna(0.0)
             TESTA3 = pd.DataFrame(index=F, columns=I).fillna(0.0)
 
-            # ===============================================================================
+        # ===============================================================================
         # SIMPLIFYING TABLES AND DOING AWAY WITH MISC FILES
         # ===============================================================================
-
         for label in G1:
             out.loc[label, label] = 0
         out.loc['MEMPHIS', 'CYGFM'] = 1
@@ -774,34 +751,7 @@ class ShelbyCGEModel(BaseAnalysis):
             IOUT.loc[label, label] = 0
         IOUT.loc['MEMPHIS', 'CYGFM'] = 1
         IOUT.loc['OTHER', 'CYGFO'] = 1
-
         LANDCAP.loc[IG, ETALANDCAP] = 1
-        '''
-        LANDCAP.loc['CONST1', 'ETAL1']       = 0.5
-        LANDCAP.loc['RETAIL1', 'ETAL1']      = 2
-        LANDCAP.loc['SERV1', 'ETAL1']        = 1.4
-        LANDCAP.loc['HC1', 'ETAL1']          = 1.4
-        LANDCAP.loc['ACCOM1', 'ETAL1']       = 0.5
-        LANDCAP.loc['REST1', 'ETAL1']       = 0.5
-        LANDCAP.loc['AG2', 'ETAL1']          = 0.5
-        LANDCAP.loc['CONST2', 'ETAL1']       = 0.5
-        LANDCAP.loc['MANUF2', 'ETAL1']       = 0.5
-        LANDCAP.loc['RETAIL2', 'ETAL1']      = 2
-        LANDCAP.loc['SERV2', 'ETAL1']        = 0.5
-        LANDCAP.loc['HC2', 'ETAL1']          = 0.5
-        LANDCAP.loc['ACCOM2', 'ETAL1']       = 0.5
-        LANDCAP.loc['REST2', 'ETAL1']        = 0.5
-        LANDCAP.loc['AG3', 'ETAL1']          = 0.5
-        LANDCAP.loc['UTIL', 'ETAL1']         = 1.4
-        LANDCAP.loc['CONST3', 'ETAL1']       = 1.4
-        LANDCAP.loc['RETAIL3', 'ETAL1']      = 2
-        LANDCAP.loc['SERV3', 'ETAL1']        = 1.4
-        LANDCAP.loc['HC3', 'ETAL1']          = 2
-        LANDCAP.loc['HS1', 'ETAL1']          = 2
-        LANDCAP.loc['HS2', 'ETAL1']          = 2
-        LANDCAP.loc['HS3', 'ETAL1']          = 2
-        '''
-
         MISCH.loc[H, ETAMISCH] = 0
         MISCH.loc[HH1, 'ETAPT'] = -0.5
         MISCH.loc[HH2, 'ETAPIT'] = -0.15
@@ -810,46 +760,20 @@ class ShelbyCGEModel(BaseAnalysis):
         MISCH.loc[HH5, 'ETAPIT'] = -0.35
 
         MISCH.loc[H, 'NRPG'] = 1
-        # MISCH.loc[H, 'ETARA']                = 1
-        '''
-        # DRAM
-        MISCH.loc[HH2, 'ETARA']                = 0.2
-        MISCH.loc[HH3, 'ETARA']                = 0.3
-        MISCH.loc[HH4, 'ETARA']                = 0.5
-        MISCH.loc[HH5, 'ETARA']                = 0.8
-        
-        MISCH.loc[HH1, 'ETAYD']              = 1.3
-        MISCH.loc[HH2, 'ETAYD']              = 1.6
-        MISCH.loc[HH3, 'ETAYD']              = 1.8
-        MISCH.loc[HH4, 'ETAYD']              = 2.0
-        MISCH.loc[HH5, 'ETAYD']              = 2.1
-        
-        MISCH.loc[HH1, 'ETAU']               = -0.8
-        MISCH.loc[HH2, 'ETAU']               = -0.6
-        MISCH.loc[HH3, 'ETAU']               = -0.5
-        MISCH.loc[HH4, 'ETAU']               = -0.4
-        MISCH.loc[HH5, 'ETAU']               = -0.3
-        '''
-        MISC.loc[IG, ETAMISC] = 0
+        MISC.loc[IG, 'ETAMISC'] = 0
         MISC.loc[IP, 'ETAM'] = 1
-        # MISC.loc[IP, 'ETAE']                 = -3.65
         MISC.loc[I, 'ETAY'] = 1
         MISC.loc[I, 'ETAOP'] = -1
 
         # ===============================================================================
         # PARAMETERS AND ELASTICITIES
         # ===============================================================================
-
         out.loc[G1, G1] = IOUT.loc[G1, G1];
         BETA.loc[I, H] = MISC.loc[I, 'ETAY'];
         BETAH.loc[HSD, H] = MISC.loc[HSD, 'ETAY'];
 
         for label in I:
             LAMBDA.loc[label, label] = MISC.loc[label, 'ETAOP'];
-        '''
-        for label in HD:
-            LAMBDAH.loc[label,label] = MISC.loc[label,'ETAOP'];
-        '''
         ETAE.loc[I] = MISC.loc[I, 'ETAE'];
         ETAM.loc[I] = MISC.loc[I, 'ETAM'];
         ETARA.loc[H] = MISCH.loc[H, 'ETARA'];
@@ -862,56 +786,32 @@ class ShelbyCGEModel(BaseAnalysis):
         ETAI.loc[IG] = LANDCAP.loc[IG, 'ETAI1'];
         ETAIX.loc['KAP', IG] = ETAI.loc[IG];
 
-        '''
-        ETAIX.loc['KAP',IG]  = LANDCAP.loc[IG,'ETAI1'];
-        ETAL.loc['LAND',IG]  = LANDCAP.loc[IG,'ETAL1'];
-        ETALB.loc[L,IG]      = LANDCAP.loc[IG,'ETALB1'];
-        '''
-
         # ========================================================================================================
         # ====================play with elasticities==============================================================
         # ========================================================================================================
 
         # EXPERIMENTAL ELASTICITIES
-        ECOMI.loc[L] = 1;
-        ECOMO.loc[CM] = 1;
-        EXWGEO.loc[CM] = 1;
-        EXWGEI.loc[L] = 1;
-        ETAE.loc[IP] = -0.4;
-        ETAIX.loc['KAP', IG] = 0.1;
-        ETARA.loc[H] = 1.5;
-        ETAYDO.loc[H] = 1.0;
-        ETAYDI.loc[H] = 1.5;
-        ETAUI.loc[H] = -0.72;
-        ETAUO.loc[HH1] = -0.8;
-        ETAUO.loc[HH2] = -0.6;
-        ETAUO.loc[HH3] = -0.4;
-        ETAUO.loc[HH4] = -0.2;
-        ETAUO.loc[HH5] = -0.2;
-        ETAU.loc[H] = -0.1;
-        ETAYD.loc[H] = 1;
-        '''
-        #ETARA[H]          = 2.0;
-        #ETAIX['KAP',IG]  = 0.1*ETAIX['KAP',IG];
-        ETAIX.loc['KAP',IG]  = 0.1;
-        ETAE.loc[IP]          = -1.5;
-        
-        # DRAM ELASTICITIES
-        #ETAUO[H]         = MISCH[H, 'ETAU'];
-        #ETAUI[H]         = MISCH[H, 'ETAU'];
-        #ETAE[IP]         = -1.65;
-        #ETAYDO[H]         = ETAYD[H];
-        #ETAYDI[H]         = ETAYD[H];
-        #ETAUI[H]          = ETAU[H];
-        #ETAUO[H]          = ETAU[H];
-        
-        SIGMA.loc[I]         = 0.67;
-        '''
+        ECOMI.loc[L] = 1
+        ECOMO.loc[CM] = 1
+        EXWGEO.loc[CM] = 1
+        EXWGEI.loc[L] = 1
+        ETAE.loc[IP] = -0.4
+        ETAIX.loc['KAP', IG] = 0.1
+        ETARA.loc[H] = 1.5
+        ETAYDO.loc[H] = 1.0
+        ETAYDI.loc[H] = 1.5
+        ETAUI.loc[H] = -0.72
+        ETAUO.loc[HH1] = -0.8
+        ETAUO.loc[HH2] = -0.6
+        ETAUO.loc[HH3] = -0.4
+        ETAUO.loc[HH4] = -0.2
+        ETAUO.loc[HH5] = -0.2
+        ETAU.loc[H] = -0.1
+        ETAYD.loc[H] = 1
 
         # ===============================================================================
         # CALIBRATION
         # ===============================================================================
-
         # Column Totals of SAM table
         Q10.loc[Z] = SAM.loc[Z, Z].sum(1)
 
@@ -977,18 +877,14 @@ class ShelbyCGEModel(BaseAnalysis):
             TAUFXgx[GX[i]] = pd.DataFrame(TAUFarray[i], index=F, columns=Z).fillna(0.0)
 
         # SS TAX RATES
-        # TAUFH(GF,F)$(TAUFF(GF,F)) =SAM(GF,F) / SUM(Z, SAM(Z,F));
         for i in GF:
             for j in F:
                 if TAUFF.loc[i, j] != 0:
-                    #            TAUFH.set_value(i, j, SAM.loc[i, j] / SAM.loc[Z, F].sum(0).loc[j])
                     TAUFH.at[i, j] = SAM.at[i, j] / SAM.loc[Z, F].sum(0).at[j]
 
-        # TAUFH(GFUS,L)  =SAM(GFUS,L) / SUM(IG, SAM(L,IG));
         for i in GFUS:
             for j in L:
                 if TAUFF.loc[i, j] != 0:
-                    #            TAUFH.set_value(i, j, SAM.loc[i, j] / SAM.loc[L, IG].sum(1).loc[j])
                     TAUFH.at[i, j] = SAM.at[i, j] / SAM.loc[L, IG].sum(1).at[j]
 
         # EMPLOYEE PORTION OF FACTOR TAXES
@@ -1045,9 +941,6 @@ class ShelbyCGEModel(BaseAnalysis):
         # SHARES FOUND IN THE SOCIAL ACCOUNTING MATRIX DATA
         # A = INPUT OUTPUT COEFICIENTS
         A.loc[Z, Z] = SAM.loc[Z, Z].div(Q0.loc[Z], axis='columns')
-
-        # SS PAYMENTS FROM IN-COMMUTERS
-        # A(GFUSC, LCOM)   = TAUFL(GFUSC, LCOM);
 
         # AGFS: LABOR PAYMENTS BY G SECTOR + USSOC PAYMENTS BY LABOR (GROSS LABOR PAYMENTS)
         AGFS.loc['L1A', G] = SAM.loc['L1A', G] + SAM.loc['USSOCL1A', G]
@@ -1155,8 +1048,6 @@ class ShelbyCGEModel(BaseAnalysis):
         RA0.loc[F] = 1.0
 
         # CALIBRATION OF PRODUCTION EXPONENTS FOR COBB DOUGLAS
-        # a = pd.Series(index=I, dtype=float).fillna(0.0)
-        # a = SAM.loc[GFUS, I].append(a, ignore_index=True).append(SAM.loc[GL, I]) # labor, capital
         a = SAM.loc['MEMPROPTAX', I] + SAM.loc['OTHERPROPTAX', I]
         a_new_row = pd.DataFrame([a])
         a = pd.concat([SAM.loc[GFUS, I], a_new_row])
@@ -1180,10 +1071,8 @@ class ShelbyCGEModel(BaseAnalysis):
             SIGMA.loc[I] = 0.67
             RHO.loc[I] = (SIGMA.loc[I] - 1) / SIGMA.loc[I]
             TESTA1.loc[F, I] = 0.0
-            # TESTA1(F,I)      = R0(F,I) * RA0(F)*(1 + SUM(GF,TAUFX(GF,F,I)))*((FD0(F,I))**(1-RHO(I)));
             TESTA1.loc[F, I] = R0.loc[F, I].mul(RA0.loc[F], axis='index') * (1 + TAUFX_SUM.loc[F, I]) * (
                     FD0.loc[F, I] ** (1 - RHO.loc[I]))
-            # TESTA2(F,I)      = SUM(F1, R0(F1,I) * RA0(F1) * (1 + SUM(GF,TAUFX(GF,F1,I)))*((FD0(F1,I))**(1-RHO(I))));
             TESTA2_pre = (R0.loc[F, I].mul(RA0.loc[F], axis='index') * (1 + TAUFX_SUM.loc[F, I]) * (
                     FD0.loc[F, I] ** (1 - RHO.loc[I]))).sum(0)
             TESTA2.loc[F, I] = 1
@@ -1214,14 +1103,6 @@ class ShelbyCGEModel(BaseAnalysis):
 
         # NOMINAL GOVERNMENT OUTFLOWS
         GVFOR0.loc[G] = SAM.loc[G, ["ROW"]].sum(1)
-        '''
-        GVFOR0.loc[GT] = SAM.loc[Z, GT].sum(0) - (
-                SAM.loc[GT, I].sum(1)
-                + SAM.loc[GT, F].sum(1)
-                + SAM.loc[GT, H].sum(1)
-                + SAM.loc[GT, G].sum(1)
-                )
-        '''
 
         # ORIGINAL EQUATION
         A.loc[H, L] = SAM.loc[H, L].div(HW0.loc[H], axis='index') / (
@@ -1299,7 +1180,6 @@ class ShelbyCGEModel(BaseAnalysis):
         ###########################################
         # VARIABLE DECLARATION
         ###########################################
-
         vars = VarContainer()
 
         # PUBLIC CONSUMPTION
@@ -1416,13 +1296,9 @@ class ShelbyCGEModel(BaseAnalysis):
         # AFTER TAX TOTAL HOUSEHOLD INCOMES
         YD = vars.add('YD', rows=H)
 
-        # GOV INCOME
-        # YT = vars.add('YT', rows=G, cols=G)
-
         ###########################################
         # INITIALIZE VARIABLES FOR SOLVER
         ###########################################
-
         vars.init('CG', CG0.loc[I, G])
         vars.init('CH', CH0.loc[I, H])
         vars.init('CMI', CMI0.loc[L])
@@ -1443,11 +1319,9 @@ class ShelbyCGEModel(BaseAnalysis):
         vars.init('HW', HW0.loc[H])
         vars.init('IGT', IGT0.loc[G, GX])
         vars.init('KS', KS0.loc[K, IG])
-        # vars.init('LAS', LAS0.loc[LA, IG])
         vars.init('M', M0.loc[I])
         vars.init('N', N0.loc[K, IG])
         vars.init('NKI', NKI0)
-        # vars.init('LNFOR', LNFOR0.loc[LA])
         vars.init('KPFOR', KPFOR0.loc[K])
         vars.init('GVFOR', GVFOR0.loc[G])
         vars.init('P', P0.loc[I])
@@ -1460,67 +1334,59 @@ class ShelbyCGEModel(BaseAnalysis):
         vars.init('V', V0.loc[I])
         vars.init('V1', V10.loc[I, I])
         vars.init('Y', Y0.loc[Z])
-        # vars.init('Y1')
-        # vars.init('Y2')
-        # vars.init('Y3')
         vars.init('YD', YD0.loc[H])
-        # vars.init('YT')
-
 
         # -------------------------------------------------------------------------------------------------------------
         # DEFINE BOUNDS FOR VARIABLES
         # -------------------------------------------------------------------------------------------------------------
-
-        vars.lo('P', vars.get('P') / 1000);
+        vars.lo('P', vars.get('P') / 1000)
         vars.up('P', vars.get('P') * 1000)
-        vars.lo('PD', vars.get('PD') / 1000);
+        vars.lo('PD', vars.get('PD') / 1000)
         vars.up('PD', vars.get('PD') * 1000)
-        vars.lo('PVA', vars.get('PVA') / 1000);
+        vars.lo('PVA', vars.get('PVA') / 1000)
         vars.up('PVA', vars.get('PVA') * 1000)
-        vars.lo('RA', vars.get('RA') / 1000);
+        vars.lo('RA', vars.get('RA') / 1000)
         vars.up('RA', vars.get('RA') * 1000)
-        vars.lo('CPI', vars.get('CPI') / 1000);
+        vars.lo('CPI', vars.get('CPI') / 1000)
         vars.up('CPI', vars.get('CPI') * 1000)
-        vars.lo('CMI', vars.get('CMI') / 1000);
+        vars.lo('CMI', vars.get('CMI') / 1000)
         vars.up('CMI', vars.get('CMI') * 1000)
-        vars.lo('CMO', vars.get('CMO') / 1000);
+        vars.lo('CMO', vars.get('CMO') / 1000)
         vars.up('CMO', vars.get('CMO') * 1000)
-        vars.lo('DS', vars.get('DS') / 1000);
+        vars.lo('DS', vars.get('DS') / 1000)
         vars.up('DS', vars.get('DS') * 1000)
-        vars.lo('DD', vars.get('DD') / 1000);
+        vars.lo('DD', vars.get('DD') / 1000)
         vars.up('DD', vars.get('DD') * 1000)
-        vars.lo('D', vars.get('D') / 1000);
+        vars.lo('D', vars.get('D') / 1000)
         vars.up('D', vars.get('D') * 1000)
-        vars.lo('V', vars.get('V') / 1000);
+        vars.lo('V', vars.get('V') / 1000)
         vars.up('V', vars.get('V') * 1000)
-        vars.lo('FD', vars.get('FD') / 1000);
+        vars.lo('FD', vars.get('FD') / 1000)
         vars.up('FD', vars.get('FD') * 1000)
-        vars.lo('HH', vars.get('HH') / 1000);
+        vars.lo('HH', vars.get('HH') / 1000)
         vars.up('HH', vars.get('HH') * 1000)
-        vars.lo('HW', vars.get('HW') / 1000);
+        vars.lo('HW', vars.get('HW') / 1000)
         vars.up('HW', vars.get('HW') * 1000)
-        vars.lo('HN', vars.get('HN') / 1000);
+        vars.lo('HN', vars.get('HN') / 1000)
         vars.up('HN', vars.get('HN') * 1000)
-        vars.lo('KS', vars.get('KS') / 1000);
+        vars.lo('KS', vars.get('KS') / 1000)
         vars.up('KS', vars.get('KS') * 1000)
-        # vars.lo('LAS',vars.get('LAS')/1000); vars.up('LAS',vars.get('LAS')*1000)
-        vars.lo('M', vars.get('M') / 1000);
+        vars.lo('M', vars.get('M') / 1000)
         vars.up('M', vars.get('M') * 1000)
-        vars.lo('Y', vars.get('Y') / 1000);
+        vars.lo('Y', vars.get('Y') / 1000)
         vars.up('Y', vars.get('Y') * 1000)
-        vars.lo('YD', vars.get('YD') / 1000);
+        vars.lo('YD', vars.get('YD') / 1000)
         vars.up('YD', vars.get('YD') * 1000)
-        vars.lo('CH', vars.get('CH') / 1000);
+        vars.lo('CH', vars.get('CH') / 1000)
         vars.up('CH', vars.get('CH') * 1000)
-        vars.lo('CG', vars.get('CG') / 1000);
+        vars.lo('CG', vars.get('CG') / 1000)
         vars.up('CG', vars.get('CG') * 1000)
-        vars.lo('CX', vars.get('CX') / 1000);
+        vars.lo('CX', vars.get('CX') / 1000)
         vars.up('CX', vars.get('CX') * 1000)
-        vars.lo('R', vars.get('R') / 1000);
+        vars.lo('R', vars.get('R') / 1000)
         vars.up('R', vars.get('R') * 1000)
-        vars.lo('N', 0);
-        vars.lo('CN', 0);
-
+        vars.lo('N', 0)
+        vars.lo('CN', 0)
 
         def set_variable(filename):
             # clear the file before write the variables
@@ -1535,46 +1401,29 @@ class ShelbyCGEModel(BaseAnalysis):
         def set_equation(filename):
             count = [0]
 
-            #   CPIEQ(H)..
-            #   CPI(H)=E=
-            #   SUM(I, P(I) * ( 1 + SUM(GS, TAUC(GS,I) ) ) * CH(I,H) )
-            #       / SUM(I, P0(I) * ( 1 + SUM(GS, TAUQ(GS,I) ) ) * CH(I,H) );
-            print('CPIEQ(H)')
+            logger.debug('CPIEQ(H)')
             line1 = (P.loc(I) * ExprM(vars, m=1 + TAUC.loc[GS, I].sum(0)) * CH.loc(I, H)).sum(I)
             line2 = (ExprM(vars, m=P0.loc[I] * (1 + TAUQ.loc[GS, I].sum(0))) * CH.loc(I, H)).sum(I)
 
             CPIEQ = (line1 / line2 - ~CPI.loc(H))
-            if test_values:
-                CPIEQ.test(vars.initialVals)
+            logger.debug(CPIEQ.test(vars.initialVals))
             CPIEQ.write(count, filename)
 
-            #   YEQ(H)..
-            # YEQ(H).. Y(H)  =E= SUM(L,  A(H,L) * HW(H) / SUM(H1, A(H1,L) * HW(H1) ) * (Y(L) * ( 1 - SUM(G, TAUFL(G,L))) - RA(L)*CMIWAGE(L)*CMI(L)))
-            #                   + SUM(CM, A(H,CM)*(CMOWAGE(CM)*CMO(CM)))
-            #                   + SUM(K,  A(H,K) * HW(H) / SUM(H1, A(H1,K) * HW(H1))
-            #                   * (Y(K) + KPFOR(K)) * ( 1 - SUM(G, TAUFK(G,K) ) ) );
-
-            print('YEQ(H)')
-            line1 = (ExprM(vars, m=A.loc[H, L]) * HW.loc(H) / (ExprM(vars, m=A.loc[H1, L]) * HW.loc(H1)).sum(H1) * (
-                    Y.loc(L) * ExprM(vars, m=1 - TAUFL.loc[G, L].sum(0)) - RA.loc(L) * ExprM(vars,
-                                                                                             m=CMIWAGE.loc[L]) * CMI.loc(
-                L))).sum(L)
+            logger.debug('YEQ(H)')
+            line1 = (ExprM(vars, m=A.loc[H, L]) * HW.loc(H) / (ExprM(vars, m=A.loc[H1, L]) * HW.loc(H1)).sum(H1) *
+                     (Y.loc(L) * ExprM(vars, m=1 - TAUFL.loc[G, L].sum(0)) - RA.loc(L) *
+                      ExprM(vars, m=CMIWAGE.loc[L]) * CMI.loc(L))).sum(L)
             line2 = (ExprM(vars, m=A.loc[H, CM]) * (ExprM(vars, m=CMOWAGE.loc[CM]) * CMO.loc(CM))).sum(CM)
-            # line3 = (ExprM(vars, m= A.loc[H,LA]) * HW.loc(H) / (ExprM(vars, m= A.loc[H1,LA]) * HW.loc(H1)).sum(H1) * (Y.loc(LA) + LNFOR.loc(LA) ) * ExprM(vars, m= 1 - TAUFLA.loc[G,LA].sum(0))).sum(LA)
-            line4 = (ExprM(vars, m=A.loc[H, K]) * HW.loc(H) / (ExprM(vars, m=A.loc[H1, K]) * HW.loc(H1)).sum(H1) * (
-                    Y.loc(K) + KPFOR.loc(K)) * ExprM(vars, m=1 - TAUFK.loc[G, K].sum(0))).sum(K)
+            line4 = (ExprM(vars, m=A.loc[H, K]) * HW.loc(H) / (ExprM(vars, m=A.loc[H1, K]) * HW.loc(H1)).sum(H1) *
+                     (Y.loc(K) + KPFOR.loc(K)) * ExprM(vars, m=1 - TAUFK.loc[G, K].sum(0))).sum(K)
 
             YEQ = ((line1 + line2 + line4) - Y.loc(H))
             if test_values:
                 YEQ.test(vars.initialVals)
             YEQ.write(count, filename)
-            # print(YEQ)
 
-            #  YDEQ(H).. YD(H)          =E=   Y(H) + (PRIVRET(H) * HH(H))
-            #                                         + SUM(G, TP(H,G) * HH(H))
-            #                                         - SUM(GI, PIT0(GI,H)  * Y(H))
-            #                                         - SUM(G, TAUH(G,H)  * HH(H));
-            print('YDEQ(H)')
+
+            logger.debug('YDEQ(H)')
             line1 = Y.loc(H) + (ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H))
             line2 = (ExprM(vars, m=TP.loc[H, G]) * HH.loc(H)).sum(G)
             line3 = ~(ExprM(vars, m=PIT0.loc[GI, H]) * Y.loc(H)).sum(GI)
@@ -1582,186 +1431,125 @@ class ShelbyCGEModel(BaseAnalysis):
 
             YDEQ = ((line1 + line2 - line3 - line4) - YD.loc(H))
             YDEQ.write(count, filename)
-            if test_values:
-                YDEQ.test(vars.initialVals)
-            # print(YDEQ)
+            logger.debug(YDEQ.test(vars.initialVals))
 
-            #  CHEQ(I,H).. CH(I,H)      =E= CH0(I,H)* ((YD(H) / YD0(H)) / ( CPI(H) / CPI0(H)))**(BETA(I,H))
-            #                                 * PROD(J, ((P(J)*( 1 + SUM(GS, TAUC(GS,J))))/ (P0(J)*(1 + SUM(GS, TAUQ(GS,J)))))** (LAMBDA(J,I)));
-            print('CHEQ(I,H)')
-            line1 = ExprM(vars, m=CH0.loc[I, H]) * (
-                    (YD.loc(H) / ExprM(vars, m=YD0.loc[H])) / (CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** ExprM(vars, m=
-            BETA.loc[I, H])
-            line2 = (((P.loc(J) * ExprM(vars, m=1 + TAUC.loc[GS, J].sum(0))) / (
-                    ExprM(vars, m=P0.loc[J]) * ExprM(vars, m=1 + TAUQ.loc[GS, J].sum(0)))) ** ExprM(vars, m=LAMBDA.loc[
-                J, I])).prod(0)
+            logger.debug('CHEQ(I,H)')
+            line1 = ExprM(vars, m=CH0.loc[I, H]) * \
+                    ((YD.loc(H) / ExprM(vars, m=YD0.loc[H])) / (CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** \
+                    ExprM(vars, m=BETA.loc[I, H])
+            line2 = (((P.loc(J) * ExprM(vars, m=1 + TAUC.loc[GS, J].sum(0))) /
+                      (ExprM(vars, m=P0.loc[J]) * ExprM(vars, m=1 + TAUQ.loc[GS, J].sum(0)))) **
+                     ExprM(vars, m=LAMBDA.loc[J, I])).prod(0)
 
             CHEQ = ((line1 * line2) - CH.loc(I, H))
             CHEQ.write(count, filename)
-            if test_values:
-                CHEQ.test(vars.initialVals)
-            # print(CHEQ)
+            logger.debug(CHEQ.test(vars.initialVals))
 
-            #  SHEQ(H).. S(H)           =E= YD(H) - SUM(I, P(I) * CH(I,H) * ( 1 + SUM(GS, TAUC(GS,I))));
-            print('SHEQ(H)')
+            logger.debug('SHEQ(H)')
             line = YD.loc(H) - ~((P.loc(I) * CH.loc(I, H) * ExprM(vars, m=1 + TAUC.loc[GS, I].sum(0))).sum(I))
 
             SHEQ = (line - S.loc(H))
             SHEQ.write(count, filename)
-            if test_values:
-                SHEQ.test(vars.initialVals)
-            # print(SHEQ)
+            logger.debug(SHEQ.test(vars.initialVals))
 
-            #  PVAEQ(I).. PVA(I)        =E= PD(I) - SUM(J, AD(J,I) * P(J) * (1 + SUM(GS, TAUQ(GS, J))));
-            print('PVAEQ(I)')
-            line = PD.loc(I) - ~((ExprM(vars, m=AD.loc[J, I]) * P.loc(J) * ExprM(vars, m=1 + TAUQ.loc[GS, J].sum(0))).sum(0))
+            logger.debug('PVAEQ(I)')
+            line = PD.loc(I) - ~((ExprM(vars, m=AD.loc[J, I]) * P.loc(J) *
+                                  ExprM(vars, m=1 + TAUQ.loc[GS, J].sum(0))).sum(0))
 
             PVAEQ = (line - PVA.loc(I))
             PVAEQ.write(count, filename)
-            if test_values:
-                PVAEQ.test(vars.initialVals)
-            # print(PVAEQ)
+            logger.debug(PVAEQ.test(vars.initialVals))
 
-            # PFEQ(I)..DS(I) =E= DELTA(I)*PROD(F$ALPHA(F,I),(TT(F,I)*FD(F,I))**ALPHA(F,I));
             if is_cd:
-                print('PFEQ(I)')
-                line = ExprM(vars, m=DELTA.loc[I]) * (
-                        (ExprM(vars, m=TT.loc[F, I]) * FD.loc(F, I)) ** ExprM(vars, m=ALPHA.loc[F, I])).prod(F)
+                logger.debug('PFEQ(I)')
+                line = ExprM(vars, m=DELTA.loc[I]) * \
+                       ((ExprM(vars, m=TT.loc[F, I]) * FD.loc(F, I)) ** ExprM(vars, m=ALPHA.loc[F, I])).prod(F)
 
                 PFEQ = (line - DS.loc(I))
                 PFEQ.write(count, filename)
-                if test_values:
-                    PFEQ.test(vars.initialVals)
-                # print(PFEQ)
+                logger.debug(PFEQ.test(vars.initialVals))
             else:
-                # CES
-                # PFEQ(I)..DS(I) =E= GAMMA(I)*(SUM(F, ALPHA(F,I)*(FD(F,I)**(RHO(I)))))**(1/RHO(I));
-                print('PFEQ(I)')
+                logger.debug('PFEQ(I)')
                 line = ExprM(vars, m=GAMMA.loc[I]) * \
-                       ((ExprM(vars, m=ALPHA.loc[F, I]) * (FD.loc(F, I) ** ExprM(vars, m=RHO.loc[I]))).sum(F)) \
-                       ** ExprM(vars, m=1 / RHO.loc[I])
+                       ((ExprM(vars, m=ALPHA.loc[F, I]) * (FD.loc(F, I) ** ExprM(vars, m=RHO.loc[I]))).sum(F)) ** \
+                       ExprM(vars, m=1 / RHO.loc[I])
                 PFEQ = (line - DS.loc(I))
                 PFEQ.write(count, filename)
-                if test_values:
-                    PFEQ.test(vars.initialVals)
-                # print(PFEQ)
+                logger.debug(PFEQ.test(vars.initialVals))
             if is_cd:
-                # FDEQ(F,I).. R(F,I) * RA(F) * (1 + SUM(GF,TAUFX(GF,F,I) ) )* (TT(F,I)* FD(F,I))
-                #                         =E= PVA(I) * DS(I) * ALPHA(F,I);
-                print('FDEQ(F,I)')
-                left = R.loc(F, I) * RA.loc(F) * ExprM(vars, m=1 + TAUFX_SUM.loc[F, I]) * (
-                        ExprM(vars, m=TT.loc[F, I]) * FD.loc(F, I))
+                logger.debug('FDEQ(F,I)')
+                left = R.loc(F, I) * RA.loc(F) * ExprM(vars, m=1 + TAUFX_SUM.loc[F, I]) * \
+                       (ExprM(vars, m=TT.loc[F, I]) * FD.loc(F, I))
                 right = ~(PVA.loc(I) * DS.loc(I) * ExprM(vars, m=ALPHA.loc[F, I]))
 
                 FDEQ = (right - left)
 
-                # FDEQ.test(vars.initialVals)
                 FDEQ.write(count, filename)
-                if test_values:
-                    FDEQ.test(vars.initialVals)
-                # print(FDEQ)
+                logger.debug(FDEQ.test(vars.initialVals))
             else:
-                # FD of CES
-                # FDEQ(F,I).. (R(F,I) * RA(F)*(1 + SUM(GF,TAUFX(GF,F,I))))* (FD(F,I)**(1-RHO(I)))
-                #               =E= PVA(I)* ALPHA(F,I)*(GAMMA(I)**RHO(I))*(DS(I)**(1-RHO(I)));
-                print('FDEQ(F,I)')
-                left = (R.loc(F, I) * RA.loc(F) * ExprM(vars, m=1 + TAUFX_SUM.loc[F, I])) * (
-                        FD.loc(F, I) ** ExprM(vars, m=1 - RHO.loc[I]))
-                right = ~(PVA.loc(I) * (ExprM(vars, m=ALPHA.loc[F, I] * (GAMMA.loc[I] ** RHO.loc[I])) * (
-                        DS.loc(I) ** ExprM(vars, m=1 - RHO.loc[I]))))
+                logger.debug('FDEQ(F,I)')
+                left = (R.loc(F, I) * RA.loc(F) * ExprM(vars, m=1 + TAUFX_SUM.loc[F, I])) * \
+                       (FD.loc(F, I) ** ExprM(vars, m=1 - RHO.loc[I]))
+                right = ~(PVA.loc(I) * (ExprM(vars, m=ALPHA.loc[F, I] * (GAMMA.loc[I] ** RHO.loc[I])) *
+                                        (DS.loc(I) ** ExprM(vars, m=1 - RHO.loc[I]))))
                 FDEQ = (right - left)
                 FDEQ.setCondition(FD0.loc[F, I], 'INEQ', 0)
 
-                # FDEQ.test(vars.initialVals)
                 FDEQ.write(count, filename)
-                if test_values:
-                    FDEQ.test(vars.initialVals)
-                # print(FDEQ)
+                logger.debug(FDEQ.test(vars.initialVals))
 
-            #   VEQ(I).. V(I) =E= SUM(J, AD(I,J) * DS(J) );
-
-            print('VEQ(I)')
+            logger.debug('VEQ(I)')
             line = (ExprM(vars, m=AD.loc[I, J]) * ~DS.loc(J)).sum(1)
 
             VEQ = (line - V.loc(I))
             VEQ.write(count, filename)
-            if test_values:
-                VEQ.test(vars.initialVals)
-            # print(VEQ)
+            logger.debug(VEQ.test(vars.initialVals))
 
-            # YFEQL(F).. Y(F) =E= SUM(IG, R(F,IG) * RA(F)*FD(F,IG));
-            print('YFEQL(L)')
+            logger.debug('YFEQL(L)')
             line = (R.loc(F, IG) * RA.loc(F) * FD.loc(F, IG)).sum(IG)
 
             YFEQL = (line - Y.loc(F))
             YFEQL.write(count, filename)
-            if test_values:
-                YFEQL.test(vars.initialVals)
-            # print(YFEQL)
+            logger.debug(YFEQL.test(vars.initialVals))
 
-            #  KAPFOR(K).. KPFOR(K)     =E= KFOR(K) * Y(K);
-            print('KAPFOR(K)')
+            logger.debug('KAPFOR(K)')
             line = ExprM(vars, m=KFOR.loc[K]) * Y.loc(K)
 
             KAPFOR = (line - KPFOR.loc(K))
             KAPFOR.write(count, filename)
-            if test_values:
-                KAPFOR.test(vars.initialVals)
-            # print(KAPFOR)
+            logger.debug(KAPFOR.test(vars.initialVals))
 
-            # XEQ(I).. CX(I) =E= CX0(I)*( (PD(I)*(1+SUM(GS,TAUX(GS,I))))
-            #                  /(PW0(I)*(1+SUM(GS,TAUQ(GS,I))))) **(ETAE(I));
-            print('XEQ(I)')
+            logger.debug('XEQ(I)')
             line = ExprM(vars, m=CX0.loc[I]) * \
-                   ((PD.loc(I) * ExprM(vars, m=1 + TAUX.loc[GS, I].sum(0))) / ExprM(vars, m=PW0.loc[I] * (1 + TAUQ.loc[GS, I].sum(0)))) \
-                   ** ExprM(vars, m=ETAE.loc[I])
+                   ((PD.loc(I) * ExprM(vars, m=1 + TAUX.loc[GS, I].sum(0))) /
+                    ExprM(vars, m=PW0.loc[I] * (1 + TAUQ.loc[GS, I].sum(0)))) ** ExprM(vars, m=ETAE.loc[I])
 
             XEQ = (line - CX.loc(I))
             XEQ.write(count, filename)
-            if test_values:
-                XEQ.test(vars.initialVals)
-            # print(XEQ)
+            logger.debug(XEQ.test(vars.initialVals))
 
-            #  DEQ(I)$PWM0(I).. D(I)    =E= D0(I) *(PD(I)/PWM0(I))**(ETAD(I));
-            print('DEQ(I)$PWM0(I)')
+            logger.debug('DEQ(I)$PWM0(I)')
             line = ExprM(vars, m=D0.loc[I]) * (PD.loc(I) / ExprM(vars, m=PWM0.loc[I])) ** ExprM(vars, m=ETAD.loc[I])
 
             DEQ = (line - D.loc(I))
-            #  DEQ.setCondition(PWM0.loc[I])
             DEQ.write(count, filename)
-            if test_values:
-                DEQ.test(vars.initialVals)
-            # print(DEQ)
+            logger.debug(DEQ.test(vars.initialVals))
 
-            #  MEQ(I).. M(I)            =E= ( 1 - D(I) ) * DD(I);
-            print('MEQ(I)')
+            logger.debug('MEQ(I)')
             line = (1 - D.loc(I)) * DD.loc(I)
 
             MEQ = (line - M.loc(I))
             MEQ.write(count, filename)
-            if test_values:
-                MEQ.test(vars.initialVals)
-            # print(MEQ)
+            logger.debug(MEQ.test(vars.initialVals))
 
-            #  PEQ(I)..  P(I)           =E= D(I) * PD(I) + ( 1 - D(I) ) * PWM0(I);
-            print('PEQ(I)')
+            logger.debug('PEQ(I)')
             line = (D.loc(I) * PD.loc(I) + (1 - D.loc(I)) * ExprM(vars, m=PWM0.loc[I]))
 
             PEQ = (line - P.loc(I))
             PEQ.write(count, filename)
-            if test_values:
-                PEQ.test(vars.initialVals)
-            # print(PEQ)
+            logger.debug(PEQ.test(vars.initialVals))
 
-            #  NKIEQ.. NKI              =E= SUM(I, M(I) * PWM0(I) )
-            #                                 - SUM(I, CX(I) * PD(I) )
-            #                                 - SUM(H, PRIVRET(H)*HH(H))
-            #                                 - SUM(K, KPFOR(K))
-            #                                 - SUM(G, GVFOR(G))
-            #                                 - SUM(CM,CMOWAGE(CM)*CMO(CM))
-            #                                 - SUM(L,CMIWAGE(L)*CMI(L));
-
-            print('NKIEQ')
+            logger.debug('NKIEQ')
             line1 = (M.loc(I) * ExprM(vars, m=PWM0.loc[I])).sum(I)
             line2 = (CX.loc(I) * PD.loc(I)).sum(I)
             line3 = (ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)).sum(H)
@@ -1772,405 +1560,306 @@ class ShelbyCGEModel(BaseAnalysis):
 
             NKIEQ = ((line1 - line2 - line3 - line5 - line6 - line7 - line8) - NKI)
             NKIEQ.write(count, filename)
-            if test_values:
-                NKIEQ.test(vars.initialVals)
-            # print(NKIEQ)
+            logger.debug(NKIEQ.test(vars.initialVals))
 
-            #  NEQ(K,I).. N(K,I)        =E= N0(K,I)*(R(K,I)/R0(K,I))**(ETAIX(K,I));
-            print('NEQ(K,I)')
-            line = ExprM(vars, m=N0.loc[K, I]) * (R.loc(K, I) / ExprM(vars, m=R0.loc[K, I])) ** ExprM(vars, m=ETAIX.loc[K, I])
+            logger.debug('NEQ(K,I)')
+            line = ExprM(vars, m=N0.loc[K, I]) * (R.loc(K, I) / ExprM(vars, m=R0.loc[K, I])) ** \
+                   ExprM(vars, m=ETAIX.loc[K, I])
 
             NEQ = (line - N.loc(K, I))
             NEQ.write(count, filename)
-            if test_values:
-                NEQ.test(vars.initialVals)
-            # print(NEQ)
+            logger.debug(NEQ.test(vars.initialVals))
 
-            #  CNEQ(I).. P(I)*(1 + SUM(GS, TAUN(GS,I)))*CN(I)
-            #                         =E= SUM(IG, B(I,IG)*(SUM(K, N(K,IG))));
-            print('CNEQ(I)')
+            logger.debug('CNEQ(I)')
             left = P.loc(I) * ExprM(vars, m=1 + TAUN.loc[GS, I].sum(0)) * CN.loc(I)
             right = (ExprM(vars, m=B.loc[I, IG]) * N.loc(K, IG).sum(K)).sum(IG)
 
             CNEQ = (right - left)
             CNEQ.write(count, filename)
-            if test_values:
-                CNEQ.test(vars.initialVals)
-            # print(CNEQ)
+            logger.debug(CNEQ.test(vars.initialVals))
 
-            #  KSEQ(K,IG).. KS(K,IG)    =E= KS0(K,IG) * ( 1 - DEPR) + N(K,IG) ;
-            print('KSEQ(K,IG)')
+            logger.debug('KSEQ(K,IG)')
             line = ExprM(vars, m=KS0.loc[K, IG] * (1 - DEPR)) + N.loc(K, IG)
 
             KSEQ = (line - KS.loc(K, IG))
             KSEQ.write(count, filename)
-            if test_values:
-                KSEQ.test(vars.initialVals)
-            # print(KSEQ)
+            logger.debug(KSEQ.test(vars.initialVals))
 
-            # LSEQ1(H).. HW(H)/HH(H)   =E= (HW0(H)/HH0(H))
-            #                              *((SUM(L, RA(L) / RA0(L))/24)/ (CPI(H) / CPI0(H))*(SUM((Z,L), FD(L,Z))/(SUM(H1, HW(H1)* SUM(L, JOBCOR(H1,L)))+ SUM(CM, CMO(CM)) + SUM(L,CMI(L))))+ SUM((CM,L), EXWGEO(CM)/RA0(L))/72 *(SUM(CM, CMO(CM))/(SUM(H1, HW(H1)* SUM(L,JOBCOR(H1,L)))+ SUM(CM, CMO(CM)) +SUM(L,CMI(L)))))** (ETARA(H))
-            #                              * ( SUM(G, TP(H,G) / CPI(H) )/ SUM(G, TP(H,G) / CPI0(H) )) ** ETAPT(H)
-            #                              *  ((SUM(GI, PIT0(GI,H)* HH0(H))+ SUM(G, TAUH(G,H)*HH0(H)))/(SUM(GI, PIT(GI,H)* HH(H))+ SUM(G, TAUH(G,H)*HH(H))))**(ETAPIT(H));
-            print('LSEQ1(H)')
+            logger.debug('LSEQ1(H)')
             line1 = ExprM(vars, m=HW0.loc[H] / HH0.loc[H])
             LSEQ1line2pre = FD.loc(L, Z).sum(1)
-            line2 = (((RA.loc(L) / ExprM(vars, m=RA0.loc[L])).sum(L) / 24) / (CPI.loc(H) / ExprM(vars, m=CPI0.loc[H])) \
-                     * (LSEQ1line2pre.sum(0) / (
-                            (HW.loc(H1) * ExprM(vars, m=JOBCOR.loc[H1, L].sum(1))).sum(H1) + CMO.loc(CM).sum(CM) + CMI.loc(
-                        L).sum(L))) \
-                     + (ExprM(vars, m=EXWGEO.loc[CM].sum(0) * RA0.loc[L].sum(0) / 72) \
-                        * (CMO.loc(CM).sum(CM) / (
-                                    (HW.loc(H1) * ExprM(vars, m=JOBCOR.loc[H1, L].sum(1))).sum(H1) + CMO.loc(CM).sum(
-                                CM) + CMI.loc(L).sum(L))))) \
-                    ** ExprM(vars, m=ETARA.loc[H])
-            line3 = ((ExprM(vars, m=TP.loc[H, G]) / CPI.loc(H)).sum(G) / (
-                    ExprM(vars, m=TP.loc[H, G]) / ExprM(vars, m=CPI0.loc[H])).sum(G)) ** ExprM(vars, m=ETAPT.loc[H])
-            line4 = (((ExprM(vars, m=PIT0.loc[GI, H]) * ExprM(vars, m=HH0.loc[H])).sum(GI) + (
-                    ExprM(vars, m=TAUH.loc[G, H]) * ExprM(vars, m=HH0.loc[H])).sum(G)) \
-                     / ((ExprM(vars, m=PIT.loc[GI, H]) * HH.loc(H)).sum(GI) + (ExprM(vars, m=TAUH.loc[G, H]) * HH.loc(H)).sum(
-                        G))) ** ExprM(vars, m=ETAPIT.loc[H])
+            line2 = (((RA.loc(L) / ExprM(vars, m=RA0.loc[L])).sum(L) / 24) / (CPI.loc(H) / ExprM(vars, m=CPI0.loc[H])) *
+                     (LSEQ1line2pre.sum(0) /
+                      ((HW.loc(H1) * ExprM(vars, m=JOBCOR.loc[H1, L].sum(1))).sum(H1) +
+                       CMO.loc(CM).sum(CM) + CMI.loc(L).sum(L))) +
+                     (ExprM(vars, m=EXWGEO.loc[CM].sum(0) * RA0.loc[L].sum(0) / 72) *
+                      (CMO.loc(CM).sum(CM) /
+                       ((HW.loc(H1) * ExprM(vars, m=JOBCOR.loc[H1, L].sum(1))).sum(H1) +
+                        CMO.loc(CM).sum(CM) + CMI.loc(L).sum(L))))) ** ExprM(vars, m=ETARA.loc[H])
+            line3 = ((ExprM(vars, m=TP.loc[H, G]) / CPI.loc(H)).sum(G) /
+                     (ExprM(vars, m=TP.loc[H, G]) / ExprM(vars, m=CPI0.loc[H])).sum(G)) ** ExprM(vars, m=ETAPT.loc[H])
+            line4 = (((ExprM(vars, m=PIT0.loc[GI, H]) * ExprM(vars, m=HH0.loc[H])).sum(GI) +
+                      (ExprM(vars, m=TAUH.loc[G, H]) * ExprM(vars, m=HH0.loc[H])).sum(G)) /
+                     ((ExprM(vars, m=PIT.loc[GI, H]) * HH.loc(H)).sum(GI) +
+                      (ExprM(vars, m=TAUH.loc[G, H]) * HH.loc(H)).sum(G))) ** ExprM(vars, m=ETAPIT.loc[H])
 
             LSEQ1 = ((line1 * line2 * line3 * line4) - HW.loc(H) / HH.loc(H))
             LSEQ1.write(count, filename)
-            if test_values:
-                LSEQ1.test(vars.initialVals)
-            # print(LSEQ1)
+            logger.debug(LSEQ1.test(vars.initialVals))
 
-            #    LSEQ2A('OUTCOM1').. CMO('OUTCOM1')=E= CMO0('OUTCOM1')* (Sum((F11,IG), FD(F11,IG))/sum((F11,IG), FD0(F11,IG)))**(-ECOMO('OUTCOM1')) ;
-            print('LSEQ2A')
-            line = ExprM(vars, m=CMO0.loc[CM1]) * (
-                    FD.loc(F11, IG).sum(IG).sum(F11) / ExprM(vars, m=FD0.loc[F11, IG].sum(1).sum(0))) ** (
-                       ExprM(vars, m=(-1) * ECOMO.loc[CM1]))
+            logger.debug('LSEQ2A')
+            line = ExprM(vars, m=CMO0.loc[CM1]) * \
+                   (FD.loc(F11, IG).sum(IG).sum(F11) / ExprM(vars, m=FD0.loc[F11, IG].sum(1).sum(0))) ** \
+                   (ExprM(vars, m=(-1) * ECOMO.loc[CM1]))
 
             LSEQ2A = (line - CMO.loc(CM1))
             LSEQ2A.write(count, filename)
-            if test_values:
-                LSEQ2A.test(vars.initialVals)
-            # print(LSEQ2A)
+            logger.debug(LSEQ2A.test(vars.initialVals))
 
-            #    LSEQ2B('OUTCOM2').. CMO('OUTCOM2')=E= CMO0('OUTCOM2')* (Sum((F21,IG), FD(F21,IG))/sum((F21,IG), FD0(F21,IG)))**(-ECOMO('OUTCOM2'));
-            print('LSEQ2B')
-            line = ExprM(vars, m=CMO0.loc[CM2]) * (
-                    FD.loc(F21, IG).sum(IG).sum(F21) / ExprM(vars, m=FD0.loc[F21, IG].sum(1).sum(0))) ** (
-                       ExprM(vars, m=(-1) * ECOMO.loc[CM2]))
+            logger.debug('LSEQ2B')
+            line = ExprM(vars, m=CMO0.loc[CM2]) * \
+                   (FD.loc(F21, IG).sum(IG).sum(F21) / ExprM(vars, m=FD0.loc[F21, IG].sum(1).sum(0))) ** \
+                   (ExprM(vars, m=(-1) * ECOMO.loc[CM2]))
 
             LSEQ2B = (line - CMO.loc(CM2))
             LSEQ2B.write(count, filename)
-            if test_values:
-                LSEQ2B.test(vars.initialVals)
-            # print(LSEQ2B)
+            logger.debug(LSEQ2B.test(vars.initialVals))
 
-            #    LSEQ2C('OUTCOM3').. CMO('OUTCOM3')=E= CMO0('OUTCOM3')* (sum((F31,IG), FD(F31,IG))/sum((F31,IG), FD0(F31,IG)))** (-ECOMO('OUTCOM3'));
-            print('LSEQ2C')
-            line = ExprM(vars, m=CMO0.loc[CM3]) * (
-                    FD.loc(F31, IG).sum(IG).sum(F31) / ExprM(vars, m=FD0.loc[F31, IG].sum(1).sum(0))) ** (
-                       ExprM(vars, m=(-1) * ECOMO.loc[CM3]))
+            logger.debug('LSEQ2C')
+            line = ExprM(vars, m=CMO0.loc[CM3]) * \
+                   (FD.loc(F31, IG).sum(IG).sum(F31) / ExprM(vars, m=FD0.loc[F31, IG].sum(1).sum(0))) ** \
+                   (ExprM(vars, m=(-1) * ECOMO.loc[CM3]))
 
             LSEQ2C = (line - CMO.loc(CM3))
             LSEQ2C.write(count, filename)
-            if test_values:
-                LSEQ2C.test(vars.initialVals)
-            # print(LSEQ2C)
+            logger.debug(LSEQ2C.test(vars.initialVals))
 
-            #    LSEQ3(L).. CMI(L)  =E= CMI0(L)* (Sum(FG, FD(L,FG))/Sum(FG, FD0(L,FG)))**(ECOMI(L));
-            print('LSEQ3')
+            logger.debug('LSEQ3')
             line = ExprM(vars, m=CMI0.loc[L]) * (
                     (FD.loc(L, FG).sum(FG) / ExprM(vars, m=FD0.loc[L, FG].sum(1))) ** (ExprM(vars, m=ECOMI.loc[L])))
 
             LSEQ3 = (line - CMI.loc(L))
             LSEQ3.write(count, filename)
-            if test_values:
-                LSEQ3.test(vars.initialVals)
-            # print(LSEQ3)
+            logger.debug(LSEQ3.test(vars.initialVals))
 
-            #  POPEQ(H).. HH(H)         =E= HH0(H) * NRPG(H)
-            #                                + MI0(H) * ((YD(H)/HH(H))/(YD0(H)/HH0(H))/(CPI(H)/CPI0(H))) ** (ETAYD(H))
-            #                                         *((HN(H)/HH(H))/(HN0(H)/HH0(H))) ** (ETAU(H))
-            #                                         *(sum(HSD, CH(HSD,H))/sum(HSD,CH0(HSD,H)))**(1)
-            #                                - MO0(H) *((YD0(H)/HH0(H))/(YD(H)/HH(H))/(CPI0(H)/CPI(H))) ** (ETAYD(H))
-            #                                         *((HN0(H)/HH0(H))/(HN(H)/HH(H))) ** (ETAU(H))
-            #                                         *(sum(HSD, CH0(HSD,H))/sum(HSD,CH(HSD,H)))**(1)  ;
-
-            print('POPEQ(H)')
+            logger.debug('POPEQ(H)')
             line1 = ExprM(vars, m=HH0.loc[H] * NRPG.loc[H])
-            line2 = ExprM(vars, m=MI0.loc[H]) * ((YD.loc(H) / HH.loc(H)) / ExprM(vars, m=YD0.loc[H] / HH0.loc[H]) / (
-                    CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** ExprM(vars, m=ETAYD.loc[H])
+            line2 = ExprM(vars, m=MI0.loc[H]) * \
+                    ((YD.loc(H) / HH.loc(H)) / ExprM(vars, m=YD0.loc[H] / HH0.loc[H]) /
+                     (CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** ExprM(vars, m=ETAYD.loc[H])
             line3 = ((HN.loc(H) / HH.loc(H)) / ExprM(vars, m=HN0.loc[H] / HH0.loc[H])) ** ExprM(vars, m=ETAU.loc[H])
             line4 = (CH.loc(HSD, H).sum(HSD) / ExprM(vars, m=CH0.loc[HSD, H].sum(0))) ** (1)
-            line5 = ExprM(vars, m=MO0.loc[H]) * (ExprM(vars, m=YD0.loc[H] / HH0.loc[H]) / (YD.loc(H) / HH.loc(H)) / (
-                    ExprM(vars, m=CPI0.loc[H]) / CPI.loc(H))) ** ExprM(vars, m=ETAYD.loc[H])
+            line5 = ExprM(vars, m=MO0.loc[H]) * \
+                    (ExprM(vars, m=YD0.loc[H] / HH0.loc[H]) / (YD.loc(H) / HH.loc(H)) /
+                     (ExprM(vars, m=CPI0.loc[H]) / CPI.loc(H))) ** ExprM(vars, m=ETAYD.loc[H])
             line6 = (ExprM(vars, m=HN0.loc[H] / HH0.loc[H]) / (HN.loc(H) / HH.loc(H))) ** ExprM(vars, m=ETAU.loc[H])
-            line7 = (ExprM(vars, m=CH0.loc[HSD, H].sum(0)) / CH.loc(HSD, H).sum(HSD)) ** (1)
+            line7 = (ExprM(vars, m=CH0.loc[HSD, H].sum(0)) / CH.loc(HSD, H).sum(HSD)) ** 1
 
             POPEQ = (line1 + line2 * line3 * line4 - line5 * line6 * line7 - HH.loc(H))
             POPEQ.write(count, filename)
-            if test_values:
-                POPEQ.test(vars.initialVals)
-            # print(POPEQ)
+            logger.debug(POPEQ.test(vars.initialVals))
 
-            #  ANEQ(H).. HN(H)          =E= HH(H) - HW(H);
-            print('ANEQ(H)')
+            logger.debug('ANEQ(H)')
             line = HH.loc(H) - HW.loc(H)
 
             ANEQ = (line - HN.loc(H))
             ANEQ.write(count, filename)
-            if test_values:
-                ANEQ.test(vars.initialVals)
-            # print(ANEQ)
+            logger.debug(ANEQ.test(vars.initialVals))
 
-            #  YGEQ(GX).. Y(GX)         =E=   SUM(I, TAUV(GX,I) * V(I) * P(I) )
-            #                                 + SUM(I, TAUX(GX,I)* CX(I) *PD(I))
-            #                                 + SUM((H,I), TAUC(GX,I) * CH(I,H) * P(I) )
-            #                                 + SUM(I, TAUN(GX,I) * CN(I) * P(I) )
-            #                                 + SUM((GN,I), TAUG(GX,I) * CG(I,GN) * P(I) )
-            #                                 + SUM((F,I), TAUFX(GX,F,I) * RA(F) * R(F,I) * TT(F,I)*FD(F,I) )
-            #                                 + SUM((F,GN), TAUFX(GX,F,GN) * RA(F) * R(F,GN) * FD(F,GN) )
-            #                                 + SUM(F, TAUFH(GX,F) * (Y(F)))
-            #                                 + SUM(H, PIT0(GX,H) * Y(H) )
-            #                                 + SUM(H, TAUH(GX,H) * HH(H) )
-            #                                 + SUM(GX1, IGT(GX,GX1));
-            print('YGEQ')
+            logger.debug('YGEQ')
             line1 = (ExprM(vars, m=TAUV.loc[GX, I]) * V.loc(I) * P.loc(I)).sum(I)
             line2 = (ExprM(vars, m=TAUX.loc[GX, I]) * CX.loc(I) * PD.loc(I)).sum(I)
 
-            YGEQline3pre = ExprM(vars, m=pd.DataFrame(index=GX, columns=H).fillna(0.0))  # first just set it to correct size
+            # first just set it to correct size
+            YGEQline3pre = ExprM(vars, m=pd.DataFrame(index=GX, columns=H).fillna(0.0))
             for label in GX:
                 for hlabel in H:
-                    YGEQline3pre.m[GX.index(label)][H.index(hlabel)] = Expr(
-                        (ExprM(vars, m=TAUC.loc[[label], I]) * CH.loc(I, [hlabel]) * P.loc(I)).sum().m[0][0])
+                    YGEQline3pre.m[GX.index(label)][H.index(hlabel)] = \
+                        Expr((ExprM(vars, m=TAUC.loc[[label], I]) * CH.loc(I, [hlabel]) * P.loc(I)).sum().m[0][0])
 
             line3 = YGEQline3pre.sum(1)
             line4 = (ExprM(vars, m=TAUN.loc[GX, I]) * CN.loc(I) * P.loc(I)).sum(I)
 
             YGEQline5pre = ExprM(vars, m=TAUG.loc[GX, I]).sum(I)  # first just set it to correct size
             for label in GX:
-                YGEQline5pre.m[GX.index(label)][0] = Expr(
-                    (ExprM(vars, m=TAUG.loc[[label], I]) * CG.loc(I, GN) * P.loc(I)).sum().m[0][0])
+                YGEQline5pre.m[GX.index(label)][0] = \
+                    Expr((ExprM(vars, m=TAUG.loc[[label], I]) * CG.loc(I, GN) * P.loc(I)).sum().m[0][0])
             line5 = YGEQline5pre
 
             line6 = ExprM(vars, m=TAUG.loc[GX, I]).sum(I)
             for label in GX:
-                line6.m[GX.index(label)][0] = Expr(
-                    (ExprM(vars, m=TAUFXgx[label].loc[F, I]) * RA.loc(F) * R.loc(F, I) * FD.loc(F, I)).sum().m[0][0])
+                line6.m[GX.index(label)][0] = \
+                    Expr((ExprM(vars, m=TAUFXgx[label].loc[F, I]) * RA.loc(F) *
+                          R.loc(F, I) * FD.loc(F, I)).sum().m[0][0])
 
             line7 = ExprM(vars, m=TAUG.loc[GX, I]).sum(I)
             for label in GX:
-                line7.m[GX.index(label)][0] = Expr(
-                    (ExprM(vars, m=TAUFXgx[label].loc[F, GN]) * RA.loc(F) * R.loc(F, GN) * FD.loc(F, GN)).sum().m[0][0])
+                line7.m[GX.index(label)][0] = \
+                    Expr((ExprM(vars, m=TAUFXgx[label].loc[F, GN]) * RA.loc(F) *
+                          R.loc(F, GN) * FD.loc(F, GN)).sum().m[0][0])
 
             line8 = (ExprM(vars, m=TAUFH.loc[GX, F]) * Y.loc(F)).sum(F)
             line9 = (ExprM(vars, m=PIT0.loc[GX, H]) * Y.loc(H)).sum(H)
             line10 = (ExprM(vars, m=TAUH.loc[GX, H]) * HH.loc(H)).sum(H)
             line11 = IGT.loc(GX, GX1).sum(1)
 
-            YGEQ = ((line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8 + line9 + line10 + line11) - Y.loc(GX))
+            YGEQ = ((line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8 + line9 + line10 + line11) -
+                    Y.loc(GX))
             YGEQ.write(count, filename)
-            if test_values:
-                YGEQ.test(vars.initialVals)
-            # print(YGEQ)
+            logger.debug(YGEQ.test(vars.initialVals))
 
-            #    YGEQ2(GT).. Y(GT)        =E= SUM(GX, IGT(GT,GX));
-            print('YGEQ2(GT)')
+            logger.debug('YGEQ2(GT)')
             line = IGT.loc(GT, GX).sum(GX)
 
             YGEQ2 = (line - Y.loc(GT))
             YGEQ2.write(count, filename)
             if test_values:
                 YGEQ2.test(vars.initialVals)
-            # print(YGEQ2)
 
-            # YGEQM(GNLM)..  Y(GNLM)   =E= TAXS1(GNLM)*Y('CYGFM');
-            print('YGEQM(GNLM)')
+            logger.debug('YGEQM(GNLM)')
             line = ExprM(vars, m=TAXS1.loc[GNLM]) * Y.loc(['CYGFM'])
 
             YGEQM = (line - Y.loc(GNLM))
             YGEQM.write(count, filename)
-            if test_values:
-                YGEQM.test(vars.initialVals)
-            # print(YGEQM)
+            logger.debug(YGEQM.test(vars.initialVals))
 
-            # YGEQO(GNLO)..  Y(GNLO)   =E= TAXS2(GNLO)*Y('CYGFO');
-            print('YGEQO(GNLO)')
+            logger.debug('YGEQO(GNLO)')
             line = ExprM(vars, m=TAXS2.loc[GNLO]) * Y.loc(['CYGFO'])
 
             YGEQO = (line - Y.loc(GNLO))
             YGEQO.write(count, filename)
-            if test_values:
-                YGEQO.test(vars.initialVals)
-            # print(YGEQ1)
+            logger.debug(YGEQO.test(vars.initialVals))
 
-            #  GOVFOR(G).. GVFOR(G)     =E= GFOR(G)*Y(G);
-            print('GOVFOR(G)')
+            logger.debug('GOVFOR(G)')
             line = ExprM(vars, m=GFOR.loc[G]) * Y.loc(G)
 
             GOVFOR = (line - GVFOR.loc(G))
             GOVFOR.write(count, filename)
-            if test_values:
-                GOVFOR.test(vars.initialVals)
-            # print(GOVFOR)
+            logger.debug(GOVFOR.test(vars.initialVals))
 
-            #  CGEQ(I,GN).. P(I)*(1 + SUM(GS, TAUG(GS,I))) * CG(I,GN)
-            #                         =E= AG(I,GN) * (Y(GN)+ GFOR(GN)*Y(GN));
-            print('CGEQ(I,GN)')
+            logger.debug('CGEQ(I,GN)')
             left = P.loc(I) * ExprM(vars, m=1 + TAUG.loc[GS, I].sum(0)) * CG.loc(I, GN)
             right = ExprM(vars, m=AG.loc[I, GN]) * (Y.loc(GN) + ExprM(vars, m=GFOR.loc[GN]) * Y.loc(GN))
 
             CGEQ = (right - left)
             CGEQ.write(count, filename)
-            if test_values:
-                CGEQ.test(vars.initialVals)
-            # print(CGEQ)
+            logger.debug(CGEQ.test(vars.initialVals))
 
-            #  GFEQ(F,GN)..  FD(F,GN) * R(F,GN) * RA(F)*( 1 + SUM(GF, TAUFX(GF,F,GN)))
-            #                         =E= AG(F,GN) * (Y(GN)+ GFOR(GN)*Y(GN));
-            print('GFEQ(F,GN)')
+            logger.debug('GFEQ(F,GN)')
             left = FD.loc(F, GN) * R.loc(F, GN) * RA.loc(F) * (1 + ExprM(vars, m=TAUFX_SUM.loc[F, GN]))
             right = ExprM(vars, m=AG.loc[F, GN]) * (Y.loc(GN) + ExprM(vars, m=GFOR.loc[GN]) * Y.loc(GN))
 
             GFEQ = left - right
             GFEQ.write(count, filename)
-            if test_values:
-                GFEQ.test(vars.initialVals)
-            # print(GFEQ)
+            logger.debug(GFEQ.test(vars.initialVals))
 
-            #  GSEQL(GN).. S(GN)        =E= (Y(GN)+ GVFOR(GN))
-            #                                 - SUM(I, CG(I,GN)*P(I)*(1 + SUM(GS, TAUG(GS,I))))
-            #                                 - SUM(F, FD(F,GN)*R(F,GN)*RA(F)*(1 + SUM(GF, TAUFX(GF,F,GN))));
-            print('GSEQL(GN)')
+            logger.debug('GSEQL(GN)')
             line1 = Y.loc(GN) + GVFOR.loc(GN)
             line2 = (CG.loc(I, GN) * P.loc(I) * (1 + ExprM(vars, m=TAUG.loc[GS, I]).sum(GS))).sum(I)
             line3 = (FD.loc(F, GN) * R.loc(F, GN) * RA.loc(F) * (1 + ExprM(vars, m=TAUFX_SUM.loc[F, GN]))).sum(F)
 
             GSEQL = ((line1 - ~line2 - ~line3) - S.loc(GN))
             GSEQL.write(count, filename)
-            if test_values:
-                GSEQL.test(vars.initialVals)
-            # print(GSEQL)
+            logger.debug(GSEQL.test(vars.initialVals))
 
-            #  GSEQ(GX).. S(GX)         =E= (Y(GX) + GFOR(GX)*Y(GX)) - SUM(H, (TP(H,GX)*HH(H))) - SUM(G,IGT(G,GX));
-            print('GSEQ(GX)')
+            logger.debug('GSEQ(GX)')
             line1 = (Y.loc(GX) + ExprM(vars, m=GFOR.loc[GX]) * Y.loc(GX))
             line2 = (ExprM(vars, m=TP.loc[H, GX]) * HH.loc(H)).sum(H)
             line3 = IGT.loc(G, GX).sum(G)
 
             GSEQ = ((line1 - ~line2 - ~line3) - S.loc(GX))
             GSEQ.write(count, filename)
-            if test_values:
-                GSEQ.test(vars.initialVals)
-            # print(GSEQ)
+            logger.debug(GSEQ.test(vars.initialVals))
 
-            #  TDEQ(G,GX)$(IGTD(G,GX) EQ 1).. IGT(G,GX)
-            #                         =E= TAXS(G,GX)*(Y(GX) + GVFOR(GX)- SUM(H, (TP(H,GX)*HH(H))));
-            print('TDEQ(G,GX)$(IGTD(G,GX) EQ 1)')
-            line = ExprM(vars, m=TAXS.loc[G, GX]) * (
-                    Y.loc(GX) + GVFOR.loc(GX) - ~(ExprM(vars, m=TP.loc[H, GX]) * HH.loc(H)).sum(H))
+            logger.debug('TDEQ(G,GX)$(IGTD(G,GX) EQ 1)')
+            line = ExprM(vars, m=TAXS.loc[G, GX]) * \
+                   (Y.loc(GX) + GVFOR.loc(GX) - ~(ExprM(vars, m=TP.loc[H, GX]) * HH.loc(H)).sum(H))
 
             TDEQ = line - IGT.loc(G, GX)
             TDEQ.setCondition(IGTD.loc[G, GX], 'EQ', 1)
             TDEQ.write(count, filename)
-            if test_values:
-                TDEQ.test(vars.initialVals)
-            # print(TDEQ)
+            logger.debug(TDEQ.test(vars.initialVals))
 
-            #  SPIEQ.. SPI              =E= SUM(H, Y(H)) + SUM((H,G), TP(H,G)*HH(H)) + SUM(H, PRIVRET(H)*HH(H));
-            print('SPIEQ')
-            line = Y.loc(H).sum(H) + (ExprM(vars, m=TP.loc[H, G]) * HH.loc(H)).sum() + (
-                    ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)).sum(H)
+            logger.debug('SPIEQ')
+            line = Y.loc(H).sum(H) + (ExprM(vars, m=TP.loc[H, G]) * HH.loc(H)).sum() + \
+                   (ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)).sum(H)
 
             SPIEQ = (line - SPI)
             SPIEQ.write(count, filename)
-            if test_values:
-                SPIEQ.test(vars.initialVals)
-            # print(SPIEQ)
+            logger.debug(SPIEQ.test(vars.initialVals))
 
-            # LMEQ1(L).. SUM(H, HW(H)* JOBCOR(H, L))+CMI(L) =E= SUM(Z, FD(L ,Z) ) ;
-            print('LMEQ1(L)')
+            logger.debug('LMEQ1(L)')
             left = (ExprM(vars, m=JOBCOR.loc[H, L]) * HW.loc(H)).sum(H) + CMI.loc(L)
             right = FD.loc(L, Z).sum(Z)
 
             LMEQ1 = (right - left)
             LMEQ1.write(count, filename)
-            if test_values:
-                LMEQ1.test(vars.initialVals)
-            # print(LMEQ1)
+            logger.debug(LMEQ1.test(vars.initialVals))
 
-            #  KMEQ(K,IG).. KS(K,IG)    =E= TT(K,IG)*FD(K,IG);
-            print('KMEQ(K,IG)')
+            logger.debug('KMEQ(K,IG)')
             KMEQ = ((ExprM(vars, m=TT.loc[K, IG]) * FD.loc(K, IG)) - KS.loc(K, IG))
             KMEQ.write(count, filename)
-            if test_values:
-                KMEQ.test(vars.initialVals)
-            # print(KMEQ)
+            logger.debug(KMEQ.test(vars.initialVals))
 
-            #  GMEQ(I).. DS(I)          =E= DD(I) + CX(I) - M(I);
-            print('GMEQ(I)')
+            logger.debug('GMEQ(I)')
             GMEQ = (DD.loc(I) + CX.loc(I) - M.loc(I) - DS.loc(I))
             GMEQ.write(count, filename)
-            if test_values:
-                GMEQ.test(vars.initialVals)
-            # print(GMEQ)
+            logger.debug(GMEQ.test(vars.initialVals))
 
-            #  DDEQ(I).. DD(I)          =E= V(I) + SUM(H, CH(I,H) ) + SUM(G, CG(I,G) ) + CN(I);
-            print('DDEQ(I)')
+            logger.debug('DDEQ(I)')
             DDEQ = (V.loc(I) + CH.loc(I, H).sum(H) + CG.loc(I, G).sum(G) + CN.loc(I) - DD.loc(I))
             DDEQ.write(count, filename)
-            if test_values:
-                DDEQ.test(vars.initialVals)
-            # print(DDEQ)
+            logger.debug(DDEQ.test(vars.initialVals))
 
             # -------------------------------------------------------------------------------------------------------------
             # MODEL CLOSURE
             # -------------------------------------------------------------------------------------------------------------
-
             # FIX INTER GOVERNMENTAL TRANSFERS TO ZERO IF NOT IN ORIGINAL SAM
-            # IGT.FX(G,GX)$(NOT IGT0(G,GX))=0;
-            print('IGT.FX(G,GX)$(NOT IGT0(G,GX))=0')
+            logger.debug('IGT.FX(G,GX)$(NOT IGT0(G,GX))=0')
             FX1 = IGT.loc(G, GX)
             FX1.setCondition(IGT0.loc[G, GX], 'EQ', 0)
             FX1.write(count, filename)
-            # print(FX1)
 
             # FIX EXOGENOUS INTERGOVERNMENTAL TRANSFERS
-            # IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX);
-            print('IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX)')
+            logger.debug('IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX)')
             FX2 = IGT.loc(G, GX) - ExprM(vars, m=IGT0.loc[G, GX])
             FX2.setCondition(IGTD.loc[G, GX], 'EQ', 2)
             FX2.write(count, filename)
-            # print(FX2)
 
             # FIX INTER SECTORAL WAGE DIFFERENTIALS
-            # R.FX(L,Z) = R0(L,Z);
-            print('R.FX(L,Z)=R0(L,Z)')
+            logger.debug('R.FX(L,Z)=R0(L,Z)')
             FX3 = R.loc(L, Z) - ExprM(vars, m=R0.loc[L, Z])
             FX3.write(count, filename)
-            # print(FX3)
 
             # FIX ECONOMY WIDE SCALAR
-            # RA.FX(K) = RA0(K);
-            print('RA.FX(K)=RA0(K)')
+            logger.debug('RA.FX(K)=RA0(K)')
             FX4 = RA.loc(K) - ExprM(vars, m=RA0.loc[K])
             FX4.write(count, filename)
-            # print(FX5)
 
-            print("Objective")
+            logger.debug("Objective")
             obj = vars.getIndex('SPI')
 
             with open(filename, 'a') as f:
                 f.write('model.obj = Objective(expr=-1*model.x' + str(obj) + ')')
 
         def run_solver(cons_filename, temp_file_name="tmp.py"):
+            logger.info("running solver...")
             solver = 'ipopt'
             solver_io = 'nl'
-            stream_solver = True  # True prints solver output to screen
+            stream_solver = self.get_parameter("print_solver_output") \
+                if self.get_parameter("print_solver_output") is not None else False  # print solver output if True
             keepfiles = False  # True prints intermediate file names (.nl,.sol,...)
-            opt = SolverFactory(solver, solver_io=solver_io)
+
+            executable_path = self.get_parameter("solver_path") \
+                if self.get_parameter("solver_path") is not None else pyglobals.IPOPT_PATH
+            if not os.path.exists(executable_path):
+                print("Invalid executable path, please make sure you have Pyomo installed.")
+
+            opt = SolverFactory(solver, solver_io=solver_io, executable=executable_path)
 
             if opt is None:
-                print("")
-                print("ERROR: Unable to create solver plugin for %s " \
+                logger.error("ERROR: Unable to create solver plugin for %s " \
                       "using the %s interface" % (solver, solver_io))
-                print("")
                 exit(1)
 
             # Create the model
@@ -2207,7 +1896,7 @@ class ShelbyCGEModel(BaseAnalysis):
             # The solver plugin will scan the model for all active suffixes
             # valid for importing, which it will store into the results object
 
-            results = opt.solve(model, keepfiles=keepfiles, tee=stream_solver)
+            opt.solve(model, keepfiles=keepfiles, tee=stream_solver)
 
             x = [None for i in range(vars.nvars)]
 
@@ -2226,11 +1915,20 @@ class ShelbyCGEModel(BaseAnalysis):
         Calibrate the model 
         '''
         soln = []
-        # filename = os.path.join(filePath, "ipopt_cons.py")
-        filename = 'ipopt_cons.py'
-        # tmp = os.path.join(filePath, "tmp.py")
-        tmp = 'tmp.py'
-        print("Calibration: ")
+
+        # create CGE tmp folder, solverconstants
+        # TODO: we need to generate the "solverconstatnt" folder with username since it uses system tmp
+        # TODO: there is a situation that multiple users on system can run this together
+
+        cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
+        if not os.path.isdir(cge_tmp_folder):  # create the folder if there is no folder
+            os.mkdir(cge_tmp_folder)
+        logger.debug(cge_tmp_folder)
+
+        filename = os.path.join(cge_tmp_folder, "ipopt_cons.py")
+        tmp = os.path.join(cge_tmp_folder, "tmp.py")
+
+        logger.info("Calibration: ")
         run_solver(filename, tmp)
 
         '''
@@ -2243,21 +1941,17 @@ class ShelbyCGEModel(BaseAnalysis):
         
         '''
 
-        ############ begin shock by using tables
-
-        # iNum = 1 # dynamic model itterations
-
-        sims = pd.read_csv(os.path.join(filePath, 'SIMS 500.csv'), index_col=0)
+        # begin shock by using tables
+        sims = pd.read_csv(self.get_input_dataset("SIMS").get_file_path('csv'), index_col=0)
         iNum = 1
-        # iNum = len(sims.columns)
         KS00 = KS0.copy()
 
         for num in range(iNum):
-            # print("Simulation: ", num+1)
             KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
             run_solver(filename, tmp)
 
         # create output
+        logger.info("Create sims")
         CG0 = vars.get('CG', x=soln[0])
         CH0 = vars.get('CH', x=soln[0])
         CMI0 = vars.get('CMI', x=soln[0])
@@ -2271,14 +1965,12 @@ class ShelbyCGEModel(BaseAnalysis):
         FD0 = vars.get('FD', x=soln[0])
         IGT0 = vars.get('IGT', x=soln[0])
         KS0 = vars.get('KS', x=soln[0])
-        #LAS0 = vars.get('LAS', x=soln[0])
         HH0 = vars.get('HH', x=soln[0])
         HN0 = vars.get('HN', x=soln[0])
         HW0 = vars.get('HW', x=soln[0])
         M0 = vars.get('M', x=soln[0])
         N0 = vars.get('N', x=soln[0])
         NKI0 = vars.get('NKI', x=soln[0])
-        #LNFOR0 = vars.get('LNFOR', x=soln[0])
         KPFOR0 = vars.get('KPFOR', x=soln[0])
         GVFOR0 = vars.get('GVFOR', x=soln[0])
         P0 = vars.get('P', x=soln[0])
@@ -2320,7 +2012,6 @@ class ShelbyCGEModel(BaseAnalysis):
             ML = vars.get('M', x=soln[i+1])
             NL = vars.get('N', x=soln[i+1])
             NKIL = vars.get('NKI', x=soln[i+1])
-            #LNFORL = vars.get('LNFOR', x=soln[i+1])
             KPFORL = vars.get('KPFOR', x=soln[i+1])
             GVFORL = vars.get('GVFOR', x=soln[i+1])
             PL = vars.get('P', x=soln[i+1])
@@ -2374,12 +2065,89 @@ class ShelbyCGEModel(BaseAnalysis):
 
         cols = {'dsc': dsclist, 'dsr': dsrlist, 'mig': miglist, 'emp': emplist, 'hhinc': hhinclist}
 
-        df = pd.DataFrame.from_dict(cols)
-        df.to_csv('simulation_outputs.csv')
-        print("simulation_outpus.csv has been created.")
+        sims_result = pd.DataFrame.from_dict(cols)
 
+        self.set_result_csv_data("Shelby_sims", sims_result, name="Shelby_sims", source="dataframe")
+        logger.info("Output sims has been created.")
 
-if __name__ == '__main__':
-    is_cd = False
-    test_values = False
-    main_calc(is_cd, test_values)
+        # Prepare cge output
+        total_employment_original = FD0.loc[L, I].sum(0).sum(0)
+        total_employment_change = vars.get('FD', x=soln[-1]).loc[L, I].sum(0).sum(0) - total_employment_original
+        total_employment_percentage = total_employment_change / total_employment_original
+
+        domestic_supply_original = DS0.sum(0)
+        domestic_supply_change = vars.get('DS', x=soln[-1]).sum(0) - domestic_supply_original
+        domestic_supply_percentage = domestic_supply_change / domestic_supply_original
+
+        DY = vars.get('Y', x=soln[-1]) - Y0
+        DY.loc[H] = pd.Series(vars.get('Y', x=soln[-1]).loc[H] / vars.get('CPI', x=soln[-1]).loc[H] - Y0.loc[H])
+
+        HH1_change = DY['HH1']
+        HH1_percentage = HH1_change / Y0.loc['HH1']
+
+        HH2_change = DY['HH2']
+        HH2_percentage = HH2_change / Y0.loc['HH2']
+
+        HH3_change = DY.loc['HH3']
+        HH3_percentage = HH3_change / Y0.loc['HH3']
+
+        HH4_change = DY.loc['HH4']
+        HH4_percentage = HH4_change / Y0.loc['HH4']
+
+        HH5_change = DY.loc['HH5']
+        HH5_percentage = HH5_change / Y0.loc['HH5']
+
+        HH_total_change = HH1_change + HH2_change + HH3_change + HH4_change + HH5_change
+        HH_total_original = Y0.loc[H].sum(0)
+        HH_total_percentage = HH_total_change / HH_total_original
+
+        LOCTAX_original = Y0.loc['LOCTAX']
+        LOCTAX_change = DY.loc['LOCTAX']
+        LOCTAX_percentage = LOCTAX_change / LOCTAX_original
+
+        PROPTX_original = Y0.loc['PROPTX']
+        PROPTX_change = DY.loc['PROPTX']
+        PROPTX_percentage = PROPTX_change / PROPTX_original
+
+        ACCTAX_original = Y0.loc['ACCTAX']
+        ACCTAX_change = DY.loc['ACCTAX']
+        ACCTAX_percentage = ACCTAX_change / ACCTAX_original
+
+        TAX_total_change = LOCTAX_change + PROPTX_change + ACCTAX_change
+        TAX_total_original = LOCTAX_original + PROPTX_original + ACCTAX_original
+        TAX_total_percentage = TAX_total_change / TAX_total_original
+
+        cge_output = pd.DataFrame({'Seaside': ['Total Employment', 'Domestic Supply($)',
+                                               'Real Household Income($)', 'HH1', 'HH2', 'HH3', 'HH4', 'HH5',
+                                               'Total',
+                                               'Local Tax Revenue($)', 'LOCTAX', 'PROPTX', 'ACCTAX',
+                                               'Total'],
+                                   'Amount of Change': ['{:.2f}'.format(total_employment_change),
+                                                        '{:.2f}'.format(domestic_supply_change), '',
+                                                        '{:.2f}'.format(HH1_change), '{:.2f}'.format(HH2_change),
+                                                        '{:.2f}'.format(HH3_change), '{:.2f}'.format(HH4_change),
+                                                        '{:.2f}'.format(HH5_change),
+                                                        '{:.2f}'.format(HH_total_change),
+                                                        '',
+                                                        '{:.2f}'.format(LOCTAX_change),
+                                                        '{:.2f}'.format(PROPTX_change),
+                                                        '{:.2f}'.format(ACCTAX_change),
+                                                        '{:.2f}'.format(TAX_total_change)],
+                                   'Percent Change': ['{:.2f}%'.format(total_employment_percentage * 100),
+                                                      '{:.2f}%'.format(domestic_supply_percentage * 100), '',
+                                                      '{:.2f}%'.format(HH1_percentage * 100),
+                                                      '{:.2f}%'.format(HH2_percentage * 100),
+                                                      '{:.2f}%'.format(HH3_percentage * 100),
+                                                      '{:.2f}%'.format(HH4_percentage * 100),
+                                                      '{:.2f}%'.format(HH5_percentage * 100),
+                                                      '{:.2f}%'.format(HH_total_percentage * 100), '',
+                                                      '{:.2f}%'.format(LOCTAX_percentage * 100),
+                                                      '{:.2f}%'.format(PROPTX_percentage * 100),
+                                                      '{:.2f}%'.format(ACCTAX_percentage * 100),
+                                                      '{:.2f}%'.format(TAX_total_percentage * 100)]
+                                   })
+
+        self.set_result_csv_data("Shelby_output", cge_output, name="Shelby_output", source="dataframe")
+        logger.info("CGE output has been created.")
+
+        return True

@@ -1,10 +1,13 @@
 from copy import deepcopy
+from pyincore import globals as pyglobals
 import pandas as pd
 import operator as op
 import math
 
 import sys
 sys.setrecursionlimit(1500)
+
+logger = pyglobals.LOGGER
 
 class VarContainer:
   """
@@ -825,9 +828,9 @@ class ExprM:
     f.close()
 
   def test(self,x):
-    print("...testing the values....")
-    for i in range(self.info['height']):
-      for j in range(self.info['width']):
-        if not self.hasCondition or self.hasCondition and self.mark[i][j]:
-          fun = lambda x: eval( self.m[i][j].debug_test_str() )
-          # print(i,j,fun(x))
+    print("test")
+    # for i in range(self.info['height']):
+    #   for j in range(self.info['width']):
+    #     if not self.hasCondition or self.hasCondition and self.mark[i][j]:
+    #       fun = lambda x: eval( self.m[i][j].debug_test_str() )
+    #       logger.debug(i,j,fun(x))

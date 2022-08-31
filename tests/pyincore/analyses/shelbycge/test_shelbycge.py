@@ -18,7 +18,6 @@ def run_base_analysis():
     jobcr = "630e5c59c8f8b7614f6e5c86"
     hhtable = "630e5d08c8f8b7614f6e5c8e"
     sims = "630e5e0bc8f8b7614f6e5c96"
-    # sector_shocks = "5f6123e35060967d84ab0f70"
 
     shelby_cge.set_parameter("print_solver_output", False)
 
@@ -28,7 +27,6 @@ def run_base_analysis():
     shelby_cge.load_remote_input_dataset("JOBCR", jobcr)
     shelby_cge.load_remote_input_dataset("HHTABLE", hhtable)
     shelby_cge.load_remote_input_dataset("SIMS", sims)
-    # seaside_cge.load_remote_input_dataset("sector_shocks", sector_shocks)
 
     shelby_cge.run_analysis()
 
