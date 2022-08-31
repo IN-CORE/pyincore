@@ -20,6 +20,7 @@ def run_base_analysis():
     sims = "630e5e0bc8f8b7614f6e5c96"
 
     shelby_cge.set_parameter("print_solver_output", False)
+    shelby_cge.set_parameter("is_cd_model", False)
 
     shelby_cge.load_remote_input_dataset("SAM", sam)
     shelby_cge.load_remote_input_dataset("BB", bb)
