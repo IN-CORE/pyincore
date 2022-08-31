@@ -177,8 +177,9 @@ class FragilityCurveSet:
         ls_ds_dspatcher = {
             # 1 LS to 4 DS
             ("hurricane", "building", 1): FragilityCurveSet._1ls_to_4ds,
-            ("hurricane", "road", 1): FragilityCurveSet._1ls_to_5ds,
+            ("hurricane", "electric_facility", 1): FragilityCurveSet._1ls_to_4ds,
             # 1 LS to 5 DS
+            ("hurricane", "road", 1): FragilityCurveSet._1ls_to_5ds,
             ("hurricane", "bridge", 1): FragilityCurveSet._1ls_to_5ds,
             # 3 LS to 4 DS
             ("earthquake", "building", 3): FragilityCurveSet._3ls_to_4ds,
