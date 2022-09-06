@@ -264,6 +264,15 @@ class NciFunctionality(BaseAnalysis):
 
     @staticmethod
     def update_wds_network_links(wds_network_links):
+        '''Update network links with functionality attributes
+
+        Args:
+            wds_network_links (pd.DataFrame): WDS network links
+
+        Returns:
+            pd.DataFrame
+
+        '''
         wds_links = wds_network_links.deepcopy()
 
         for idx in wds_links['linknwid']:
