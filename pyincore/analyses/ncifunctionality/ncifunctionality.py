@@ -247,7 +247,7 @@ class NciFunctionality(BaseAnalysis):
             discretized_days (list): days used for discretization of restoration analyses
 
         Returns:
-
+            pd.DataFrame
         """
         # Create a deep copy of the incoming fuctionality results to store new values
         df_functionality_nodes = copy.deepcopy(functionality_nodes)
@@ -264,7 +264,7 @@ class NciFunctionality(BaseAnalysis):
 
     @staticmethod
     def update_wds_network_links(wds_network_links):
-        '''Update network links with functionality attributes
+        """Update network links with functionality attributes
 
         Args:
             wds_network_links (pd.DataFrame): WDS network links
@@ -272,7 +272,7 @@ class NciFunctionality(BaseAnalysis):
         Returns:
             pd.DataFrame
 
-        '''
+        """
         wds_links = wds_network_links.deepcopy()
 
         for idx in wds_links['linknwid']:
