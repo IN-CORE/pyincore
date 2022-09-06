@@ -387,8 +387,9 @@ class NetworkUtil:
         """
 
         # Define directionality when needed
-        __left_to_right = '+'
-        __right_to_left = '-'
+        __left_to_right = 1
+        __right_to_left = -1
+        __no_direction = 0
 
         # Extract labels
         labels = list(edges_ab.columns)
@@ -408,6 +409,9 @@ class NetworkUtil:
             if directed:
                 if row[direction] == __left_to_right:
                     merged_graph.add_edge(f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}")
+                elif row[direction] == __no_direction:
+                    merged_graph.add_edge(f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}")
+                    merged_graph.add_edge(f"{prefix_b}{row[prefix_b]}", f"{prefix_a}{row[prefix_a]}")
                 else:
                     merged_graph.add_edge(f"{prefix_b}{row[prefix_b]}", f"{prefix_a}{row[prefix_a]}")
             else:
