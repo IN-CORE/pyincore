@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 
+from typing import List
 from pyincore import BaseAnalysis, NetworkDataset, NetworkUtil
 from pyincore.analyses.wfnfunctionality.wfnfunctionalityutil import WfnFunctionalityUtil
 
@@ -172,13 +173,13 @@ class WfnFunctionality(BaseAnalysis):
                     'id': 'tank_node_list',
                     'required': True,
                     'description': "list of tank nodes",
-                    'type': list
+                    'type': List[int]
                 },
                 {
                     'id': 'pumpstation_node_list',
                     'required': True,
                     'description': "list of pump station nodes",
-                    'type': list
+                    'type': List[int]
                 }
             ],
             'input_datasets': [
