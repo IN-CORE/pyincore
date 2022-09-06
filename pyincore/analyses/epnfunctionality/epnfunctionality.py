@@ -8,7 +8,7 @@ import copy
 import numpy as np
 import pandas as pd
 import networkx as nx
-
+from typing import List
 from pyincore import BaseAnalysis, NetworkDataset
 from pyincore.analyses.epnfunctionality.epnfunctionalityutil import EpnFunctionalityUtil
 
@@ -144,7 +144,7 @@ class EpnFunctionality(BaseAnalysis):
                     'id': 'gate_station_node_list',
                     'required': False,
                     'description': "list of gate station nodes",
-                    'type': list
+                    'type': List[int]
                 },
             ],
             'input_datasets': [
