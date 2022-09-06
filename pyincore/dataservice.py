@@ -96,6 +96,9 @@ class DataService:
         # if cache_data_dir doesn't exist create one
         if not os.path.exists(cache_data_dir):
             os.makedirs(cache_data_dir)
+            # for consistency check to ensure the repository hash is recorded in service.json
+            self.client.create_service_json_entry()
+
             local_filename = self.download_dataset_blob(cache_data_dir, dataset_id)
 
         # if cache_data_dir exist, check if id folder and zip file exist inside
