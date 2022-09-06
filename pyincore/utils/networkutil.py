@@ -438,3 +438,52 @@ class NetworkUtil:
         de_prefixed = map(lambda node_id: int(node_id.lstrip(prefix)), prefix_nodes)
         de_mapping = dict(zip(prefix_nodes, de_prefixed))
         return nx.relabel_nodes(subgraph, de_mapping, copy=True)
+
+    @staticmethod
+    def create_network_graph_from_dataframes(df_nodes, df_links, sort='unsorted'):
+        """Given a dataframe of nodes and a dataframe of links, assemble a network object.
+
+        Args:
+            df_nodes (pd.DataFrame):
+            df_links (pd.DataFrame):
+            sort:
+
+        Returns:
+
+        """
+        graph = nx.DiGraph()  # Empty graph
+
+        pos_x = df_nodes['geometry'].apply(lambda p: p.x).head()
+        pos_y = df_nodes['geometry'].apply(lambda p: p.y).head()
+        node_id = df_nodes['nodenwid']
+
+        pos = {}
+        pos_x = df_nodes['geometry'].apply(lambda p: p.x)
+        
+        pos_y = df_nodes['geometry'].apply(lambda p: p.y)
+        for i, val in enumerate(df_nodes["nodenwid"]):
+            pos[val] = (pos_x[i], pos_y[i])
+
+        edges = [(x, y) for x, y in zip(df_links["fromnode"], df_links["tonode"])]
+        edge = []
+
+        if sort == 'sorted':
+            for i, val in enumerate(df_links["linknwid"]):
+                if df_links["direction"][i] == 1:
+                    edge.append((df_links["fromnode"][i], df_links["tonode"][i]))
+                else:
+                    edge.append((df_links["tonode"][i], df_links["fromnode"][i]))
+        elif sort == 'unsorted':
+            for i, val in enumerate(df_links["linknwid"]):
+                edge.append((df_links["fromnode"][i], df_links["tonode"][i]))
+
+        graph.add_nodes_from(pos.keys())
+        graph.add_edges_from(edge)
+
+        for x, y, id in zip(pos_x, pos_y, node_id):
+            graph.nodes[id]['pos'] = (x, y)
+
+        for ii, node_id in enumerate(graph.nodes()):
+            graph.nodes[node_id]["classification"] = df_nodes["utilfcltyc"][ii]
+
+        return graph

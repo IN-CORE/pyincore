@@ -7,6 +7,7 @@ from pyincore import BaseAnalysis, NetworkDataset
 from pyincore.utils.networkutil import NetworkUtil
 from numpy.linalg import inv
 import networkx as nx
+import pandas as pd
 import numpy as np
 import copy
 
@@ -49,13 +50,11 @@ class NciFunctionality(BaseAnalysis):
         epf_network_dataset = NetworkDataset.from_dataset(self.get_input_dataset('epf_network'))
         epf_network_nodes = epf_network_dataset.nodes.get_dataframe_from_shapefile()
         epf_network_links = epf_network_dataset.links.get_dataframe_from_shapefile()
-        epf_graph = epf_network_dataset.get_graph_networkx()
 
         # Load all dataset-related entities for WDS
         wds_network_dataset = NetworkDataset.from_dataset(self.get_input_dataset('wds_network'))
         wds_network_nodes = wds_network_dataset.nodes.get_dataframe_from_shapefile()
         wds_network_links = wds_network_dataset.links.get_dataframe_from_shapefile()
-        wds_graph = wds_network_dataset.get_graph_networkx()
 
         # Load network interdependencies
         interdependency_table = self.get_input_dataset('interdependency_table').get_dataframe_from_csv()
@@ -63,20 +62,24 @@ class NciFunctionality(BaseAnalysis):
         # Load restoration functionality and time results for EPF
         epf_func_results = self.get_input_dataset('epf_func_results').get_dataframe_from_csv()
         epf_time_results = self.get_input_dataset('epf_time_results').get_dataframe_from_csv()
+        epf_dmg_results = self.get_input_dataset('epf_dmg_results').get_dataframe_from_csv()
 
         # Load restoration functionality and time results for WDS
         wds_func_results = self.get_input_dataset('wds_func_results').get_dataframe_from_csv()
         wds_time_results = self.get_input_dataset('wds_time_results').get_dataframe_from_csv()
+        wds_dmg_results = self.get_input_dataset('wds_dmg_results').get_dataframe_from_csv()
+        wds_inventory_rest_map = self.get_input_dataset('wds_inventory_restoration_map').get_dataframe_from_csv()
 
         (epf_cascading_functionality, wds_cascading_functionality) = self.nci_functionality(epf_network_nodes,
                                                                                             epf_network_links,
-                                                                                            epf_graph,
                                                                                             wds_network_nodes,
                                                                                             wds_network_links,
-                                                                                            wds_graph,
                                                                                             interdependency_table,
+                                                                                            epf_dmg_results,
                                                                                             epf_func_results,
                                                                                             epf_time_results,
+                                                                                            wds_dmg_results,
+                                                                                            wds_inventory_rest_map,
                                                                                             wds_func_results,
                                                                                             wds_time_results)
 
@@ -90,22 +93,22 @@ class NciFunctionality(BaseAnalysis):
 
         return True
 
-    def nci_functionality(self, epf_network_nodes, epf_network_links, epf_graph,
-                         wds_network_nodes, wds_network_links, wds_graph,
-                         interdepedency_table, epf_func_results, epf_time_results,
-                         wds_func_results, wds_time_results):
+    def nci_functionality(self, epf_network_nodes, epf_network_links, wds_network_nodes,
+                          wds_network_links, interdepedency_table, epf_func_results, epf_time_results,
+                         epf_dmg_results, wds_dmg_results, wds_inventory_rest_map, wds_func_results, wds_time_results):
         """Compute EPF and WDS cascading functionality outcomes
 
         Args:
-            epf_network_nodes (pd.DataFrame):
-            epf_network_links (pd.DataFrame):
-            epf_graph (networkx object):
+            epf_network_nodes (pd.DataFrame): network nodes for EPF network
+            epf_network_links (pd.DataFrame): network links for EPF network
             wds_network_nodes (pd.DataFrame):
             wds_network_links (pd.DataFrame):
-            wds_graph (networkx object):
             interdepedency_table (pd.DataFrame):
             epf_func_results (pd.DataFrame):
             epf_time_results (pd.DataFrame):
+            epf_dmg_results (pd.DataFrame):
+            wds_dmg_results (pd.DataFrame):
+            wds_inventory_rest_map (pd.DataFrame):
             wds_func_results (pd.DataFrame):
             wds_time_results (pd.DataFrame):
 
@@ -123,8 +126,47 @@ class NciFunctionality(BaseAnalysis):
     def assemble_epf_discretized_func(self):
         pass
 
-    def assemble_wds_discretized_func(selfs):
-        pass
+    @staticmethod
+    def assemble_wds_discretized_func(wds_nodes, wds_dmg_results, wds_inventory_restoration_map, wds_time_results):
+        wf_time_results = wds_time_results.loc[
+            (wds_time_results['time'] == 1) | (wds_time_results['time'] == 3) | (wds_time_results['time'] == 7) | (
+                        wds_time_results['time'] == 30) | (wds_time_results['time'] == 90)]
+        wf_time_results.insert(2, 'PF_00', list(np.ones(len(wf_time_results))))
+
+
+        wds_nodes_updated = pd.merge(wds_nodes[['nodenwid', 'utilfcltyc', 'guid']],
+                                        wds_dmg_results[['guid', 'DS_0', 'DS_1', 'DS_2', 'DS_3', 'DS_4']], on='guid',
+                                        how='outer')
+
+        PPPL_restoration_id = list(wds_inventory_restoration_map.loc[wds_inventory_restoration_map['guid'] ==
+                                                                    wds_nodes_updated.loc[wds_nodes_updated[
+                                                                                        'utilfcltyc'] == 'PPPL'].guid.tolist()[
+                                                                        0]]['restoration_id'])[0]
+        PSTAS_restoration_id = list(wds_inventory_restoration_map.loc[wds_inventory_restoration_map['guid'] ==
+                                                                     wds_nodes_updated.loc[wds_nodes_updated[
+                                                                                         'utilfcltyc'] == 'PSTAS'].guid.tolist()[
+                                                                         0]]['restoration_id'])[0]
+        df_wds_node_PPPL = wds_nodes_updated.loc[wds_nodes_updated['utilfcltyc'] == 'PPPL']
+        df_wds_node_PSTAS = wds_nodes_updated.loc[wds_nodes_updated['utilfcltyc'] == 'PSTAS']
+
+        wf_time_results_PPPL = wf_time_results.loc[wf_time_results['restoration_id'] == PPPL_restoration_id][
+            ['PF_00', 'PF_0', 'PF_1', 'PF_2', 'PF_3']]
+        PPPL_func_df = pd.DataFrame(
+            np.dot(df_wds_node_PPPL[['DS_0', 'DS_1', 'DS_2', 'DS_3', 'DS_4']], np.array(wf_time_results_PPPL).T),
+            columns=['functionality1', 'functionality3', 'functionality7', 'functionality30', 'functionality90'])
+        PPPL_func_df.insert(0, 'guid', list(df_wds_node_PPPL.guid))
+
+        wf_time_results_PSTAS = wf_time_results.loc[wf_time_results['restoration_id'] == PSTAS_restoration_id][
+            ['PF_00', 'PF_0', 'PF_1', 'PF_2', 'PF_3']]
+        PSTAS_func_df = pd.DataFrame(
+            np.dot(df_wds_node_PSTAS[['DS_0', 'DS_1', 'DS_2', 'DS_3', 'DS_4']], np.array(wf_time_results_PSTAS).T),
+            columns=['functionality1', 'functionality3', 'functionality7', 'functionality30', 'functionality90'])
+        PSTAS_func_df.insert(0, 'guid', list(df_wds_node_PSTAS.guid))
+
+        wf_function_df = pd.concat([PSTAS_func_df, PPPL_func_df], ignore_index=True)
+        wds_nodes_updated = pd.merge(wds_nodes_updated, wf_function_df, on="guid")
+
+        return wds_nodes_updated
 
     def solve_leontief_equation(self, epf_wds_graph, epf_wds_functionality_nodes, discretized_days):
         """Computes the solution to the Leontief equation for network interdependency given a
