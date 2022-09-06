@@ -62,7 +62,8 @@ class NciFunctionality(BaseAnalysis):
         # Load restoration functionality and time results for EPF
         epf_func_results = self.get_input_dataset('epf_func_results').get_dataframe_from_csv()
         epf_time_results = self.get_input_dataset('epf_time_results').get_dataframe_from_csv()
-        epf_dmg_results = self.get_input_dataset('epf_dmg_results').get_dataframe_from_csv()
+        epf_subst_failure_results = self.get_input_dataset('epf_subst_failure_results').get_dataframe_from_csv()
+        epf_inventory_rest_map = self.get_input_dataset('epf_inventory_restoration_map').get_dataframe_from_csv()
 
         # Load restoration functionality and time results for WDS
         wds_func_results = self.get_input_dataset('wds_func_results').get_dataframe_from_csv()
@@ -75,7 +76,8 @@ class NciFunctionality(BaseAnalysis):
                                                                                             wds_network_nodes,
                                                                                             wds_network_links,
                                                                                             interdependency_table,
-                                                                                            epf_dmg_results,
+                                                                                            epf_subst_failure_results,
+                                                                                            epf_inventory_rest_map,
                                                                                             epf_func_results,
                                                                                             epf_time_results,
                                                                                             wds_dmg_results,
@@ -94,27 +96,37 @@ class NciFunctionality(BaseAnalysis):
         return True
 
     def nci_functionality(self, epf_network_nodes, epf_network_links, wds_network_nodes,
-                          wds_network_links, interdepedency_table, epf_func_results, epf_time_results,
-                         epf_dmg_results, wds_dmg_results, wds_inventory_rest_map, wds_func_results, wds_time_results):
+                          wds_network_links, interdepedency_table, epf_subst_failure_results, epf_inventory_rest_map,
+                          epf_func_results, epf_time_results, wds_dmg_results, wds_inventory_rest_map, wds_func_results,
+                          wds_time_results):
         """Compute EPF and WDS cascading functionality outcomes
 
         Args:
             epf_network_nodes (pd.DataFrame): network nodes for EPF network
             epf_network_links (pd.DataFrame): network links for EPF network
-            wds_network_nodes (pd.DataFrame):
-            wds_network_links (pd.DataFrame):
-            interdepedency_table (pd.DataFrame):
-            epf_func_results (pd.DataFrame):
-            epf_time_results (pd.DataFrame):
-            epf_dmg_results (pd.DataFrame):
-            wds_dmg_results (pd.DataFrame):
-            wds_inventory_rest_map (pd.DataFrame):
-            wds_func_results (pd.DataFrame):
-            wds_time_results (pd.DataFrame):
+            wds_network_nodes (pd.DataFrame): network nodes for WDS network
+            wds_network_links (pd.DataFrame): network links for WDS network
+            interdepedency_table (pd.DataFrame): mapping between EPF and WDS networks
+            epf_subst_failure_results (pd.DataFrame): substation failure results for EPF network
+            epf_inventory_rest_map (pd.DataFrame): inventory restoration map for EPF network
+            epf_func_results (pd.DataFrame): functionality results for EPF network
+            epf_time_results (pd.DataFrame): time results for EPF network
+            wds_dmg_results (pd.DataFrame): damage results for WDS network
+            wds_inventory_rest_map (pd.DataFrame): inventory restoration map for WDS network
+            wds_func_results (pd.DataFrame): functionality results for WDS network
+            wds_time_results (pd.DataFrame): time results for WDS network
 
         Returns:
             (pd.DataFrame, pd.DataFrame): results for EPF and WDS networks
         """
+
+        # Compute updated EPF and WDS node information
+        efp_nodes_updated = self.update_epf_discretized_func(epf_network_nodes, epf_subst_failure_results,
+                                                             epf_inventory_rest_map, epf_time_results)
+
+        wds_nodes_updated = self.update_wds_discretized_func(wds_network_nodes, wds_dmg_results,
+                                                             wds_inventory_rest_map, wds_time_results)
+
         return None, None
 
     def add_properties(self):
@@ -123,11 +135,45 @@ class NciFunctionality(BaseAnalysis):
     def integrate_epf_wds(self):
         pass
 
-    def assemble_epf_discretized_func(self):
-        pass
+    @staticmethod
+    def update_epf_discretized_func(epf_nodes, epf_subst_failure_results, epf_inventory_restoration_map,
+                                    epf_time_results):
+        epf_time_results = epf_time_results.loc[
+            (epf_time_results['time'] == 1) | (epf_time_results['time'] == 3) | (epf_time_results['time'] == 7) | (
+                        epf_time_results['time'] == 30) | (epf_time_results['time'] == 90)]
+        epf_time_results.insert(2, 'PF_00', list(
+            np.ones(len(epf_time_results))))  # PF_00, PF_0, PF_1, PF_2, PF_3  ---> DS_0, DS_1, DS_2, DS_3, DS_4
+
+        epf_nodes_updated = pd.merge(epf_nodes[['nodenwid', 'utilfcltyc', 'guid']], epf_subst_failure_results[
+            ['guid', 'DS_0', 'DS_1', 'DS_2', 'DS_3', 'DS_4', 'failure_probability']], on='guid', how='outer')
+
+        EPPL_restoration_id = list(epf_inventory_restoration_map.loc[epf_inventory_restoration_map['guid'] ==
+                                                                     epf_nodes_updated.loc[epf_nodes_updated[
+                                                                                               'utilfcltyc'] == 'EPPL'].guid.tolist()[
+                                                                         0]]['restoration_id'])[0]
+        ESS_restoration_id = \
+        list(set(epf_inventory_restoration_map.restoration_id.unique()) - set([EPPL_restoration_id]))[0]
+        df_EPN_node_EPPL = epf_nodes_updated.loc[epf_nodes_updated['utilfcltyc'] == 'EPPL']
+        df_EPN_node_ESS = epf_nodes_updated.loc[epf_nodes_updated['utilfcltyc'] != 'EPPL']
+        epf_time_results_EPPL = epf_time_results.loc[epf_time_results['restoration_id'] == EPPL_restoration_id][
+            ['PF_00', 'PF_0', 'PF_1', 'PF_2', 'PF_3']]
+        EPPL_func_df = pd.DataFrame(
+            np.dot(df_EPN_node_EPPL[['DS_0', 'DS_1', 'DS_2', 'DS_3', 'DS_4']], np.array(epf_time_results_EPPL).T),
+            columns=['functionality1', 'functionality3', 'functionality7', 'functionality30', 'functionality90'])
+        EPPL_func_df.insert(0, 'guid', list(df_EPN_node_EPPL.guid))
+        epf_time_results_ESS = epf_time_results.loc[epf_time_results['restoration_id'] == ESS_restoration_id][
+            ['PF_00', 'PF_0', 'PF_1', 'PF_2', 'PF_3']]
+        ESS_func_df = pd.DataFrame(
+            np.dot(df_EPN_node_ESS[['DS_0', 'DS_1', 'DS_2', 'DS_3', 'DS_4']], np.array(epf_time_results_ESS).T),
+            columns=['functionality1', 'functionality3', 'functionality7', 'functionality30', 'functionality90'])
+        ESS_func_df.insert(0, 'guid', list(df_EPN_node_ESS.guid))
+        epf_function_df = pd.concat([ESS_func_df, EPPL_func_df], ignore_index=True)
+        epf_nodes_updated = pd.merge(epf_nodes_updated, epf_function_df, on="guid")
+
+        return epf_nodes_updated
 
     @staticmethod
-    def assemble_wds_discretized_func(wds_nodes, wds_dmg_results, wds_inventory_restoration_map, wds_time_results):
+    def update_wds_discretized_func(wds_nodes, wds_dmg_results, wds_inventory_restoration_map, wds_time_results):
         wf_time_results = wds_time_results.loc[
             (wds_time_results['time'] == 1) | (wds_time_results['time'] == 3) | (wds_time_results['time'] == 7) | (
                         wds_time_results['time'] == 30) | (wds_time_results['time'] == 90)]
