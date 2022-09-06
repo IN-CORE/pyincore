@@ -177,7 +177,7 @@ def test_create_and_delete_repair_mapping(repairsvc):
 
 
 def test_get_repair_sets(repairsvc):
-    metadata = repairsvc.get_dfr3_sets(hazard_type="tornado", creator="incrtest")
+    metadata = repairsvc.get_dfr3_sets(hazard_type="tornado")
 
     assert 'id' in metadata[0].keys()
 
