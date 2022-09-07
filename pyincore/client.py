@@ -216,7 +216,7 @@ class IncoreClient(Client):
 
         # store the token file in the respective repository's directory
         if token_file_name is None or len(token_file_name.strip()) == 0:
-            token_file_name = "." + self.service_url.split("//")[-1].replace(".", "_") + "_token"
+            token_file_name = "." + self.hashed_service_url + "_token"
         self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
 
         authorization = self.retrieve_token_from_file()
