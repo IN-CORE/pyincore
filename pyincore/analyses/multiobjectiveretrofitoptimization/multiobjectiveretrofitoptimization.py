@@ -8,6 +8,7 @@ from pyincore import BaseAnalysis
 import pandas as pd
 import numpy as np
 import time
+from typing import List
 from pandas import DataFrame
 from pyomo.environ import ConcreteModel, Set, Var, Param, Objective, Constraint
 from pyomo.environ import quicksum, minimize, maximize, NonNegativeReals, Any
@@ -1392,7 +1393,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     'id': 'inactive_submodels',
                     'required': False,
                     'description': 'Identifier of submodels to inactivate during analysis',
-                    'type': [int]
+                    'type': List[int]
                 },
                 {
                     'id': 'scale_data',
