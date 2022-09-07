@@ -393,19 +393,26 @@ class NetworkUtil:
 
         # Extract labels
         labels = list(edges_ab.columns)
+        print(edges_ab)
+
         prefix_a = labels[0]
         prefix_b = labels[1]
+
+        # Ensure data types are correct
+        edges_ab[prefix_a] = edges_ab[prefix_a].astype('int64')
+        edges_ab[prefix_b] = edges_ab[prefix_a].astype('int64')
 
         direction = None
 
         if directed:
             direction = labels[2]
+            edges_ab[direction] = edges_ab[direction].astype('int64')
 
         # Merge the networks
         merged_graph = nx.union(graph_a, graph_b, rename=(prefix_a, prefix_b))
 
         # Use edge and direction to add connecting edges
-        for row in edges_ab.iterrows():
+        for idx, row in edges_ab.iterrows():
             if directed:
                 if row[direction] == __left_to_right:
                     merged_graph.add_edge(f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}")
