@@ -48,7 +48,8 @@ class NciFunctionality(BaseAnalysis):
         super(NciFunctionality, self).__init__(incore_client)
 
     def run(self):
-        # Load discretized days
+        # Load parameters
+        result_name = self.get_parameter('result_name')
         discretized_days = self.get_parameter('discretized_days')
 
         # Load all dataset-related entities for EPF
@@ -68,12 +69,12 @@ class NciFunctionality(BaseAnalysis):
         # Load restoration functionality and time results for EPF
         epf_time_results = self.get_input_dataset('epf_time_results').get_dataframe_from_csv()
         epf_subst_failure_results = self.get_input_dataset('epf_subst_failure_results').get_dataframe_from_csv()
-        epf_inventory_rest_map = self.get_input_dataset('epf_inventory_restoration_map').get_dataframe_from_csv()
+        epf_inventory_rest_map = self.get_input_dataset('epf_inventory_rest_map').get_dataframe_from_csv()
 
         # Load restoration functionality and time results for WDS
         wds_time_results = self.get_input_dataset('wds_time_results').get_dataframe_from_csv()
         wds_dmg_results = self.get_input_dataset('wds_dmg_results').get_dataframe_from_csv()
-        wds_inventory_rest_map = self.get_input_dataset('wds_inventory_restoration_map').get_dataframe_from_csv()
+        wds_inventory_rest_map = self.get_input_dataset('wds_inventory_rest_map').get_dataframe_from_csv()
 
         (epf_cascading_functionality, wds_cascading_functionality) = self.nci_functionality(discretized_days,
                                                                                             epf_network_nodes,
@@ -89,13 +90,10 @@ class NciFunctionality(BaseAnalysis):
                                                                                             wds_inventory_rest_map,
                                                                                             wds_time_results)
 
-        self.set_result_csv_data("epf_cascading_functionality",
-                                 epf_cascading_functionality, name=self.get_parameter("epf_cascading_functionality"),
-                                 source="dataframe")
-        self.set_result_csv_data("wds_cascading_functionality",
-                                 wds_cascading_functionality,
-                                 name=self.get_parameter("wds_cascading_functionality"),
-                                 source="dataframe")
+        self.set_result_csv_data(result_name + "_epf_cascading_functionality", epf_cascading_functionality,
+                                 name=self.get_parameter("epf_cascading_functionality"), source="dataframe")
+        self.set_result_csv_data(result_name + "_wds_cascading_functionality", wds_cascading_functionality,
+                                 name=self.get_parameter("wds_cascading_functionality"), source="dataframe")
 
         return True
 
@@ -273,7 +271,7 @@ class NciFunctionality(BaseAnalysis):
             pd.DataFrame
 
         """
-        wds_links = wds_network_links.deepcopy()
+        wds_links = copy.deepcopy(wds_network_links)
 
         for idx in wds_links['linknwid']:
             df = wds_links[wds_links.linknwid.isin([idx])]
@@ -326,13 +324,13 @@ class NciFunctionality(BaseAnalysis):
                 {
                     'id': 'epf_network',
                     'required': True,
-                    'description': 'EPN network to merge via dependencies',
+                    'description': 'EPN network',
                     'type': ['incore:epnNetwork'],
                 },
                 {
                     'id': 'wds_network',
                     'required': True,
-                    'description': 'WDS network to merge via dependencies',
+                    'description': 'WDS network',
                     'type': ['incore:epnNetwork', 'incore:waterNetwork'],
                 },
                 {

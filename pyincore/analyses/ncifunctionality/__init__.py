@@ -1,0 +1,1 @@
+from pyincore.analyses.ncifunctionality.ncifunctionality import NciFunctionality
