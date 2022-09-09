@@ -18,7 +18,7 @@ from pyincore import globals as pyglobals
 logger = pyglobals.LOGGER
 
 
-def edit_hash_entry(mode, hashed_url=None, service_url=None):
+def update_hash_entry(mode, hashed_url=None, service_url=None):
     """
     Helper function to add/remove the hashed url to service.json file to keep track of
     the data coming from various repositories.
@@ -377,7 +377,7 @@ class IncoreClient(Client):
         return self.return_http_response(r)
 
     def create_service_json_entry(self):
-        edit_hash_entry("add", hashed_url=self.hashed_service_url, service_url=self.service_url)
+        update_hash_entry("add", hashed_url=self.hashed_service_url, service_url=self.service_url)
 
     @staticmethod
     def clear_root_cache():
@@ -387,11 +387,9 @@ class IncoreClient(Client):
             return None
 
         for root, dirs, files in os.walk(pyglobals.PYINCORE_USER_DATA_CACHE):
-            # for f in files:
-            #     os.unlink(os.path.join(root, f))
             for d in dirs:
                 shutil.rmtree(os.path.join(root, d))
-        edit_hash_entry("clear")
+        update_hash_entry("clear")
         return None
 
     def clear_cache(self):
@@ -412,7 +410,7 @@ class IncoreClient(Client):
 
         shutil.rmtree(self.hashed_svc_data_dir)
         # clear entry from service.json
-        edit_hash_entry("edit", hashed_url=self.hashed_service_url)
+        update_hash_entry("edit", hashed_url=self.hashed_service_url)
         return
 
 
