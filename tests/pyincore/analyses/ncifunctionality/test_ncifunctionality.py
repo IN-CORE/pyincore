@@ -6,7 +6,7 @@ from pyincore.analyses.waterfacilityrestoration import WaterFacilityRestoration
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
 from pyincore.analyses.montecarlofailureprobability import MonteCarloFailureProbability
 from pyincore.analyses.ncifunctionality import NciFunctionality
-#import pyincore.globals as pyglobals
+import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
@@ -16,6 +16,7 @@ def run_with_base_class():
     hazard_type = "earthquake"
     hazard_id = "5e3dd04f7fdf7e0008032bfe"
 
+    epf_dataset = "631f932d61fe1122867c00d3"
     epf_mapping_id = "5b47be62337d4a37b6197a3a"
     epf_restoration_mapping_id = "61f302e6e3a03e465500b3eb"
 
@@ -28,8 +29,13 @@ def run_with_base_class():
     uncertainty = False
     wds_restoration_mapping_id = "61f075ee903e515036cee0a5"
 
+    # MMSA network datasets
     epf_mmsa_network = "631f48ccb4f2e17eff72d33d"
     wds_mmsa_network = "631f4bfb923e0e341acf1c96"
+
+    # Dependency tables
+    epf_wds_interdependency = "631f95f3b4f2e17eff72e2e9"
+    wds_epf_interdependency = "631f96fb923e0e341acf1f5d"
 
     # EPF substation damage analysis
     fragility_service = FragilityService(client)
@@ -37,10 +43,8 @@ def run_with_base_class():
 
     print("Electric power facility damage analysis...")
     epn_sub_dmg = EpfDamage(client)
-    epn_dataset = Dataset.from_file("shapefiles/Mem_power_link5_node.shp", data_type="incore:epf")
-    epn_sub_dmg.set_input_dataset("epfs", epn_dataset)
+    epn_sub_dmg.load_remote_input_dataset("epfs", epf_dataset)
     epn_sub_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
-
     result_name = "3_MMSA_EPN_substations_dmg_result"
     epn_sub_dmg.set_parameter("result_name", result_name)
     epn_sub_dmg.set_parameter("hazard_type", hazard_type)
@@ -71,7 +75,7 @@ def run_with_base_class():
     epf_rest = EpfRestoration(client)
     restorationsvc = RestorationService(client)
     mapping_set = MappingSet(restorationsvc.get_mapping(epf_restoration_mapping_id))
-    epf_rest.set_input_dataset("epfs", epn_dataset)
+    epf_rest.load_remote_input_dataset("epfs", epf_dataset)
     epf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
     epf_rest.set_input_dataset("damage", substation_dmg_result)
     result_name = "4_MMSA_epf_restoration_result"
@@ -127,12 +131,8 @@ def run_with_base_class():
     nic_func.set_parameter("discretized_days", [1, 3, 7, 30, 90])
     nic_func.load_remote_input_dataset("epf_network", epf_mmsa_network)
     nic_func.load_remote_input_dataset("wds_network", wds_mmsa_network)
-    nic_func.set_input_dataset("epf_wds_intdp_table", Dataset.from_csv_data([],
-                                                                            "epf_wds_interdependencies.csv",
-                                                                            'incore:networkInterdependencyTable'))
-    nic_func.set_input_dataset("wds_epf_intdp_table", Dataset.from_csv_data([],
-                                                                            "wds_epf_interdependencies.csv",
-                                                                            'incore:networkInterdependencyTable'))
+    nic_func.load_remote_input_dataset("epf_wds_intdp_table", epf_wds_interdependency)
+    nic_func.load_remote_input_dataset("wds_epf_intdp_table", wds_epf_interdependency)
     nic_func.set_input_dataset("epf_subst_failure_results", epf_subst_failure_results)
     nic_func.set_input_dataset("epf_inventory_rest_map", epf_inventory_rest_map)
     nic_func.set_input_dataset("epf_time_results", epf_time_results)
