@@ -49,7 +49,6 @@ class NciFunctionality(BaseAnalysis):
 
     def run(self):
         # Load parameters
-        result_name = self.get_parameter('result_name')
         discretized_days = self.get_parameter('discretized_days')
 
         # Load all dataset-related entities for EPF
@@ -76,29 +75,23 @@ class NciFunctionality(BaseAnalysis):
         wds_dmg_results = self.get_input_dataset('wds_dmg_results').get_dataframe_from_csv()
         wds_inventory_rest_map = self.get_input_dataset('wds_inventory_rest_map').get_dataframe_from_csv()
 
-        # Load pipeline damage results
-        pp_dmg_results = self.get_input_dataset('pp_dmg_results').get_dataframe_from_csv()
-
         epf_cascading_functionality = self.nci_functionality(discretized_days, epf_network_nodes, epf_network_links,
                                                              wds_network_nodes, wds_network_links,
                                                              epf_wds_intdp_table, wds_epf_intdp_table,
                                                              epf_subst_failure_results, epf_inventory_rest_map,
                                                              epf_time_results, wds_dmg_results,  wds_inventory_rest_map,
-                                                             wds_time_results, pp_dmg_results)
+                                                             wds_time_results)
 
-        self.set_result_csv_data(result_name + "_epf_cascading_functionality", epf_cascading_functionality,
-                                 name=self.get_parameter("epf_cascading_functionality"), source="dataframe")
-
-        # To be implemented in a future release
-        #self.set_result_csv_data(result_name + "_wds_cascading_functionality", wds_cascading_functionality,
-        #                         name=self.get_parameter("wds_cascading_functionality"), source="dataframe")
+        result_name = self.get_parameter("result_name")
+        self.set_result_csv_data("epf_cascading_functionality", epf_cascading_functionality, name=result_name,
+                                 source="dataframe")
 
         return True
 
     def nci_functionality(self, discretized_days, epf_network_nodes, epf_network_links, wds_network_nodes,
                           wds_network_links, epf_wds_intdp_table, wds_epf_intdp_table, epf_subst_failure_results,
                           epf_inventory_rest_map, epf_time_results, wds_dmg_results, wds_inventory_rest_map,
-                          wds_time_results, pp_damage_results):
+                          wds_time_results):
         """Compute EPF and WDS cascading functionality outcomes
 
         Args:
@@ -115,7 +108,6 @@ class NciFunctionality(BaseAnalysis):
             wds_dmg_results (pd.DataFrame): damage results for WDS network
             wds_inventory_rest_map (pd.DataFrame): inventory restoration map for WDS network
             wds_time_results (pd.DataFrame): time results for WDS network
-            pp_damage_results (pd.DataFrame): pipeline damage results for WDS network
 
         Returns:
             (pd.DataFrame, pd.DataFrame): results for EPF and WDS networks
@@ -129,11 +121,10 @@ class NciFunctionality(BaseAnalysis):
                                                              wds_inventory_rest_map, wds_time_results)
 
         # Compute updated WDS links
-        wds_links_updated = self.update_wds_network_links(pp_damage_results, wds_network_links)
+        wds_links_updated = self.update_wds_network_links(wds_network_links)
 
         # Generate the functionality data
         df_functionality_nodes = efp_nodes_updated.append(wds_nodes_updated, ignore_index=True)
-        print(df_functionality_nodes.head())
 
         # Create each individual graph
         g_epf = NetworkUtil.create_network_graph_from_dataframes(epf_network_nodes, epf_network_links)
@@ -269,7 +260,7 @@ class NciFunctionality(BaseAnalysis):
         return df_functionality_nodes
 
     @staticmethod
-    def update_wds_network_links(pp_dmg_results, wds_network_links):
+    def update_wds_network_links(wds_network_links):
         """Update network links with functionality attributes
 
         Args:
@@ -394,12 +385,6 @@ class NciFunctionality(BaseAnalysis):
                     'required': True,
                     'description': 'A csv file recording repair time for WDS per class and limit state',
                     'type': 'incore:waterFacilityRestorationTime'
-                },
-                {
-                    'id': 'pp_dmg_results',
-                    'required': True,
-                    'description': 'A csv file recording pipeline damage with repair rate class and limit state',
-                    'type': 'ergo:pipelineDamageVer3'
                 }
             ],
             'output_datasets': [

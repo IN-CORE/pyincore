@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, Dataset, FragilityService, MappingSet, RestorationService, DataService
+from pyincore import IncoreClient, Dataset, FragilityService, MappingSet, RestorationService, DataService, NetworkDataset
 from pyincore.analyses.epfdamage.epfdamage import EpfDamage
 from pyincore.analyses.epfrestoration import EpfRestoration
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
@@ -7,10 +7,12 @@ from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
 from pyincore.analyses.montecarlofailureprobability import MonteCarloFailureProbability
 from pyincore.analyses.ncifunctionality import NciFunctionality
 import pyincore.globals as pyglobals
+#import os
 
 
 def run_with_base_class():
     client = IncoreClient()
+    #datasvc = DataService(client)
 
     num_samples = 10000
     hazard_type = "earthquake"
@@ -28,12 +30,8 @@ def run_with_base_class():
     uncertainty = False
     wds_restoration_mapping_id = "61f075ee903e515036cee0a5"
 
-    pipeline_dataset_id = "5a284f28c7d30d13bc081d14"
-    pipeline_mapping_id = "5b47c227337d4a38464efea8"
-    pipeline_use_liq = False
-
-    epf_mmsa_network = "62d85b399701070dbf8c65fe"
-    wds_mmsa_network = "62d586120b99e237881b0519"
+    epf_mmsa_network = "631f48ccb4f2e17eff72d33d"
+    wds_mmsa_network = "631f4bfb923e0e341acf1c96"
 
     # EPF substation damage analysis
     fragility_service = FragilityService(client)
@@ -124,32 +122,10 @@ def run_with_base_class():
     wds_time_results = wf_rest.get_output_dataset("time_results")
     wds_inventory_rest_map = wf_rest.get_output_dataset("inventory_restoration_map")
 
-    # Pipeline restoration
-    print("Pipeline damage with repair rate analysis...")
-    pipeline_dataset = Dataset.from_data_service(pipeline_dataset_id, DataService(client))
-    df_inv_pipeline = pipeline_dataset.get_dataframe_from_shapefile()
-    df_inv_pipeline["x"] = df_inv_pipeline.centroid.map(lambda p: p.x)
-    df_inv_pipeline["y"] = df_inv_pipeline.centroid.map(lambda p: p.y)
-    pipeline_dmg_w_rr = PipelineDamageRepairRate(client)
-    pipeline_dmg_w_rr.load_remote_input_dataset("pipeline", pipeline_dataset_id)
-    mapping_set = MappingSet(fragility_service.get_mapping(pipeline_mapping_id))
-    pipeline_dmg_w_rr.set_input_dataset("dfr3_mapping_set", mapping_set)
-    result_name = "2_MMSA_pipeline_dmg_result"
-    pipeline_dmg_w_rr.set_parameter("result_name", result_name)
-    pipeline_dmg_w_rr.set_parameter("hazard_type", hazard_type)
-    pipeline_dmg_w_rr.set_parameter("hazard_id", hazard_id)
-    pipeline_dmg_w_rr.set_parameter("liquefaction_fragility_key", liq_fragility_key)
-    pipeline_dmg_w_rr.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
-    pipeline_dmg_w_rr.set_parameter("use_liquefaction", pipeline_use_liq)
-    pipeline_dmg_w_rr.set_parameter("num_cpu", 4)
-    pipeline_dmg_w_rr.run_analysis()
-
-    pp_dmg_results = pipeline_dmg_w_rr.get_output_dataset("result")
-
     # Network cascading interdependency functionality
     print("EPF/WDS network cascading interdependency analysis...")
     nic_func = NciFunctionality(client)
-    nic_func.set_parameter("result_name", "test")
+    nic_func.set_parameter("result_name", "MMSA_nci_result")
     nic_func.set_parameter("discretized_days", [1, 3, 7, 30, 90])
     nic_func.load_remote_input_dataset("epf_network", epf_mmsa_network)
     nic_func.load_remote_input_dataset("wds_network", wds_mmsa_network)
@@ -165,7 +141,6 @@ def run_with_base_class():
     nic_func.set_input_dataset("wds_dmg_results", wds_dmg_results)
     nic_func.set_input_dataset("wds_inventory_rest_map", wds_inventory_rest_map)
     nic_func.set_input_dataset("wds_time_results", wds_time_results)
-    nic_func.set_input_dataset("pp_dmg_results", pp_dmg_results)
     nic_func.run_analysis()
 
 
