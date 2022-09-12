@@ -6,13 +6,11 @@ from pyincore.analyses.waterfacilityrestoration import WaterFacilityRestoration
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
 from pyincore.analyses.montecarlofailureprobability import MonteCarloFailureProbability
 from pyincore.analyses.ncifunctionality import NciFunctionality
-import pyincore.globals as pyglobals
-#import os
+#import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
     client = IncoreClient()
-    #datasvc = DataService(client)
 
     num_samples = 10000
     hazard_type = "earthquake"
