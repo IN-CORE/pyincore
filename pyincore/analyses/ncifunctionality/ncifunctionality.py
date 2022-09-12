@@ -232,7 +232,8 @@ class NciFunctionality(BaseAnalysis):
 
         return wds_nodes_updated
 
-    def solve_leontief_equation(self, graph, functionality_nodes, discretized_days):
+    @staticmethod
+    def solve_leontief_equation(graph, functionality_nodes, discretized_days):
         """Computes the solution to the Leontief equation for network interdependency given a
 
         Args:
