@@ -27,9 +27,9 @@ USER_CACHE_DIR = ".incore"
 PYINCORE_USER_CACHE = os.path.join(USER_HOME, USER_CACHE_DIR)
 
 DATA_CACHE_FOLDER_NAME = "cache_data"
+DATA_CACHE_HASH_NAMES_SERVICE_JSON = "service.json"
 PYINCORE_USER_DATA_CACHE = os.path.join(PYINCORE_USER_CACHE, DATA_CACHE_FOLDER_NAME)
-
-TOKEN_FILE_NAME = ".incoretoken"
+PYINCORE_SERVICE_JSON = os.path.join(PYINCORE_USER_CACHE, DATA_CACHE_HASH_NAMES_SERVICE_JSON)
 
 LOGGING_CONFIG = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini'))
 logging_config.fileConfig(LOGGING_CONFIG)

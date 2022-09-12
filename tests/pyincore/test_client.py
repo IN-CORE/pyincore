@@ -3,6 +3,7 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
+import os.path
 
 import pytest
 import requests
@@ -28,7 +29,8 @@ def test_client_fail(monkeypatch):
         IncoreClient(token_file_name=".none")
 
 
-@pytest.mark.skip(reason="needs more thought on what to assert")
-def test_delete_cache():
-    r = Client.clear_cache()
-    assert r is None
+def test_delete_repo_cache():
+    client = IncoreClient(token_file_name=".incrtesttoken")
+    hashed_repo_dir_path = client.hashed_svc_data_dir
+    client.clear_cache()
+    assert os.path.exists(hashed_repo_dir_path) is False
