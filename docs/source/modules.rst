@@ -41,6 +41,10 @@ analyses/capitalshocks
 ..  autoclass:: pyincore.analyses.capitalshocks.CapitalShocks
     :members:
 
+analyses/combinedwindwavesurgebuildingdamage
+..  autoclass:: pyincore.analyses.combinedwindwavesurgebuildingdamage.CombinedWindWaveSurgeBuildingDamage
+    :members:
+
 analyses/cumulativebuildingdamage
 =================================
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
