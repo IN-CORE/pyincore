@@ -79,25 +79,19 @@ class NciFunctionality(BaseAnalysis):
         # Load pipeline damage results
         pp_dmg_results = self.get_input_dataset('pp_dmg_results').get_dataframe_from_csv()
 
-        (epf_cascading_functionality, wds_cascading_functionality) = self.nci_functionality(discretized_days,
-                                                                                            epf_network_nodes,
-                                                                                            epf_network_links,
-                                                                                            wds_network_nodes,
-                                                                                            wds_network_links,
-                                                                                            epf_wds_intdp_table,
-                                                                                            wds_epf_intdp_table,
-                                                                                            epf_subst_failure_results,
-                                                                                            epf_inventory_rest_map,
-                                                                                            epf_time_results,
-                                                                                            wds_dmg_results,
-                                                                                            wds_inventory_rest_map,
-                                                                                            wds_time_results,
-                                                                                            pp_dmg_results)
+        epf_cascading_functionality = self.nci_functionality(discretized_days, epf_network_nodes, epf_network_links,
+                                                             wds_network_nodes, wds_network_links,
+                                                             epf_wds_intdp_table, wds_epf_intdp_table,
+                                                             epf_subst_failure_results, epf_inventory_rest_map,
+                                                             epf_time_results, wds_dmg_results,  wds_inventory_rest_map,
+                                                             wds_time_results, pp_dmg_results)
 
         self.set_result_csv_data(result_name + "_epf_cascading_functionality", epf_cascading_functionality,
                                  name=self.get_parameter("epf_cascading_functionality"), source="dataframe")
-        self.set_result_csv_data(result_name + "_wds_cascading_functionality", wds_cascading_functionality,
-                                 name=self.get_parameter("wds_cascading_functionality"), source="dataframe")
+
+        # To be implemented in a future release
+        #self.set_result_csv_data(result_name + "_wds_cascading_functionality", wds_cascading_functionality,
+        #                         name=self.get_parameter("wds_cascading_functionality"), source="dataframe")
 
         return True
 
@@ -139,6 +133,7 @@ class NciFunctionality(BaseAnalysis):
 
         # Generate the functionality data
         df_functionality_nodes = efp_nodes_updated.append(wds_nodes_updated, ignore_index=True)
+        print(df_functionality_nodes.head())
 
         # Create each individual graph
         g_epf = NetworkUtil.create_network_graph_from_dataframes(epf_network_nodes, epf_network_links)
@@ -146,20 +141,26 @@ class NciFunctionality(BaseAnalysis):
 
         # Obtain two graphs for directional interdependencies
         g_epf_wds = NetworkUtil.merge_labeled_networks(g_epf, g_wds, epf_wds_intdp_table, directed=True)
-        g_wds_epf = NetworkUtil.merge_labeled_networks(g_wds, g_epf, wds_epf_intdp_table, directed=True)
+
+        # To be implemented in a future release
+        # g_wds_epf = NetworkUtil.merge_labeled_networks(g_wds, g_epf, wds_epf_intdp_table, directed=True)
 
         # Solve the corresponding Leontief problems
         df_epn_func_nodes = self.solve_leontief_equation(g_epf_wds, df_functionality_nodes, discretized_days)
-        df_wds_func_nodes = self.solve_leontief_equation(g_wds_epf, df_functionality_nodes, discretized_days)
+
+        # To be implemented in a future release
+        # df_wds_func_nodes = self.solve_leontief_equation(g_wds_epf, df_functionality_nodes, discretized_days)
 
         epn_cascading_functionality = epf_network_nodes[['guid', 'geometry']].merge(df_epn_func_nodes, on='guid',
                                                                                     how='left').rename(columns={
             'guid': 'sguid'})
-        wds_cascading_functionality = wds_network_nodes[['guid', 'geometry']].merge(df_wds_func_nodes, on='guid',
-                                                                                    how='left').rename(columns={
-            'guid': 'sguid'})
 
-        return epn_cascading_functionality, wds_cascading_functionality
+        # To be implemented in a future release
+        # wds_cascading_functionality = wds_network_nodes[['guid', 'geometry']].merge(df_wds_func_nodes, on='guid',
+                                                                                    #how='left').rename(columns={
+           #'guid': 'sguid'})
+
+        return epn_cascading_functionality
 
     @staticmethod
     def update_epf_discretized_func(epf_nodes, epf_subst_failure_results, epf_inventory_restoration_map,
@@ -255,13 +256,15 @@ class NciFunctionality(BaseAnalysis):
         # Create a deep copy of the incoming fuctionality results to store new values
         df_functionality_nodes = copy.deepcopy(functionality_nodes)
 
+        # M is computed once and remains common across discretized days
+        M = nx.adjacency_matrix(graph).todense()
+
         for idx in discretized_days:
-            M = nx.adjacency_matrix(graph).todense()
             u = 1 - df_functionality_nodes[f'functionality{idx}']
             u = u.to_numpy()
             I = np.identity(len(u))
-            q = list(np.dot(np.linalg.inv(I - M.T), u))[0]
-            df_functionality_nodes['func_cascading{idx}'] = [0 if i >= 1 else 1 - i for i in q]
+            q = np.dot(np.linalg.inv(I - M.T), u).tolist()[0]
+            df_functionality_nodes[f'func_cascading{idx}'] = [0 if i >= 1 else 1 - i for i in q]
 
         return df_functionality_nodes
 
@@ -279,7 +282,7 @@ class NciFunctionality(BaseAnalysis):
         wds_links = copy.deepcopy(wds_network_links)
 
         # Use `numpgvrpr` from pipeline damage
-        wds_links = pd.merge(wds_links, pp_dmg_results, on='guid', how='outer')
+        #wds_links = pd.merge(wds_links, pp_dmg_results, on='guid', how='outer')
 
         # Update values with pgv and pgd calculations
         for idx in wds_links['linknwid']:

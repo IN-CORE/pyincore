@@ -393,7 +393,6 @@ class NetworkUtil:
 
         # Extract labels
         labels = list(edges_ab.columns)
-        print(edges_ab)
 
         prefix_a = labels[0]
         prefix_b = labels[1]
