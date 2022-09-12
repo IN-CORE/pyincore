@@ -392,11 +392,6 @@ class NciFunctionality(BaseAnalysis):
                     'id': 'epf_cascading_functionality',
                     'description': 'CSV file of interdependent cascading network functionality for EPF',
                     'type': 'incore:epfDiscretizedCascadingFunc'
-                },
-                {
-                    'id': 'wds_cascading_functionality',
-                    'description': 'CSV file of interdependent cascading network functionality for WDS',
-                    'type': 'incore:waterFacilityDiscretizedCascadingFunc'
                 }
             ]
         }
