@@ -90,17 +90,15 @@ class DataService:
         """
         local_filename = None
 
-        # construct local directory and filename
-        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
-        if not os.path.exists(cache_data):
-            os.makedirs(cache_data)
-
         # add another layer of dataset id folder to differentiate datasets with the same filename
-        cache_data_dir = os.path.join(cache_data, dataset_id)
+        cache_data_dir = os.path.join(self.client.hashed_svc_data_dir, dataset_id)
 
         # if cache_data_dir doesn't exist create one
         if not os.path.exists(cache_data_dir):
             os.makedirs(cache_data_dir)
+            # for consistency check to ensure the repository hash is recorded in service.json
+            self.client.create_service_json_entry()
+
             local_filename = self.download_dataset_blob(cache_data_dir, dataset_id)
 
         # if cache_data_dir exist, check if id folder and zip file exist inside

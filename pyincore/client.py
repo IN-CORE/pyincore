@@ -5,6 +5,8 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import getpass
+import hashlib
+import json
 import os
 import shutil
 import urllib.parse
@@ -14,6 +16,66 @@ import requests
 from pyincore import globals as pyglobals
 
 logger = pyglobals.LOGGER
+
+
+def update_hash_entry(mode, hashed_url=None, service_url=None):
+    """
+    Helper function to add/remove the hashed url to service.json file to keep track of
+    the data coming from various repositories.
+    modes = ["add", "edit", "clear"]
+    Args:
+        mode (str): String value indicating operation mode
+        hashed_url (optional str): String value of the Hashed Service URL
+        service_url (optional str): Actual Service URL value
+
+    Returns: None
+
+    """
+    if mode not in ["clear", "edit", "add"]:
+        logger.warning("Incorrect mode. Please check the mode.")
+        return
+
+    service_json = {}
+    # to clear the entire cache data folder
+    if mode == "clear":
+        with open(pyglobals.PYINCORE_SERVICE_JSON, "w") as f:
+            json.dump(service_json, f, indent=4)
+        return
+
+    # to add a hash entry
+    if mode == "add" and (service_url is not None and hashed_url is not None):
+        entry = {
+                "service-name": "",
+                "service-url": service_url,
+                "hash": hashed_url,
+                "description": ""
+        }
+        if not os.path.exists(pyglobals.PYINCORE_SERVICE_JSON):
+            with open(pyglobals.PYINCORE_SERVICE_JSON, "w") as f:
+                service_json[hashed_url] = entry
+                json.dump(service_json, f, indent=4)
+                return
+    # read the current entries in service.json
+    try:
+        with open(pyglobals.PYINCORE_SERVICE_JSON, "r") as f:
+            service_json = json.load(f)
+    except FileNotFoundError:
+        logger.warning("service.json file not present.")
+        return
+
+    if hashed_url is None:
+        logger.warning("Need Hashed URL with edit mode")
+        return
+
+    # write back the data with or without a hash entry depending upon operation
+    with open(pyglobals.PYINCORE_SERVICE_JSON, "w") as f:
+        if hashed_url not in service_json and mode == "add":
+            service_json[hashed_url] = entry
+        elif hashed_url in service_json and mode == "edit":
+            del service_json[hashed_url]
+
+        json.dump(service_json, f, indent=4)
+    return
 
 
 class Client:
@@ -119,18 +181,6 @@ class Client:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
-    @staticmethod
-    def clear_cache():
-        if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
-            logger.warning("User data cache does not exist")
-            return None
-        for root, dirs, files in os.walk(pyglobals.PYINCORE_USER_DATA_CACHE):
-            for f in files:
-                os.unlink(os.path.join(root, f))
-            for d in dirs:
-                shutil.rmtree(os.path.join(root, d))
-        return None
-
 
 class IncoreClient(Client):
     """IN-CORE service client class. It contains token and service root url.
@@ -148,8 +198,25 @@ class IncoreClient(Client):
         self.service_url = service_url
         self.token_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_AUTH_PATH)
 
+        # hashlib requires bytes array for hash operations
+        byte_url_string = str.encode(self.service_url)
+        self.hashed_service_url = hashlib.sha256(byte_url_string).hexdigest()
+
+        self.create_service_json_entry()
+
+        # construct local directory and filename
+        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
+        if not os.path.exists(cache_data):
+            os.makedirs(cache_data)
+
+        self.hashed_svc_data_dir = os.path.join(cache_data, self.hashed_service_url)
+
+        if not os.path.exists(self.hashed_svc_data_dir):
+            os.makedirs(self.hashed_svc_data_dir)
+
+        # store the token file in the respective repository's directory
         if token_file_name is None or len(token_file_name.strip()) == 0:
-            token_file_name = pyglobals.TOKEN_FILE_NAME
+            token_file_name = "." + self.hashed_service_url + "_token"
         self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
 
         authorization = self.retrieve_token_from_file()
@@ -308,6 +375,43 @@ class IncoreClient(Client):
             r = self.session.delete(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r)
+
+    def create_service_json_entry(self):
+        update_hash_entry("add", hashed_url=self.hashed_service_url, service_url=self.service_url)
+
+    @staticmethod
+    def clear_root_cache():
+        # incase cache_data folder doesn't exist
+        if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
+            logger.warning("User data cache does not exist")
+            return None
+
+        for root, dirs, files in os.walk(pyglobals.PYINCORE_USER_DATA_CACHE):
+            for d in dirs:
+                shutil.rmtree(os.path.join(root, d))
+        update_hash_entry("clear")
+        return None
+
+    def clear_cache(self):
+        """
+            This function helps clear the data cache for a specific repository or the entire cache
+
+            Returns: None
+
+        """
+        # incase cache_data folder doesn't exist
+        if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
+            logger.warning("User data cache does not exist")
+            return None
+
+        if not os.path.isdir(self.hashed_svc_data_dir):
+            logger.warning("Cached folder doesn't exist")
+            return None
+
+        shutil.rmtree(self.hashed_svc_data_dir)
+        # clear entry from service.json
+        update_hash_entry("edit", hashed_url=self.hashed_service_url)
+        return
 
 
 class InsecureIncoreClient(Client):
