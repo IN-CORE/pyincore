@@ -134,6 +134,11 @@ analyses/multiobjectiveretrofitoptimization
 ..  autoclass:: multiobjectiveretrofitoptimization.multiobjectiveretrofitoptimization.MultiObjectiveRetrofitOptimization
     :members:
 
+analyses/ncifunctionality
+=========================
+..  autoclass:: ncifunctionality.ncifunctionality.NciFunctionality
+    :members:
+
 analyses/nonstructbuildingdamage
 ================================
 ..  autoclass:: nonstructbuildingdamage.nonstructbuildingdamage.NonStructBuildingDamage
