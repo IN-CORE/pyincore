@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-##[Unreleased]
+## [1.7.0] - 2022-09-14
 
 ### Added
 - EPN-WDS network cascading interdependency functionality analysis working with MMSA Shelby [#197](https://github.com/IN-CORE/pyincore/issues/197)
