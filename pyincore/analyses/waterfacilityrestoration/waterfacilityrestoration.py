@@ -9,6 +9,7 @@ Water Facility Restoration
 
 import numpy as np
 
+from typing import List
 from pyincore import BaseAnalysis, RestorationService, AnalysisUtil
 from pyincore.models.restorationcurveset import RestorationCurveSet
 
@@ -205,7 +206,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                     'id': 'discretized_days',
                     'required': False,
                     'description': 'Discretized days to compute functionality',
-                    'type': list
+                    'type': List[int]
                 }
 
             ],

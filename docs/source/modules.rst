@@ -41,6 +41,10 @@ analyses/capitalshocks
 ..  autoclass:: pyincore.analyses.capitalshocks.CapitalShocks
     :members:
 
+analyses/combinedwindwavesurgebuildingdamage
+..  autoclass:: pyincore.analyses.combinedwindwavesurgebuildingdamage.CombinedWindWaveSurgeBuildingDamage
+    :members:
+
 analyses/cumulativebuildingdamage
 =================================
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
@@ -128,6 +132,11 @@ analyses/montecarlofailureprobability
 analyses/multiobjectiveretrofitoptimization
 ===========================================
 ..  autoclass:: multiobjectiveretrofitoptimization.multiobjectiveretrofitoptimization.MultiObjectiveRetrofitOptimization
+    :members:
+
+analyses/ncifunctionality
+=========================
+..  autoclass:: ncifunctionality.ncifunctionality.NciFunctionality
     :members:
 
 analyses/nonstructbuildingdamage

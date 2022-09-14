@@ -369,3 +369,131 @@ class NetworkUtil:
                 validate = False
 
         return validate
+
+    @staticmethod
+    def merge_labeled_networks(graph_a, graph_b, edges_ab, directed=False):
+        """Merges two networks, each distinguished by a label
+
+        Args:
+            graph_a (obj): labeled network a
+            graph_b (obj): labeled network b
+            edges_ab (pd.DataFrame): mapping containing links between network a and network b, column labels should
+                                     correspond to the labels in each graph
+            directed (bool): if the network is directed, use an additional column to determine edge direction
+
+        Returns:
+
+            obj: a new graph that integrates the two networks
+        """
+
+        # Define directionality when needed
+        __left_to_right = 1
+        __right_to_left = -1
+        __no_direction = 0
+
+        # Extract labels
+        labels = list(edges_ab.columns)
+
+        prefix_a = labels[0]
+        prefix_b = labels[1]
+
+        # Ensure data types are correct
+        edges_ab[prefix_a] = edges_ab[prefix_a].astype('int64')
+        edges_ab[prefix_b] = edges_ab[prefix_a].astype('int64')
+
+        direction = None
+
+        if directed:
+            direction = labels[2]
+            edges_ab[direction] = edges_ab[direction].astype('int64')
+
+        # Merge the networks
+        merged_graph = nx.union(graph_a, graph_b, rename=(prefix_a, prefix_b))
+
+        # Use edge and direction to add connecting edges
+        for idx, row in edges_ab.iterrows():
+            if directed:
+                if row[direction] == __left_to_right:
+                    merged_graph.add_edge(f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}")
+                elif row[direction] == __no_direction:
+                    merged_graph.add_edge(f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}")
+                    merged_graph.add_edge(f"{prefix_b}{row[prefix_b]}", f"{prefix_a}{row[prefix_a]}")
+                else:
+                    merged_graph.add_edge(f"{prefix_b}{row[prefix_b]}", f"{prefix_a}{row[prefix_a]}")
+            else:
+                merged_graph.add_edge(f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}")
+
+        return merged_graph
+
+    @staticmethod
+    def extract_network_by_label(labeled_graph, prefix):
+        """Given a network resulting from a labeled merging, extract only one of the networks based on its prefix
+
+        Args:
+            labeled_graph (obj): a graph obtained by labeling and merging two networks
+            prefix (str): label of the network to extract
+
+        Returns:
+
+            obj: a new graph represented the network extracted using the label
+        """
+
+        # Filter the list of nodes based on prefix
+        prefix_nodes = filter(lambda node_id: node_id.startswith(prefix), list(labeled_graph.nodes))
+
+        # Extract the corresponding subgraph
+        subgraph = labeled_graph.subgraph(prefix_nodes)
+
+        # Construct the inverse mapping to get back to the original network
+        de_prefixed = map(lambda node_id: int(node_id.lstrip(prefix)), prefix_nodes)
+        de_mapping = dict(zip(prefix_nodes, de_prefixed))
+        return nx.relabel_nodes(subgraph, de_mapping, copy=True)
+
+    @staticmethod
+    def create_network_graph_from_dataframes(df_nodes, df_links, sort='unsorted'):
+        """Given a dataframe of nodes and a dataframe of links, assemble a network object.
+
+        Args:
+            df_nodes (pd.DataFrame):
+            df_links (pd.DataFrame):
+            sort:
+
+        Returns:
+
+        """
+        graph = nx.DiGraph()  # Empty graph
+
+        pos_x = df_nodes['geometry'].apply(lambda p: p.x).head()
+        pos_y = df_nodes['geometry'].apply(lambda p: p.y).head()
+        node_id = df_nodes['nodenwid']
+
+        pos = {}
+        pos_x = df_nodes['geometry'].apply(lambda p: p.x)
+        
+        pos_y = df_nodes['geometry'].apply(lambda p: p.y)
+        for i, val in enumerate(df_nodes["nodenwid"]):
+            pos[val] = (pos_x[i], pos_y[i])
+
+        edges = [(x, y) for x, y in zip(df_links["fromnode"], df_links["tonode"])]
+        edge = []
+
+        if sort == 'sorted':
+            for i, val in enumerate(df_links["linknwid"]):
+                if df_links["direction"][i] == 1:
+                    edge.append((df_links["fromnode"][i], df_links["tonode"][i]))
+                else:
+                    edge.append((df_links["tonode"][i], df_links["fromnode"][i]))
+        elif sort == 'unsorted':
+            for i, val in enumerate(df_links["linknwid"]):
+                edge.append((df_links["fromnode"][i], df_links["tonode"][i]))
+
+        graph.add_nodes_from(pos.keys())
+        graph.add_edges_from(edge)
+
+        for x, y, id in zip(pos_x, pos_y, node_id):
+            graph.nodes[id]['pos'] = (x, y)
+
+        for ii, node_id in enumerate(graph.nodes()):
+            graph.nodes[node_id]["classification"] = df_nodes["utilfcltyc"][ii]
+
+        return graph

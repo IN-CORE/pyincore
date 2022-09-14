@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [1.7.0] - 2022-09-14
+
+### Added
+- EPN-WDS network cascading interdependency functionality analysis working with MMSA Shelby [#197](https://github.com/IN-CORE/pyincore/issues/197)
+- Combined building damage for wind, wave and surge working with Galveston [#199](https://github.com/IN-CORE/pyincore/issues/199)
+
+### Changed
+- Improved validation of list types with nested sub-types in get_spec [#180](https://github.com/IN-CORE/pyincore/issues/180)
+- Format test for the code simplified to include all the paths [#193](https://github.com/IN-CORE/pyincore/issues/193)
+- Enable Hurricane in EPF damage [#200](https://github.com/IN-CORE/pyincore/issues/200)
+- Refactored caching mechanism to separate datasets by specifying hashed repository names. [#196](https://github.com/IN-CORE/pyincore/issues/196)
+
 ## [1.6.0] - 2022-07-27
 
 ### Added
