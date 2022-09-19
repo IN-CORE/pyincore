@@ -11,7 +11,7 @@ import time
 from typing import List
 from pandas import DataFrame
 from pyomo.environ import ConcreteModel, Set, Var, Param, Objective, Constraint
-from pyomo.environ import quicksum, minimize, maximize, NonNegativeReals, Any
+from pyomo.environ import quicksum, minimize, maximize, NonNegativeReals
 from pyomo.environ import sum_product
 import pyomo.environ as pyo
 from pyomo.opt import SolverStatus, TerminationCondition

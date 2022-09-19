@@ -4,7 +4,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import urllib
+from urllib.parse import urljoin
 from pyincore import IncoreClient
 
 
@@ -18,7 +18,7 @@ class SpaceService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_space_url = urllib.parse.urljoin(client.service_url, "space/api/spaces/")
+        self.base_space_url = urljoin(client.service_url, "space/api/spaces/")
 
     def create_space(self, space_json):
         """Creates a Space.
@@ -67,7 +67,7 @@ class SpaceService:
             obj: HTTP response with the created space information.
 
         """
-        url = urllib.parse.urljoin(self.base_space_url, space_id)
+        url = urljoin(self.base_space_url, space_id)
         r = self.client.get(url)
         response = r.json()
 
@@ -84,7 +84,7 @@ class SpaceService:
             obj: HTTP response with the updated space.
 
         """
-        url = urllib.parse.urljoin(self.base_space_url, space_id)
+        url = urljoin(self.base_space_url, space_id)
         space_data = {('space', space_json)}
         kwargs = {"files": space_data}
         r = self.client.put(url, **kwargs)
@@ -102,7 +102,7 @@ class SpaceService:
             obj: HTTP response with the updated space.
 
         """
-        url = urllib.parse.urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
+        url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
 
         r = self.client.post(url)
         response = r.json()
@@ -119,7 +119,7 @@ class SpaceService:
             obj: HTTP response with space privileges.
 
         """
-        url = urllib.parse.urljoin(self.base_space_url, space_id + "/grant")
+        url = urljoin(self.base_space_url, space_id + "/grant")
         space_privileges = {('grant', privileges_json)}
         kwargs = {"files": space_privileges}
         r = self.client.post(url, **kwargs)

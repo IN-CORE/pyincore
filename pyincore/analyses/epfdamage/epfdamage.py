@@ -114,8 +114,15 @@ class EpfDamage(BaseAnalysis):
 
         """
 
+        # Setting Local Variables
         use_liquefaction = False
         liquefaction_available = False
+        fragility_sets_liq = None
+        geology_dataset_id = None
+        liq_demand_types = None
+        liq_demand_units = None
+        liq_hazard_vals = None
+        liquefaction_prob = None
 
         fragility_key = self.get_parameter("fragility_key")
 

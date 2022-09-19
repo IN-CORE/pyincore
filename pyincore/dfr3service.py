@@ -6,7 +6,7 @@
 
 
 import re
-import urllib
+from urllib.parse import urljoin
 from typing import Dict
 
 from pyincore import IncoreClient
@@ -50,13 +50,9 @@ class MappingRequest(object):
 
 
 class MappingResponse(object):
-    def __init__(self, sets: Dict[str, any], mapping: Dict[str, str]):
+    def __init__(self, sets: Dict[str, any] = dict(), mapping: Dict[str, str] = dict()):
         self.sets = sets
         self.mapping = mapping
-
-    def __init__(self):
-        self.sets = dict()  # dfr3set id to dfr3set
-        self.mapping = dict()  # inventory id to dfr3set id
 
 
 class Dfr3Service:
@@ -69,8 +65,7 @@ class Dfr3Service:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_mapping_url = urllib.parse.urljoin(client.service_url,
-                                                     'dfr3/api/mappings/')
+        self.base_mapping_url = urljoin(client.service_url, 'dfr3/api/mappings/')
 
     def get_dfr3_set(self, dfr3_id: str):
         """Get specific DFR3 set.
@@ -82,7 +77,7 @@ class Dfr3Service:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_dfr3_url, dfr3_id)
+        url = urljoin(self.base_dfr3_url, dfr3_id)
         r = self.client.get(url)
 
         return r.json()
@@ -97,7 +92,7 @@ class Dfr3Service:
                 obj: HTTP response with return results.
 
         """
-        url = urllib.parse.urljoin(self.base_dfr3_url, dfr3_id)
+        url = urljoin(self.base_dfr3_url, dfr3_id)
         r = self.client.delete(url)
 
         return r.json()
@@ -140,7 +135,7 @@ class Dfr3Service:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_dfr3_url, "search")
+        url = urljoin(self.base_dfr3_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip
@@ -552,7 +547,7 @@ class Dfr3Service:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_mapping_url, mapping_id)
+        url = urljoin(self.base_mapping_url, mapping_id)
         r = self.client.get(url)
 
         return r.json()
@@ -567,7 +562,7 @@ class Dfr3Service:
             obj: HTTP response with return results.
 
         """
-        url = urllib.parse.urljoin(self.base_mapping_url, mapping_id)
+        url = urljoin(self.base_mapping_url, mapping_id)
         r = self.client.delete(url)
 
         return r.json()

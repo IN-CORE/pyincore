@@ -177,6 +177,7 @@ class BuildingDamage(BaseAnalysis):
             raise ValueError("The provided hazard type is not supported yet by this analysis")
 
         # Check if liquefaction is applicable
+        liquefaction_resp = None
         if use_liquefaction and geology_dataset_id is not None:
             liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
                                                                         values_payload_liq)
@@ -192,6 +193,7 @@ class BuildingDamage(BaseAnalysis):
             dmg_interval = dict()
             b_id = b["id"]
             selected_fragility_set = fragility_sets[b_id]
+            ground_failure_prob = None
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
             if isinstance(selected_fragility_set.fragility_curves[0], DFR3Curve):

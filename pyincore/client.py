@@ -253,7 +253,7 @@ class IncoreClient(Client):
             url (str): Service url.
             data (obj): Data to be posted on the server.
             json (obj): Description of the data, metadata json.
-            timeout (int): Session timeout.
+            timeout (tuple[int,int]): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -322,7 +322,7 @@ class InsecureIncoreClient(Client):
     def __init__(self, service_url: str = None, username: str = None):
         super().__init__()
         if service_url is None or len(service_url.strip()) == 0:
-            service_url = pyglobals.TEST_INCORE_API_PROD_URL
+            service_url = pyglobals.INCORE_API_PROD_URL
         self.service_url = service_url
         if username is None or len(username.strip()) == 0:
             self.session.headers["x-auth-userinfo"] = pyglobals.INCORE_LDAP_TEST_USER_INFO

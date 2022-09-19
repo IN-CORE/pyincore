@@ -9,7 +9,6 @@
 
 """
 
-import collections
 import concurrent.futures
 import math
 from itertools import repeat
@@ -188,6 +187,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
         else:
             raise ValueError("The provided hazard type is not supported yet by this analysis")
 
+        liquefaction_resp = None
         # Check if liquefaction is applicable
         if use_liquefaction is True and \
                 fragility_sets_liq is not None and \
