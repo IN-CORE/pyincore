@@ -6,10 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-##[Unreleased]
+## [1.7.0] - 2022-09-14
 
 ### Added
 - EPN-WDS network cascading interdependency functionality analysis working with MMSA Shelby [#197](https://github.com/IN-CORE/pyincore/issues/197)
+- Combined building damage for wind, wave and surge working with Galveston [#199](https://github.com/IN-CORE/pyincore/issues/199)
 
 ### Changed
 - Improved validation of list types with nested sub-types in get_spec [#180](https://github.com/IN-CORE/pyincore/issues/180)
