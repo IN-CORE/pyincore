@@ -39,10 +39,10 @@ def test_get_fragility_sets(fragilitysvc):
 
 
 def test_get_fragility_set(fragilitysvc):
-    id = "5b47b2d7337d4a36187c61c9"
-    metadata = fragilitysvc.get_dfr3_set(id)
+    set_id = "5b47b2d7337d4a36187c61c9"
+    metadata = fragilitysvc.get_dfr3_set(set_id)
 
-    assert metadata['id'] == id
+    assert metadata['id'] == set_id
 
 
 def test_search_fragility_sets(fragilitysvc):
