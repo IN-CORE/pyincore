@@ -50,7 +50,7 @@ class MappingRequest(object):
 
 
 class MappingResponse(object):
-    def __init__(self, sets: Dict[str, any] = dict(), mapping: Dict[str, str] = dict()):
+    def __init__(self, sets: Dict[str, any]=dict(), mapping: Dict[str, str]=dict()):
         self.sets = sets
         self.mapping = mapping
 
