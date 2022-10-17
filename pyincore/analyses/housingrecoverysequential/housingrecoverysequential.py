@@ -94,7 +94,7 @@ class HousingRecoverySequential(BaseAnalysis):
         pop_dis_selectors = ['guid', 'huid', 'blockid',
                              'numprec', 'race', 'hispan',
                              'ownershp', 'randincome', 'dislocated']
-        households_csv = self.get_input_dataset('population_dislocation_block').get_csv_reader()
+        households_csv = self.get_input_dataset('population_dislocation_block').get_csv_dict_reader()
         households_df = (pd.DataFrame(households_csv))[pop_dis_selectors]
 
         # Perform  conversions across the dataset from object type into the appropriate type
@@ -107,7 +107,7 @@ class HousingRecoverySequential(BaseAnalysis):
         households_df['dislocated'] = (households_df['dislocated'] == 'True')
 
         # Load the transition probability matrix from IN-CORE
-        tpm_csv = self.get_input_dataset("tpm").get_csv_reader()
+        tpm_csv = self.get_input_dataset("tpm").get_csv_dict_reader()
         tpm = pd.DataFrame(list(tpm_csv))
 
         # Make sure all columns have numeric values
@@ -118,7 +118,7 @@ class HousingRecoverySequential(BaseAnalysis):
         tpm[:, 0] = np.around(tpm[:, 0], 3)
 
         # Load the initial stage probability vector
-        initial_prob_csv = self.get_input_dataset("initial_stage_probabilities").get_csv_reader()
+        initial_prob_csv = self.get_input_dataset("initial_stage_probabilities").get_csv_dict_reader()
         initial_prob = pd.DataFrame(list(initial_prob_csv))
         initial_prob['value'] = pd.to_numeric(initial_prob['value'])
 
