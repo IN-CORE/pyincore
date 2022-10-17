@@ -86,7 +86,7 @@ class INDPUtil:
                     ds = dmg_sce_data[dmg_sce_data['name'] == node_name].iloc[0][sample_num + 1]
                     rep_time = reptime_func_node.iloc[0]['ds_' + ds + '_mean']
                     dr = dr_data.iloc[0]['dr_' + ds + '_be']
-                    repair_cost = v[1]['q (complete DS)'] * dr
+                    repair_cost = v[1]['q_ds_3'] * dr
                 node_data.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0
                 node_data.loc[v[0], 'p_budget'] = repair_cost
                 node_data.loc[v[0], 'q'] = repair_cost
@@ -116,15 +116,15 @@ class INDPUtil:
                     num_20_ft_seg = pipe_length_ft / 20
                     num_breaks = rep_rate['break'] * pipe_length
                     if num_breaks > num_20_ft_seg:
-                        repair_cost += v[1]['f (complete)'] * dr['break']
+                        repair_cost += v[1]['f_ds_3'] * dr['break']
                     else:
-                        repair_cost += v[1]['f (complete)'] / num_20_ft_seg * num_breaks * dr['break']
+                        repair_cost += v[1]['f_ds_3'] / num_20_ft_seg * num_breaks * dr['break']
                     num_leaks = rep_rate['leak'] * pipe_length
                     if num_leaks > num_20_ft_seg:
-                        repair_cost += v[1]['f (complete)'] * dr['leak']
+                        repair_cost += v[1]['f_ds_3'] * dr['leak']
                     else:
-                        repair_cost += v[1]['f (complete)'] / num_20_ft_seg * num_leaks * dr['leak']
-                    repair_cost = min(repair_cost, v[1]['f (complete)'])
+                        repair_cost += v[1]['f_ds_3'] / num_20_ft_seg * num_leaks * dr['leak']
+                    repair_cost = min(repair_cost, v[1]['f_ds_3'])
                 arc_data.loc[v[0], 'h_time'] = float(rep_time)
                 arc_data.loc[v[0], 'h_budget'] = repair_cost
                 arc_data.loc[v[0], 'f'] = repair_cost

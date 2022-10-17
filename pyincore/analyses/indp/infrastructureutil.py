@@ -51,7 +51,7 @@ class InfrastructureUtil:
                 G.G.add_node((n.local_id, n.net_id), data={'inf_data': n})
                 global_index += 1
                 node_main_data = G.G.nodes[(n.local_id, n.net_id)]['data']['inf_data']
-                node_main_data.reconstruction_cost = float(v[1]['q (complete DS)']) * cost_scale
+                node_main_data.reconstruction_cost = float(v[1]['q_ds_3']) * cost_scale
                 node_main_data.oversupply_penalty = float(v[1]['Mp']) * cost_scale
                 node_main_data.undersupply_penalty = float(v[1]['Mm']) * cost_scale
                 node_main_data.demand = float(v[1]['Demand'])

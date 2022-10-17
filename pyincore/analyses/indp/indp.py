@@ -14,7 +14,7 @@ import pyomo.environ as pyo
 from pyomo.opt import SolverFactory, TerminationCondition
 from pyomo.util.infeasible import log_infeasible_constraints
 
-from pyincore import BaseAnalysis
+from pyincore import BaseAnalysis, NetworkDataset
 from pyincore.analyses.indp.dislocationutils import DislocationUtil
 from pyincore.analyses.indp.indpresults import INDPResults
 from pyincore.analyses.indp.indputil import INDPUtil
@@ -117,10 +117,15 @@ class INDP(BaseAnalysis):
         arcs_reptime_func = self.get_input_dataset("arcs_reptime_func").get_dataframe_from_csv(low_memory=False)
         arcs_damge_ratio = self.get_input_dataset("arcs_damge_ratio").get_dataframe_from_csv(low_memory=False)
         dmg_sce_data = self.get_input_dataset("dmg_sce_data").get_dataframe_from_csv(low_memory=False)
-        power_arcs = self.get_input_dataset("power_arcs").get_dataframe_from_csv(low_memory=False)
-        power_nodes = self.get_input_dataset("power_nodes").get_dataframe_from_csv(low_memory=False)
-        water_arcs = self.get_input_dataset("water_arcs").get_dataframe_from_csv(low_memory=False)
-        water_nodes = self.get_input_dataset("water_nodes").get_dataframe_from_csv(low_memory=False)
+
+        power_network = NetworkDataset.from_dataset(self.get_input_dataset("power_network"))
+        power_arcs = power_network.links.get_dataframe_from_shapefile()
+        power_nodes = power_network.nodes.get_dataframe_from_shapefile()
+
+        water_network = NetworkDataset.from_dataset(self.get_input_dataset("water_network"))
+        water_arcs = water_network.links.get_dataframe_from_shapefile()
+        water_nodes = water_network.nodes.get_dataframe_from_shapefile()
+
         pipeline_dmg = self.get_input_dataset("pipeline_dmg").get_dataframe_from_csv(low_memory=False)
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
         initial_node = self.get_input_dataset("initial_node").get_csv_reader()
@@ -754,28 +759,16 @@ class INDP(BaseAnalysis):
                     "type": "incore:dmgSceData"
                 },
                 {
-                    "id": "power_arcs",
-                    "required": True,
-                    "description": "Power Arcs",
-                    "type": "incore:powerArcs"
+                    'id': 'power_network',
+                    'required': True,
+                    'description': 'EPN Network Dataset',
+                    'type': ['incore:epnNetwork'],
                 },
                 {
-                    "id": "power_nodes",
-                    "required": True,
-                    "description": "Power Nodes",
-                    "type": "incore:powerNodes"
-                },
-                {
-                    "id": "water_arcs",
-                    "required": True,
-                    "description": "Water Arcs",
-                    "type": "incore:waterArcs"
-                },
-                {
-                    "id": "water_nodes",
-                    "required": True,
-                    "description": "Water Nodes",
-                    "type": "incore:waterNodes"
+                    'id': 'water_network',
+                    'required': True,
+                    'description': 'Water Network Dataset',
+                    'type': ['incore:waterNetwork'],
                 },
                 {
                     "id": "pipeline_dmg",
