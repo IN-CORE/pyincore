@@ -52,7 +52,7 @@ class EpfRestoration(BaseAnalysis):
         if discretized_days is None:
             discretized_days = [1, 3, 7, 30, 90]
 
-        damage = self.get_input_dataset("damage").get_csv_reader()
+        damage = self.get_input_dataset("damage").get_csv_dict_reader()
         damage_result = AnalysisUtil.get_csv_table_rows(damage, ignore_first_row=False)
 
         (inventory_restoration_map, pf_results, time_results, func_results) = self.electricpowerfacility_restoration(
