@@ -37,7 +37,7 @@ class BuildingDamage(BaseAnalysis):
         # building retrofit strategy
         retrofit_strategy_dataset = self.get_input_dataset("retrofit_strategy")
         if retrofit_strategy_dataset is not None:
-            retrofit_strategy = list(retrofit_strategy_dataset.get_csv_dict_reader())
+            retrofit_strategy = list(retrofit_strategy_dataset.get_csv_reader())
         else:
             retrofit_strategy = None
 

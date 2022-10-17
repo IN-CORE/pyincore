@@ -22,10 +22,10 @@ class CumulativeBuildingDamage(BaseAnalysis):
 
     def run(self):
         """Executes Cumulative Building Damage Analysis"""
-        eq_damage_set = self.get_input_dataset("eq_bldg_dmg").get_csv_dict_reader()
+        eq_damage_set = self.get_input_dataset("eq_bldg_dmg").get_csv_reader()
         eq_damage_df = pd.DataFrame(list(eq_damage_set))
         tsunami_damage_set = self.get_input_dataset(
-            "tsunami_bldg_dmg").get_csv_dict_reader()
+            "tsunami_bldg_dmg").get_csv_reader()
         tsunami_damage_df = pd.DataFrame(list(tsunami_damage_set))
 
         user_defined_cpu = 1
