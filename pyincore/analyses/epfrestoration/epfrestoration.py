@@ -9,7 +9,8 @@ Electric Power Facility Restoration
 
 import numpy as np
 
-from pyincore import BaseAnalysis, RestorationService
+from typing import List
+from pyincore import BaseAnalysis, RestorationService, AnalysisUtil
 from pyincore.models.restorationcurveset import RestorationCurveSet
 
 
@@ -47,28 +48,40 @@ class EpfRestoration(BaseAnalysis):
         if pf_interval is None:
             pf_interval = 0.1
 
-        (inventory_restoration_map, pf_results, time_results) = self.electricpowerfacility_restoration(
-            inventory_list, mapping_set, restoration_key, end_time, time_interval, pf_interval)
+        discretized_days = self.get_parameter("discretized_days")
+        if discretized_days is None:
+            discretized_days = [1, 3, 7, 30, 90]
+
+        damage = self.get_input_dataset("damage").get_csv_reader()
+        damage_result = AnalysisUtil.get_csv_table_rows(damage, ignore_first_row=False)
+
+        (inventory_restoration_map, pf_results, time_results, func_results) = self.electricpowerfacility_restoration(
+            inventory_list, damage_result, mapping_set, restoration_key, end_time, time_interval, pf_interval, 
+            discretized_days)
 
         self.set_result_csv_data("inventory_restoration_map", inventory_restoration_map,
                                  name="inventory_restoration_map_" + self.get_parameter("result_name"))
         self.set_result_csv_data("pf_results", time_results, name="percentage_of_functionality_" +
                                                                   self.get_parameter("result_name"))
         self.set_result_csv_data("time_results", pf_results, name="reptime_" + self.get_parameter("result_name"))
+        self.set_result_csv_data("func_results", func_results,
+                                 name=self.get_parameter("result_name") + "_discretized_restoration")
 
         return True
 
-    def electricpowerfacility_restoration(self, inventory_list, mapping_set, restoration_key, end_time, time_interval,
-                                          pf_interval):
+    def electricpowerfacility_restoration(self, inventory_list, damage_result, mapping_set, restoration_key, end_time,
+                                          time_interval, pf_interval, discretized_days):
         """Gets applicable restoration curve set and calculates restoration time and functionality
 
         Args:
             inventory_list (list): Multiple EPF facilities from input inventory set.
+            damage_result: EPF damage
             mapping_set (class): Restoration Mapping Set
             restoration_key (str): Restoration Key to determine which curve to use. E.g. Restoration ID Code
             end_time (float): User specified end repair time
             time_interval (float): Increment interval of repair time. Default to 1 (1 day)
             pf_interval (float): Increment interval of percentage of functionality. Default 0.1 (10%)
+            discretized_days (list): Days to compute discretized restoration (e.g. 1, 3, 7, 30, 90)
 
         Returns:
             time_results (list): Given Percentage of functionality, the change of repair time
@@ -77,6 +90,9 @@ class EpfRestoration(BaseAnalysis):
         """
         # Obtain the restoration id for each electric facilities
         inventory_restoration_map = []
+
+        # Obtain classification for each electric facility, used to lookup discretized functionality
+        inventory_class_map = {}
         restoration_sets = self.restorationsvc.match_inventory(
             self.get_input_dataset("dfr3_mapping_set"), inventory_list, restoration_key)
         for inventory in inventory_list:
@@ -84,8 +100,15 @@ class EpfRestoration(BaseAnalysis):
                 restoration_set_id = restoration_sets[inventory["id"]].id
             else:
                 restoration_set_id = None
+
             inventory_restoration_map.append({"guid": inventory['properties']['guid'],
                                               "restoration_id": restoration_set_id})
+
+            restoration_curve_set = restoration_sets[inventory["id"]]
+
+            # For each facility, get the discretized restoration from the continuous curve
+            discretized_restoration = AnalysisUtil.get_discretized_restoration(restoration_curve_set, discretized_days)
+            inventory_class_map[inventory['properties']['guid']] = discretized_restoration
 
         time_results = []
         pf_results = []
@@ -119,7 +142,27 @@ class EpfRestoration(BaseAnalysis):
                     **new_dict
                 })
 
-        return inventory_restoration_map, pf_results, time_results
+        # Compute discretized restoration
+        func_result = []
+        for dmg in damage_result:
+            guid = dmg['guid']
+            
+            # Dictionary of discretized restoration functionality
+            rest_dict = inventory_class_map[guid]
+
+            ds_0, ds_1, ds_2, ds_3, ds_4 = dmg['DS_0'], dmg['DS_1'], dmg['DS_2'], dmg['DS_3'], dmg['DS_4']
+            result_dict = {}
+            for time in discretized_days:
+                key = "day" + str(time)
+                # Only compute if we have damage
+                if ds_0:
+                    functionality = (rest_dict[key][0] * float(ds_0) + rest_dict[key][1] * float(ds_1) + rest_dict[
+                        key][2] * float(ds_2) + rest_dict[key][3] * float(ds_3) + rest_dict[key][4] * float(ds_4))
+                    result_dict.update({str(key): functionality})
+
+            func_result.append({"guid": guid, **result_dict})
+
+        return inventory_restoration_map, pf_results, time_results, func_result
 
     def get_spec(self):
         return {
@@ -155,6 +198,12 @@ class EpfRestoration(BaseAnalysis):
                     'required': False,
                     'description': 'incremental interval for percentage of functionality. Default to 0.1',
                     'type': float
+                },
+                {
+                    'id': 'discretized_days',
+                    'required': False,
+                    'description': 'Discretized days to compute functionality',
+                    'type': List[int]
                 }
             ],
             'input_datasets': [
@@ -169,7 +218,20 @@ class EpfRestoration(BaseAnalysis):
                     'required': True,
                     'description': 'DFR3 Mapping Set Object',
                     'type': ['incore:dfr3MappingSet'],
+                },
+                {
+
+                    'id': 'damage',
+                    'required': True,
+                    'description': 'damage result that has damage intervals in it',
+                    'type': [
+                             'incore:epfDamage',
+                             'incore:epfDamageVer2',
+                             'incore:epfDamageVer3']
                 }
+
+
+
             ],
             'output_datasets': [
                 {
@@ -189,9 +251,17 @@ class EpfRestoration(BaseAnalysis):
                 {
                     'id': 'time_results',
                     'parent_type': '',
-                    'description': 'A csv file recording repair time at certain funcionality recovery for each class '
+                    'description': 'A csv file recording repair time at certain functionality recovery for each class '
                                    'and limit state.',
                     'type': 'incore:epfRestorationTime'
                 },
+                {
+
+                    'id': 'func_results',
+                    'parent_type': '',
+                    'description': 'A csv file recording discretized functionality over time',
+                    'type': 'incore:epfDiscretizedRestorationFunc'
+                }
+
             ]
         }

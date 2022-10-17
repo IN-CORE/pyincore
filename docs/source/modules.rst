@@ -41,6 +41,10 @@ analyses/capitalshocks
 ..  autoclass:: pyincore.analyses.capitalshocks.CapitalShocks
     :members:
 
+analyses/combinedwindwavesurgebuildingdamage
+..  autoclass:: pyincore.analyses.combinedwindwavesurgebuildingdamage.CombinedWindWaveSurgeBuildingDamage
+    :members:
+
 analyses/cumulativebuildingdamage
 =================================
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
@@ -56,6 +60,13 @@ analyses/epfdamage
 ..  autoclass:: epfdamage.epfdamage.EpfDamage
     :members:
 ..  autoclass:: epfdamage.epfutil.EpfUtil
+    :members:
+
+analyses/epnfunctionality
+=========================
+..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionality
+    :members:
+..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionalityUtil
     :members:
 
 analyses/example
@@ -123,6 +134,11 @@ analyses/multiobjectiveretrofitoptimization
 ..  autoclass:: multiobjectiveretrofitoptimization.multiobjectiveretrofitoptimization.MultiObjectiveRetrofitOptimization
     :members:
 
+analyses/ncifunctionality
+=========================
+..  autoclass:: ncifunctionality.ncifunctionality.NciFunctionality
+    :members:
+
 analyses/nonstructbuildingdamage
 ================================
 ..  autoclass:: nonstructbuildingdamage.nonstructbuildingdamage.NonStructBuildingDamage
@@ -140,6 +156,11 @@ analyses/pipelinedamagerepairrate
 ..  autoclass:: pipelinedamagerepairrate.pipelinedamagerepairrate.PipelineDamageRepairRate
     :members:
 ..  autoclass:: pipelinedamagerepairrate.pipelineutil.PipelineUtil
+    :members:
+
+analyses/pipelinefunctionality
+=========================
+..  autoclass:: pipelinefunctionality.pipelinefunctionality.PipelineFunctionality
     :members:
 
 analyses/pipelinerestoration
@@ -218,6 +239,11 @@ analyses/waterfacilitydamage
 analyses/waterfacilityrestoration
 =================================
 ..  autoclass:: waterfacilityrestoration.waterfacilityrestoration.WaterFacilityRestoration
+    :members:
+
+analyses/wfnfunctionality
+=================================
+..  autoclass:: wfnfunctionality.wfnfunctionality.WfnFunctionality
     :members:
 
 models

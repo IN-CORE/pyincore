@@ -4,11 +4,11 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
 import collections
 import concurrent.futures
 import numpy as np
 
+from typing import List
 from pyincore import BaseAnalysis, AnalysisUtil
 
 
@@ -59,13 +59,13 @@ class MonteCarloFailureProbability(BaseAnalysis):
                     'id': 'damage_interval_keys',
                     'required': True,
                     'description': 'Column name of the damage interval',
-                    'type': list
+                    'type': List[str]
                 },
                 {
                     'id': 'failure_state_keys',
                     'required': True,
                     'description': 'Column name of the damage interval that considered as damaged',
-                    'type': list
+                    'type': List[str]
                 },
                 {
                     'id': 'seed',

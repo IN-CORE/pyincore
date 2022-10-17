@@ -121,7 +121,17 @@ class BuildingDamage(BaseAnalysis):
         fragility_key = self.get_parameter("fragility_key")
         fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
                                                            fragility_key, retrofit_strategy)
+
+        # Liquefaction
+        use_liquefaction = False
+        if hazard_type == "earthquake" and self.get_parameter("use_liquefaction") is not None:
+            use_liquefaction = self.get_parameter("use_liquefaction")
+
+        # Get geology dataset id containing liquefaction susceptibility
+        geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
+
         values_payload = []
+        values_payload_liq = []  # for liquefaction, if used
         unmapped_buildings = []
         mapped_buildings = []
         for b in buildings:
@@ -138,6 +148,14 @@ class BuildingDamage(BaseAnalysis):
                 }
                 values_payload.append(value)
                 mapped_buildings.append(b)
+
+                if use_liquefaction and geology_dataset_id is not None:
+                    value_liq = {
+                        "demands": [""],
+                        "units": [""],
+                        "loc": loc
+                    }
+                    values_payload_liq.append(value_liq)
             else:
                 unmapped_buildings.append(b)
 
@@ -157,6 +175,11 @@ class BuildingDamage(BaseAnalysis):
             hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
         else:
             raise ValueError("The provided hazard type is not supported yet by this analysis")
+
+        # Check if liquefaction is applicable
+        if use_liquefaction and geology_dataset_id is not None:
+            liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
+                                                                        values_payload_liq)
 
         ds_results = []
         damage_results = []
@@ -194,6 +217,12 @@ class BuildingDamage(BaseAnalysis):
 
                     dmg_probability = selected_fragility_set.calculate_limit_state(
                         hval_dict, **building_args, period=building_period)
+
+                    if use_liquefaction and geology_dataset_id is not None and liquefaction_resp is not None:
+                        ground_failure_prob = liquefaction_resp[i][BuildingUtil.GROUND_FAILURE_PROB]
+                        dmg_probability = AnalysisUtil.update_precision_of_dicts(
+                            AnalysisUtil.adjust_damage_for_liquefaction(dmg_probability, ground_failure_prob))
+
                     dmg_interval = selected_fragility_set.calculate_damage_interval(
                         dmg_probability, hazard_type=hazard_type, inventory_type="building")
             else:
@@ -211,6 +240,9 @@ class BuildingDamage(BaseAnalysis):
             damage_result['demandtype'] = b_demands
             damage_result['demandunits'] = b_units
             damage_result['hazardval'] = b_haz_vals
+
+            if use_liquefaction and geology_dataset_id is not None:
+                damage_result[BuildingUtil.GROUND_FAILURE_PROB] = ground_failure_prob
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)
@@ -289,6 +321,12 @@ class BuildingDamage(BaseAnalysis):
                     'required': False,
                     'description': 'Initial seed for the tornado hazard value',
                     'type': int
+                },
+                {
+                    'id': 'liquefaction_geology_dataset_id',
+                    'required': False,
+                    'description': 'Geology dataset id',
+                    'type': str,
                 }
             ],
             'input_datasets': [

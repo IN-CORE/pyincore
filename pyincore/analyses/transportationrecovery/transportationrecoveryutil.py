@@ -62,17 +62,17 @@ class TransportationRecoveryUtil:
             reader = csv.reader(f)
             next(reader)
             for row in reader:
-                id = row[0]
+                state_id = row[0]
                 mean_damage = float(row[10])
 
                 if mean_damage > 0 and mean_damage < 0.25:
-                    bridge_damage_value[id] = 1
+                    bridge_damage_value[state_id] = 1
                 elif mean_damage >= 0.25 and mean_damage < 0.5:
-                    bridge_damage_value[id] = 2
+                    bridge_damage_value[state_id] = 2
                 elif mean_damage >= 0.5 and mean_damage < 0.75:
-                    bridge_damage_value[id] = 3
+                    bridge_damage_value[state_id] = 3
                 elif mean_damage >= 0.75 and mean_damage <= 1:
-                    bridge_damage_value[id] = 4
+                    bridge_damage_value[state_id] = 4
                 else:
                     raise ValueError('mean damage should not larger than 1!')
 
