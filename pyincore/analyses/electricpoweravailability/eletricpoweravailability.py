@@ -24,12 +24,14 @@ class ElectricPowerAvailability(BaseAnalysis):
     def run(self):
         """Executes building power availability analysis."""
         # inventory dataset
-        bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
+        bldg_inv_gdf = self.get_input_dataset("buildings").get_dataframe_from_shapefile()
         substation_set = self.get_input_dataset("epfs").get_inventory_reader()
         epf_damage = self.get_input_dataset("epf_damage").get_csv_reader()
         epf_damage_result = AnalysisUtil.get_csv_table_rows(epf_damage, ignore_first_row=False)
 
-        power_availability = self.building_power_availability(bldg_set, substation_set, epf_damage_result)
+        city_polygon = self.get_input_dataset("polygon").get_dataframe_from_shapefile().set_crs(epsg=4326)
+
+        power_availability = self.building_power_availability(bldg_inv_gdf, substation_set, epf_damage_result, city_polygon)
 
         self.set_result_csv_data("power_availability", power_availability, name=self.get_parameter(
             "result_name")+"_power_availability")
@@ -37,7 +39,7 @@ class ElectricPowerAvailability(BaseAnalysis):
         return True
 
 
-    def building_power_availability(self, bldg_set, substation_set, epf_damage_result):
+    def building_power_availability(self, bldg_inv_gdf, substation_set, epf_damage_result, city_polygon):
         """Run analysis for multiple buildings.
 
         Args:
@@ -98,8 +100,6 @@ class ElectricPowerAvailability(BaseAnalysis):
         return power_availability
 
     def service_areas_to_substations(self, city_polygon):
-        # city_polygon = gpd.GeoDataFrame(Lumbertoncity)
-        # city_polygon = city_polygon.set_crs(epsg=4326)
         city_polygon_shape = unary_union(city_polygon.geometry)
         substation_coordinates = points_to_coords(substation_points.geometry)
 
