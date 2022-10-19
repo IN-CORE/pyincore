@@ -4,14 +4,9 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-
-import concurrent.futures
-from itertools import repeat
-
-from pyincore import BaseAnalysis, HazardService, \
-    FragilityService, AnalysisUtil, GeoUtil
-from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
-from pyincore.models.dfr3curve import DFR3Curve
+from pyincore import BaseAnalysis, AnalysisUtil
+from shapely.ops import unary_union
+from geovoronoi import voronoi_regions_from_coords, points_to_coords
 
 
 class ElectricPowerAvailability(BaseAnalysis):
@@ -24,9 +19,6 @@ class ElectricPowerAvailability(BaseAnalysis):
     """
 
     def __init__(self, incore_client):
-        self.hazardsvc = HazardService(incore_client)
-        self.fragilitysvc = FragilityService(incore_client)
-
         super(ElectricPowerAvailability, self).__init__(incore_client)
 
     def run(self):
@@ -54,9 +46,67 @@ class ElectricPowerAvailability(BaseAnalysis):
         Returns:
 
         """
+        poly_shapes, pts = self.service_areas_to_substations(city_polygon)
 
+        # Create dataframe to keep track of access to infrastructure
+        bldg_infra_availability = bldg_inv_gdf[['guid', 'geometry']]
+
+        # Initialize substation index that services building
+        bldg_infra_availability = bldg_infra_availability.assign(substation_idx=3)
+
+        # Create empty list to hold gpd dataframes corresponding to buildings in each substation
+        bldg_groups = []
+
+        # For each substation, identify buildings being serviced and assign state of substation functionality
+        for poly_shape_idx in range(len(poly_shapes)):
+            idx = poly_shape_idx
+            region_polygon = gpd.GeoDataFrame()
+            region_polygon['geometry'] = None
+            region_polygon.loc[0, 'geometry'] = poly_shapes[idx]
+            region_polygon = region_polygon.set_crs("epsg:4326")
+
+            region_polygons.append(region_polygon)
+
+            bldg_points_within_region = gpd.sjoin(bldg_infra_availability, region_polygon, op='within', how='inner')
+            bldg_points_within_region = bldg_points_within_region.append(pd.Series(), ignore_index=True)
+
+            # print(idx)
+            bldg_points_within_region['substation_idx'] = idx
+            # print(bldg_points_within_region)
+            bldg_groups.append(bldg_points_within_region)
+
+            fig, ax = plt.subplots(figsize=(5, 5))
+            Lumbertoncity.plot(ax=ax, color='grey', alpha=0.4)
+            node_color = 'green'
+            if is_substation_flooded[idx]:
+                node_color = 'red'
+            bldg_points_within_region.plot(ax=ax, markersize=0.7, color=node_color)
+            plt.show()
+
+        # Assign electric power service availability to each building
+
+        bldg_infra_availability = bldg_infra_availability.assign(is_power_available=True)
+
+        for idx in range(len(poly_shapes)):
+            region_polygon = region_polygons[idx]
+            for building_id in bldg_groups[idx]["guid"]:
+                bldg_infra_availability.loc[bldg_infra_availability["guid"] == str(building_id), 'substation_idx'] = idx
+                bldg_infra_availability.loc[
+                    bldg_infra_availability["guid"] == str(building_id), 'is_power_available'] = ~is_substation_flooded[
+                    idx]
 
         return power_availability
+
+    def service_areas_to_substations(self, city_polygon):
+        # city_polygon = gpd.GeoDataFrame(Lumbertoncity)
+        # city_polygon = city_polygon.set_crs(epsg=4326)
+        city_polygon_shape = unary_union(city_polygon.geometry)
+        substation_coordinates = points_to_coords(substation_points.geometry)
+
+        # Use Voronoi polygon to assign service areas to corresponding substations
+        poly_shapes, pts = voronoi_regions_from_coords(substation_coordinates, city_polygon_shape)
+
+        return poly_shapes, pts
 
     def get_spec(self):
         """Get specifications of the building damage analysis.
