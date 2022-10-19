@@ -7,6 +7,8 @@
 from pyincore import BaseAnalysis, AnalysisUtil
 from shapely.ops import unary_union
 from geovoronoi import voronoi_regions_from_coords, points_to_coords
+import geopandas as gpd
+import pandas as pd
 
 
 class ElectricPowerAvailability(BaseAnalysis):
@@ -25,21 +27,21 @@ class ElectricPowerAvailability(BaseAnalysis):
         """Executes building power availability analysis."""
         # inventory dataset
         bldg_inv_gdf = self.get_input_dataset("buildings").get_dataframe_from_shapefile()
-        substation_set = self.get_input_dataset("epfs").get_inventory_reader()
+        sbustations_gdf = self.get_input_dataset("epfs").get_dataframe_from_shapefile()
         epf_damage = self.get_input_dataset("epf_damage").get_csv_reader()
         epf_damage_result = AnalysisUtil.get_csv_table_rows(epf_damage, ignore_first_row=False)
 
-        city_polygon = self.get_input_dataset("polygon").get_dataframe_from_shapefile().set_crs(epsg=4326)
+        city_polygon = self.get_input_dataset("polygon").get_dataframe_from_shapefile()
 
-        power_availability = self.building_power_availability(bldg_inv_gdf, substation_set, epf_damage_result, city_polygon)
+        power_availability = self.building_power_availability(bldg_inv_gdf, sbustations_gdf, epf_damage_result,
+                                                              city_polygon)
 
         self.set_result_csv_data("power_availability", power_availability, name=self.get_parameter(
             "result_name")+"_power_availability")
 
         return True
 
-
-    def building_power_availability(self, bldg_inv_gdf, substation_set, epf_damage_result, city_polygon):
+    def building_power_availability(self, bldg_inv_gdf, sbustations_gdf, epf_damage_result, city_polygon):
         """Run analysis for multiple buildings.
 
         Args:
@@ -48,7 +50,7 @@ class ElectricPowerAvailability(BaseAnalysis):
         Returns:
 
         """
-        poly_shapes, pts = self.service_areas_to_substations(city_polygon)
+        poly_shapes, pts = self.service_areas_to_substations(city_polygon, sbustations_gdf)
 
         # Create dataframe to keep track of access to infrastructure
         bldg_infra_availability = bldg_inv_gdf[['guid', 'geometry']]
@@ -60,6 +62,7 @@ class ElectricPowerAvailability(BaseAnalysis):
         bldg_groups = []
 
         # For each substation, identify buildings being serviced and assign state of substation functionality
+        region_polygons = []
         for poly_shape_idx in range(len(poly_shapes)):
             idx = poly_shape_idx
             region_polygon = gpd.GeoDataFrame()
@@ -77,36 +80,40 @@ class ElectricPowerAvailability(BaseAnalysis):
             # print(bldg_points_within_region)
             bldg_groups.append(bldg_points_within_region)
 
-            fig, ax = plt.subplots(figsize=(5, 5))
-            Lumbertoncity.plot(ax=ax, color='grey', alpha=0.4)
-            node_color = 'green'
-            if is_substation_flooded[idx]:
-                node_color = 'red'
-            bldg_points_within_region.plot(ax=ax, markersize=0.7, color=node_color)
-            plt.show()
-
         # Assign electric power service availability to each building
-
         bldg_infra_availability = bldg_infra_availability.assign(is_power_available=True)
-
         for idx in range(len(poly_shapes)):
-            region_polygon = region_polygons[idx]
             for building_id in bldg_groups[idx]["guid"]:
                 bldg_infra_availability.loc[bldg_infra_availability["guid"] == str(building_id), 'substation_idx'] = idx
                 bldg_infra_availability.loc[
-                    bldg_infra_availability["guid"] == str(building_id), 'is_power_available'] = ~is_substation_flooded[
-                    idx]
+                    bldg_infra_availability["guid"] == str(building_id), 'is_power_available'] = \
+                    ~is_substation_flooded[idx]
 
-        return power_availability
+        return bldg_infra_availability
 
-    def service_areas_to_substations(self, city_polygon):
+    def service_areas_to_substations(self, city_polygon, substations):
         city_polygon_shape = unary_union(city_polygon.geometry)
-        substation_coordinates = points_to_coords(substation_points.geometry)
+        substation_coordinates = points_to_coords(substations.geometry)
 
         # Use Voronoi polygon to assign service areas to corresponding substations
         poly_shapes, pts = voronoi_regions_from_coords(substation_coordinates, city_polygon_shape)
 
         return poly_shapes, pts
+
+    def is_substation_flooded(self, substations):
+        substation_flooded = [False for i in range(substations.shape[0])]
+        for point in substations['geometry']:
+            x = point.xy[0][0]
+            y = point.xy[1][0]
+
+            # TODO POST TO HAZARD SERVICES SEE IF FLOODED
+            # row, col = ProjectedMaxDepthRaster.index(x, y)
+            # print("Point correspond to row, col: %d, %d" % (row, col))
+            # water_depth = ProjectedMaxDepthRaster.read(1)[row, col]
+            # print("Raster value on point %.2f \n" % water_depth)
+            # is_substation_flooded[i] = (water_depth > 4.0)
+
+        return substation_flooded
 
     def get_spec(self):
         """Get specifications of the building damage analysis.
