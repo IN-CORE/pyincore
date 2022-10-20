@@ -178,6 +178,7 @@ class FragilityCurveSet:
             # 1 LS to 4 DS
             ("hurricane", "building", 1): FragilityCurveSet._1ls_to_4ds,
             ("hurricane", "electric_facility", 1): FragilityCurveSet._1ls_to_4ds,
+            ("flood", "electric_facility", 1): FragilityCurveSet._1ls_to_4ds,
             # 1 LS to 5 DS
             ("hurricane", "road", 1): FragilityCurveSet._1ls_to_5ds,
             ("hurricane", "bridge", 1): FragilityCurveSet._1ls_to_5ds,

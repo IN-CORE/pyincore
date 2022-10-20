@@ -9,6 +9,8 @@ from shapely.ops import unary_union
 from geovoronoi import voronoi_regions_from_coords, points_to_coords
 import geopandas as gpd
 import pandas as pd
+import osmnx as ox
+import numpy as np
 
 
 class ElectricPowerAvailability(BaseAnalysis):
@@ -35,7 +37,7 @@ class ElectricPowerAvailability(BaseAnalysis):
                                                                    city_polygon)
 
         self.set_result_csv_data("power_availability", bldg_infra_availability, name=self.get_parameter(
-            "result_name")+"_power_availability")
+            "result_name")+"_power_availability", source='dataframe')
 
         return True
 
@@ -94,8 +96,10 @@ class ElectricPowerAvailability(BaseAnalysis):
 
     @staticmethod
     def service_areas_to_substations(city_polygon, substations):
+        city_polygon.set_crs(epsg=4326)
         city_polygon_shape = unary_union(city_polygon.geometry)
-        substation_coordinates = points_to_coords(substations.geometry)
+        # TDOO no idea why decimal matters; without it it won't work
+        substation_coordinates = points_to_coords(substations.geometry).round(decimals=3)
 
         # Use Voronoi polygon to assign service areas to corresponding substations
         poly_shapes, pts = voronoi_regions_from_coords(substation_coordinates, city_polygon_shape)
