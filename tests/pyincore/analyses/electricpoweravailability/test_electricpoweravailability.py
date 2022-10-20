@@ -1,5 +1,6 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.epfdamage import EpfDamage
+from pyincore.analyses.electricpoweravailability import ElectricPowerAvailability
 import pyincore.globals as pyglobals
 
 
@@ -28,6 +29,18 @@ def run_with_base_class():
     epf_dmg_flood_lumberton.set_parameter("num_cpu", 1)
     # Run Analysis
     epf_dmg_flood_lumberton.run_analysis()
+
+    # chain with electric power availability model
+    epa_lumberton = ElectricPowerAvailability(client)
+    epa_lumberton.load_remote_input_dataset("buildings", "6036c2a9e379f22e1658d451")
+    epa_lumberton.load_remote_input_dataset("city_polygon", "635175db1f950c126bcbe249")
+    epa_lumberton.load_remote_input_dataset("epfs", epf_dataset_id)
+
+    epf_damage_result = epf_dmg_flood_lumberton.get_output_dataset("result")
+    epa_lumberton.set_input_dataset("epf_damage", epf_damage_result)
+
+    epa_lumberton.set_parameter("result_name", "lumberton")
+    epa_lumberton.run_analysis()
 
 
 if __name__ == '__main__':

@@ -28,20 +28,18 @@ class ElectricPowerAvailability(BaseAnalysis):
         # inventory dataset
         bldg_inv_gdf = self.get_input_dataset("buildings").get_dataframe_from_shapefile()
         sbustations_gdf = self.get_input_dataset("epfs").get_dataframe_from_shapefile()
-        epf_damage = self.get_input_dataset("epf_damage").get_csv_reader()
-        epf_damage_result = AnalysisUtil.get_csv_table_rows(epf_damage, ignore_first_row=False)
+        epf_damage = self.get_input_dataset("epf_damage").get_dataframe_from_shapefile()
+        city_polygon = self.get_input_dataset("city_polygon").get_dataframe_from_shapefile()
 
-        city_polygon = self.get_input_dataset("polygon").get_dataframe_from_shapefile()
+        bldg_infra_availability = self.building_power_availability(bldg_inv_gdf, sbustations_gdf, epf_damage,
+                                                                   city_polygon)
 
-        power_availability = self.building_power_availability(bldg_inv_gdf, sbustations_gdf, epf_damage_result,
-                                                              city_polygon)
-
-        self.set_result_csv_data("power_availability", power_availability, name=self.get_parameter(
+        self.set_result_csv_data("power_availability", bldg_infra_availability, name=self.get_parameter(
             "result_name")+"_power_availability")
 
         return True
 
-    def building_power_availability(self, bldg_inv_gdf, sbustations_gdf, epf_damage_result, city_polygon):
+    def building_power_availability(self, bldg_inv_gdf, sbustations_gdf, epf_damage, city_polygon):
         """Run analysis for multiple buildings.
 
         Args:
@@ -50,7 +48,10 @@ class ElectricPowerAvailability(BaseAnalysis):
         Returns:
 
         """
-        poly_shapes, pts = self.service_areas_to_substations(city_polygon, sbustations_gdf)
+        # is flooded or not
+        substation_flooded = ElectricPowerAvailability.is_substation_flooded(epf_damage)
+
+        poly_shapes, pts = ElectricPowerAvailability.service_areas_to_substations(city_polygon, sbustations_gdf)
 
         # Create dataframe to keep track of access to infrastructure
         bldg_infra_availability = bldg_inv_gdf[['guid', 'geometry']]
@@ -87,11 +88,12 @@ class ElectricPowerAvailability(BaseAnalysis):
                 bldg_infra_availability.loc[bldg_infra_availability["guid"] == str(building_id), 'substation_idx'] = idx
                 bldg_infra_availability.loc[
                     bldg_infra_availability["guid"] == str(building_id), 'is_power_available'] = \
-                    ~is_substation_flooded[idx]
+                    ~substation_flooded[idx]
 
         return bldg_infra_availability
 
-    def service_areas_to_substations(self, city_polygon, substations):
+    @staticmethod
+    def service_areas_to_substations(city_polygon, substations):
         city_polygon_shape = unary_union(city_polygon.geometry)
         substation_coordinates = points_to_coords(substations.geometry)
 
@@ -100,18 +102,9 @@ class ElectricPowerAvailability(BaseAnalysis):
 
         return poly_shapes, pts
 
-    def is_substation_flooded(self, substations):
-        substation_flooded = [False for i in range(substations.shape[0])]
-        for point in substations['geometry']:
-            x = point.xy[0][0]
-            y = point.xy[1][0]
-
-            # TODO POST TO HAZARD SERVICES SEE IF FLOODED
-            # row, col = ProjectedMaxDepthRaster.index(x, y)
-            # print("Point correspond to row, col: %d, %d" % (row, col))
-            # water_depth = ProjectedMaxDepthRaster.read(1)[row, col]
-            # print("Raster value on point %.2f \n" % water_depth)
-            # is_substation_flooded[i] = (water_depth > 4.0)
+    @staticmethod
+    def is_substation_flooded(epf_damage):
+        substation_flooded = [False for i in range(epf_damage.shape[0])]
 
         return substation_flooded
 
@@ -140,6 +133,12 @@ class ElectricPowerAvailability(BaseAnalysis):
                     'description': 'Building Inventory',
                     'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5',
                              'ergo:buildingInventoryVer6', 'ergo:buildingInventoryVer7'],
+                },
+                {
+                    'id': 'city_polygon',
+                    'required': True,
+                    'description': 'city boundary',
+                    'type': ['incore:cityPolygonShape'],
                 },
                 {
                     'id': 'epfs',

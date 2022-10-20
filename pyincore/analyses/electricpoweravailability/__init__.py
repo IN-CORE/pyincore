@@ -6,4 +6,3 @@
 
 
 from pyincore.analyses.electricpoweravailability.electricpoweravailability import ElectricPowerAvailability
-
