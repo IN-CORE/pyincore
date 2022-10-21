@@ -59,7 +59,7 @@ class ElectricPowerAvailability(BaseAnalysis):
         bldg_infra_availability = bldg_inv_gdf[['guid', 'geometry']]
 
         # Initialize substation index that services building
-        bldg_infra_availability = bldg_infra_availability.assign(substation_guid="NA")
+        bldg_infra_availability = bldg_infra_availability.assign(epf_guid="NA")
 
         # Create empty list to hold gpd dataframes corresponding to buildings in each substation
         bldg_groups = []
@@ -84,10 +84,10 @@ class ElectricPowerAvailability(BaseAnalysis):
         # Assign electric power service availability to each building
         bldg_infra_availability = bldg_infra_availability.assign(is_power_available=True)
         for idx in range(len(poly_shapes)):
-            substation_guid = epf_damage.loc[idx, "guid"]
+            epf_guid = epf_damage.loc[idx, "guid"]
             for building_id in bldg_groups[idx]["guid"]:
-                bldg_infra_availability.loc[bldg_infra_availability["guid"] == str(building_id), 'substation_guid']\
-                    = substation_guid
+                bldg_infra_availability.loc[bldg_infra_availability["guid"] == str(building_id), 'epf_guid']\
+                    = epf_guid
                 bldg_infra_availability.loc[
                     bldg_infra_availability["guid"] == str(building_id), 'is_power_available'] = \
                     not substation_flooded[idx]
