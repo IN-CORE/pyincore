@@ -34,8 +34,8 @@ class ElectricPowerAvailability(BaseAnalysis):
         city_polygon = self.get_input_dataset("city_polygon").get_dataframe_from_shapefile()
 
         bldg_infra_availability = self.building_power_availability(bldg_inv_gdf, sbustations_gdf, epf_damage,
-                                                                   city_polygon)
-
+                                                                   city_polygon).drop(columns=['geometry'])
+        # get substation guid and put it in the table
         self.set_result_csv_data("power_availability", bldg_infra_availability, name=self.get_parameter(
             "result_name")+"_power_availability", source='dataframe')
 
@@ -59,7 +59,7 @@ class ElectricPowerAvailability(BaseAnalysis):
         bldg_infra_availability = bldg_inv_gdf[['guid', 'geometry']]
 
         # Initialize substation index that services building
-        bldg_infra_availability = bldg_infra_availability.assign(substation_idx=3)
+        bldg_infra_availability = bldg_infra_availability.assign(substation_guid="NA")
 
         # Create empty list to hold gpd dataframes corresponding to buildings in each substation
         bldg_groups = []
@@ -76,21 +76,21 @@ class ElectricPowerAvailability(BaseAnalysis):
             region_polygons.append(region_polygon)
 
             bldg_points_within_region = gpd.sjoin(bldg_infra_availability, region_polygon, op='within', how='inner')
-            bldg_points_within_region = bldg_points_within_region.append(pd.Series(), ignore_index=True)
+            bldg_points_within_region = pd.concat([bldg_points_within_region, pd.Series(dtype="float64")],
+                                                  ignore_index=True)
 
-            # print(idx)
-            bldg_points_within_region['substation_idx'] = idx
-            # print(bldg_points_within_region)
             bldg_groups.append(bldg_points_within_region)
 
         # Assign electric power service availability to each building
         bldg_infra_availability = bldg_infra_availability.assign(is_power_available=True)
         for idx in range(len(poly_shapes)):
+            substation_guid = epf_damage.loc[idx, "guid"]
             for building_id in bldg_groups[idx]["guid"]:
-                bldg_infra_availability.loc[bldg_infra_availability["guid"] == str(building_id), 'substation_idx'] = idx
+                bldg_infra_availability.loc[bldg_infra_availability["guid"] == str(building_id), 'substation_guid']\
+                    = substation_guid
                 bldg_infra_availability.loc[
                     bldg_infra_availability["guid"] == str(building_id), 'is_power_available'] = \
-                    ~substation_flooded[idx]
+                    not substation_flooded[idx]
 
         return bldg_infra_availability
 
@@ -103,12 +103,14 @@ class ElectricPowerAvailability(BaseAnalysis):
 
         # Use Voronoi polygon to assign service areas to corresponding substations
         poly_shapes, pts = voronoi_regions_from_coords(substation_coordinates, city_polygon_shape)
-
         return poly_shapes, pts
 
     @staticmethod
     def is_substation_flooded(epf_damage):
         substation_flooded = [False for i in range(epf_damage.shape[0])]
+        epf_damage = epf_damage.astype({"DS_3": float})
+        for i, row in epf_damage.iterrows():
+            substation_flooded[i] = (row["DS_3"] > 0)
 
         return substation_flooded
 
