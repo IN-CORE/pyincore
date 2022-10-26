@@ -4,3 +4,4 @@
 
 
 from pyincore.analyses.waterserviceavailability.waterserviceavailability import WaterServiceAvailability
+from pyincore.analyses.waterserviceavailability.waterserviceavailabilityutil import WaterServiceAvailabilityUtil

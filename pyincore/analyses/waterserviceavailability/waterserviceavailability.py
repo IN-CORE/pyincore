@@ -10,6 +10,9 @@ Water Service Availability
 from typing import List
 from pyincore import BaseAnalysis
 import pandas as pd
+import networkx as nx
+
+from pyincore.analyses.waterserviceavailability import WaterServiceAvailabilityUtil
 
 
 class WaterServiceAvailability(BaseAnalysis):
@@ -28,12 +31,26 @@ class WaterServiceAvailability(BaseAnalysis):
             bool: True if successful, False otherwise
         """
 
-        service_availability = self.calculate_service_availability(stage_time_series,
-                                                                   demand_post_hazard,
-                                                                   demand_normal)
+        service_availability_stage1 = self.calculate_service_availability(stage_time_series, demand_post_hazard,
+                                                                          demand_normal)
 
-        self.set_result_csv_data("service_availability", service_availability,
-                                 name="service_availability" + self.get_parameter("result_name"))
+        service_availability_stage2 = self.infer_service_availability(supply, stage_time_series,
+                                                                      wdn_post_hazard, results_post_hazard,
+                                                                      results_normal)
+        # combine two stages
+        service_availability = pd.concat([service_availability_stage1, service_availability_stage2])
+
+        household_service_availability = WaterServiceAvailabilityUtil.map_to_household_service_availability(
+            house_junction, service_availability)
+        self.set_result_csv_data("household_service_availability", household_service_availability,
+                                 name="household_service_availability" + self.get_parameter("result_name"),
+                                 source="dataframe")
+
+        building_service_availability = WaterServiceAvailabilityUtil.map_to_building_service_availability(
+            building_junction, service_availability)
+        self.set_result_csv_data("building_service_availability", building_service_availability,
+                                 name="building_service_availability" + self.get_parameter("result_name"),
+                                 source="dataframe")
 
         return True
 
@@ -49,6 +66,52 @@ class WaterServiceAvailability(BaseAnalysis):
                     row[c] = 0
                 else:
                     row[c] = demand_post_hazard.loc[index * 3600, c] / demand_normal.loc[index * 3600, c]
+        return service_availability
+
+    # Infer if a node has water service
+    def infer_service_availability(self, supply, stage_time_series, wdn_post_hazard, results_post_hazard,
+                                   results_normal):
+        stage_start = stage_time_series[0]
+        # Get the directed network at the stage_start, use this network as the base network for inference
+        flow_post_hazard = results_post_hazard.link['flowrate']
+        dgraph_stage_start = WaterServiceAvailabilityUtil.hourly_dgraph(wdn_post_hazard, flow_post_hazard, stage_start)
+        # Initialize a pandas dataframe with time (hour) as index, node names as column names
+        demand_normal = results_normal.node['demand']
+        service_availability = pd.DataFrame(columns=demand_normal.columns, index=stage_time_series)
+        # All the downstream nodes of the source (water treatment plant)
+        downstreams = list(nx.bfs_successors(dgraph_stage_start, source=wdn_post_hazard.reservoir_name_list[0]))
+        n = len(downstreams)
+        # Iterate over rows of the dataframe
+        for index, row in service_availability.iterrows():
+            # Sepcify the available partial supply at this index time instant
+            total_supply = supply
+            # Store nodes with service
+            node_service = []
+            end_indicator = 0
+            for i in range(n):
+                (up, down) = downstreams[i]
+                # Check if the downstream node has water service
+                if end_indicator < 1:
+                    for dn in down:
+                        # Only focus on node that has demand
+                        if demand_normal.loc[index * 3600, dn] > 1e-5:
+                            total_supply -= demand_normal.loc[index * 3600, dn]
+                            # If there is left supply
+                            if total_supply > 0:
+                                # node dn has water service
+                                node_service.append(dn)
+                            else:
+                                end_indicator = 1
+                                break
+                else:
+                    break
+            # Iterate over columns
+            for c in service_availability.columns:
+                # If this node has water service
+                if c in node_service:
+                    row[c] = 1
+                else:
+                    row[c] = 0
         return service_availability
 
     def get_spec(self):
