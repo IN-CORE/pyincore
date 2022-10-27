@@ -11,6 +11,7 @@ from typing import List
 from pyincore import BaseAnalysis
 import pandas as pd
 import networkx as nx
+import numpy as np
 
 from pyincore.analyses.waterserviceavailability import WaterServiceAvailabilityUtil
 
@@ -30,6 +31,14 @@ class WaterServiceAvailability(BaseAnalysis):
         Returns:
             bool: True if successful, False otherwise
         """
+
+        supply = self.get_parameter("supply_rate")
+        stage_time_series = self.get_parameter("stage_time_series")
+
+        Stage2_time_series = np.linspace(stage2_start, stage2_end, stage2_end - stage2_start + 1)
+        house_junction = self.get_input_dataset("house_junction").get_json_reader()
+        building_junction = self.get_input_dataset("building_junction").get_json_reader()
+
 
         service_availability_stage1 = self.calculate_service_availability(stage_time_series, demand_post_hazard,
                                                                           demand_normal)
@@ -150,6 +159,14 @@ class WaterServiceAvailability(BaseAnalysis):
                     'type': int
                 },
                 {
+                    'id': 'supply_rate',
+                    'required': True,
+                    'description': 'Average supply flow rates, 50% of normal average flow rates from the water '
+                                   'treatment plant',
+                    'type': float
+                },
+
+                {
                     'id': 'pf_interval',
                     'required': False,
                     'description': 'incremental interval for percentage of functionality. Default to 0.05',
@@ -165,16 +182,16 @@ class WaterServiceAvailability(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    'id': 'water_facilities',
+                    'id': 'house_junction',
                     'required': True,
-                    'description': 'Water Facility Inventory',
-                    'type': ['ergo:waterFacilityTopo'],
+                    'description': 'House junction',
+                    'type': ['incore:houseJunction'],
                 },
                 {
-                    'id': 'dfr3_mapping_set',
+                    'id': 'building_junction',
                     'required': True,
-                    'description': 'DFR3 Mapping Set Object',
-                    'type': ['incore:dfr3MappingSet'],
+                    'description': 'building junction',
+                    'type': ['incore:bldgJunction'],
                 },
                 {
 
