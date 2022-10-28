@@ -15,7 +15,7 @@ import networkx as nx
 import numpy as np
 
 
-from pyincore.analyses.waterserviceavailability import WaterServiceAvailabilityUtil
+from pyincore.analyses.waterserviceavailability.waterserviceavailabilityutil import WaterServiceAvailabilityUtil
 
 
 class WaterServiceAvailability(BaseAnalysis):
@@ -187,9 +187,9 @@ class WaterServiceAvailability(BaseAnalysis):
                     'type': int
                 },
                 {
-                    'id': 'stage2_start_hr',
+                    'id': 'stage2_end_hr',
                     'required': True,
-                    'description': 'Stage 2 start hour',
+                    'description': 'Stage 2 end hour',
                     'type': int
                 },
                 {
