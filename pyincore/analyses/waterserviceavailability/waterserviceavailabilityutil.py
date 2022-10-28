@@ -5,6 +5,30 @@ import networkx as nx
 class WaterServiceAvailabilityUtil:
 
     @staticmethod
+    def generate_results_normal(wdn, stage_end_time, demand_model="PDD"):
+        """
+        Perform hydraulic simulation for normal conditions as the baseline
+
+        Args:
+            wdn:
+            stage_end_time:
+            demand_model:
+
+        Returns:
+
+        """
+        # Specify time duration of interest
+        wdn.options.time.duration = stage_end_time * 3600
+        # Specify the demand model to be pressure driven demand
+        wdn.options.hydraulic.demand_model = demand_model
+        # Specify the simulatior
+        sim_normal = wntr.sim.WNTRSimulator(wdn)
+        # Results is the object stores necessary flow, pressure, and demand data (all in SI units)
+        results = sim_normal.run_sim()
+
+        return results
+
+    @staticmethod
     def hourly_dgraph(wdn, flow, t):
         """
         Build hourly hydraulic-informed directed graph

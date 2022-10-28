@@ -6,12 +6,14 @@
 """
 Water Service Availability
 """
-
+import copy
 from typing import List
+
 from pyincore import BaseAnalysis
 import pandas as pd
 import networkx as nx
 import numpy as np
+
 
 from pyincore.analyses.waterserviceavailability import WaterServiceAvailabilityUtil
 
@@ -31,34 +33,66 @@ class WaterServiceAvailability(BaseAnalysis):
         Returns:
             bool: True if successful, False otherwise
         """
-
         supply = self.get_parameter("supply_rate")
-        stage_time_series = self.get_parameter("stage_time_series")
+        if supply is None:
+            supply = 0.112
 
-        Stage2_time_series = np.linspace(stage2_start, stage2_end, stage2_end - stage2_start + 1)
+        stage1_start = self.get_parameter("stage1_start_hr")
+        stage1_end = self.get_parameter("stage1_end_hr")
+        stage1_time_series = np.linspace(stage1_start, stage1_end - 1, stage1_end - stage1_start)
+
+        stage2_start = self.get_parameter("stage2_start_hr")
+        stage2_end = self.get_parameter("stage2_end_hr")
+        stage2_time_series = np.linspace(stage2_start, stage2_end, stage2_end - stage2_start + 1)
+
+        # Make copys of the water distribution network object for normal and post hazard analysis
+        wdn = self.get_input_dataset("water_network_inp").get_EPAnet_inp_reader()
+        wdn_normal = copy.deepcopy(wdn)
+        results_normal = WaterServiceAvailabilityUtil.generate_results_normal(wdn_normal, stage2_end)
+
+        # Post-hazard
+        wdn_post_hazard = copy.deepcopy(wdn)
+
+        # Specify the pump name to apply outage
+        pump_names = self.get_parameter("pump_names")
+        if pump_names is None:
+            pump_names = wdn_post_hazard.pump_name_list
+
+        # Withdraw the pump object corresponding to the pump name
+        for pump_name in pump_names:
+            pump_object = wdn_post_hazard.get_link(pump_name)
+            pump_object.add_outage(wdn_post_hazard, stage1_start * 3600, stage1_end * 3600)
+
+        results_post_hazard = WaterServiceAvailabilityUtil.generate_results_normal(wdn_post_hazard, stage1_end)
+
+        # Obtain the actual demand delivered at nodes
+        demand_post_hazard = results_post_hazard.node['demand']
+
+        # Obtain the required demand (the actual demand under normal conditions)
+        demand_normal = results_normal.node['demand']
+
         house_junction = self.get_input_dataset("house_junction").get_json_reader()
         building_junction = self.get_input_dataset("building_junction").get_json_reader()
 
-
-        service_availability_stage1 = self.calculate_service_availability(stage_time_series, demand_post_hazard,
+        service_availability_stage1 = self.calculate_service_availability(stage1_time_series, demand_post_hazard,
                                                                           demand_normal)
 
-        service_availability_stage2 = self.infer_service_availability(supply, stage_time_series,
+        service_availability_stage2 = self.infer_service_availability(supply, stage2_time_series,
                                                                       wdn_post_hazard, results_post_hazard,
                                                                       results_normal)
         # combine two stages
         service_availability = pd.concat([service_availability_stage1, service_availability_stage2])
 
-        household_service_availability = WaterServiceAvailabilityUtil.map_to_household_service_availability(
+        household_water_service_availability = WaterServiceAvailabilityUtil.map_to_household_service_availability(
             house_junction, service_availability)
-        self.set_result_csv_data("household_service_availability", household_service_availability,
-                                 name="household_service_availability" + self.get_parameter("result_name"),
+        self.set_result_csv_data("household_water_service_availability", household_water_service_availability,
+                                 name="household_water_service_availability" + self.get_parameter("result_name"),
                                  source="dataframe")
 
-        building_service_availability = WaterServiceAvailabilityUtil.map_to_building_service_availability(
+        building_water_service_availability = WaterServiceAvailabilityUtil.map_to_building_service_availability(
             building_junction, service_availability)
-        self.set_result_csv_data("building_service_availability", building_service_availability,
-                                 name="building_service_availability" + self.get_parameter("result_name"),
+        self.set_result_csv_data("building_water_service_availability", building_water_service_availability,
+                                 name="building_water_service_availability" + self.get_parameter("result_name"),
                                  source="dataframe")
 
         return True
@@ -160,25 +194,18 @@ class WaterServiceAvailability(BaseAnalysis):
                 },
                 {
                     'id': 'supply_rate',
-                    'required': True,
+                    'required': False,
                     'description': 'Average supply flow rates, 50% of normal average flow rates from the water '
                                    'treatment plant',
                     'type': float
                 },
-
                 {
-                    'id': 'pf_interval',
+                    'id': 'pump_names',
                     'required': False,
-                    'description': 'incremental interval for percentage of functionality. Default to 0.05',
-                    'type': float
-                },
-                {
-                    'id': 'discretized_days',
-                    'required': False,
-                    'description': 'Discretized days to compute functionality',
-                    'type': List[int]
+                    'description': 'Average supply flow rates, 50% of normal average flow rates from the water '
+                                   'treatment plant',
+                    'type': List[str]
                 }
-
             ],
             'input_datasets': [
                 {
@@ -194,40 +221,24 @@ class WaterServiceAvailability(BaseAnalysis):
                     'type': ['incore:bldgJunction'],
                 },
                 {
-
-                    'id': 'damage',
+                    'id': 'water_network_inp',
                     'required': True,
-                    'description': 'damage result that has damage intervals in it',
-                    'type': ['ergo:waterFacilityDamageVer6']
+                    'description': 'Water network input file for WNTR',
+                    'type': ['incore:waterNetworkEpanetInp'],
                 }
             ],
             'output_datasets': [
                 {
-                    'id': "inventory_restoration_map",
+                    'id': "household_water_service_availability",
                     'parent_type': '',
-                    'description': 'A csv file recording the mapping relationship between GUID and restoration id '
-                                   'applicable.',
-                    'type': 'incore:inventoryRestorationMap'
+                    'description': 'A csv file recording the water service availability at household level',
+                    'type': 'incore:hdWaterServiceAvailability'
                 },
                 {
-                    'id': 'pf_results',
+                    'id': "building_water_service_availability",
                     'parent_type': '',
-                    'description': 'A csv file recording functionality change with time for each class and limit '
-                                   'state.',
-                    'type': 'incore:waterFacilityRestorationFunc'
+                    'description': 'A csv file recording the water service availability at each builing level',
+                    'type': 'incore:bldgWaterServiceAvailability'
                 },
-                {
-                    'id': 'time_results',
-                    'parent_type': '',
-                    'description': 'A csv file recording repair time at certain functionality recovery for each class '
-                                   'and limit state.',
-                    'type': 'incore:waterFacilityRestorationTime'
-                },
-                {
-                    'id': 'func_results',
-                    'parent_type': '',
-                    'description': 'A csv file recording discretized functionality over time',
-                    'type': 'incore:waterFacilityDiscretizedRestorationFunc'
-                }
             ]
         }
