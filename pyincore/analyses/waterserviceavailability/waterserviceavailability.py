@@ -85,12 +85,15 @@ class WaterServiceAvailability(BaseAnalysis):
 
         household_water_service_availability = WaterServiceAvailabilityUtil.map_to_household_service_availability(
             house_junction, service_availability)
+        household_water_service_availability = household_water_service_availability.rename_axis('time (hr)').reset_index()
         self.set_result_csv_data("household_water_service_availability", household_water_service_availability,
                                  name="household_water_service_availability" + self.get_parameter("result_name"),
                                  source="dataframe")
 
         building_water_service_availability = WaterServiceAvailabilityUtil.map_to_building_service_availability(
             building_junction, service_availability)
+        building_water_service_availability = building_water_service_availability.rename_axis('time (hr)').reset_index()
+
         self.set_result_csv_data("building_water_service_availability", building_water_service_availability,
                                  name="building_water_service_availability" + self.get_parameter("result_name"),
                                  source="dataframe")
