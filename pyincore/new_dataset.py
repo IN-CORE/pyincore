@@ -4,13 +4,11 @@ import csv
 
 import fiona
 import geopandas as gpd
-import numpy
 import pandas as pd
-import rasterio
 import wntr
 import warnings
 from pyincore import DataService
-from .io import CSVIO, JSONIO
+from .io import CSVIO, JSONIO, InventoryIO, EPAnetIO, ShapefileIO, RasterIO
 
 from typing import TypeVar, Optional, Union
 
@@ -30,21 +28,19 @@ class NewDataset:
         self.file_descriptors = metadata["fileDescriptors"]
         self.local_file_path = None
 
-        self.raster_reader = None
-
     @classmethod
-    def from_data_service(cls, id: str, data_service: DataService) -> NewDataset:
+    def from_data_service(cls, dataset_id: str, data_service: DataService) -> NewDataset:
         """Get Dataset from Data service, get metadata as well.
 
         Args:
-            id (str): ID of the Dataset.
+            dataset_id (str): ID of the Dataset.
             data_service (obj): Data service.
 
         Returns:
             obj: Dataset from Data service.
 
         """
-        metadata = data_service.get_dataset_metadata(id)
+        metadata = data_service.get_dataset_metadata(dataset_id)
         instance = cls(metadata)
         instance.cache_files(data_service)
         return instance
@@ -79,9 +75,8 @@ class NewDataset:
             str: A path to the local file.
 
         """
-        if self.local_file_path is not None:
-            return
-        self.local_file_path = data_service.get_dataset_blob(self.id)
+        if self.local_file_path is None:
+            self.local_file_path = data_service.get_dataset_blob(self.id)
         return self.local_file_path
 
     def get_file_path(self, search_type: str = 'csv') -> str:
@@ -102,34 +97,12 @@ class NewDataset:
 
         return filename
 
-    def get_raster_value(self, location) -> float:
-        """Utility method for reading different standard file formats: raster value.
-
-        Args:
-            location (obj): A point defined as location.x and location.y.
-
-        Returns:
-            numpy.array: Hazard values.
-
-        """
-        if "raster" not in self.readers:
-            filename = self.local_file_path
-            self.readers["raster"] = rasterio.open(filename)
-
-        hazard = self.readers["raster"]
-        row, col = hazard.index(location.x, location.y)
-        # assume that there is only 1 band
-        data = hazard.read(1)
-        if row < 0 or col < 0 or row >= hazard.height or col >= hazard.width:
-            return 0.0
-        return numpy.asscalar(data[row, col])
-
     @classmethod
     def read(
             cls,
-            from_type: str,
+            from_file_type: str,
             local_file_path: str,
-            to_type: Optional[str] = None,
+            to_data_type: Optional[str] = None,
             **kwargs
     ) -> Optional[
             dict,
@@ -140,46 +113,41 @@ class NewDataset:
             Union[pd.DataFrame, gpd.GeoDataFrame]
     ]:
         filename = local_file_path
-        if from_type == 'inventory':
-            if os.path.isdir(filename):
-                layers = fiona.listlayers(filename)
-                if len(layers) > 0:
-                    # for now, open a first shapefile
-                    # TODO: Do we need separate IO for this?
-                    # TODO: Perform Datavalidation here if needed
-                    return fiona.open(filename, layer=layers[0])
-            else:
-                return fiona.open(filename)
+        if from_file_type == 'inventory':
+            if not to_data_type:
+                return InventoryIO.read(filename)
+            return InventoryIO.read(filename, to_data_type=to_data_type, **kwargs)
 
-        elif from_type == 'EPAnet':
-            if os.path.isdir(filename):
-                files = glob.glob(filename + "/*.inp")
-                if len(files) > 0:
-                    filename = files[0]
-            # TODO: Do we need separate IO for this?
-            # TODO: Perform Datavalidation here if needed
-            return wntr.network.WaterNetworkModel(filename)
+        elif from_file_type == 'EPAnet':
+            if not to_data_type:
+                return EPAnetIO.read(filename)
+            return EPAnetIO.read(filename, to_data_type=to_data_type, **kwargs)
 
-        elif from_type == 'shapefile':
-            # read shapefile directly by Geopandas.read_file()
-            # It will preserve CRS information also
-            # TODO: Do we need separate IO for this?
-            # TODO: Perform Datavalidation here if needed
-            gdf = gpd.read_file(filename)
-            return gdf
+        elif from_file_type == 'rasterfile':
+            location = kwargs.get('location', False)
+            if location:
+                if not to_data_type:
+                    return RasterIO.read(filename, location=location, **kwargs)
+                return RasterIO.read(filename, to_data_type=to_data_type, location=location, **kwargs)
+            raise ValueError("Reading Raster file requires argument location which was not passed.")
 
-        elif from_type == 'csv' or from_type == 'df':
-            if not to_type:
+        elif from_file_type == 'shapefile':
+            if not to_data_type:
+                return ShapefileIO.read(filename)
+            return ShapefileIO.read(filename, to_data_type=to_data_type, **kwargs)
+
+        elif from_file_type == 'csv':
+            if not to_data_type:
                 return CSVIO.read(filename, **kwargs)
-            return CSVIO.read(filename, to_type=to_type, **kwargs)
+            return CSVIO.read(filename, to_data_type=to_data_type, **kwargs)
 
-        elif from_type == 'json':
-            if not to_type:
+        elif from_file_type == 'json':
+            if not to_data_type:
                 return JSONIO.read(filename, **kwargs)
-            return JSONIO.read(filename, to_type=to_type, **kwargs)
+            return JSONIO.read(filename, to_data_type=to_data_type, **kwargs)
 
         else:
-            raise TypeError(f"Unknown from_type = {from_type}")
+            raise TypeError(f"Unknown from_type = {from_file_type}")
 
     @classmethod
     def write(
@@ -187,23 +155,23 @@ class NewDataset:
             result_data: ResultType,
             name: str,
             data_type: str,
-            from_type: str,
-            to_type: Optional[str] = None,
+            from_data_type: str,
+            to_file_type: Optional[str] = None,
             **kwargs
     ) -> NewDataset:
 
-        if from_type == 'csv' or from_type == 'df':
-            if not to_type:
-                CSVIO.write(result_data, name, from_type=from_type, **kwargs)
-            CSVIO.write(result_data, name, from_type=from_type, to_type=to_type, **kwargs)
+        if to_file_type == 'csv':
+            if not from_data_type:
+                CSVIO.write(result_data, name, **kwargs)
+            CSVIO.write(result_data, name, from_data_type=from_data_type, **kwargs)
 
-        elif from_type == 'json':
-            if not to_type:
-                JSONIO.write(result_data, name, from_type=from_type, **kwargs)
-            JSONIO.write(result_data, name, from_type=from_type, to_type=to_type, **kwargs)
+        elif to_file_type == 'json':
+            if not from_data_type:
+                JSONIO.write(result_data, name, **kwargs)
+            JSONIO.write(result_data, name, from_data_type=from_data_type, **kwargs)
 
         else:
-            raise TypeError(f"Unknown from_type = {from_type}")
+            raise TypeError(f"Unknown from_data_type = {from_data_type}")
 
         return NewDataset.from_file(name, data_type)
 

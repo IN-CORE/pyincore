@@ -8,13 +8,13 @@ from typing import Optional
 
 class CSVIO(BaseIO):
     @classmethod
-    def read(cls, local_file_path: str, to_type: str = 'csv', **kwargs) -> Optional[csv.DictReader, pd.DataFrame]:
+    def read(cls, local_file_path: str, to_data_type: str = 'csv', **kwargs) -> Optional[csv.DictReader, pd.DataFrame]:
         if os.path.isdir(local_file_path):
             files = glob.glob(local_file_path + "/*.csv")
             if len(files) > 0:
                 local_file_path = files[0]
 
-        if to_type == 'df':
+        if to_data_type == 'df':
             low_memory = kwargs.get('low_memory', True)
             df = pd.DataFrame()
             if os.path.isfile(local_file_path):
@@ -22,36 +22,34 @@ class CSVIO(BaseIO):
             # TODO: implement data validation here
             return df
 
-        elif to_type == 'csv':
+        elif to_data_type == 'csv_reader':
             csv_file = open(local_file_path, 'r')
             # TODO: implement data validation here
             return csv.DictReader(csv_file)
 
         # not known to_type
         else:
-            raise TypeError(f"to_type = {to_type} is not defined. Possible values are df and csv")
+            raise TypeError(f"to_data_type = {to_data_type} is not defined. Possible values are df and csv_reader")
 
     @classmethod
     def write(
             cls,
             result_data: Optional[pd.DataFrame],
             name: str,
-            from_type: Optional[str] = None,
-            to_type: str = 'csv',
+            from_data_type: str = 'list',
             **kwargs
     ) -> None:
-        if to_type == 'df':
+        # TODO: Perform conversion if needed
+        if from_data_type == 'df':
             # expecting the result_data to be of type pd.DataFrame
-            # TODO: Perform conversion if needed
             # TODO: implement data validation here
             if type(result_data) != pd.DataFrame:
                 raise TypeError(f"Cannot convert result_data of type {type(result_data)} to pandas DataFrame")
             result_data.to_csv(name, index=False)
             return
 
-        elif to_type == 'csv':
+        elif from_data_type == 'list':
             # expecting result_data to be of format supported to be stored in csv file
-            # TODO: Perform conversion if needed
             # TODO: implement data validation here
             if len(result_data) > 0:
                 with open(name, 'w') as csv_file:
@@ -62,8 +60,4 @@ class CSVIO(BaseIO):
             return
         # writing to an unknown type
         else:
-            raise TypeError(f"to_type = {to_type} is not defined. Possible values are df and csv")
-
-    @classmethod
-    def convert_to(cls, *args):
-        pass
+            raise TypeError(f"from_data_type = {from_data_type} is not defined. Possible values are df and list")

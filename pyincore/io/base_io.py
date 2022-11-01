@@ -11,8 +11,3 @@ class BaseIO(ABC):
     @abstractmethod
     def write(cls, *args):
         pass
-
-    @classmethod
-    @abstractmethod
-    def convert_to(cls, *args):
-        pass
