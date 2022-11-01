@@ -8,8 +8,7 @@ import pandas as pd
 import wntr
 import warnings
 from pyincore import DataService
-from .io import CSVIO, JSONIO, InventoryIO, EPAnetIO, ShapefileIO, RasterIO
-
+from pyincore.io import CSVIO, JSONIO, InventoryIO, EPAnetIO, ShapefileIO, RasterIO
 from typing import TypeVar, Optional, Union
 
 NewDataset = TypeVar('NewDataset', bound="NewDataset")
@@ -105,12 +104,12 @@ class NewDataset:
             to_data_type: Optional[str] = None,
             **kwargs
     ) -> Optional[
-            dict,
-            pd.DataFrame,
-            fiona.Collection,
-            wntr.network.WaterNetworkModel,
-            csv.DictReader,
-            Union[pd.DataFrame, gpd.GeoDataFrame]
+        dict,
+        pd.DataFrame,
+        fiona.Collection,
+        wntr.network.WaterNetworkModel,
+        csv.DictReader,
+        Union[pd.DataFrame, gpd.GeoDataFrame]
     ]:
         filename = local_file_path
         if from_file_type == 'inventory':
@@ -174,4 +173,3 @@ class NewDataset:
             raise TypeError(f"Unknown from_data_type = {from_data_type}")
 
         return NewDataset.from_file(name, data_type)
-
