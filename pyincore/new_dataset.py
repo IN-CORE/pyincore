@@ -4,6 +4,7 @@ import csv
 
 import fiona
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import wntr
 import warnings
@@ -103,13 +104,14 @@ class NewDataset:
             local_file_path: str,
             to_data_type: Optional[str] = None,
             **kwargs
-    ) -> Optional[
+    ) -> Union[
         dict,
         pd.DataFrame,
         fiona.Collection,
         wntr.network.WaterNetworkModel,
         csv.DictReader,
-        Union[pd.DataFrame, gpd.GeoDataFrame]
+        Union[pd.DataFrame, gpd.GeoDataFrame],
+        np.ndarray
     ]:
         filename = local_file_path
         if from_file_type == 'inventory':

@@ -1,5 +1,5 @@
 import geopandas as gpd
-from base_io import BaseIO
+from .base_io import BaseIO
 import pandas as pd
 from typing import Union
 

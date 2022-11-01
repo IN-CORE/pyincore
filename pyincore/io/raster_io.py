@@ -1,5 +1,5 @@
 import rasterio
-from base_io import BaseIO
+from .base_io import BaseIO
 import numpy as np
 from typing import Any
 

@@ -1,8 +1,8 @@
-from base_io import BaseIO
+from .base_io import BaseIO
 import glob
 import json
 import os
-from typing import Optional
+from typing import Optional, Union
 
 
 class JSONIO(BaseIO):
@@ -27,7 +27,7 @@ class JSONIO(BaseIO):
     @classmethod
     def write(
             cls,
-            result_data: Optional[str, dict],
+            result_data: Union[str, dict],
             name: Optional[str] = None,
             from_data_type: str = 'str',
             **kwargs

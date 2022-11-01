@@ -1,5 +1,5 @@
 import fiona
-from base_io import BaseIO
+from .base_io import BaseIO
 import os
 
 

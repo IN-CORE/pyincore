@@ -1,14 +1,14 @@
-from base_io import BaseIO
+from .base_io import BaseIO
 import csv
 import glob
 import os
 import pandas as pd
-from typing import Optional
+from typing import Union
 
 
 class CSVIO(BaseIO):
     @classmethod
-    def read(cls, local_file_path: str, to_data_type: str = 'csv', **kwargs) -> Optional[csv.DictReader, pd.DataFrame]:
+    def read(cls, local_file_path: str, to_data_type: str = 'csv', **kwargs) -> Union[csv.DictReader, pd.DataFrame]:
         if os.path.isdir(local_file_path):
             files = glob.glob(local_file_path + "/*.csv")
             if len(files) > 0:
@@ -34,7 +34,7 @@ class CSVIO(BaseIO):
     @classmethod
     def write(
             cls,
-            result_data: Optional[pd.DataFrame],
+            result_data: Union[pd.DataFrame, list],
             name: str,
             from_data_type: str = 'list',
             **kwargs
