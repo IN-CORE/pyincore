@@ -105,16 +105,34 @@ class ShelbyCGEModel(BaseAnalysis):
             ],
             'output_datasets': [
                 {
-                    'id': 'Shelby_sims',
+                    'id': 'domestic-supply',
                     'parent_type': '',
-                    'description': 'CSV file of Seaside cge simulations',
-                    'type': 'incore:ShelbyCGEsims'
+                    'description': 'CSV file of resulting domestic supply',
+                    'type': 'incore:Employment'
                 },
                 {
-                    'id': 'Shelby_output',
+                    'id': 'gross-income',
                     'parent_type': '',
-                    'description': 'CSV file of output of Seaside cge, containing changes in employment and supply.',
-                    'type': 'incore:ShelbyCGEEmployDS'
+                    'description': 'CSV file of resulting gross income',
+                    'type': 'incore:Employment'
+                },
+                {
+                    'id': 'pre-disaster-factor-demand',
+                    'parent_type': '',
+                    'description': 'CSV file of factor demand before disaster',
+                    'type': 'incore:FactorDemand'
+                },
+                {
+                    'id': 'post-disaster-factor-demand',
+                    'parent_type': '',
+                    'description': 'CSV file of resulting factor-demand',
+                    'type': 'incore:FactorDemand'
+                },
+                {
+                    'id': 'household-count',
+                    'parent_type': '',
+                    'description': 'CSV file of household count',
+                    'type': 'incore:HouseholdCount'
                 }
             ]
         }
@@ -2044,33 +2062,40 @@ class ShelbyCGEModel(BaseAnalysis):
             DN = NL - N0
 
             s_name = 'Simulation ' + str(i+1)
+        '''
+        export domestic supply, household income (gross income), number of household, and factor demand
+        '''
+        # domestic supply
+        cols = {'DS0': DS0, 'DSL': DSL}
+        domestic_supply = pd.DataFrame.from_dict(cols)
+        domestic_supply.index.name = 'Sectors'
+        self.set_result_csv_data("domestic-supply", domestic_supply, name="domestic-supply", source="dataframe")
+        logger.info("Output domestic-supply has been created.")
 
-            emp = DFFD[DFFD.index.isin(['L1A', 'L2A', 'L3A', 'L1B', 'L2B', 'L3B', 'L1C', 'L2C', 'L3C', \
-                                        'L1D', 'L2D', 'L3D', 'L1E', 'L2E', 'L3E', 'L1F', 'L2F', 'L3F', \
-                                        'L1G', 'L2G', 'L3G', 'L1H', 'L2H', 'L3H'])].sum().sum()
-            dsr = DDS[DDS.index.isin(['HS1A', 'HS1B', 'HS1C', 'HS1D', 'HS1E', 'HS1F', 'HS1G', 'HS1H', \
-                                      'HS2A', 'HS2B', 'HS2C', 'HS2D', 'HS2E', 'HS2F', 'HS2G', 'HS2H', \
-                                      'HS3A', 'HS3B', 'HS3C', 'HS3D', 'HS3E', 'HS3F', 'HS3G', 'HS3H'])].sum()
-            dsc = DDS[DDS.index.isin(['GOODSA', 'TRADEA', 'OTHERA', 'GOODSB', 'TRADEB', 'OTHERB', 'GOODSC', 'TRADEC', 'OTHERC', 'GOODSD', 'TRADED', 'OTHERD', \
-                                      'GOODSE', 'TRADEE', 'OTHERE', 'GOODSF', 'TRADEF', 'OTHERF', 'GOODSG', 'TRADEG', 'OTHERG', 'GOODSH', 'TRADEH', 'OTHERH'])].sum()
-            hhinc = DY[DY.index.isin(['HH1A', 'HH2A', 'HH3A', 'HH4A', 'HH5A', 'HH1B', 'HH2B', 'HH3B', 'HH4B', 'HH5B', 'HH1C', 'HH2C', 'HH3C', 'HH4C', 'HH5C', \
-                                      'HH1D', 'HH2D', 'HH3D', 'HH4D', 'HH5D', 'HH1E', 'HH2E', 'HH3E', 'HH4E', 'HH5E', 'HH1F', 'HH2F', 'HH3F', 'HH4F', 'HH5F', \
-                                      'HH1G', 'HH2G', 'HH3G', 'HH4G', 'HH5G', 'HH1H', 'HH2H', 'HH3H', 'HH4H', 'HH5H'])].sum()
-            hhdiff = HHL-HH0
-            mig = hhdiff.sum()
+        # gross income
+        cols = {'Y0': Y0.loc[H], 'YL': YL.loc[H]}
+        gross_income = pd.DataFrame.from_dict(cols)
+        gross_income.index.name = 'Household Group'
+        self.set_result_csv_data("gross-income", gross_income, name="gross-income", source="dataframe")
+        logger.info("Output gross-income has been created.")
 
-            emplist.append(emp)
-            dsrlist.append(dsr)
-            dsclist.append(dsc)
-            hhinclist.append(hhinc)
-            miglist.append(mig)
-            simlist.append(s_name)
+        # household count
+        cols = {'HH0': HH0, 'HHL': HHL}
+        household_count = pd.DataFrame.from_dict(cols)
+        household_count.index.name = 'Household Group'
+        self.set_result_csv_data("household-count", household_count, name="household-count", source="dataframe")
+        logger.info("Output household-count has been created.")
 
-        cols = {'dsc': dsclist, 'dsr': dsrlist, 'mig': miglist, 'emp': emplist, 'hhinc': hhinclist}
+        # pre-disaster-factor-demand
+        pre_disaster = FD0.loc[L]
+        pre_disaster.index.name = 'Labor Group'
+        self.set_result_csv_data("pre-disaster-factor-demand", pre_disaster,
+                                 name="pre-disaster-factor-demand", source="dataframe")
+        logger.info("Output pre-disaster-factor-demand has been created.")
 
-        sims_result = pd.DataFrame.from_dict(cols)
-
-        self.set_result_csv_data("Shelby_sims", sims_result, name="Shelby_sims", source="dataframe")
-        logger.info("Output sims has been created.")
-
-        return True
+        # post-disaster-factor-demand
+        post_disaster = FDL.loc[L]
+        post_disaster.index.name = 'Labor Group'
+        self.set_result_csv_data("post-disaster-factor-demand", pre_disaster,
+                                 name="post-disaster-factor-demand", source="dataframe")
+        logger.info("Output post-disaster-factor-demand has been created.")
