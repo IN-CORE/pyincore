@@ -6,12 +6,11 @@ import pyincore.globals as pyglobals
 
 def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
-
     # Lumberton Flood EPF Damage
     hazard_type = "flood"
     hazard_id_eq = "5f4d02e99f43ee0dde768406"
-    epf_dataset_id = "635176081f950c126bcbe296"
-    mapping_id = "635171e3297f7611014c2207"
+    epf_dataset_id = "636424f71f950c126bce009c"
+    mapping_id = "63641cbd297f7611014c2260"
 
     # Run epf damage
     epf_dmg_flood_lumberton = EpfDamage(client)
@@ -26,7 +25,7 @@ def run_with_base_class():
     epf_dmg_flood_lumberton.set_parameter("result_name", "lumberton_flood_epf")
     epf_dmg_flood_lumberton.set_parameter("hazard_type", hazard_type)
     epf_dmg_flood_lumberton.set_parameter("hazard_id", hazard_id_eq)
-    epf_dmg_flood_lumberton.set_parameter("num_cpu", 1)
+    epf_dmg_flood_lumberton.set_parameter("num_cpu", 8)
     # Run Analysis
     epf_dmg_flood_lumberton.run_analysis()
 
