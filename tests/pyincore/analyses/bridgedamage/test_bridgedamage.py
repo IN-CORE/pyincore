@@ -42,6 +42,7 @@ def run_with_base_class():
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("num_cpu", 4)
+    bridge_dmg.set_parameter("use_liquefaction", use_liquefaction)
     bridge_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
 
     # Run bridge damage analysis

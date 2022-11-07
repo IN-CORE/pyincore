@@ -230,8 +230,6 @@ class BridgeDamage(BaseAnalysis):
             ds_result.update(dmg_probability)
             ds_result.update(dmg_intervals)
             ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_val, hazard_type)
-            if use_liquefaction and geology_dataset_id is not None:
-                ds_result[BridgeUtil.GROUND_FAILURE_PROB] = ground_failure_prob
 
             damage_result['guid'] = bridge['properties']['guid']
             damage_result['fragility_id'] = selected_fragility_set.id
@@ -241,6 +239,8 @@ class BridgeDamage(BaseAnalysis):
             damage_result["demandunits"] = input_demand_units
             damage_result["hazardtype"] = hazard_type
             damage_result["hazardval"] = hazard_val
+            if use_liquefaction and geology_dataset_id is not None:
+                damage_result[BridgeUtil.GROUND_FAILURE_PROB] = ground_failure_prob
 
             # add spans to bridge output so mean damage calculation can use that info
             if "spans" in bridge["properties"] and bridge["properties"]["spans"] is not None:
