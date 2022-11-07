@@ -19,7 +19,11 @@ def run_with_base_class():
     # Use hazard uncertainty for computing damage
     use_hazard_uncertainty = False
     # Use liquefaction (LIQ) column of bridges to modify fragility curve
-    use_liquefaction = False
+    # use_liquefaction = False
+    use_liquefaction = True
+
+    # Geology dataset
+    liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
 
     # Create bridge damage
     bridge_dmg = BridgeDamage(client)
@@ -33,17 +37,17 @@ def run_with_base_class():
     bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
     # Set analysis parameters
-    bridge_dmg.set_parameter("result_name", "bridge_result")
+    # bridge_dmg.set_parameter("result_name", "bridge_result")
+    bridge_dmg.set_parameter("result_name", "bridge_result_w_liquefaction")
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
     bridge_dmg.set_parameter("num_cpu", 4)
+    bridge_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
 
     # Run bridge damage analysis
     bridge_dmg.run_analysis()
 
     ###################################################################
-    # Test liquefaction
-
     # south carolina eq damage
     hazard_type = "earthquake"
     hazard_id = "5ee9309bc9f1b70008fdbd26"
@@ -54,11 +58,6 @@ def run_with_base_class():
     # Default Bridge Fragility Mapping on incore-service
     mapping_id = "5b47bcce337d4a37755e0cb2"
 
-    # Use hazard uncertainty for computing damage
-    use_hazard_uncertainty = False
-    # Use liquefaction (LIQ) column of bridges to modify fragility curve
-    use_liquefaction = True
-
     # Create bridge damage
     bridge_dmg = BridgeDamage(client)
 
@@ -71,10 +70,10 @@ def run_with_base_class():
     bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
     # Set analysis parameters
-    bridge_dmg.set_parameter("result_name", "bridge_result_w_liquefaction")
+    bridge_dmg.set_parameter("result_name", "bridge_result_south_carolina")
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
-    bridge_dmg.set_parameter("use_liquefaction", use_liquefaction)
+    bridge_dmg.set_parameter("use_liquefaction", False)
     bridge_dmg.set_parameter("num_cpu", 1)
 
     # Run bridge damage analysis
