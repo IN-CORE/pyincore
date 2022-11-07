@@ -123,10 +123,14 @@ class BridgeDamage(BaseAnalysis):
                 "use_liquefaction") is not None:
             use_liquefaction = self.get_parameter("use_liquefaction")
 
+        # Get geology dataset id containing liquefaction susceptibility
+        geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
+
         fragility_set = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), bridges,
                                                           fragility_key)
 
         values_payload = []
+        values_payload_liq = []  # for liquefaction, if used
         unmapped_bridges = []
         mapped_bridges = []
         for b in bridges:
@@ -144,6 +148,14 @@ class BridgeDamage(BaseAnalysis):
                 }
                 values_payload.append(value)
                 mapped_bridges.append(b)
+
+                if use_liquefaction and geology_dataset_id is not None:
+                    value_liq = {
+                        "demands": [""],
+                        "units": [""],
+                        "loc": loc
+                    }
+                    values_payload_liq.append(value_liq)
 
             else:
                 unmapped_bridges.append(b)
@@ -163,6 +175,11 @@ class BridgeDamage(BaseAnalysis):
             hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
         else:
             raise ValueError("The provided hazard type is not supported yet by this analysis")
+
+        # Check if liquefaction is applicable
+        if use_liquefaction and geology_dataset_id is not None:
+            liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
+                                                                        values_payload_liq)
 
         ds_results = []
         damage_results = []
@@ -193,6 +210,12 @@ class BridgeDamage(BaseAnalysis):
                         selected_fragility_set.calculate_limit_state(hval_dict,
                                                                      inventory_type="bridge",
                                                                      **bridge_args)
+
+                    if use_liquefaction and geology_dataset_id is not None and liquefaction_resp is not None:
+                        ground_failure_prob = liquefaction_resp[i][BridgeUtil.GROUND_FAILURE_PROB]
+                        dmg_probability = AnalysisUtil.update_precision_of_dicts(
+                            AnalysisUtil.adjust_damage_for_liquefaction(dmg_probability, ground_failure_prob))
+
                     dmg_intervals = selected_fragility_set.calculate_damage_interval(dmg_probability,
                                                                                      hazard_type=hazard_type,
                                                                                      inventory_type="bridge")
@@ -207,6 +230,8 @@ class BridgeDamage(BaseAnalysis):
             ds_result.update(dmg_probability)
             ds_result.update(dmg_intervals)
             ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_val, hazard_type)
+            if use_liquefaction and geology_dataset_id is not None:
+                ds_result[BridgeUtil.GROUND_FAILURE_PROB] = ground_failure_prob
 
             damage_result['guid'] = bridge['properties']['guid']
             damage_result['fragility_id'] = selected_fragility_set.id
@@ -295,6 +320,12 @@ class BridgeDamage(BaseAnalysis):
                     'required': False,
                     'description': 'Use liquefaction',
                     'type': bool
+                },
+                {
+                    'id': 'liquefaction_geology_dataset_id',
+                    'required': False,
+                    'description': 'Geology dataset id',
+                    'type': str,
                 },
                 {
                     'id': 'use_hazard_uncertainty',
