@@ -23,6 +23,7 @@ from pyincore.utils.analysisutil import AnalysisUtil
 from pyincore.utils.popdisloutputprocess import PopDislOutputProcess
 from pyincore.utils.cgeoutputprocess import CGEOutputProcess
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
+from pyincore.new_dataset import NewDataset
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.repaircurveset import RepairCurveSet
 from pyincore.models.restorationcurveset import RestorationCurveSet
@@ -33,5 +34,6 @@ from pyincore.models.networkdataset import NetworkDataset
 from pyincore.networkdata import NetworkData
 from pyincore.baseanalysis import BaseAnalysis
 import pyincore.globals
+import pyincore.io
 
 __version__ = pyincore.globals.PACKAGE_VERSION
