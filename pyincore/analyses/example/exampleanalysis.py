@@ -17,7 +17,8 @@ class ExampleAnalysis(BaseAnalysis):
     def run(self):
         """Executes building damage analysis."""
         # Building dataset
-        bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
+        bldg_set_dataset = self.get_input_dataset("buildings")
+        bldg_set = bldg_set_dataset.read(from_file_type='inventory', local_file_path=bldg_set_dataset.local_file_path)
 
         results = []
         # Iterate over the building dataset and compute damage for each

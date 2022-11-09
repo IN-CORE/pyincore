@@ -6,7 +6,7 @@
 
 # TODO: exception handling for validation and set methods
 from pyincore import DataService, AnalysisUtil
-from pyincore.dataset import Dataset
+from pyincore.new_dataset import NewDataset
 import typing
 
 
@@ -69,7 +69,7 @@ class BaseAnalysis:
             remote_id (str):  ID of the Dataset in the Data service.
 
         """
-        dataset = Dataset.from_data_service(remote_id, self.data_service)
+        dataset = NewDataset.from_data_service(remote_id, self.data_service)
 
         # TODO: Need to handle failing to set input dataset.
         self.set_input_dataset(analysis_param_id, dataset)
@@ -241,7 +241,7 @@ class BaseAnalysis:
 
     """ convenience function(s) for setting result data as a csv """
 
-    def set_result_csv_data(self, result_id, result_data, name, source='file'):
+    def set_result_csv_data(self, result_id, result_data, name, source='list'):
         if name is None:
             name = self.spec["name"] + "-result"
 
@@ -251,14 +251,19 @@ class BaseAnalysis:
         dataset_type = self.output_datasets[result_id]["spec"]["type"]
         dataset = None
 
-        if source == 'file':
-            dataset = Dataset.from_csv_data(result_data, name, dataset_type)
-        elif source == 'dataframe':
-            dataset = Dataset.from_dataframe(result_data, name, dataset_type)
+        # modified from file to list as we specify python datatype from which
+        # we are saving the data and to a csv file
+        dataset = NewDataset.write(
+            result_data,
+            name,
+            dataset_type,
+            from_data_type=source,
+            to_file_type='csv'
+        )
 
         self.set_output_dataset(result_id, dataset)
 
-    def set_result_json_data(self, result_id, result_data, name, source='file'):
+    def set_result_json_data(self, result_id, result_data, name, source='dict'):
         if name is None:
             name = self.spec["name"] + "-result"
 
@@ -266,8 +271,15 @@ class BaseAnalysis:
             name = name + ".json"
 
         dataset_type = self.output_datasets[result_id]["spec"]["type"]
-        if source == 'file':
-            dataset = Dataset.from_json_data(result_data, name, dataset_type)
+        # modified from file to dict as we specify python datatype from which
+        # we are saving the data and to a JSON file
+        dataset = NewDataset.write(
+            result_data,
+            name,
+            dataset_type,
+            from_data_type=source,
+            to_file_type='json'
+        )
 
         self.set_output_dataset(result_id, dataset)
 

@@ -172,6 +172,8 @@ class NewDataset:
             JSONIO.write(result_data, name, from_data_type=from_data_type, **kwargs)
 
         else:
-            raise TypeError(f"Unknown from_data_type = {from_data_type}")
+            raise TypeError(
+                f"Unknown from_data_type = {from_data_type}, you need to specify "
+                f"what format you are writing the data to")
 
         return NewDataset.from_file(name, data_type)

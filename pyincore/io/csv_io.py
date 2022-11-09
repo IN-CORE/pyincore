@@ -40,7 +40,7 @@ class CSVIO(BaseIO):
             **kwargs
     ) -> None:
         # TODO: Perform conversion if needed
-        if from_data_type == 'df':
+        if from_data_type == 'dataframe':
             # expecting the result_data to be of type pd.DataFrame
             # TODO: implement data validation here
             if type(result_data) != pd.DataFrame:
@@ -60,4 +60,4 @@ class CSVIO(BaseIO):
             return
         # writing to an unknown type
         else:
-            raise TypeError(f"from_data_type = {from_data_type} is not defined. Possible values are df and list")
+            raise TypeError(f"from_data_type = {from_data_type} is not defined. Possible values are dataframe and list")

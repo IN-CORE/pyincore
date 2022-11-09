@@ -35,7 +35,7 @@ class JSONIO(BaseIO):
         # TODO: Perform conversion if needed
         # TODO: implement data validation here
         write_to_file = len(result_data) > 0
-        if from_data_type == 'dict' and result_data == dict and write_to_file:
+        if from_data_type == 'dict' and type(result_data) == dict and write_to_file:
             result_data = json.dumps(result_data, indent=4)
             from_data_type = 'str'
 
