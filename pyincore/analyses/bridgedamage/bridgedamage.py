@@ -213,6 +213,13 @@ class BridgeDamage(BaseAnalysis):
 
                     if use_liquefaction and geology_dataset_id is not None and liquefaction_resp is not None:
                         ground_failure_prob = liquefaction_resp[i][BridgeUtil.GROUND_FAILURE_PROB]
+
+                        # TODO: put it in a util method
+                        # Adjust for 4 LS of bridges - the service returns ground failure
+                        # expecting 3 LS
+                        ground_failure_prob.append(ground_failure_prob[2])
+                        ground_failure_prob[2] = ground_failure_prob[1]
+
                         dmg_probability = AnalysisUtil.update_precision_of_dicts(
                             AnalysisUtil.adjust_damage_for_liquefaction(dmg_probability, ground_failure_prob))
 
