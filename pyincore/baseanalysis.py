@@ -266,6 +266,7 @@ class BaseAnalysis:
             name = name + ".json"
 
         dataset_type = self.output_datasets[result_id]["spec"]["type"]
+        dataset = None
         if source == 'file':
             dataset = Dataset.from_json_data(result_data, name, dataset_type)
 

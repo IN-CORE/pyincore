@@ -215,7 +215,7 @@ class HousingRecovery(BaseAnalysis):
         add dummy variable for census tract as a seasonal/vacation housing submarket.
 .
         Args:
-            vacation_status (obj): Seasonal/vacation housing Census ACS data from json reader.
+            vac_status (obj): Seasonal/vacation housing Census ACS data from json reader.
 
         Returns:
             pd.DataFrame: Seasonal/vacation housing data.

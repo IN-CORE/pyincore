@@ -135,7 +135,7 @@ class DataProcessUtil:
         Args:
             inventory: dataframe represent inventory
             dmg_result: dmg_result that need to merge with inventory and be grouped
-            archetype_mapping_path: Path to the arechetype mappings
+            arch_mapping: Path to the arechetype mappings
 
         Returns:
             ret_json: JSON of the results ordered by cluster and category.
@@ -179,8 +179,8 @@ class DataProcessUtil:
 
         Args:
             inventory: dataframe represent inventory
-            dmg_result: dmg_result that need to merge with inventory and be grouped
-            archetype_mapping_path: Path to the arechetype mappings
+            bldg_func: building func dataset
+            arch_mapping: Path to the arechetype mappings
 
         Returns:
             ret_json: JSON of the results ordered by cluster and category.

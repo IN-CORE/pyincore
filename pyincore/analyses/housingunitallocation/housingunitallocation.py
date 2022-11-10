@@ -259,8 +259,8 @@ class HousingUnitAllocation(BaseAnalysis):
         It assumes that suffixes are _x and _y
 
         Args:
-            table1_cols (list):         columns in table 1
-            table2_cols (list):         columns in table 2
+            table1_cols (Index):         columns in table 1
+            table2_cols (Index):         columns in table 2
             table_merged (pd.DataFrame):merged table
 
             Returns:

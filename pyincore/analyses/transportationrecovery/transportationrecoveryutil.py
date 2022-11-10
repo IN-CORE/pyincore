@@ -3,7 +3,7 @@ import csv
 import pandas as pd
 import networkx as nx
 import copy
-
+import math
 from pyincore import GeoUtil, InventoryDataset
 
 
@@ -152,7 +152,7 @@ class TransportationRecoveryUtil:
             for j in range(num_node):
                 if i != j:
                     if distance[i][j] == 0:
-                        distance[i][j] = float("inf")
+                        distance[i][j] = math.inf
                     travel_efficiency += 1 / distance[i][j]
 
         return travel_efficiency

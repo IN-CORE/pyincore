@@ -105,60 +105,6 @@ class FragilityCurveSet:
 
         return output
 
-    def calculate_limit_state_w_conversion(self, hazard, period: float = 0.0, std_dev: float = 0.0,
-                                           inventory_type: str = "building", **kwargs):
-        """Computes limit state probabilities.
-
-        Args:
-            hazard (float): Hazard value to compute probability for.
-            period (float): Period of the structure, if applicable.
-            std_dev (float): Standard deviation.
-            inventory_type (str): A type of inventory.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            dict: Limit state probabilities.
-
-        """
-        output = FragilityCurveSet._initialize_limit_states(inventory_type)
-        limit_state = list(output.keys())
-        index = 0
-
-        if len(self.fragility_curves) <= 4:
-            for fragility_curve in self.fragility_curves:
-                probability = fragility_curve.solve_curve_expression(hazard, period, std_dev, **kwargs)
-                output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
-                index += 1
-        else:
-            raise ValueError("We can only handle fragility curves with less than 4 limit states.")
-
-        return output
-
-    def calculate_custom_limit_state_w_conversion(self, variables: dict, inventory_type: str = "building"):
-        """Computes limit state probabilities.
-
-        Args:
-            variables (dict): A dictionary of variables.
-            inventory_type (str): A type of inventory.
-
-        Returns:
-            dict: Limit state probabilities for custom expression fragilities.
-
-        """
-        output = FragilityCurveSet._initialize_limit_states(inventory_type)
-        limit_state = list(output.keys())
-        index = 0
-
-        if len(self.fragility_curves) <= 4:
-            for fragility_curve in self.fragility_curves:
-                probability = fragility_curve.compute_custom_limit_state_probability(variables)
-                output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
-                index += 1
-        else:
-            raise ValueError("We can only handle fragility curves with less than 4 limit states.")
-
-        return output
-
     def calculate_damage_interval(self, damage, hazard_type="earthquake", inventory_type: str = "building"):
         """
 
@@ -208,7 +154,7 @@ class FragilityCurveSet:
             raise ValueError(inventory_type + " " + hazard_type + " damage analysis do not support " +
                              str(len(self.fragility_curves)) + " limit state")
 
-        return ls_ds_dspatcher[hazard_type, inventory_type, len(self.fragility_curves)](damage)
+        return ls_ds_dspatcher[(hazard_type, inventory_type, len(self.fragility_curves))](damage)
 
     def construct_expression_args_from_inventory(self, inventory_unit: dict):
         """
@@ -223,7 +169,7 @@ class FragilityCurveSet:
         kwargs_dict = {}
         for parameters in self.curve_parameters:
 
-            if parameters['name'] == "age_group" and ('age_group' not in inventory_unit['properties'] or \
+            if parameters['name'] == "age_group" and ('age_group' not in inventory_unit['properties'] or
                                                       inventory_unit['properties']['age_group'] == ""):
                 if 'year_built' in inventory_unit['properties'].keys() and inventory_unit['properties']['year_built'] \
                         is not None:

@@ -100,6 +100,7 @@ class NSGAII:
         for s in p:
             s.evaluate_solution(0)
 
+        first_front = []
         for i in range(num_generations):
 
             r = []
@@ -124,9 +125,9 @@ class NSGAII:
             if len(p) > population_size:
                 del p[population_size:]
 
-            First_front = list(fronts.values())[0]
+            first_front = list(fronts.values())[0]
 
-        return First_front
+        return first_front
 
     @staticmethod
     def sort_ranking(p):

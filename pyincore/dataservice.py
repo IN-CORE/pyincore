@@ -9,12 +9,12 @@ import io
 import json
 import os
 import re
-import urllib
 import zipfile
 import ntpath
 
 import pyincore.globals as pyglobals
 from pyincore import IncoreClient
+from urllib.parse import urljoin
 
 
 class DataService:
@@ -27,10 +27,10 @@ class DataService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_url = urllib.parse.urljoin(client.service_url, 'data/api/datasets/')
-        self.files_url = urllib.parse.urljoin(client.service_url, 'data/api/files/')
-        self.base_earthquake_url = urllib.parse.urljoin(client.service_url, 'hazard/api/earthquakes/')
-        self.base_tornado_url = urllib.parse.urljoin(client.service_url, 'hazard/api/tornadoes/')
+        self.base_url = urljoin(client.service_url, 'data/api/datasets/')
+        self.files_url = urljoin(client.service_url, 'data/api/files/')
+        self.base_earthquake_url = urljoin(client.service_url, 'hazard/api/earthquakes/')
+        self.base_tornado_url = urljoin(client.service_url, 'hazard/api/tornadoes/')
 
     def get_dataset_metadata(self, dataset_id: str):
         """Retrieve metadata from data service. Dataset API endpoint is called.
@@ -43,7 +43,7 @@ class DataService:
 
         """
         # construct url with service, dataset api, and id
-        url = urllib.parse.urljoin(self.base_url, dataset_id)
+        url = urljoin(self.base_url, dataset_id)
         r = self.client.get(url)
         return r.json()
 
@@ -57,7 +57,7 @@ class DataService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urllib.parse.urljoin(self.base_url, dataset_id + '/files')
+        url = urljoin(self.base_url, dataset_id + '/files')
         r = self.client.get(url)
         return r.json()
 
@@ -72,7 +72,7 @@ class DataService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urllib.parse.urljoin(self.base_url,
+        url = urljoin(self.base_url,
                                    dataset_id + "/files/" + file_id)
         r = self.client.get(url)
         return r.json()
@@ -118,7 +118,7 @@ class DataService:
 
     def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None):
         # construct url for file download
-        url = urllib.parse.urljoin(self.base_url, dataset_id + '/blob')
+        url = urljoin(self.base_url, dataset_id + '/blob')
         kwargs = {"stream": True}
         if join is None:
             r = self.client.get(url, **kwargs)
@@ -208,7 +208,7 @@ class DataService:
             obj: HTTP PUT Response. Json of the dataset updated on the server.
 
         """
-        url = urllib.parse.urljoin(self.base_url, dataset_id)
+        url = urljoin(self.base_url, dataset_id)
         payload = {'update': json.dumps({"property name": property_name,
                                          "property value": property_value})}
         kwargs = {"files": payload}
@@ -220,13 +220,13 @@ class DataService:
 
         Args:
             dataset_id (str): ID of the Dataset.
-            filepath (list): Path to the files.
+            filepaths (list): Path to the files.
 
         Returns:
             obj: HTTP POST Response. Json of the files added to the dataset.
 
         """
-        url = urllib.parse.urljoin(self.base_url, dataset_id + "/files")
+        url = urljoin(self.base_url, dataset_id + "/files")
         listfiles = []
         for filepath in filepaths:
             file = open(filepath, 'rb')
@@ -247,7 +247,7 @@ class DataService:
 
         Args:
             dataset_id (str): ID of the Dataset.
-            filepath (list): Path to the files.
+            filepaths (list): Path to the files.
             nodename (str): node shapefile name.
             linkname (str): link shapefile name.
             graphname (str): graph file name.
@@ -256,7 +256,7 @@ class DataService:
             obj: HTTP POST Response. Json of the files added to the dataset.
 
         """
-        url = urllib.parse.urljoin(self.base_url, dataset_id + "/files")
+        url = urljoin(self.base_url, dataset_id + "/files")
         listfiles = []
         linkname = os.path.splitext(linkname)[0]
         nodename = os.path.splitext(nodename)[0]
@@ -292,7 +292,7 @@ class DataService:
             obj: HTTP DELETE Response. Json model of the delete action.
 
         """
-        url = urllib.parse.urljoin(self.base_url, dataset_id)
+        url = urljoin(self.base_url, dataset_id)
         r = self.client.delete(url)
         return r.json()
 
@@ -317,7 +317,7 @@ class DataService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urllib.parse.urljoin(self.files_url, file_id)
+        url = urljoin(self.files_url, file_id)
         r = self.client.get(url)
         return r.json()
 
@@ -332,7 +332,7 @@ class DataService:
 
         """
         # construct url for file download
-        url = urllib.parse.urljoin(self.files_url, file_id + '/blob')
+        url = urljoin(self.files_url, file_id + '/blob')
         kwargs = {"stream": True}
         r = self.client.get(url, **kwargs)
 
@@ -434,7 +434,7 @@ class DataService:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_url, "search")
+        url = urljoin(self.base_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip

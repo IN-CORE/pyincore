@@ -42,20 +42,20 @@ class VarContainer:
         """
         if rows is not None and cols is not None:
             size = len(rows) * len(cols)
-            self.namelist[name] = { \
-                'nrows': len(rows), \
-                'ncols': len(cols), \
-                'rows': rows, \
-                'cols': cols, \
-                'start': self.nvars, \
+            self.namelist[name] = {
+                'nrows': len(rows),
+                'ncols': len(cols),
+                'rows': rows,
+                'cols': cols,
+                'start': self.nvars,
                 'size': size
             }
         elif rows is not None and cols is None:
             size = len(rows)
             self.namelist[name] = {
-                'nrows': len(rows), \
-                'rows': rows, \
-                'start': self.nvars, \
+                'nrows': len(rows),
+                'rows': rows,
+                'start': self.nvars,
                 'size': size
             }
         else:
@@ -74,7 +74,7 @@ class VarContainer:
         An internal method for setting the initial values or UPs and LOs for variables
 
         :param name: Name of the variable in GAMS
-        :param value: a pandas DataFrame, pandas Series, int or float with initial values
+        :param values: a pandas DataFrame, pandas Series, int or float with initial values
         :param target: target array to be set
 
         :return: None
@@ -190,6 +190,7 @@ class VarContainer:
         if x is None:
             x = self.initialVals
 
+        ret = None
         info = self.namelist[name]
         if 'nrows' in info and 'ncols' in info:
             ret = pd.DataFrame(index=info['rows'], columns=info['cols']).fillna(0.0)
@@ -424,7 +425,7 @@ class Expr:
             if copy.isComposite:
                 if copy.operator == '/':
                     copy.first = copy.first * rhs
-                elif copy.opeartor == '**':
+                elif copy.operator == '**':
                     return ExprItem(rhs) * copy
             else:
                 result = []
@@ -458,6 +459,7 @@ class Expr:
                     result = []
                     for i in copy.itemList:
                         for j in rhs.itemList:
+                            tmp = None
                             if type(i) == Expr:
                                 tmp = Expr(i)
                             elif type(i) == ExprItem:

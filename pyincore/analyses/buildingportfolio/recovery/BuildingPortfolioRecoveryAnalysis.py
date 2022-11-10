@@ -563,12 +563,12 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 for k in range(5):
                     # Functionality State l
                     for l in range(5):
-                        expect1 += joint_probability[k][l] * (temporary_correlation1[t][i][k] * \
-                                                              temporary_correlation1[t][j][l] \
+                        expect1 += joint_probability[k][l] * (temporary_correlation1[t][i][k] *
+                                                              temporary_correlation1[t][j][l]
                                                               + temporary_correlation1[t][i][k] *
-                                                              temporary_correlation1[t][j][l] \
+                                                              temporary_correlation1[t][j][l]
                                                               + temporary_correlation2[t][i][k] *
-                                                              temporary_correlation1[t][j][l] \
+                                                              temporary_correlation1[t][j][l]
                                                               + temporary_correlation2[t][i][k] *
                                                               temporary_correlation2[t][j][l])
                 expect2 = mean_over_time[t][i] * mean_over_time[t][j]
@@ -717,10 +717,10 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
     def log_n_cdf(self, x, mean, sig):
         if x < 0:
             cdf = 0
-        elif sp.isposinf(x):
+        elif np.isposinf(x):
             cdf = 1
         else:
-            z = (sp.log(x) - mean) / float(sig)
-            cdf = 0.5 * (math.erfc(-z / sp.sqrt(2)))
+            z = (np.log(x) - mean) / float(sig)
+            cdf = 0.5 * (math.erfc(-z / np.sqrt(2)))
 
         return cdf

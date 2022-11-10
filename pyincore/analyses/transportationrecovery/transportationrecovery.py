@@ -166,6 +166,7 @@ class TransportationRecovery(BaseAnalysis):
 
             # calculate different travel efficiency based on different
             # performance metrics
+            current_te = None
             if pm == 1:
                 current_te = TransportationRecoveryUtil.traveltime_freeflow(network)
 
