@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Added missing output spec description for EPF damage [#107](https://github.com/IN-CORE/pyincore/issues/107)
+- Removed PEP 8 warnings [#210](https://github.com/IN-CORE/pyincore/issues/210)
 
 ## [1.7.0] - 2022-09-14
 
