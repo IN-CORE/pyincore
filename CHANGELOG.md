@@ -5,13 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.8.0] - 2022-11-16
 
 ### Changed
 - Enable liquefaction for bridge earthquake damage [#226](https://github.com/IN-CORE/pyincore/issues/226)
 
 ### Fixed
 - Added missing output spec description for EPF damage [#107](https://github.com/IN-CORE/pyincore/issues/107)
+- Removed PEP 8 warnings [#210](https://github.com/IN-CORE/pyincore/issues/210)
 
 ## [1.7.0] - 2022-09-14
 
