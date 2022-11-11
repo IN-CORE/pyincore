@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Enable liquefaction for bridge earthquake damage [#226](https://github.com/IN-CORE/pyincore/issues/226)
 
+### Fixed
+- Added missing output spec description for EPF damage [#107](https://github.com/IN-CORE/pyincore/issues/107)
 
 ## [1.7.0] - 2022-09-14
 
