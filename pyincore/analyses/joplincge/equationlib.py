@@ -108,7 +108,6 @@ class VarContainer:
 
         Args:
             name (str): Name of the variable in GAMS.
-            initial_value (obj): A pandas DataFrame or pandas Series with initial values.
 
         Returns:
             bool: Whether the variable is added.
@@ -186,6 +185,7 @@ class VarContainer:
         if x is None:
             x = self.initialVals
 
+        ret = None
         info = self.namelist[name]
         if 'nrows' in info and 'ncols' in info:
             ret = pd.DataFrame(index=info['rows'], columns=info['cols']).fillna(0.0)
@@ -246,7 +246,7 @@ class Variable:
             gams_vars (obj): The variable container that already added the GAMS variable.
             name (str): GAMS variable name.
             row (obj): GAMS rows label if there is.
-            cols (obj): GAMS columns label if there is.
+            col (obj): GAMS columns label if there is.
 
         """
         try:
@@ -380,7 +380,7 @@ class Expr:
             if copy.isComposite:
                 if copy.operator == '/':
                     copy.first = copy.first * rhs
-                elif copy.opeartor == '**':
+                elif copy.operator == '**':
                     return ExprItem(rhs) * copy
             else:
                 result = []
@@ -411,6 +411,7 @@ class Expr:
                     # The expanding way is super slow for long equations
 
                     result = []
+                    tmp = None
                     for i in copy.itemList:
                         for j in rhs.itemList:
                             if type(i) == Expr:

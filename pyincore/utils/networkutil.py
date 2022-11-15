@@ -219,10 +219,12 @@ class NetworkUtil:
         indataset = fiona.open(link_file)
 
         for line_feature in indataset:
+            from_node_val = None
             if fromnode_fldname in line_feature["properties"]:
                 from_node_val = line_feature['properties'][fromnode_fldname]
             elif fromnode_fldname.lower() in line_feature["properties"]:
                 from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            to_node_val = None
             if tonode_fldname in line_feature["properties"]:
                 to_node_val = line_feature['properties'][tonode_fldname]
             elif tonode_fldname.lower() in line_feature["properties"]:
@@ -252,10 +254,12 @@ class NetworkUtil:
         # create coordinates
         node_coords_list = [None] * (len(node_list))
         for line_feature in indataset:
+            from_node_val = None
             if fromnode_fldname in line_feature["properties"]:
                 from_node_val = line_feature['properties'][fromnode_fldname]
             elif fromnode_fldname.lower() in line_feature["properties"]:
                 from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            to_node_val = None
             if tonode_fldname in line_feature["properties"]:
                 to_node_val = line_feature['properties'][tonode_fldname]
             elif tonode_fldname.lower() in line_feature["properties"]:
@@ -281,8 +285,7 @@ class NetworkUtil:
         # nx.draw(graph, coords, with_lables=True, font_weithg='bold')
 
         # other ways to draw
-        nx.draw_networkx_nodes(graph, coords, cmap=plt.get_cmap('jet'), node_size=100, node_color='g', with_lables=True,
-                               font_weithg='bold')
+        nx.draw_networkx_nodes(graph, coords, cmap=plt.get_cmap('jet'), node_size=100, node_color='g')
         nx.draw_networkx_labels(graph, coords)
         nx.draw_networkx_edges(graph, coords, edge_color='r', arrows=True)
         plt.show()
@@ -323,7 +326,7 @@ class NetworkUtil:
         """Check if the node id in from or to node exist in the real node id.
 
         Args:
-            network_dataset (str):  A name of a network dataset
+            network_dataset (obj):  Network dataset
             fromnode_fldname (str): Line feature, from node field name.
             tonode_fldname (str): Line feature, to node field name.
             nodeid_fldname (str): Node field id name.
@@ -339,10 +342,12 @@ class NetworkUtil:
         # iterate link
         link_node_list = []
         for line_feature in link_dataset:
+            from_node_val = None
             if fromnode_fldname in line_feature["properties"]:
                 from_node_val = line_feature['properties'][fromnode_fldname]
             elif fromnode_fldname.lower() in line_feature["properties"]:
                 from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+            to_node_val = None
             if tonode_fldname in line_feature["properties"]:
                 to_node_val = line_feature['properties'][tonode_fldname]
             elif tonode_fldname.lower() in line_feature["properties"]:
@@ -353,6 +358,7 @@ class NetworkUtil:
         # iterate node
         node_list = []
         for node_feature in node_dataset:
+            node_val = None
             if nodeid_fldname in node_feature["properties"]:
                 node_val = node_feature['properties'][nodeid_fldname]
             elif nodeid_fldname.lower() in node_feature["properties"]:

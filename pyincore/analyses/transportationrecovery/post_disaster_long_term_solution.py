@@ -198,6 +198,7 @@ class PostDisasterLongTermSolution(Solution):
 
                 # calculate the travel efficiency based on different
                 # performance metrics based on travel time
+                te = None
                 if self.pm == 1:
                     te = TransportationRecoveryUtil.traveltime_freeflow(self.network)
 

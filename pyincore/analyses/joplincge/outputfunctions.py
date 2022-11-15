@@ -53,6 +53,7 @@ def new_value(vars, soln, eqName, ittr):
             newvalue = pd.DataFrame(rws, index=rows)
         #       data frames
         else:
+            cols = []
             for rr in rows:
                 cols = vars.get_info(eqName)['cols']
                 clms = []
@@ -67,5 +68,5 @@ def new_value(vars, soln, eqName, ittr):
 
 # Get differences function
 def get_diff(vars, soln, eqName, ittr):
-    difference = new_value(vars, soln, eqName, ittr) - base_value(vars, soln, eqName)
+    difference = new_value(vars, soln, eqName, ittr) - base_value(vars, eqName)
     return difference

@@ -707,7 +707,7 @@ class JoplinCGEModel(BaseAnalysis):
 
         KS0.loc[K, IG] = FD0.loc[K, IG]
 
-        KSNEW0.loc[K, IG] = KS0.loc[K, IG];
+        KSNEW0.loc[K, IG] = KS0.loc[K, IG]
 
         LAS0.loc[LA, IG] = FD0.loc[LA, IG]
 
@@ -857,14 +857,14 @@ class JoplinCGEModel(BaseAnalysis):
                (CMIWAGE.loc[L] * CMI0.loc[L]).sum(0)
 
         Y0.loc[H] = (A.loc[H, L].mul(HW0[H], axis='index').div(A.loc[H, L].mul(HW0[H], axis='index').sum(0),
-                                                               axis='columns') \
+                                                               axis='columns')
                      .mul(Y0.loc[L] - (CMIWAGE.loc[L] * CMI0.loc[L]), axis='columns').mul(1.0 - TAUFL.loc[G, L].sum(0),
                                                                                           axis='columns')).sum(1) \
                     + (A.loc[H, CM].mul((CMOWAGE.loc[CM] * CMO0.loc[CM]), axis='columns')).sum(1) \
                     + (A.loc[H, LA].mul(HW0[H], axis='index').div(A.loc[H, LA].mul(HW0[H], axis='index').sum(0),
-                                                                  axis='columns') \
+                                                                  axis='columns')
                        * (Y0.loc[LA] * (1.0 - TAUFLA.loc[G, LA].sum(0)) + LNFOR0.loc[LA])).sum(1) \
-                    + (A.loc[H, K].mul(HW0[H], axis='index') / A.loc[H, K].mul(HW0[H], axis='index').sum(0) \
+                    + (A.loc[H, K].mul(HW0[H], axis='index') / A.loc[H, K].mul(HW0[H], axis='index').sum(0)
                        * (Y0[K] * (1.0 - TAUFK.loc[G, K].sum(0)) + KPFOR0.loc[K])).sum(1)
 
         SPI0 = (Y0.loc[H].sum(0) +
@@ -1774,7 +1774,7 @@ class JoplinCGEModel(BaseAnalysis):
         '''
 
         iNum = self.get_parameter("model_iterations")  # dynamic model iterations
-
+        result = []
         for ittr in range(iNum):
             # print("Simulation: ", ittr + 1)
             if ittr == 0:  # if it is the first simulation, apply the shock

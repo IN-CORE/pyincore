@@ -6,7 +6,7 @@ def run_with_base_class():
     client = IncoreClient()
     transportation_recovery = TransportationRecovery(client)
 
-    nodes = "5c5de1dec5c0e488fc0355f7"
+    nodes = "603d37ec34f29a7fa4211fc4"
     transportation_recovery.load_remote_input_dataset("nodes", nodes)
 
     links = "5c5de25ec5c0e488fc035613"
