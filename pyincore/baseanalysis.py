@@ -6,7 +6,7 @@
 
 # TODO: exception handling for validation and set methods
 from pyincore import DataService, AnalysisUtil
-from pyincore.new_dataset import NewDataset
+from pyincore.dataset import Dataset
 import typing
 
 
@@ -69,7 +69,7 @@ class BaseAnalysis:
             remote_id (str):  ID of the Dataset in the Data service.
 
         """
-        dataset = NewDataset.from_data_service(remote_id, self.data_service)
+        dataset = Dataset.from_data_service(remote_id, self.data_service)
 
         # TODO: Need to handle failing to set input dataset.
         self.set_input_dataset(analysis_param_id, dataset)
@@ -253,7 +253,7 @@ class BaseAnalysis:
 
         # modified from file to list as we specify python datatype from which
         # we are saving the data and to a csv file
-        dataset = NewDataset.write(
+        dataset = Dataset.write(
             result_data,
             name,
             dataset_type,
@@ -273,7 +273,7 @@ class BaseAnalysis:
         dataset_type = self.output_datasets[result_id]["spec"]["type"]
         # modified from file to dict as we specify python datatype from which
         # we are saving the data and to a JSON file
-        dataset = NewDataset.write(
+        dataset = Dataset.write(
             result_data,
             name,
             dataset_type,

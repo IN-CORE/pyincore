@@ -94,10 +94,18 @@ class MeanDamage(BaseAnalysis):
         """Executes mean damage calculation."""
 
         # read in file and parameters
-        damage = self.get_input_dataset("damage").get_csv_reader()
+        damage_dataset = self.get_input_dataset("damage")
+        damage = damage_dataset.read(
+            from_file_type='csv',
+            local_file_path=damage_dataset.local_file_path
+        )
         damage_result = AnalysisUtil.get_csv_table_rows(damage, ignore_first_row=False)
 
-        dmg_ratio_csv = self.get_input_dataset("dmg_ratios").get_csv_reader()
+        dmg_ratios_dataset = self.get_input_dataset("dmg_ratios")
+        dmg_ratio_csv = dmg_ratios_dataset.read(
+            from_file_type='csv',
+            local_file_path=dmg_ratios_dataset.local_file_path
+        )
         dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(dmg_ratio_csv)
 
         # setting number of cpus to use

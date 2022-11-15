@@ -1,35 +1,33 @@
-# Copyright (c) 2019 University of Illinois and others. All rights reserved.
-#
-# This program and the accompanying materials are made available under the
-# terms of the Mozilla Public License v2.0 which accompanies this distribution,
-# and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
-
-import csv
-import glob
-import json
 import os
+import glob
+import csv
 
 import fiona
-import numpy
-import pandas as pd
+from deprecated import deprecated
 import geopandas as gpd
+import numpy as np
+import pandas as pd
 import rasterio
+import json
 import wntr
 import warnings
 from pyincore import DataService
+from pyincore.io import CSVIO, JSONIO, InventoryIO, EPAnetIO, ShapefileIO, RasterIO
+from typing import TypeVar, Optional, Union
 
+Dataset = TypeVar('Dataset', bound="Dataset")
+ResultType = TypeVar('ResultType')
 warnings.filterwarnings("ignore", "", UserWarning)
+write_deprecation_warning = 'This function will be removed in future, please use the write method with appropriate ' \
+                            'arguments'
+read_deprecation_warning = 'This function will be removed in future, please use the read method with appropriate ' \
+                           'arguments'
+close_deprecated_msg = "The readers property on Dataset is deprecated and will be removed in future versions. Use " \
+                           "read and write methods"
+deprecation_warning_version = '1.8.0'
 
 
 class Dataset:
-    """Dataset.
-
-    Args:
-        metadata (dict): Dataset metadata.
-
-    """
-
     def __init__(self, metadata):
         self.metadata = metadata
 
@@ -40,26 +38,28 @@ class Dataset:
         self.file_descriptors = metadata["fileDescriptors"]
         self.local_file_path = None
 
+        # Deprecated remove this in future
         self.readers = {}
 
     @classmethod
-    def from_data_service(cls, id: str, data_service: DataService):
+    def from_data_service(cls, dataset_id: str, data_service: DataService) -> Dataset:
         """Get Dataset from Data service, get metadata as well.
 
         Args:
-            id (str): ID of the Dataset.
+            dataset_id (str): ID of the Dataset.
             data_service (obj): Data service.
 
         Returns:
             obj: Dataset from Data service.
 
         """
-        metadata = data_service.get_dataset_metadata(id)
+        metadata = data_service.get_dataset_metadata(dataset_id)
         instance = cls(metadata)
         instance.cache_files(data_service)
         return instance
 
     @classmethod
+    @deprecated(reason=write_deprecation_warning, version=deprecation_warning_version)
     def from_json_str(cls, json_str, data_service: DataService = None, file_path=None):
         """Get Dataset from json string.
 
@@ -88,7 +88,7 @@ class Dataset:
         return instance
 
     @classmethod
-    def from_file(cls, file_path, data_type):
+    def from_file(cls, file_path: str, data_type: str) -> Dataset:
         """Get Dataset from the file.
 
         Args:
@@ -108,6 +108,7 @@ class Dataset:
         return instance
 
     @classmethod
+    @deprecated(reason=write_deprecation_warning, version=deprecation_warning_version)
     def from_dataframe(cls, dataframe, name, data_type):
         """Get Dataset from Panda's DataFrame.
 
@@ -124,6 +125,7 @@ class Dataset:
         return Dataset.from_file(name, data_type)
 
     @classmethod
+    @deprecated(reason=write_deprecation_warning, version=deprecation_warning_version)
     def from_csv_data(cls, result_data, name, data_type):
         """Get Dataset from CSV data.
 
@@ -145,6 +147,7 @@ class Dataset:
         return Dataset.from_file(name, data_type)
 
     @classmethod
+    @deprecated(reason=write_deprecation_warning, version=deprecation_warning_version)
     def from_json_data(cls, result_data, name, data_type):
         """Get Dataset from JSON data.
 
@@ -163,7 +166,7 @@ class Dataset:
                 json_file.write(json_dumps_str)
         return Dataset.from_file(name, data_type)
 
-    def cache_files(self, data_service: DataService):
+    def cache_files(self, data_service: DataService) -> str:
         """Get the set of fragility data, curves.
 
         Args:
@@ -173,13 +176,11 @@ class Dataset:
             str: A path to the local file.
 
         """
-        if self.local_file_path is not None:
-            return
-        self.local_file_path = data_service.get_dataset_blob(self.id)
+        if self.local_file_path is None:
+            self.local_file_path = data_service.get_dataset_blob(self.id)
         return self.local_file_path
 
-    """Utility methods for reading different standard file formats"""
-
+    @deprecated(reason=read_deprecation_warning, version=deprecation_warning_version)
     def get_inventory_reader(self):
         """Utility method for reading different standard file formats: Set of inventory.
 
@@ -196,6 +197,7 @@ class Dataset:
         else:
             return fiona.open(filename)
 
+    @deprecated(reason=read_deprecation_warning, version=deprecation_warning_version)
     def get_EPAnet_inp_reader(self):
         """Utility method for reading different standard file formats: EPAnet reader.
 
@@ -211,6 +213,7 @@ class Dataset:
         wn = wntr.network.WaterNetworkModel(filename)
         return wn
 
+    @deprecated(reason=read_deprecation_warning, version=deprecation_warning_version)
     def get_json_reader(self):
         """Utility method for reading different standard file formats: json reader.
 
@@ -230,6 +233,7 @@ class Dataset:
 
         return self.readers["json"]
 
+    @deprecated(reason=read_deprecation_warning, version=deprecation_warning_version)
     def get_raster_value(self, location):
         """Utility method for reading different standard file formats: raster value.
 
@@ -250,8 +254,9 @@ class Dataset:
         data = hazard.read(1)
         if row < 0 or col < 0 or row >= hazard.height or col >= hazard.width:
             return 0.0
-        return numpy.asscalar(data[row, col])
+        return np.asscalar(data[row, col])
 
+    @deprecated(reason=read_deprecation_warning, version=deprecation_warning_version)
     def get_csv_reader(self):
         """Utility method for reading different standard file formats: csv reader.
 
@@ -271,11 +276,11 @@ class Dataset:
 
         return self.readers["csv"]
 
-    def get_file_path(self, type='csv'):
+    def get_file_path(self, search_type: str = 'csv') -> str:
         """Utility method for reading different standard file formats: file path.
 
         Args:
-            type (str): A file type.
+            search_type (str): A file type.
 
         Returns:
             str: File name and path.
@@ -283,12 +288,13 @@ class Dataset:
         """
         filename = self.local_file_path
         if os.path.isdir(filename):
-            files = glob.glob(filename + "/*." + type)
+            files = glob.glob(filename + "/*." + search_type)
             if len(files) > 0:
                 filename = files[0]
 
         return filename
 
+    @deprecated(reason=read_deprecation_warning, version=deprecation_warning_version)
     def get_dataframe_from_csv(self, low_memory=True):
         """Utility method for reading different standard file formats: Pandas DataFrame from csv.
 
@@ -306,6 +312,7 @@ class Dataset:
             df = pd.read_csv(filename, header="infer", low_memory=low_memory)
         return df
 
+    @deprecated(reason=read_deprecation_warning, version=deprecation_warning_version)
     def get_dataframe_from_shapefile(self):
         """Utility method for reading different standard file formats: GeoDataFrame from shapefile.
 
@@ -319,10 +326,93 @@ class Dataset:
 
         return gdf
 
+    @classmethod
+    def read(
+            cls,
+            from_file_type: str,
+            local_file_path: str,
+            to_data_type: Optional[str] = None,
+            **kwargs
+    ) -> Union[
+        dict,
+        pd.DataFrame,
+        fiona.Collection,
+        wntr.network.WaterNetworkModel,
+        csv.DictReader,
+        Union[pd.DataFrame, gpd.GeoDataFrame],
+        np.ndarray
+    ]:
+        filename = local_file_path
+        if from_file_type == 'inventory':
+            if not to_data_type:
+                return InventoryIO.read(filename)
+            return InventoryIO.read(filename, to_data_type=to_data_type, **kwargs)
+
+        elif from_file_type == 'EPAnet':
+            if not to_data_type:
+                return EPAnetIO.read(filename)
+            return EPAnetIO.read(filename, to_data_type=to_data_type, **kwargs)
+
+        elif from_file_type == 'rasterfile':
+            location = kwargs.get('location', False)
+            if location:
+                if not to_data_type:
+                    return RasterIO.read(filename, location=location, **kwargs)
+                return RasterIO.read(filename, to_data_type=to_data_type, location=location, **kwargs)
+            raise ValueError("Reading Raster file requires argument location which was not passed.")
+
+        elif from_file_type == 'shapefile':
+            if not to_data_type:
+                return ShapefileIO.read(filename)
+            return ShapefileIO.read(filename, to_data_type=to_data_type, **kwargs)
+
+        elif from_file_type == 'csv':
+            if not to_data_type:
+                return CSVIO.read(filename, **kwargs)
+            return CSVIO.read(filename, to_data_type=to_data_type, **kwargs)
+
+        elif from_file_type == 'json':
+            if not to_data_type:
+                return JSONIO.read(filename, **kwargs)
+            return JSONIO.read(filename, to_data_type=to_data_type, **kwargs)
+
+        else:
+            raise TypeError(f"Unknown from_type = {from_file_type}")
+
+    @classmethod
+    def write(
+            cls,
+            result_data: ResultType,
+            name: str,
+            data_type: str,
+            from_data_type: str,
+            to_file_type: Optional[str] = None,
+            **kwargs
+    ) -> Dataset:
+
+        if to_file_type == 'csv':
+            if not from_data_type:
+                CSVIO.write(result_data, name, **kwargs)
+            CSVIO.write(result_data, name, from_data_type=from_data_type, **kwargs)
+
+        elif to_file_type == 'json':
+            if not from_data_type:
+                JSONIO.write(result_data, name, **kwargs)
+            JSONIO.write(result_data, name, from_data_type=from_data_type, **kwargs)
+
+        else:
+            raise TypeError(
+                f"Unknown from_data_type = {from_data_type}, you need to specify "
+                f"what format you are writing the data to")
+
+        return Dataset.from_file(name, data_type)
+
+    @deprecated(reason=close_deprecated_msg, version='1.8.0')
     def close(self):
         for key in self.readers:
             self.readers[key].close()
 
+    @deprecated(reason=close_deprecated_msg, version='1.8.0')
     def __del__(self):
         self.close()
 
@@ -367,3 +457,4 @@ class InventoryDataset:
 
     def __del__(self):
         self.close()
+

@@ -35,14 +35,18 @@ class JSONIO(BaseIO):
         # TODO: Perform conversion if needed
         # TODO: implement data validation here
         write_to_file = len(result_data) > 0
-        if from_data_type == 'dict' and type(result_data) == dict and write_to_file:
+        if from_data_type == 'dict' and write_to_file:
             result_data = json.dumps(result_data, indent=4)
-            from_data_type = 'str'
+            with open(name, 'w') as json_file:
+                json_file.write(result_data)
 
-        if from_data_type == 'str' and write_to_file:
+        elif from_data_type == 'str' and write_to_file:
             with open(name, 'w') as json_file:
                 json_file.write(result_data)
         # writing to an unknown type
-        else:
+        elif write_to_file:
             raise TypeError(f"from_data_type = {from_data_type} is not defined. Possible values are str and dict")
+
+        else:
+            raise AssertionError("Length of the result data to be written is not > 0")
         return
