@@ -455,7 +455,7 @@ class ClowderClient(Client):
         if os.path.isfile(self.token_file):
             try:
                 with open(self.token_file, 'r') as f:
-                    authorization = f.read().splitlines()
+                    authorization = f.read().splitlines()[0]
             except IndexError:
                 raise
             except OSError:
@@ -522,8 +522,7 @@ class ClowderClient(Client):
         r = self.session.get(url, params=params, timeout=timeout, **kwargs)
 
         if r.status_code == 401:
-            self.login()
-            r = self.session.get(url, params=params, timeout=timeout, **kwargs)
+            raise
 
         return self.return_http_response(r)
 
@@ -544,8 +543,7 @@ class ClowderClient(Client):
         r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
 
         if r.status_code == 401:
-            self.login()
-            r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
+            raise
 
         return self.return_http_response(r)
 
@@ -565,8 +563,7 @@ class ClowderClient(Client):
         r = self.session.put(url, data=data, timeout=timeout, **kwargs)
 
         if r.status_code == 401:
-            self.login()
-            r = self.session.put(url, data=data, timeout=timeout, **kwargs)
+            raise
 
         return self.return_http_response(r)
 
@@ -585,8 +582,7 @@ class ClowderClient(Client):
         r = self.session.delete(url, timeout=timeout, **kwargs)
 
         if r.status_code == 401:
-            self.login()
-            r = self.session.delete(url, timeout=timeout, **kwargs)
+            raise
 
         return self.return_http_response(r)
 

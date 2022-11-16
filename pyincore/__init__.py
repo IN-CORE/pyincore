@@ -9,6 +9,7 @@
 from pyincore.client import Client
 from pyincore.client import IncoreClient
 from pyincore.client import InsecureIncoreClient
+from pyincore.client import ClowderClient
 from pyincore.hazardservice import HazardService
 from pyincore.utils.expressioneval import Parser
 from pyincore.dataservice import DataService

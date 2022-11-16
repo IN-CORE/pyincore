@@ -13,7 +13,7 @@ import zipfile
 import ntpath
 
 import pyincore.globals as pyglobals
-from pyincore import IncoreClient
+from pyincore import IncoreClient, ClowderClient
 from urllib.parse import urljoin
 
 
@@ -25,12 +25,16 @@ class DataService:
 
     """
 
-    def __init__(self, client: IncoreClient):
+    def __init__(self, client: IncoreClient or ClowderClient):
         self.client = client
-        self.base_url = urljoin(client.service_url, 'data/api/datasets/')
-        self.files_url = urljoin(client.service_url, 'data/api/files/')
-        self.base_earthquake_url = urljoin(client.service_url, 'hazard/api/earthquakes/')
-        self.base_tornado_url = urljoin(client.service_url, 'hazard/api/tornadoes/')
+        if isinstance(client, IncoreClient):
+            self.base_url = urljoin(client.service_url, 'data/api/datasets/')
+            self.files_url = urljoin(client.service_url, 'data/api/files/')
+            self.base_earthquake_url = urljoin(client.service_url, 'hazard/api/earthquakes/')
+            self.base_tornado_url = urljoin(client.service_url, 'hazard/api/tornadoes/')
+        elif isinstance(client, ClowderClient):
+            self.base_url = urljoin(client.service_url, '/api/datasets/')
+            self.files_url = urljoin(client.service_url, '/api/files/')
 
     def get_dataset_metadata(self, dataset_id: str):
         """Retrieve metadata from data service. Dataset API endpoint is called.
@@ -73,7 +77,7 @@ class DataService:
 
         """
         url = urljoin(self.base_url,
-                                   dataset_id + "/files/" + file_id)
+                      dataset_id + "/files/" + file_id)
         r = self.client.get(url)
         return r.json()
 
@@ -116,11 +120,11 @@ class DataService:
         else:
             return local_filename
 
-    def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None, source="incore"):
+    def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None):
         # construct url for file download
-        if source == "incore":
+        if isinstance(self.client, IncoreClient):
             url = urljoin(self.base_url, dataset_id + '/blob')
-        elif source == "clowder":
+        elif isinstance(self.client, ClowderClient):
             url = urljoin(self.base_url, dataset_id + '/download')
 
         kwargs = {"stream": True}
@@ -135,10 +139,16 @@ class DataService:
             r = self.client.get(url, params=payload, **kwargs)
 
         # extract filename
-        disposition = r.headers['content-disposition']
-        fname = re.findall("filename=(.+)", disposition)
+        disposition = ""
+        for key in r.headers.keys():
+            if key.lower() == 'content-disposition':
+                disposition = r.headers[key]
+        fname = re.findall("filename\**=(.+)", disposition)
 
-        local_filename = os.path.join(cache_data_dir, fname[0].strip('\"'))
+        if len(fname) > 0:
+            local_filename = os.path.join(cache_data_dir, fname[0].strip('\"').strip('UTF-8').strip('\''))
+        else:
+            local_filename = dataset_id + ".zip"
 
         # download
         with open(local_filename, 'wb') as f:

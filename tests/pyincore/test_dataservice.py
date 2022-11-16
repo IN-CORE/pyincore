@@ -72,10 +72,10 @@ def test_get_dataset_blob(datasvc):
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
 
-def test_get_dataset_blob_clowder():
+def test_get_dataset_blob_clowder(datasvc_clowder):
     errors = []
     dataset_id = "63750d33e4b0e6b66b32f56b"
-    fname = datasvc_clowder.get_dataset_blob(dataset_id, join=True, source="clowder")
+    fname = datasvc_clowder.get_dataset_blob(dataset_id, join=True)
 
     if type(fname) != str:
         errors.append("doesn't return the correct filename!")
