@@ -116,9 +116,13 @@ class DataService:
         else:
             return local_filename
 
-    def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None):
+    def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None, source="incore"):
         # construct url for file download
-        url = urljoin(self.base_url, dataset_id + '/blob')
+        if source == "incore":
+            url = urljoin(self.base_url, dataset_id + '/blob')
+        elif source == "clowder":
+            url = urljoin(self.base_url, dataset_id + '/download')
+
         kwargs = {"stream": True}
         if join is None:
             r = self.client.get(url, **kwargs)
