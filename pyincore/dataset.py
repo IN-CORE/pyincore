@@ -38,7 +38,10 @@ class Dataset:
         self.data_type = metadata["dataType"]
         self.format = metadata["format"]
         self.id = metadata["id"]
-        self.file_descriptors = metadata["fileDescriptors"]
+        if "fileDescriptors" in metadata.keys():
+            self.file_descriptors = metadata["fileDescriptors"]
+        else:
+            self.file_descriptors = []
         self.local_file_path = None
 
         self.readers = {}
@@ -62,34 +65,20 @@ class Dataset:
 
     @classmethod
     def from_clowder_service(cls, id: str, clowder_data_service: ClowderDataService):
-        """Get Dataset from Data service, get metadata as well.
+        """Get Dataset from Clowder service, get metadata as well.
 
         Args:
             id (str): ID of the Dataset.
-            clowder_data_service (obj): Clowder Data service.
+            clowder_data_service (obj): Clowder service.
 
         Returns:
-            obj: Dataset from Data service.
+            obj: Dataset from Clowder service.
 
         """
-        # TODO get metadata elsewhere from clowder
-        # metadata = data_service.get_dataset_metadata(id)
-        metadata = {
-            "id": id,
-            "title": "Hospitals",
-            "description": "",
-            "date": "2017-12-06T20:11:55+0000",
-            "creator": "ergo",
-            "spaces": [
-                "ergo"
-            ],
-            "contributors": [],
-            "dataType": "ergo:buildingInventoryVer5",
-            "storedUrl": "",
-            "format": "shapefile",
-            "sourceDataset": "",
-            "fileDescriptors": []
-        }
+        metadata = {"id": id}
+        metadata_jsonld = clowder_data_service.get_dataset_metadata(id)
+        for entry in metadata_jsonld:
+            metadata.update(entry["content"])
         instance = cls(metadata)
         instance.cache_files(clowder_data_service)
         return instance

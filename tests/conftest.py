@@ -8,7 +8,7 @@ from jose import jwt
 from pyincore import (
     globals as pyglobals,
     IncoreClient, DataService, FragilityService, RepairService, RestorationService, HazardService, SpaceService,
-    ClowderClient
+    ClowderClient, ClowderDataService
 )
 
 
@@ -32,7 +32,7 @@ def pytest_sessionstart(session):
     clowder_client = ClowderClient(service_url="http://localhost:8000/", token_file_name=".clowderapikey")
     pytest.client = client
     pytest.datasvc = DataService(client)
-    pytest.datasvc_clowder = DataService(clowder_client)
+    pytest.datasvc_clowder = ClowderDataService(clowder_client)
     pytest.fragilitysvc = FragilityService(client)
     pytest.repairsvc = RepairService(client)
     pytest.restorationsvc = RestorationService(client)

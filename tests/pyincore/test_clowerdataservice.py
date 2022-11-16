@@ -26,3 +26,9 @@ def test_get_dataset_blob_clowder(datasvc_clowder):
         errors.append("no file or folder has been downloaded!")
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
+
+
+def test_get_dataset_metadata_clowder(datasvc_clowder):
+    dataset_id = "63750d33e4b0e6b66b32f56b"
+    metadata = datasvc_clowder.get_dataset_metadata(dataset_id)
+    assert len(metadata) == 2

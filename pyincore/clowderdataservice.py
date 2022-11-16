@@ -27,7 +27,7 @@ class ClowderDataService:
         self.files_url = urljoin(client.service_url, '/api/files/')
 
     def get_dataset_metadata(self, dataset_id: str):
-        """Retrieve metadata from data service. Dataset API endpoint is called.
+        """Retrieve metadata from clowder data service. Dataset API endpoint is called.
 
         Args:
             dataset_id (str): ID of the Dataset.
@@ -36,12 +36,10 @@ class ClowderDataService:
             obj: HTTP response containing the metadata.
 
         """
-        # TODO
         # construct url with service, dataset api, and id
-        # url = urljoin(self.base_url, dataset_id)
-        # r = self.client.get(url)
-        # return r.json()
-        return {}
+        url = urljoin(self.base_url, dataset_id + "/metadata.jsonld")
+        r = self.client.get(url)
+        return r.json()
 
     def get_dataset_blob(self, dataset_id: str, join=None):
         """Retrieve a blob of the dataset. Blob API endpoint is called.
