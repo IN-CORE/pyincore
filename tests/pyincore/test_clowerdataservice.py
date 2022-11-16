@@ -16,7 +16,7 @@ def datasvc_clowder():
 
 def test_get_dataset_blob_clowder(datasvc_clowder):
     errors = []
-    dataset_id = "63750d33e4b0e6b66b32f56b"
+    dataset_id = "63755d06e4b0a2eb0196b5cb"
     fname = datasvc_clowder.get_dataset_blob(dataset_id, join=True)
 
     if type(fname) != str:
@@ -29,6 +29,6 @@ def test_get_dataset_blob_clowder(datasvc_clowder):
 
 
 def test_get_dataset_metadata_clowder(datasvc_clowder):
-    dataset_id = "63750d33e4b0e6b66b32f56b"
+    dataset_id = "6375572ae4b0a2eb0196b56d"
     metadata = datasvc_clowder.get_dataset_metadata(dataset_id)
     assert len(metadata) == 2

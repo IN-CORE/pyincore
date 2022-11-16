@@ -23,8 +23,8 @@ class ClowderDataService:
 
     def __init__(self, client: ClowderClient):
         self.client = client
-        self.base_url = urljoin(client.service_url, '/api/datasets/')
-        self.files_url = urljoin(client.service_url, '/api/files/')
+        self.base_url = urljoin(client.service_url, 'api/datasets/')
+        self.files_url = urljoin(client.service_url, 'api/files/')
 
     def get_dataset_metadata(self, dataset_id: str):
         """Retrieve metadata from clowder data service. Dataset API endpoint is called.
@@ -76,8 +76,7 @@ class ClowderDataService:
 
         folder = self.unzip_dataset(local_filename)
         if folder is not None:
-            # Clowder dataset has another layer of "data"
-            return os.path.join(folder, "data")
+            return folder
         else:
             return local_filename
 

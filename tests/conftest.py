@@ -29,7 +29,8 @@ def pytest_sessionstart(session):
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
     client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
-    clowder_client = ClowderClient(service_url="http://localhost:8000/", token_file_name=".clowderapikey")
+    clowder_client = ClowderClient(service_url="https://clowder.ncsa.illinois.edu/clowder/",
+                                   token_file_name=".clowderapikey")
     pytest.client = client
     pytest.datasvc = DataService(client)
     pytest.datasvc_clowder = ClowderDataService(clowder_client)
