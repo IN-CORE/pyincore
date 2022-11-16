@@ -74,7 +74,7 @@ class Dataset:
         # TODO get metadata elsewhere from clowder
         # metadata = data_service.get_dataset_metadata(id)
         metadata = {
-            "id": "5a284f0bc7d30d13bc081a28",
+            "id": id,
             "title": "Hospitals",
             "description": "",
             "date": "2017-12-06T20:11:55+0000",

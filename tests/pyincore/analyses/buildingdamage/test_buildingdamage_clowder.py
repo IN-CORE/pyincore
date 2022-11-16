@@ -18,7 +18,6 @@ def run_with_base_class():
     clowder_client = ClowderClient(service_url="http://localhost:8000/", token_file_name=".clowderapikey")
     datasvc_clowder = DataService(clowder_client)
     clowder_bldg_dataset_id = "63750d33e4b0e6b66b32f56b"
-    datasvc_clowder.get_dataset_blob(clowder_bldg_dataset_id, join=True)
     buildings = Dataset.from_clowder_service(clowder_bldg_dataset_id, datasvc_clowder)
 
     bldg_dmg = BuildingDamage(client)
@@ -31,7 +30,7 @@ def run_with_base_class():
 
     bldg_dmg.set_input_dataset('buildings', buildings)
 
-    result_name = "memphis_eq_bldg_dmg_result"
+    result_name = "clowder_memphis_eq_bldg_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
