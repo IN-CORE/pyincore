@@ -16,6 +16,7 @@ from pyincore.dataservice import DataService
 from pyincore.utils.geoutil import GeoUtil
 from pyincore.utils.networkutil import NetworkUtil
 from pyincore.dataservice import DataService
+from pyincore.clowderdataservice import ClowderDataService
 from pyincore.fragilityservice import FragilityService
 from pyincore.repairservice import RepairService
 from pyincore.restorationservice import RestorationService

@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, FragilityService, MappingSet, ClowderClient, Dataset, DataService
+from pyincore import IncoreClient, FragilityService, MappingSet, ClowderClient, Dataset, ClowderDataService
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
 
@@ -16,7 +16,7 @@ def run_with_base_class():
 
     # Building dataset clowder id
     clowder_client = ClowderClient(service_url="http://localhost:8000/", token_file_name=".clowderapikey")
-    datasvc_clowder = DataService(clowder_client)
+    datasvc_clowder = ClowderDataService(clowder_client)
     clowder_bldg_dataset_id = "63750d33e4b0e6b66b32f56b"
     buildings = Dataset.from_clowder_service(clowder_bldg_dataset_id, datasvc_clowder)
 

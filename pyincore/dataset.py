@@ -9,6 +9,7 @@ import csv
 import glob
 import json
 import os
+from typing import Union
 
 import fiona
 import numpy
@@ -17,7 +18,7 @@ import geopandas as gpd
 import rasterio
 import wntr
 import warnings
-from pyincore import DataService
+from pyincore import DataService, ClowderDataService
 
 warnings.filterwarnings("ignore", "", UserWarning)
 
@@ -60,12 +61,12 @@ class Dataset:
         return instance
 
     @classmethod
-    def from_clowder_service(cls, id: str, data_service: DataService):
+    def from_clowder_service(cls, id: str, clowder_data_service: ClowderDataService):
         """Get Dataset from Data service, get metadata as well.
 
         Args:
             id (str): ID of the Dataset.
-            data_service (obj): Data service.
+            clowder_data_service (obj): Clowder Data service.
 
         Returns:
             obj: Dataset from Data service.
@@ -90,7 +91,7 @@ class Dataset:
             "fileDescriptors": []
         }
         instance = cls(metadata)
-        instance.cache_files(data_service)
+        instance.cache_files(clowder_data_service)
         return instance
 
     @classmethod
@@ -197,7 +198,7 @@ class Dataset:
                 json_file.write(json_dumps_str)
         return Dataset.from_file(name, data_type)
 
-    def cache_files(self, data_service: DataService):
+    def cache_files(self, data_service: Union[DataService, ClowderDataService]):
         """Get the set of fragility data, curves.
 
         Args:
