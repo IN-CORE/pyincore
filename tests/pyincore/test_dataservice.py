@@ -10,12 +10,12 @@ import re
 
 import pytest
 
-from pyincore import globals as pyglobals
 from pyincore import (
     Dataset,
     NetworkData,
     NetworkDataset,
 )
+from pyincore import globals as pyglobals
 
 
 @pytest.fixture
@@ -63,20 +63,6 @@ def test_get_dataset_blob(datasvc):
     errors = []
     dataset_id = "5a284f0ac7d30d13bc0819c4"
     fname = datasvc.get_dataset_blob(dataset_id, join=True)
-
-    if type(fname) != str:
-        errors.append("doesn't return the correct filename!")
-    # check if file or folder exists locally, which means successfully downloaded
-    if not os.path.exists(fname):
-        errors.append("no file or folder has been downloaded!")
-
-    assert not errors, "errors occured:\n{}".format("\n".join(errors))
-
-
-def test_get_dataset_blob_clowder(datasvc_clowder):
-    errors = []
-    dataset_id = "63750d33e4b0e6b66b32f56b"
-    fname = datasvc_clowder.get_dataset_blob(dataset_id, join=True)
 
     if type(fname) != str:
         errors.append("doesn't return the correct filename!")

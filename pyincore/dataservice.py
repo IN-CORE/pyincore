@@ -12,9 +12,9 @@ import re
 import zipfile
 import ntpath
 
-from pyincore import IncoreClient, ClowderClient
+import pyincore.globals as pyglobals
+from pyincore import IncoreClient
 from urllib.parse import urljoin
-from typing import Union
 
 
 class DataService:
@@ -25,16 +25,12 @@ class DataService:
 
     """
 
-    def __init__(self, client: Union[IncoreClient, ClowderClient]):
+    def __init__(self, client: IncoreClient):
         self.client = client
-        if isinstance(client, IncoreClient):
-            self.base_url = urljoin(client.service_url, 'data/api/datasets/')
-            self.files_url = urljoin(client.service_url, 'data/api/files/')
-            self.base_earthquake_url = urljoin(client.service_url, 'hazard/api/earthquakes/')
-            self.base_tornado_url = urljoin(client.service_url, 'hazard/api/tornadoes/')
-        elif isinstance(client, ClowderClient):
-            self.base_url = urljoin(client.service_url, '/api/datasets/')
-            self.files_url = urljoin(client.service_url, '/api/files/')
+        self.base_url = urljoin(client.service_url, 'data/api/datasets/')
+        self.files_url = urljoin(client.service_url, 'data/api/files/')
+        self.base_earthquake_url = urljoin(client.service_url, 'hazard/api/earthquakes/')
+        self.base_tornado_url = urljoin(client.service_url, 'hazard/api/tornadoes/')
 
     def get_dataset_metadata(self, dataset_id: str):
         """Retrieve metadata from data service. Dataset API endpoint is called.
@@ -77,7 +73,7 @@ class DataService:
 
         """
         url = urljoin(self.base_url,
-                      dataset_id + "/files/" + file_id)
+                                   dataset_id + "/files/" + file_id)
         r = self.client.get(url)
         return r.json()
 
@@ -116,21 +112,13 @@ class DataService:
 
         folder = self.unzip_dataset(local_filename)
         if folder is not None:
-            if isinstance(self.client, IncoreClient):
-                return folder
-            # Clowder dataset has another layer of "data"
-            elif isinstance(self.client, ClowderClient):
-                return os.path.join(folder, "data")
+            return folder
         else:
             return local_filename
 
     def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None):
         # construct url for file download
-        if isinstance(self.client, IncoreClient):
-            url = urljoin(self.base_url, dataset_id + '/blob')
-        elif isinstance(self.client, ClowderClient):
-            url = urljoin(self.base_url, dataset_id + '/download')
-
+        url = urljoin(self.base_url, dataset_id + '/blob')
         kwargs = {"stream": True}
         if join is None:
             r = self.client.get(url, **kwargs)
@@ -143,16 +131,10 @@ class DataService:
             r = self.client.get(url, params=payload, **kwargs)
 
         # extract filename
-        disposition = ""
-        for key in r.headers.keys():
-            if key.lower() == 'content-disposition':
-                disposition = r.headers[key]
-        fname = re.findall("filename\**=(.+)", disposition)
+        disposition = r.headers['content-disposition']
+        fname = re.findall("filename=(.+)", disposition)
 
-        if len(fname) > 0:
-            local_filename = os.path.join(cache_data_dir, fname[0].strip('\"').strip('UTF-8').strip('\''))
-        else:
-            local_filename = dataset_id + ".zip"
+        local_filename = os.path.join(cache_data_dir, fname[0].strip('\"'))
 
         # download
         with open(local_filename, 'wb') as f:
