@@ -14,6 +14,7 @@ def run_with_base_class():
     # Building dataset clowder id
     clowder_client = ClowderClient(service_url="https://clowder.ncsa.illinois.edu/clowder/",
                                    token_file_name=".clowderapikey")
+    # clowder_client.clear_cache()
     datasvc_clowder = ClowderDataService(clowder_client)
     buildings = Dataset.from_clowder_service("63755d06e4b0a2eb0196b5cb", datasvc_clowder)
 
