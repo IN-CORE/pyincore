@@ -12,9 +12,9 @@ import re
 import zipfile
 import ntpath
 
-import pyincore.globals as pyglobals
 from pyincore import IncoreClient, ClowderClient
 from urllib.parse import urljoin
+from typing import Union
 
 
 class DataService:
@@ -25,7 +25,7 @@ class DataService:
 
     """
 
-    def __init__(self, client: IncoreClient or ClowderClient):
+    def __init__(self, client: Union[IncoreClient, ClowderClient]):
         self.client = client
         if isinstance(client, IncoreClient):
             self.base_url = urljoin(client.service_url, 'data/api/datasets/')
@@ -116,7 +116,11 @@ class DataService:
 
         folder = self.unzip_dataset(local_filename)
         if folder is not None:
-            return folder
+            if isinstance(self.client, IncoreClient):
+                return folder
+            # Clowder dataset has another layer of "data"
+            elif isinstance(self.client, ClowderClient):
+                return os.path.join(folder, "data")
         else:
             return local_filename
 

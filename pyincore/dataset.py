@@ -60,6 +60,40 @@ class Dataset:
         return instance
 
     @classmethod
+    def from_clowder_service(cls, id: str, data_service: DataService):
+        """Get Dataset from Data service, get metadata as well.
+
+        Args:
+            id (str): ID of the Dataset.
+            data_service (obj): Data service.
+
+        Returns:
+            obj: Dataset from Data service.
+
+        """
+        # TODO get metadata elsewhere from clowder
+        # metadata = data_service.get_dataset_metadata(id)
+        metadata = {
+            "id": "5a284f0bc7d30d13bc081a28",
+            "title": "Hospitals",
+            "description": "",
+            "date": "2017-12-06T20:11:55+0000",
+            "creator": "ergo",
+            "spaces": [
+                "ergo"
+            ],
+            "contributors": [],
+            "dataType": "ergo:buildingInventoryVer5",
+            "storedUrl": "",
+            "format": "shapefile",
+            "sourceDataset": "",
+            "fileDescriptors": []
+        }
+        instance = cls(metadata)
+        instance.cache_files(data_service)
+        return instance
+
+    @classmethod
     def from_json_str(cls, json_str, data_service: DataService = None, file_path=None):
         """Get Dataset from json string.
 
