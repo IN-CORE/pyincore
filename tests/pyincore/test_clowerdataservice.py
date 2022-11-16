@@ -14,6 +14,7 @@ def datasvc_clowder():
     return pytest.datasvc_clowder
 
 
+@pytest.mark.skip("apikey not available yet")
 def test_get_dataset_blob_clowder(datasvc_clowder):
     errors = []
     dataset_id = "63755d06e4b0a2eb0196b5cb"
@@ -28,6 +29,7 @@ def test_get_dataset_blob_clowder(datasvc_clowder):
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
 
+@pytest.mark.skip("apikey not available yet")
 def test_get_dataset_metadata_clowder(datasvc_clowder):
     dataset_id = "6375572ae4b0a2eb0196b56d"
     metadata = datasvc_clowder.get_dataset_metadata(dataset_id)

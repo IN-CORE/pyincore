@@ -23,11 +23,6 @@ def datasvc():
     return pytest.datasvc
 
 
-@pytest.fixture
-def datasvc_clowder():
-    return pytest.datasvc_clowder
-
-
 def test_get_dataset_metadata(datasvc):
     dataset_id = "5a284f0ac7d30d13bc0819c4"
     metadata = datasvc.get_dataset_metadata(dataset_id)
