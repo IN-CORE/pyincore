@@ -14,6 +14,7 @@ PACKAGE_VERSION = "1.7.0"
 
 INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
 CLOWDER_API_PROD_URL = "https://clowder.ncsa.illinois.edu/clowder/"
+ZENODO_API_PROD_URL = "https://zenodo.org/"
 INCORE_API_DEV_URL = "https://incore-dev.ncsa.illinois.edu"
 
 KEYCLOAK_AUTH_PATH = "/auth/realms/In-core/protocol/openid-connect/token"

@@ -10,6 +10,7 @@ from pyincore.client import Client
 from pyincore.client import IncoreClient
 from pyincore.client import InsecureIncoreClient
 from pyincore.client import ClowderClient
+from pyincore.client import ZenodoClient
 from pyincore.hazardservice import HazardService
 from pyincore.utils.expressioneval import Parser
 from pyincore.dataservice import DataService
@@ -17,6 +18,7 @@ from pyincore.utils.geoutil import GeoUtil
 from pyincore.utils.networkutil import NetworkUtil
 from pyincore.dataservice import DataService
 from pyincore.clowderdataservice import ClowderDataService
+from pyincore.zenododataservice import ZenodoDataService
 from pyincore.fragilityservice import FragilityService
 from pyincore.repairservice import RepairService
 from pyincore.restorationservice import RestorationService

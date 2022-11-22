@@ -254,45 +254,6 @@ class IncoreClient(Client):
         logger.warning("Authentication failed.")
         exit(0)
 
-    def store_authorization_in_file(self, authorization: str):
-        """Store the access token in local file. If the file does not exist, this function creates it.
-
-        Args:
-            authorization (str): An authorization in the format "bearer access_token".
-
-        """
-        try:
-            with open(self.token_file, 'w') as f:
-                f.write(authorization)
-        except IOError as e:
-            logger.warning(e)
-
-    def retrieve_token_from_file(self):
-        """Attempts to retrieve authorization from a local file, if it exists.
-
-        Returns:
-            None if token file does not exist
-            dict: Dictionary containing authorization in  the format "bearer access_token" if file exists,
-             None otherwise
-
-        """
-        if not os.path.isfile(self.token_file):
-            return None
-        else:
-            try:
-                with open(self.token_file, 'r') as f:
-                    auth = f.read().splitlines()
-                    # check if token is valid
-                    userinfo_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_USERINFO_PATH)
-                    r = requests.get(userinfo_url, headers={'Authorization': auth[0]})
-                    if r.status_code != 200:
-                        return None
-                return auth[0]
-            except IndexError:
-                return None
-            except OSError:
-                return None
-
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.
 
@@ -379,6 +340,42 @@ class IncoreClient(Client):
 
     def create_service_json_entry(self):
         update_hash_entry("add", hashed_url=self.hashed_service_url, service_url=self.service_url)
+
+    def retrieve_token_from_file(self):
+        """Attempts to retrieve authorization from a local file, if it exists.
+        Returns:
+            None if token file does not exist
+            dict: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
+        """
+        if not os.path.isfile(self.token_file):
+            return None
+        else:
+            try:
+                with open(self.token_file, 'r') as f:
+                    auth = f.read().splitlines()
+                    # check if token is valid
+                    userinfo_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_USERINFO_PATH)
+                    r = requests.get(userinfo_url, headers={'Authorization': auth[0]})
+                    if r.status_code != 200:
+                        return None
+                return auth[0]
+            except IndexError:
+                return None
+            except OSError:
+                return None
+
+    def store_authorization_in_file(self, authorization: str):
+        """Store the access token in local file. If the file does not exist, this function creates it.
+
+        Args:
+            authorization (str): An authorization in the format "bearer access_token".
+
+        """
+        try:
+            with open(self.token_file, 'w') as f:
+                f.write(authorization)
+        except IOError as e:
+            logger.warning(e)
 
     @staticmethod
     def clear_root_cache():
@@ -468,30 +465,9 @@ class ClowderClient(Client):
             print("Username/Password login not supported yet for Clowder services.")
 
     # TODO check if we can use password/username to login to clowder
-    def login(self):
-        for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
-            try:
-                username = input("Enter username: ")
-                password = getpass.getpass("Enter password: ")
-            except EOFError as e:
-                logger.warning(e)
-                raise e
-            r = requests.post(self.token_url, data={'grant_type': 'password',
-                                                    'client_id': pyglobals.CLIENT_ID,
-                                                    'username': username, 'password': password})
-            if r.status_code == 200:
-                token = r.json()
-                if token is None or token["access_token"] is None:
-                    logger.warning("Authentication Failed.")
-                    exit(0)
-                authorization = str("bearer " + token["access_token"])
-                self.store_authorization_in_file(authorization)
-                self.session.headers['Authorization'] = authorization
-                return True
-            logger.warning("Authentication failed, attempting login again.")
-
-        logger.warning("Authentication failed.")
-        exit(0)
+    # def login(self):
+    #     logger.warning("Authentication failed.")
+    #     exit(0)
 
     def store_authorization_in_file(self, authorization: str):
         """Store the access token in local file. If the file does not exist, this function creates it.
@@ -601,6 +577,101 @@ class ClowderClient(Client):
                 shutil.rmtree(os.path.join(root, d))
         update_hash_entry("clear")
         return None
+
+    def clear_cache(self):
+        """
+            This function helps clear the data cache for a specific repository or the entire cache
+
+            Returns: None
+
+        """
+        # incase cache_data folder doesn't exist
+        if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
+            logger.warning("User data cache does not exist")
+            return None
+
+        if not os.path.isdir(self.hashed_svc_data_dir):
+            logger.warning("Cached folder doesn't exist")
+            return None
+
+        shutil.rmtree(self.hashed_svc_data_dir)
+        # clear entry from service.json
+        update_hash_entry("edit", hashed_url=self.hashed_service_url)
+        return
+
+
+class ZenodoClient(Client):
+    """Zenodo service client class. It contains token and service root url.
+
+    Args:
+        service_url (str): Service url.
+        token_file_name (str): Path to file containing the authorization token.
+
+    """
+
+    def __init__(self, service_url: str = None, token_file_name: str = None):
+        super().__init__()
+        if service_url is None or len(service_url.strip()) == 0:
+            service_url = pyglobals.ZENODO_API_PROD_URL
+        self.service_url = service_url
+
+        # hashlib requires bytes array for hash operations
+        byte_url_string = str.encode(self.service_url)
+        self.hashed_service_url = hashlib.sha256(byte_url_string).hexdigest()
+
+        self.create_service_json_entry()
+
+        # construct local directory and filename
+        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
+        if not os.path.exists(cache_data):
+            os.makedirs(cache_data)
+
+        self.hashed_svc_data_dir = os.path.join(cache_data, self.hashed_service_url)
+
+        if not os.path.exists(self.hashed_svc_data_dir):
+            os.makedirs(self.hashed_svc_data_dir)
+
+        # store the token file in the respective repository's directory
+        if token_file_name is None or len(token_file_name.strip()) == 0:
+            token_file_name = "." + self.hashed_service_url + "_token"
+        self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
+
+        # read the apikey
+        if os.path.isfile(self.token_file):
+            try:
+                with open(self.token_file, 'r') as f:
+                    authorization = f.read().splitlines()[0]
+            except IndexError:
+                raise
+            except OSError:
+                raise
+
+            self.session.params["access_token"] = authorization
+            print("Connection successful to Zenodo services.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
+
+        else:
+            print("Username/Password login not supported yet for Zenodo services.")
+
+    # TODO check if we can use password/username to login to zenodo
+    # def login(self):
+    #     logger.warning("Authentication failed.")
+    #     exit(0)
+
+    def store_authorization_in_file(self, authorization: str):
+        """Store the access token in local file. If the file does not exist, this function creates it.
+
+        Args:
+            authorization (str): An authorization in the format "bearer access_token".
+
+        """
+        try:
+            with open(self.token_file, 'w') as f:
+                f.write(authorization)
+        except IOError as e:
+            logger.warning(e)
+
+    def create_service_json_entry(self):
+        update_hash_entry("add", hashed_url=self.hashed_service_url, service_url=self.service_url)
 
     def clear_cache(self):
         """
