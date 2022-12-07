@@ -129,13 +129,15 @@ class DataProcessUtil:
         return dmg_ret_json, func_ret_json, max_state_df
 
     @staticmethod
-    def create_mapped_dmg_result(inventory, dmg_result, arch_mapping, groupby_col_name="max_state"):
+    def create_mapped_dmg_result(inventory, dmg_result, arch_mapping, groupby_col_name="max_state",
+                                 merge_field='archetype'):
         """
 
         Args:
             inventory: dataframe represent inventory
             dmg_result: dmg_result that need to merge with inventory and be grouped
-            arch_mapping: Path to the arechetype mappings
+            arch_mapping: Path to the archetype mappings
+            merge_on: archetype column to use for the clustering
 
         Returns:
             ret_json: JSON of the results ordered by cluster and category.
@@ -143,7 +145,7 @@ class DataProcessUtil:
         """
         dmg_states = dmg_result[groupby_col_name].unique().tolist()  # get unique damage states
         dmg_merged = pd.merge(inventory, dmg_result, on='guid')
-        mapped_df = pd.merge(dmg_merged, arch_mapping, on='archetype')
+        mapped_df = pd.merge(dmg_merged, arch_mapping, on=merge_field)
         unique_categories = arch_mapping.groupby(by=['cluster', 'category'], sort=False).count().reset_index()
 
         group_by = mapped_df.groupby(by=[groupby_col_name, 'cluster', 'category']).count().reset_index()
@@ -174,13 +176,14 @@ class DataProcessUtil:
         return {"by_cluster": json_by_cluster, "by_category": json_by_category}
 
     @staticmethod
-    def create_mapped_func_result(inventory, bldg_func, arch_mapping):
+    def create_mapped_func_result(inventory, bldg_func, arch_mapping, merge_field='archetype'):
         """
 
         Args:
             inventory: dataframe represent inventory
             bldg_func: building func dataset
-            arch_mapping: Path to the arechetype mappings
+            arch_mapping: Path to the archetype mappings
+            merge_on: archetype column to use for the clustering
 
         Returns:
             ret_json: JSON of the results ordered by cluster and category.
@@ -188,7 +191,7 @@ class DataProcessUtil:
         """
         func_state = ["percent_functional", "percent_non_functional", "num_functional", "num_non_functional"]
         func_merged = pd.merge(inventory, bldg_func, on='guid')
-        mapped_df = pd.merge(func_merged, arch_mapping, on='archetype')
+        mapped_df = pd.merge(func_merged, arch_mapping, on=merge_field)
         unique_categories = arch_mapping.groupby(by=['category'], sort=False, as_index=False).count()['category']
         unique_cluster = arch_mapping.groupby(by=['cluster', 'category'], sort=False, as_index=False).count()[[
             'cluster', 'category']]
