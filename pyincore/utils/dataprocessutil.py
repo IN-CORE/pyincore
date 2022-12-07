@@ -141,7 +141,6 @@ class DataProcessUtil:
             inventory: dataframe represent inventory
             dmg_result: dmg_result that need to merge with inventory and be grouped
             arch_mapping: Path to the archetype mappings
-            merge_on: archetype column to use for the clustering
 
         Returns:
             ret_json: JSON of the results ordered by cluster and category.
