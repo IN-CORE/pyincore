@@ -16,7 +16,8 @@ class DataProcessUtil:
     @staticmethod
     def get_mapped_result_from_analysis(client, inventory_id: str, dmg_result_dataset,
                                         bldg_func_dataset, archetype_mapping_id: str,
-                                        groupby_col_name: str = "max_state"):
+                                        groupby_col_name: str = "max_state", arch_col='archetype'
+                                        ):
         """Use this if you want to load results directly from the output files of the analysis, than storing the results
         to data service and loading from there using ids.
         It takes the static inputs: inventory & archetypes as dataset ids. The result inputs are taken as
@@ -33,6 +34,7 @@ class DataProcessUtil:
             dmg_ret_json: JSON of the damage state results ordered by cluster and category.
             func_ret_json: JSON of the building functionality results ordered by cluster and category.
             mapped_df: Dataframe of max damage state
+            arch_col: column name for the archetype to perform the merge
 
         """
         bldg_inv = Dataset.from_data_service(inventory_id, DataService(client))
@@ -47,15 +49,15 @@ class DataProcessUtil:
 
         max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
         dmg_ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping,
-                                                                groupby_col_name)
-        func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping)
+                                                                groupby_col_name, arch_col)
+        func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping, arch_col)
 
         return dmg_ret_json, func_ret_json, max_state_df
 
     @staticmethod
     def get_mapped_result_from_dataset_id(client, inventory_id: str, dmg_result_id: str, bldg_func_id,
                                           archetype_mapping_id: str,
-                                          groupby_col_name: str = "max_state"):
+                                          groupby_col_name: str = "max_state", arch_col='archetype'):
         """Use this if your damage results are already stored in the data service and you have their dataset ids.
         All the inputs (except groupby_col_name) are dataset ids.
 
@@ -66,6 +68,7 @@ class DataProcessUtil:
             bldg_func_id: Incore dataset for building func id
             archetype_mapping_id: Mapping id dataset for archetype
             groupby_col_name: column name to group by, default to max_state
+            arch_col: column name for the archetype to perform the merge
 
         Returns:
             dmg_ret_json: JSON of the damage state results ordered by cluster and category.
@@ -88,8 +91,8 @@ class DataProcessUtil:
 
         max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
         dmg_ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping,
-                                                                groupby_col_name)
-        func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping)
+                                                                groupby_col_name, arch_col)
+        func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping, arch_col)
 
         return dmg_ret_json, func_ret_json, max_state_df
 
@@ -97,7 +100,7 @@ class DataProcessUtil:
     def get_mapped_result_from_path(inventory_path: str, dmg_result_path: str,
                                     func_result_path: str,
                                     archetype_mapping_path: str,
-                                    groupby_col_name: str):
+                                    groupby_col_name: str, arch_col='archetype'):
         """
 
         Args:
@@ -107,6 +110,7 @@ class DataProcessUtil:
             func_result_path: Path to the bldg functionality result output file
             archetype_mapping_path: Path to the arechetype mappings
             groupby_col_name: column name to group by, default to max_state
+            arch_col: column name for the archetype to perform the merge
 
         Returns:
             dmg_ret_json: JSON of the damage state results ordered by cluster and category.
@@ -122,15 +126,15 @@ class DataProcessUtil:
 
         max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
         dmg_ret_json = DataProcessUtil.create_mapped_dmg_result(inventory, max_state_df, arch_mapping,
-                                                                groupby_col_name)
+                                                                groupby_col_name, arch_col)
 
-        func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping)
+        func_ret_json = DataProcessUtil.create_mapped_func_result(inventory, bldg_func_df, arch_mapping, arch_col)
 
         return dmg_ret_json, func_ret_json, max_state_df
 
     @staticmethod
     def create_mapped_dmg_result(inventory, dmg_result, arch_mapping, groupby_col_name="max_state",
-                                 merge_field='archetype'):
+                                 arch_col='archetype'):
         """
 
         Args:
@@ -145,7 +149,7 @@ class DataProcessUtil:
         """
         dmg_states = dmg_result[groupby_col_name].unique().tolist()  # get unique damage states
         dmg_merged = pd.merge(inventory, dmg_result, on='guid')
-        mapped_df = pd.merge(dmg_merged, arch_mapping, on=merge_field)
+        mapped_df = pd.merge(dmg_merged, arch_mapping, on=arch_col)
         unique_categories = arch_mapping.groupby(by=['cluster', 'category'], sort=False).count().reset_index()
 
         group_by = mapped_df.groupby(by=[groupby_col_name, 'cluster', 'category']).count().reset_index()
@@ -176,14 +180,14 @@ class DataProcessUtil:
         return {"by_cluster": json_by_cluster, "by_category": json_by_category}
 
     @staticmethod
-    def create_mapped_func_result(inventory, bldg_func, arch_mapping, merge_field='archetype'):
+    def create_mapped_func_result(inventory, bldg_func, arch_mapping, arch_col='archetype'):
         """
 
         Args:
             inventory: dataframe represent inventory
             bldg_func: building func dataset
             arch_mapping: Path to the archetype mappings
-            merge_on: archetype column to use for the clustering
+            arch_col: archetype column to use for the clustering
 
         Returns:
             ret_json: JSON of the results ordered by cluster and category.
@@ -191,7 +195,7 @@ class DataProcessUtil:
         """
         func_state = ["percent_functional", "percent_non_functional", "num_functional", "num_non_functional"]
         func_merged = pd.merge(inventory, bldg_func, on='guid')
-        mapped_df = pd.merge(func_merged, arch_mapping, on=merge_field)
+        mapped_df = pd.merge(func_merged, arch_mapping, on=arch_col)
         unique_categories = arch_mapping.groupby(by=['category'], sort=False, as_index=False).count()['category']
         unique_cluster = arch_mapping.groupby(by=['cluster', 'category'], sort=False, as_index=False).count()[[
             'cluster', 'category']]
