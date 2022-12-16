@@ -63,6 +63,9 @@ class SaltLakeCGEModel(BaseAnalysis):
 
         """
 
+        def _(x):
+            return ExprM(vars, m=x)
+
         # ----------------------------------------------------------------
         # define sets
         # ----------------------------------------------------------------
@@ -2172,9 +2175,6 @@ class SaltLakeCGEModel(BaseAnalysis):
                 KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
                 run_solver(filename, tmp)
 
-    @staticmethod
-    def _(x):
-        return ExprM(vars, m=x)
 
     def get_spec(self):
         return {
@@ -2236,31 +2236,10 @@ class SaltLakeCGEModel(BaseAnalysis):
                     'type': ['incore:JoplinCGEmisch']
                 },
                 {
-                    'id': 'LANDCAP',
-                    'required': True,
-                    'description': 'LANDCAP contains information regarding elasticity values for the response of '
-                                   'changes in the price of physical capital with respect to the supply of investment.',
-                    'type': ['incore:JoplinCGElandcap']
-                },
-                {
                     'id': 'EMPLOY',
                     'required': True,
                     'description': 'EMPLOY is a table name containing data for commercial sector employment.',
                     'type': ['incore:JoplinCGEemploy']
-                },
-                {
-                    'id': 'IGTD',
-                    'required': True,
-                    'description': 'IGTD variable represents a matrix describing the transfer of taxes collected'
-                                   ' to a variable which permits governments to spend the tax revenue on workers and'
-                                   ' intermediate inputs.',
-                    'type': ['incore:JoplinCGEigtd']
-                },
-                {
-                    'id': 'TAUFF',
-                    'required': True,
-                    'description': 'TAUFF represents social security tax rates',
-                    'type': ['incore:JoplinCGEtauff']
                 },
                 {
                     'id': 'JOBCR',
