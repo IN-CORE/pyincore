@@ -46,11 +46,22 @@ class SaltLakeCGEModel(BaseAnalysis):
 
         """
 
+        iNum = self.get_parameter("model_iterations")
+
         # TODO: load input and parameters from get_spec
+        sam = self.get_input_dataset("SAM").get_dataframe_from_csv(low_memory=False)
+        bb = self.get_input_dataset("BB").get_dataframe_from_csv(low_memory=False)
+        jobcr = self.get_input_dataset("JOBCR").get_dataframe_from_csv(low_memory=False)
+        misch = self.get_input_dataset("MISCH").get_dataframe_from_csv(low_memory=False)
+        employ = self.get_input_dataset("EMPLOY").get_dataframe_from_csv(low_memory=False)
+        outcr = self.get_input_dataset("OUTCR").get_dataframe_from_csv(low_memory=False)
+        sector_shocks = self.get_input_dataset("sector_shocks").get_dataframe_from_csv(low_memory=False)
+
+        self.salt_lake_city_cge(iNum, sam, bb, jobcr, misch, employ, outcr, sector_shocks)
 
         pass
 
-    def prepare_salt_lake_city_cge(self, sam, bb, jobcr, misch, employ, outcr, sector_shocks):
+    def salt_lake_city_cge(self, iNum, sam, bb, jobcr, misch, employ, outcr, sector_shocks):
         """
 
         Args:
@@ -2171,7 +2182,6 @@ class SaltLakeCGEModel(BaseAnalysis):
             '''
             # iNum = 1 # dynamic model iterations
             sims = sector_shocks
-            iNum = 1
             # iNum = len(sims.columns)
             KS00 = KS0.copy()
 
