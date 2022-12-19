@@ -65,6 +65,7 @@ class SaltLakeCGEModel(BaseAnalysis):
         """
 
         Args:
+            iNum (int):
             sam (pd.DataFrame):
             bb (str):
             jobcr:
