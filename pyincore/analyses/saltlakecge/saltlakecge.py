@@ -4,6 +4,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore.analyses.saltlakecge.equationlib import *
+from pyincore.analyses.saltlakecge.outputfunctions import *
 from pyincore.analyses.saltlakecge.saltlakeoutput import gams_to_dataframes
 from pyincore import globals as pyglobals
 from pyincore import BaseAnalysis
