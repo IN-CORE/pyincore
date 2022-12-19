@@ -4,6 +4,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore.analyses.saltlakecge.equationlib import *
+from pyincore.analyses.saltlakecge.saltlakeoutput import gams_to_dataframes
 from pyincore import globals as pyglobals
 from pyincore import BaseAnalysis
 
@@ -2117,8 +2118,10 @@ class SaltLakeCGEModel(BaseAnalysis):
             '''
 
             soln = []
-            filename = os.path.join(filePath, "ipopt_cons.py")
-            tmp = os.path.join(filePath, "tmp.py")
+            # TODO: I am not sure this is needed here. We might want to leave the python version
+            # of the models out for now
+            filename = "ipopt_cons.py"
+            tmp = "tmp.py"
             print("Calibration: ")
             run_solver(filename, tmp)
 
@@ -2174,6 +2177,22 @@ class SaltLakeCGEModel(BaseAnalysis):
             for num in range(iNum):
                 KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
                 run_solver(filename, tmp)
+
+            gams_to_dataframes(soln)
+
+            # TODO: CGE output still needs to be generated
+            #self.set_result_csv_data("domestic-supply", pd.DataFrame(ds), name="domestic-supply",
+            #                         source="dataframe")
+            #self.set_result_csv_data("pre-disaster-factor-demand", FD0.iloc[0:3, 0:4],
+            #                         name="pre-disaster-factor-demand",
+            #                         source="dataframe")
+            #self.set_result_csv_data("post-disaster-factor-demand", FDL.iloc[0:3, 0:4],
+            #                         name="post-disaster-factor-demand",
+            #                         source="dataframe")
+            #self.set_result_csv_data("gross-income", pd.DataFrame(gross_income),
+            #                         name="gross-income", source="dataframe")
+            #self.set_result_csv_data("household-count", pd.DataFrame(hh),
+            #                         name="household-count", source="dataframe")
 
 
     def get_spec(self):
