@@ -3,19 +3,19 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
+import os
+from pyincore import globals as pyglobals
+from pyincore import BaseAnalysis
 from pyincore.analyses.saltlakecge.equationlib import *
 from pyincore.analyses.saltlakecge.outputfunctions import *
 from pyincore.analyses.saltlakecge.saltlakeoutput import gams_to_dataframes
-from pyincore import globals as pyglobals
-from pyincore import BaseAnalysis
 
-from pyomo.opt import SolverFactory
 from pyomo.environ import *
-
-#from pyincore.analyses.joplincge.equationlib import *
+from pyomo.opt import SolverFactory
 
 import pandas as pd
 import sys
+
 
 class SaltLakeCGEModel(BaseAnalysis):
     """A computable general equilibrium (CGE) model is based on fundamental economic principles.
@@ -48,18 +48,17 @@ class SaltLakeCGEModel(BaseAnalysis):
 
         iNum = self.get_parameter("model_iterations")
 
-        # TODO: load input and parameters from get_spec
-        sam = self.get_input_dataset("SAM").get_dataframe_from_csv(low_memory=False)
-        bb = self.get_input_dataset("BB").get_dataframe_from_csv(low_memory=False)
-        jobcr = self.get_input_dataset("JOBCR").get_dataframe_from_csv(low_memory=False)
-        misch = self.get_input_dataset("MISCH").get_dataframe_from_csv(low_memory=False)
-        employ = self.get_input_dataset("EMPLOY").get_dataframe_from_csv(low_memory=False)
-        outcr = self.get_input_dataset("OUTCR").get_dataframe_from_csv(low_memory=False)
-        sector_shocks = self.get_input_dataset("sector_shocks").get_dataframe_from_csv(low_memory=False)
+        # TODO: Update SPEC data types to be generic
+        sam = pd.read_csv(self.get_input_dataset("SAM").get_file_path('csv'), index_col=0)
+        bb = pd.read_csv(self.get_input_dataset("BB").get_file_path('csv'), index_col=0)
+        jobcr = pd.read_csv(self.get_input_dataset("JOBCR").get_file_path('csv'), index_col=0)
+        misch = pd.read_csv(self.get_input_dataset("MISCH").get_file_path('csv'), index_col=0)
+        employ = pd.read_csv(self.get_input_dataset("EMPLOY").get_file_path('csv'), index_col=0)
+        outcr = pd.read_csv(self.get_input_dataset("OUTCR").get_file_path('csv'), index_col=0)
+        sector_shocks = pd.read_csv(self.get_input_dataset("sector_shocks").get_file_path('csv'), index_col=0)
 
         self.salt_lake_city_cge(iNum, sam, bb, jobcr, misch, employ, outcr, sector_shocks)
 
-        pass
 
     def salt_lake_city_cge(self, iNum, sam, bb, jobcr, misch, employ, outcr, sector_shocks):
         """
@@ -83,7 +82,6 @@ class SaltLakeCGEModel(BaseAnalysis):
         # ----------------------------------------------------------------
         # define sets
         # ----------------------------------------------------------------
-
         # ALL ACCOUNTS IN SOCIAL ACCOUNTING MATRIX
         Z = [
             'AG_MI_R1',
@@ -1419,18 +1417,18 @@ class SaltLakeCGEModel(BaseAnalysis):
             #   CPI(H)=E=
             #   SUM(I, P(I) * ( 1 + SUM(GS, TAUC(GS,I) ) ) * CH(I,H) )
             #       / SUM(I, P0(I) * ( 1 + SUM(GS, TAUQ(GS,I) ) ) * CH(I,H) );
-            print('CPIEQ(H)')
+            # print('CPIEQ(H)')
             line1 = (P.loc(I) * ExprM(vars, m=1 + TAUC.loc[GS, I].sum(0)) * CH.loc(I, H)).sum(I)
             line2 = (ExprM(vars, m=P0.loc[I] * (1 + TAUQ.loc[GS, I].sum(0))) * CH.loc(I, H)).sum(I)
 
             CPIEQ = (line1 / line2 - ~CPI.loc(H))
-            print(CPIEQ.test(vars.initialVals))
+            # print(CPIEQ.test(vars.initialVals))
             CPIEQ.write(count, filename)
 
             # YEQ(H).. Y(H) =E= SUM(L,  A(H,L) * HW(H) / SUM(H1, A(H1,L) * HW(H1) ) * (Y(L)-(CMIWAGE(L)*CMI(L))) * ( 1 - SUM(G, TAUFL(G,L))))
             #                + SUM(CM, A(H,CM)*(CMOWAGE(CM)*CMO(CM)))
             #                + SUM(K,  A(H,K) * HW(H) / SUM(H1, A(H1,K) * HW(H1)) * (Y(K) + KPFOR(K)) * ( 1 - SUM(G, TAUFK(G,K) ) ) ) ;
-            print('YEQ(H)')
+            # print('YEQ(H)')
             line1 = (ExprM(vars, m=A.loc[H, L]) * HW.loc(H) / (ExprM(vars, m=A.loc[H1, L]) * HW.loc(H1)).sum(H1) * (
                         Y.loc(L) - ExprM(vars, m=CMIWAGE.loc[L]) * CMI.loc(L)) * ExprM(vars, m=1 - TAUFL.loc[G, L].sum(
                 0))).sum(L)
@@ -1440,7 +1438,7 @@ class SaltLakeCGEModel(BaseAnalysis):
                         Y.loc(K) + KPFOR.loc(K)) * ExprM(vars, m=1 - TAUFK.loc[G, K].sum(0))).sum(K)
 
             YEQ = ((line1 + line2 + line4) - Y.loc(H))
-            print(YEQ.test(vars.initialVals))
+            # print(YEQ.test(vars.initialVals))
             YEQ.write(count, filename)
             # print(YEQ)
 
@@ -1448,7 +1446,7 @@ class SaltLakeCGEModel(BaseAnalysis):
             #                                         + SUM(G, TP(H,G) * HH(H))
             #                                         - SUM(GI, PIT0(GI,H)  * Y(H))
             #                                         - SUM(G, TAUH(G,H)  * HH(H));
-            print('YDEQ(H)')
+            # print('YDEQ(H)')
             line1 = Y.loc(H) + ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)
             line2 = (ExprM(vars, m=TP.loc[H, G]) * HH.loc(H)).sum(G)
             line3 = ~(ExprM(vars, m=PIT0.loc[GI, H]) * Y.loc(H)).sum(GI)
@@ -1456,12 +1454,12 @@ class SaltLakeCGEModel(BaseAnalysis):
 
             YDEQ = ((line1 + line2 - line3 - line4) - YD.loc(H))
             YDEQ.write(count, filename)
-            print(YDEQ.test(vars.initialVals))
+            # print(YDEQ.test(vars.initialVals))
             # print(YDEQ)
 
             #  CHEQ(I,H).. CH(I,H)      =E= CH0(I,H)* ((YD(H) / YD0(H)) / ( CPI(H) / CPI0(H)))**(BETA(I,H))
             #                                 * PROD(J, ((P(J)*( 1 + SUM(GS, TAUC(GS,J))))/ (P0(J)*(1 + SUM(GS, TAUQ(GS,J)))))** (LAMBDA(J,I)));
-            print('CHEQ(I,H)')
+            # print('CHEQ(I,H)')
             line1 = ExprM(vars, m=CH0.loc[I, H]) * (
                         (YD.loc(H) / ExprM(vars, m=YD0.loc[H])) / (CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** ExprM(
                 vars, m=BETA.loc[I, H])
@@ -1473,26 +1471,26 @@ class SaltLakeCGEModel(BaseAnalysis):
 
             CHEQ = ((line1 * line2) - CH.loc(I, H))
             CHEQ.write(count, filename)
-            print(CHEQ.test(vars.initialVals))
+            # print(CHEQ.test(vars.initialVals))
             # print(CHEQ)
 
             #  SHEQ(H).. S(H)           =E= YD(H) - SUM(I, P(I) * CH(I,H) * ( 1 + SUM(GS, TAUC(GS,I))));
-            print('SHEQ(H)')
+            # print('SHEQ(H)')
             line = YD.loc(H) - ~((P.loc(I) * CH.loc(I, H) * ExprM(vars, m=1 + TAUC.loc[GS, I].sum(0))).sum(I))
 
             SHEQ = (line - S.loc(H))
             SHEQ.write(count, filename)
-            print(SHEQ.test(vars.initialVals))
+            # print(SHEQ.test(vars.initialVals))
             # print(SHEQ)
 
             #  PVAEQ(I).. PVA(I)        =E= PD(I) - SUM(J, AD(J,I) * P(J) * (1 + SUM(GS, TAUQ(GS, J))));
-            print('PVAEQ(I)')
+            # print('PVAEQ(I)')
             line = PD.loc(I) - ~(
                 (ExprM(vars, m=AD.loc[J, I]) * P.loc(J) * ExprM(vars, m=1 + TAUQ.loc[GS, J].sum(0))).sum(0))
 
             PVAEQ = (line - PVA.loc(I))
             PVAEQ.write(count, filename)
-            print(PVAEQ.test(vars.initialVals))
+            # print(PVAEQ.test(vars.initialVals))
             # print(PVAEQ)
 
             # Cobb-Douglas production function
@@ -1507,7 +1505,7 @@ class SaltLakeCGEModel(BaseAnalysis):
 
             # CES production function
             # PFEQ(I)..DS(I) =E= GAMMA(I)*(SUM(F, ALPHA(F,I)*(FD(F,I)**(RHO(I)))))**(1/RHO(I));
-            print('PFEQ(I)')
+            # print('PFEQ(I)')
             line = ExprM(vars, m=GAMMA.loc[I]) * (
                 (ExprM(vars, m=ALPHA.loc[F, I]) * (FD.loc(F, I) ** ExprM(vars, m=RHO.loc[I]))).sum(F)) ** ExprM(vars,
                                                                                                                 m=1 /
@@ -1516,7 +1514,7 @@ class SaltLakeCGEModel(BaseAnalysis):
 
             PFEQ = (line - DS.loc(I))
             PFEQ.write(count, filename)
-            print(PFEQ.test(vars.initialVals))
+            # print(PFEQ.test(vars.initialVals))
             # print(PFEQ)
 
             # Cobb-Douglas factor demand function
@@ -1535,7 +1533,7 @@ class SaltLakeCGEModel(BaseAnalysis):
             # CES factor demand function
             # FDEQ(F,I).. (R(F,I) * RA(F)*(1 + SUM(GF,TAUFX(GF,F,I))))* (FD(F,I)**(1-RHO(I)))
             #               =E= PVA(I)* ALPHA(F,I)*(GAMMA(I)**RHO(I))*(DS(I)**(1-RHO(I)));
-            print('FDEQ(F,I)')
+            # print('FDEQ(F,I)')
             left = (R.loc(F, I) * RA.loc(F) * ExprM(vars, m=1 + TAUFX_SUM.loc[F, I])) * (
                         FD.loc(F, I) ** ExprM(vars, m=1 - RHO.loc[I]))
             right = ~(PVA.loc(I) * (ExprM(vars, m=ALPHA.loc[F, I] * (GAMMA.loc[I] ** RHO.loc[I])) * (
@@ -1545,34 +1543,34 @@ class SaltLakeCGEModel(BaseAnalysis):
 
             # FDEQ.test(vars.initialVals)
             FDEQ.write(count, filename)
-            print(FDEQ.test(vars.initialVals))
+            # print(FDEQ.test(vars.initialVals))
             # print(FDEQ)
 
             #   VEQ(I).. V(I) =E= SUM(J, AD(I,J) * DS(J) );
-            print('VEQ(I)')
+            # print('VEQ(I)')
             line = (ExprM(vars, m=AD.loc[I, J]) * ~DS.loc(J)).sum(1)
 
             VEQ = (line - V.loc(I))
             VEQ.write(count, filename)
-            print(VEQ.test(vars.initialVals))
+            # print(VEQ.test(vars.initialVals))
             # print(VEQ)
 
             #   YFEQL(F).. Y(F) =E= SUM(IG, R(F,IG)* RA(F)*FD(F,IG));
-            print('YFEQL(F)')
+            # print('YFEQL(F)')
             line = (R.loc(F, IG) * RA.loc(F) * FD.loc(F, IG)).sum(IG)
 
             YFEQL = (line - Y.loc(F))
             YFEQL.write(count, filename)
-            print(YFEQL.test(vars.initialVals))
+            # print(YFEQL.test(vars.initialVals))
             # print(YFEQL)
 
             # YFEQK(K).. Y('KAP') =E= SUM(IG, R('KAP',IG) * RA('KAP') * FD('KAP',IG));
-            print('YFEQK(K)')
+            # print('YFEQK(K)')
             line = (R.loc(['KAP'], IG) * RA.loc(['KAP']) * FD.loc(['KAP'], IG)).sum(IG)
 
             YFEQK = (line - Y.loc(['KAP']))
             YFEQK.write(count, filename)
-            print(YFEQK.test(vars.initialVals))
+            # print(YFEQK.test(vars.initialVals))
             # print(YFEQK)
 
             #  YFEQLA(LA).. Y('LAND')   =E= SUM(IG, R('LAND',IG) * RA('LAND') * FD('LAND',IG));
@@ -1594,52 +1592,52 @@ class SaltLakeCGEModel(BaseAnalysis):
             # print(LANFOR)
 
             #  KAPFOR(K).. KPFOR(K)     =E= KFOR(K) * Y(K);
-            print('KAPFOR(K)')
+            # print('KAPFOR(K)')
             line = ExprM(vars, m=KFOR.loc[K]) * Y.loc(K)
 
             KAPFOR = (line - KPFOR.loc(K))
             KAPFOR.write(count, filename)
-            print(KAPFOR.test(vars.initialVals))
+            # print(KAPFOR.test(vars.initialVals))
             # print(KAPFOR)
 
             # XEQ(I).. CX(I) =E= CX0(I)*( (PD(I)*(1+SUM(GS,TAUX(GS,I))))
             #                  /(PW0(I)*(1+SUM(GS,TAUQ(GS,I))))) **(ETAE(I));
-            print('XEQ(I)')
+            # print('XEQ(I)')
             line = ExprM(vars, m=CX0.loc[I]) * ((PD.loc(I) * ExprM(vars, m=1 + TAUX.loc[GS, I].sum(0))) / ExprM(vars, m=
             PW0.loc[I] * (1 + TAUQ.loc[GS, I].sum(0)))) ** ExprM(vars, m=ETAE.loc[I])
 
             XEQ = (line - CX.loc(I))
             XEQ.write(count, filename)
-            print(XEQ.test(vars.initialVals))
+            # print(XEQ.test(vars.initialVals))
             # print(XEQ)
 
             #  DEQ(I)$PWM0(I).. D(I)    =E= D0(I) *(PD(I)/PWM0(I))**(ETAD(I)*0.1);
-            print('DEQ(I)$PWM0(I)')
+            # print('DEQ(I)$PWM0(I)')
             line = ExprM(vars, m=D0.loc[I]) * (PD.loc(I) / ExprM(vars, m=PWM0.loc[I])) ** ExprM(vars,
                                                                                                 m=ETAD.loc[I] * 0.1)
 
             DEQ = (line - D.loc(I))
             #  DEQ.setCondition(PWM0.loc[I])
             DEQ.write(count, filename)
-            print(DEQ.test(vars.initialVals))
+            # print(DEQ.test(vars.initialVals))
             # print(DEQ)
 
             #  PEQ(I)..  P(I)           =E= D(I) * PD(I) + ( 1 - D(I) ) * PWM0(I);
-            print('PEQ(I)')
+            # print('PEQ(I)')
             line = (D.loc(I) * PD.loc(I) + (1 - D.loc(I)) * ExprM(vars, m=PWM0.loc[I]))
 
             PEQ = (line - P.loc(I))
             PEQ.write(count, filename)
-            print(PEQ.test(vars.initialVals))
+            # print(PEQ.test(vars.initialVals))
             # print(PEQ)
 
             #  MEQ(I).. M(I)            =E= ( 1 - D(I) ) * DD(I);
-            print('MEQ(I)')
+            # print('MEQ(I)')
             line = (1 - D.loc(I)) * DD.loc(I)
 
             MEQ = (line - M.loc(I))
             MEQ.write(count, filename)
-            print(MEQ.test(vars.initialVals))
+            # print(MEQ.test(vars.initialVals))
             # print(MEQ)
 
             #  NKIEQ.. NKI              =E= SUM(I, M(I) * PWM0(I) )
@@ -1650,7 +1648,7 @@ class SaltLakeCGEModel(BaseAnalysis):
             #                                 - SUM(CM,CMOWAGE(CM)*CMO(CM))
             #                                 + SUM(L,CMIWAGE(L)*CMI(L));
 
-            print('NKIEQ')
+            # print('NKIEQ')
             line1 = (M.loc(I) * ExprM(vars, m=PWM0.loc[I])).sum(I)
             line2 = (CX.loc(I) * PD.loc(I)).sum(I)
             line3 = (ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)).sum(H)
@@ -1661,44 +1659,44 @@ class SaltLakeCGEModel(BaseAnalysis):
 
             NKIEQ = ((line1 - line2 - line3 - line5 - line6 - line7 + line8) - NKI)
             NKIEQ.write(count, filename)
-            print(NKIEQ.test(vars.initialVals))
+            # print(NKIEQ.test(vars.initialVals))
             # print(NKIEQ)
 
             #  NEQ(K,I).. N(K,I)        =E= N0(K,I)*(R(K,I)/R0(K,I))**(ETAIX(K,I)*0.1);
-            print('NEQ(K,I)')
+            # print('NEQ(K,I)')
             line = ExprM(vars, m=N0.loc[K, I]) * (R.loc(K, I) / ExprM(vars, m=R0.loc[K, I])) ** ExprM(vars, m=ETAIX.loc[
                                                                                                                   K, I] * 0.1)
 
             NEQ = (line - N.loc(K, I))
             NEQ.write(count, filename)
-            print(NEQ.test(vars.initialVals))
+            # print(NEQ.test(vars.initialVals))
             # print(NEQ)
 
             #  CNEQ(I).. P(I)*(1 + SUM(GS, TAUN(GS,I)))*CN(I)
             #                         =E= SUM(IG, B(I,IG)*(SUM(K, N(K,IG))));
-            print('CNEQ(I)')
+            # print('CNEQ(I)')
             left = P.loc(I) * ExprM(vars, m=1 + TAUN.loc[GS, I].sum(0)) * CN.loc(I)
             right = (ExprM(vars, m=B.loc[I, IG]) * N.loc(K, IG).sum(K)).sum(IG)
 
             CNEQ = (right - left)
             CNEQ.write(count, filename)
-            print(CNEQ.test(vars.initialVals))
+            # print(CNEQ.test(vars.initialVals))
             # print(CNEQ)
 
             #  KSEQ(K,IG).. KS(K,IG)    =E= KS0(K,IG) * ( 1 - DEPR) + N(K,IG) ;
-            print('KSEQ(K,IG)')
+            # print('KSEQ(K,IG)')
             line = ExprM(vars, m=KS0.loc[K, IG] * (1 - DEPR)) + N.loc(K, IG)
 
             KSEQ = (line - KS.loc(K, IG))
             KSEQ.write(count, filename)
-            print(KSEQ.test(vars.initialVals))
+            # print(KSEQ.test(vars.initialVals))
             # print(KSEQ)
 
             # LSEQ1(H).. HW(H)/HH(H)   =E= (HW0(H)/HH0(H))
             #                              *((SUM(L, RA(L) / RA0(L))/24)/ (CPI(H) / CPI0(H))*(SUM((Z,L), FD(L,Z))/(SUM(H1, HW(H1)* SUM(L, JOBCOR(H1,L)))+ SUM(CM, CMO(CM)) + SUM(L,CMI(L))))+ SUM((CM,L), EXWGEO(CM)/RA(L))/96 *(SUM(CM, CMO(CM))/(SUM(H1, HW(H1)* SUM(L,JOBCOR(H1,L)))+ SUM(CM, CMO(CM)) +SUM(L,CMI(L)))))** (ETARA(H))
             #                              * ( SUM(G, TP(H,G) / CPI(H) )/ SUM(G, TP(H,G) / CPI0(H) )) ** ETAPT(H)
             #                              *  ((SUM(GI, PIT0(GI,H)* HH0(H))+ SUM(G, TAUH(G,H)*HH0(H)))/(SUM(GI, PIT(GI,H)* HH(H))+ SUM(G, TAUH(G,H)*HH(H))))**(ETAPIT(H));
-            print('LSEQ1(H)')
+            # print('LSEQ1(H)')
             line1 = ExprM(vars, m=HW0.loc[H] / HH0.loc[H])
             LSEQ1line2pre = FD.loc(L, Z).sum(1)
             line2 = (((RA.loc(L) / ExprM(vars, m=RA0.loc[L])).sum(L) / 28) / (CPI.loc(H) / ExprM(vars, m=CPI0[H])) \
@@ -1719,57 +1717,57 @@ class SaltLakeCGEModel(BaseAnalysis):
 
             LSEQ1 = ((line1 * line2 * line3 * line4) - HW.loc(H) / HH.loc(H))
             LSEQ1.write(count, filename)
-            print(LSEQ1.test(vars.initialVals))
+            # print(LSEQ1.test(vars.initialVals))
             # print(LSEQ1)
 
             # LSEQ2A('OUT1').. CMO('OUT1')=E= CMO0('OUT1')* (((EXWGEO('OUT1') /RA('L1WA') ))** ECOMO('OUT1'));
-            print('LSEQ2A')
+            # print('LSEQ2A')
             line = ExprM(vars, m=CMO0.loc[CM1]) * (
                         (ExprM(vars, m=EXWGEO.loc[CM1].sum(0)) / RA.loc(FW1)) ** (ExprM(vars, m=ECOMO.loc[CM1])))
 
             LSEQ2A = (line - CMO.loc(CM1))
             LSEQ2A.write(count, filename)
-            print(LSEQ2A.test(vars.initialVals))
+            # print(LSEQ2A.test(vars.initialVals))
             # print(LSEQ2A)
 
             # LSEQ2B('OUT2').. CMO('OUT2')=E= CMO0('OUT2')* (((EXWGEO('OUT2') /RA('L2WA') ))** ECOMO('OUT2'));
-            print('LSEQ2B')
+            # print('LSEQ2B')
             line = ExprM(vars, m=CMO0.loc[CM2]) * (
                         (ExprM(vars, m=EXWGEO.loc[CM2].sum(0)) / RA.loc(FW2)) ** (ExprM(vars, m=ECOMO.loc[CM2])))
 
             LSEQ2B = (line - CMO.loc(CM2))
             LSEQ2B.write(count, filename)
-            print(LSEQ2B.test(vars.initialVals))
+            # print(LSEQ2B.test(vars.initialVals))
             # print(LSEQ2B)
 
             # LSEQ2C('OUT3').. CMO('OUT3')=E= CMO0('OUT3')* (((EXWGEO('OUT3') /RA('L3WA') ))** ECOMO('OUT3'));
-            print('LSEQ2C')
+            # print('LSEQ2C')
             line = ExprM(vars, m=CMO0.loc[CM3]) * (
                         (ExprM(vars, m=EXWGEO.loc[CM3].sum(0)) / RA.loc(FW3)) ** (ExprM(vars, m=ECOMO.loc[CM3])))
 
             LSEQ2C = (line - CMO.loc(CM3))
             LSEQ2C.write(count, filename)
-            print(LSEQ2C.test(vars.initialVals))
+            # print(LSEQ2C.test(vars.initialVals))
             # print(LSEQ2C)
 
             # LSEQ2D('OUT4').. CMO('OUT4')=E= CMO0('OUT4')* (((EXWGEO('OUT4') /RA('L4WA') ))** ECOMO('OUT4'));
-            print('LSEQ2D')
+            # print('LSEQ2D')
             line = ExprM(vars, m=CMO0.loc[CM4]) * (
                         (ExprM(vars, m=EXWGEO.loc[CM4].sum(0)) / RA.loc(FW4)) ** (ExprM(vars, m=ECOMO.loc[CM4])))
 
             LSEQ2D = (line - CMO.loc(CM4))
             LSEQ2D.write(count, filename)
-            print(LSEQ2D.test(vars.initialVals))
+            # print(LSEQ2D.test(vars.initialVals))
             # print(LSEQ2D)
 
             # LSEQ3(L).. CMI(L)  =E= CMI0(L)* ((( RA(L)/(SUM( H, CPI(H))/30))** ECOMI(L)));
-            print('LSEQ3')
+            # print('LSEQ3')
             line = ExprM(vars, m=CMI0.loc[L]) * (
                         (RA.loc(L) / (CPI.loc(H).sum(H) / 28)) ** (ExprM(vars, m=ECOMI.loc[L])))
 
             LSEQ3 = (line - CMI.loc(L))
             LSEQ3.write(count, filename)
-            print(LSEQ3.test(vars.initialVals))
+            # print(LSEQ3.test(vars.initialVals))
             # print(LSEQ3)
 
             #  LASEQ1(LA,I).. LAS(LA,I) =E= LAS0(LA,I)*(R(LA, I)/R0(LA, I))**(ETAL(LA,I));
@@ -1787,7 +1785,7 @@ class SaltLakeCGEModel(BaseAnalysis):
             #                                - MO0(H) *((YD0(H)/HH0(H))/(YD(H)/HH(H))/(CPI0(H)/CPI(H))) ** (ETAYD(H))
             #                                         *((HN0(H)/HH0(H))/(HN(H)/HH(H))) ** (ETAU(H))  ;
 
-            print('POPEQ(H)')
+            # print('POPEQ(H)')
             line1 = ExprM(vars, m=HH0.loc[H] * NRPG.loc[H])
             line2 = ExprM(vars, m=MI0.loc[H]) * ((YD.loc(H) / HH.loc(H)) / ExprM(vars, m=YD0.loc[H] / HH0.loc[H]) / (
                         CPI.loc(H) / ExprM(vars, m=CPI0.loc[H]))) ** ExprM(vars, m=ETAYD.loc[H])
@@ -1798,16 +1796,16 @@ class SaltLakeCGEModel(BaseAnalysis):
 
             POPEQ = (line1 + line2 * line3 - line4 * line5 - HH.loc(H))
             POPEQ.write(count, filename)
-            print(POPEQ.test(vars.initialVals))
+            # print(POPEQ.test(vars.initialVals))
             # print(POPEQ)
 
             #  ANEQ(H).. HN(H)          =E= HH(H) - HW(H);
-            print('ANEQ(H)')
+            # print('ANEQ(H)')
             line = HH.loc(H) - HW.loc(H)
 
             ANEQ = (line - HN.loc(H))
             ANEQ.write(count, filename)
-            print(ANEQ.test(vars.initialVals))
+            # print(ANEQ.test(vars.initialVals))
             # print(ANEQ)
 
             #  YGEQ(GX).. Y(GX)         =E=   SUM(I, TAUV(GX,I) * V(I) * P(I) )
@@ -1821,7 +1819,7 @@ class SaltLakeCGEModel(BaseAnalysis):
             #                                 + SUM(H, PIT0(GX,H) * Y(H) )
             #                                 + SUM(H, TAUH(GX,H) * HH(H) )
             #                                 + SUM(GX1, IGT(GX,GX1));
-            print('YGEQ')
+            # print('YGEQ')
             line1 = (ExprM(vars, m=TAUV.loc[GX, I]) * V.loc(I) * P.loc(I)).sum(I)
             line2 = (ExprM(vars, m=TAUX.loc[GX, I]) * CX.loc(I) * PD.loc(I)).sum(I)
 
@@ -1859,124 +1857,124 @@ class SaltLakeCGEModel(BaseAnalysis):
             YGEQ = ((line1 + line2 + line3 + line4 + line5 + line6 + line7 + line8 + line9 + line10 + line11) - Y.loc(
                 GX))
             YGEQ.write(count, filename)
-            print(YGEQ.test(vars.initialVals))
+            # print(YGEQ.test(vars.initialVals))
             # print(YGEQ)
 
             #    YGEQ2(GT).. Y(GT)        =E= SUM(GX, IGT(GT,GX));
-            print('YGEQ2')
+            # print('YGEQ2')
             line = IGT.loc(GT, GX).sum(GX)
             YGEQ2 = (line - Y.loc(GT))
             YGEQ2.write(count, filename)
-            print(YGEQ2.test(vars.initialVals))
+            # print(YGEQ2.test(vars.initialVals))
             # print(YGEQ2)
 
             #  YGEQL(GNL).. Y(GNL)      =E= TAXS1(GNL)*Y('CYGF');
-            print('YGEQL(GNL)')
+            # print('YGEQL(GNL)')
             line = ExprM(vars, m=TAXS1.loc[GNL]) * Y.loc(['CYGF'])
             YGEQ1 = (line - Y.loc(GNL))
             YGEQ1.write(count, filename)
-            print(YGEQ1.test(vars.initialVals))
+            # print(YGEQ1.test(vars.initialVals))
             # print(YGEQ1)
 
             #  GOVFOR(G).. GVFOR(G)     =E= GFOR(G)*Y(G);
-            print('GOVFOR(G)')
+            # print('GOVFOR(G)')
             line = ExprM(vars, m=GFOR.loc[G]) * Y.loc(G)
 
             GOVFOR = (line - GVFOR.loc(G))
             GOVFOR.write(count, filename)
-            print(GOVFOR.test(vars.initialVals))
+            # print(GOVFOR.test(vars.initialVals))
             # print(GOVFOR)
 
             #  CGEQ(I,GN).. P(I)*(1 + SUM(GS, TAUG(GS,I))) * CG(I,GN)
             #                         =E= AG(I,GN) * (Y(GN)+ GFOR(GN)*Y(GN));
-            print('CGEQ(I,GN)')
+            # print('CGEQ(I,GN)')
             left = P.loc(I) * ExprM(vars, m=1 + TAUG.loc[GS, I].sum(0)) * CG.loc(I, GN)
             right = ExprM(vars, m=AG.loc[I, GN]) * (Y.loc(GN) + ExprM(vars, m=GFOR.loc[GN]) * Y.loc(GN))
 
             CGEQ = (right - left)
             CGEQ.write(count, filename)
-            print(CGEQ.test(vars.initialVals))
+            # print(CGEQ.test(vars.initialVals))
             # print(CGEQ)
 
             #  GFEQ(F,GN)..  FD(F,GN) * R(F,GN) * RA(F)*( 1 + SUM(GF, TAUFX(GF,F,GN)))
             #                         =E= AG(F,GN) * (Y(GN)+ GFOR(GN)*Y(GN));
-            print('GFEQ(F,GN)')
+            # print('GFEQ(F,GN)')
             left = FD.loc(F, GN) * R.loc(F, GN) * RA.loc(F) * (1 + ExprM(vars, m=TAUFX_SUM.loc[F, GN]))
             right = ExprM(vars, m=AG.loc[F, GN]) * (Y.loc(GN) + ExprM(vars, m=GFOR.loc[GN]) * Y.loc(GN))
 
             GFEQ = left - right
             GFEQ.write(count, filename)
-            print(GFEQ.test(vars.initialVals))
+            # print(GFEQ.test(vars.initialVals))
             # print(GFEQ)
 
             #  GSEQL(GN).. S(GN)        =E= (Y(GN)+ GVFOR(GN))
             #                                 - SUM(I, CG(I,GN)*P(I)*(1 + SUM(GS, TAUG(GS,I))))
             #                                 - SUM(F, FD(F,GN)*R(F,GN)*RA(F)*(1 + SUM(GF, TAUFX(GF,F,GN))));
-            print('GSEQL(GN)')
+            # print('GSEQL(GN)')
             line1 = Y.loc(GN) + GVFOR.loc(GN)
             line2 = (CG.loc(I, GN) * P.loc(I) * (1 + ExprM(vars, m=TAUG.loc[GS, I]).sum(GS))).sum(I)
             line3 = (FD.loc(F, GN) * R.loc(F, GN) * RA.loc(F) * (1 + ExprM(vars, m=TAUFX_SUM.loc[F, GN]))).sum(F)
 
             GSEQL = ((line1 - ~line2 - ~line3) - S.loc(GN))
             GSEQL.write(count, filename)
-            print(GSEQL.test(vars.initialVals))
+            # print(GSEQL.test(vars.initialVals))
             # print(GSEQL)
 
             #  GSEQ(GX).. S(GX)         =E= (Y(GX) + GFOR(GX)*Y(GX)) - SUM(H, (TP(H,GX)*HH(H))) - SUM(G,IGT(G,GX));
-            print('GSEQ(GX)')
+            # print('GSEQ(GX)')
             line1 = (Y.loc(GX) + ExprM(vars, m=GFOR.loc[GX]) * Y.loc(GX))
             line2 = (ExprM(vars, m=TP.loc[H, GX]) * HH.loc(H)).sum(H)
             line3 = IGT.loc(G, GX).sum(G)
 
             GSEQ = ((line1 - ~line2 - ~line3) - S.loc(GX))
             GSEQ.write(count, filename)
-            print(GSEQ.test(vars.initialVals))
+            # print(GSEQ.test(vars.initialVals))
             # print(GSEQ)
 
             #  TDEQ(G,GX)$(IGTD(G,GX) EQ 1).. IGT(G,GX)
             #                         =E= TAXS(G,GX)*(Y(GX) + GVFOR(GX)- SUM(H, (TP(H,GX)*HH(H))));
-            print('TDEQ(G,GX)$(IGTD(G,GX) EQ 1)')
+            # print('TDEQ(G,GX)$(IGTD(G,GX) EQ 1)')
             line = ExprM(vars, m=TAXS.loc[G, GX]) * (
                         Y.loc(GX) + GVFOR.loc(GX) - ~(ExprM(vars, m=TP.loc[H, GX]) * HH.loc(H)).sum(H))
 
             TDEQ = line - IGT.loc(G, GX)
             TDEQ.setCondition(IGTD.loc[G, GX], 'EQ', 1)
             TDEQ.write(count, filename)
-            print(TDEQ.test(vars.initialVals))
+            # print(TDEQ.test(vars.initialVals))
             # print(TDEQ)
 
             # GSEQJ1('CYGF').. S('CYGF')=E= Y('CYGF') -  Y('CYGF');
-            print('GSEQJ1(\'CYGF\')')
+            # print('GSEQJ1(\'CYGF\')')
             GSEQJ1 = S.loc(['CYGF']) - Y.loc(['CYGF']) + Y.loc(['CYGF'])
             GSEQJ1.write(count, filename)
-            print(GSEQJ1.test(vars.initialVals))
+            # print(GSEQJ1.test(vars.initialVals))
 
             #  SPIEQ.. SPI =E= SUM(H, Y(H)) + SUM((H,G), TP(H,G)*HH(H)) + SUM(H, PRIVRET(H)*HH(H));
-            print('SPIEQ')
+            # print('SPIEQ')
             line = Y.loc(H).sum(H) + (ExprM(vars, m=TP.loc[H, G]) * HH.loc(H)).sum() + (
                         ExprM(vars, m=PRIVRET.loc[H]) * HH.loc(H)).sum(H)
 
             SPIEQ = (line - SPI)
             SPIEQ.write(count, filename)
-            print(SPIEQ.test(vars.initialVals))
+            # print(SPIEQ.test(vars.initialVals))
             # print(SPIEQ)
 
             #  LMEQ1(L).. SUM(H, HW(H)* JOBCOR(H,L)) + CMI(L) =E= SUM(Z, FD(L,Z)));
-            print('LMEQ1')
+            # print('LMEQ1')
             left = (ExprM(vars, m=JOBCOR.loc[H, L]) * HW.loc(H)).sum(H) + CMI.loc(L)
             right = FD.loc(L, Z).sum(Z)
             # right = FD.loc(['L1'], Z).sum(Z) + CMO.loc(CM1).sum(CM1)
 
             LMEQ1 = (right - left)
             LMEQ1.write(count, filename)
-            print(LMEQ1.test(vars.initialVals))
+            # print(LMEQ1.test(vars.initialVals))
             # print(LMEQ1)
 
             #  KMEQ(K,IG).. KS(K,IG)    =E= FD(K,IG);
-            print('KMEQ(K,IG)')
+            # print('KMEQ(K,IG)')
             KMEQ = (FD.loc(K, IG) - KS.loc(K, IG))
             KMEQ.write(count, filename)
-            print(KMEQ.test(vars.initialVals))
+            # print(KMEQ.test(vars.initialVals))
             # print(KMEQ)
 
             #  LAMEQ(LA,IG).. LAS(LA,IG)=E= FD(LA,IG);
@@ -1987,35 +1985,35 @@ class SaltLakeCGEModel(BaseAnalysis):
             # print(LAMEQ)
 
             #  GMEQ(I).. DS(I)          =E= DD(I) + CX(I) - M(I);
-            print('GMEQ(I)')
+            # print('GMEQ(I)')
             GMEQ = (DD.loc(I) + CX.loc(I) - M.loc(I) - DS.loc(I))
             GMEQ.write(count, filename)
-            print(GMEQ.test(vars.initialVals))
+            # print(GMEQ.test(vars.initialVals))
             # print(GMEQ)
 
             #  DDEQ(I).. DD(I)          =E= V(I) + SUM(H, CH(I,H) ) + SUM(G, CG(I,G) ) + CN(I);
-            print('DDEQ(I)')
+            # print('DDEQ(I)')
             DDEQ = (V.loc(I) + CH.loc(I, H).sum(H) + CG.loc(I, G).sum(G) + CN.loc(I) - DD.loc(I))
             DDEQ.write(count, filename)
-            print(DDEQ.test(vars.initialVals))
+            # print(DDEQ.test(vars.initialVals))
             # print(DDEQ)
 
             # IGT.FX(G,GX)$(NOT IGT0(G,GX))=0;
-            print('IGT.FX(G,GX)$(NOT IGT0(G,GX))=0')
+            # print('IGT.FX(G,GX)$(NOT IGT0(G,GX))=0')
             FX1 = IGT.loc(G, GX)
             FX1.setCondition(IGT0.loc[G, GX], 'EQ', 0)
             FX1.write(count, filename)
             # print(FX1)
 
             # IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX);
-            print('IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX)')
+            # print('IGT.FX(G,GX)$(IGTD(G,GX) EQ 2)=IGT0(G,GX)')
             FX2 = IGT.loc(G, GX) - ExprM(vars, m=IGT0.loc[G, GX])
             FX2.setCondition(IGTD.loc[G, GX], 'EQ', 2)
             FX2.write(count, filename)
             # print(FX2)
 
             # R.FX(L,Z)=R0(L,Z);
-            print('R.FX(L,Z)=R0(L,Z)')
+            # print('R.FX(L,Z)=R0(L,Z)')
             FX3 = R.loc(L, Z) - ExprM(vars, m=R0.loc[L, Z])
             FX3.write(count, filename)
             # print(FX3)
@@ -2029,183 +2027,197 @@ class SaltLakeCGEModel(BaseAnalysis):
             '''
 
             # RA.FX(K)=RA0(K);
-            print('RA.FX(K)=RA0(K)')
+            # print('RA.FX(K)=RA0(K)')
             FX5 = RA.loc(K) - ExprM(vars, m=RA0.loc[K])
             FX5.write(count, filename)
             # print(FX5)
 
-            print("Objective")
+            # print("Objective")
             obj = vars.getIndex('SPI')
 
             with open(filename, 'a') as f:
                 f.write('model.obj = Objective(expr=-1*model.x' + str(obj) + ')')
 
-            def run_solver(cons_filename, temp_file_name="tmp.py"):
-                solver = 'ipopt'
-                solver_io = 'nl'
-                stream_solver = False  # True prints solver output to screen
-                keepfiles = False  # True prints intermediate file names (.nl,.sol,...)
-                opt = SolverFactory(solver, solver_io=solver_io)
+        def run_solver(cons_filename, temp_file_name="tmp.py"):
+            solver = 'ipopt'
+            solver_io = 'nl'
+            # TODO these could be read from the environment
+            stream_solver = True  # True prints solver output to screen
+            keepfiles = False  # True prints intermediate file names (.nl,.sol,...)
+            executable_path = self.get_parameter("solver_path") \
+                if self.get_parameter("solver_path") is not None else pyglobals.IPOPT_PATH
+            if not os.path.exists(executable_path):
+                print("Invalid executable path, please make sure you have Pyomo installed.")
 
-                if opt is None:
-                    print("")
-                    print("ERROR: Unable to create solver plugin for %s " \
-                          "using the %s interface" % (solver, solver_io))
-                    print("")
-                    exit(1)
+            opt = SolverFactory(solver, solver_io=solver_io, executable=executable_path)
 
-                ### Create the model
-                model = ConcreteModel()
-                set_variable(cons_filename)
-                set_equation(cons_filename)
-                ###
+            if opt is None:
+                print("")
+                print("ERROR: Unable to create solver plugin for %s " \
+                      "using the %s interface" % (solver, solver_io))
+                print("")
+                exit(1)
 
-                ### read the model
-                exec(open(cons_filename).read())
-                ###
+            ### Create the model
+            model = ConcreteModel()
+            set_variable(cons_filename)
+            set_equation(cons_filename)
+            ###
 
-                ### Declare all suffixes
+            ### read the model
+            exec(open(cons_filename).read())
+            ###
 
-                # Ipopt bound multipliers (obtained from solution)
-                model.ipopt_zL_out = Suffix(direction=Suffix.IMPORT)
-                model.ipopt_zU_out = Suffix(direction=Suffix.IMPORT)
+            ### Declare all suffixes
 
-                # Ipopt bound multipliers (sent to solver)
-                model.ipopt_zL_in = Suffix(direction=Suffix.EXPORT)
-                model.ipopt_zU_in = Suffix(direction=Suffix.EXPORT)
+            # Ipopt bound multipliers (obtained from solution)
+            model.ipopt_zL_out = Suffix(direction=Suffix.IMPORT)
+            model.ipopt_zU_out = Suffix(direction=Suffix.IMPORT)
 
-                # Obtain dual solutions from first solve and send to warm start
-                model.dual = Suffix(direction=Suffix.IMPORT_EXPORT)
+            # Ipopt bound multipliers (sent to solver)
+            model.ipopt_zL_in = Suffix(direction=Suffix.EXPORT)
+            model.ipopt_zU_in = Suffix(direction=Suffix.EXPORT)
 
-                # opt.options['halt_on_ampl_error'] = 'yes'
-                # opt.options['acceptable_tol'] = '1e-3'
-                ### Send the model to ipopt and collect the solution
-                # results = opt.solve(model,keepfiles=keepfiles,tee=stream_solver)
+            # Obtain dual solutions from first solve and send to warm start
+            model.dual = Suffix(direction=Suffix.IMPORT_EXPORT)
 
-                # IMPORT / IMPORT_EXPORT Suffix components)
-                # model.solutions.load_from(results)
+            # opt.options['halt_on_ampl_error'] = 'yes'
+            # opt.options['acceptable_tol'] = '1e-3'
+            ### Send the model to ipopt and collect the solution
+            # results = opt.solve(model,keepfiles=keepfiles,tee=stream_solver)
 
-                ### Set Ipopt options for warm-start
-                # The current values on the ipopt_zU_out and
-                # ipopt_zL_out suffixes will be used as initial
-                # conditions for the bound multipliers to solve
-                # the new problem
-                model.ipopt_zL_in.update(model.ipopt_zL_out)
-                model.ipopt_zU_in.update(model.ipopt_zU_out)
-                opt.options['warm_start_init_point'] = 'yes'
-                opt.options['warm_start_bound_push'] = 1e-6
-                opt.options['warm_start_mult_bound_push'] = 1e-6
-                opt.options['mu_init'] = 1e-6
-                # opt.options['acceptable_tol'] = 10
-                # opt.options['max_iter'] = 15
-                # opt.options['compl_inf_tol'] = 1e-3
-                # opt.options['bound_relax_factor'] = 0
-                # opt.options['start_with_resto'] = 'yes'
-                # opt.options['acceptable_iter'] = 15
-                # opt.options['halt_on_ampl_error'] = 'yes'
-                # opt.options['fixed_variable_treatment'] = 'relax_bounds'
-                # opt.options['print_options_documentation'] = 'yes'
+            # IMPORT / IMPORT_EXPORT Suffix components)
+            # model.solutions.load_from(results)
 
-                ###
+            ### Set Ipopt options for warm-start
+            # The current values on the ipopt_zU_out and
+            # ipopt_zL_out suffixes will be used as initial
+            # conditions for the bound multipliers to solve
+            # the new problem
+            model.ipopt_zL_in.update(model.ipopt_zL_out)
+            model.ipopt_zU_in.update(model.ipopt_zU_out)
+            opt.options['warm_start_init_point'] = 'yes'
+            opt.options['warm_start_bound_push'] = 1e-6
+            opt.options['warm_start_mult_bound_push'] = 1e-6
+            opt.options['mu_init'] = 1e-6
+            # opt.options['acceptable_tol'] = 10
+            # opt.options['max_iter'] = 15
+            # opt.options['compl_inf_tol'] = 1e-3
+            # opt.options['bound_relax_factor'] = 0
+            # opt.options['start_with_resto'] = 'yes'
+            # opt.options['acceptable_iter'] = 15
+            # opt.options['halt_on_ampl_error'] = 'yes'
+            # opt.options['fixed_variable_treatment'] = 'relax_bounds'
+            # opt.options['print_options_documentation'] = 'yes'
 
-                ### Send the model and suffix information to ipopt and collect the solution
-                # The solver plugin will scan the model for all active suffixes
-                # valid for importing, which it will store into the results object
+            ###
 
-                results = opt.solve(model, keepfiles=keepfiles, tee=stream_solver)
+            ### Send the model and suffix information to ipopt and collect the solution
+            # The solver plugin will scan the model for all active suffixes
+            # valid for importing, which it will store into the results object
 
-                x = [None for i in range(vars.nvars)]
+            results = opt.solve(model, keepfiles=keepfiles, tee=stream_solver)
 
-                with open(temp_file_name, 'w') as f:
-                    for i in range(vars.nvars):
-                        f.write('x[' + str(i) + ']=value(model.x' + str(i) + ')\n')
+            x = [None for i in range(vars.nvars)]
 
-                exec(open(temp_file_name).read())
+            with open(temp_file_name, 'w') as f:
+                for i in range(vars.nvars):
+                    f.write('x[' + str(i) + ']=value(model.x' + str(i) + ')\n')
 
-                soln.append(x[:])
+            exec(open(temp_file_name).read())
 
-                return None
+            soln.append(x[:])
 
-            '''
-            Calibrate the model 
-            '''
+            return None
 
-            soln = []
-            # TODO: I am not sure this is needed here. We might want to leave the python version
-            # of the models out for now
-            filename = "ipopt_cons.py"
-            tmp = "tmp.py"
-            print("Calibration: ")
+        '''
+        Calibrate the model 
+        '''
+
+        soln = []
+        # TODO: I am not sure this is needed here. We might want to leave the python version
+        # of the models out for now
+        filename = "ipopt_cons.py"
+        tmp = "tmp.py"
+        print("Calibration: ")
+        run_solver(filename, tmp)
+
+        '''
+        Simulation code below:
+        In each simulation:
+
+        1. Apply simulation code (for instance PI(I) = 1.02).
+        2. Rewrite all equations
+        3. Solve the new model with the result from last run as initial guess.
+
+        '''
+
+        '''
+        ######## The following is for individual shocks. ######## 
+
+        iNum = 1 # dynamic model itterations
+
+        for ittr in range(iNum):
+          print("Simulation: ", ittr+1)
+          if ittr == 0: # if it is the first simulation, apply the shock
+
+              #DELTA.loc[I] = 1.02 * DELTA.loc[I]
+
+              KS0.loc[K, I] = KS0.loc[K, I]*0.7
+
+              #KS0.loc[K, ['HS1']] = KS0.loc[K, ['HS1']] * 0.675
+              #KS0.loc[K, ['HS2']] = KS0.loc[K, ['HS2']] * 0.739
+              #KS0.loc[K, ['HS3']] = KS0.loc[K, ['HS3']] * 0.958
+              #KS0.loc[K, ['GOODS']] = KS0.loc[K, ['GOODS']] * 0.658
+              #KS0.loc[K, ['TRADE']] = KS0.loc[K, ['TRADE']] * 0.961
+              #KS0.loc[K, ['OTHER']] = KS0.loc[K, ['OTHER']] * 0.673
+
+
+          else: # other simulations
+
+              #KS0 = KSNEW*(1-DEPR)+vars.get('N', x=soln[-1])
+              KS0 = vars.get('KS', x=soln[-1])
+
+          run_solver(filename, tmp)
+
+        '''
+
+        '''
+         ######## The following is for random shocks. ########  
+        '''
+        # iNum = 1 # dynamic model iterations
+        sims = sector_shocks
+        # iNum = len(sims.columns)
+        KS00 = KS0.copy()
+
+        for num in range(iNum):
+            KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
             run_solver(filename, tmp)
 
-            '''
-            Simulation code below:
-            In each simulation:
+        domestic_supply, gross_income, household_count, pre_disaster_demand, post_disaster_demand = \
+            gams_to_dataframes(iNum, vars, H, L, soln)
 
-            1. Apply simulation code (for instance PI(I) = 1.02).
-            2. Rewrite all equations
-            3. Solve the new model with the result from last run as initial guess.
+        self.set_result_csv_data("domestic-supply", domestic_supply, name="domestic-supply", source="dataframe")
+        self.set_result_csv_data("pre-disaster-factor-demand", pre_disaster_demand,
+                                 name="pre-disaster-factor-demand", source="dataframe")
+        self.set_result_csv_data("post-disaster-factor-demand", post_disaster_demand,
+                                 name="post-disaster-factor-demand", source="dataframe")
+        self.set_result_csv_data("gross-income", gross_income, name="gross-income", source="dataframe")
+        self.set_result_csv_data("household-count", household_count, name="household-count", source="dataframe")
 
-            '''
-
-            '''
-            ######## The following is for individual shocks. ######## 
-
-            iNum = 1 # dynamic model itterations
-
-            for ittr in range(iNum):
-              print("Simulation: ", ittr+1)
-              if ittr == 0: # if it is the first simulation, apply the shock
-
-                  #DELTA.loc[I] = 1.02 * DELTA.loc[I]
-
-                  KS0.loc[K, I] = KS0.loc[K, I]*0.7
-
-                  #KS0.loc[K, ['HS1']] = KS0.loc[K, ['HS1']] * 0.675
-                  #KS0.loc[K, ['HS2']] = KS0.loc[K, ['HS2']] * 0.739
-                  #KS0.loc[K, ['HS3']] = KS0.loc[K, ['HS3']] * 0.958
-                  #KS0.loc[K, ['GOODS']] = KS0.loc[K, ['GOODS']] * 0.658
-                  #KS0.loc[K, ['TRADE']] = KS0.loc[K, ['TRADE']] * 0.961
-                  #KS0.loc[K, ['OTHER']] = KS0.loc[K, ['OTHER']] * 0.673
-
-
-              else: # other simulations
-
-                  #KS0 = KSNEW*(1-DEPR)+vars.get('N', x=soln[-1])
-                  KS0 = vars.get('KS', x=soln[-1])
-
-              run_solver(filename, tmp)
-
-            '''
-
-            '''
-             ######## The following is for random shocks. ########  
-            '''
-            # iNum = 1 # dynamic model iterations
-            sims = sector_shocks
-            # iNum = len(sims.columns)
-            KS00 = KS0.copy()
-
-            for num in range(iNum):
-                KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
-                run_solver(filename, tmp)
-
-            gams_to_dataframes(soln)
-
-            # TODO: CGE output still needs to be generated
-            #self.set_result_csv_data("domestic-supply", pd.DataFrame(ds), name="domestic-supply",
-            #                         source="dataframe")
-            #self.set_result_csv_data("pre-disaster-factor-demand", FD0.iloc[0:3, 0:4],
-            #                         name="pre-disaster-factor-demand",
-            #                         source="dataframe")
-            #self.set_result_csv_data("post-disaster-factor-demand", FDL.iloc[0:3, 0:4],
-            #                         name="post-disaster-factor-demand",
-            #                         source="dataframe")
-            #self.set_result_csv_data("gross-income", pd.DataFrame(gross_income),
-            #                         name="gross-income", source="dataframe")
-            #self.set_result_csv_data("household-count", pd.DataFrame(hh),
-            #                         name="household-count", source="dataframe")
-
+        # TODO: CGE output still needs to be generated
+        #self.set_result_csv_data("domestic-supply", pd.DataFrame(ds), name="domestic-supply",
+        #                         source="dataframe")
+        #self.set_result_csv_data("pre-disaster-factor-demand", FD0.iloc[0:3, 0:4],
+        #                         name="pre-disaster-factor-demand",
+        #                         source="dataframe")
+        #self.set_result_csv_data("post-disaster-factor-demand", FDL.iloc[0:3, 0:4],
+        #                         name="post-disaster-factor-demand",
+        #                         source="dataframe")
+        #self.set_result_csv_data("gross-income", pd.DataFrame(gross_income),
+        #                         name="gross-income", source="dataframe")
+        #self.set_result_csv_data("household-count", pd.DataFrame(hh),
+        #                         name="household-count", source="dataframe")
 
     def get_spec(self):
         return {
@@ -2246,14 +2258,14 @@ class SaltLakeCGEModel(BaseAnalysis):
                 },
                 {
                     'id': 'IOUT',
-                    'required': True,
+                    'required': False,
                     'description': 'IOUT is a matrix that describes the transfer of tax revenue collected by the local'
                                    ' government to help finance local government expenditures.',
                     'type': ['incore:JoplinCGEiout']
                 },
                 {
                     'id': 'MISC',
-                    'required': True,
+                    'required': False,
                     'description': 'MISC is the name of a file that contains data for commercial sector employment'
                                    ' and physical capital. It also contains data for the number of households and'
                                    ' working households in the economy.',
@@ -2283,7 +2295,7 @@ class SaltLakeCGEModel(BaseAnalysis):
                     'id': 'OUTCR',
                     'required': True,
                     'description': 'OUTCR is a matrix describing the number of workers who'
-                                   ' live in Joplin but commute outside of town to work.',
+                                   ' live in Salt Lake City but commute outside of town to work.',
                     'type': ['incore:JoplinCGEoutcr']
                 },
                 {
