@@ -2197,27 +2197,15 @@ class SaltLakeCGEModel(BaseAnalysis):
         domestic_supply, gross_income, household_count, pre_disaster_demand, post_disaster_demand = \
             gams_to_dataframes(iNum, vars, H, L, soln)
 
-        self.set_result_csv_data("domestic-supply", domestic_supply, name="domestic-supply", source="dataframe")
+        self.set_result_csv_data("domestic-supply", domestic_supply, name="domestic-supply", source="dataframe",
+                                 index=True)
         self.set_result_csv_data("pre-disaster-factor-demand", pre_disaster_demand,
-                                 name="pre-disaster-factor-demand", source="dataframe")
+                                 name="pre-disaster-factor-demand", source="dataframe", index=True)
         self.set_result_csv_data("post-disaster-factor-demand", post_disaster_demand,
-                                 name="post-disaster-factor-demand", source="dataframe")
-        self.set_result_csv_data("gross-income", gross_income, name="gross-income", source="dataframe")
-        self.set_result_csv_data("household-count", household_count, name="household-count", source="dataframe")
-
-        # TODO: CGE output still needs to be generated
-        #self.set_result_csv_data("domestic-supply", pd.DataFrame(ds), name="domestic-supply",
-        #                         source="dataframe")
-        #self.set_result_csv_data("pre-disaster-factor-demand", FD0.iloc[0:3, 0:4],
-        #                         name="pre-disaster-factor-demand",
-        #                         source="dataframe")
-        #self.set_result_csv_data("post-disaster-factor-demand", FDL.iloc[0:3, 0:4],
-        #                         name="post-disaster-factor-demand",
-        #                         source="dataframe")
-        #self.set_result_csv_data("gross-income", pd.DataFrame(gross_income),
-        #                         name="gross-income", source="dataframe")
-        #self.set_result_csv_data("household-count", pd.DataFrame(hh),
-        #                         name="household-count", source="dataframe")
+                                 name="post-disaster-factor-demand", source="dataframe", index=True)
+        self.set_result_csv_data("gross-income", gross_income, name="gross-income", source="dataframe", index=True)
+        self.set_result_csv_data("household-count", household_count, name="household-count", source="dataframe",
+                                 index=True)
 
     def get_spec(self):
         return {

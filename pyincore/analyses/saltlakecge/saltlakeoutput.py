@@ -189,37 +189,33 @@ def gams_to_dataframes(iNum, variables, H, L, soln):
     # domestic supply
     cols = {'DS0': DS0,
             'DSL': DSL}
-    df = pd.DataFrame.from_dict(cols)
-    df.index.name = 'Sectors'
+    domestic_supply_df = pd.DataFrame.from_dict(cols)
+    domestic_supply_df.index.name = 'Sectors'
     # df.to_csv('domestic-supply.csv')
-    domestic_supply_df = df
 
     # gross income
     cols = {'Y0': Y0.loc[H],
             'YL': YL.loc[H]}
-    df = pd.DataFrame.from_dict(cols)
-    df.index.name = 'Household Group'
+    gross_income_df = pd.DataFrame.from_dict(cols)
+    gross_income_df.index.name = 'Household Group'
     # df.to_csv('gross-income.csv')
-    gross_income_df = df
 
     # household count
     cols = {'HH0': HH0,
             'HHL': HHL}
-    df = pd.DataFrame.from_dict(cols)
-    df.index.name = 'Household Group'
+    household_count_df = pd.DataFrame.from_dict(cols)
+    household_count_df.index.name = 'Household Group'
     # df.to_csv('household-count.csv')
-    household_count_df = df
 
     # pre-disaster-factor-demand
-    df = FD0.loc[L]
-    df.index.name = 'Labor Group'
+    pre_disaster_demand_df = FD0.loc[L]
+    pre_disaster_demand_df.index.name = 'Labor Group'
     # df.to_csv('pre-disaster-factor-demand.csv')
-    pre_disaster_demand_df = df
 
     # post-disaster-factor-demand
-    df = FDL.loc[L]
-    df.index.name = 'Labor Group'
+    post_disaster_demand_df = FDL.loc[L]
+    post_disaster_demand_df.index.name = 'Labor Group'
     # df.to_csv('post-disaster-factor-demand.csv')
-    post_disater_demand_df = df
+    # post_disaster_demand_df = df
 
-    return domestic_supply_df, gross_income_df, household_count_df, pre_disaster_demand_df, post_disater_demand_df
+    return domestic_supply_df, gross_income_df, household_count_df, pre_disaster_demand_df, post_disaster_demand_df
