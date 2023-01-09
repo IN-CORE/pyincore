@@ -59,10 +59,14 @@ def run_convert_cge_json_chained():
     post_demand_result = joplin_cge.get_output_dataset("post-disaster-factor-demand")
 
     cge_json = CGEOutputProcess()
-    cge_json.get_cge_domestic_supply(domestic_supply_result, None, "cge_domestic_supply.json")
-    # cge_json.get_cge_household_count(household_count_result, None, "cge_total_household_count.json")
-    cge_json.get_cge_gross_income(gross_income_result, None, "cge_total_household_income.json")
-    cge_json.get_cge_employment(pre_demand_result, post_demand_result, None, None, "cge_employment.json")
+    cge_json.get_cge_domestic_supply(domestic_supply_result, ["Goods", "Trade", "Other", "HS1", "HS2", "HS3"], None,
+                                     "cge_domestic_supply.json")
+    # cge_json.get_cge_household_count(household_count_result, ["HH1", "HH2", "HH3", "HH4", "HH5"], None,
+    # "cge_total_household_count.json")
+    cge_json.get_cge_gross_income(gross_income_result, ["HH1", "HH2", "HH3", "HH4", "HH5"], None,
+                                  "cge_total_household_income.json")
+    cge_json.get_cge_employment(pre_demand_result, post_demand_result, ["Goods", "Trade", "Other"], None, None,
+                                "cge_employment.json")
 
     return True
 
@@ -71,17 +75,17 @@ def run_convert_cge_json_path(testpath):
     # test the external file with a path
 
     cge_json = CGEOutputProcess()
-    cge_json.get_cge_household_count(None,
+    cge_json.get_cge_household_count(None, ["HH1", "HH2", "HH3", "HH4", "HH5"],
                                      os.path.join(testpath, "household-count.csv"),
                                      "cge_total_household_count.json")
-    cge_json.get_cge_gross_income(None,
+    cge_json.get_cge_gross_income(None, ["HH1", "HH2", "HH3", "HH4", "HH5"],
                                   os.path.join(testpath, "gross-income.csv"),
                                   "cge_total_household_income.json")
-    cge_json.get_cge_employment(None, None,
+    cge_json.get_cge_employment(None, None, ["Goods", "Trade", "Other"],
                                 os.path.join(testpath, "pre-disaster-factor-demand.csv"),
                                 os.path.join(testpath, "post-disaster-factor-demand.csv"),
                                 "cge_employment.json")
-    cge_json.get_cge_domestic_supply(None,
+    cge_json.get_cge_domestic_supply(None, ["Goods", "Trade", "Other", "HS1", "HS2", "HS3"],
                                      os.path.join(testpath, "domestic-supply.csv"),
                                      "cge_domestic_supply.json")
     return True
