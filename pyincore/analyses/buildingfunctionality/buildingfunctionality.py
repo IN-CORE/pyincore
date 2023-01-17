@@ -108,12 +108,6 @@ class BuildingFunctionality(BaseAnalysis):
         else:
             poles_df = None
 
-        # All three above needs to be present at the same time or none
-        if not all(epf is None for epf in [interdependency_dict, substations_df, poles_df]) \
-                and not all(epf is not None for epf in [interdependency_dict, substations_df, poles_df]):
-            raise ValueError("To consider electric power availability in the analysis, please provide pole damage "
-                             "samples, substation damage samples, and interdependency.")
-
         functionality_probabilities = []
         functionality_samples = []
         for building_guid in buildings_df.index:
@@ -168,30 +162,53 @@ class BuildingFunctionality(BaseAnalysis):
         if interdependency is not None:
 
             if building_guid in interdependency.keys():
-                substations_mc_samples = substations.loc[interdependency[building_guid]["substations_guid"]]
-                poles_mc_samples = poles.loc[interdependency[building_guid]["poles_guid"]]
+                if substations:
+                    substations_mc_samples = substations.loc[interdependency[building_guid]["substations_guid"]]
+                    substation_list = []
+                    try:
+                        substation_list = substations_mc_samples["failure"].split(",")
+                    except IndexError:
+                        print("error with substations")
+                        print(interdependency[building_guid]["substations_guid"])
+                        return {building_guid: -1}
+                else:
+                    substation_list = None
 
-                substation_list = []
-                try:
-                    substation_list = substations_mc_samples["failure"].split(",")
-                except IndexError:
-                    print("error with substations")
-                    print(interdependency[building_guid]["substations_guid"])
-                    return {building_guid: -1}
+                if poles:
+                    poles_mc_samples = poles.loc[interdependency[building_guid]["poles_guid"]]
+                    pole_list = []
+                    try:
+                        pole_list = poles_mc_samples["failure"].split(",")
+                    except IndexError:
+                        print("error with poles")
+                        print(interdependency[building_guid]["poles_guid"])
+                        return {building_guid: -1}
+                else:
+                    pole_list = None
 
-                pole_list = []
-                try:
-                    pole_list = poles_mc_samples["failure"].split(",")
-                except IndexError:
-                    print("error with poles")
-                    print(interdependency[building_guid]["poles_guid"])
-                    return {building_guid: -1}
-
-                functionality_samples = [BuildingFunctionality._calc_functionality_samples(building_sample,
-                                                                                           substation_sample,
-                                                                                           pole_sample)
-                                         for building_sample, substation_sample, pole_sample in
-                                         zip(building_list, substation_list, pole_list)]
+                if substation_list is not None and pole_list is not None:
+                    functionality_samples = [BuildingFunctionality._calc_functionality_samples(building_sample,
+                                                                                               substation_sample,
+                                                                                               pole_sample)
+                                             for building_sample, substation_sample, pole_sample in
+                                             zip(building_list, substation_list, pole_list)]
+                elif substation_list is not None:
+                    functionality_samples = [BuildingFunctionality._calc_functionality_samples(building_sample,
+                                                                                               substation_sample,
+                                                                                               None)
+                                             for building_sample, substation_sample in
+                                             zip(building_list, substation_list)]
+                elif pole_list is not None:
+                    functionality_samples = [BuildingFunctionality._calc_functionality_samples(building_sample,
+                                                                                               None,
+                                                                                               pole_sample)
+                                             for building_sample, pole_sample in
+                                             zip(building_list, pole_list)]
+                else:
+                    functionality_samples = [BuildingFunctionality._calc_functionality_samples(building_sample,
+                                                                                               None,
+                                                                                               None)
+                                             for building_sample in building_list]
                 probability = BuildingFunctionality._calc_functionality_probability(functionality_samples)
                 return building_guid, ",".join([str(sample) for sample in functionality_samples]), probability
 
@@ -212,8 +229,8 @@ class BuildingFunctionality(BaseAnalysis):
 
         Args:
             building_sample (str): Monte Carlo samples of building functionality.
-            substation_sample (str): Monte Carlo samples of substation functionality.
-            pole_sample (str): Monte Carlo samples of pole functionality.
+            substation_sample (str|None): Monte Carlo samples of substation functionality.
+            pole_sample (str|None): Monte Carlo samples of pole functionality.
 
         Returns:
             int: 1 if building is functional, 0 otherwise
