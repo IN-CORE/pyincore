@@ -162,7 +162,7 @@ class BuildingFunctionality(BaseAnalysis):
         if interdependency is not None:
 
             if building_guid in interdependency.keys():
-                if substations:
+                if substations is not None:
                     substations_mc_samples = substations.loc[interdependency[building_guid]["substations_guid"]]
                     substation_list = []
                     try:
@@ -174,7 +174,7 @@ class BuildingFunctionality(BaseAnalysis):
                 else:
                     substation_list = None
 
-                if poles:
+                if poles is not None:
                     poles_mc_samples = poles.loc[interdependency[building_guid]["poles_guid"]]
                     pole_list = []
                     try:
