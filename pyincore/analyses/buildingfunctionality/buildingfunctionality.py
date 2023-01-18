@@ -108,6 +108,10 @@ class BuildingFunctionality(BaseAnalysis):
         else:
             poles_df = None
 
+        if (poles_dataset is not None or substations_dataset is not None) and interdependency_dataset is None:
+            raise ValueError("Please provide interdependency table if pole or substation damage is "
+                             "considered in the building functionality calculation.")
+
         functionality_probabilities = []
         functionality_samples = []
         for building_guid in buildings_df.index:
