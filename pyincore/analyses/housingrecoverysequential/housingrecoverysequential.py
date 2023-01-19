@@ -91,19 +91,15 @@ class HousingRecoverySequential(BaseAnalysis):
         t_final = self.get_parameter('t_final')
 
         # Load population block data from IN-CORE
-        pop_dis_selectors = ['guid', 'huid', 'blockid',
-                             'numprec', 'race', 'hispan',
-                             'ownershp', 'randincome', 'dislocated']
+        pop_dis_selectors = ['guid', 'huid', 'blockid', 'race', 'hispan', 'ownershp', 'dislocated']
         households_csv = self.get_input_dataset('population_dislocation_block').get_csv_reader()
         households_df = (pd.DataFrame(households_csv))[pop_dis_selectors]
 
         # Perform  conversions across the dataset from object type into the appropriate type
         households_df['blockid'] = households_df['blockid'].astype('int64')
-        households_df['numprec'] = households_df['numprec'].astype(int)
         households_df['race'] = pd.to_numeric(households_df['race'])
         households_df['hispan'] = pd.to_numeric(households_df['hispan'])
         households_df['ownershp'] = pd.to_numeric(households_df['ownershp'])
-        households_df['randincome'] = pd.to_numeric(households_df['randincome'])
         households_df['dislocated'] = (households_df['dislocated'] == 'True')
 
         # Load the transition probability matrix from IN-CORE
