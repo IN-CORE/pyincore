@@ -25,8 +25,8 @@ class HHRSOutputPRocess:
         hhrs_stage_count = {}
         for t in timesteps:
             stage = hhrs_df[t]
-            hhrs_stage_count[t] = [(stage == 1.0).sum(), (stage == 2.0).sum(), (stage == 3.0).sum(),
-                                   (stage == 4.0).sum(), (stage == 5.0).sum()]
+            hhrs_stage_count[t] = [int((stage == 1.0).sum()), int((stage == 2.0).sum()), int((stage == 3.0).sum()),
+                                   int((stage == 4.0).sum()), int((stage == 5.0).sum())]
 
         if filename_json:
             with open(filename_json, "w") as outfile:
