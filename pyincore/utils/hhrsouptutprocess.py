@@ -30,7 +30,7 @@ class HHRSOutputPRocess:
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(hhrs_stage_count, outfile)
+                json.dump(hhrs_stage_count, outfile, indent=2)
 
         return hhrs_stage_count
 
