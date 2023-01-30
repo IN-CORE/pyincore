@@ -100,10 +100,10 @@ def run_convert_SLC_cge_json_path(testpath):
 
     cge_json.get_cge_household_count(None,
                                      os.path.join(testpath, "household-count.csv"),
-                                     "cge_total_household_count.json", income_categories=categories)
+                                     "slc_cge_total_household_count.json", income_categories=categories)
     cge_json.get_cge_gross_income(None,
                                   os.path.join(testpath, "gross-income.csv"),
-                                  "cge_total_household_income.json", income_categories=categories)
+                                  "slc_cge_total_household_income.json", income_categories=categories)
 
     categories = []
     for d in ["AG_MI", "UTIL", "CONS", "MANU", "COMMER", "EDU", "HEALTH", "ART_ACC", "RELIG", "L1W", "L2W", "L3W",
@@ -112,7 +112,7 @@ def run_convert_SLC_cge_json_path(testpath):
             categories.append(d + "_" + r)
     cge_json.get_cge_employment(None, None, os.path.join(testpath, "pre-disaster-factor-demand.csv"),
                                 os.path.join(testpath, "post-disaster-factor-demand.csv"),
-                                "cge_employment.json", demand_categories=categories)
+                                "slc_cge_employment.json", demand_categories=categories)
 
     categories = []
     for d in ["AG_MI", "UTIL", "CONS", "MANU", "COMMER", "EDU", "HEALTH", "ART_ACC", "RELIG",
@@ -120,7 +120,7 @@ def run_convert_SLC_cge_json_path(testpath):
         for r in region:
             categories.append(d + "_" + r)
     cge_json.get_cge_domestic_supply(None,
-                                     os.path.join(testpath, "domestic-supply.csv"), "cge_domestic_supply.json",
+                                     os.path.join(testpath, "domestic-supply.csv"), "slc_cge_domestic_supply.json",
                                      supply_categories=categories)
     return True
 
@@ -135,7 +135,6 @@ if __name__ == '__main__':
     if testpath:
         run_convert_cge_json_path(testpath)
 
-
-    run_convert_SLC_cge_json_path(testpath="../../data")
+    run_convert_SLC_cge_json_path(testpath="../../data/SLC_CGE")
 
     print("DONE")
