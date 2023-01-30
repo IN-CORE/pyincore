@@ -59,14 +59,10 @@ def run_convert_cge_json_chained():
     post_demand_result = joplin_cge.get_output_dataset("post-disaster-factor-demand")
 
     cge_json = CGEOutputProcess()
-    cge_json.get_cge_domestic_supply(domestic_supply_result, ["Goods", "Trade", "Other", "HS1", "HS2", "HS3"], None,
-                                     "cge_domestic_supply.json")
-    # cge_json.get_cge_household_count(household_count_result, ["HH1", "HH2", "HH3", "HH4", "HH5"], None,
-    # "cge_total_household_count.json")
-    cge_json.get_cge_gross_income(gross_income_result, ["HH1", "HH2", "HH3", "HH4", "HH5"], None,
-                                  "cge_total_household_income.json")
-    cge_json.get_cge_employment(pre_demand_result, post_demand_result, ["Goods", "Trade", "Other"], None, None,
-                                "cge_employment.json")
+    cge_json.get_cge_domestic_supply(domestic_supply_result, None, "cge_domestic_supply.json")
+    # cge_json.get_cge_household_count(household_count_result, None, "cge_total_household_count.json")
+    cge_json.get_cge_gross_income(gross_income_result, None, "cge_total_household_income.json")
+    cge_json.get_cge_employment(pre_demand_result, post_demand_result, None, None, "cge_employment.json")
 
     return True
 
@@ -75,19 +71,57 @@ def run_convert_cge_json_path(testpath):
     # test the external file with a path
 
     cge_json = CGEOutputProcess()
-    cge_json.get_cge_household_count(None, ["HH1", "HH2", "HH3", "HH4", "HH5"],
+    cge_json.get_cge_household_count(None,
                                      os.path.join(testpath, "household-count.csv"),
                                      "cge_total_household_count.json")
-    cge_json.get_cge_gross_income(None, ["HH1", "HH2", "HH3", "HH4", "HH5"],
+    cge_json.get_cge_gross_income(None,
                                   os.path.join(testpath, "gross-income.csv"),
                                   "cge_total_household_income.json")
-    cge_json.get_cge_employment(None, None, ["Goods", "Trade", "Other"],
+    cge_json.get_cge_employment(None, None,
                                 os.path.join(testpath, "pre-disaster-factor-demand.csv"),
                                 os.path.join(testpath, "post-disaster-factor-demand.csv"),
                                 "cge_employment.json")
-    cge_json.get_cge_domestic_supply(None, ["Goods", "Trade", "Other", "HS1", "HS2", "HS3"],
+    cge_json.get_cge_domestic_supply(None,
                                      os.path.join(testpath, "domestic-supply.csv"),
                                      "cge_domestic_supply.json")
+    return True
+
+
+def run_convert_SLC_cge_json_path(testpath):
+    # test the external file with a path
+
+    cge_json = CGEOutputProcess()
+    region = ["R1", "R2", "R3", "R4", "R5", "R7"]
+
+    categories = []
+    for h in ["HH1", "HH2", "HH3", "HH4"]:
+        for r in region:
+            categories.append(h + "_" + r)
+
+    cge_json.get_cge_household_count(None,
+                                     os.path.join(testpath, "household-count.csv"),
+                                     "cge_total_household_count.json", income_categories=categories)
+    cge_json.get_cge_gross_income(None,
+                                  os.path.join(testpath, "gross-income.csv"),
+                                  "cge_total_household_income.json", income_categories=categories)
+
+    categories = []
+    for d in ["AG_MI", "UTIL", "CONS", "MANU", "COMMER", "EDU", "HEALTH", "ART_ACC", "RELIG", "L1W", "L2W", "L3W",
+              "L4W", "HS1", "HS2", "HH1", "HH2", "HH3", "HH4", "USSOC1", "USSOC2", "USSOC3", "USSOC4"]:
+        for r in region:
+            categories.append(d + "_" + r)
+    cge_json.get_cge_employment(None, None, os.path.join(testpath, "pre-disaster-factor-demand.csv"),
+                                os.path.join(testpath, "post-disaster-factor-demand.csv"),
+                                "cge_employment.json", demand_categories=categories)
+
+    categories = []
+    for d in ["AG_MI", "UTIL", "CONS", "MANU", "COMMER", "EDU", "HEALTH", "ART_ACC", "RELIG",
+              "HS1", "HS2"]:
+        for r in region:
+            categories.append(d + "_" + r)
+    cge_json.get_cge_domestic_supply(None,
+                                     os.path.join(testpath, "domestic-supply.csv"), "cge_domestic_supply.json",
+                                     supply_categories=categories)
     return True
 
 
@@ -100,5 +134,8 @@ if __name__ == '__main__':
     # testpath = "/Users/<user>/<path_to_pyincore>/pyincore/tests/pyincore/utils"
     if testpath:
         run_convert_cge_json_path(testpath)
+
+
+    run_convert_SLC_cge_json_path(testpath="../../data")
 
     print("DONE")
