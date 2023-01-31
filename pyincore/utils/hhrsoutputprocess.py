@@ -6,7 +6,7 @@
 import json
 
 
-class HHRSOutputPRocess:
+class HHRSOutputProcess:
     """This class converts results outputs of housing household recovery sequential analysis to certain format."""
 
     @staticmethod
