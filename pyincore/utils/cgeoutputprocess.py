@@ -13,7 +13,7 @@ class CGEOutputProcess:
 
     @staticmethod
     def get_cge_household_count(household_count, household_count_path=None, filename_json=None,
-                                income_categories=("HH1", "HH2", "HH3", "HH4", "HH5"),):
+                                income_categories=("HH1", "HH2", "HH3", "HH4", "HH5")):
         """Calculate income results from the output files of the Joplin CGE analysis and convert the results
         to json format.
         {
@@ -63,7 +63,7 @@ class CGEOutputProcess:
 
     @staticmethod
     def get_cge_gross_income(gross_income, gross_income_path=None, filename_json=None,
-                             income_categories=("HH1", "HH2", "HH3", "HH4", "HH5"),):
+                             income_categories=("HH1", "HH2", "HH3", "HH4", "HH5")):
         """Calculate household gross income results from the output files of the Joplin CGE analysis
         and convert the results to json format.
         {
@@ -113,7 +113,7 @@ class CGEOutputProcess:
 
     @staticmethod
     def get_cge_employment(pre_demand, post_demand, pre_demand_path=None, post_demand_path=None,
-                           filename_json=None, demand_categories=("GOODS", "TRADE", "OTHER"),):
+                           filename_json=None, demand_categories=("GOODS", "TRADE", "OTHER")):
         """Calculate employment results from the output files of the Joplin CGE analysis and convert the results
         to json format. The value is a sum of L1, L2 and L3 Labor groups numbers.
         {
@@ -174,7 +174,7 @@ class CGEOutputProcess:
 
     @staticmethod
     def get_cge_domestic_supply(domestic_supply, domestic_supply_path=None, filename_json=None,
-                                supply_categories=("Goods", "Trade", "Other", "HS1", "HS2", "HS3"),):
+                                supply_categories=("Goods", "Trade", "Other", "HS1", "HS2", "HS3")):
         """Calculate domestic supply results from the output files of the Joplin CGE analysis and convert the results
         to json format.
         {
