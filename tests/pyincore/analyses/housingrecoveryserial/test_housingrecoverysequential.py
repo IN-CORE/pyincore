@@ -2,7 +2,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import IncoreClient, FragilityService, MappingSet, HHRSOutputPRocess
+from pyincore import IncoreClient, HHRSOutputProcess
 from pyincore.analyses.housingrecoverysequential import HousingRecoverySequential
 import pyincore.globals as pyglobals
 
@@ -39,7 +39,7 @@ def run_with_base_class():
     hhr_result = housing_recovery.get_output_dataset("ds_result")
     hhrs_df = hhr_result.get_dataframe_from_csv()
     timesteps = ["1", "7", "13", "25", "49"]  # t0, t6, t12, t24, t48
-    print(HHRSOutputPRocess.get_hhrs_stage_count(timesteps, hhrs_df))
+    print(HHRSOutputProcess.get_hhrs_stage_count(timesteps, hhrs_df))
 
 
 if __name__ == '__main__':
