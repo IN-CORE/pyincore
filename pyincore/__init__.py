@@ -22,6 +22,7 @@ from pyincore.spaceservice import SpaceService
 from pyincore.utils.analysisutil import AnalysisUtil
 from pyincore.utils.popdisloutputprocess import PopDislOutputProcess
 from pyincore.utils.cgeoutputprocess import CGEOutputProcess
+from pyincore.utils.hhrsoutputprocess import HHRSOutputProcess
 from pyincore.dataset import Dataset, InventoryDataset, DamageRatioDataset
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.repaircurveset import RepairCurveSet
