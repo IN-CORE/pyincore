@@ -7,6 +7,7 @@
 import pandas as pd
 from pyincore import BaseAnalysis
 from pyincore.utils.dataprocessutil import DataProcessUtil
+import numpy as np
 
 class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
     """ Determines overall building maximum damage state from wind, flood and surge-wave damage
@@ -64,6 +65,7 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
 
         # Find combined damage
         combined_bldg_dmg = self.get_combined_damage(wind_damage, surge_wave_damage, flood_damage)
+        print(combined_bldg_dmg)
         
         # TODO save combined damage as buildingdamageVer6
         # self.set_result_csv_data("ds-result", combined_bldg_dmg, self.get_parameter("result_name") + "_combined_dmg",
@@ -73,8 +75,41 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
         self.set_result_csv_data("result", combined_output, self.get_parameter("result_name"), "dataframe")
 
         return True
-
+    
     def get_combined_damage(self, wind_dmg: pd.DataFrame, sw_dmg: pd.DataFrame, flood_dmg: pd.DataFrame):
+        flood_dmg.rename(columns={'LS_0': 'f_LS_0', 'LS_1': 'f_LS_1', 'LS_2': 'f_LS_2', 'DS_0': 'f_DS_0', 
+                                  'DS_1': 'f_DS_1', 'DS_2': 'f_DS_2', 'DS_3': 'f_DS_3', 'haz_expose': 'f_haz_expose'}, 
+                         inplace=True)
+
+        sw_dmg.rename(columns={'LS_0': 'sw_LS_0', 'LS_1': 'sw_LS_1', 'LS_2': 'sw_LS_2', 'DS_0': 'sw_DS_0',
+                               'DS_1': 'sw_DS_1', 'DS_2': 'sw_DS_2', 'DS_3': 'sw_DS_3', 'haz_expose': 
+                                   'sw_haz_expose'}, inplace=True)
+
+        wind_dmg.rename(columns={'LS_0': 'w_LS_0', 'LS_1': 'w_LS_1', 'LS_2': 'w_LS_2', 'DS_0': 'w_DS_0',
+                                 'DS_1': 'w_DS_1', 'DS_2': 'w_DS_2', 'DS_3': 'w_DS_3', 'haz_expose': 'wind_haz_expose'},
+                        inplace=True)
+
+        combined_df = pd.merge(pd.merge(wind_dmg, sw_dmg, on='guid'), flood_dmg, on='guid')
+
+        def find_match(row, col_name):
+            if row['w_DS_3'] > row['sw_DS_3'] and row['w_DS_3'] > row['f_DS_3']:
+                return row['w_'+col_name]
+            elif row['sw_DS_3'] > row['w_DS_3'] and row['sw_DS_3'] > row['f_DS_3']:
+                return row['sw_'+col_name]
+            else:
+                return row['f_'+col_name]
+
+        combined_df['LS_0'] = combined_df.apply(lambda x: find_match(x, col_name="LS_0"), axis=1)
+        combined_df['LS_1'] = combined_df.apply(lambda x: find_match(x, col_name="LS_1"), axis=1)
+        combined_df['LS_2'] = combined_df.apply(lambda x: find_match(x, col_name="LS_2"), axis=1)
+        combined_df['DS_0'] = combined_df.apply(lambda x: find_match(x, col_name="DS_0"), axis=1)
+        combined_df['DS_1'] = combined_df.apply(lambda x: find_match(x, col_name="DS_1"), axis=1)
+        combined_df['DS_2'] = combined_df.apply(lambda x: find_match(x, col_name="DS_2"), axis=1)
+        combined_df['DS_3'] = combined_df.apply(lambda x: find_match(x, col_name="DS_3"), axis=1)
+
+        return combined_df
+
+    def get_combined_damage_old(self, wind_dmg: pd.DataFrame, sw_dmg: pd.DataFrame, flood_dmg: pd.DataFrame):
         entries = []
         for index, row in wind_dmg.iterrows():
             guid = row['guid']
