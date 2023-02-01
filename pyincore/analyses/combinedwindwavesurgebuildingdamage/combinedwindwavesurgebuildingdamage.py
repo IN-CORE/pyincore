@@ -8,7 +8,6 @@ import pandas as pd
 from pyincore import BaseAnalysis
 from pyincore.utils.dataprocessutil import DataProcessUtil
 
-
 class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
     """ Determines overall building maximum damage state from wind, flood and surge-wave damage
     
@@ -63,10 +62,43 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
         combined_output['f_max_ds'] = combined_output['f_max_ds'].replace(old_ds_vals, new_ds_vals)
         combined_output['max_state'] = combined_output['max_state'].replace(old_ds_vals, new_ds_vals)
 
+        # Find combined damage
+        combined_bldg_dmg = self.get_combined_damage(wind_damage, surge_wave_damage, flood_damage)
+        
+        # TODO save combined damage as buildingdamageVer6
+        # self.set_result_csv_data("ds-result", combined_bldg_dmg, self.get_parameter("result_name") + "_combined_dmg",
+        #                          "dataframe")
+
         # Create the result dataset
         self.set_result_csv_data("result", combined_output, self.get_parameter("result_name"), "dataframe")
 
         return True
+
+    def get_combined_damage(self, wind_dmg: pd.DataFrame, sw_dmg: pd.DataFrame, flood_dmg: pd.DataFrame):
+        entries = []
+        for index, row in wind_dmg.iterrows():
+            guid = row['guid']
+            wind_ds3 = row['DS_3']
+
+            # Get Surge wave DS3
+            sw_dmg_row = sw_dmg.loc[sw_dmg['guid'] == guid]
+            sw_ds3 = sw_dmg_row.iloc[0]['DS_3']
+
+            # Get Flood DS3
+            flood_dmg_row = flood_dmg.loc[sw_dmg['guid'] == guid]
+            flood_ds3 = flood_dmg_row.iloc[0]['DS_3']
+
+            # See which DS3 is higher and save the LS and DS values for that row
+            if wind_ds3 > sw_ds3 and wind_ds3 > flood_ds3:
+                entries.append(wind_dmg.loc[wind_dmg['guid'] == guid])
+            elif sw_ds3 > wind_ds3 and sw_ds3 > flood_ds3:
+                entries.append(sw_dmg_row)
+            else:
+                entries.append(flood_dmg_row)
+
+        combined_df = pd.concat(entries)
+        print(combined_df)
+        return combined_df
 
     def get_spec(self):
         """Get specifications of the combined wind, wave, and surge building damage analysis.
@@ -108,6 +140,12 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
 
             ],
             'output_datasets': [
+                # {
+                #     'id': 'ds_result',
+                #     'parent_type': 'buildings',
+                #     'description': 'CSV file of damage states for building structural damage',
+                #     'type': 'ergo:buildingDamageVer6'
+                # },
                 {
                     'id': 'result',
                     'parent_type': 'buildings',
