@@ -93,18 +93,13 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
         combined_df = pd.merge(pd.merge(wind_dmg, sw_dmg, on='guid'), flood_dmg, on='guid')
 
         def find_match(row, col_name):
-            if row['w_DS_3'] > row['sw_DS_3'] and row['w_DS_3'] > row['f_DS_3']:
-                if col_name == 'haz_expose':
-                    return row["w_haz_expose"]
-                return row['w_'+col_name]
-            elif row['sw_DS_3'] > row['w_DS_3'] and row['sw_DS_3'] > row['f_DS_3']:
-                if col_name == 'haz_expose':
-                    return row["sw_haz_expose"]
-                return row['sw_'+col_name]
-            else:
-                if col_name == 'haz_expose':
-                    return row["f_haz_expose"]
-                return row['f_'+col_name]
+            max_finder = {
+                row['f_DS_3']: 'f_',
+                row['w_DS_3']: 'w_',
+                row['sw_DS_3']: 'sw_'
+            }
+
+            return row[max_finder[max(max_finder.keys())] + col_name]
 
         combined_df['LS_0'] = combined_df.apply(lambda x: find_match(x, col_name="LS_0"), axis=1)
         combined_df['LS_1'] = combined_df.apply(lambda x: find_match(x, col_name="LS_1"), axis=1)
