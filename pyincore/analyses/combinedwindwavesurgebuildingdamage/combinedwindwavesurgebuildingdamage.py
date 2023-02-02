@@ -66,9 +66,8 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
 
         # Find combined damage
         combined_bldg_dmg = self.get_combined_damage(wind_damage, surge_wave_damage, flood_damage)
-        # print(combined_bldg_dmg)
-        
-        # TODO save combined damage as buildingdamageVer6
+
+        # Create the result containing the 3 combined damages into a single damage
         self.set_result_csv_data("ds_result", combined_bldg_dmg, self.get_parameter("result_name") + "_combined_dmg",
                                  "dataframe")
 
@@ -78,6 +77,18 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
         return True
     
     def get_combined_damage(self, wind_dmg: pd.DataFrame, sw_dmg: pd.DataFrame, flood_dmg: pd.DataFrame):
+        """Calculates overall building damage
+                Determines the overall building damage probabilities from the 3 hazards by taking the maximum.
+
+                Args:
+                    wind_dmg (pd.DataFrame): Table of wind damage for the building inventory
+                    sw_dmg (pd.DataFrame): Table of surge-wave damage for the building inventory
+                    flood_dmg (pd.DataFrame): Table of flood damage for the building inventory
+
+                Returns:
+                    pd.DataFrame: An table of combined damage probabilities for the building inventory
+
+                """
         flood_dmg.rename(columns={'LS_0': 'f_LS_0', 'LS_1': 'f_LS_1', 'LS_2': 'f_LS_2', 'DS_0': 'f_DS_0', 
                                   'DS_1': 'f_DS_1', 'DS_2': 'f_DS_2', 'DS_3': 'f_DS_3', 'haz_expose': 'f_haz_expose'}, 
                          inplace=True)
