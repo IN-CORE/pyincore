@@ -5,7 +5,7 @@
 from pyincore.utils.cgeoutputprocess import CGEOutputProcess
 import os
 
-PYINCOREPATH = "path-to-pyincore"
+PYINCOREPATH = ""
 TESTAPATH = "pyincore/tests/pyincore/analyses/"
 
 def run_convert_cge_json():
@@ -31,7 +31,7 @@ def run_convert_cge_json():
     cge_json.get_cge_domestic_supply(None,
                                      os.path.join(filepath, "domestic-supply.csv"),
                                      "cge_domestic_supply.json",
-                                     ["GOODS", "TRADE", "OTHER", "HS1", "HS2", "HS3"])
+                                     ["Goods", "trade", "other", "HS1", "HS2", "HS3"])
     return True
 
 
