@@ -91,7 +91,7 @@ def run_convert_SLC_cge_json_path(testpath):
     # test the external file with a path
 
     cge_json = CGEOutputProcess()
-    region = ["R1", "R2", "R3", "R4", "R5", "R7"]
+    region = ["R1", "R2", "R3", "R4", "R5", "R6", "R7"]
 
     categories = []
     for h in ["HH1", "HH2", "HH3", "HH4"]:
