@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Rewrote clustering utility function to use flexible archetype column [#247](https://github.com/IN-CORE/pyincore/issues/247)
-- Made documentation containter to use requirments instead of environemt [#257](https://github.com/IN-CORE/pyincore/issues/257)
+- Made documentation containter to use requirements instead of environemt [#257](https://github.com/IN-CORE/pyincore/issues/257)
 
 ## [1.8.0] - 2022-11-16
 
