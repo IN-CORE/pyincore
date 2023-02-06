@@ -413,12 +413,6 @@ class HousingRecoverySequential(BaseAnalysis):
                     'type': 'incore:houseRecInitialStageProbability'
                 },
                 {
-                    'id': 'initial_stage_probabilities',
-                    'required': True,
-                    'description': 'initial mass probability function for stage 0 of the Markov Chain',
-                    'type': 'incore:houseRecInitialStageProbability'
-                },
-                {
                     'id': 'sv_result',
                     'required': True,
                     'description': 'A csv file with zones containing demographic factors'
