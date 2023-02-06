@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Rewrote clustering utility function to use flexible archetype column [#247](https://github.com/IN-CORE/pyincore/issues/247)
 - Made documentation containter to use requirements instead of environemt [#257](https://github.com/IN-CORE/pyincore/issues/257)
 
+### Fixed
+- Duplicate input spec for housing recovery sequential model [#263](https://github.com/IN-CORE/pyincore/issues/263)
+
 ## [1.8.0] - 2022-11-16
 
 ### Changed
