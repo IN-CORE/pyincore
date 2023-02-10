@@ -59,7 +59,7 @@ class JoplinCGEModel(BaseAnalysis):
                     'description': 'Social accounting matrix (SAM) contains data for firms, '
                                    'households and government which are organized in a way to '
                                    'represent the interactions of all three entities in a typical economy.',
-                    'type': ['incore:JoplinCGEsam']
+                    'type': ['incore:CGEsam']
                 },
                 {
                     'id': 'BB',
@@ -67,14 +67,14 @@ class JoplinCGEModel(BaseAnalysis):
                     'description': 'BB is a matrix which describes how investment in physical infrastructure is'
                                    ' transformed into functioning capital such as commercial and residential buildings.'
                                    ' These data are collected from the Bureau of Economic Analysis (BEA).',
-                    'type': ['incore:JoplinCGEbb']
+                    'type': ['incore:CGEbb']
                 },
                 {
                     'id': 'IOUT',
                     'required': True,
                     'description': 'IOUT is a matrix that describes the transfer of tax revenue collected by the local'
                                    ' government to help finance local government expenditures.',
-                    'type': ['incore:JoplinCGEiout']
+                    'type': ['incore:CGEiout']
                 },
                 {
                     'id': 'MISC',
@@ -82,27 +82,27 @@ class JoplinCGEModel(BaseAnalysis):
                     'description': 'MISC is the name of a file that contains data for commercial sector employment'
                                    ' and physical capital. It also contains data for the number of households and'
                                    ' working households in the economy.',
-                    'type': ['incore:JoplinCGEmisc']
+                    'type': ['incore:CGEmisc']
                 },
                 {
                     'id': 'MISCH',
                     'required': True,
                     'description': 'MISCH is a file that contains elasticities for the supply of labor with'
                                    ' respect to paying income taxes.',
-                    'type': ['incore:JoplinCGEmisch']
+                    'type': ['incore:CGEmisch']
                 },
                 {
                     'id': 'LANDCAP',
                     'required': True,
                     'description': 'LANDCAP contains information regarding elasticity values for the response of '
                                    'changes in the price of physical capital with respect to the supply of investment.',
-                    'type': ['incore:JoplinCGElandcap']
+                    'type': ['incore:CGElandcap']
                 },
                 {
                     'id': 'EMPLOY',
                     'required': True,
                     'description': 'EMPLOY is a table name containing data for commercial sector employment.',
-                    'type': ['incore:JoplinCGEemploy']
+                    'type': ['incore:CGEemploy']
                 },
                 {
                     'id': 'IGTD',
@@ -110,27 +110,27 @@ class JoplinCGEModel(BaseAnalysis):
                     'description': 'IGTD variable represents a matrix describing the transfer of taxes collected'
                                    ' to a variable which permits governments to spend the tax revenue on workers and'
                                    ' intermediate inputs.',
-                    'type': ['incore:JoplinCGEigtd']
+                    'type': ['incore:CGEigtd']
                 },
                 {
                     'id': 'TAUFF',
                     'required': True,
                     'description': 'TAUFF represents social security tax rates',
-                    'type': ['incore:JoplinCGEtauff']
+                    'type': ['incore:CGEtauff']
                 },
                 {
                     'id': 'JOBCR',
                     'required': True,
                     'description': 'JOBCR is a matrix describing the supply of workers'
                                    ' coming from each household group in the economy.',
-                    'type': ['incore:JoplinCGEjobcr']
+                    'type': ['incore:CGEjobcr']
                 },
                 {
                     'id': 'OUTCR',
                     'required': True,
                     'description': 'OUTCR is a matrix describing the number of workers who'
                                    ' live in Joplin but commute outside of town to work.',
-                    'type': ['incore:JoplinCGEoutcr']
+                    'type': ['incore:CGEoutcr']
                 },
                 {
                     'id': 'sector_shocks',
