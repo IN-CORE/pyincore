@@ -2234,7 +2234,7 @@ class SaltLakeCGEModel(BaseAnalysis):
                     'description': 'Social accounting matrix (SAM) contains data for firms, '
                                    'households and government which are organized in a way to '
                                    'represent the interactions of all three entities in a typical economy.',
-                    'type': ['incore:JoplinCGEsam']
+                    'type': ['incore:CGEsam']
                 },
                 {
                     'id': 'BB',
@@ -2242,14 +2242,14 @@ class SaltLakeCGEModel(BaseAnalysis):
                     'description': 'BB is a matrix which describes how investment in physical infrastructure is'
                                    ' transformed into functioning capital such as commercial and residential buildings.'
                                    ' These data are collected from the Bureau of Economic Analysis (BEA).',
-                    'type': ['incore:JoplinCGEbb']
+                    'type': ['incore:CGEbb']
                 },
                 {
                     'id': 'IOUT',
                     'required': False,
                     'description': 'IOUT is a matrix that describes the transfer of tax revenue collected by the local'
                                    ' government to help finance local government expenditures.',
-                    'type': ['incore:JoplinCGEiout']
+                    'type': ['incore:CGEiout']
                 },
                 {
                     'id': 'MISC',
@@ -2257,34 +2257,34 @@ class SaltLakeCGEModel(BaseAnalysis):
                     'description': 'MISC is the name of a file that contains data for commercial sector employment'
                                    ' and physical capital. It also contains data for the number of households and'
                                    ' working households in the economy.',
-                    'type': ['incore:JoplinCGEmisc']
+                    'type': ['incore:CGEmisc']
                 },
                 {
                     'id': 'MISCH',
                     'required': True,
                     'description': 'MISCH is a file that contains elasticities for the supply of labor with'
                                    ' respect to paying income taxes.',
-                    'type': ['incore:JoplinCGEmisch']
+                    'type': ['incore:CGEmisch']
                 },
                 {
                     'id': 'EMPLOY',
                     'required': True,
                     'description': 'EMPLOY is a table name containing data for commercial sector employment.',
-                    'type': ['incore:JoplinCGEemploy']
+                    'type': ['incore:CGEemploy']
                 },
                 {
                     'id': 'JOBCR',
                     'required': True,
                     'description': 'JOBCR is a matrix describing the supply of workers'
                                    ' coming from each household group in the economy.',
-                    'type': ['incore:JoplinCGEjobcr']
+                    'type': ['incore:CGEjobcr']
                 },
                 {
                     'id': 'OUTCR',
                     'required': True,
                     'description': 'OUTCR is a matrix describing the number of workers who'
                                    ' live in Salt Lake City but commute outside of town to work.',
-                    'type': ['incore:JoplinCGEoutcr']
+                    'type': ['incore:CGEoutcr']
                 },
                 {
                     'id': 'sector_shocks',
