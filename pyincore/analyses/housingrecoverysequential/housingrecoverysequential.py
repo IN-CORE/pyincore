@@ -3,10 +3,12 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-from pyincore import BaseAnalysis
+from pyincore import BaseAnalysis, AnalysisUtil
 
 import numpy as np
 import pandas as pd
+import concurrent.futures
+from itertools import repeat
 
 
 class HousingRecoverySequential(BaseAnalysis):
@@ -118,8 +120,59 @@ class HousingRecoverySequential(BaseAnalysis):
         initial_prob = pd.DataFrame(list(initial_prob_csv))
         initial_prob['value'] = pd.to_numeric(initial_prob['value'])
 
+        # Obtain the number of CPUs (cores) to execute the analysis with
+        user_defined_cpu = 1
+
+        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
+            user_defined_cpu = self.get_parameter("num_cpu")
+
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, households_df.size, user_defined_cpu)
+
+        # TODO: adapt this for a Pandas dataframe
+        avg_bulk_input_size = int(households_df.size / num_workers)
+        inventory_args = []
+        count = 0
+        inventory_list = list(households_df.size)
+
+        while count < len(inventory_list):
+            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
+            count += avg_bulk_input_size
+
         # Run the analysis
-        self.housing_serial_recovery_model(t_delta, t_final, tpm, initial_prob, households_df)
+        (ds_results, damage_results) = self.hhrs_concurrent_future(self.hhrs_concurrent_future,
+                                                                   num_workers,
+                                                                   inventory_args,
+                                                                   repeat(retrofit_strategy),
+                                                                   repeat(hazard_type),
+                                                                   repeat(hazard_dataset_id))
+
+        self.set_result_csv_data("ds_result", ds_results, name=self.get_parameter("result_name"))
+        self.set_result_json_data("damage_result",
+                                  damage_results,
+                                  name=self.get_parameter("result_name") + "_additional_info")
+
+        return True
+
+    def hhrs_concurrent_future(self, function_name, parallelism, *args):
+        """Utilizes concurrent.future module.
+
+        Args:
+            function_name (function): The function to be parallelized.
+            parallelism (int): Number of workers in parallelization.
+            *args: All the arguments in order to pass into parameter function_name.
+
+        Returns:
+            list: A list of ordered dictionaries with building damage values and other data/metadata.
+
+        """
+        output_ds = []
+        output_dmg = []
+        with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
+            for ret1, ret2 in executor.map(function_name, *args):
+                output_ds.extend(ret1)
+                output_dmg.extend(ret2)
+
+        return output_ds, output_dmg
 
     def housing_serial_recovery_model(self, t_delta, t_final, tpm, initial_prob, households_df):
         """Performs the computation of the model as indicated in Sutley and Hamide (2020).
@@ -172,13 +225,13 @@ class HousingRecoverySequential(BaseAnalysis):
 
         # With all data in place, run the Markov chain (Cell 36 onwards)
 
-        # Iterate over all stages
-        for t in range(1, stages):
+        # Iterate over all households
+        for household in range(0, num_households):
             # Generate a vector with random numbers for all households
             spins = rng.rand(num_households)
 
-            # Iterate over all households
-            for household in range(0, num_households):
+            # Iterate over all stages
+            for t in range(1, stages):
                 stage_val = markov_stages[t - 1][household]
 
                 if stage_val == 5:
@@ -348,6 +401,7 @@ class HousingRecoverySequential(BaseAnalysis):
         regressions = 0
 
         # Check the previous timesteps between [lower, upper] prior to the current timestep.
+
         for t in range(lower, upper):
             if markov_stages[t][household] < markov_stages[t - 1][household]:
                 regressions += 1
@@ -388,6 +442,12 @@ class HousingRecoverySequential(BaseAnalysis):
                     'required': False,
                     'description': 'Seed to ensure replication of the Markov Chain path'
                                    'in connection with Population Dislocation.',
+                    'type': int
+                },
+                {
+                    'id': 'num_cpu',
+                    'required': False,
+                    'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
                 }
             ],
