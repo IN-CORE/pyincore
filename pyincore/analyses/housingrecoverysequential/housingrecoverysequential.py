@@ -225,13 +225,13 @@ class HousingRecoverySequential(BaseAnalysis):
 
         # With all data in place, run the Markov chain (Cell 36 onwards)
 
-        # Iterate over all households
-        for household in range(0, num_households):
+        # Iterate over all stages
+        for t in range(1, stages):
             # Generate a vector with random numbers for all households
             spins = rng.rand(num_households)
 
-            # Iterate over all stages
-            for t in range(1, stages):
+            # Iterate over all households
+            for household in range(0, num_households):
                 stage_val = markov_stages[t - 1][household]
 
                 if stage_val == 5:
