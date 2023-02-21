@@ -126,30 +126,27 @@ class HousingRecoverySequential(BaseAnalysis):
         if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(self, households_df.size, user_defined_cpu)
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(households_df), user_defined_cpu)
 
-        # TODO: adapt this for a Pandas dataframe
-        avg_bulk_input_size = int(households_df.size / num_workers)
-        inventory_args = []
-        count = 0
-        inventory_list = list(households_df.size)
+        # Chop dataset into `num_size` chunks
+        max_chunk_size = int(np.ceil(len(households_df)/num_workers))
 
-        while count < len(inventory_list):
-            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
-            count += avg_bulk_input_size
+        households_df_list = list(
+            map(lambda x: households_df[x * max_chunk_size:x * max_chunk_size + max_chunk_size],
+                list(range(num_workers)))
+        )
 
         # Run the analysis
-        (ds_results, damage_results) = self.hhrs_concurrent_future(self.hhrs_concurrent_future,
-                                                                   num_workers,
-                                                                   inventory_args,
-                                                                   repeat(retrofit_strategy),
-                                                                   repeat(hazard_type),
-                                                                   repeat(hazard_dataset_id))
+        result = self.hhrs_concurrent_future(self.housing_serial_recovery_model,
+                                                 num_workers,
+                                                 households_df_list,
+                                                 repeat(t_delta),
+                                                 repeat(t_final),
+                                                 repeat(tpm),
+                                                 repeat(initial_prob))
 
-        self.set_result_csv_data("ds_result", ds_results, name=self.get_parameter("result_name"))
-        self.set_result_json_data("damage_result",
-                                  damage_results,
-                                  name=self.get_parameter("result_name") + "_additional_info")
+        result_name = self.get_parameter("result_name")
+        self.set_result_csv_data("ds_result", result, name=result_name, source="dataframe")
 
         return True
 
@@ -165,25 +162,23 @@ class HousingRecoverySequential(BaseAnalysis):
             list: A list of ordered dictionaries with building damage values and other data/metadata.
 
         """
-        output_ds = []
-        output_dmg = []
+        output_ds = pd.DataFrame()
+
         with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
-            for ret1, ret2 in executor.map(function_name, *args):
-                output_ds.extend(ret1)
-                output_dmg.extend(ret2)
+            for ret in executor.map(function_name, *args):
+                output_ds = pd.concat([output_ds, ret], ignore_index=True)
 
-        return output_ds, output_dmg
+        return output_ds
 
-    def housing_serial_recovery_model(self, t_delta, t_final, tpm, initial_prob, households_df):
+    def housing_serial_recovery_model(self, households_df, t_delta, t_final, tpm, initial_prob):
         """Performs the computation of the model as indicated in Sutley and Hamide (2020).
 
         Args:
+            households_df (pd.DataFrame): Households with population dislocation data.
             t_delta (float): Time step size.
             t_final (float): Final time.
             tpm (np.Array): Transition probability matrix.
             initial_prob (pd.DataFrame): Initial probability Markov vector.
-            households_df (pd.DataFrame): Households with population dislocation data.
-
         """
         seed = self.get_parameter('seed')
         rng = np.random.RandomState(seed)
@@ -319,8 +314,7 @@ class HousingRecoverySequential(BaseAnalysis):
         for i, c in enumerate(column_names):
             result[c] = markov_stages[i]
 
-        result_name = self.get_parameter("result_name")
-        self.set_result_csv_data("ds_result", result, name=result_name, source="dataframe")
+        return result
 
     @staticmethod
     def compute_social_vulnerability_zones(sv_result, households_df):
