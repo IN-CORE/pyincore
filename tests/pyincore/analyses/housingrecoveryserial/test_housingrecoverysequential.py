@@ -26,7 +26,7 @@ def run_with_base_class():
     housing_recovery = HousingRecoverySequential(client)
 
     # Parameter setup
-    housing_recovery.set_parameter('num_cpu', 2)
+    housing_recovery.set_parameter('num_cpu', 4)
     housing_recovery.set_parameter('seed', seed)
     housing_recovery.set_parameter('t_delta', t_delta)
     housing_recovery.set_parameter('t_final', t_final)
