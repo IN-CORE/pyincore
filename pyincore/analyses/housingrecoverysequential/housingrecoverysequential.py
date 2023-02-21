@@ -159,7 +159,7 @@ class HousingRecoverySequential(BaseAnalysis):
             *args: All the arguments in order to pass into parameter function_name.
 
         Returns:
-            list: A list of ordered dictionaries with building damage values and other data/metadata.
+            pd.DataFrame: outcome DataFrame containing the results from the concurrent function.
 
         """
         output_ds = pd.DataFrame()
@@ -179,6 +179,9 @@ class HousingRecoverySequential(BaseAnalysis):
             t_final (float): Final time.
             tpm (np.Array): Transition probability matrix.
             initial_prob (pd.DataFrame): Initial probability Markov vector.
+
+        Returns:
+            pd.DataFrame: outcome of the HHRS model for a given household dataset.
         """
         seed = self.get_parameter('seed')
         rng = np.random.RandomState(seed)
