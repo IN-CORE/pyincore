@@ -3,10 +3,12 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-from pyincore import BaseAnalysis
+from pyincore import BaseAnalysis, AnalysisUtil
 
 import numpy as np
 import pandas as pd
+import concurrent.futures
+from itertools import repeat
 
 
 class HousingRecoverySequential(BaseAnalysis):
@@ -118,19 +120,68 @@ class HousingRecoverySequential(BaseAnalysis):
         initial_prob = pd.DataFrame(list(initial_prob_csv))
         initial_prob['value'] = pd.to_numeric(initial_prob['value'])
 
-        # Run the analysis
-        self.housing_serial_recovery_model(t_delta, t_final, tpm, initial_prob, households_df)
+        # Obtain the number of CPUs (cores) to execute the analysis with
+        user_defined_cpu = 1
 
-    def housing_serial_recovery_model(self, t_delta, t_final, tpm, initial_prob, households_df):
+        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
+            user_defined_cpu = self.get_parameter("num_cpu")
+
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(households_df), user_defined_cpu)
+
+        # Chop dataset into `num_size` chunks
+        max_chunk_size = int(np.ceil(len(households_df)/num_workers))
+
+        households_df_list = list(
+            map(lambda x: households_df[x * max_chunk_size:x * max_chunk_size + max_chunk_size],
+                list(range(num_workers)))
+        )
+
+        # Run the analysis
+        result = self.hhrs_concurrent_future(self.housing_serial_recovery_model,
+                                                 num_workers,
+                                                 households_df_list,
+                                                 repeat(t_delta),
+                                                 repeat(t_final),
+                                                 repeat(tpm),
+                                                 repeat(initial_prob))
+
+        result_name = self.get_parameter("result_name")
+        self.set_result_csv_data("ds_result", result, name=result_name, source="dataframe")
+
+        return True
+
+    def hhrs_concurrent_future(self, function_name, parallelism, *args):
+        """Utilizes concurrent.future module.
+
+        Args:
+            function_name (function): The function to be parallelized.
+            parallelism (int): Number of workers in parallelization.
+            *args: All the arguments in order to pass into parameter function_name.
+
+        Returns:
+            pd.DataFrame: outcome DataFrame containing the results from the concurrent function.
+
+        """
+        output_ds = pd.DataFrame()
+
+        with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
+            for ret in executor.map(function_name, *args):
+                output_ds = pd.concat([output_ds, ret], ignore_index=True)
+
+        return output_ds
+
+    def housing_serial_recovery_model(self, households_df, t_delta, t_final, tpm, initial_prob):
         """Performs the computation of the model as indicated in Sutley and Hamide (2020).
 
         Args:
+            households_df (pd.DataFrame): Households with population dislocation data.
             t_delta (float): Time step size.
             t_final (float): Final time.
             tpm (np.Array): Transition probability matrix.
             initial_prob (pd.DataFrame): Initial probability Markov vector.
-            households_df (pd.DataFrame): Households with population dislocation data.
 
+        Returns:
+            pd.DataFrame: outcome of the HHRS model for a given household dataset.
         """
         seed = self.get_parameter('seed')
         rng = np.random.RandomState(seed)
@@ -266,8 +317,7 @@ class HousingRecoverySequential(BaseAnalysis):
         for i, c in enumerate(column_names):
             result[c] = markov_stages[i]
 
-        result_name = self.get_parameter("result_name")
-        self.set_result_csv_data("ds_result", result, name=result_name, source="dataframe")
+        return result
 
     @staticmethod
     def compute_social_vulnerability_zones(sv_result, households_df):
@@ -348,6 +398,7 @@ class HousingRecoverySequential(BaseAnalysis):
         regressions = 0
 
         # Check the previous timesteps between [lower, upper] prior to the current timestep.
+
         for t in range(lower, upper):
             if markov_stages[t][household] < markov_stages[t - 1][household]:
                 regressions += 1
@@ -388,6 +439,12 @@ class HousingRecoverySequential(BaseAnalysis):
                     'required': False,
                     'description': 'Seed to ensure replication of the Markov Chain path'
                                    'in connection with Population Dislocation.',
+                    'type': int
+                },
+                {
+                    'id': 'num_cpu',
+                    'required': False,
+                    'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
                 }
             ],
