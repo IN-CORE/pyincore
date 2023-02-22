@@ -121,7 +121,7 @@ class HousingRecoverySequential(BaseAnalysis):
         initial_prob['value'] = pd.to_numeric(initial_prob['value'])
 
         # Obtain the number of CPUs (cores) to execute the analysis with
-        user_defined_cpu = 1
+        user_defined_cpu = 4
 
         if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
