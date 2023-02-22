@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Duplicate input spec for housing recovery sequential model [#263](https://github.com/IN-CORE/pyincore/issues/263)
+- Updated building economic loss analysis to handle case when no occupancy multiplier is provided [#274](https://github.com/IN-CORE/pyincore/issues/274)
 
 ## [1.8.0] - 2022-11-16
 
