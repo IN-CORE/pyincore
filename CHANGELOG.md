@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Duplicate input spec for housing recovery sequential model [#263](https://github.com/IN-CORE/pyincore/issues/263)
+- Tested hurricane windfield test methods [#100](https://github.com/IN-CORE/incore-services/issues/100)
 
 ## [1.8.0] - 2022-11-16
 
