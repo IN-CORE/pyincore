@@ -73,6 +73,24 @@ class SpaceService:
 
         return response
 
+    def get_space_by_name(self, space_name: str):
+        """Get space information.
+
+        Args:
+            space_name (str): A space representation. Name of the Space.
+
+        Returns:
+            obj: HTTP response with the returned space information.
+
+        """
+        r = self.client.get(self.base_space_url, params={"name": space_name})
+        if r.status_code == 200:
+            return r.json()
+        else:
+            # return empty list
+            # todo should this be some error message json instead of empty json?
+            return []
+
     def update_space(self, space_id: str, space_json):
         """Updates a Space.
 

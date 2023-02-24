@@ -55,3 +55,9 @@ def test_get_space(spacesvc):
     space_id = "5c813be55648c42a9168d5c1"
     space = spacesvc.get_space_by_id(space_id)
     assert "id" in space and space["id"] == space_id
+
+
+def test_get_space_by_name(spacesvc):
+    space_name = "incore"
+    space = spacesvc.get_space_by_name(space_name)
+    assert "id" in space[0]
