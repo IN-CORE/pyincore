@@ -74,7 +74,7 @@ class SpaceService:
         return response
 
     def get_space_by_name(self, space_name: str):
-        """Get space information.
+        """Get space information by querying the name of space.
 
         Args:
             space_name (str): A space representation. Name of the Space.
