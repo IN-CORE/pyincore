@@ -59,7 +59,7 @@ class GalvestonCGEModel(BaseAnalysis):
         bb = pd.read_csv(self.get_input_dataset("BB").get_file_path('csv'), index_col=0)
         jobcr = pd.read_csv(self.get_input_dataset("JOBCR").get_file_path('csv'), index_col=0)
         misch = pd.read_csv(self.get_input_dataset("MISCH").get_file_path('csv'), index_col=0)
-        employ = pd.read_csv(self.get_input_dataset("").get_file_path('csv'), index_col=0)
+        employ = pd.read_csv(self.get_input_dataset("EMPLOY").get_file_path('csv'), index_col=0)
         outcr = pd.read_csv(self.get_input_dataset("OUTCR").get_file_path('csv'), index_col=0)
         sector_shocks = pd.read_csv(self.get_input_dataset("sector_shocks").get_file_path('csv'), index_col=0)
 
