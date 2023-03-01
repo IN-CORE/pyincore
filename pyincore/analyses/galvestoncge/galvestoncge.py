@@ -16,11 +16,6 @@ import pandas as pd
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
 
-sys.setrecursionlimit(10000)
-
-def _(x):
-    return ExprM(vars, m=x)
-
 class GalvestonCGEModel(BaseAnalysis):
     """A computable general equilibrium (CGE) model is based on fundamental economic principles.
     A CGE model uses multiple data sources to reflect the interactions of households,
@@ -1870,7 +1865,12 @@ class GalvestonCGEModel(BaseAnalysis):
             solver_io = 'nl'
             stream_solver = True  # True prints solver output to screen
             keepfiles = False  # True prints intermediate file names (.nl,.sol,...)
-            opt = SolverFactory(solver, solver_io=solver_io)
+            executable_path = self.get_parameter("solver_path") \
+                if self.get_parameter("solver_path") is not None else pyglobals.IPOPT_PATH
+            if not os.path.exists(executable_path):
+                print("Invalid executable path, please make sure you have Pyomo installed.")
+
+            opt = SolverFactory(solver, solver_io=solver_io, executable=executable_path)
 
             if opt is None:
                 print("")
