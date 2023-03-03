@@ -87,9 +87,9 @@ class SpaceService:
         if r.status_code == 200:
             return r.json()
         else:
-            # return empty list
-            # todo should this be some error message json instead of empty json?
-            return []
+            # throw an error instead of returning the empty result
+            # return []
+            raise r.exceptions.HTTPError("There is no matching name or you don't have a privilege to view the space.")
 
     def update_space(self, space_id: str, space_json):
         """Updates a Space.
