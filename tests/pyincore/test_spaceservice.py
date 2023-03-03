@@ -61,3 +61,13 @@ def test_get_space_by_name(spacesvc):
     space_name = "incore"
     space = spacesvc.get_space_by_name(space_name)
     assert "id" in space[0]
+
+def test_add_to_space_by_name(spacesvc):
+    space_name = "incore"
+    dataset_id = "640128d5b40ec85799d46039"
+    space = spacesvc.add_to_space_by_name(space_name, dataset_id)
+    assert "id" in space and dataset_id in space["members"]
+
+    # delete the dataset id from the space after testing add
+    space = spacesvc.delete_from_space_by_name(space_name, dataset_id)
+    assert "id" in space and dataset_id not in space["members"]
