@@ -126,8 +126,8 @@ class SpaceService:
 
         return response
 
-    def delete_from_space_by_name(self, space_name, dataset_id):
-        """Delete dataset from a space by using space name and dataset id.
+    def remove_from_space_by_name(self, space_name, dataset_id):
+        """Remove dataset from a space by using space name and dataset id.
 
         Args:
             space_name (str): Name of the space that dataset id will go to.
@@ -139,16 +139,16 @@ class SpaceService:
         """
         space_id = self.get_space_by_name(space_name)[0]
 
-        response = self.delete_dataset_from_space(space_id["id"], dataset_id)
+        response = self.remove_dataset_from_space(space_id["id"], dataset_id)
 
         return response
 
-    def delete_dataset_from_space(self, space_id: str, dataset_id: str):
-        """Delete dataset from the space using dataset id and space id
+    def remove_dataset_from_space(self, space_id: str, dataset_id: str):
+        """Remove dataset from the space using dataset id and space id
 
         Args:
             space_id (str): ID of the space to update.
-            dataset_id (str): ID of the dataset to be deleted from the space.
+            dataset_id (str): ID of the dataset to be removed from the space.
 
         Returns:
             obj: HTTP response with the updated space.

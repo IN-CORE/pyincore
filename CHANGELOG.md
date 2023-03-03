@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Method in space service to add a dataset by space name [#273](https://github.com/IN-CORE/pyincore/issues/273)
 - Method in space service to get space id by space name [#272](https://github.com/IN-CORE/pyincore/issues/272)
-- Method in space service to delete dataset from the space [#283](https://github.com/IN-CORE/pyincore/issues/283)
-- Method in space service to delete dataset by space name [#284](https://github.com/IN-CORE/pyincore/issues/284)
+- Method in space service to remove dataset from the space [#283](https://github.com/IN-CORE/pyincore/issues/283)
+- Method in space service to remove dataset by space name [#284](https://github.com/IN-CORE/pyincore/issues/284)
 - Combined wind, surge-wave, and flood building loss [#276](https://github.com/IN-CORE/pyincore/issues/276)
 
 ### Changed

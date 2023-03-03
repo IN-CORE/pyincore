@@ -70,5 +70,5 @@ def test_add_to_space_by_name(spacesvc):
     assert "id" in space and dataset_id in space["members"]
 
     # delete the dataset id from the space after testing add
-    space = spacesvc.delete_from_space_by_name(space_name, dataset_id)
+    space = spacesvc.remove_from_space_by_name(space_name, dataset_id)
     assert "id" in space and dataset_id not in space["members"]
