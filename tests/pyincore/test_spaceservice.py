@@ -62,6 +62,7 @@ def test_get_space_by_name(spacesvc):
     space = spacesvc.get_space_by_name(space_name)
     assert "id" in space[0]
 
+
 def test_add_to_space_by_name(spacesvc):
     space_name = "incore"
     dataset_id = "640128d5b40ec85799d46039"
