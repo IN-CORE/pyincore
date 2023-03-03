@@ -12,14 +12,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Method in space service to get space id by space name [#272](https://github.com/IN-CORE/pyincore/issues/272)
 - Method in space service to delete dataset from the space [#283](https://github.com/IN-CORE/pyincore/issues/283)
 - Method in space service to delete dataset by space name [#284](https://github.com/IN-CORE/pyincore/issues/284)
+- Combined wind, surge-wave, and flood building loss [#276](https://github.com/IN-CORE/pyincore/issues/276)
 
 ### Changed
 - Rewrote clustering utility function to use flexible archetype column [#247](https://github.com/IN-CORE/pyincore/issues/247)
 - Made documentation containter to use requirements instead of environemt [#257](https://github.com/IN-CORE/pyincore/issues/257)
 - Parallelized the HHRS analysis [#268](https://github.com/IN-CORE/pyincore/issues/268)
+- Tested hurricane windfield test methods [#100](https://github.com/IN-CORE/incore-services/issues/100)
 
 ### Fixed
 - Duplicate input spec for housing recovery sequential model [#263](https://github.com/IN-CORE/pyincore/issues/263)
+- Updated building economic loss analysis to handle case when no occupancy multiplier is provided [#274](https://github.com/IN-CORE/pyincore/issues/274)
 
 ## [1.8.0] - 2022-11-16
 
