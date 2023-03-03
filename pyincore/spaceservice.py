@@ -109,7 +109,7 @@ class SpaceService:
         response = r.json()
         return response
 
-    def add_to_space_by_name(self, space_name, dataset_id):
+    def add_to_space_by_name(self, space_name: str, dataset_id: str):
         """Add dataset to a space by using space name and dataset id.
 
         Args:
@@ -126,7 +126,7 @@ class SpaceService:
 
         return response
 
-    def remove_from_space_by_name(self, space_name, dataset_id):
+    def remove_from_space_by_name(self, space_name: str, dataset_id: str):
         """Remove dataset from a space by using space name and dataset id.
 
         Args:
