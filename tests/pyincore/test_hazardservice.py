@@ -427,12 +427,15 @@ def test_search_floods(hazardsvc):
 
 
 @pytest.mark.skip(reason="performance issues")
-def test_create_hurricane_windfield(hazardsvc):
+def test_create_and_delete_hurricane_windfield(hazardsvc):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "hurricanewf.json"), 'r') as file:
         hurr_wf_inputs = file.read()
 
-    response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
-    assert response["id"] is not None
+    post_response = hazardsvc.create_hurricane_windfield(hurr_wf_inputs)
+    assert post_response["id"] is not None
+
+    del_response = hazardsvc.delete_hurricanewf(post_response["id"])
+    assert del_response["id"] is not None
 
 
 @pytest.mark.skip(reason="performance issues")
