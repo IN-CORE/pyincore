@@ -428,7 +428,6 @@ def test_search_floods(hazardsvc):
 
 @pytest.mark.skip(reason="performance issues")
 def test_create_and_delete_hurricane_windfield(hazardsvc):
-    # tested by ywkim on Feb 24 2023 and worked okay
     with open(os.path.join(pyglobals.TEST_DATA_DIR, "hurricanewf.json"), 'r') as file:
         hurr_wf_inputs = file.read()
 
@@ -441,14 +440,12 @@ def test_create_and_delete_hurricane_windfield(hazardsvc):
 
 @pytest.mark.skip(reason="performance issues")
 def test_get_hurricanewf_metadata(hazardsvc):
-    # tested by ywkim on Feb 24 2023 and worked okay
     response = hazardsvc.get_hurricanewf_metadata("5bd3d6a1f242fe0cf903cb0e")
     assert response['id'] == "5bd3d6a1f242fe0cf903cb0e"
 
 
 @pytest.mark.skip(reason="performance issues")
 def test_get_hurricanewf_metadata_list(hazardsvc):
-    # tested by ywkim on Feb 24 2023 and worked okay
     response = hazardsvc.get_hurricanewf_metadata_list(coast="florida")
     assert len(response) > 0 and 'id' in response[0].keys()
 
@@ -481,7 +478,6 @@ def test_post_hurricanewf_hazard_values(hazardsvc):
 
 @pytest.mark.skip(reason="performance issues")
 def test_get_hurricanewf_json(hazardsvc):
-    # tested by ywkim on Feb 24 2023 and worked okay
     hjson = hazardsvc.get_hurricanewf_json("florida", 1, -83, "28,-81", "3s", "kmph", 6, 10,
                                            "circular")
 
