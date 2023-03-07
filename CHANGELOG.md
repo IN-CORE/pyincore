@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Rewrote clustering utility function to use flexible archetype column [#247](https://github.com/IN-CORE/pyincore/issues/247)
 - Made documentation containter to use requirements instead of environemt [#257](https://github.com/IN-CORE/pyincore/issues/257)
 - Parallelized the HHRS analysis [#268](https://github.com/IN-CORE/pyincore/issues/268)
+- Updated Salt Lake City CGE [#281](https://github.com/IN-CORE/pyincore/issues/281)
 
 ### Fixed
 - Duplicate input spec for housing recovery sequential model [#263](https://github.com/IN-CORE/pyincore/issues/263)
