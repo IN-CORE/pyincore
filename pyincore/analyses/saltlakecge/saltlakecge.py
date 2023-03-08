@@ -1745,7 +1745,13 @@ class SaltLakeCGEModel(BaseAnalysis):
           solver_io = 'nl'
           stream_solver = True     # True prints solver output to screen
           keepfiles = False    # True prints intermediate file names (.nl,.sol,...)
-          opt = SolverFactory(solver, solver_io= solver_io)
+
+          executable_path = self.get_parameter("solver_path") \
+              if self.get_parameter("solver_path") is not None else pyglobals.IPOPT_PATH
+          if not os.path.exists(executable_path):
+              print("Invalid executable path, please make sure you have Pyomo installed.")
+
+          opt = SolverFactory(solver, solver_io= solver_io, executable=executable_path)
 
           if opt is None:
               print("")
