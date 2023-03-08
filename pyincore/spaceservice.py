@@ -73,6 +73,24 @@ class SpaceService:
 
         return response
 
+    def get_space_by_name(self, space_name: str):
+        """Get space information by querying the name of space.
+
+        Args:
+            space_name (str): A space representation. Name of the Space.
+
+        Returns:
+            obj: HTTP response with the returned space information.
+
+        """
+        r = self.client.get(self.base_space_url, params={"name": space_name})
+        if r.status_code == 200:
+            return r.json()
+        else:
+            # throw an error instead of returning the empty result
+            # return []
+            raise r.exceptions.HTTPError("There is no matching name or you don't have a privilege to view the space.")
+
     def update_space(self, space_id: str, space_json):
         """Updates a Space.
 
@@ -88,6 +106,57 @@ class SpaceService:
         space_data = {('space', space_json)}
         kwargs = {"files": space_data}
         r = self.client.put(url, **kwargs)
+        response = r.json()
+        return response
+
+    def add_to_space_by_name(self, space_name: str, dataset_id: str):
+        """Add dataset to a space by using space name and dataset id.
+
+        Args:
+            space_name (str): Name of the space that dataset id will go to.
+            dataset_id (json): ID of the dataset that will be copied in to the space.
+
+        Returns:
+            obj: HTTP response with the updated space.
+
+        """
+        space_id = self.get_space_by_name(space_name)[0]
+
+        response = self.add_dataset_to_space(space_id["id"], dataset_id)
+
+        return response
+
+    def remove_from_space_by_name(self, space_name: str, dataset_id: str):
+        """Remove dataset from a space by using space name and dataset id.
+
+        Args:
+            space_name (str): Name of the space that dataset id will go to.
+            dataset_id (json): ID of the dataset that will be copied in to the space.
+
+        Returns:
+            obj: HTTP response with the updated space.
+
+        """
+        space_id = self.get_space_by_name(space_name)[0]
+
+        response = self.remove_dataset_from_space(space_id["id"], dataset_id)
+
+        return response
+
+    def remove_dataset_from_space(self, space_id: str, dataset_id: str):
+        """Remove dataset from the space using dataset id and space id
+
+        Args:
+            space_id (str): ID of the space to update.
+            dataset_id (str): ID of the dataset to be removed from the space.
+
+        Returns:
+            obj: HTTP response with the updated space.
+
+        """
+        url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
+
+        r = self.client.delete(url)
         response = r.json()
         return response
 
