@@ -1964,6 +1964,8 @@ class SaltLakeCGEModel(BaseAnalysis):
             self.set_result_csv_data("gross-income", gross_income, name="gross-income", source="dataframe", index=True)
             self.set_result_csv_data("household-count", household_count, name="household-count", source="dataframe",
                                      index=True)
+        else:
+            raise ValueError("Solution infeasible - no output to save")
 
     def get_spec(self):
         return {
