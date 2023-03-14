@@ -108,19 +108,20 @@ class Dataset:
         return instance
 
     @classmethod
-    def from_dataframe(cls, dataframe, name, data_type):
+    def from_dataframe(cls, dataframe, name, data_type, index=False):
         """Get Dataset from Panda's DataFrame.
 
         Args:
             dataframe (obj): Panda's DataFrame.
             name (str): filename.
             data_type (str): Incore data type, e.g. incore:xxxx or ergo:xxxx
+            index (bool): Store the index column
 
         Returns:
             obj: Dataset from file.
 
         """
-        dataframe.to_csv(name, index=False)
+        dataframe.to_csv(name, index=index)
         return Dataset.from_file(name, data_type)
 
     @classmethod

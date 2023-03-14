@@ -87,6 +87,44 @@ def run_convert_cge_json_path(testpath):
     return True
 
 
+def run_convert_SLC_cge_json_path(testpath):
+    # test the external file with a path
+
+    cge_json = CGEOutputProcess()
+    region = ["R1", "R2", "R3", "R4", "R5", "R6", "R7"]
+
+    categories = []
+    for h in ["HH1", "HH2", "HH3", "HH4"]:
+        for r in region:
+            categories.append(h + "_" + r)
+
+    cge_json.get_cge_household_count(None,
+                                     os.path.join(testpath, "household-count.csv"),
+                                     "slc_cge_total_household_count.json", income_categories=categories)
+    cge_json.get_cge_gross_income(None,
+                                  os.path.join(testpath, "gross-income.csv"),
+                                  "slc_cge_total_household_income.json", income_categories=categories)
+
+    categories = []
+    for d in ["AG_MI", "UTIL", "CONS", "MANU", "COMMER", "EDU", "HEALTH", "ART_ACC", "RELIG", "L1W", "L2W", "L3W",
+              "L4W", "HS1", "HS2", "HH1", "HH2", "HH3", "HH4", "USSOC1", "USSOC2", "USSOC3", "USSOC4"]:
+        for r in region:
+            categories.append(d + "_" + r)
+    cge_json.get_cge_employment(None, None, os.path.join(testpath, "pre-disaster-factor-demand.csv"),
+                                os.path.join(testpath, "post-disaster-factor-demand.csv"),
+                                "slc_cge_employment.json", demand_categories=categories)
+
+    categories = []
+    for d in ["AG_MI", "UTIL", "CONS", "MANU", "COMMER", "EDU", "HEALTH", "ART_ACC", "RELIG",
+              "HS1", "HS2"]:
+        for r in region:
+            categories.append(d + "_" + r)
+    cge_json.get_cge_domestic_supply(None,
+                                     os.path.join(testpath, "domestic-supply.csv"), "slc_cge_domestic_supply.json",
+                                     supply_categories=categories)
+    return True
+
+
 if __name__ == '__main__':
     # test chaining with Joplin CGE analysis
     run_convert_cge_json_chained()
@@ -96,5 +134,7 @@ if __name__ == '__main__':
     # testpath = "/Users/<user>/<path_to_pyincore>/pyincore/tests/pyincore/utils"
     if testpath:
         run_convert_cge_json_path(testpath)
+
+    run_convert_SLC_cge_json_path(testpath="../../data/SLC_CGE")
 
     print("DONE")

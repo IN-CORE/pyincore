@@ -40,8 +40,12 @@ class BuildingEconLoss(BaseAnalysis):
         bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
 
         # Occupancy type of the exposure
-        occ_multiplier = self.get_input_dataset("occupancy_multiplier").get_csv_reader()
-        occ_mult_df = pd.DataFrame(occ_multiplier)
+        occ_multiplier = self.get_input_dataset("occupancy_multiplier")
+        if occ_multiplier is not None:
+            occ_multiplier = occ_multiplier.get_csv_reader()
+            occ_mult_df = pd.DataFrame(occ_multiplier)
+        else:
+            occ_mult_df = None
 
         try:
             prop_select = []
@@ -112,7 +116,7 @@ class BuildingEconLoss(BaseAnalysis):
             dmg_set_df = pd.merge(dmg_set_df, occ_mult_df, how="left", left_on="occ_type",
                                   right_on="occ_type", sort=True, copy=True)
         else:
-            dmg_set_df = dmg_set_df["Multiplier"] = 1.0
+            dmg_set_df["Multiplier"] = 1.0
 
         return dmg_set_df
 

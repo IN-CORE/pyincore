@@ -12,7 +12,8 @@ class CGEOutputProcess:
     """This class converts csv results outputs of Joplin CGE analysis to json format."""
 
     @staticmethod
-    def get_cge_household_count(household_count, household_count_path=None, filename_json=None):
+    def get_cge_household_count(household_count, household_count_path=None, filename_json=None,
+                                income_categories=("HH1", "HH2", "HH3", "HH4", "HH5")):
         """Calculate income results from the output files of the Joplin CGE analysis and convert the results
         to json format.
         {
@@ -26,12 +27,12 @@ class CGEOutputProcess:
             household_count_path (obj): A fallback for the case that household count object of CGE is not provided.
                  For example a user wants to directly pass in csv files, a path to CGE household count result.
             filename_json (str): Path and name to save json output file in. E.g "cge_total_household_count.json"
+            income_categories (list): A list of income categories to partition the data
 
         Returns:
             obj: CGE total household count. A JSON of the total household count results ordered by category.
 
         """
-        income_categories = ["HH1", "HH2", "HH3", "HH4", "HH5"]
 
         if household_count_path:
             household_group_count = pd.read_csv(household_count_path)
@@ -56,12 +57,13 @@ class CGEOutputProcess:
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(cge_total_household_count, outfile)
+                json.dump(cge_total_household_count, outfile, indent=2)
         # Serializing json
         return json.dumps(cge_total_household_count)
 
     @staticmethod
-    def get_cge_gross_income(gross_income, gross_income_path=None, filename_json=None):
+    def get_cge_gross_income(gross_income, gross_income_path=None, filename_json=None,
+                             income_categories=("HH1", "HH2", "HH3", "HH4", "HH5")):
         """Calculate household gross income results from the output files of the Joplin CGE analysis
         and convert the results to json format.
         {
@@ -75,12 +77,12 @@ class CGEOutputProcess:
             gross_income_path (obj): A fallback for the case that gross_income object of CGE is not provided.
                  For example a user wants to directly pass in csv files, a path to CGE gross income result.
             filename_json (str): Path and name to save json output file in. E.g "cge_total_house_income.json"
+            income_categories (list): A list of income categories to partition the data
 
         Returns:
             obj: CGE total house income. A JSON of the total household income results ordered by category.
 
         """
-        income_categories = ["HH1", "HH2", "HH3", "HH4", "HH5"]
 
         if gross_income_path:
             household_income = pd.read_csv(gross_income_path)
@@ -105,14 +107,13 @@ class CGEOutputProcess:
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(cge_total_household_income, outfile)
+                json.dump(cge_total_household_income, outfile, indent=2)
         # Serializing json
         return json.dumps(cge_total_household_income)
 
     @staticmethod
-    def get_cge_employment(pre_demand, post_demand,
-                           pre_demand_path=None, post_demand_path=None,
-                           filename_json=None):
+    def get_cge_employment(pre_demand, post_demand, pre_demand_path=None, post_demand_path=None,
+                           filename_json=None, demand_categories=("GOODS", "TRADE", "OTHER")):
         """Calculate employment results from the output files of the Joplin CGE analysis and convert the results
         to json format. The value is a sum of L1, L2 and L3 Labor groups numbers.
         {
@@ -135,12 +136,12 @@ class CGEOutputProcess:
                 of CGE is not provided. For example a user wants to directly pass in csv files, a path to CGE
                 household count result.
             filename_json (str): Path and name to save json output file in. E.g "cge_employment.json"
+            demand_categories (list): demand categories to partition data with.
 
         Returns:
             obj: CGE total employment. A JSON of the employment results ordered by category.
 
         """
-        demand_categories = ["Goods", "Trade", "Other"]
 
         if pre_demand_path and post_demand_path:
             pre_disaster_demand = pd.read_csv(pre_demand_path)
@@ -149,12 +150,8 @@ class CGEOutputProcess:
             pre_disaster_demand = pre_demand.get_dataframe_from_csv()
             post_disaster_demand = post_demand.get_dataframe_from_csv()
 
-        before_values = [pre_disaster_demand["GOODS"].sum(),
-                         pre_disaster_demand["TRADE"].sum(),
-                         pre_disaster_demand["OTHER"].sum()]
-        after_values = [post_disaster_demand["GOODS"].sum(),
-                        post_disaster_demand["TRADE"].sum(),
-                        post_disaster_demand["OTHER"].sum()]
+        before_values = [pre_disaster_demand[demand_category].sum() for demand_category in demand_categories]
+        after_values = [post_disaster_demand[demand_category].sum() for demand_category in demand_categories]
 
         before_event = {}
         after_event = {}
@@ -171,12 +168,13 @@ class CGEOutputProcess:
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(cge_employment, outfile)
+                json.dump(cge_employment, outfile, indent=2)
         # Serializing json
         return json.dumps(cge_employment)
 
     @staticmethod
-    def get_cge_domestic_supply(domestic_supply, domestic_supply_path=None, filename_json=None):
+    def get_cge_domestic_supply(domestic_supply, domestic_supply_path=None, filename_json=None,
+                                supply_categories=("Goods", "Trade", "Other", "HS1", "HS2", "HS3")):
         """Calculate domestic supply results from the output files of the Joplin CGE analysis and convert the results
         to json format.
         {
@@ -190,6 +188,7 @@ class CGEOutputProcess:
 
         Args:
             domestic_supply (obj): IN-CORE dataset for CGE domestic supply result.
+            supply_categories (list): demand categories to partition data with.
             domestic_supply_path (obj): A fallback for the case that domestic supply object of CGE is not provided.
                  For example a user wants to directly pass in csv files, a path to CGE household count result.
             filename_json (str): Path and name to save json output file in. E.g "cge_domestic_supply"
@@ -198,7 +197,7 @@ class CGEOutputProcess:
             obj: CGE total domestic supply. A JSON of the total domestic supply results ordered by category.
 
         """
-        supply_categories = ["Goods", "Trade", "Other", "HS1", "HS2", "HS3"]
+
         if domestic_supply_path:
             sector_supply = pd.read_csv(domestic_supply_path)
         else:
@@ -222,6 +221,6 @@ class CGEOutputProcess:
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(cge_domestic_supply, outfile)
+                json.dump(cge_domestic_supply, outfile, indent=2)
         # Serializing json
         return json.dumps(cge_domestic_supply)
