@@ -215,13 +215,14 @@ class DataService:
         r = self.client.put(url, **kwargs)
         return r.json()
 
-    def add_files_to_dataset(self, dataset_id: str, filepaths: list):
+    def add_files_to_dataset(self, dataset_id: str, filepaths: list, timeout=(30,600)):
         """Add files to the dataset. Post API endpoint is called.
 
         Args:
             dataset_id (str): ID of the Dataset.
             filepaths (list): Path to the files.
-
+            timeout (tuple[int,int]): Session timeout.
+            
         Returns:
             obj: HTTP POST Response. Json of the files added to the dataset.
 
@@ -233,7 +234,7 @@ class DataService:
             tuple = ('file', file)
             listfiles.append(tuple)
         kwargs = {"files": listfiles}
-        r = self.client.post(url, **kwargs)
+        r = self.client.post(url, timeout=timeout, **kwargs)
 
         # close files
         for tuple in listfiles:
