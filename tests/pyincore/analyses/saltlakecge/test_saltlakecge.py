@@ -18,7 +18,12 @@ def run_base_analysis():
     saltlake_cge.load_remote_input_dataset("EMPLOY", "64075b116121f94388729f91")
     saltlake_cge.load_remote_input_dataset("JOBCR", "64075d1c6121f9438872a648")
     saltlake_cge.load_remote_input_dataset("OUTCR", "64075e306121f9438872a7fb")
+
+    # This sector shock should work and print results
     saltlake_cge.load_remote_input_dataset("sector_shocks", "64075ec46121f9438872a802")
+
+    # Bad shock data - should produce infeasible result and not write output files
+    # saltlake_cge.load_remote_input_dataset("sector_shocks", "640b94348bec9f280fdf9164")
 
     saltlake_cge.run_analysis()
 

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.9.0] - Unreleased
+## [1.9.0] - 2023-03-15
 
 ### Added
 - Method in space service to add a dataset by space name [#273](https://github.com/IN-CORE/pyincore/issues/273)
@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Parallelized the HHRS analysis [#268](https://github.com/IN-CORE/pyincore/issues/268)
 - Updated Salt Lake City CGE [#281](https://github.com/IN-CORE/pyincore/issues/281)
 - Tested hurricane windfield test methods [#100](https://github.com/IN-CORE/incore-services/issues/100)
+- Updatd Salt Lake City CGE formatting and handled infeasible case  [#287](https://github.com/IN-CORE/pyincore/issues/287)
 
 ### Fixed
 - Duplicate input spec for housing recovery sequential model [#263](https://github.com/IN-CORE/pyincore/issues/263)
