@@ -29,7 +29,6 @@ class DatasetUtil:
         # remove the tables except guid
         if clean_attributes:
             gdf = gdf[['geometry','guid']]
-            # gdf = gdf.drop('column_name', axis=1)
 
         join_gdf = gdf.join(df.set_index("guid"))
 
