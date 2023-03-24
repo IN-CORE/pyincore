@@ -30,7 +30,7 @@ class DatasetUtil:
         if clean_attributes:
             gdf = gdf[['geometry','guid']]
 
-        join_gdf = gdf.join(df.set_index("guid"))
+        join_gdf = gdf.set_index("guid").join(df.set_index("guid"))
 
         return join_gdf
 
