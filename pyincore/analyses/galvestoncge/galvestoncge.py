@@ -88,29 +88,23 @@ class GalvestonCGEModel(BaseAnalysis):
              'IHEALTH', 'IART', 'IACCO',
              'MAGMIN', 'MUTIL', 'MCONS', 'MMANU', 'MWHOLE', 'MRETAIL', 'MTRANS', 'MPROFSER', 'MREALE', 'MEDU',
              'MHEALTH', 'MART', 'MACCO',
-             'L1WI', 'L2WI', 'L3WI', 'L4WI', 'L1BI', 'L2BI', 'L3BI', 'L4BI', 'L1HI', 'L2HI', 'L3HI', 'L4HI',
-             'L1WM', 'L2WM', 'L3WM', 'L4WM', 'L1BM', 'L2BM', 'L3BM', 'L4BM', 'L1HM', 'L2HM', 'L3HM', 'L4HM',
+             'IL1', 'IL2', 'IL3', 'IL4',
+             'ML1', 'ML2', 'ML3', 'ML4',
              'KAP', 'INVES',
              'HS1I', 'HS2I', 'HS3I', 'HS1M', 'HS2M', 'HS3M',
-             'HH1WI', 'HH2WI', 'HH3WI', 'HH4WI', 'HH5WI', 'HH1BI', 'HH2BI', 'HH3BI', 'HH4BI', 'HH5BI', 'HH1HI', 'HH2HI',
-             'HH3HI', 'HH4HI', 'HH5HI',
-             'HH1WM', 'HH2WM', 'HH3WM', 'HH4WM', 'HH5WM', 'HH1BM', 'HH2BM', 'HH3BM', 'HH4BM', 'HH5BM', 'HH1HM', 'HH2HM',
-             'HH3HM', 'HH4HM', 'HH5HM',
-             'WIUSSOC1', 'WIUSSOC2', 'WIUSSOC3', 'WIUSSOC4', 'BIUSSOC1', 'BIUSSOC2', 'BIUSSOC3', 'BIUSSOC4', 'HIUSSOC1',
-             'HIUSSOC2', 'HIUSSOC3', 'HIUSSOC4',
-             'WMUSSOC1', 'WMUSSOC2', 'WMUSSOC3', 'WMUSSOC4', 'BMUSSOC1', 'BMUSSOC2', 'BMUSSOC3', 'BMUSSOC4', 'HMUSSOC1',
-             'HMUSSOC2', 'HMUSSOC3', 'HMUSSOC4',
+             'IHH1', 'IHH2', 'IHH3', 'IHH4', 'IHH5',
+             'MHH1', 'MHH2', 'MHH3', 'MHH4', 'MHH5',
+             'IUSSOC1', 'IUSSOC2', 'IUSSOC3', 'IUSSOC4',
+             'MUSSOC1', 'MUSSOC2', 'MUSSOC3', 'MUSSOC4',
              'PROTAX', 'TXSTX', 'COUNTYSTX', 'USPIT', 'OTX', 'CYGF', 'COUNTY', 'STATE', 'FED',
              'OUT1', 'OUT2', 'OUT3', 'OUT4', 'ROW']
 
         # FACTORS
-        F = ['L1WI', 'L2WI', 'L3WI', 'L4WI', 'L1BI', 'L2BI', 'L3BI', 'L4BI', 'L1HI', 'L2HI', 'L3HI', 'L4HI',
-             'L1WM', 'L2WM', 'L3WM', 'L4WM', 'L1BM', 'L2BM', 'L3BM', 'L4BM', 'L1HM', 'L2HM', 'L3HM', 'L4HM',
-             'KAP']
-        FW1 = ['L1WI']
-        FW2 = ['L2WI']
-        FW3 = ['L3WI']
-        FW4 = ['L4WI']
+        F = ['IL1', 'IL2', 'IL3', 'IL4', 'ML1', 'ML2', 'ML3', 'ML4', 'KAP']
+        FW1 = ['IL1']
+        FW2 = ['IL2']
+        FW3 = ['IL3']
+        FW4 = ['IL4']
 
         # OUT COMMUTERS
         CM = ['OUT1', 'OUT2', 'OUT3', 'OUT4']
@@ -120,13 +114,10 @@ class GalvestonCGEModel(BaseAnalysis):
         CM4 = ['OUT4']
 
         # LABOR SUPPLY
-        LT = ['L1WI', 'L2WI', 'L3WI', 'L4WI', 'L1BI', 'L2BI', 'L3BI', 'L4BI', 'L1HI', 'L2HI', 'L3HI', 'L4HI',
-              'L1WM', 'L2WM', 'L3WM', 'L4WM', 'L1BM', 'L2BM', 'L3BM', 'L4BM', 'L1HM', 'L2HM', 'L3HM', 'L4HM',
-              'OUT1', 'OUT2', 'OUT3', 'OUT4']
+        LT = ['IL1', 'IL2', 'IL3', 'IL4', 'ML1', 'ML2', 'ML3', 'ML4', 'OUT1', 'OUT2', 'OUT3', 'OUT4']
 
         # LABOR WORKING IN GALVESTON
-        L = ['L1WI', 'L2WI', 'L3WI', 'L4WI', 'L1BI', 'L2BI', 'L3BI', 'L4BI', 'L1HI', 'L2HI', 'L3HI', 'L4HI',
-             'L1WM', 'L2WM', 'L3WM', 'L4WM', 'L1BM', 'L2BM', 'L3BM', 'L4BM', 'L1HM', 'L2HM', 'L3HM', 'L4HM']
+        L = ['IL1', 'IL2', 'IL3', 'IL4', 'ML1', 'ML2', 'ML3', 'ML4']
 
         # CAPITAL
         K = ['KAP']
@@ -135,10 +126,7 @@ class GalvestonCGEModel(BaseAnalysis):
         # LA = ['LAND']
 
         # GOVERNMENTS
-        G = ['WIUSSOC1', 'WIUSSOC2', 'WIUSSOC3', 'WIUSSOC4', 'BIUSSOC1', 'BIUSSOC2', 'BIUSSOC3', 'BIUSSOC4', 'HIUSSOC1',
-             'HIUSSOC2', 'HIUSSOC3', 'HIUSSOC4',
-             'WMUSSOC1', 'WMUSSOC2', 'WMUSSOC3', 'WMUSSOC4', 'BMUSSOC1', 'BMUSSOC2', 'BMUSSOC3', 'BMUSSOC4', 'HMUSSOC1',
-             'HMUSSOC2', 'HMUSSOC3', 'HMUSSOC4',
+        G = ['IUSSOC1', 'IUSSOC2', 'IUSSOC3', 'IUSSOC4', 'MUSSOC1', 'MUSSOC2', 'MUSSOC3', 'MUSSOC4',
              'PROTAX', 'TXSTX', 'COUNTYSTX', 'USPIT', 'OTX', 'CYGF', 'COUNTY', 'STATE', 'FED']
 
         # ENDOGENOUS GOVERNMENTS
@@ -148,10 +136,7 @@ class GalvestonCGEModel(BaseAnalysis):
         GNL = ['COUNTY']
 
         # EXOGENOUS GOVERMENTS
-        GX = ['WIUSSOC1', 'WIUSSOC2', 'WIUSSOC3', 'WIUSSOC4', 'BIUSSOC1', 'BIUSSOC2', 'BIUSSOC3', 'BIUSSOC4',
-              'HIUSSOC1', 'HIUSSOC2', 'HIUSSOC3', 'HIUSSOC4',
-              'WMUSSOC1', 'WMUSSOC2', 'WMUSSOC3', 'WMUSSOC4', 'BMUSSOC1', 'BMUSSOC2', 'BMUSSOC3', 'BMUSSOC4',
-              'HMUSSOC1', 'HMUSSOC2', 'HMUSSOC3', 'HMUSSOC4',
+        GX = ['IUSSOC1', 'IUSSOC2', 'IUSSOC3', 'IUSSOC4', 'MUSSOC1', 'MUSSOC2', 'MUSSOC3', 'MUSSOC4',
               'PROTAX', 'TXSTX', 'COUNTYSTX', 'USPIT', 'OTX']
 
         # SALES OR EXCISE TAXES
@@ -164,10 +149,7 @@ class GalvestonCGEModel(BaseAnalysis):
         GL = ['PROTAX']
 
         # FACTOR TAXES
-        GF = ['WIUSSOC1', 'WIUSSOC2', 'WIUSSOC3', 'WIUSSOC4', 'BIUSSOC1', 'BIUSSOC2', 'BIUSSOC3', 'BIUSSOC4',
-              'HIUSSOC1', 'HIUSSOC2', 'HIUSSOC3', 'HIUSSOC4',
-              'WMUSSOC1', 'WMUSSOC2', 'WMUSSOC3', 'WMUSSOC4', 'BMUSSOC1', 'BMUSSOC2', 'BMUSSOC3', 'BMUSSOC4',
-              'HMUSSOC1', 'HMUSSOC2', 'HMUSSOC3', 'HMUSSOC4',
+        GF = ['IUSSOC1', 'IUSSOC2', 'IUSSOC3', 'IUSSOC4', 'MUSSOC1', 'MUSSOC2', 'MUSSOC3', 'MUSSOC4',
               'PROTAX']
 
         # INCOME TAX UNITS
@@ -177,40 +159,28 @@ class GalvestonCGEModel(BaseAnalysis):
         GH = ['PROTAX']
 
         # SOCIAL SECURITY PAYMENT
-        GFUS = ['WIUSSOC1', 'WIUSSOC2', 'WIUSSOC3', 'WIUSSOC4', 'BIUSSOC1', 'BIUSSOC2', 'BIUSSOC3', 'BIUSSOC4',
-                'HIUSSOC1', 'HIUSSOC2', 'HIUSSOC3', 'HIUSSOC4',
-                'WMUSSOC1', 'WMUSSOC2', 'WMUSSOC3', 'WMUSSOC4', 'BMUSSOC1', 'BMUSSOC2', 'BMUSSOC3', 'BMUSSOC4',
-                'HMUSSOC1', 'HMUSSOC2', 'HMUSSOC3', 'HMUSSOC4']
+        GFUS = ['IUSSOC1', 'IUSSOC2', 'IUSSOC3', 'IUSSOC4', 'MUSSOC1', 'MUSSOC2', 'MUSSOC3', 'MUSSOC4']
 
         # EXOGNOUS TRANSFER PMT
-        GY = ['WIUSSOC1', 'WIUSSOC2', 'WIUSSOC3', 'WIUSSOC4', 'BIUSSOC1', 'BIUSSOC2', 'BIUSSOC3', 'BIUSSOC4',
-              'HIUSSOC1', 'HIUSSOC2', 'HIUSSOC3', 'HIUSSOC4',
-              'WMUSSOC1', 'WMUSSOC2', 'WMUSSOC3', 'WMUSSOC4', 'BMUSSOC1', 'BMUSSOC2', 'BMUSSOC3', 'BMUSSOC4',
-              'HMUSSOC1', 'HMUSSOC2', 'HMUSSOC3', 'HMUSSOC4',
+        GY = ['IUSSOC1', 'IUSSOC2', 'IUSSOC3', 'IUSSOC4', 'MUSSOC1', 'MUSSOC2', 'MUSSOC3', 'MUSSOC4',
               'PROTAX', 'TXSTX', 'COUNTYSTX', 'USPIT', 'OTX', 'CYGF', 'COUNTY', 'STATE', 'FED']
 
         # EXOGNOUS TRANSFER PMT
-        GTA = ['WIUSSOC1', 'WIUSSOC2', 'WIUSSOC3', 'WIUSSOC4', 'BIUSSOC1', 'BIUSSOC2', 'BIUSSOC3', 'BIUSSOC4',
-               'HIUSSOC1', 'HIUSSOC2', 'HIUSSOC3', 'HIUSSOC4',
-               'WMUSSOC1', 'WMUSSOC2', 'WMUSSOC3', 'WMUSSOC4', 'BMUSSOC1', 'BMUSSOC2', 'BMUSSOC3', 'BMUSSOC4',
-               'HMUSSOC1', 'HMUSSOC2', 'HMUSSOC3', 'HMUSSOC4',
+        GTA = ['IUSSOC1', 'IUSSOC2', 'IUSSOC3', 'IUSSOC4', 'MUSSOC1', 'MUSSOC2', 'MUSSOC3', 'MUSSOC4',
                'PROTAX', 'TXSTX', 'COUNTYSTX', 'USPIT', 'OTX', 'CYGF', 'COUNTY', 'STATE', 'FED']
 
         # ENDOGENOUS TRANSFER PMT
         GT = ['CYGF', 'STATE', 'FED']
 
         # ALL HOUSEHOLDS IN GALVESTON
-        H = ['HH1WI', 'HH2WI', 'HH3WI', 'HH4WI', 'HH5WI', 'HH1BI', 'HH2BI', 'HH3BI', 'HH4BI', 'HH5BI', 'HH1HI', 'HH2HI',
-             'HH3HI', 'HH4HI', 'HH5HI',
-             'HH1WM', 'HH2WM', 'HH3WM', 'HH4WM', 'HH5WM', 'HH1BM', 'HH2BM', 'HH3BM', 'HH4BM', 'HH5BM', 'HH1HM', 'HH2HM',
-             'HH3HM', 'HH4HM', 'HH5HM']
+        H = ['IHH1', 'IHH2', 'IHH3', 'IHH4', 'IHH5', 'MHH1', 'MHH2', 'MHH3', 'MHH4', 'MHH5']
 
         # HOUSEHOLD (INCOME i, i = 1,2,3,4,5)
-        HH1 = ['HH1WI', 'HH1BI', 'HH1HI', 'HH1WM', 'HH1BM', 'HH1HM']
-        HH2 = ['HH2WI', 'HH2BI', 'HH2HI', 'HH2WM', 'HH2BM', 'HH2HM']
-        HH3 = ['HH3WI', 'HH3BI', 'HH3HI', 'HH3WM', 'HH3BM', 'HH3HM']
-        HH4 = ['HH4WI', 'HH4BI', 'HH4HI', 'HH4WM', 'HH4BM', 'HH4HM']
-        HH5 = ['HH5WI', 'HH5BI', 'HH5HI', 'HH5WM', 'HH5BM', 'HH5HM']
+        HH1 = ['IHH1', 'MHH1']
+        HH2 = ['IHH2', 'MHH2']
+        HH3 = ['IHH3', 'MHH3']
+        HH4 = ['IHH4', 'MHH4']
+        HH5 = ['IHH5', 'MHH5']
 
         # I+G SECTORS
         IG = ['IAGMIN', 'IUTIL', 'ICONS', 'IMANU', 'IWHOLE', 'IRETAIL', 'ITRANS', 'IPROFSER', 'IREALE', 'IEDU',
@@ -517,35 +487,15 @@ class GalvestonCGEModel(BaseAnalysis):
         TPC.loc[H, GFUS] = 1
 
         TAUFF.loc[G, F] = 0
-        TAUFF.loc['WIUSSOC1', 'L1WI'] = 1
-        TAUFF.loc['WIUSSOC2', 'L2WI'] = 1
-        TAUFF.loc['WIUSSOC3', 'L3WI'] = 1
-        TAUFF.loc['WIUSSOC4', 'L4WI'] = 1
+        TAUFF.loc['IUSSOC1', 'IL1'] = 1
+        TAUFF.loc['IUSSOC2', 'IL2'] = 1
+        TAUFF.loc['IUSSOC3', 'IL3'] = 1
+        TAUFF.loc['IUSSOC4', 'IL4'] = 1
 
-        TAUFF.loc['BIUSSOC1', 'L1BI'] = 1
-        TAUFF.loc['BIUSSOC2', 'L2BI'] = 1
-        TAUFF.loc['BIUSSOC3', 'L3BI'] = 1
-        TAUFF.loc['BIUSSOC4', 'L4BI'] = 1
-
-        TAUFF.loc['HIUSSOC1', 'L1HI'] = 1
-        TAUFF.loc['HIUSSOC2', 'L2HI'] = 1
-        TAUFF.loc['HIUSSOC3', 'L3HI'] = 1
-        TAUFF.loc['HIUSSOC4', 'L4HI'] = 1
-
-        TAUFF.loc['WMUSSOC1', 'L1WM'] = 1
-        TAUFF.loc['WMUSSOC2', 'L2WM'] = 1
-        TAUFF.loc['WMUSSOC3', 'L3WM'] = 1
-        TAUFF.loc['WMUSSOC4', 'L4WM'] = 1
-
-        TAUFF.loc['BMUSSOC1', 'L1BM'] = 1
-        TAUFF.loc['BMUSSOC2', 'L2BM'] = 1
-        TAUFF.loc['BMUSSOC3', 'L3BM'] = 1
-        TAUFF.loc['BMUSSOC4', 'L4BM'] = 1
-
-        TAUFF.loc['HMUSSOC1', 'L1HM'] = 1
-        TAUFF.loc['HMUSSOC2', 'L2HM'] = 1
-        TAUFF.loc['HMUSSOC3', 'L3HM'] = 1
-        TAUFF.loc['HMUSSOC4', 'L4HM'] = 1
+        TAUFF.loc['MUSSOC1', 'ML1'] = 1
+        TAUFF.loc['MUSSOC2', 'ML2'] = 1
+        TAUFF.loc['MUSSOC3', 'ML3'] = 1
+        TAUFF.loc['MUSSOC4', 'ML4'] = 1
 
         TAUFF.loc['PROTAX', 'KAP'] = 1
 
@@ -752,35 +702,15 @@ class GalvestonCGEModel(BaseAnalysis):
         A.loc[Z, Z] = SAM.loc[Z, Z].div(Q0.loc[Z], axis='columns')
 
         # AGFS: LABOR PAYMENTS BY G SECTOR + USSOC PAYMENTS BY LABOR (GROSS LABOR PAYMENTS)
-        AGFS.loc['L1WI', G] = SAM.loc['L1WI', G] + SAM.loc['WIUSSOC1', G]
-        AGFS.loc['L2WI', G] = SAM.loc['L2WI', G] + SAM.loc['WIUSSOC2', G]
-        AGFS.loc['L3WI', G] = SAM.loc['L3WI', G] + SAM.loc['WIUSSOC3', G]
-        AGFS.loc['L4WI', G] = SAM.loc['L4WI', G] + SAM.loc['WIUSSOC4', G]
+        AGFS.loc['IL1', G] = SAM.loc['IL1', G] + SAM.loc['IUSSOC1', G]
+        AGFS.loc['IL2', G] = SAM.loc['IL2', G] + SAM.loc['IUSSOC2', G]
+        AGFS.loc['IL3', G] = SAM.loc['IL3', G] + SAM.loc['IUSSOC3', G]
+        AGFS.loc['IL4', G] = SAM.loc['IL4', G] + SAM.loc['IUSSOC4', G]
 
-        AGFS.loc['L1BI', G] = SAM.loc['L1BI', G] + SAM.loc['BIUSSOC1', G]
-        AGFS.loc['L2BI', G] = SAM.loc['L2BI', G] + SAM.loc['BIUSSOC2', G]
-        AGFS.loc['L3BI', G] = SAM.loc['L3BI', G] + SAM.loc['BIUSSOC3', G]
-        AGFS.loc['L4BI', G] = SAM.loc['L4BI', G] + SAM.loc['BIUSSOC4', G]
-
-        AGFS.loc['L1HI', G] = SAM.loc['L1HI', G] + SAM.loc['HIUSSOC1', G]
-        AGFS.loc['L2HI', G] = SAM.loc['L2HI', G] + SAM.loc['HIUSSOC2', G]
-        AGFS.loc['L3HI', G] = SAM.loc['L3HI', G] + SAM.loc['HIUSSOC3', G]
-        AGFS.loc['L4HI', G] = SAM.loc['L4HI', G] + SAM.loc['HIUSSOC4', G]
-
-        AGFS.loc['L1WM', G] = SAM.loc['L1WM', G] + SAM.loc['WMUSSOC1', G]
-        AGFS.loc['L2WM', G] = SAM.loc['L2WM', G] + SAM.loc['WMUSSOC2', G]
-        AGFS.loc['L3WM', G] = SAM.loc['L3WM', G] + SAM.loc['WMUSSOC3', G]
-        AGFS.loc['L4WM', G] = SAM.loc['L4WM', G] + SAM.loc['WMUSSOC4', G]
-
-        AGFS.loc['L1BM', G] = SAM.loc['L1BM', G] + SAM.loc['BMUSSOC1', G]
-        AGFS.loc['L2BM', G] = SAM.loc['L2BM', G] + SAM.loc['BMUSSOC2', G]
-        AGFS.loc['L3BM', G] = SAM.loc['L3BM', G] + SAM.loc['BMUSSOC3', G]
-        AGFS.loc['L4BM', G] = SAM.loc['L4BM', G] + SAM.loc['BMUSSOC4', G]
-
-        AGFS.loc['L1HM', G] = SAM.loc['L1HM', G] + SAM.loc['HMUSSOC1', G]
-        AGFS.loc['L2HM', G] = SAM.loc['L2HM', G] + SAM.loc['HMUSSOC2', G]
-        AGFS.loc['L3HM', G] = SAM.loc['L3HM', G] + SAM.loc['HMUSSOC3', G]
-        AGFS.loc['L4HM', G] = SAM.loc['L4HM', G] + SAM.loc['HMUSSOC4', G]
+        AGFS.loc['ML1', G] = SAM.loc['ML1', G] + SAM.loc['MUSSOC1', G]
+        AGFS.loc['ML2', G] = SAM.loc['ML2', G] + SAM.loc['MUSSOC2', G]
+        AGFS.loc['ML3', G] = SAM.loc['ML3', G] + SAM.loc['MUSSOC3', G]
+        AGFS.loc['ML4', G] = SAM.loc['ML4', G] + SAM.loc['MUSSOC4', G]
 
         # AG - GOVERNMENT SPENDING SHARES OF NET INCOME
         AG_1 = SAM.loc[I, G]
@@ -1513,17 +1443,17 @@ class GalvestonCGEModel(BaseAnalysis):
             # print(KSEQ)
 
             # LSEQ1(H).. HW(H)/HH(H)   =E= (HW0(H)/HH0(H))
-            #                              *((SUM(L, RA(L) / RA0(L))/24)/ (CPI(H) / CPI0(H))*(SUM((Z,L), FD(L,Z))/(SUM(H1, HW(H1)* SUM(L, JOBCOR(H1,L)))+ SUM(CM, CMO(CM)) + SUM(L,CMI(L))))+ SUM((CM,L), EXWGEO(CM)/RA(L))/96 *(SUM(CM, CMO(CM))/(SUM(H1, HW(H1)* SUM(L,JOBCOR(H1,L)))+ SUM(CM, CMO(CM)) +SUM(L,CMI(L)))))** (ETARA(H)*0.1)
+            #                              *((SUM(L, RA(L) / RA0(L))/8)/ (CPI(H) / CPI0(H))*(SUM((Z,L), FD(L,Z))/(SUM(H1, HW(H1)* SUM(L, JOBCOR(H1,L)))+ SUM(CM, CMO(CM)) + SUM(L,CMI(L))))+ SUM((CM,L), EXWGEO(CM)/RA(L))/32 *(SUM(CM, CMO(CM))/(SUM(H1, HW(H1)* SUM(L,JOBCOR(H1,L)))+ SUM(CM, CMO(CM)) +SUM(L,CMI(L)))))** (ETARA(H)*0.1)
             #                              * ( SUM(G, TP(H,G) / CPI(H) )/ SUM(G, TP(H,G) / CPI0(H) )) ** ETAPT(H)
             #                              *  ((SUM(GI, PIT0(GI,H)* HH0(H))+ SUM(G, TAUH(G,H)*HH0(H)))/(SUM(GI, PIT(GI,H)* HH(H))+ SUM(G, TAUH(G,H)*HH(H))))**(ETAPIT(H));
             print('LSEQ1(H)')
             line1 = ExprM(vars, m=HW0.loc[H] / HH0.loc[H])
             LSEQ1line2pre = FD.loc(L, Z).sum(1)
-            line2 = (((RA.loc(L) / ExprM(vars, m=RA0.loc[L])).sum(L) / 24) / (CPI.loc(H) / ExprM(vars, m=CPI0[H])) \
+            line2 = (((RA.loc(L) / ExprM(vars, m=RA0.loc[L])).sum(L) / 8) / (CPI.loc(H) / ExprM(vars, m=CPI0[H])) \
                      * (LSEQ1line2pre.sum(0) / (
                                 (HW.loc(H1) * ExprM(vars, m=JOBCOR.loc[H1, L].sum(1))).sum(H1) + CMO.loc(CM).sum(
                             CM) + CMI.loc(L).sum(L))) \
-                     + ((ExprM(vars, m=EXWGEO.loc[CM].sum(0)) / RA.loc(L)).sum(0) / 96) \
+                     + ((ExprM(vars, m=EXWGEO.loc[CM].sum(0)) / RA.loc(L)).sum(0) / 32) \
                      * (CMO.loc(CM).sum(CM) / (
                                 (HW.loc(H1) * ExprM(vars, m=JOBCOR.loc[H1, L].sum(1))).sum(H1) + CMO.loc(CM).sum(
                             CM) + CMI.loc(L).sum(L)))) \
@@ -1540,7 +1470,7 @@ class GalvestonCGEModel(BaseAnalysis):
             print(LSEQ1.test(vars.initialVals))
             # print(LSEQ1)
 
-            # LSEQ2A('OUT1').. CMO('OUT1')=E= CMO0('OUT1')* (((EXWGEO('OUT1') /RA('L1WI') ))** ECOMO('OUT1'));
+            # LSEQ2A('OUT1').. CMO('OUT1')=E= CMO0('OUT1')* (((EXWGEO('OUT1') /RA('IL1') ))** ECOMO('OUT1'));
             print('LSEQ2A')
             line = ExprM(vars, m=CMO0.loc[CM1]) * (
                         (ExprM(vars, m=EXWGEO.loc[CM1].sum(0)) / RA.loc(FW1)) ** (ExprM(vars, m=ECOMO.loc[CM1])))
@@ -1550,7 +1480,7 @@ class GalvestonCGEModel(BaseAnalysis):
             print(LSEQ2A.test(vars.initialVals))
             # print(LSEQ2A)
 
-            # LSEQ2B('OUT2').. CMO('OUT2')=E= CMO0('OUT2')* (((EXWGEO('OUT2') /RA('L2WI') ))** ECOMO('OUT2'));
+            # LSEQ2B('OUT2').. CMO('OUT2')=E= CMO0('OUT2')* (((EXWGEO('OUT2') /RA('IL2') ))** ECOMO('OUT2'));
             print('LSEQ2B')
             line = ExprM(vars, m=CMO0.loc[CM2]) * (
                         (ExprM(vars, m=EXWGEO.loc[CM2].sum(0)) / RA.loc(FW2)) ** (ExprM(vars, m=ECOMO.loc[CM2])))
@@ -1560,7 +1490,7 @@ class GalvestonCGEModel(BaseAnalysis):
             print(LSEQ2B.test(vars.initialVals))
             # print(LSEQ2B)
 
-            # LSEQ2C('OUT3').. CMO('OUT3')=E= CMO0('OUT3')* (((EXWGEO('OUT3') /RA('L3WI') ))** ECOMO('OUT3'));
+            # LSEQ2C('OUT3').. CMO('OUT3')=E= CMO0('OUT3')* (((EXWGEO('OUT3') /RA('IL3') ))** ECOMO('OUT3'));
             print('LSEQ2C')
             line = ExprM(vars, m=CMO0.loc[CM3]) * (
                         (ExprM(vars, m=EXWGEO.loc[CM3].sum(0)) / RA.loc(FW3)) ** (ExprM(vars, m=ECOMO.loc[CM3])))
@@ -1570,7 +1500,7 @@ class GalvestonCGEModel(BaseAnalysis):
             print(LSEQ2C.test(vars.initialVals))
             # print(LSEQ2C)
 
-            # LSEQ2D('OUT4').. CMO('OUT4')=E= CMO0('OUT4')* (((EXWGEO('OUT4') /RA('L4WI') ))** ECOMO('OUT4'));
+            # LSEQ2D('OUT4').. CMO('OUT4')=E= CMO0('OUT4')* (((EXWGEO('OUT4') /RA('IL4') ))** ECOMO('OUT4'));
             print('LSEQ2D')
             line = ExprM(vars, m=CMO0.loc[CM4]) * (
                         (ExprM(vars, m=EXWGEO.loc[CM4].sum(0)) / RA.loc(FW4)) ** (ExprM(vars, m=ECOMO.loc[CM4])))
@@ -1580,10 +1510,10 @@ class GalvestonCGEModel(BaseAnalysis):
             print(LSEQ2D.test(vars.initialVals))
             # print(LSEQ2D)
 
-            # LSEQ3(L).. CMI(L)  =E= CMI0(L)* ((( RA(L)/(SUM( H, CPI(H))/30))** ECOMI(L)));
+            # LSEQ3(L).. CMI(L)  =E= CMI0(L)* ((( RA(L)/(SUM( H, CPI(H))/10))** ECOMI(L)));
             print('LSEQ3')
             line = ExprM(vars, m=CMI0.loc[L]) * (
-                        (RA.loc(L) / (CPI.loc(H).sum(H) / 30)) ** (ExprM(vars, m=ECOMI.loc[L])))
+                        (RA.loc(L) / (CPI.loc(H).sum(H) / 10)) ** (ExprM(vars, m=ECOMI.loc[L])))
 
             LSEQ3 = (line - CMI.loc(L))
             LSEQ3.write(count, filename)
@@ -1869,8 +1799,7 @@ class GalvestonCGEModel(BaseAnalysis):
                 if self.get_parameter("solver_path") is not None else pyglobals.IPOPT_PATH
             if not os.path.exists(executable_path):
                 print("Invalid executable path, please make sure you have Pyomo installed.")
-
-            opt = SolverFactory(solver, solver_io=solver_io, executable=executable_path)
+            opt = SolverFactory(solver, solver_io=solver_io)
 
             if opt is None:
                 print("")
@@ -1930,6 +1859,8 @@ class GalvestonCGEModel(BaseAnalysis):
             # opt.options['halt_on_ampl_error'] = 'yes'
             # opt.options['fixed_variable_treatment'] = 'relax_bounds'
             # opt.options['print_options_documentation'] = 'yes'
+            # opt.options['line_search_method'] = 'penalty'
+            # opt.options['watchdog_shortened_iter_trigger'] = 0
 
             ###
 
@@ -2004,14 +1935,13 @@ class GalvestonCGEModel(BaseAnalysis):
         '''
          ######## The following is for random shocks. ########  
         '''
+        # iNum = 1 # dynamic model iterations
         sims = sector_shocks
-        # iNum = 1 # dynamic model itterations
         # iNum = len(sims.columns)
         KS00 = KS0.copy()
 
         for num in range(iNum):
             KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
-            KS0 = KS0.fillna(0.0)
             run_solver(filename, tmp)
 
         domestic_supply, gross_income, household_count, pre_disaster_demand, post_disaster_demand = \

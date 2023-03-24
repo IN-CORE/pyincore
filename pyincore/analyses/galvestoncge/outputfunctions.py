@@ -69,3 +69,4 @@ def getDiff(vars, soln, eqName, ittr):
     difference = newValue(vars, soln, eqName, ittr) - baseValue(vars, soln, eqName)
     return difference
 
+
