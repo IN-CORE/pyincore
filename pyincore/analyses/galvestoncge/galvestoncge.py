@@ -1942,6 +1942,22 @@ class GalvestonCGEModel(BaseAnalysis):
         '''
         # iNum = 1 # dynamic model itterations
         sims = sector_shocks
+        all_sectors = ['IAGMIN', 'IUTIL', 'ICONS', 'IMANU', 'IWHOLE', 'IRETAIL', 'ITRANS', 'IPROFSER', 'IREALE', 'IEDU',
+             'IHEALTH', 'IART', 'IACCO',
+             'MAGMIN', 'MUTIL', 'MCONS', 'MMANU', 'MWHOLE', 'MRETAIL', 'MTRANS', 'MPROFSER', 'MREALE', 'MEDU',
+             'MHEALTH', 'MART', 'MACCO',
+             'HS1I', 'HS2I', 'HS3I', 'HS1M', 'HS2M', 'HS3M']
+
+
+        missing_sectors = list(set(all_sectors) - set(sims.index.unique()))
+
+        for i in missing_sectors:
+            data = {'shock':1}
+            index = [i]
+            df = pd.DataFrame(data=data, index=index)
+
+            sims = sims.append(df)
+
 
         # === begin replacing the average shocks on housing services
         HSmean = sims.loc[['HS1I', 'HS2I', 'HS3I']].mean().mean()
