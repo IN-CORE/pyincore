@@ -1795,11 +1795,13 @@ class GalvestonCGEModel(BaseAnalysis):
             solver_io = 'nl'
             stream_solver = True  # True prints solver output to screen
             keepfiles = False  # True prints intermediate file names (.nl,.sol,...)
+            # executable_path = '/Users/mohanar2/opt/anaconda3/envs/pyincore/bin/ipopt'
             executable_path = self.get_parameter("solver_path") \
                 if self.get_parameter("solver_path") is not None else pyglobals.IPOPT_PATH
             if not os.path.exists(executable_path):
                 print("Invalid executable path, please make sure you have Pyomo installed.")
-            opt = SolverFactory(solver, solver_io=solver_io)
+
+            opt = SolverFactory(solver, solver_io=solver_io, executable=executable_path)
 
             if opt is None:
                 print("")
@@ -1887,11 +1889,14 @@ class GalvestonCGEModel(BaseAnalysis):
         '''
 
         soln = []
+        # TODO: I am not sure this is needed here. We might want to leave the python version
+        # of the models out for now
         filename = "ipopt_cons.py"
         tmp = "tmp.py"
         print("Calibration: ")
         run_solver(filename, tmp)
 
+        # sys.exit()
         '''
         Simulation code below:
         In each simulation:
@@ -1935,14 +1940,23 @@ class GalvestonCGEModel(BaseAnalysis):
         '''
          ######## The following is for random shocks. ########  
         '''
-        # iNum = 1 # dynamic model iterations
+        # iNum = 1 # dynamic model itterations
         sims = sector_shocks
+
+        # === begin replacing the average shocks on housing services
+        HSmean = sims.loc[['HS1I', 'HS2I', 'HS3I']].mean().mean()
+        sims.loc[['HS1I', 'HS2I', 'HS3I']] = HSmean
+        # === end replacing the average shocks on housing services
+
+        iNum = 1
         # iNum = len(sims.columns)
         KS00 = KS0.copy()
 
         for num in range(iNum):
             KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
+            KS0 = KS0.fillna(0.0)
             run_solver(filename, tmp)
+
 
         domestic_supply, gross_income, household_count, pre_disaster_demand, post_disaster_demand = \
             gams_to_dataframes(iNum, vars, H, L, soln)
