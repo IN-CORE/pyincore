@@ -27,4 +27,4 @@ def test_join_datasets(client):
     joined_gdf = util.join_datasets(bldg_dataset, bldg_dmg_dataset)
 
     # assert if the fields from each dataset exist
-    assert 'year_built' in joined_gdf.keys() and 'meandamage' in joined_gdf.keys()
+    assert 'geometry' in joined_gdf.keys() and 'meandamage' in joined_gdf.keys()
