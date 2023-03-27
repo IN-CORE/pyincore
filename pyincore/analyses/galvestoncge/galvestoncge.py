@@ -1990,7 +1990,7 @@ class GalvestonCGEModel(BaseAnalysis):
     def get_spec(self):
         return {
             'name': 'Galveston-cge',
-            'description': 'CGE model for Salt Lake City.',
+            'description': 'CGE model for Galveston.',
             'input_parameters': [
                 {
                     'id': 'model_iterations',
@@ -2063,7 +2063,7 @@ class GalvestonCGEModel(BaseAnalysis):
                     'id': 'OUTCR',
                     'required': True,
                     'description': 'OUTCR is a matrix describing the number of workers who'
-                                   ' live in Salt Lake City but commute outside of town to work.',
+                                   ' live in Galveston but commute outside of town to work.',
                     'type': ['incore:CGEoutcr']
                 },
                 {
