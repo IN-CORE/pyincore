@@ -82,12 +82,14 @@ class DataService:
         r = self.client.get(url, timeout=timeout, **kwargs)
         return r.json()
 
-    def get_dataset_blob(self, dataset_id: str, join=None):
+    def get_dataset_blob(self, dataset_id: str, join=None, timeout=(30, 600), **kwargs):
         """Retrieve a blob of the dataset. Blob API endpoint is called.
 
         Args:
             dataset_id (str): ID of the Dataset.
             join (bool): Add join parameter if True. Default None.
+            timeout (tuple[int,int]): Session timeout.
+            **kwargs: A dictionary of external parameters.
 
         Returns:
             str: Folder or file name.
@@ -104,7 +106,7 @@ class DataService:
             # for consistency check to ensure the repository hash is recorded in service.json
             self.client.create_service_json_entry()
 
-            local_filename = self.download_dataset_blob(cache_data_dir, dataset_id)
+            local_filename = self.download_dataset_blob(cache_data_dir, dataset_id, timeout=timeout, **kwargs )
 
         # if cache_data_dir exist, check if id folder and zip file exist inside
         else:
@@ -113,7 +115,7 @@ class DataService:
                     local_filename = os.path.join(cache_data_dir, fname)
                     print('Dataset already exists locally. Reading from local cached zip.')
             if not local_filename:
-                local_filename = self.download_dataset_blob(cache_data_dir, dataset_id)
+                local_filename = self.download_dataset_blob(cache_data_dir, dataset_id, timeout=timeout, **kwargs)
 
         folder = self.unzip_dataset(local_filename)
         if folder is not None:
@@ -297,18 +299,20 @@ class DataService:
 
         return r.json()
 
-    def delete_dataset(self, dataset_id: str):
+    def delete_dataset(self, dataset_id: str, timeout=(30, 600), **kwargs):
         """Delete dataset. Delete API endpoint is called.
 
         Args:
             dataset_id (str): ID of the Dataset to be deleted.
+            timeout (tuple[int,int]): Session timeout.
+            **kwargs: A dictionary of external parameters.
 
         Returns:
             obj: HTTP DELETE Response. Json model of the delete action.
 
         """
         url = urljoin(self.base_url, dataset_id)
-        r = self.client.delete(url)
+        r = self.client.delete(url, timeout=timeout, **kwargs)
         return r.json()
 
     def get_files(self, timeout=(30, 600), **kwargs):
