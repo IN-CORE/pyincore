@@ -1968,24 +1968,27 @@ class GalvestonCGEModel(BaseAnalysis):
         # iNum = len(sims.columns)
         KS00 = KS0.copy()
 
+        solver_status = False
         for num in range(iNum):
             KS0.loc[K, I] = KS00.loc[K, I].mul(sims.iloc[:, num])
             KS0 = KS0.fillna(0.0)
-            run_solver(filename, tmp)
+            solver_status = run_solver(filename, tmp)
 
+        if solver_status:
+            domestic_supply, gross_income, household_count, pre_disaster_demand, post_disaster_demand = \
+                gams_to_dataframes(iNum, vars, H, L, soln)
 
-        domestic_supply, gross_income, household_count, pre_disaster_demand, post_disaster_demand = \
-            gams_to_dataframes(iNum, vars, H, L, soln)
-
-        self.set_result_csv_data("domestic-supply", domestic_supply, name="domestic-supply", source="dataframe",
-                                 index=True)
-        self.set_result_csv_data("pre-disaster-factor-demand", pre_disaster_demand,
-                                 name="pre-disaster-factor-demand", source="dataframe", index=True)
-        self.set_result_csv_data("post-disaster-factor-demand", post_disaster_demand,
-                                 name="post-disaster-factor-demand", source="dataframe", index=True)
-        self.set_result_csv_data("gross-income", gross_income, name="gross-income", source="dataframe", index=True)
-        self.set_result_csv_data("household-count", household_count, name="household-count", source="dataframe",
-                                 index=True)
+            self.set_result_csv_data("domestic-supply", domestic_supply, name="domestic-supply", source="dataframe",
+                                     index=True)
+            self.set_result_csv_data("pre-disaster-factor-demand", pre_disaster_demand,
+                                     name="pre-disaster-factor-demand", source="dataframe", index=True)
+            self.set_result_csv_data("post-disaster-factor-demand", post_disaster_demand,
+                                     name="post-disaster-factor-demand", source="dataframe", index=True)
+            self.set_result_csv_data("gross-income", gross_income, name="gross-income", source="dataframe", index=True)
+            self.set_result_csv_data("household-count", household_count, name="household-count", source="dataframe",
+                                     index=True)
+        else:
+            raise ValueError("Solution infeasible - no output to save")
 
     def get_spec(self):
         return {
