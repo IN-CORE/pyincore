@@ -1872,17 +1872,24 @@ class GalvestonCGEModel(BaseAnalysis):
 
             results = opt.solve(model, keepfiles=keepfiles, tee=stream_solver)
 
-            x = [None for i in range(vars.nvars)]
+            if results.solver.status == SolverStatus.ok and results.solver.termination_condition == TerminationCondition.optimal:
+                x = [None for i in range(vars.nvars)]
 
-            with open(temp_file_name, 'w') as f:
-                for i in range(vars.nvars):
-                    f.write('x[' + str(i) + ']=value(model.x' + str(i) + ')\n')
+                with open(temp_file_name, 'w') as f:
+                    for i in range(vars.nvars):
+                        f.write('x[' + str(i) + ']=value(model.x' + str(i) + ')\n')
 
-            exec(open(temp_file_name).read())
+                exec(open(temp_file_name).read())
+                soln.append(x[:])
+                return True
 
-            soln.append(x[:])
+            elif results.solver.termination_condition == TerminationCondition.infeasible:
+                print("Solution is not feasible.")
+                return False
 
-            return None
+            else:
+                print("Solver Status: ", results.solver.status)
+                return False
 
         '''
         Calibrate the model 
