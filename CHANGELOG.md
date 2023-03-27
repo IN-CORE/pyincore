@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.10.0] - not released
+## [Unreleased] 
 
 ### Fixed
 - Population Dislocation utility function arbitrarily assumes there will be dislocated and non-dislocated [#301](https://github.com/IN-CORE/pyincore/issues/301)
