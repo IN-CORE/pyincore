@@ -80,6 +80,27 @@ analyses/example
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
     :members:
 
+analyses/galvestoncge
+==================
+..  autoclass:: galvestoncge.galvestoncge.GalvestonCGEModel
+    :members:
+..  autoclass:: galvestoncge.equationlib.VarContainer
+    :members:
+..  autoclass:: galvestoncge.equationlib.Variable
+    :members:
+..  autoclass:: galvestoncge.equationlib.ExprItem
+    :members:
+..  autoclass:: galvestoncge.equationlib.Expr
+    :members:
+..  autoclass:: galvestoncge.equationlib.ExprM
+    :members:
+..  autofunction:: galvestoncge.outputfunctions.baseValue
+    :members:
+..  autofunction:: galvestoncge.outputfunctions.newValue
+    :members:
+..  autofunction:: galvestoncge.outputfunctions.getDiff
+    :members:
+
 analyses/housingrecovery
 ========================
 ..  autoclass:: housingrecovery.housingrecovery.HousingRecovery
