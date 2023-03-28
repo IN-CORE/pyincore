@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Added Galveston Capital Shock and CGE models as a submodule[#239](https://github.com/IN-CORE/pyincore/issues/239)
+
 ### Fixed
 - CGE output post process util function [#298](https://github.com/IN-CORE/pyincore/issues/298)
 - Population Dislocation utility function arbitrarily assumes there will be dislocated and non-dislocated [#301](https://github.com/IN-CORE/pyincore/issues/301)
