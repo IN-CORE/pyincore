@@ -64,7 +64,7 @@ def run_convert_Joplin_cge_json_path(testpath):
                                   "joplin_cge_total_household_income.json", income_categories=categories)
 
     categories = []
-    for d in ["Goods", "Trades", "Others", "HS1", "HS2", "HS3"]:
+    for d in ["GOODS", "TRADE", "OTHER"]:
         for r in region:
             categories.append(d + "_" + r)
     cge_json.get_cge_employment(None, None, os.path.join(testpath, "pre-disaster-factor-demand.csv"),
@@ -72,7 +72,7 @@ def run_convert_Joplin_cge_json_path(testpath):
                                 "joplin_cge_employment.json", demand_categories=categories)
 
     categories = []
-    for d in ["GOODS", "TRADE", "OTHER"]:
+    for d in ["Goods", "Trades", "Others", "HS1", "HS2", "HS3"]:
         for r in region:
             categories.append(d + "_" + r)
     cge_json.get_cge_domestic_supply(None,
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     saltlake_cge.load_remote_input_dataset("sector_shocks", "64075ec46121f9438872a802")
 
     saltlake_cge.run_analysis()
-    run_convert_SLC_cge_json_path(testpath="../analyses/saltlakecge")
+    run_convert_SLC_cge_json_path(testpath="./")
     print("Salt lake city post processing done.")
 
     # run joplin cge
@@ -138,5 +138,5 @@ if __name__ == '__main__':
     joplin_cge.load_remote_input_dataset("sector_shocks", sector_shocks)
 
     joplin_cge.run_analysis()
-    run_convert_Joplin_cge_json_path("../analyses/joplincge")
+    run_convert_Joplin_cge_json_path("./")
     print("Joplin post processing done.")
