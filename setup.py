@@ -7,7 +7,7 @@
 from setuptools import setup, find_packages
 
 # version number of pyincore
-version = '1.9.0'
+version = '1.10.0'
 
 with open("README.rst", encoding="utf-8") as f:
     readme = f.read()
