@@ -1,8 +1,10 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-from build.lib.pyincore.analyses.galvestoncge.galvestoncge import GalvestonCGEModel
-from build.lib.pyincore.analyses.saltlakecge.saltlakecge import SaltLakeCGEModel
+import pytest
+
+from pyincore.analyses.galvestoncge.galvestoncge import GalvestonCGEModel
+from pyincore.analyses.saltlakecge.saltlakecge import SaltLakeCGEModel
 from pyincore import IncoreClient
 from pyincore.analyses.joplincge import JoplinCGEModel
 from pyincore.utils.cgeoutputprocess import CGEOutputProcess
@@ -13,7 +15,6 @@ import os
 # This script runs JoplinCGEModel analysis with input files from
 # IN-CORE development services. The output csv files are converted to json
 # format suitable for the IN-CORE Playbook tool.
-
 def run_convert_SLC_cge_json_path(testpath):
     # test the external file with a path
 
