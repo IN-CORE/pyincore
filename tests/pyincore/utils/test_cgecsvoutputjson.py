@@ -104,7 +104,7 @@ def run_convert_Galveston_cge_json_path(testpath):
             categories.append(r + d)  # e.g.iAGMIN
     for d in ["HS1", "HS2", "HS3"]:
         for r in region:
-            categories.append(d + r) # e.g.HS1I
+            categories.append(d + r)  # e.g.HS1I
     cge_json.get_cge_domestic_supply(None,
                                      os.path.join(testpath, "domestic-supply.csv"),
                                      "galveston_cge_domestic_supply.json",
