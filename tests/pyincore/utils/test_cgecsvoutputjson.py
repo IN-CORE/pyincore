@@ -114,7 +114,7 @@ def run_convert_Galveston_cge_json_path(testpath):
 
 if __name__ == '__main__':
 
-    # run slc cge
+    # # run slc cge
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     saltlake_cge = SaltLakeCGEModel(client)
 
