@@ -1,6 +1,7 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
+from build.lib.pyincore.analyses.galvestoncge.galvestoncge import GalvestonCGEModel
 from build.lib.pyincore.analyses.saltlakecge.saltlakecge import SaltLakeCGEModel
 from pyincore import IncoreClient
 from pyincore.analyses.joplincge import JoplinCGEModel
@@ -53,8 +54,6 @@ def run_convert_Joplin_cge_json_path(testpath):
     # test the external file with a path
 
     cge_json = CGEOutputProcess()
-    region = []
-
     categories = ["HH1", "HH2", "HH3", "HH4", "HH5"]
     cge_json.get_cge_household_count(None,
                                      os.path.join(testpath, "household-count.csv"),
@@ -63,20 +62,52 @@ def run_convert_Joplin_cge_json_path(testpath):
                                   os.path.join(testpath, "gross-income.csv"),
                                   "joplin_cge_total_household_income.json", income_categories=categories)
 
-    categories = []
-    for d in ["GOODS", "TRADE", "OTHER"]:
-        for r in region:
-            categories.append(d + "_" + r)
+    categories = ["GOODS", "TRADE", "OTHER"]
     cge_json.get_cge_employment(None, None, os.path.join(testpath, "pre-disaster-factor-demand.csv"),
                                 os.path.join(testpath, "post-disaster-factor-demand.csv"),
                                 "joplin_cge_employment.json", demand_categories=categories)
 
-    categories = []
-    for d in ["Goods", "Trades", "Others", "HS1", "HS2", "HS3"]:
-        for r in region:
-            categories.append(d + "_" + r)
+    categories = ["Goods", "Trades", "Others", "HS1", "HS2", "HS3"]
     cge_json.get_cge_domestic_supply(None,
-                                     os.path.join(testpath, "domestic-supply.csv"), "slc_cge_domestic_supply.json",
+                                     os.path.join(testpath, "domestic-supply.csv"), "joplin_cge_domestic_supply.json",
+                                     supply_categories=categories)
+    return True
+
+
+def run_convert_Galveston_cge_json_path(testpath):
+    # test the external file with a path
+
+    cge_json = CGEOutputProcess()
+    region = ["I", "M"]
+
+    categories = ["IHH1", "IHH2", "IHH3", "IHH4", "IHH5", "MHH1", "MHH2", "MHH3", "MHH4", "MHH5"]
+    cge_json.get_cge_household_count(None,
+                                     os.path.join(testpath, "household-count.csv"),
+                                     "galveston_cge_total_household_count.json", income_categories=categories)
+    cge_json.get_cge_gross_income(None,
+                                  os.path.join(testpath, "gross-income.csv"),
+                                  "galveston_cge_total_household_income.json", income_categories=categories)
+
+    categories = []
+    for d in ["AGMIN", "UTIL", "CONS", "MANU", "WHOLE", "RETAIL", "TRANS", "PROFSER", "REALE", "EDU", "HEALTH", "ART",
+              "ACCO"]:
+        for r in region:
+            categories.append(r + d)
+    cge_json.get_cge_employment(None, None, os.path.join(testpath, "pre-disaster-factor-demand.csv"),
+                                os.path.join(testpath, "post-disaster-factor-demand.csv"),
+                                "galveston_cge_employment.json", demand_categories=categories)
+
+    categories = []
+    for d in ["AGMIN", "UTIL", "CONS", "MANU", "WHOLE", "RETAIL", "TRANS", "PROFSER", "REALE", "EDU", "HEALTH", "ART",
+              "ACCO"]:
+        for r in region:
+            categories.append(r + d)  # e.g.iAGMIN
+    for d in ["HS1", "HS2", "HS3"]:
+        for r in region:
+            categories.append(d + r) # e.g.HS1I
+    cge_json.get_cge_domestic_supply(None,
+                                     os.path.join(testpath, "domestic-supply.csv"),
+                                     "galveston_cge_domestic_supply.json",
                                      supply_categories=categories)
     return True
 
@@ -140,3 +171,19 @@ if __name__ == '__main__':
     joplin_cge.run_analysis()
     run_convert_Joplin_cge_json_path("./")
     print("Joplin post processing done.")
+
+    galveston_cge = GalvestonCGEModel(client)
+
+    galveston_cge.set_parameter("model_iterations", 1)
+    galveston_cge.load_remote_input_dataset("SAM", "6420c377b18d026e7c7dc327")
+    galveston_cge.load_remote_input_dataset("BB", "6420c3d2b18d026e7c7dc328")
+    galveston_cge.load_remote_input_dataset("MISCH", "6420c434b18d026e7c7dc32e")
+    galveston_cge.load_remote_input_dataset("EMPLOY", "6420c474b18d026e7c7dc334")
+    galveston_cge.load_remote_input_dataset("JOBCR", "6420c4d9b18d026e7c7dc33a")
+    galveston_cge.load_remote_input_dataset("OUTCR", "6420c511b18d026e7c7dc340")
+    galveston_cge.load_remote_input_dataset("sector_shocks", "64219be5b18d026e7c7e1534")
+
+    galveston_cge.run_analysis()
+
+    run_convert_Galveston_cge_json_path("./")
+    print("Galveston post processing done.")
