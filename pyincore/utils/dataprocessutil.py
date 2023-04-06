@@ -8,7 +8,7 @@ import geopandas as gpd
 import json
 import pandas as pd
 
-from pyincore import Dataset, DataService
+from pyincore import Dataset, DataService, IncoreClient
 
 
 class DataProcessUtil:
@@ -184,7 +184,7 @@ class DataProcessUtil:
 
         Args:
             inventory: dataframe represent inventory
-            bldg_func: building func dataset
+            bldg_func: building func state dataset
             arch_mapping: Path to the archetype mappings
             arch_col: archetype column to use for the clustering
 
@@ -271,3 +271,34 @@ class DataProcessUtil:
         dmg_concat.rename(columns={0: 'max_prob', 1: 'max_state'}, inplace=True)
 
         return dmg_concat
+
+
+if __name__ == "__main__":
+    client = IncoreClient()
+
+    # Data Service
+    dataservice = DataService(client)
+
+    # Archetype mapping file
+    archetype_mapping = "5fca92781ab3d87c35db1e54"
+    archetype_mapping_dataset = Dataset.from_data_service(archetype_mapping, dataservice)
+    archetype_mapping_path = archetype_mapping_dataset.get_file_path()
+    arch_mapping = pd.read_csv(archetype_mapping_path)
+
+    # Building dataset id
+    building_dataset_id = "5dbc8478b9219c06dd242c0d"
+    bldg_dataset = Dataset.from_data_service(building_dataset_id, dataservice)
+    buildings = bldg_dataset.get_dataframe_from_shapefile()
+
+    # Cluster the mcs building failure probability - essentially building functionality without electric power being
+    # considered
+    bldg_dmg_df = pd.read_csv("./building_damage_2_failure_state.csv", usecols=['guid', 'failure'])
+
+    arch_column = "archetype"
+    if args.arch_col is not None and len(args.arch_col) > 0:
+        arch_column = args.arch_col
+
+    ret_json = DataProcessUtil.create_mapped_func_result(buildings, bldg_dmg_df, arch_mapping, arch_column)
+
+    # bldg_dmg_df.to_csv(args.result_name + "_mcs_building_failure_probability_cluster.csv",
+    #                    columns=['guid', 'probability'], index=False)
