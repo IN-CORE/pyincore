@@ -194,7 +194,7 @@ class DataProcessUtil:
             ret_json: JSON of the results ordered by cluster and category.
 
         """
-        def _sum_failure(series):
+        def _sum_average(series):
             return reduce(lambda x, y: np.mean(x + y).round(0), series)
 
         func_state = ["percent_functional", "percent_non_functional", "num_functional", "num_non_functional"]
@@ -205,58 +205,45 @@ class DataProcessUtil:
             "cluster", "category"]]
         mapped_df = mapped_df[["guid", "failure", "category", "cluster"]]
         mapped_df["failure_array"] = mapped_df["failure"].apply(lambda x: np.array([int(x) for x in x.split(",")]))
-        # group by cluster
-        result_by_cluster = mapped_df.groupby(by=["cluster", "category"], sort=False, as_index=False).agg(
-            {"guid": "count", "failure_array": [_sum_failure]})
 
-        # clean up
-        result_by_cluster.rename(columns={"guid": "tot_count", "failure_array": "num_functional"}, inplace=True)
+        def _group_by(by_column):
+            # group by cluster
+            result = mapped_df.groupby(by=by_column, sort=False, as_index=False).agg(
+                {"guid": "count", "failure_array": [_sum_average]})
 
-        # 0 (failed), 1 (not failed). MCS
-        # 0 otherwise (not functional), 1 (functional),  Functionality
-        result_by_cluster["num_non_functional"] = result_by_cluster["tot_count"].squeeze() - result_by_cluster["num_functional"].squeeze()
-        result_by_cluster["percent_functional"] = result_by_cluster["num_functional"].squeeze()/result_by_cluster["tot_count"].squeeze()
-        result_by_cluster["percent_non_functional"] = 1 - result_by_cluster["percent_functional"]
+            # clean up
+            result.rename(columns={"guid": "tot_count", "failure_array": "num_functional"}, inplace=True)
 
-        # remove the tuples in column
-        result_by_cluster.columns = [x[0] if len(x) > 1 else x for x in result_by_cluster.columns]
+            # 0 (failed), 1 (not failed). MCS
+            # 0 otherwise (not functional), 1 (functional),  Functionality
+            result["num_non_functional"] = result["tot_count"].squeeze() - result["num_functional"].squeeze()
+            result["percent_functional"] = result["num_functional"].squeeze() / result["tot_count"].squeeze()
+            result["percent_non_functional"] = 1 - result["percent_functional"]
 
-        # more clean up
-        result_by_cluster = result_by_cluster.drop("tot_count", 1)
-        result_by_cluster = pd.merge(unique_cluster, result_by_cluster, how="left", on=["cluster", "category"])
+            # remove the tuples in column
+            result.columns = [x[0] if len(x) > 1 else x for x in result.columns]
 
-        # Add missing max damage states. Handles case when no inventory fall under some damage states.
-        result_by_cluster = result_by_cluster.reindex(result_by_cluster.columns.union(
-            func_state, sort=False), axis=1, fill_value=0)
+            # more clean up
+            result = pd.merge(unique_cluster, result, how="left", on=by_column)
 
-        # replace NaN
-        result_by_cluster[func_state] = result_by_cluster[func_state].fillna(-1)
-        result_by_cluster[["num_functional", "num_non_functional"]] = \
-            result_by_cluster[["num_functional", "num_non_functional"]].astype(int)
+            # Add missing max damage states. Handles case when no inventory fall under some damage states.
+            result = result.reindex(result.columns.union(func_state, sort=False), axis=1, fill_value=0)
 
-        # # group by category
-        # result_by_category = mapped_df.groupby(by=["category"], sort=False, as_index=False).agg({"guid": "count",
-        #                                                                                          "probability": "mean"})
-        # result_by_category.rename(columns={"guid": "tot_count", "probability": "percent_functional"}, inplace=True)
-        # result_by_category["percent_non_functional"] = 1 - result_by_category["percent_functional"]
-        # result_by_category["num_functional"] = (
-        #         result_by_category["tot_count"] * result_by_category["percent_functional"]).round(0)
-        # result_by_category["num_non_functional"] = (
-        #         result_by_category["tot_count"] * result_by_category["percent_non_functional"]).round(0)
-        # result_by_category = result_by_category.drop("tot_count", 1)
-        # result_by_category = pd.merge(unique_categories, result_by_category, how="left", on=["category"])
-        # # replace NaN
-        # result_by_category[func_state] = result_by_category[func_state].fillna(-1)
-        # result_by_category[["num_functional", "num_non_functional"]] = result_by_category[
-        #     ["num_functional", "num_non_functional"]].astype(int)
-        #
+            # replace NaN
+            result[func_state] = result[func_state].fillna(-1)
+            result[["num_functional", "num_non_functional"]] = result[["num_functional", "num_non_functional"]].astype(int)
+
+            return result
+
+        result_by_cluster = _group_by(by_column=["cluster", "category"])
+        result_by_category = _group_by(by_column=["category"])
+
         cluster_records = result_by_cluster.to_json(orient="records")
-        # category_records = result_by_category.to_json(orient="records")
+        category_records = result_by_category.to_json(orient="records")
         json_by_cluster = json.loads(cluster_records)
-        # json_by_category = json.loads(category_records)
+        json_by_category = json.loads(category_records)
 
-        # return {"by_cluster": json_by_cluster, "by_category": json_by_category}
-        return {"by_cluster": json_by_cluster}
+        return {"by_cluster": json_by_cluster, "by_category": json_by_category}
 
     @staticmethod
     def get_max_damage_state(dmg_result):
@@ -312,6 +299,9 @@ if __name__ == "__main__":
     arch_column = "archetype"
 
     ret_json = DataProcessUtil.create_mapped_func_result(buildings, bldg_dmg_df, arch_mapping, arch_column)
+
+    with open("./joplin_mcs.json", "w") as f:
+        json.dump(ret_json, f, indent=2)
 
     # bldg_dmg_df.to_csv(args.result_name + "_mcs_building_failure_probability_cluster.csv",
     #                    columns=["guid", "probability"], index=False)
