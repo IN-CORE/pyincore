@@ -273,35 +273,3 @@ class DataProcessUtil:
         dmg_concat.rename(columns={0: "max_prob", 1: "max_state"}, inplace=True)
 
         return dmg_concat
-
-
-if __name__ == "__main__":
-    client = IncoreClient()
-
-    # Data Service
-    dataservice = DataService(client)
-
-    # Archetype mapping file
-    archetype_mapping = "5fca92781ab3d87c35db1e54"
-    archetype_mapping_dataset = Dataset.from_data_service(archetype_mapping, dataservice)
-    archetype_mapping_path = archetype_mapping_dataset.get_file_path()
-    arch_mapping = pd.read_csv(archetype_mapping_path)
-
-    # Building dataset id
-    building_dataset_id = "5dbc8478b9219c06dd242c0d"
-    bldg_dataset = Dataset.from_data_service(building_dataset_id, dataservice)
-    buildings = bldg_dataset.get_dataframe_from_shapefile()
-
-    # Cluster the mcs building failure probability - essentially building functionality without electric power being
-    # considered
-    bldg_dmg_df = pd.read_csv("./tornado_mc_failure_probability_buildings_failure_state.csv", usecols=["guid", "failure"])
-
-    arch_column = "archetype"
-
-    ret_json = DataProcessUtil.create_mapped_func_result(buildings, bldg_dmg_df, arch_mapping, arch_column)
-
-    with open("./joplin_mcs.json", "w") as f:
-        json.dump(ret_json, f, indent=2)
-
-    # bldg_dmg_df.to_csv(args.result_name + "_mcs_building_failure_probability_cluster.csv",
-    #                    columns=["guid", "probability"], index=False)
