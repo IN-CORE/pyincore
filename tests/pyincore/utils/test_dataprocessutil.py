@@ -1,10 +1,10 @@
 import json
 
+import pandas as pd
 import pytest
 
-from pyincore.utils.dataprocessutil import DataProcessUtil as util
 from pyincore import Dataset, DataService
-import pandas as pd
+from pyincore.utils.dataprocessutil import DataProcessUtil as util
 
 
 @pytest.fixture
@@ -46,11 +46,11 @@ def test_get_mapped_result_from_analysis(client):
     assert "max_state" in max_state_df._info_axis.values
 
 
-def test_functionality_cluster(client, archetype_mapping="5fca915fb34b193f7a44059b",
-                               building_dataset_id="5fa0b132cc6848728b66948d",
-                               bldg_func_state_id="5f0f6fbfb922f96f4e989ed8",
-                               arch_column="archetype",
-                               title="joplin_mcs"):
+def _functionality_cluster(client, archetype_mapping="5fca915fb34b193f7a44059b",
+                           building_dataset_id="5fa0b132cc6848728b66948d",
+                           bldg_func_state_id="5f0f6fbfb922f96f4e989ed8",
+                           arch_column="archetype",
+                           title="joplin_mcs"):
     dataservice = DataService(client)
 
     # Archetype mapping file
@@ -72,3 +72,19 @@ def test_functionality_cluster(client, archetype_mapping="5fca915fb34b193f7a4405
 
     with open(title + "_cluster.json", "w") as f:
         json.dump(ret_json, f, indent=2)
+
+
+def test_joplin_mcs_cluster(client):
+    _functionality_cluster(client, archetype_mapping="5fca915fb34b193f7a44059b",
+                           building_dataset_id="5fa0b132cc6848728b66948d",
+                           bldg_func_state_id="5f0f6fbfb922f96f4e989ed8",
+                           arch_column="archetype",
+                           title="joplin_mcs")
+
+
+def test_galveston_mcs_cluster(client):
+    _functionality_cluster(client, archetype_mapping="6420befbb18d026e7c7dbafc",
+                           building_dataset_id="63ff69a96d3b2a308baaca12",
+                           bldg_func_state_id="642f6230f27db66801038964",
+                           arch_column="arch_wind",
+                           title="galveston_mcs")
