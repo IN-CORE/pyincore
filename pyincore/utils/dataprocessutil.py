@@ -198,11 +198,16 @@ class DataProcessUtil:
             return reduce(lambda x, y: np.mean(x + y).round(0), series)
 
         func_state = ["percent_functional", "percent_non_functional", "num_functional", "num_non_functional"]
+
+        # unify mcs and bldg func naming
+        bldg_func.rename(columns={"building_guid": "guid", "samples": "failure"}, inplace=True)
+
         func_merged = pd.merge(inventory, bldg_func, on="guid")
         mapped_df = pd.merge(func_merged, arch_mapping, on=arch_col)
         unique_categories = arch_mapping.groupby(by=["category"], sort=False, as_index=False).count()["category"]
         unique_cluster = arch_mapping.groupby(by=["cluster", "category"], sort=False, as_index=False).count()[[
             "cluster", "category"]]
+
         mapped_df = mapped_df[["guid", "failure", "category", "cluster"]]
         mapped_df["failure_array"] = mapped_df["failure"].apply(lambda x: np.array([int(x) for x in x.split(",")]))
 
@@ -231,6 +236,7 @@ class DataProcessUtil:
 
             # replace NaN
             result[func_state] = result[func_state].fillna(-1)
+            result["tot_count"] = result["tot_count"].fillna(-1)
             result[["num_functional", "num_non_functional"]] = result[["num_functional", "num_non_functional"]].astype(int)
 
             return result

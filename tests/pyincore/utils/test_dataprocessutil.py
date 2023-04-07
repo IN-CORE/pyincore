@@ -66,7 +66,7 @@ def _functionality_cluster(client, archetype_mapping="5fca915fb34b193f7a44059b",
     # considered
     bldg_func_state_dataset = Dataset.from_data_service(bldg_func_state_id, dataservice)
     bldg_func_state_dataset_path = bldg_func_state_dataset.get_file_path()
-    bldg_func_state = pd.read_csv(bldg_func_state_dataset_path, usecols=["guid", "failure"])
+    bldg_func_state = pd.read_csv(bldg_func_state_dataset_path)
 
     ret_json = util.create_mapped_func_result(buildings, bldg_func_state, arch_mapping, arch_column)
 
@@ -82,9 +82,25 @@ def test_joplin_mcs_cluster(client):
                            title="joplin_mcs")
 
 
+def test_joplin_bldg_func_cluster(client):
+    _functionality_cluster(client, archetype_mapping="5fca915fb34b193f7a44059b",
+                           building_dataset_id="5fa0b132cc6848728b66948d",
+                           bldg_func_state_id="642f66e5f27db6680103c4ad",
+                           arch_column="archetype",
+                           title="joplin_bldg_func")
+
+
 def test_galveston_mcs_cluster(client):
     _functionality_cluster(client, archetype_mapping="6420befbb18d026e7c7dbafc",
                            building_dataset_id="63ff69a96d3b2a308baaca12",
                            bldg_func_state_id="642f6230f27db66801038964",
                            arch_column="arch_wind",
                            title="galveston_mcs")
+
+
+def test_galveston_bldg_func_cluster(client):
+    _functionality_cluster(client, archetype_mapping="6420befbb18d026e7c7dbafc",
+                           building_dataset_id="63ff69a96d3b2a308baaca12",
+                           bldg_func_state_id="642f6495f27db66801039434",
+                           arch_column="arch_wind",
+                           title="galveston_bldg_func")
