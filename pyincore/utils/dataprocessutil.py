@@ -211,7 +211,7 @@ class DataProcessUtil:
         mapped_df = mapped_df[["guid", "failure", "category", "cluster"]]
         mapped_df["failure_array"] = mapped_df["failure"].apply(lambda x: np.array([int(x) for x in x.split(",")]))
 
-        def _group_by(by_column):
+        def _group_by(by_column, unique):
             # group by cluster
             result = mapped_df.groupby(by=by_column, sort=False, as_index=False).agg(
                 {"guid": "count", "failure_array": [_sum_average]})
@@ -229,7 +229,7 @@ class DataProcessUtil:
             result.columns = [x[0] if len(x) > 1 else x for x in result.columns]
 
             # more clean up
-            result = pd.merge(unique_cluster, result, how="left", on=by_column)
+            result = pd.merge(unique, result, how="left", on=by_column)
 
             # Add missing max damage states. Handles case when no inventory fall under some damage states.
             result = result.reindex(result.columns.union(func_state, sort=False), axis=1, fill_value=0)
@@ -241,8 +241,8 @@ class DataProcessUtil:
 
             return result
 
-        result_by_cluster = _group_by(by_column=["cluster", "category"])
-        result_by_category = _group_by(by_column=["category"])
+        result_by_cluster = _group_by(by_column=["cluster", "category"], unique=unique_cluster)
+        result_by_category = _group_by(by_column=["category"], unique=unique_categories)
 
         cluster_records = result_by_cluster.to_json(orient="records")
         category_records = result_by_category.to_json(orient="records")
