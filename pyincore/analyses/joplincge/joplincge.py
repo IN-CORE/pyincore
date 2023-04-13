@@ -1758,19 +1758,6 @@ class JoplinCGEModel(BaseAnalysis):
         run_solver(filename, tmp)
 
         '''
-        cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
-        if not os.path.isdir(cge_tmp_folder):  # create the folder if there is no folder
-            os.mkdir(cge_tmp_folder)
-        logger.debug(cge_tmp_folder)
-
-        filename = os.path.join(cge_tmp_folder, "ipopt_cons.py")
-        tmp = os.path.join(cge_tmp_folder, "tmp.py")
-
-        # print("Calibration: ")
-        run_solver(filename, tmp)
-        '''
-
-        '''
         Simulation code below:
         In each simulation:
         
