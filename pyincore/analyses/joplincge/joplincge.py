@@ -1752,6 +1752,12 @@ class JoplinCGEModel(BaseAnalysis):
         # TODO: we need to generate the "solverconstatnt" folder with username since it uses system tmp
         # TODO: there is a situation that multiple users on system can run this together
 
+        filename = "ipopt_cons.py"
+        tmp = "tmp.py"
+        print("Calibration: ")
+        run_solver(filename, tmp)
+
+        '''
         cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
         if not os.path.isdir(cge_tmp_folder):  # create the folder if there is no folder
             os.mkdir(cge_tmp_folder)
@@ -1762,6 +1768,7 @@ class JoplinCGEModel(BaseAnalysis):
 
         # print("Calibration: ")
         run_solver(filename, tmp)
+        '''
 
         '''
         Simulation code below:
