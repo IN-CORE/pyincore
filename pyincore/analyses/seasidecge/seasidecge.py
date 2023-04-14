@@ -5,7 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import os
-import tempfile
 
 from pyomo.environ import *
 from pyomo.opt import SolverFactory

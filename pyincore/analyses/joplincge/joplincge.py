@@ -7,7 +7,6 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory
 
 import os
-import tempfile
 import pandas as pd
 
 logger = pyglobals.LOGGER
