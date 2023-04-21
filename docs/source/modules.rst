@@ -100,6 +100,8 @@ analyses/galvestoncge
     :members:
 ..  autofunction:: galvestoncge.outputfunctions.getDiff
     :members:
+..  autofunction:: galvestoncge.galvestonoutput.gams_to_dataframes
+    :members:
 
 analyses/housingrecovery
 ========================
@@ -225,6 +227,29 @@ analyses/seasidecge
 ..  autoclass:: seasidecge.solverconstants.equationlib.Expr
     :members:
 ..  autoclass:: seasidecge.solverconstants.equationlib.ExprM
+    :members:
+
+analyses/saltlakecge
+==================
+..  autoclass:: saltlakecge.saltlakecge.SaltLakeCGEModel
+    :members:
+..  autoclass:: saltlakecge.equationlib.VarContainer
+    :members:
+..  autoclass:: saltlakecge.equationlib.Variable
+    :members:
+..  autoclass:: saltlakecge.equationlib.ExprItem
+    :members:
+..  autoclass:: saltlakecge.equationlib.Expr
+    :members:
+..  autoclass:: saltlakecge.equationlib.ExprM
+    :members:
+..  autofunction:: saltlakecge.outputfunctions.baseValue
+    :members:
+..  autofunction:: saltlakecge.outputfunctions.newValue
+    :members:
+..  autofunction:: saltlakecge.outputfunctions.getDiff
+    :members:
+..  autofunction:: saltlakecge.saltlakecge.gams_to_dataframes
     :members:
 
 analyses/socialvulnerability
