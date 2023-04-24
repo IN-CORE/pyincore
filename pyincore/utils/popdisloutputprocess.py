@@ -514,7 +514,19 @@ class PopDislOutputProcess:
         # Dislocated by race and ethnicity
         hud = self.pop_disl_result
         hud_vals = hud["dislocated"].value_counts()
-        hua_disl = [int(hud_vals[False]), int(hud_vals[True])]
+
+        hud_vals_false = 0
+        hud_vals_true = 0
+
+        # if there is "False" category, assign the value
+        if False in hud_vals.keys().values:
+            hud_vals_false = int(hud_vals[False])
+
+        # if there is "True" category, assign the value
+        if True in hud_vals.keys().values:
+            hud_vals_true = int(hud_vals[True])
+
+        hua_disl = [hud_vals_false, hud_vals_true]
 
         pd_disl = [int(hud["numprec"].where(hud["dislocated"] == 0).sum()),
                    int(hud["numprec"].where(hud["dislocated"] == 1).sum())]

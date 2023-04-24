@@ -3,10 +3,10 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-from pyincore.analyses.saltlakecge.equationlib import *
+
+from pyincore.analyses.galvestoncge.equationlib import *
 import pandas as pd
 import numpy as np
-
 
 # Return initial values function
 def baseValue(vars, soln, eqName):
@@ -68,3 +68,5 @@ def newValue(vars, soln, eqName, ittr):
 def getDiff(vars, soln, eqName, ittr):
     difference = newValue(vars, soln, eqName, ittr) - baseValue(vars, soln, eqName)
     return difference
+
+

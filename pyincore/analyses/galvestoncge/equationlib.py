@@ -43,20 +43,20 @@ class VarContainer:
         """
         if rows is not None and cols is not None:
             size = len(rows) * len(cols)
-            self.namelist[name] = {
-                'nrows': len(rows),
-                'ncols': len(cols),
-                'rows': rows,
-                'cols': cols,
-                'start': self.nvars,
+            self.namelist[name] = { \
+                'nrows': len(rows), \
+                'ncols': len(cols), \
+                'rows': rows, \
+                'cols': cols, \
+                'start': self.nvars, \
                 'size': size
             }
         elif rows is not None and cols is None:
             size = len(rows)
             self.namelist[name] = {
-                'nrows': len(rows),
-                'rows': rows,
-                'start': self.nvars,
+                'nrows': len(rows), \
+                'rows': rows, \
+                'start': self.nvars, \
                 'size': size
             }
         else:
@@ -85,7 +85,7 @@ class VarContainer:
             if 'nrows' in info and 'ncols' in info:
                 values = pd.DataFrame(index=info['rows'], columns=info['cols']).fillna(values)
             elif 'nrows' in info and 'ncols' not in info:
-                values = pd.Series(index=info['rows'], dtype=pd.Float64Dtype).fillna(values)
+                values = pd.Series(index=info['rows'], dtype="float64").fillna(values)
 
         if type(values) == pd.DataFrame:
             rows = values.index.tolist()
@@ -182,8 +182,7 @@ class VarContainer:
 
     def get(self, name, x=None):
         """
-          Returns a Dataframe, Series, or a variable based on the given name
-          and the result array returned from the solver
+          Returns a Dataframe, Series, or a variable based on the given name and the result array returned from the solver
 
           :param name: GAMS variable name
           :return: if x is not given, it returns the initial values
@@ -199,7 +198,7 @@ class VarContainer:
                 for j in info['cols']:
                     ret.at[i, j] = x[self.getIndex(name, row=i, col=j)]
         elif 'nrows' in info and 'ncols' not in info:
-            ret = pd.Series(index=info['rows'], dtype=pd.Float64Dtype).fillna(0.0)
+            ret = pd.Series(index=info['rows'], dtype="float64").fillna(0.0)
             for i in info['rows']:
                 ret.at[i] = x[self.getIndex(name, row=i)]
         elif 'nrows' not in info and 'ncols' not in info:
@@ -240,25 +239,19 @@ class VarContainer:
                 upper = 1e20 if self.UP[i] == None else self.UP[i]
                 value = 0 if math.isnan(self.initialVals[i]) else self.initialVals[i]
 
-                # tmp_list = ['CG','CH','CN','CPI','CPIN','CPIH','CX','D','DD','DS','FD','GCP','GCP1',
-                # 'HH','HN','HW','IGT','KS']
-                '''tmp_list = ['CG','CH','CN','CPI','CPIN','CPIH','CX','D','DD','DS','FD','GCP','GCP1',
-                'HH','HN','HW','IGT','KS','LAS','M','N','NKI','LNFOR','KPFOR','GVFOR','P','PD','PVA']                        
+                # tmp_list = ['CG','CH','CN','CPI','CPIN','CPIH','CX','D','DD','DS','FD','GCP','GCP1','HH','HN','HW','IGT','KS']
+                '''tmp_list = ['CG','CH','CN','CPI','CPIN','CPIH','CX','D','DD','DS','FD','GCP','GCP1','HH','HN','HW','IGT','KS','LAS','M','N','NKI','LNFOR','KPFOR','GVFOR','P','PD','PVA']                        
                 if self.getLabel(i)[0] in tmp_list:
-                    f.write('model.x' + str(i) + ' = Var(bounds=(' + str(lower) + ',' + str(upper) + '),initialize=' + 
-                    str(self.initialVals[i]) + ')' + '\n')
+                    f.write('model.x' + str(i) + ' = Var(bounds=(' + str(lower) + ',' + str(upper) + '),initialize=' + str(self.initialVals[i]) + ')' + '\n')
                 else:
-                    f.write('model.x' + str(i) + ' = Var(bounds=(' + str(self.initialVals[i]-1e-3) + ',' + 
-                    str(self.initialVals[i]+1e-3) + '),initialize=' + str(self.initialVals[i]) + ')' + '\n')
+                    f.write('model.x' + str(i) + ' = Var(bounds=(' + str(self.initialVals[i]-1e-3) + ',' + str(self.initialVals[i]+1e-3) + '),initialize=' + str(self.initialVals[i]) + ')' + '\n')
                 '''
                 # if i == 1507:
-                #  f.write('model.x' + str(i) + ' = Var(bounds=(' + str(value) + ',' + str(value*10) + '),initialize=
-                #  ' + str(value) + ')' + '\n')
+                #  f.write('model.x' + str(i) + ' = Var(bounds=(' + str(value) + ',' + str(value*10) + '),initialize=' + str(value) + ')' + '\n')
                 # else:
-                #  f.write('model.x' + str(i) + ' = Var(bounds=(' + str(lower) + ',' + str(upper) + '),initialize=' +
-                #  str(value) + ')' + '\n')
-                f.write('model.x' + str(i) + ' = Var(bounds=(' + str(lower) + ',' + str(upper) + '),initialize=' +
-                        str(value) + ')' + '\n')
+                #  f.write('model.x' + str(i) + ' = Var(bounds=(' + str(lower) + ',' + str(upper) + '),initialize=' + str(value) + ')' + '\n')
+                f.write('model.x' + str(i) + ' = Var(bounds=(' + str(lower) + ',' + str(upper) + '),initialize=' + str(
+                    value) + ')' + '\n')
 
 
 class variable:
@@ -554,22 +547,25 @@ class Expr:
                     if not self.itemList[i].is_empty():
                         result.append(self.itemList[i])
             self.itemList = result
-        # else:
-        #   if self.operator == '**' and is_empty(self.second):
-        #     self.isComposite = False
-        #     self.itemList = []
-        #     self.itemList.append(ExprItem(1))
+        """
+        else:
+          if self.operator == '**' and is_empty(self.second):
+            self.isComposite = False
+            self.itemList = []
+            self.itemList.append(ExprItem(1))
+        """
 
 
 class ExprM:
-    """
+    '''
     Three ways to create a ExprMatrix:
     1. Give it the variable name, selected rows and cols(could be empty),
       The constructor will create a Expression matrix from the variable matrix
     2. Give it a pandas Series or DataFrame, it will create the Expression matrix
       with the content in the Series or DataFrame as constants
     3. Give it a ExprMatrix, will return a deep copy of it
-    """
+    '''
+
     def __init__(self, vars, name=None, rows=None, cols=None, m=None, em=None):
         self.vars = vars
         self.hasCondition = False
