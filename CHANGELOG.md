@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Population Dislocation utility function arbitrarily assumes there will be dislocated and non-dislocated [#301](https://github.com/IN-CORE/pyincore/issues/301)
 - Seaside & Joplin cge uses a fixed location for temporary files [#312](https://github.com/IN-CORE/pyincore/issues/312)
 - Functional vs non-functional calculation based of failure sample now [#300](https://github.com/IN-CORE/pyincore/issues/300)
+- Exposed timeout and kwargs parameter for incore client methods [#295](https://github.com/IN-CORE/pyincore/issues/295)
 
 ## [1.9.0] - 2023-03-15
 
@@ -32,7 +33,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Updated Salt Lake City CGE [#281](https://github.com/IN-CORE/pyincore/issues/281)
 - Tested hurricane windfield test methods [#100](https://github.com/IN-CORE/incore-services/issues/100)
 - Updatd Salt Lake City CGE formatting and handled infeasible case  [#287](https://github.com/IN-CORE/pyincore/issues/287)
-- Exposed timeout and kwargs parameter for incore client methods [#295](https://github.com/IN-CORE/pyincore/issues/295)
 
 ### Fixed
 - Duplicate input spec for housing recovery sequential model [#263](https://github.com/IN-CORE/pyincore/issues/263)
