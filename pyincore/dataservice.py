@@ -160,7 +160,6 @@ class DataService:
             elif join is False:
                 payload['join'] = 'false'
             r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
-
         # extract filename
         disposition = r.headers['content-disposition']
         fname = re.findall("filename=(.+)", disposition)
@@ -189,7 +188,6 @@ class DataService:
             space (str): Name of space, default None.
             timeout (tuple[int,int]): Session timeout.
             **kwargs: A dictionary of external parameters.
-
 
         Returns:
             obj: HTTP response containing the metadata.
@@ -238,6 +236,7 @@ class DataService:
         Args:
             dataset_id (str): ID of the Dataset.
             property_name (str): Property parameters such as name and value.
+            property_value (str): Property parameters such as name and value.
             timeout (tuple[int,int]): Session timeout.
             **kwargs: A dictionary of external parameters.
 
@@ -346,6 +345,8 @@ class DataService:
             **kwargs: A dictionary of external parameters.
         Returns:
             obj: HTTP response containing the files.
+            timeout (tuple[int,int]): Session timeout.
+            **kwargs: A dictionary of external parameters.
 
         """
         url = self.files_url

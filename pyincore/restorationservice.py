@@ -28,7 +28,7 @@ class RestorationService(Dfr3Service):
 
     def get_dfr3_sets(self, hazard_type: str = None, inventory_type: str = None,
                       author: str = None, creator: str = None, space: str = None,
-                      skip: int = None, limit: int = None):
+                      skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Get the set of restoration data, curves.
 
         Args:
@@ -62,5 +62,5 @@ class RestorationService(Dfr3Service):
         if space is not None:
             payload['space'] = space
 
-        r = self.client.get(url, params=payload)
+        r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()

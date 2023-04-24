@@ -50,6 +50,8 @@ class SpaceService:
 
         Args:
             space_json (json): A space representation. ID of the Space.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Additional arguments.
 
         Returns:
             obj: HTTP response with the created space information.
@@ -58,14 +60,16 @@ class SpaceService:
         url = self.base_space_url
         space_data = {('space', space_json)}
         kwargs = {"files": space_data}
-        r = self.client.post(url, **kwargs)
+        r = self.client.post(url, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()
 
-    def get_spaces(self, dataset_id: str = None):
+    def get_spaces(self, dataset_id: str = None, timeout=(30, 600), **kwargs):
         """Retrieve  a Space with the dataset.
 
         Args:
             dataset_id (str): ID of the Dataset.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Additional arguments.
 
         Returns:
             obj: HTTP response with the created space information.
@@ -76,11 +80,11 @@ class SpaceService:
         if dataset_id is not None:
             payload['dataset'] = dataset_id
 
-        r = self.client.get(url, params=payload)
+        r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
 
-    def get_space_by_id(self, space_id: str):
+    def get_space_by_id(self, space_id: str, timeout=(30, 600), **kwargs):
         """Get space information.
 
         Args:
@@ -91,29 +95,33 @@ class SpaceService:
 
         """
         url = urljoin(self.base_space_url, space_id)
-        r = self.client.get(url)
+        r = self.client.get(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
 
-    def get_space_by_name(self, space_name: str):
+    def get_space_by_name(self, space_name: str, timeout=(30, 600), **kwargs):
         """Get space information by querying the name of space.
 
         Args:
             space_name (str): A space representation. Name of the Space.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Additional arguments.
 
         Returns:
             obj: HTTP response with the returned space information.
 
         """
-        r = self.client.get(self.base_space_url, params={"name": space_name})
+        r = self.client.get(self.base_space_url, params={"name": space_name}, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()
 
-    def update_space(self, space_id: str, space_json):
+    def update_space(self, space_id: str, space_json, timeout=(30, 600), **kwargs):
         """Updates a Space.
 
         Args:
             space_id (str): ID of the space to update.
             space_json (json): JSON representing a space update.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Additional arguments.
 
         Returns:
             obj: HTTP response with the updated space.
@@ -122,7 +130,7 @@ class SpaceService:
         url = urljoin(self.base_space_url, space_id)
         space_data = {('space', space_json)}
         kwargs = {"files": space_data}
-        r = self.client.put(url, **kwargs)
+        r = self.client.put(url, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()
 
     def add_to_space_by_name(self, space_name: str, dataset_id: str):
@@ -159,12 +167,14 @@ class SpaceService:
 
         return response
 
-    def remove_dataset_from_space(self, space_id: str, dataset_id: str):
+    def remove_dataset_from_space(self, space_id: str, dataset_id: str, timeout=(30, 600), **kwargs):
         """Remove dataset from the space using dataset id and space id
 
         Args:
             space_id (str): ID of the space to update.
             dataset_id (str): ID of the dataset to be removed from the space.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Additional arguments.
 
         Returns:
             obj: HTTP response with the updated space.
@@ -172,15 +182,17 @@ class SpaceService:
         """
         url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
 
-        r = self.client.delete(url)
+        r = self.client.delete(url, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()
 
-    def add_dataset_to_space(self, space_id: str, dataset_id: str):
+    def add_dataset_to_space(self, space_id: str, dataset_id: str, timeout=(30, 600), **kwargs):
         """Add member to a Space.
 
         Args:
             space_id (str): ID of the space to update.
             dataset_id (str): ID of the dataset to be added to the space.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Additional arguments.
 
         Returns:
             obj: HTTP response with the updated space.
@@ -188,15 +200,17 @@ class SpaceService:
         """
         url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
 
-        r = self.client.post(url)
+        r = self.client.post(url, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()
 
-    def grant_privileges_to_space(self, space_id: str, privileges_json):
+    def grant_privileges_to_space(self, space_id: str, privileges_json, timeout=(30, 600), **kwargs):
         """Updates a Space.
 
         Args:
             space_id (str): ID of the space to update.
             privileges_json (json): JSON representing a space update.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Additional arguments.
 
         Returns:
             obj: HTTP response with space privileges.
@@ -204,7 +218,7 @@ class SpaceService:
         """
         url = urljoin(self.base_space_url, space_id + "/grant")
         space_privileges = {('grant', privileges_json)}
-        kwargs = {"files": space_privileges}
-        r = self.client.post(url, **kwargs)
+        kwargs["files"] = space_privileges
+        r = self.client.post(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
