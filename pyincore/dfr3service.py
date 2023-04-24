@@ -93,30 +93,35 @@ class Dfr3Service:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
-    def get_dfr3_set(self, dfr3_id: str):
+    def get_dfr3_set(self, dfr3_id: str, timeout=(30, 600), **kwargs):
         """Get specific DFR3 set.
 
         Args:
             dfr3_id (str): ID of the DFR3 set.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             obj: HTTP response with search results.
 
         """
         url = urljoin(self.base_dfr3_url, dfr3_id)
-        r = self.client.get(url)
+        r = self.client.get(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
 
-    def delete_dfr3_set(self, dfr3_id: str):
+    def delete_dfr3_set(self, dfr3_id: str, timeout=(30, 600), **kwargs):
         """Delete specific DFR3 set.
             Args:
                 dfr3_id (str): ID of the DFR3 set.
+                timeout (tuple): Timeout for the request.
+                **kwargs: Arbitrary keyword arguments.
+
             Returns:
                 obj: HTTP response with return results.
         """
         url = urljoin(self.base_dfr3_url, dfr3_id)
-        r = self.client.delete(url)
+        r = self.client.delete(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
 
@@ -146,13 +151,15 @@ class Dfr3Service:
 
         return batch_dfr3_sets
 
-    def search_dfr3_sets(self, text: str, skip: int = None, limit: int = None):
+    def search_dfr3_sets(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Search DFR3 sets based on a specific text.
 
         Args:
             text (str): Text to search by.
             skip (int):  Skip the first n results, default None.
             limit (int): Limit number of results to return, default None.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             obj: HTTP response with search results.
@@ -165,21 +172,23 @@ class Dfr3Service:
         if limit is not None:
             payload['limit'] = limit
 
-        r = self.client.get(url, params=payload)
+        r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()
 
-    def create_dfr3_set(self, dfr3_set: dict):
+    def create_dfr3_set(self, dfr3_set: dict, timeout=(30, 600), **kwargs):
         """Create DFR3 set on the server. POST API endpoint call.
 
         Args:
             dfr3_set (dict): Set of DFR3 jsons.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             obj: HTTP POST Response. Returned value model of the created DFR3 set.
 
         """
         url = self.base_dfr3_url
-        r = self.client.post(url, json=dfr3_set)
+        r = self.client.post(url, json=dfr3_set, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()
 
     def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str, add_info: list = None):
@@ -504,24 +513,27 @@ class Dfr3Service:
             else:
                 raise ValueError("boolean " + boolean + " not supported!")
 
-    def create_mapping(self, mapping_set: dict):
+    def create_mapping(self, mapping_set: dict, timeout=(30, 600), **kwargs):
         """Create DFR3 mapping on the server. POST API endpoint call.
 
         Args:
             mapping_set (dict): Mapping set, relationship between inventories (buildings, bridges etc.)
                 and DFR3 sets.
+            timeout (tuple): Timeout for the request.
+            **kwargs: Additional keyword arguments.
 
         Returns:
             obj: HTTP POST Response. Returned value model of the created mapping set.
 
         """
         url = self.base_mapping_url
-        r = self.client.post(url, json=mapping_set)
+        r = self.client.post(url, json=mapping_set, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
 
     def get_mappings(self, hazard_type: str = None, inventory_type: str = None, mapping_type: str = None,
-                     creator: str = None, space: str = None, skip: int = None, limit: int = None):
+                     creator: str = None, space: str = None, skip: int = None, limit: int = None,
+                     timeout=(30, 600), **kwargs):
         """Get the set of mappings. Mapping is a relationship between inventories (buildings, bridges
             etc.) and DFR3 sets.
 
@@ -533,6 +545,8 @@ class Dfr3Service:
             space (str): Name of space, default None.
             skip (int):  Skip the first n results, default None.
             limit (int): Limit number of results to return, default None.
+            timeout (tuple): Timeout for the request, default (30, 600).
+            **kwargs: Additional keyword arguments.
 
         Returns:
             obj: HTTP response with search results.
@@ -556,36 +570,40 @@ class Dfr3Service:
         if space is not None:
             payload['space'] = space
 
-        r = self.client.get(url, params=payload)
+        r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
 
-    def get_mapping(self, mapping_id):
+    def get_mapping(self, mapping_id, timeout=(30, 600), **kwargs):
         """Get specific inventory mapping.
 
         Args:
             mapping_id (str): ID of the Mapping set.
+            timeout (tuple): Timeout for the request, default (30, 600).
+            **kwargs: Additional keyword arguments.
 
         Returns:
             obj: HTTP response with search results.
 
         """
         url = urljoin(self.base_mapping_url, mapping_id)
-        r = self.client.get(url)
+        r = self.client.get(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
 
-    def delete_mapping(self, mapping_id):
+    def delete_mapping(self, mapping_id, timeout=(30, 600), **kwargs):
         """delete specific inventory mappings.
 
         Args:
             mapping_id (str): ID of the Mapping set.
+            timeout (tuple): Timeout for the request, default (30, 600).
+            **kwargs: Additional keyword arguments.
 
         Returns:
             obj: HTTP response with return results.
 
         """
         url = urljoin(self.base_mapping_url, mapping_id)
-        r = self.client.delete(url)
+        r = self.client.delete(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
