@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.10.0] - 2023-04-21
 
 ### Added
 - Added Galveston Capital Shock and CGE models as a submodule[#239](https://github.com/IN-CORE/pyincore/issues/239)
