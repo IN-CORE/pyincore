@@ -1128,8 +1128,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
 
                     # Append to local analysis result
-                    epsilon9_xresult_df = epsilon9_xresult_df.append(newx_df)
-                    epsilon9_yresult_df = epsilon9_yresult_df.append(newy_df)
+                    epsilon9_xresult_df = pd.concat([epsilon9_xresult_df, newx_df])
+                    epsilon9_yresult_df = pd.concat([epsilon9_yresult_df, newy_df])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
