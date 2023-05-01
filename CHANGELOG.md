@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Broken analyses related to pandas 2.0 update [#310](https://github.com/IN-CORE/pyincore/issues/310)
+
 ## [1.10.0] - 2023-04-21
 
 ### Added
