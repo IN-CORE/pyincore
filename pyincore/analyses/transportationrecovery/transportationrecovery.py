@@ -20,21 +20,24 @@ class TransportationRecovery(BaseAnalysis):
         nodes = list(node_set)
         node_df = pd.DataFrame(columns=nodes[0]['properties'].keys())
         for node in nodes:
-            node_df = node_df.append(node['properties'], ignore_index=True)
+            node_properties_df = pd.DataFrame.from_dict(node['properties'], orient='index').T
+            node_df = pd.concat([node_df, node_properties_df], ignore_index=True)
 
         # read the link in transportation
         link_set = self.get_input_dataset("links").get_inventory_reader()
         links = list(link_set)
         arc_df = pd.DataFrame(columns=links[0]['properties'].keys())
         for link in links:
-            arc_df = arc_df.append(link['properties'], ignore_index=True)
+            link_properties_df = pd.DataFrame.from_dict(link['properties'], orient='index').T
+            arc_df = pd.concat([arc_df, link_properties_df], ignore_index=True)
 
         # read bridge information
         bridge_set = self.get_input_dataset("bridges").get_inventory_reader()
         bridges = list(bridge_set)
         bridge_df = pd.DataFrame(columns=bridges[0]['properties'].keys())
         for bridge in bridges:
-            bridge_df = bridge_df.append(bridge['properties'], ignore_index=True)
+            bridge_properties_df = pd.DataFrame.from_dict(bridge['properties'], orient='index').T
+            bridge_df = pd.concat([bridge_df, bridge_properties_df], ignore_index=True)
 
         # read bridge damage information
         bridge_damage_value = self.get_input_dataset("bridge_damage_value").get_json_reader()
