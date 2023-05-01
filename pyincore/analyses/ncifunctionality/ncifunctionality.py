@@ -124,7 +124,8 @@ class NciFunctionality(BaseAnalysis):
         wds_links_updated = self.update_wds_network_links(wds_network_links)
 
         # Generate the functionality data
-        df_functionality_nodes = efp_nodes_updated.append(wds_nodes_updated, ignore_index=True)
+        df_functionality_nodes = pd.concat([efp_nodes_updated, wds_nodes_updated], ignore_index=True)
+        df_functionality_nodes = pd.concat([efp_nodes_updated, wds_nodes_updated], ignore_index=True)
 
         # Create each individual graph
         g_epf = NetworkUtil.create_network_graph_from_dataframes(epf_network_nodes, epf_network_links)
@@ -255,7 +256,7 @@ class NciFunctionality(BaseAnalysis):
             u = 1 - df_functionality_nodes[f'functionality{idx}']
             u = u.to_numpy()
             I = np.identity(len(u))
-            q = np.dot(np.linalg.inv(I - M.T), u).tolist()[0]
+            q = np.dot(np.linalg.inv(I - M.T), u).tolist()
             df_functionality_nodes[f'func_cascading{idx}'] = [0 if i >= 1 else 1 - i for i in q]
 
         return df_functionality_nodes
