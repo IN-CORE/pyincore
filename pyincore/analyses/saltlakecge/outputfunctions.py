@@ -7,6 +7,7 @@ from pyincore.analyses.saltlakecge.equationlib import *
 import pandas as pd
 import numpy as np
 
+
 # Return initial values function
 def baseValue(vars, soln, eqName):
     if vars.getInfo(eqName)['size'] == 1:

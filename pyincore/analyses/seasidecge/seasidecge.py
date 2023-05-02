@@ -5,7 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import os
-import tempfile
 
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
@@ -1817,15 +1816,9 @@ class SeasideCGEModel(BaseAnalysis):
         # TODO: we need to generate the "solverconstatnt" folder with username since it uses system tmp
         # TODO: there is a situation that multiple users on system can run this together
 
-        cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
-        if not os.path.isdir(cge_tmp_folder):  # create the folder if there is no folder
-            os.mkdir(cge_tmp_folder)
-        logger.debug(cge_tmp_folder)
-
-        filename = os.path.join(cge_tmp_folder, "ipopt_cons.py")
-        tmp = os.path.join(cge_tmp_folder, "tmp.py")
-
-        logger.debug("Calibration: ")
+        filename = "ipopt_cons.py"
+        tmp = "tmp.py"
+        print("Calibration: ")
         run_solver(filename, tmp)
 
         '''

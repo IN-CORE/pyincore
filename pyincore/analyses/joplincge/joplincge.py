@@ -7,7 +7,6 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory
 
 import os
-import tempfile
 import pandas as pd
 
 logger = pyglobals.LOGGER
@@ -1752,15 +1751,9 @@ class JoplinCGEModel(BaseAnalysis):
         # TODO: we need to generate the "solverconstatnt" folder with username since it uses system tmp
         # TODO: there is a situation that multiple users on system can run this together
 
-        cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
-        if not os.path.isdir(cge_tmp_folder):  # create the folder if there is no folder
-            os.mkdir(cge_tmp_folder)
-        logger.debug(cge_tmp_folder)
-
-        filename = os.path.join(cge_tmp_folder, "ipopt_cons.py")
-        tmp = os.path.join(cge_tmp_folder, "tmp.py")
-
-        # print("Calibration: ")
+        filename = "ipopt_cons.py"
+        tmp = "tmp.py"
+        print("Calibration: ")
         run_solver(filename, tmp)
 
         '''

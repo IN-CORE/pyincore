@@ -7,14 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix NCI Functionality float value not iterable error [#291](https://github.com/IN-CORE/pyincore/issues/291)
+
+## [1.10.0] - 2023-04-21
+
 ### Added
 - Added Galveston Capital Shock and CGE models as a submodule[#239](https://github.com/IN-CORE/pyincore/issues/239)
 
 ### Fixed
 - CGE output post process util function [#298](https://github.com/IN-CORE/pyincore/issues/298)
 - Population Dislocation utility function arbitrarily assumes there will be dislocated and non-dislocated [#301](https://github.com/IN-CORE/pyincore/issues/301)
-- Fix NCI Functionality float value not iterable error [#291](https://github.com/IN-CORE/pyincore/issues/291)
-
+- Seaside & Joplin cge uses a fixed location for temporary files [#312](https://github.com/IN-CORE/pyincore/issues/312)
+- Functional vs non-functional calculation based of failure sample now [#300](https://github.com/IN-CORE/pyincore/issues/300)
+- Exposed timeout and kwargs parameter for incore client methods [#295](https://github.com/IN-CORE/pyincore/issues/295)
 
 ## [1.9.0] - 2023-03-15
 

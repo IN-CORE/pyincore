@@ -561,7 +561,6 @@ class Expr:
         #     self.itemList.append(ExprItem(1))
 
 
-
 class ExprM:
     """
     Three ways to create a ExprMatrix:
