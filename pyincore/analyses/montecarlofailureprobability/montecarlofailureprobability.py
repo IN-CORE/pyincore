@@ -332,5 +332,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
                 count += 1
             else:
                 func[sample] = "1"
-
-        return func, count / len(ds_sample)
+        if len(ds_sample):
+            return func, count / len(ds_sample)
+        else:
+            return func, np.nan
