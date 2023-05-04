@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added a name extension for combined wind, wave, surge building damage analysis [#308](https://github.com/IN-CORE/pyincore/issues/308)
 
+### Fixed
+
+- Fix NCI Functionality float value not iterable error [#291](https://github.com/IN-CORE/pyincore/issues/291)
+
 ## [1.10.0] - 2023-04-21
 
 ### Added
