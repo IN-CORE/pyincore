@@ -241,7 +241,7 @@ class BaseAnalysis:
 
     """ convenience function(s) for setting result data as a csv """
 
-    def set_result_csv_data(self, result_id, result_data, name, source='file'):
+    def set_result_csv_data(self, result_id, result_data, name, source='file', index=False):
         if name is None:
             name = self.spec["name"] + "-result"
 
@@ -254,7 +254,7 @@ class BaseAnalysis:
         if source == 'file':
             dataset = Dataset.from_csv_data(result_data, name, dataset_type)
         elif source == 'dataframe':
-            dataset = Dataset.from_dataframe(result_data, name, dataset_type)
+            dataset = Dataset.from_dataframe(result_data, name, dataset_type, index)
 
         self.set_output_dataset(result_id, dataset)
 
@@ -266,6 +266,7 @@ class BaseAnalysis:
             name = name + ".json"
 
         dataset_type = self.output_datasets[result_id]["spec"]["type"]
+        dataset = None
         if source == 'file':
             dataset = Dataset.from_json_data(result_data, name, dataset_type)
 

@@ -11,7 +11,7 @@ import concurrent.futures
 from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, FragilityService, \
-    FragilityCurveSet, AnalysisUtil, GeoUtil
+     AnalysisUtil, GeoUtil
 from pyincore.models.dfr3curve import DFR3Curve
 
 

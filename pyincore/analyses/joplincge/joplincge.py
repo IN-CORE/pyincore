@@ -7,7 +7,6 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory
 
 import os
-import tempfile
 import pandas as pd
 
 logger = pyglobals.LOGGER
@@ -59,7 +58,7 @@ class JoplinCGEModel(BaseAnalysis):
                     'description': 'Social accounting matrix (SAM) contains data for firms, '
                                    'households and government which are organized in a way to '
                                    'represent the interactions of all three entities in a typical economy.',
-                    'type': ['incore:JoplinCGEsam']
+                    'type': ['incore:CGEsam']
                 },
                 {
                     'id': 'BB',
@@ -67,14 +66,14 @@ class JoplinCGEModel(BaseAnalysis):
                     'description': 'BB is a matrix which describes how investment in physical infrastructure is'
                                    ' transformed into functioning capital such as commercial and residential buildings.'
                                    ' These data are collected from the Bureau of Economic Analysis (BEA).',
-                    'type': ['incore:JoplinCGEbb']
+                    'type': ['incore:CGEbb']
                 },
                 {
                     'id': 'IOUT',
                     'required': True,
                     'description': 'IOUT is a matrix that describes the transfer of tax revenue collected by the local'
                                    ' government to help finance local government expenditures.',
-                    'type': ['incore:JoplinCGEiout']
+                    'type': ['incore:CGEiout']
                 },
                 {
                     'id': 'MISC',
@@ -82,27 +81,27 @@ class JoplinCGEModel(BaseAnalysis):
                     'description': 'MISC is the name of a file that contains data for commercial sector employment'
                                    ' and physical capital. It also contains data for the number of households and'
                                    ' working households in the economy.',
-                    'type': ['incore:JoplinCGEmisc']
+                    'type': ['incore:CGEmisc']
                 },
                 {
                     'id': 'MISCH',
                     'required': True,
                     'description': 'MISCH is a file that contains elasticities for the supply of labor with'
                                    ' respect to paying income taxes.',
-                    'type': ['incore:JoplinCGEmisch']
+                    'type': ['incore:CGEmisch']
                 },
                 {
                     'id': 'LANDCAP',
                     'required': True,
                     'description': 'LANDCAP contains information regarding elasticity values for the response of '
                                    'changes in the price of physical capital with respect to the supply of investment.',
-                    'type': ['incore:JoplinCGElandcap']
+                    'type': ['incore:CGElandcap']
                 },
                 {
                     'id': 'EMPLOY',
                     'required': True,
                     'description': 'EMPLOY is a table name containing data for commercial sector employment.',
-                    'type': ['incore:JoplinCGEemploy']
+                    'type': ['incore:CGEemploy']
                 },
                 {
                     'id': 'IGTD',
@@ -110,27 +109,27 @@ class JoplinCGEModel(BaseAnalysis):
                     'description': 'IGTD variable represents a matrix describing the transfer of taxes collected'
                                    ' to a variable which permits governments to spend the tax revenue on workers and'
                                    ' intermediate inputs.',
-                    'type': ['incore:JoplinCGEigtd']
+                    'type': ['incore:CGEigtd']
                 },
                 {
                     'id': 'TAUFF',
                     'required': True,
                     'description': 'TAUFF represents social security tax rates',
-                    'type': ['incore:JoplinCGEtauff']
+                    'type': ['incore:CGEtauff']
                 },
                 {
                     'id': 'JOBCR',
                     'required': True,
                     'description': 'JOBCR is a matrix describing the supply of workers'
                                    ' coming from each household group in the economy.',
-                    'type': ['incore:JoplinCGEjobcr']
+                    'type': ['incore:CGEjobcr']
                 },
                 {
                     'id': 'OUTCR',
                     'required': True,
                     'description': 'OUTCR is a matrix describing the number of workers who'
                                    ' live in Joplin but commute outside of town to work.',
-                    'type': ['incore:JoplinCGEoutcr']
+                    'type': ['incore:CGEoutcr']
                 },
                 {
                     'id': 'sector_shocks',
@@ -707,7 +706,7 @@ class JoplinCGEModel(BaseAnalysis):
 
         KS0.loc[K, IG] = FD0.loc[K, IG]
 
-        KSNEW0.loc[K, IG] = KS0.loc[K, IG];
+        KSNEW0.loc[K, IG] = KS0.loc[K, IG]
 
         LAS0.loc[LA, IG] = FD0.loc[LA, IG]
 
@@ -857,14 +856,14 @@ class JoplinCGEModel(BaseAnalysis):
                (CMIWAGE.loc[L] * CMI0.loc[L]).sum(0)
 
         Y0.loc[H] = (A.loc[H, L].mul(HW0[H], axis='index').div(A.loc[H, L].mul(HW0[H], axis='index').sum(0),
-                                                               axis='columns') \
+                                                               axis='columns')
                      .mul(Y0.loc[L] - (CMIWAGE.loc[L] * CMI0.loc[L]), axis='columns').mul(1.0 - TAUFL.loc[G, L].sum(0),
                                                                                           axis='columns')).sum(1) \
                     + (A.loc[H, CM].mul((CMOWAGE.loc[CM] * CMO0.loc[CM]), axis='columns')).sum(1) \
                     + (A.loc[H, LA].mul(HW0[H], axis='index').div(A.loc[H, LA].mul(HW0[H], axis='index').sum(0),
-                                                                  axis='columns') \
+                                                                  axis='columns')
                        * (Y0.loc[LA] * (1.0 - TAUFLA.loc[G, LA].sum(0)) + LNFOR0.loc[LA])).sum(1) \
-                    + (A.loc[H, K].mul(HW0[H], axis='index') / A.loc[H, K].mul(HW0[H], axis='index').sum(0) \
+                    + (A.loc[H, K].mul(HW0[H], axis='index') / A.loc[H, K].mul(HW0[H], axis='index').sum(0)
                        * (Y0[K] * (1.0 - TAUFK.loc[G, K].sum(0)) + KPFOR0.loc[K])).sum(1)
 
         SPI0 = (Y0.loc[H].sum(0) +
@@ -1752,15 +1751,9 @@ class JoplinCGEModel(BaseAnalysis):
         # TODO: we need to generate the "solverconstatnt" folder with username since it uses system tmp
         # TODO: there is a situation that multiple users on system can run this together
 
-        cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
-        if not os.path.isdir(cge_tmp_folder):  # create the folder if there is no folder
-            os.mkdir(cge_tmp_folder)
-        logger.debug(cge_tmp_folder)
-
-        filename = os.path.join(cge_tmp_folder, "ipopt_cons.py")
-        tmp = os.path.join(cge_tmp_folder, "tmp.py")
-
-        # print("Calibration: ")
+        filename = "ipopt_cons.py"
+        tmp = "tmp.py"
+        print("Calibration: ")
         run_solver(filename, tmp)
 
         '''
@@ -1774,7 +1767,7 @@ class JoplinCGEModel(BaseAnalysis):
         '''
 
         iNum = self.get_parameter("model_iterations")  # dynamic model iterations
-
+        result = []
         for ittr in range(iNum):
             # print("Simulation: ", ittr + 1)
             if ittr == 0:  # if it is the first simulation, apply the shock

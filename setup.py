@@ -7,7 +7,7 @@
 from setuptools import setup, find_packages
 
 # version number of pyincore
-version = '1.7.0'
+version = '1.10.0'
 
 with open("README.rst", encoding="utf-8") as f:
     readme = f.read()
@@ -60,7 +60,7 @@ setup(
         'matplotlib>=2.1.0',
         'networkx>=2.2',
         'numpy>=1.16.6,<2.0a0',
-        'pandas>=0.24.1',
+        'pandas>=0.24.1,<2',
         'pyomo>=5.6',
         'pyproj>=1.9.6',
         'rasterio>=1.0.18',

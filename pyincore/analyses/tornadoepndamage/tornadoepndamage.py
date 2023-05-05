@@ -5,7 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import math
-import os
 import random
 import sys
 
@@ -126,8 +125,7 @@ class TornadoEpnDamage(BaseAnalysis):
         node_id_validation = NetworkUtil.validate_network_node_ids(
             network_dataset, self.fromnode_fld_name, self.tonode_fld_name, self.nodenwid_fld_name)
         if node_id_validation is False:
-            print("ID in from or to node field doesn't exist in the node dataset")
-            os.exit(0)
+            sys.exit("ID in from or to node field doesn't exist in the node dataset")
 
         # getting network graph and node coordinates
         is_directed_graph = True
@@ -251,7 +249,7 @@ class TornadoEpnDamage(BaseAnalysis):
 
                         # compute the intersections between link line and ef polygon
                         # also figure out the length of the line that ovelapped with EF box
-
+                        inter_length_meter = None
                         # compute the intersection between tornado polygon and line
                         if sim_fld_val == z and ef_fld_val.lower() == ef_content.lower():
                             if poly is not None and line is not None:
@@ -324,6 +322,8 @@ class TornadoEpnDamage(BaseAnalysis):
                                     npoles = int(round(inter_length_meter / self.pole_distance))
                                     repairtime_list = []
 
+                                    mu = None
+                                    sigma = None
                                     for k in range(npoles):
                                         repair_time = 0
                                         random_resistivity = random.uniform(0, 1)

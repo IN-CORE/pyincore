@@ -4,7 +4,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-import urllib
+from urllib.parse import urljoin
 from pyincore import IncoreClient
 
 
@@ -18,7 +18,7 @@ class SpaceService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_space_url = urllib.parse.urljoin(client.service_url, "space/api/spaces/")
+        self.base_space_url = urljoin(client.service_url, "space/api/spaces/")
 
     def create_space(self, space_json):
         """Creates a Space.
@@ -67,11 +67,29 @@ class SpaceService:
             obj: HTTP response with the created space information.
 
         """
-        url = urllib.parse.urljoin(self.base_space_url, space_id)
+        url = urljoin(self.base_space_url, space_id)
         r = self.client.get(url)
         response = r.json()
 
         return response
+
+    def get_space_by_name(self, space_name: str):
+        """Get space information by querying the name of space.
+
+        Args:
+            space_name (str): A space representation. Name of the Space.
+
+        Returns:
+            obj: HTTP response with the returned space information.
+
+        """
+        r = self.client.get(self.base_space_url, params={"name": space_name})
+        if r.status_code == 200:
+            return r.json()
+        else:
+            # throw an error instead of returning the empty result
+            # return []
+            raise r.exceptions.HTTPError("There is no matching name or you don't have a privilege to view the space.")
 
     def update_space(self, space_id: str, space_json):
         """Updates a Space.
@@ -84,10 +102,61 @@ class SpaceService:
             obj: HTTP response with the updated space.
 
         """
-        url = urllib.parse.urljoin(self.base_space_url, space_id)
+        url = urljoin(self.base_space_url, space_id)
         space_data = {('space', space_json)}
         kwargs = {"files": space_data}
         r = self.client.put(url, **kwargs)
+        response = r.json()
+        return response
+
+    def add_to_space_by_name(self, space_name: str, dataset_id: str):
+        """Add dataset to a space by using space name and dataset id.
+
+        Args:
+            space_name (str): Name of the space that dataset id will go to.
+            dataset_id (json): ID of the dataset that will be copied in to the space.
+
+        Returns:
+            obj: HTTP response with the updated space.
+
+        """
+        space_id = self.get_space_by_name(space_name)[0]
+
+        response = self.add_dataset_to_space(space_id["id"], dataset_id)
+
+        return response
+
+    def remove_from_space_by_name(self, space_name: str, dataset_id: str):
+        """Remove dataset from a space by using space name and dataset id.
+
+        Args:
+            space_name (str): Name of the space that dataset id will go to.
+            dataset_id (json): ID of the dataset that will be copied in to the space.
+
+        Returns:
+            obj: HTTP response with the updated space.
+
+        """
+        space_id = self.get_space_by_name(space_name)[0]
+
+        response = self.remove_dataset_from_space(space_id["id"], dataset_id)
+
+        return response
+
+    def remove_dataset_from_space(self, space_id: str, dataset_id: str):
+        """Remove dataset from the space using dataset id and space id
+
+        Args:
+            space_id (str): ID of the space to update.
+            dataset_id (str): ID of the dataset to be removed from the space.
+
+        Returns:
+            obj: HTTP response with the updated space.
+
+        """
+        url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
+
+        r = self.client.delete(url)
         response = r.json()
         return response
 
@@ -102,7 +171,7 @@ class SpaceService:
             obj: HTTP response with the updated space.
 
         """
-        url = urllib.parse.urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
+        url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
 
         r = self.client.post(url)
         response = r.json()
@@ -119,7 +188,7 @@ class SpaceService:
             obj: HTTP response with space privileges.
 
         """
-        url = urllib.parse.urljoin(self.base_space_url, space_id + "/grant")
+        url = urljoin(self.base_space_url, space_id + "/grant")
         space_privileges = {('grant', privileges_json)}
         kwargs = {"files": space_privileges}
         r = self.client.post(url, **kwargs)

@@ -9,7 +9,7 @@ import os
 
 from pyincore.dataservice import DataService
 
-from pyincore import Dataset, AnalysisUtil
+from pyincore import Dataset
 import networkx as nx
 
 
@@ -75,7 +75,7 @@ class NetworkDataset:
         Args:
             json_str (str): JSON of the Dataset.
             data_service (obj): Data Service class.
-            file_path (str): File path.
+            folder_path (str): File path.
 
         Returns:
             obj: network dataset

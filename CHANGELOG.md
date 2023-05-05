@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Added a name extension for combined wind, wave, surge building damage analysis [#308](https://github.com/IN-CORE/pyincore/issues/308)
+
+### Fixed
+- TransportationRecovery analysis fails to run with concatentation error [#292](https://github.com/IN-CORE/pyincore/issues/292)
+- Fix NCI Functionality float value not iterable error [#291](https://github.com/IN-CORE/pyincore/issues/291)
+
+## [1.10.0] - 2023-04-21
+
+### Added
+- Added Galveston Capital Shock and CGE models as a submodule[#239](https://github.com/IN-CORE/pyincore/issues/239)
+
+### Fixed
+- CGE output post process util function [#298](https://github.com/IN-CORE/pyincore/issues/298)
+- Population Dislocation utility function arbitrarily assumes there will be dislocated and non-dislocated [#301](https://github.com/IN-CORE/pyincore/issues/301)
+- Seaside & Joplin cge uses a fixed location for temporary files [#312](https://github.com/IN-CORE/pyincore/issues/312)
+- Functional vs non-functional calculation based of failure sample now [#300](https://github.com/IN-CORE/pyincore/issues/300)
+- Exposed timeout and kwargs parameter for incore client methods [#295](https://github.com/IN-CORE/pyincore/issues/295)
+
+## [1.9.0] - 2023-03-15
+
+### Added
+- Method in space service to add a dataset by space name [#273](https://github.com/IN-CORE/pyincore/issues/273)
+- Method in space service to get space id by space name [#272](https://github.com/IN-CORE/pyincore/issues/272)
+- Method in space service to remove dataset from the space [#283](https://github.com/IN-CORE/pyincore/issues/283)
+- Method in space service to remove dataset by space name [#284](https://github.com/IN-CORE/pyincore/issues/284)
+- Combined wind, surge-wave, and flood building loss [#276](https://github.com/IN-CORE/pyincore/issues/276)
+
+### Changed
+- Rewrote clustering utility function to use flexible archetype column [#247](https://github.com/IN-CORE/pyincore/issues/247)
+- Made documentation containter to use requirements instead of environemt [#257](https://github.com/IN-CORE/pyincore/issues/257)
+- Parallelized the HHRS analysis [#268](https://github.com/IN-CORE/pyincore/issues/268)
+- Updated Salt Lake City CGE [#281](https://github.com/IN-CORE/pyincore/issues/281)
+- Tested hurricane windfield test methods [#100](https://github.com/IN-CORE/incore-services/issues/100)
+- Updatd Salt Lake City CGE formatting and handled infeasible case  [#287](https://github.com/IN-CORE/pyincore/issues/287)
+
+### Fixed
+- Duplicate input spec for housing recovery sequential model [#263](https://github.com/IN-CORE/pyincore/issues/263)
+- Updated building economic loss analysis to handle case when no occupancy multiplier is provided [#274](https://github.com/IN-CORE/pyincore/issues/274)
+
+## [1.8.0] - 2022-11-16
+
+### Changed
+- Enable liquefaction for bridge earthquake damage [#226](https://github.com/IN-CORE/pyincore/issues/226)
+
+### Fixed
+- Added missing output spec description for EPF damage [#107](https://github.com/IN-CORE/pyincore/issues/107)
+- Removed PEP 8 warnings [#210](https://github.com/IN-CORE/pyincore/issues/210)
 
 ## [1.7.0] - 2022-09-14
 

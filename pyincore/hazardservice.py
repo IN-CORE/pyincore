@@ -6,8 +6,8 @@
 
 
 import json
-import urllib
 from typing import List
+from urllib.parse import urljoin
 
 import numpy
 
@@ -25,16 +25,16 @@ class HazardService:
     def __init__(self, client: IncoreClient):
         self.client = client
 
-        self.base_earthquake_url = urllib.parse.urljoin(client.service_url,
+        self.base_earthquake_url = urljoin(client.service_url,
                                                         'hazard/api/earthquakes/')
-        self.base_tornado_url = urllib.parse.urljoin(client.service_url,
+        self.base_tornado_url = urljoin(client.service_url,
                                                      'hazard/api/tornadoes/')
-        self.base_tsunami_url = urllib.parse.urljoin(client.service_url,
+        self.base_tsunami_url = urljoin(client.service_url,
                                                      'hazard/api/tsunamis/')
-        self.base_hurricane_url = urllib.parse.urljoin(client.service_url, 'hazard/api/hurricanes/')
-        self.base_hurricanewf_url = urllib.parse.urljoin(client.service_url,
+        self.base_hurricane_url = urljoin(client.service_url, 'hazard/api/hurricanes/')
+        self.base_hurricanewf_url = urljoin(client.service_url,
                                                          'hazard/api/hurricaneWindfields/')
-        self.base_flood_url = urllib.parse.urljoin(client.service_url, 'hazard/api/floods/')
+        self.base_flood_url = urljoin(client.service_url, 'hazard/api/floods/')
 
     def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         """Retrieve earthquake metadata list from hazard service. Hazard API endpoint is called.
@@ -72,7 +72,7 @@ class HazardService:
             json: Response containing the metadata.
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id)
+        url = urljoin(self.base_earthquake_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
 
@@ -99,7 +99,7 @@ class HazardService:
         # bbox: [[minx, miny],[maxx, maxy]]
         # raster?demandType=0.2+SA&demandUnits=g&minX=-90.3099&minY=34.9942&maxX=-89.6231&maxY=35.4129&gridSpacing=0.01696
         # bbox
-        url = urllib.parse.urljoin(self.base_earthquake_url,
+        url = urljoin(self.base_earthquake_url,
                                    hazard_id + "/raster")
         payload = {'demandType': demand_type, 'demandUnits': demand_unit,
                    'minX': bbox[0][0], 'minY': bbox[0][1],
@@ -145,7 +145,7 @@ class HazardService:
             obj: Hazard values.
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/values")
+        url = urljoin(self.base_earthquake_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload)), ('amplifyHazard', json.dumps(amplify_hazard))}}
         r = self.client.post(url, **kwargs)
         response = r.json()
@@ -166,7 +166,7 @@ class HazardService:
             obj: HTTP response.
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url,
+        url = urljoin(self.base_earthquake_url,
                                    hazard_id + "/liquefaction/values")
         payload = {'demandUnits': demand_unit,
                    'geologyDataset': geology_dataset_id, 'point': points}
@@ -184,7 +184,7 @@ class HazardService:
             obj: Hazard values.
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/liquefaction/values")
+        url = urljoin(self.base_earthquake_url, hazard_id + "/liquefaction/values")
         kwargs = {"files": {('points', json.dumps(payload)), ('geologyDataset', geology_dataset_id)}}
         r = self.client.post(url, **kwargs)
         response = r.json()
@@ -210,7 +210,7 @@ class HazardService:
             obj: HTTP response.
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url,
+        url = urljoin(self.base_earthquake_url,
                                    'soil/amplification')
         payload = {"method": method, "datasetId": dataset_id,
                    "siteLat": site_lat, "siteLong": site_long,
@@ -230,7 +230,7 @@ class HazardService:
             obj: HTTP response.
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url, 'models')
+        url = urljoin(self.base_earthquake_url, 'models')
         r = self.client.get(url)
         response = r.json()
 
@@ -268,7 +268,7 @@ class HazardService:
             obj: Json of deleted hazard
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id)
+        url = urljoin(self.base_earthquake_url, hazard_id)
         r = self.client.delete(url)
         return r.json()
 
@@ -284,7 +284,7 @@ class HazardService:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url, "search")
+        url = urljoin(self.base_earthquake_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip
@@ -306,7 +306,7 @@ class HazardService:
              obj: HTTP POST Response with aleatory uncertainty value.
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/aleatoryuncertainty")
+        url = urljoin(self.base_earthquake_url, hazard_id + "/aleatoryuncertainty")
         payload = {"demandType": demand_type}
 
         r = self.client.get(url, params=payload)
@@ -327,7 +327,7 @@ class HazardService:
             obj: HTTP POST Response with variance value.
 
         """
-        url = urllib.parse.urljoin(self.base_earthquake_url, hazard_id + "/variance/" + variance_type)
+        url = urljoin(self.base_earthquake_url, hazard_id + "/variance/" + variance_type)
         payload = {"demandType": demand_type, "demandUnits": demand_unit, 'point': points}
 
         r = self.client.get(url, params=payload)
@@ -369,7 +369,7 @@ class HazardService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urllib.parse.urljoin(self.base_tornado_url, hazard_id)
+        url = urljoin(self.base_tornado_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
 
@@ -386,7 +386,7 @@ class HazardService:
             obj: Hazard values.
 
         """
-        url = urllib.parse.urljoin(self.base_tornado_url, hazard_id + "/values")
+        url = urljoin(self.base_tornado_url, hazard_id + "/values")
 
         if seed is not None:
             kwargs = {"files": {('points', json.dumps(payload)), ('seed', json.dumps(seed))}}
@@ -430,7 +430,7 @@ class HazardService:
             obj: Json of deleted hazard
 
         """
-        url = urllib.parse.urljoin(self.base_tornado_url, hazard_id)
+        url = urljoin(self.base_tornado_url, hazard_id)
         r = self.client.delete(url)
         return r.json()
 
@@ -446,7 +446,7 @@ class HazardService:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_tornado_url, "search")
+        url = urljoin(self.base_tornado_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip
@@ -493,7 +493,7 @@ class HazardService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id)
+        url = urljoin(self.base_tsunami_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
 
@@ -509,7 +509,7 @@ class HazardService:
             obj: Hazard values.
 
         """
-        url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id + "/values")
+        url = urljoin(self.base_tsunami_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload))}}
         r = self.client.post(url, **kwargs)
         response = r.json()
@@ -548,7 +548,7 @@ class HazardService:
             obj: Json of deleted hazard
 
         """
-        url = urllib.parse.urljoin(self.base_tsunami_url, hazard_id)
+        url = urljoin(self.base_tsunami_url, hazard_id)
         r = self.client.delete(url)
         return r.json()
 
@@ -564,7 +564,7 @@ class HazardService:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_tsunami_url, "search")
+        url = urljoin(self.base_tsunami_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip
@@ -633,7 +633,7 @@ class HazardService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urllib.parse.urljoin(self.base_hurricane_url, hazard_id)
+        url = urljoin(self.base_hurricane_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
 
@@ -649,7 +649,7 @@ class HazardService:
             obj: Hazard values.
 
         """
-        url = urllib.parse.urljoin(self.base_hurricane_url, hazard_id + "/values")
+        url = urljoin(self.base_hurricane_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload))}}
         r = self.client.post(url, **kwargs)
         response = r.json()
@@ -666,7 +666,7 @@ class HazardService:
             obj: Json of deleted hazard
 
         """
-        url = urllib.parse.urljoin(self.base_hurricane_url, hazard_id)
+        url = urljoin(self.base_hurricane_url, hazard_id)
         r = self.client.delete(url)
         return r.json()
 
@@ -682,7 +682,7 @@ class HazardService:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_hurricane_url, "search")
+        url = urljoin(self.base_hurricane_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip
@@ -751,7 +751,7 @@ class HazardService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urllib.parse.urljoin(self.base_flood_url, hazard_id)
+        url = urljoin(self.base_flood_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
 
@@ -767,7 +767,7 @@ class HazardService:
             obj: Hazard values.
 
         """
-        url = urllib.parse.urljoin(self.base_flood_url, hazard_id + "/values")
+        url = urljoin(self.base_flood_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload))}}
         r = self.client.post(url, **kwargs)
         response = r.json()
@@ -784,7 +784,7 @@ class HazardService:
             obj: Json of deleted hazard
 
         """
-        url = urllib.parse.urljoin(self.base_flood_url, hazard_id)
+        url = urljoin(self.base_flood_url, hazard_id)
         r = self.client.delete(url)
         return r.json()
 
@@ -800,7 +800,7 @@ class HazardService:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_flood_url, "search")
+        url = urljoin(self.base_flood_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip
@@ -874,7 +874,7 @@ class HazardService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id)
+        url = urljoin(self.base_hurricanewf_url, hazard_id)
         r = self.client.get(url)
         response = r.json()
 
@@ -890,7 +890,7 @@ class HazardService:
             obj: Hazard values.
 
         """
-        url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id + "/values")
+        url = urljoin(self.base_hurricanewf_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload)),
                             ('elevation', json.dumps(elevation)),
                             ('roughness', json.dumps(roughness))}}
@@ -920,7 +920,7 @@ class HazardService:
 
         """
         # land_fall_loc: IncorePoint e.g.'28.01, -83.85'
-        url = urllib.parse.urljoin(self.base_hurricanewf_url, "json/" + coast)
+        url = urljoin(self.base_hurricanewf_url, "json/" + coast)
         payload = {"category": category, "TransD": trans_d,
                    "LandfallLoc": land_fall_loc,
                    "demandType": demand_type, "demandUnits": demand_unit,
@@ -941,7 +941,7 @@ class HazardService:
             obj: Json of deleted hazard
 
         """
-        url = urllib.parse.urljoin(self.base_hurricanewf_url, hazard_id)
+        url = urljoin(self.base_hurricanewf_url, hazard_id)
         r = self.client.delete(url)
         return r.json()
 
@@ -957,7 +957,7 @@ class HazardService:
             obj: HTTP response with search results.
 
         """
-        url = urllib.parse.urljoin(self.base_hurricanewf_url, "search")
+        url = urljoin(self.base_hurricanewf_url, "search")
         payload = {"text": text}
         if skip is not None:
             payload['skip'] = skip

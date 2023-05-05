@@ -128,6 +128,7 @@ class NonStructBuildingDamage(BaseAnalysis):
         values_payload_liq = []
         mapped_buildings = []
         unmapped_buildings = []
+        liquefaction_resp = None
         for building in buildings:
             if building["id"] in fragility_sets_as and building["id"] in fragility_sets_ds:
                 fragility_set_as = fragility_sets_as[building["id"]]

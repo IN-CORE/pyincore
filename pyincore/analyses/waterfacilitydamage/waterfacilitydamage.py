@@ -7,7 +7,6 @@
 Water Facility Damage
 """
 
-import collections
 import concurrent.futures
 import random
 from itertools import repeat

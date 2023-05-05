@@ -5,7 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import os
-import tempfile
 
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
@@ -621,27 +620,27 @@ class SeasideCGEModel(BaseAnalysis):
         # PARAMETERS AND ELASTICITIES
         # ===============================================================================
 
-        BETA.loc[I, H] = MISC.loc[I, 'ETAY'];
-        BETAH.loc[HD, H] = MISC.loc[HD, 'ETAY'];
+        BETA.loc[I, H] = MISC.loc[I, 'ETAY']
+        BETAH.loc[HD, H] = MISC.loc[HD, 'ETAY']
         for label in I:
-            LAMBDA.loc[label, label] = MISC.loc[label, 'ETAOP'];
+            LAMBDA.loc[label, label] = MISC.loc[label, 'ETAOP']
         for label in HD:
-            LAMBDAH.loc[label, label] = MISC.loc[label, 'ETAOP'];
-        ETAE.loc[I] = MISC.loc[I, 'ETAE'];
-        ETAM.loc[I] = MISC.loc[I, 'ETAM'];
-        ETARA.loc[H] = MISCH.loc[H, 'ETARA'];
+            LAMBDAH.loc[label, label] = MISC.loc[label, 'ETAOP']
+        ETAE.loc[I] = MISC.loc[I, 'ETAE']
+        ETAM.loc[I] = MISC.loc[I, 'ETAM']
+        ETARA.loc[H] = MISCH.loc[H, 'ETARA']
 
-        ETAPIT.loc[H] = MISCH.loc[H, 'ETAPIT'];
-        ETAPT.loc[H] = MISCH.loc[H, 'ETAPT'];
-        ETAYD.loc[H] = MISCH.loc[H, 'ETAYD'];
-        ETAU.loc[H] = MISCH.loc[H, 'ETAU'];
+        ETAPIT.loc[H] = MISCH.loc[H, 'ETAPIT']
+        ETAPT.loc[H] = MISCH.loc[H, 'ETAPT']
+        ETAYD.loc[H] = MISCH.loc[H, 'ETAYD']
+        ETAU.loc[H] = MISCH.loc[H, 'ETAU']
 
-        ETAIX.loc['KAP', IG] = LANDCAP.loc[IG, 'ETAI1'];
-        ETAI.loc[IG] = LANDCAP.loc[IG, 'ETAI1'];
-        ETAL.loc['LAND', IG] = LANDCAP.loc[IG, 'ETAL1'];
-        ETALB.loc[L, IG] = LANDCAP.loc[IG, 'ETALB1'];
+        ETAIX.loc['KAP', IG] = LANDCAP.loc[IG, 'ETAI1']
+        ETAI.loc[IG] = LANDCAP.loc[IG, 'ETAI1']
+        ETAL.loc['LAND', IG] = LANDCAP.loc[IG, 'ETAL1']
+        ETALB.loc[L, IG] = LANDCAP.loc[IG, 'ETALB1']
 
-        NRPG.loc[H] = MISCH.loc[H, 'NRPG'];
+        NRPG.loc[H] = MISCH.loc[H, 'NRPG']
 
         # EXPERIMENTAL ELASTICITIES
         # ECOMI[L]         = 0.75;
@@ -649,18 +648,18 @@ class SeasideCGEModel(BaseAnalysis):
 
         # CENTERVILLE ELASTICITIES
 
-        ETARA.loc[H] = 2.5;
+        ETARA.loc[H] = 2.5
         # ETARA[H]          = 2.0;
 
-        ETAUI.loc[H] = -1.5;
-        ETAUO.loc[H] = -0.72;
+        ETAUI.loc[H] = -1.5
+        ETAUO.loc[H] = -0.72
 
-        ETAYDO.loc[H] = 1.4;
-        ETAYDI.loc[H] = 1.5;
+        ETAYDO.loc[H] = 1.4
+        ETAYDI.loc[H] = 1.5
 
         # ETAIX['KAP',IG]  = 0.1*ETAIX['KAP',IG];
-        ETAIX.loc['KAP', IG] = 0.1;
-        ETAE.loc[IP] = -1.5;
+        ETAIX.loc['KAP', IG] = 0.1
+        ETAE.loc[IP] = -1.5
 
         # DRAM ELASTICITIES
         # ETAUO[H]         = MISCH[H, 'ETAU'];
@@ -673,7 +672,7 @@ class SeasideCGEModel(BaseAnalysis):
         # ETAUI[H]          = ETAU[H];
         # ETAUO[H]          = ETAU[H];
 
-        SIGMA.loc[I] = 0.67;
+        SIGMA.loc[I] = 0.67
 
         # -------------------------------------------------------------------------------------------------------------
         # CALCULATIONS OF PARAMETERS AND INITIAL VALUES
@@ -862,7 +861,7 @@ class SeasideCGEModel(BaseAnalysis):
 
         ETAD.loc[I] = -1.0 * ETAM.loc[I] * M0.loc[I] / (DD0.loc[I] * D0.loc[I])
 
-        DS0.loc[I] = DD0.loc[I] + CX0.loc[I] - M0.loc[I];
+        DS0.loc[I] = DD0.loc[I] + CX0.loc[I] - M0.loc[I]
 
         AD.loc[I, I] = SAM.loc[I, I].div(P0.loc[I], axis='index').div(1.0 + TAUQ.loc[GS, I].sum(0), axis='index') / \
                        DS0.loc[I]
@@ -945,13 +944,13 @@ class SeasideCGEModel(BaseAnalysis):
                KPFOR0.loc[K].sum(0) - GVFOR0.loc[G].sum(0)
 
         Y0.loc[H] = (A.loc[H, L].mul(HW0[H], axis='index').div(A.loc[H, L].mul(HW0[H], axis='index').sum(0),
-                                                               axis='columns') \
+                                                               axis='columns')
                      .mul(Y0.loc[L] - (CMIWAGE.loc[L] * CMI0.loc[L]), axis='columns').mul(1.0 - TAUFL.loc[G, L].sum(0),
                                                                                           axis='columns')).sum(1) \
                     + (A.loc[H, LA].mul(HW0[H], axis='index').div(A.loc[H, LA].mul(HW0[H], axis='index').sum(0),
-                                                                  axis='columns') \
+                                                                  axis='columns')
                        * (Y0.loc[LA] * (1.0 - TAUFLA.loc[G, LA].sum(0)) + LNFOR0.loc[LA])).sum(1) \
-                    + (A.loc[H, K].mul(HW0[H], axis='index') / A.loc[H, K].mul(HW0[H], axis='index').sum(0) \
+                    + (A.loc[H, K].mul(HW0[H], axis='index') / A.loc[H, K].mul(HW0[H], axis='index').sum(0)
                        * (Y0[K] * (1.0 - TAUFK.loc[G, K].sum(0)) + KPFOR0.loc[K])).sum(1)
 
         SPI0 = (Y0.loc[H].sum(0) +
@@ -1123,49 +1122,49 @@ class SeasideCGEModel(BaseAnalysis):
         # DEFINE BOUNDS FOR VARIABLES
         # -------------------------------------------------------------------------------------------------------------
 
-        vars.lo('P', vars.get('P') / 1000);
+        vars.lo('P', vars.get('P') / 1000)
         vars.up('P', vars.get('P') * 1000)
-        vars.lo('PD', vars.get('PD') / 1000);
+        vars.lo('PD', vars.get('PD') / 1000)
         vars.up('PD', vars.get('PD') * 1000)
-        vars.lo('PVA', vars.get('PVA') / 1000);
+        vars.lo('PVA', vars.get('PVA') / 1000)
         vars.up('PVA', vars.get('PVA') * 1000)
-        vars.lo('RA', vars.get('RA') / 1000);
+        vars.lo('RA', vars.get('RA') / 1000)
         vars.up('RA', vars.get('RA') * 1000)
-        vars.lo('CPI', vars.get('CPI') / 1000);
+        vars.lo('CPI', vars.get('CPI') / 1000)
         vars.up('CPI', vars.get('CPI') * 1000)
-        vars.lo('DS', vars.get('DS') / 1000);
+        vars.lo('DS', vars.get('DS') / 1000)
         vars.up('DS', vars.get('DS') * 1000)
-        vars.lo('DD', vars.get('DD') / 1000);
+        vars.lo('DD', vars.get('DD') / 1000)
         vars.up('DD', vars.get('DD') * 1000)
-        vars.lo('D', vars.get('D') / 1000);
+        vars.lo('D', vars.get('D') / 1000)
         vars.up('D', vars.get('D') * 1000)
-        vars.lo('V', vars.get('V') / 1000);
+        vars.lo('V', vars.get('V') / 1000)
         vars.up('V', vars.get('V') * 1000)
-        vars.lo('FD', vars.get('FD') / 1000);
+        vars.lo('FD', vars.get('FD') / 1000)
         vars.up('FD', vars.get('FD') * 1000)
-        vars.lo('HH', vars.get('HH') / 1000);
+        vars.lo('HH', vars.get('HH') / 1000)
         vars.up('HH', vars.get('HH') * 1000)
-        vars.lo('HW', vars.get('HW') / 1000);
+        vars.lo('HW', vars.get('HW') / 1000)
         vars.up('HW', vars.get('HW') * 1000)
-        vars.lo('HN', vars.get('HN') / 1000);
+        vars.lo('HN', vars.get('HN') / 1000)
         vars.up('HN', vars.get('HN') * 1000)
-        vars.lo('KS', vars.get('KS') / 1000);
+        vars.lo('KS', vars.get('KS') / 1000)
         vars.up('KS', vars.get('KS') * 1000)
-        vars.lo('LAS', vars.get('LAS') / 1000);
+        vars.lo('LAS', vars.get('LAS') / 1000)
         vars.up('LAS', vars.get('LAS') * 1000)
-        vars.lo('M', vars.get('M') / 1000);
+        vars.lo('M', vars.get('M') / 1000)
         vars.up('M', vars.get('M') * 1000)
-        vars.lo('Y', vars.get('Y') / 1000);
+        vars.lo('Y', vars.get('Y') / 1000)
         vars.up('Y', vars.get('Y') * 1000)
-        vars.lo('YD', vars.get('YD') / 1000);
+        vars.lo('YD', vars.get('YD') / 1000)
         vars.up('YD', vars.get('YD') * 1000)
-        vars.lo('CH', vars.get('CH') / 1000);
+        vars.lo('CH', vars.get('CH') / 1000)
         vars.up('CH', vars.get('CH') * 1000)
-        vars.lo('CG', vars.get('CG') / 1000);
+        vars.lo('CG', vars.get('CG') / 1000)
         vars.up('CG', vars.get('CG') * 1000)
-        vars.lo('CX', vars.get('CX') / 1000);
+        vars.lo('CX', vars.get('CX') / 1000)
         vars.up('CX', vars.get('CX') * 1000)
-        vars.lo('R', vars.get('R') / 1000);
+        vars.lo('R', vars.get('R') / 1000)
         vars.up('R', vars.get('R') * 1000)
         # vars.lo('CMI',vars.get('CMI')/1000); vars.up('CMI',vars.get('CMI')*1000)
         # vars.lo('CMO',vars.get('CMO')/1000); vars.up('CMO',vars.get('CMO')*1000)
@@ -1444,7 +1443,7 @@ class SeasideCGEModel(BaseAnalysis):
             # line4 =( ((ExprM(vars, m = PIT.loc[GI,H])* ExprM(vars, m = HH0.loc[H])).sum(GI)+ (ExprM(vars, m = TAUH0.loc[G,H])*ExprM(vars, m = HH0.loc[H])).sum(G))\
             #        / ((ExprM(vars, m = PIT.loc[GI,H])* HH.loc(H)).sum(GI)+ (ExprM(vars, m = TAUH.loc[G,H])*HH.loc(H)).sum(G)) )** ExprM(vars, m = ETAPIT.loc[H])
             line4 = (((ExprM(vars, m=PIT.loc[GI, H]) * HH.loc(H)).sum(GI) + (
-                    ExprM(vars, m=TAUH0.loc[G, H]) * HH.loc(H)).sum(G)) \
+                    ExprM(vars, m=TAUH0.loc[G, H]) * HH.loc(H)).sum(G))
                      / ((ExprM(vars, m=PIT.loc[GI, H]) * HH.loc(H)).sum(GI) + (
                             ExprM(vars, m=TAUH.loc[G, H]) * HH.loc(H)).sum(
                         G))) ** ExprM(vars, m=ETAPIT.loc[H])
@@ -1817,15 +1816,9 @@ class SeasideCGEModel(BaseAnalysis):
         # TODO: we need to generate the "solverconstatnt" folder with username since it uses system tmp
         # TODO: there is a situation that multiple users on system can run this together
 
-        cge_tmp_folder = os.path.join(tempfile.gettempdir(), "solverconstants")
-        if not os.path.isdir(cge_tmp_folder):  # create the folder if there is no folder
-            os.mkdir(cge_tmp_folder)
-        logger.debug(cge_tmp_folder)
-
-        filename = os.path.join(cge_tmp_folder, "ipopt_cons.py")
-        tmp = os.path.join(cge_tmp_folder, "tmp.py")
-
-        logger.debug("Calibration: ")
+        filename = "ipopt_cons.py"
+        tmp = "tmp.py"
+        print("Calibration: ")
         run_solver(filename, tmp)
 
         '''
@@ -1848,7 +1841,6 @@ class SeasideCGEModel(BaseAnalysis):
         sector_shocks = sector_shocks.set_index('sector')
         headers = list((KS0.loc[K, I]).columns)
         sector_shocks = sector_shocks.reindex(headers)
-        sector_shocks.loc[headers]
 
         # The line below this can be used if we want to add the ability to do multiple simulations later, currently
         # it changes nothing.

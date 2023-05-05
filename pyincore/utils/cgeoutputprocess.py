@@ -12,7 +12,8 @@ class CGEOutputProcess:
     """This class converts csv results outputs of Joplin CGE analysis to json format."""
 
     @staticmethod
-    def get_cge_household_count(household_count, household_count_path=None, filename_json=None):
+    def get_cge_household_count(household_count, household_count_path=None, filename_json=None,
+                                income_categories=("HH1", "HH2", "HH3", "HH4", "HH5")):
         """Calculate income results from the output files of the Joplin CGE analysis and convert the results
         to json format.
         {
@@ -26,42 +27,44 @@ class CGEOutputProcess:
             household_count_path (obj): A fallback for the case that household count object of CGE is not provided.
                  For example a user wants to directly pass in csv files, a path to CGE household count result.
             filename_json (str): Path and name to save json output file in. E.g "cge_total_household_count.json"
+            income_categories (list): A list of income categories to partition the data
 
         Returns:
             obj: CGE total household count. A JSON of the total household count results ordered by category.
 
         """
-        income_categories = ["HH1", "HH2", "HH3", "HH4", "HH5"]
 
         if household_count_path:
             household_group_count = pd.read_csv(household_count_path)
         else:
             household_group_count = household_count.get_dataframe_from_csv()
 
-        before_values = household_group_count["HH0"]
-        after_values = household_group_count["HHL"]
-
         before_event = {}
         after_event = {}
         pct_change = {}
-        for i in range(len(income_categories)):
-            before_event[income_categories[i]] = before_values[i]
-            after_event[income_categories[i]] = after_values[i]
-            if before_values[i]:
-                pct_change[income_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+        for income_category in income_categories:
+            before_event[income_category] = household_group_count[household_group_count["Household Group"] ==
+                                                                  income_category]["HH0"].values[0]
+            after_event[income_category] = household_group_count[household_group_count["Household Group"] ==
+                                                                 income_category]["HHL"].values[0]
+
+            if before_event[income_category]:
+                pct_change[income_category] = 100 * ((after_event[income_category] - before_event[income_category]) /
+                                                     abs(before_event[income_category]))
             else:
-                pct_change[income_categories[i]] = None
+                pct_change[income_category] = None
 
         cge_total_household_count = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(cge_total_household_count, outfile)
+                json.dump(cge_total_household_count, outfile, indent=2)
         # Serializing json
         return json.dumps(cge_total_household_count)
 
     @staticmethod
-    def get_cge_gross_income(gross_income, gross_income_path=None, filename_json=None):
+    def get_cge_gross_income(gross_income, gross_income_path=None, filename_json=None,
+                             income_categories=("HH1", "HH2", "HH3", "HH4", "HH5")):
         """Calculate household gross income results from the output files of the Joplin CGE analysis
         and convert the results to json format.
         {
@@ -75,44 +78,44 @@ class CGEOutputProcess:
             gross_income_path (obj): A fallback for the case that gross_income object of CGE is not provided.
                  For example a user wants to directly pass in csv files, a path to CGE gross income result.
             filename_json (str): Path and name to save json output file in. E.g "cge_total_house_income.json"
+            income_categories (list): A list of income categories to partition the data
 
         Returns:
             obj: CGE total house income. A JSON of the total household income results ordered by category.
 
         """
-        income_categories = ["HH1", "HH2", "HH3", "HH4", "HH5"]
 
         if gross_income_path:
             household_income = pd.read_csv(gross_income_path)
         else:
             household_income = gross_income.get_dataframe_from_csv()
 
-        before_values = household_income["Y0"]
-        after_values = household_income["YL"]
-
         before_event = {}
         after_event = {}
         pct_change = {}
-        for i in range(len(income_categories)):
-            before_event[income_categories[i]] = before_values[i]
-            after_event[income_categories[i]] = after_values[i]
-            if before_values[i]:
-                pct_change[income_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+        for income_category in income_categories:
+            before_event[income_category] = household_income[household_income["Household Group"] == income_category][
+                "Y0"].values[0]
+            after_event[income_category] = household_income[household_income["Household Group"] == income_category][
+                "YL"].values[0]
+
+            if before_event[income_category]:
+                pct_change[income_category] = 100 * ((after_event[income_category] - before_event[income_category]) /
+                                                     abs(before_event[income_category]))
             else:
-                pct_change[income_categories[i]] = None
+                pct_change[income_category] = None
 
         cge_total_household_income = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(cge_total_household_income, outfile)
+                json.dump(cge_total_household_income, outfile, indent=2)
         # Serializing json
         return json.dumps(cge_total_household_income)
 
     @staticmethod
-    def get_cge_employment(pre_demand, post_demand,
-                           pre_demand_path=None, post_demand_path=None,
-                           filename_json=None):
+    def get_cge_employment(pre_demand, post_demand, pre_demand_path=None, post_demand_path=None,
+                           filename_json=None, demand_categories=("GOODS", "TRADE", "OTHER")):
         """Calculate employment results from the output files of the Joplin CGE analysis and convert the results
         to json format. The value is a sum of L1, L2 and L3 Labor groups numbers.
         {
@@ -135,12 +138,12 @@ class CGEOutputProcess:
                 of CGE is not provided. For example a user wants to directly pass in csv files, a path to CGE
                 household count result.
             filename_json (str): Path and name to save json output file in. E.g "cge_employment.json"
+            demand_categories (list): demand categories to partition data with.
 
         Returns:
             obj: CGE total employment. A JSON of the employment results ordered by category.
 
         """
-        demand_categories = ["Goods", "Trade", "Other"]
 
         if pre_demand_path and post_demand_path:
             pre_disaster_demand = pd.read_csv(pre_demand_path)
@@ -149,34 +152,30 @@ class CGEOutputProcess:
             pre_disaster_demand = pre_demand.get_dataframe_from_csv()
             post_disaster_demand = post_demand.get_dataframe_from_csv()
 
-        before_values = [pre_disaster_demand["GOODS"].sum(),
-                         pre_disaster_demand["TRADE"].sum(),
-                         pre_disaster_demand["OTHER"].sum()]
-        after_values = [post_disaster_demand["GOODS"].sum(),
-                        post_disaster_demand["TRADE"].sum(),
-                        post_disaster_demand["OTHER"].sum()]
-
         before_event = {}
         after_event = {}
         pct_change = {}
-        for i in range(len(demand_categories)):
-            before_event[demand_categories[i]] = before_values[i]
-            after_event[demand_categories[i]] = after_values[i]
-            if before_values[i]:
-                pct_change[demand_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+        for demand_category in demand_categories:
+            before_event[demand_category] = pre_disaster_demand[demand_category].sum()
+            after_event[demand_category] = post_disaster_demand[demand_category].sum()
+
+            if before_event[demand_category]:
+                pct_change[demand_category] = 100 * ((after_event[demand_category] - before_event[demand_category]) /
+                                                     abs(before_event[demand_category]))
             else:
-                pct_change[demand_categories[i]] = None
+                pct_change[demand_category] = None
 
         cge_employment = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(cge_employment, outfile)
+                json.dump(cge_employment, outfile, indent=2)
         # Serializing json
         return json.dumps(cge_employment)
 
     @staticmethod
-    def get_cge_domestic_supply(domestic_supply, domestic_supply_path=None, filename_json=None):
+    def get_cge_domestic_supply(domestic_supply, domestic_supply_path=None, filename_json=None,
+                                supply_categories=("Goods", "Trade", "Other", "HS1", "HS2", "HS3")):
         """Calculate domestic supply results from the output files of the Joplin CGE analysis and convert the results
         to json format.
         {
@@ -190,6 +189,7 @@ class CGEOutputProcess:
 
         Args:
             domestic_supply (obj): IN-CORE dataset for CGE domestic supply result.
+            supply_categories (list): demand categories to partition data with.
             domestic_supply_path (obj): A fallback for the case that domestic supply object of CGE is not provided.
                  For example a user wants to directly pass in csv files, a path to CGE household count result.
             filename_json (str): Path and name to save json output file in. E.g "cge_domestic_supply"
@@ -198,30 +198,28 @@ class CGEOutputProcess:
             obj: CGE total domestic supply. A JSON of the total domestic supply results ordered by category.
 
         """
-        supply_categories = ["Goods", "Trade", "Other", "HS1", "HS2", "HS3"]
+
         if domestic_supply_path:
             sector_supply = pd.read_csv(domestic_supply_path)
         else:
             sector_supply = domestic_supply.get_dataframe_from_csv()
 
-        before_values = sector_supply["DS0"]
-        after_values = sector_supply["DSL"]
-
         before_event = {}
         after_event = {}
         pct_change = {}
-        for i in range(len(supply_categories)):
-            before_event[supply_categories[i]] = before_values[i]
-            after_event[supply_categories[i]] = after_values[i]
-            if before_values[i]:
-                pct_change[supply_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+        for supply_category in supply_categories:
+            before_event[supply_category] = sector_supply[sector_supply["Sectors"] == supply_category]["DS0"].values[0]
+            after_event[supply_category] = sector_supply[sector_supply["Sectors"] == supply_category]["DSL"].values[0]
+            if before_event[supply_category]:
+                pct_change[supply_category] = 100 * ((after_event[supply_category] - before_event[supply_category]) /
+                                                     abs(before_event[supply_category]))
             else:
-                pct_change[supply_categories[i]] = None
+                pct_change[supply_category] = None
 
         cge_domestic_supply = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
         if filename_json:
             with open(filename_json, "w") as outfile:
-                json.dump(cge_domestic_supply, outfile)
+                json.dump(cge_domestic_supply, outfile, indent=2)
         # Serializing json
         return json.dumps(cge_domestic_supply)
