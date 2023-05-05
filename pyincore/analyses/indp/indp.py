@@ -754,8 +754,7 @@ class INDP(BaseAnalysis):
                 {
                     "id": "dmg_sce_data",
                     "required": True,
-                    # TODO needs explanation
-                    "description": "damage sce data",
+                    "description": "Initial damage states for combined nodes",
                     "type": "incore:dmgSceData"
                 },
                 {
@@ -776,6 +775,7 @@ class INDP(BaseAnalysis):
                     "description": "Pipeline Repair Rate output",
                     "type": "ergo:pipelineDamageVer3"
                 },
+                # TODO this is different than any other interdependency dict
                 {
                     "id": "interdep",
                     "required": True,
@@ -785,13 +785,13 @@ class INDP(BaseAnalysis):
                 {
                     "id": "initial_node",
                     "required": True,
-                    "description": "initial node csv",
+                    "description": "Initial damage scenarios failed state for combined nodes",
                     "type": "incore:initialNode"
                 },
                 {
                     "id": "initial_link",
                     "required": True,
-                    "description": "initial link csv",
+                    "description": "Initial damage scenarios failed state for combined links",
                     "type": "incore:initialLink"
                 },
                 {

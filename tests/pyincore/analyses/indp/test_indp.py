@@ -38,7 +38,7 @@ def run_with_base_class():
     indp_analysis.load_remote_input_dataset("power_network", "634d99f51f950c126bca46a9")
     indp_analysis.load_remote_input_dataset("water_network", "634d975b1f950c126bca45e2")
 
-    # this can be chained with pipeline damage
+    # TODO this can be chained with pipeline damage
     pipeline_dmg = Dataset.from_file("data/pipe_dmg.csv", "ergo:pipelineDamageVer3")
     indp_analysis.set_input_dataset("pipeline_dmg", pipeline_dmg)
 
@@ -50,7 +50,7 @@ def run_with_base_class():
     # indp_analysis.load_remote_input_dataset("bldgs2elec", "61c10219837ac508f9a17904")
     # indp_analysis.load_remote_input_dataset("bldgs2wter", "c102b0837ac508f9a1790a")
 
-    # this can be chained with population dislocation model
+    # TODO this can be chained with population dislocation model
     pop_dislocation = Dataset.from_file("data/PopDis_results.csv", "incore:popDislocation")
     indp_analysis.set_input_dataset("pop_dislocation", pop_dislocation)
 
