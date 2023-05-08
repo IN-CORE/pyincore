@@ -79,7 +79,10 @@ class AnalysisUtil:
                 else:
                     float_dmg_dict[key] = float(dmg_dict[key])
             else:
-                float_dmg_dict[key] = dmg_dict[key]
+                if dmg_dict[key] != '':
+                    float_dmg_dict[key] = dmg_dict[key]
+                else:
+                    float_dmg_dict[key] = np.nan
         return float_dmg_dict
 
     @staticmethod
@@ -135,11 +138,13 @@ class AnalysisUtil:
     @staticmethod
     def calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg,
                                             mean_damage, damage_interval_keys):
+
+        float_dmg = AnalysisUtil.dmg_string_dict_to_dmg_float_dict(dmg)
         output = collections.OrderedDict()
         result = 0.0
         idx = 0
         for key in damage_interval_keys:
-            result += float(dmg[key]) * (math.pow(
+            result += float_dmg[key] * (math.pow(
                 float(dmg_ratio_tbl[idx]["Mean Damage Factor"]), 2) + math.pow(
                 float(dmg_ratio_tbl[idx]["Deviation Damage Factor"]), 2))
             idx += 1
