@@ -71,13 +71,15 @@ class AnalysisUtil:
 
     @staticmethod
     def dmg_string_dict_to_dmg_float_dict(dmg_dict: dict):
-        float_dmg_dict = {'guid': dmg_dict['guid']}
+        float_dmg_dict = {}
         for key in dmg_dict:
-            if key != 'guid':
+            if key != 'guid' and key != 'haz_expose':
                 if dmg_dict[key] == '':
                     float_dmg_dict[key] = np.nan
                 else:
                     float_dmg_dict[key] = float(dmg_dict[key])
+            else:
+                float_dmg_dict[key] = dmg_dict[key]
         return float_dmg_dict
 
     @staticmethod
@@ -99,10 +101,10 @@ class AnalysisUtil:
 
         elif len(dmg_ratio_tbl) == 4:
             output['meandamage'] = float(
-                float(dmg_ratio_tbl[0]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[0]] + \
-                float(dmg_ratio_tbl[1]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[1]] + \
-                float(dmg_ratio_tbl[2]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[2]] + \
-                float(dmg_ratio_tbl[3]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[3]])
+                float(dmg_ratio_tbl[0]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[0]] + \
+                float(dmg_ratio_tbl[1]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[1]] + \
+                float(dmg_ratio_tbl[2]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[2]] + \
+                float(dmg_ratio_tbl[3]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[3]])
 
         elif len(dmg_ratio_tbl) == 6 and is_bridge:
             # this is for bridge
