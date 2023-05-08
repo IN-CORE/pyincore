@@ -72,7 +72,7 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
                                  "dataframe")
 
         # Create the result dataset
-        self.set_result_csv_data("result", combined_output, self.get_parameter("result_name"), "dataframe")
+        self.set_result_csv_data("result", combined_output, self.get_parameter("result_name") + "_max_state", "dataframe")
 
         return True
     
