@@ -86,6 +86,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Fix data type of Census input dataset to CSV [#166](https://github.com/IN-CORE/pyincore/issues/166)
+- MCS handles empty rows in the input dataset [#195](https://github.com/IN-CORE/pyincore/issues/195)
 
 ## [1.5.0] - 2022-06-29
 
