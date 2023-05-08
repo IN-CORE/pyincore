@@ -163,6 +163,7 @@ class Client:
     @staticmethod
     def return_http_response(http_response):
         try:
+            print(http_response)
             http_response.raise_for_status()
             return http_response
         except requests.exceptions.HTTPError:
