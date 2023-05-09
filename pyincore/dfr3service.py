@@ -8,7 +8,11 @@
 import re
 from urllib.parse import urljoin
 from typing import Dict
+import requests
 
+logger = pyglobals.LOGGER
+
+import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.repaircurveset import RepairCurveSet
@@ -20,7 +24,7 @@ known_types = {
     "java.lang.String": "str",
     "double": "float",
     "int": "int",
-    "str": "str"
+    "str": "str",
 }
 
 # add more operators if needed
@@ -33,7 +37,7 @@ known_operators = {
     "LT": "<",
     "LE": "<=",
     "NMATCHES": "",
-    "MATCHES": ""
+    "MATCHES": "",
 }
 
 
@@ -50,7 +54,9 @@ class MappingRequest(object):
 
 
 class MappingResponse(object):
-    def __init__(self, sets: Dict[str, any]=dict(), mapping: Dict[str, str]=dict()):
+    def __init__(
+        self, sets: Dict[str, any] = dict(), mapping: Dict[str, str] = dict()
+    ):
         self.sets = sets
         self.mapping = mapping
 
@@ -65,7 +71,38 @@ class Dfr3Service:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_mapping_url = urljoin(client.service_url, 'dfr3/api/mappings/')
+        self.base_mapping_url = urljoin(
+            client.service_url, "dfr3/api/mappings/"
+        )
+
+    @staticmethod
+    def return_http_response(http_response):
+        try:
+            http_response.raise_for_status()
+            return http_response
+        except requests.exceptions.HTTPError:
+            logger.error(
+                "A HTTPError has occurred \n"
+                + "HTTP Status code: "
+                + str(http_response.status_code)
+                + "\n"
+                + "Error Message: "
+                + http_response.content.decode()
+            )
+            raise
+        except requests.exceptions.ConnectionError:
+            logger.error(
+                "ConnectionError: Failed to establish a connection with the server. "
+                "This might be due to a refused connection. "
+                "Please check that you are using the right URLs."
+            )
+            raise
+        except requests.exceptions.RequestException:
+            logger.error(
+                "RequestException: There was an exception while trying to handle your request. "
+                "Please go to the end of this message for more specific information about the exception."
+            )
+            raise
 
     def get_dfr3_set(self, dfr3_id: str):
         """Get specific DFR3 set.
@@ -80,22 +117,22 @@ class Dfr3Service:
         url = urljoin(self.base_dfr3_url, dfr3_id)
         r = self.client.get(url)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def delete_dfr3_set(self, dfr3_id: str):
         """Delete specific DFR3 set.
 
-            Args:
-                dfr3_id (str): ID of the DFR3 set.
+        Args:
+            dfr3_id (str): ID of the DFR3 set.
 
-            Returns:
-                obj: HTTP response with return results.
+        Returns:
+            obj: HTTP response with return results.
 
         """
         url = urljoin(self.base_dfr3_url, dfr3_id)
         r = self.client.delete(url)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def batch_get_dfr3_set(self, dfr3_id_lists: list):
         """This method is intended to replace batch_get_dfr3_set in the future. It retrieve dfr3 sets
@@ -112,14 +149,16 @@ class Dfr3Service:
         for id in dfr3_id_lists:
             dfr3_set = self.get_dfr3_set(id)
             instance = self.__class__.__name__
-            if instance == 'FragilityService':
+            if instance == "FragilityService":
                 batch_dfr3_sets[id] = FragilityCurveSet(dfr3_set)
-            elif instance == 'RepairService':
+            elif instance == "RepairService":
                 batch_dfr3_sets[id] = RepairCurveSet(dfr3_set)
-            elif instance == 'RestorationService':
+            elif instance == "RestorationService":
                 batch_dfr3_sets[id] = RestorationCurveSet(dfr3_set)
             else:
-                raise ValueError("Only fragility and repair services are currently supported")
+                raise ValueError(
+                    "Only fragility and repair services are currently supported"
+                )
 
         return batch_dfr3_sets
 
@@ -138,12 +177,12 @@ class Dfr3Service:
         url = urljoin(self.base_dfr3_url, "search")
         payload = {"text": text}
         if skip is not None:
-            payload['skip'] = skip
+            payload["skip"] = skip
         if limit is not None:
-            payload['limit'] = limit
+            payload["limit"] = limit
 
         r = self.client.get(url, params=payload)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def create_dfr3_set(self, dfr3_set: dict):
         """Create DFR3 set on the server. POST API endpoint call.
@@ -157,9 +196,15 @@ class Dfr3Service:
         """
         url = self.base_dfr3_url
         r = self.client.post(url, json=dfr3_set)
-        return r.json()
+        return self.return_http_response(r).json()
 
-    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str, add_info: list = None):
+    def match_inventory(
+        self,
+        mapping: MappingSet,
+        inventories: list,
+        entry_key: str,
+        add_info: list = None,
+    ):
         """This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
         FragilityCurveSet Object.
@@ -179,19 +224,26 @@ class Dfr3Service:
         # loop through inventory to match the rules
         matched_curve_ids = []
         for inventory in inventories:
-            if "occ_type" in inventory["properties"] and \
-                    inventory["properties"]["occ_type"] is None:
+            if (
+                "occ_type" in inventory["properties"]
+                and inventory["properties"]["occ_type"] is None
+            ):
                 inventory["properties"]["occ_type"] = ""
-            if "efacility" in inventory["properties"] and \
-                    inventory["properties"]["efacility"] is None:
+            if (
+                "efacility" in inventory["properties"]
+                and inventory["properties"]["efacility"] is None
+            ):
                 inventory["properties"]["efacility"] = ""
 
             # if additional information presented, merge inventory properties with that additional information
             if add_info is not None:
                 for add_info_row in add_info:
-                    if inventory["properties"].get("guid") is not None and \
-                            add_info_row.get("guid") is not None and \
-                            inventory["properties"].get("guid") == add_info_row.get("guid"):
+                    if (
+                        inventory["properties"].get("guid") is not None
+                        and add_info_row.get("guid") is not None
+                        and inventory["properties"].get("guid")
+                        == add_info_row.get("guid")
+                    ):
                         inventory["properties"].update(add_info_row)
                         break  # assume no duplicated guid
 
@@ -199,12 +251,17 @@ class Dfr3Service:
                 # for old format rule matching [[]]
                 # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
-                    if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
+                    if self._property_match_legacy(
+                        rules=m.rules, properties=inventory["properties"]
+                    ):
                         curve = m.entry[entry_key]
-                        dfr3_sets[inventory['id']] = curve
+                        dfr3_sets[inventory["id"]] = curve
 
                         # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
-                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                        if (
+                            isinstance(curve, str)
+                            and curve not in matched_curve_ids
+                        ):
                             matched_curve_ids.append(curve)
 
                         # use the first match
@@ -213,12 +270,17 @@ class Dfr3Service:
                 # for new format rule matching {"AND/OR":[]}
                 # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
                 elif isinstance(m.rules, dict):
-                    if self._property_match(rules=m.rules, properties=inventory["properties"]):
+                    if self._property_match(
+                        rules=m.rules, properties=inventory["properties"]
+                    ):
                         curve = m.entry[entry_key]
-                        dfr3_sets[inventory['id']] = curve
+                        dfr3_sets[inventory["id"]] = curve
 
                         # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
-                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                        if (
+                            isinstance(curve, str)
+                            and curve not in matched_curve_ids
+                        ):
                             matched_curve_ids.append(curve)
 
                         # use the first match
@@ -234,11 +296,14 @@ class Dfr3Service:
                 dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]
             else:
                 raise ValueError(
-                    "Cannot realize dfr3_set entry. The entry has to be either remote id string; or dfr3curve object!")
+                    "Cannot realize dfr3_set entry. The entry has to be either remote id string; or dfr3curve object!"
+                )
 
         return dfr3_sets
 
-    def match_list_of_dicts(self, mapping: MappingSet, inventories: list, entry_key: str):
+    def match_list_of_dicts(
+        self, mapping: MappingSet, inventories: list, entry_key: str
+    ):
         """This method is same as match_inventory, except it takes a simple list of dictionaries that contains the items
         to be mapped in the rules. The match_inventory method takes a list of fiona objects
 
@@ -259,12 +324,17 @@ class Dfr3Service:
             for m in mapping.mappings:
                 # for old format rule matching [[]]
                 if isinstance(m.rules, list):
-                    if self._property_match_legacy(rules=m.rules, properties=inventory):
+                    if self._property_match_legacy(
+                        rules=m.rules, properties=inventory
+                    ):
                         curve = m.entry[entry_key]
-                        dfr3_sets[inventory['id']] = curve
+                        dfr3_sets[inventory["id"]] = curve
 
                         # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
-                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                        if (
+                            isinstance(curve, str)
+                            and curve not in matched_curve_ids
+                        ):
                             matched_curve_ids.append(curve)
 
                         # use the first match
@@ -272,12 +342,17 @@ class Dfr3Service:
 
                 # for new format rule matching {"AND/OR":[]}
                 elif isinstance(m.rules, dict):
-                    if self._property_match(rules=m.rules, properties=inventory):
+                    if self._property_match(
+                        rules=m.rules, properties=inventory
+                    ):
                         curve = m.entry[entry_key]
-                        dfr3_sets[inventory['guid']] = curve
+                        dfr3_sets[inventory["guid"]] = curve
 
                         # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
-                        if isinstance(curve, str) and curve not in matched_curve_ids:
+                        if (
+                            isinstance(curve, str)
+                            and curve not in matched_curve_ids
+                        ):
                             matched_curve_ids.append(curve)
 
                         # use the first match
@@ -287,14 +362,18 @@ class Dfr3Service:
 
         # replace the curve id in dfr3_sets to the dfr3 curve
         for inventory_id, curve_item in dfr3_sets.items():
-            if isinstance(curve_item, FragilityCurveSet) or isinstance(curve_item, RepairCurveSet) \
-                    or isinstance(curve_item, RestorationCurveSet):
+            if (
+                isinstance(curve_item, FragilityCurveSet)
+                or isinstance(curve_item, RepairCurveSet)
+                or isinstance(curve_item, RestorationCurveSet)
+            ):
                 pass
             elif isinstance(curve_item, str):
                 dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]
             else:
                 raise ValueError(
-                    "Cannot realize dfr3_set entry. The entry has to be either remote id string; or dfr3curve object!")
+                    "Cannot realize dfr3_set entry. The entry has to be either remote id string; or dfr3curve object!"
+                )
 
         return dfr3_sets
 
@@ -317,12 +396,18 @@ class Dfr3Service:
 
         else:
             # rules = [[A and B], OR [C and D], OR [E and F]]
-            or_matched = [False for i in range(len(rules))]  # initiate all false state outer list
+            or_matched = [
+                False for i in range(len(rules))
+            ]  # initiate all false state outer list
             for i, and_rules in enumerate(rules):
-                and_matched = [False for j in range(len(and_rules))]  # initialte all false state for inner list
+                and_matched = [
+                    False for j in range(len(and_rules))
+                ]  # initialte all false state for inner list
                 for j, rule in enumerate(and_rules):
                     # evaluate, return True or False. And place it in the corresponding place
-                    and_matched[j] = Dfr3Service._eval_criterion(rule, properties)
+                    and_matched[j] = Dfr3Service._eval_criterion(
+                        rule, properties
+                    )
 
                 # for inner list, AND boolean applied
                 if all(and_matched):
@@ -355,12 +440,18 @@ class Dfr3Service:
             for criterion in criteria:
                 # Recursively parse and evaluate the rules with boolean
                 if isinstance(criterion, dict):
-                    matches.append(Dfr3Service._property_match(criterion, properties))
+                    matches.append(
+                        Dfr3Service._property_match(criterion, properties)
+                    )
                 # Base case: evaluate the rule and return match=true/false
                 elif isinstance(criterion, str):
-                    matches.append(Dfr3Service._eval_criterion(criterion, properties))
+                    matches.append(
+                        Dfr3Service._eval_criterion(criterion, properties)
+                    )
                 else:
-                    raise ValueError("Cannot evaluate criterion, unsupported format!")
+                    raise ValueError(
+                        "Cannot evaluate criterion, unsupported format!"
+                    )
 
             if boolean.lower() == "and":
                 return all(matches)
@@ -389,38 +480,61 @@ class Dfr3Service:
         # e.g. "java.lang.String Soil EQUALS Upland",
         # e.g. "java.lang.String struct_typ EQUALS W2"
 
-        rule_type = elements[0]  # e.g. int, str, double, java.lang.String, etc...
+        rule_type = elements[
+            0
+        ]  # e.g. int, str, double, java.lang.String, etc...
         if rule_type not in known_types.keys():
-            raise ValueError(rule_type + " Unknown. Cannot parse the rules of this mapping!")
+            raise ValueError(
+                rule_type + " Unknown. Cannot parse the rules of this mapping!"
+            )
 
         rule_key = elements[1]  # e.g. no_storeis, year_built, etc...
 
         rule_operator = elements[2]  # e.g. EQ, GE, LE, EQUALS
         if rule_operator not in known_operators.keys():
-            raise ValueError(rule_operator + " Unknown. Cannot parse the rules of this mapping!")
+            raise ValueError(
+                rule_operator
+                + " Unknown. Cannot parse the rules of this mapping!"
+            )
 
-        rule_value = elements[3].strip('\'').strip('\"')
+        rule_value = elements[3].strip("'").strip('"')
 
         if rule_key in properties.keys():
             # validate if the rule is written correctly by comparing variable type, e.g. no_stories properties
             # should be integer
             if isinstance(properties[rule_key], eval(known_types[rule_type])):
                 # additional steps to strip "'" for string matches
-                if known_types[rule_type] == 'str':
+                if known_types[rule_type] == "str":
                     if rule_operator == "MATCHES":
-                        matched = bool(re.search(rule_value, properties[rule_key]))
+                        matched = bool(
+                            re.search(rule_value, properties[rule_key])
+                        )
                     elif rule_operator == "NMATCHES":
-                        matched = not bool(re.search(rule_value, properties[rule_key]))
+                        matched = not bool(
+                            re.search(rule_value, properties[rule_key])
+                        )
                     else:
                         matched = eval(
-                            '"{0}"'.format(properties[rule_key]) + known_operators[rule_operator] + '"{0}"'.format(
-                                rule_value))
+                            '"{0}"'.format(properties[rule_key])
+                            + known_operators[rule_operator]
+                            + '"{0}"'.format(rule_value)
+                        )
                 else:
-                    matched = eval(str(properties[rule_key]) + known_operators[rule_operator] + rule_value)
+                    matched = eval(
+                        str(properties[rule_key])
+                        + known_operators[rule_operator]
+                        + rule_value
+                    )
             else:
-                raise ValueError("Mismatched datatype found in the mapping rule: " + rule +
-                                 ". Datatype found in the dataset for " + rule_key + " : "
-                                 + str(type(properties[rule_key])) + ". Please review the mapping being used.")
+                raise ValueError(
+                    "Mismatched datatype found in the mapping rule: "
+                    + rule
+                    + ". Datatype found in the dataset for "
+                    + rule_key
+                    + " : "
+                    + str(type(properties[rule_key]))
+                    + ". Please review the mapping being used."
+                )
 
         return matched
 
@@ -446,7 +560,7 @@ class Dfr3Service:
                 for j, rule in enumerate(and_rules):
                     if j != 0:
                         inventory_class += "+"
-                    inventory_class += rule.split(" ")[3].strip('\'').strip('\"')
+                    inventory_class += rule.split(" ")[3].strip("'").strip('"')
             return inventory_class
 
     @staticmethod
@@ -468,11 +582,17 @@ class Dfr3Service:
             criteria = rules[boolean]
             for criterion in criteria:
                 if isinstance(criterion, dict):
-                    inventory_class.append(Dfr3Service.extract_inventory_class(criterion))
+                    inventory_class.append(
+                        Dfr3Service.extract_inventory_class(criterion)
+                    )
                 elif isinstance(criterion, str):
-                    inventory_class.append(criterion.split(" ")[3].strip('\'').strip('\"'))
+                    inventory_class.append(
+                        criterion.split(" ")[3].strip("'").strip('"')
+                    )
                 else:
-                    raise ValueError("Cannot evaluate criterion, unsupported format!")
+                    raise ValueError(
+                        "Cannot evaluate criterion, unsupported format!"
+                    )
 
             if boolean.lower() == "and":
                 return "+".join(inventory_class)
@@ -495,10 +615,18 @@ class Dfr3Service:
         url = self.base_mapping_url
         r = self.client.post(url, json=mapping_set)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
-    def get_mappings(self, hazard_type: str = None, inventory_type: str = None, mapping_type: str = None,
-                     creator: str = None, space: str = None, skip: int = None, limit: int = None):
+    def get_mappings(
+        self,
+        hazard_type: str = None,
+        inventory_type: str = None,
+        mapping_type: str = None,
+        creator: str = None,
+        space: str = None,
+        skip: int = None,
+        limit: int = None,
+    ):
         """Get the set of mappings. Mapping is a relationship between inventories (buildings, bridges
             etc.) and DFR3 sets.
 
@@ -519,23 +647,23 @@ class Dfr3Service:
         payload = {}
 
         if hazard_type is not None:
-            payload['hazard'] = hazard_type
+            payload["hazard"] = hazard_type
         if inventory_type is not None:
-            payload['inventory'] = inventory_type
+            payload["inventory"] = inventory_type
         if mapping_type is not None:
-            payload['mappingType'] = mapping_type
+            payload["mappingType"] = mapping_type
         if creator is not None:
-            payload['creator'] = creator
+            payload["creator"] = creator
         if skip is not None:
-            payload['skip'] = skip
+            payload["skip"] = skip
         if limit is not None:
-            payload['limit'] = limit
+            payload["limit"] = limit
         if space is not None:
-            payload['space'] = space
+            payload["space"] = space
 
         r = self.client.get(url, params=payload)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def get_mapping(self, mapping_id):
         """Get specific inventory mapping.
@@ -550,7 +678,7 @@ class Dfr3Service:
         url = urljoin(self.base_mapping_url, mapping_id)
         r = self.client.get(url)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def delete_mapping(self, mapping_id):
         """delete specific inventory mappings.
@@ -565,4 +693,4 @@ class Dfr3Service:
         url = urljoin(self.base_mapping_url, mapping_id)
         r = self.client.delete(url)
 
-        return r.json()
+        return self.return_http_response(r).json()

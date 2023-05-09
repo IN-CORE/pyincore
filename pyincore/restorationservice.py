@@ -21,14 +21,22 @@ class RestorationService(Dfr3Service):
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_dfr3_url = urljoin(client.service_url,
-                                                  'dfr3/api/restorations/')
+        self.base_dfr3_url = urljoin(
+            client.service_url, "dfr3/api/restorations/"
+        )
 
         super(RestorationService, self).__init__(client)
 
-    def get_dfr3_sets(self, hazard_type: str = None, inventory_type: str = None,
-                      author: str = None, creator: str = None, space: str = None,
-                      skip: int = None, limit: int = None):
+    def get_dfr3_sets(
+        self,
+        hazard_type: str = None,
+        inventory_type: str = None,
+        author: str = None,
+        creator: str = None,
+        space: str = None,
+        skip: int = None,
+        limit: int = None,
+    ):
         """Get the set of restoration data, curves.
 
         Args:
@@ -48,19 +56,19 @@ class RestorationService(Dfr3Service):
         payload = {}
 
         if hazard_type is not None:
-            payload['hazard'] = hazard_type
+            payload["hazard"] = hazard_type
         if inventory_type is not None:
-            payload['inventory'] = inventory_type
+            payload["inventory"] = inventory_type
         if author is not None:
-            payload['author'] = author
+            payload["author"] = author
         if creator is not None:
-            payload['creator'] = creator
+            payload["creator"] = creator
         if skip is not None:
-            payload['skip'] = skip
+            payload["skip"] = skip
         if limit is not None:
-            payload['limit'] = limit
+            payload["limit"] = limit
         if space is not None:
-            payload['space'] = space
+            payload["space"] = space
 
         r = self.client.get(url, params=payload)
-        return r.json()
+        return self.return_http_response(r).json()

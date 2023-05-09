@@ -6,6 +6,10 @@
 
 from urllib.parse import urljoin
 from pyincore import IncoreClient
+import pyincore.globals as pyglobals
+import requests
+
+logger = pyglobals.LOGGER
 
 
 class SpaceService:
@@ -20,6 +24,35 @@ class SpaceService:
         self.client = client
         self.base_space_url = urljoin(client.service_url, "space/api/spaces/")
 
+    @staticmethod
+    def return_http_response(http_response):
+        try:
+            http_response.raise_for_status()
+            return http_response
+        except requests.exceptions.HTTPError:
+            logger.error(
+                "A HTTPError has occurred \n"
+                + "HTTP Status code: "
+                + str(http_response.status_code)
+                + "\n"
+                + "Error Message: "
+                + http_response.content.decode()
+            )
+            raise
+        except requests.exceptions.ConnectionError:
+            logger.error(
+                "ConnectionError: Failed to establish a connection with the server. "
+                "This might be due to a refused connection. "
+                "Please check that you are using the right URLs."
+            )
+            raise
+        except requests.exceptions.RequestException:
+            logger.error(
+                "RequestException: There was an exception while trying to handle your request. "
+                "Please go to the end of this message for more specific information about the exception."
+            )
+            raise
+
     def create_space(self, space_json):
         """Creates a Space.
 
@@ -31,11 +64,10 @@ class SpaceService:
 
         """
         url = self.base_space_url
-        space_data = {('space', space_json)}
+        space_data = {("space", space_json)}
         kwargs = {"files": space_data}
         r = self.client.post(url, **kwargs)
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
 
     def get_spaces(self, dataset_id: str = None):
         """Retrieve  a Space with the dataset.
@@ -50,12 +82,11 @@ class SpaceService:
         url = self.base_space_url
         payload = {}
         if dataset_id is not None:
-            payload['dataset'] = dataset_id
+            payload["dataset"] = dataset_id
 
         r = self.client.get(url, params=payload)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_space_by_id(self, space_id: str):
         """Get space information.
@@ -69,9 +100,8 @@ class SpaceService:
         """
         url = urljoin(self.base_space_url, space_id)
         r = self.client.get(url)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_space_by_name(self, space_name: str):
         """Get space information by querying the name of space.
@@ -89,7 +119,9 @@ class SpaceService:
         else:
             # throw an error instead of returning the empty result
             # return []
-            raise r.exceptions.HTTPError("There is no matching name or you don't have a privilege to view the space.")
+            raise r.exceptions.HTTPError(
+                "There is no matching name or you don't have a privilege to view the space."
+            )
 
     def update_space(self, space_id: str, space_json):
         """Updates a Space.
@@ -103,11 +135,10 @@ class SpaceService:
 
         """
         url = urljoin(self.base_space_url, space_id)
-        space_data = {('space', space_json)}
+        space_data = {("space", space_json)}
         kwargs = {"files": space_data}
         r = self.client.put(url, **kwargs)
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
 
     def add_to_space_by_name(self, space_name: str, dataset_id: str):
         """Add dataset to a space by using space name and dataset id.
@@ -157,8 +188,7 @@ class SpaceService:
         url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
 
         r = self.client.delete(url)
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
 
     def add_dataset_to_space(self, space_id: str, dataset_id: str):
         """Add member to a Space.
@@ -174,8 +204,7 @@ class SpaceService:
         url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
 
         r = self.client.post(url)
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
 
     def grant_privileges_to_space(self, space_id: str, privileges_json):
         """Updates a Space.
@@ -189,9 +218,8 @@ class SpaceService:
 
         """
         url = urljoin(self.base_space_url, space_id + "/grant")
-        space_privileges = {('grant', privileges_json)}
+        space_privileges = {("grant", privileges_json)}
         kwargs = {"files": space_privileges}
         r = self.client.post(url, **kwargs)
 
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
