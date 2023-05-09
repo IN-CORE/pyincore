@@ -59,7 +59,7 @@ class AnalysisUtil:
 
     @staticmethod
     def float_to_decimal(num: float):
-        if num:
+        if isinstance(num, float):
             return Decimal(str(num))
         else:
             return np.nan
