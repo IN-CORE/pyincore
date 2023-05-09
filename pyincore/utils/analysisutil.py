@@ -8,6 +8,7 @@ import csv
 import math
 import os
 import re
+import numpy as np
 from typing import List, Dict
 from collections import Counter
 
@@ -69,34 +70,44 @@ class AnalysisUtil:
         return {key: Decimal(str(num_dict[key])) for key in num_dict}
 
     @staticmethod
+    def dmg_string_dict_to_dmg_float_dict(dmg_dict: dict):
+        float_dmg_dict = {}
+        for key in dmg_dict:
+            if key != 'guid' and key != 'haz_expose':
+                if dmg_dict[key] == '':
+                    float_dmg_dict[key] = np.nan
+                else:
+                    float_dmg_dict[key] = float(dmg_dict[key])
+            else:
+                if dmg_dict[key] != '':
+                    float_dmg_dict[key] = dmg_dict[key]
+                else:
+                    float_dmg_dict[key] = np.nan
+        return float_dmg_dict
+
+    @staticmethod
     def calculate_mean_damage(dmg_ratio_tbl, dmg_intervals,
                               damage_interval_keys, is_bridge=False,
                               bridge_spans=1):
         if len(damage_interval_keys) < 4:
             raise ValueError("we only accept 4 damage or more than 4 interval keys!")
 
+        float_dmg_intervals = AnalysisUtil.dmg_string_dict_to_dmg_float_dict(dmg_intervals)
+
         output = collections.OrderedDict()
         if len(dmg_ratio_tbl) == 5:
             output['meandamage'] = float(
-                dmg_ratio_tbl[1]["Best Mean Damage Ratio"]) * float(
-                dmg_intervals[damage_interval_keys[0]]) + float(
-                dmg_ratio_tbl[2]["Best Mean Damage Ratio"]) * float(
-                dmg_intervals[damage_interval_keys[1]]) + float(
-                dmg_ratio_tbl[3]["Best Mean Damage Ratio"]) * float(
-                dmg_intervals[damage_interval_keys[2]]) + float(
-                dmg_ratio_tbl[4]["Best Mean Damage Ratio"]) * float(
-                dmg_intervals[damage_interval_keys[3]])
+                float(dmg_ratio_tbl[1]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[0]] + \
+                float(dmg_ratio_tbl[2]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[1]] + \
+                float(dmg_ratio_tbl[3]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[2]] +\
+                float(dmg_ratio_tbl[4]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[3]])
 
         elif len(dmg_ratio_tbl) == 4:
             output['meandamage'] = float(
-                dmg_ratio_tbl[0]["Mean Damage Factor"]) * float(
-                dmg_intervals[damage_interval_keys[0]]) + float(
-                dmg_ratio_tbl[1]["Mean Damage Factor"]) * float(
-                dmg_intervals[damage_interval_keys[1]]) + float(
-                dmg_ratio_tbl[2]["Mean Damage Factor"]) * float(
-                dmg_intervals[damage_interval_keys[2]]) + float(
-                dmg_ratio_tbl[3]["Mean Damage Factor"]) * float(
-                dmg_intervals[damage_interval_keys[3]])
+                float(dmg_ratio_tbl[0]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[0]] + \
+                float(dmg_ratio_tbl[1]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[1]] + \
+                float(dmg_ratio_tbl[2]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[2]] + \
+                float(dmg_ratio_tbl[3]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[3]])
 
         elif len(dmg_ratio_tbl) == 6 and is_bridge:
             # this is for bridge
@@ -110,19 +121,15 @@ class AnalysisUtil:
                 dmg_ratio_tbl[5]['Best Mean Damage Ratio'])
 
             output['meandamage'] = \
-                weight_slight * float(dmg_intervals[damage_interval_keys[1]]) + \
-                weight_moderate * float(
-                    dmg_intervals[damage_interval_keys[2]]) + \
-                weight_extensive * float(
-                    dmg_intervals[damage_interval_keys[3]])
+                weight_slight * float_dmg_intervals[damage_interval_keys[1]] + \
+                weight_moderate * float_dmg_intervals[damage_interval_keys[2]] + \
+                weight_extensive * float_dmg_intervals[damage_interval_keys[3]]
 
             if bridge_spans >= 3:
                 output[
-                    'meandamage'] += weight_collapse1 / bridge_spans * float(
-                    dmg_intervals[damage_interval_keys[4]])
+                    'meandamage'] += weight_collapse1 / bridge_spans *float_dmg_intervals[damage_interval_keys[4]]
             else:
-                output['meandamage'] += weight_collapse0 * float(
-                    dmg_intervals[damage_interval_keys[4]])
+                output['meandamage'] += weight_collapse0 * float_dmg_intervals[damage_interval_keys[4]]
         else:
             raise ValueError('We cannot handle this damage ratio format.')
 
@@ -131,11 +138,13 @@ class AnalysisUtil:
     @staticmethod
     def calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg,
                                             mean_damage, damage_interval_keys):
+
+        float_dmg = AnalysisUtil.dmg_string_dict_to_dmg_float_dict(dmg)
         output = collections.OrderedDict()
         result = 0.0
         idx = 0
         for key in damage_interval_keys:
-            result += float(dmg[key]) * (math.pow(
+            result += float_dmg[key] * (math.pow(
                 float(dmg_ratio_tbl[idx]["Mean Damage Factor"]), 2) + math.pow(
                 float(dmg_ratio_tbl[idx]["Deviation Damage Factor"]), 2))
             idx += 1

@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - TransportationRecovery analysis fails to run with concatentation error [#292](https://github.com/IN-CORE/pyincore/issues/292)
 - Fix NCI Functionality float value not iterable error [#291](https://github.com/IN-CORE/pyincore/issues/291)
 - Broken analyses related to pandas 2.0 update [#310](https://github.com/IN-CORE/pyincore/issues/310)
-
+- Mean damage should handle buildings that don't have damage probabilities [#131](https://github.com/IN-CORE/pyincore/issues/131)
 
 ## [1.10.0] - 2023-04-21
 
