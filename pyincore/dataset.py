@@ -9,6 +9,7 @@ import csv
 import glob
 import json
 import os
+from typing import Union
 
 import fiona
 import numpy
@@ -17,7 +18,7 @@ import geopandas as gpd
 import rasterio
 import wntr
 import warnings
-from pyincore import DataService
+from pyincore import DataService, ClowderDataService
 
 warnings.filterwarnings("ignore", "", UserWarning)
 
@@ -37,7 +38,10 @@ class Dataset:
         self.data_type = metadata["dataType"]
         self.format = metadata["format"]
         self.id = metadata["id"]
-        self.file_descriptors = metadata["fileDescriptors"]
+        if "fileDescriptors" in metadata.keys():
+            self.file_descriptors = metadata["fileDescriptors"]
+        else:
+            self.file_descriptors = []
         self.local_file_path = None
 
         self.readers = {}
@@ -57,6 +61,26 @@ class Dataset:
         metadata = data_service.get_dataset_metadata(id)
         instance = cls(metadata)
         instance.cache_files(data_service)
+        return instance
+
+    @classmethod
+    def from_clowder_service(cls, id: str, clowder_data_service: ClowderDataService):
+        """Get Dataset from Clowder service, get metadata as well.
+
+        Args:
+            id (str): ID of the Dataset.
+            clowder_data_service (obj): Clowder service.
+
+        Returns:
+            obj: Dataset from Clowder service.
+
+        """
+        metadata = {"id": id}
+        metadata_jsonld = clowder_data_service.get_dataset_metadata(id)
+        for entry in metadata_jsonld:
+            metadata.update(entry["content"])
+        instance = cls(metadata)
+        instance.cache_files(clowder_data_service)
         return instance
 
     @classmethod
@@ -164,7 +188,7 @@ class Dataset:
                 json_file.write(json_dumps_str)
         return Dataset.from_file(name, data_type)
 
-    def cache_files(self, data_service: DataService):
+    def cache_files(self, data_service: Union[DataService, ClowderDataService]):
         """Get the set of fragility data, curves.
 
         Args:
