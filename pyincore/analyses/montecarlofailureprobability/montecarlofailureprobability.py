@@ -308,6 +308,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
                     prob_val += AnalysisUtil.float_to_decimal(dmg[ds_name])
             if flag:
                 print("cannot determine MC damage state!")
+                break
 
         return ds
 
