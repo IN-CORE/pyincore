@@ -11,9 +11,10 @@ from urllib.parse import urljoin
 import numpy
 import requests
 
+import pyincore.globals as pyglobals
+
 logger = pyglobals.LOGGER
 
-import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 
 

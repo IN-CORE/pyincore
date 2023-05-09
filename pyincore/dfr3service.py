@@ -10,9 +10,10 @@ from urllib.parse import urljoin
 from typing import Dict
 import requests
 
+import pyincore.globals as pyglobals
+
 logger = pyglobals.LOGGER
 
-import pyincore.globals as pyglobals
 from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.repaircurveset import RepairCurveSet
