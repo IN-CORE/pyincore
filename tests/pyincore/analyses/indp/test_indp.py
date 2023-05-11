@@ -36,7 +36,7 @@ def run_with_base_class():
     indp_analysis.load_remote_input_dataset("arcs_damge_ratio", "61c0fe4b837ac508f9a16d8b")
     indp_analysis.load_remote_input_dataset("dmg_sce_data", "61c104f0837ac508f9a17e5f")
     indp_analysis.load_remote_input_dataset("power_network", "634d99f51f950c126bca46a9")
-    indp_analysis.load_remote_input_dataset("water_network", "634d975b1f950c126bca45e2")
+    indp_analysis.load_remote_input_dataset("water_network", "645d67675bc8b26ddf913565")
 
     # TODO this can be chained with pipeline damage
     pipeline_dmg = Dataset.from_file("data/pipe_dmg.csv", "ergo:pipelineDamageVer3")
