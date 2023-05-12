@@ -84,7 +84,7 @@ class INDPUtil:
                     else:
                         node_name = '(' + str(node_id) + ',' + str(net_names["Power"]) + ')'
                     ds = dmg_sce_data[dmg_sce_data['name'] == node_name].iloc[0][sample_num + 1]
-                    rep_time = reptime_func_node.iloc[0]['ds_' + ds + '_mean']
+                    rep_time = reptime_func_node.iloc[0]['ds_' + ds + '_mean'] # we can use the 100% instead of mean
                     dr = dr_data.iloc[0]['dr_' + ds + '_be']
                     repair_cost = v[1]['q_ds_3'] * dr
                 node_data.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0

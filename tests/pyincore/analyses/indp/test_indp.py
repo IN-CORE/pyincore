@@ -17,7 +17,8 @@ def run_with_base_class():
     indp_analysis.set_parameter("testbed_name", "seaside")
     indp_analysis.set_parameter("extra_commodity", {1: ["PW"], 3: []})
     # indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 70}, {"budget": 300000, "time": 60}])
-    indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 70}])  # test just one resource
+    indp_analysis.set_parameter("RC", [{"budget": 2400000, "time": 700}])  # test just one resource increase the
+    # resource will see actions
 
     indp_analysis.set_parameter("layers", [1, 3])
     indp_analysis.set_parameter("method", "INDP")
@@ -25,9 +26,9 @@ def run_with_base_class():
 
     indp_analysis.set_parameter("t_steps", 10)
     indp_analysis.set_parameter("time_resource", True)
-    indp_analysis.set_parameter("save_model", True)
+    indp_analysis.set_parameter("save_model", False)
     # indp_analysis.set_parameter("solver_engine", "glpk")
-    indp_analysis.set_parameter("solver_engine", "ipopt")
+    indp_analysis.set_parameter("solver_engine", "ipopt") # recommended
 
     # input datasets
     indp_analysis.load_remote_input_dataset("nodes_reptime_func", "61c0f82a837ac508f9a16d79")

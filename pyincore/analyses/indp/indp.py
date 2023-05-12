@@ -51,6 +51,9 @@ class INDP(BaseAnalysis):
         dislocation_data_type = self.get_parameter("dislocation_data_type")
         return_model = self.get_parameter("return_model")
         testbed_name = self.get_parameter("testbed_name")
+
+        # more advanced; can hide from user for the first implementation
+        # this is for dynamically updating the demands
         bldgs2elec_dataset = self.get_input_dataset("bldgs2elec")
         bldgs2wter_dataset = self.get_input_dataset("bldgs2wter")
 
