@@ -21,12 +21,31 @@ jobs:
         python-version: [ '3.8', '3.9', '3.10', '3.11' ]
     name: Python ${{ matrix.python-version }} sample
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup python
-        uses: actions/setup-python@v1
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Cache conda
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if environment.yml has not changed
+          CACHE_NUMBER: 0
         with:
+          path: ~/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
+            hashFiles('environment.yml') }}
+
+      - name: Install miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          mamba-version: "*"
+          use-mamba: true
           python-version: ${{ matrix.python-version }}
-          architecture: x64
+          activate-environment: base
+          environment-file: environment.yml
+          use-only-tar-bz2: true
+
       - name: Run tests with pytest
         run: |
           echo "${{secrets.PYTEST_USER_TOKEN}}" > tests/pyincore/.incorepw
