@@ -27,10 +27,10 @@ class EpfRepairCost(BaseAnalysis):
         """Executes electric power facility repair cost analysis."""
 
         epf_df = self.get_input_dataset("epfs").get_dataframe_from_shapefile()
-        epf_damage_df = self.get_input_dataset("epf_damage").get_dataframe_from_csv()
+        sample_damage_states_df = self.get_input_dataset("sample_damage_states").get_dataframe_from_csv()
 
         # join damage result with original inventory
-        epf_set = epf_df.merge(epf_damage_df, on='guid').tolist()
+        epf_set = epf_df.merge(sample_damage_states_df, on="guid").to_dict(orient="records")
 
         user_defined_cpu = 1
         if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
@@ -86,28 +86,61 @@ class EpfRepairCost(BaseAnalysis):
             list: A list of ordered dictionaries with epf damage values and other data/metadata.
 
         """
+        # read in the damage ratio tables
+        substation_dmg_ratios_csv = self.get_input_dataset("substation_dmg_ratios").get_csv_reader()
+        substation_dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(substation_dmg_ratios_csv)
 
-        # Setting Local Variables
+        circuit_dmg_ratios_csv = self.get_input_dataset("substation_dmg_ratios").get_csv_reader()
+        circuit_dmg_ratios_tbl = AnalysisUtil.get_csv_table_rows(circuit_dmg_ratios_csv)
+
+        generation_plant_dmg_ratios_csv = self.get_input_dataset("substation_dmg_ratios").get_csv_reader()
+        generation_plant_dmg_ratios_tbl = AnalysisUtil.get_csv_table_rows(generation_plant_dmg_ratios_csv)
+
+        epf_substation_types = ["ESSL", "ESSM", "ESSH"]
+        if not self.get_parameter("epf_substation_types") is None:
+            epf_substation_types = self.get_parameter("epf_substation_types")
+
+        epf_circuit_types = ["EDC"]
+        if not self.get_parameter("epf_circuit_types") is None:
+            epf_substation_types = self.get_parameter("epf_circuit_types")
+
+        epf_generation_plant_types = ["EPPL", "EPPM", "EPPS"]
+        if not self.get_parameter("epf_generation_plant_types") is None:
+            epf_substation_types = self.get_parameter("epf_generation_plant_types")
+
         for epf in epfs:
-            node_type = epf['utilfcltyc']
-            node_id = int(epf['nodenwid'])
+            epf_type = epf["utilfcltyc"]
+            epf_id = int(epf["nodenwid"])
 
-            reptime_func_node = nodes_reptime_func[nodes_reptime_func['Type'] == node_type]
-            dr_data = nodes_damge_ratio[nodes_damge_ratio['Type'] == node_type]
-            rep_time = 0
+            reptime_func_node = nodes_reptime_func[nodes_reptime_func["Type"] == node_type]
+
+            # substations
+            for epf_substation_type in epf_substation_types:
+                # partial match since some times it's ESSL2
+                if epf_substation_type in epf_type:
+                    dmg_ratio_tbl = substation_dmg_ratio_tbl
+
+            # distribution circuits
+            for epf_circuit_type in epf_circuit_types:
+                if epf_circuit_type in epf_type:
+                    dmg_ratio_tbl = circuit_dmg_ratios_tbl
+
+            # generation plant
+            for epf_generation_plant_type in epf_generation_plant_types:
+                if epf_generation_plant_type in epf_type:
+                    dmg_ratio_tbl = generation_plant_dmg_ratios_tbl
+
+            dr_data = nodes_damge_ratio[nodes_damge_ratio["Type"] == node_type]
             repair_cost = 0
-            if not reptime_func_node.empty:
-                if index == 0:
-                    node_name = '(' + str(node_id) + ',' + str(net_names["Water"]) + ')'
-                else:
-                    node_name = '(' + str(node_id) + ',' + str(net_names["Power"]) + ')'
-                ds = dmg_sce_data[dmg_sce_data['name'] == node_name].iloc[0][sample_num + 1]
-                rep_time = reptime_func_node.iloc[0]['ds_' + ds + '_mean']  # we can use the 100% instead of mean
-                dr = dr_data.iloc[0]['dr_' + ds + '_be']
-                repair_cost = v[1]['q_ds_3'] * dr
-            node_data.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0
-            node_data.loc[v[0], 'p_budget'] = repair_cost
-            node_data.loc[v[0], 'q'] = repair_cost
+            sample_damage_states = epf["sample_damage_states"].split(",")
+
+                ds = dmg_sce_data[dmg_sce_data["name"] == node_name].iloc[0][sample_num + 1]
+                rep_time = reptime_func_node.iloc[0]["ds_" + ds + "_mean"]  # we can use the 100% instead of mean
+                dr = dr_data.iloc[0]["dr_" + ds + "_be"]
+                repair_cost = v[1]["q_ds_3"] * dr
+            node_data.loc[v[0], "p_time"] = rep_time if rep_time > 0 else 0
+            node_data.loc[v[0], "p_budget"] = repair_cost
+            node_data.loc[v[0], "q"] = repair_cost
 
         return ds_results, damage_results
 
@@ -119,53 +152,81 @@ class EpfRepairCost(BaseAnalysis):
 
         """
         return {
-            'name': 'epf-damage',
-            'description': 'Electric Power Facility damage analysis.',
-            'input_parameters': [
+            "name": "epf-damage",
+            "description": "Electric Power Facility damage analysis.",
+            "input_parameters": [
                 {
-                    'id': 'result_name',
-                    'required': True,
-                    'description': 'A name of the resulting dataset',
-                    'type': str
+                    "id": "result_name",
+                    "required": True,
+                    "description": "A name of the resulting dataset",
+                    "type": str
                 },
                 {
-                    'id': 'num_cpu',
-                    'required': False,
-                    'description': 'If using parallel execution, the number of cpus to request.',
-                    'type': int
+                    "id": "num_cpu",
+                    "required": False,
+                    "description": "If using parallel execution, the number of cpus to request.",
+                    "type": int
+                },
+                {
+                    "id": "epf_substation_types",
+                    "required": False,
+                    "description": "EPF substation types. Default to HAZUS code ESSL, ESSM, ESSH",
+                    "type": list
+                },
+                {
+                    "id": "epf_circuit_types",
+                    "required": False,
+                    "description": "EPF circuit types. Default to HAZUS code EDC",
+                    "type": list
+                },
+                {
+                    "id": "epf_generation_plant_types",
+                    "required": False,
+                    "description": "EPF substation types. Default to HAZUS code EPPL, EPPM, EPPS",
+                    "type": list
                 },
             ],
-            'input_datasets': [
+            "input_datasets": [
                 {
-                    'id': 'epfs',
-                    'required': True,
-                    'description': 'Electric Power Facility Inventory',
-                    'type': ['incore:epf',
-                             'ergo:epf',
-                             'incore:epfVer2'
+                    "id": "epfs",
+                    "required": True,
+                    "description": "Electric Power Facility Inventory",
+                    "type": ["incore:epf",
+                             "ergo:epf",
+                             "incore:epfVer2"
                              ],
                 },
                 {
-                    'id': 'damage',
-                    'required': True,
-                    'description': 'damage result that has damage intervals in it',
-                    'type': ['incore:epfDamage',
-                             'incore:epfDamageVer2',
-                             'incore:epfDamageVer3']
+                    "id": "sample_damage_states",
+                    "required": True,
+                    "description": "sample damage states from Monte Carlo Simulation",
+                    "type": ["incore:sampleDamageState"]
                 },
                 {
-                    'id': 'dmg_ratios',
-                    'required': True,
-                    'description': 'Damage Ratios table',
-                    'type': ['incore:epfDamageRatios']
+                    "id": "substation_dmg_ratios",
+                    "required": True,
+                    "description": "Damage Ratios table",
+                    "type": ["incore:epfDamageRatios"]
+                },
+                {
+                    "id": "circuit_dmg_ratios",
+                    "required": True,
+                    "description": "Damage Ratios table",
+                    "type": ["incore:epfDamageRatios"]
+                },
+                {
+                    "id": "generation_plant_dmg_ratios",
+                    "required": True,
+                    "description": "Damage Ratios table",
+                    "type": ["incore:epfDamageRatios"]
                 },
             ],
-            'output_datasets': [
+            "output_datasets": [
                 {
-                    'id': 'result',
-                    'parent_type': 'epfs',
-                    'description': 'A csv file with repair cost for each electric power facility',
-                    'type': 'incore:epfRepairCost'
+                    "id": "result",
+                    "parent_type": "epfs",
+                    "description": "A csv file with repair cost for each electric power facility",
+                    "type": "incore:epfRepairCost"
                 }
             ]
         }
