@@ -30,27 +30,19 @@ class SpaceService:
             http_response.raise_for_status()
             return http_response
         except requests.exceptions.HTTPError:
-            logger.error(
-                "A HTTPError has occurred \n"
-                + "HTTP Status code: "
-                + str(http_response.status_code)
-                + "\n"
-                + "Error Message: "
-                + http_response.content.decode()
-            )
+            logger.error('A HTTPError has occurred \n' +
+                         'HTTP Status code: ' + str(http_response.status_code) + '\n' +
+                         'Error Message: ' + http_response.content.decode()
+                         )
             raise
         except requests.exceptions.ConnectionError:
-            logger.error(
-                "ConnectionError: Failed to establish a connection with the server. "
-                "This might be due to a refused connection. "
-                "Please check that you are using the right URLs."
-            )
+            logger.error("ConnectionError: Failed to establish a connection with the server. "
+                         "This might be due to a refused connection. "
+                         "Please check that you are using the right URLs.")
             raise
         except requests.exceptions.RequestException:
-            logger.error(
-                "RequestException: There was an exception while trying to handle your request. "
-                "Please go to the end of this message for more specific information about the exception."
-            )
+            logger.error("RequestException: There was an exception while trying to handle your request. "
+                         "Please go to the end of this message for more specific information about the exception.")
             raise
 
     def create_space(self, space_json):
@@ -64,7 +56,7 @@ class SpaceService:
 
         """
         url = self.base_space_url
-        space_data = {("space", space_json)}
+        space_data = {('space', space_json)}
         kwargs = {"files": space_data}
         r = self.client.post(url, **kwargs)
         return self.return_http_response(r).json()
@@ -82,7 +74,7 @@ class SpaceService:
         url = self.base_space_url
         payload = {}
         if dataset_id is not None:
-            payload["dataset"] = dataset_id
+            payload['dataset'] = dataset_id
 
         r = self.client.get(url, params=payload)
 
@@ -119,9 +111,7 @@ class SpaceService:
         else:
             # throw an error instead of returning the empty result
             # return []
-            raise r.exceptions.HTTPError(
-                "There is no matching name or you don't have a privilege to view the space."
-            )
+            raise r.exceptions.HTTPError("There is no matching name or you don't have a privilege to view the space.")
 
     def update_space(self, space_id: str, space_json):
         """Updates a Space.
@@ -135,7 +125,7 @@ class SpaceService:
 
         """
         url = urljoin(self.base_space_url, space_id)
-        space_data = {("space", space_json)}
+        space_data = {('space', space_json)}
         kwargs = {"files": space_data}
         r = self.client.put(url, **kwargs)
         return self.return_http_response(r).json()
@@ -218,7 +208,7 @@ class SpaceService:
 
         """
         url = urljoin(self.base_space_url, space_id + "/grant")
-        space_privileges = {("grant", privileges_json)}
+        space_privileges = {('grant', privileges_json)}
         kwargs = {"files": space_privileges}
         r = self.client.post(url, **kwargs)
 
