@@ -17,7 +17,8 @@ def run_with_base_class():
     epf_repair_cost.set_input_dataset("replacement_cost", replacement_cost)
 
     # can be chained with MCS
-    sample_damage_states = Dataset.from_file("data/sample_damage_states.csv", "incore:sampleDamageState")
+    sample_damage_states = Dataset.from_file("data/mc_electric_cumulative_1000yr_sample_damage_states.csv",
+                                             "incore:sampleDamageState")
     epf_repair_cost.set_input_dataset("sample_damage_states", sample_damage_states)
     
     # substation_dmg_ratios

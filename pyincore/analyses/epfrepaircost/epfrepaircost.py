@@ -142,7 +142,7 @@ class EpfRepairCost(BaseAnalysis):
                 for dmg_ratio_row in dmg_ratio_tbl:
                     if dmg_ratio_row["Damage State"] == ds:
                         dr = dmg_ratio_row["Best Mean Damage Ratio"]
-                        repair_cost[n] = str(epf["q_ds_3"] * dr)
+                        repair_cost[n] = str(epf["replacement_cost"] * dr)
 
             rc["p_budget"] = ','.join(repair_cost)
             rc["q"] = ','.join(repair_cost)
