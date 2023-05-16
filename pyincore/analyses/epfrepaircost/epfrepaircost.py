@@ -129,50 +129,6 @@ class EpfRepairCost(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'hazard_type',
-                    'required': True,
-                    'description': 'Hazard type (e.g. earthquake).',
-                    'type': str
-                },
-                {
-                    'id': 'hazard_id',
-                    'required': True,
-                    'description': 'Hazard ID which defines the particular hazard (e.g. New madrid earthquake '
-                                   'using Atkinson Boore 1995).',
-                    'type': str
-                },
-                {
-                    'id': 'fragility_key',
-                    'required': False,
-                    'description': 'Fragility key to use in mapping dataset ()',
-                    'type': str
-                },
-                {
-                    'id': 'liquefaction_fragility_key',
-                    'required': False,
-                    'description': 'Fragility key to use in liquefaction mapping dataset',
-                    'type': str
-                },
-                {
-                    'id': 'use_liquefaction',
-                    'required': False,
-                    'description': 'Use a ground liquifacition to modify damage interval.',
-                    'type': bool
-                },
-                {
-                    'id': 'liquefaction_geology_dataset_id',
-                    'required': False,
-                    'description': 'Liquefaction geology/susceptibility dataset id. '
-                                   'If not provided, liquefaction will be ignored',
-                    'type': str
-                },
-                {
-                    'id': 'use_hazard_uncertainty',
-                    'required': False,
-                    'description': 'Use hazard uncertainty',
-                    'type': bool
-                },
-                {
                     'id': 'num_cpu',
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request.',
@@ -190,26 +146,26 @@ class EpfRepairCost(BaseAnalysis):
                              ],
                 },
                 {
-                    'id': 'dfr3_mapping_set',
+                    'id': 'damage',
                     'required': True,
-                    'description': 'DFR3 Mapping Set Object',
-                    'type': ['incore:dfr3MappingSet'],
-                }
+                    'description': 'damage result that has damage intervals in it',
+                    'type': ['incore:epfDamage',
+                             'incore:epfDamageVer2',
+                             'incore:epfDamageVer3']
+                },
+                {
+                    'id': 'dmg_ratios',
+                    'required': True,
+                    'description': 'Damage Ratios table',
+                    'type': ['incore:epfDamageRatios']
+                },
             ],
             'output_datasets': [
                 {
                     'id': 'result',
                     'parent_type': 'epfs',
-                    'description': 'A csv file with limit state probabilities and damage states '
-                                   'for each electric power facility',
-                    'type': 'incore:epfDamageVer3'
-                },
-                {
-                    'id': 'metadata',
-                    'parent_type': 'epfs',
-                    'description': 'additional metadata in json file about applied hazard value and '
-                                   'fragility',
-                    'type': 'incore:epfDamageSupplement'
+                    'description': 'A csv file with repair cost for each electric power facility',
+                    'type': 'incore:epfRepairCost'
                 }
             ]
         }
