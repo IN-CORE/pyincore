@@ -16,6 +16,10 @@ on:
 jobs:
   unit_test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ '3.8', '3.9' ] # 3.10 and 3.11 have conflicts with environment.yml
+    name: Python ${{ matrix.python-version }} Test
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -37,7 +41,7 @@ jobs:
           miniconda-version: "latest"
           mamba-version: "*"
           use-mamba: true
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
           activate-environment: base
           environment-file: environment.yml
           use-only-tar-bz2: true

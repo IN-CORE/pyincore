@@ -60,7 +60,7 @@ setup(
         'matplotlib>=2.1.0',
         'networkx>=2.2',
         'numpy>=1.16.6,<2.0a0',
-        'pandas>=0.24.1,<2',
+        'pandas>=1.1.0',
         'pyomo>=5.6',
         'pyproj>=1.9.6',
         'rasterio>=1.0.18',

@@ -8,13 +8,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
-
 - Added a name extension for combined wind, wave, surge building damage analysis [#308](https://github.com/IN-CORE/pyincore/issues/308)
 - Added error handeling after a request completes in services and the client [#324](https://github.com/IN-CORE/pyincore/issues/324)
 
 ### Fixed
 - TransportationRecovery analysis fails to run with concatentation error [#292](https://github.com/IN-CORE/pyincore/issues/292)
 - Fix NCI Functionality float value not iterable error [#291](https://github.com/IN-CORE/pyincore/issues/291)
+- Broken analyses related to pandas 2.0 update [#310](https://github.com/IN-CORE/pyincore/issues/310)
+- Mean damage should handle buildings that don't have damage probabilities [#131](https://github.com/IN-CORE/pyincore/issues/131)
 
 ## [1.10.0] - 2023-04-21
 
@@ -86,6 +87,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Fix data type of Census input dataset to CSV [#166](https://github.com/IN-CORE/pyincore/issues/166)
+- MCS handles empty rows in the input dataset [#195](https://github.com/IN-CORE/pyincore/issues/195)
 
 ## [1.5.0] - 2022-06-29
 
