@@ -68,14 +68,12 @@ class EpfRepairCost(BaseAnalysis):
 
         """
 
-        output_ds = []
-        output_dmg = []
+        output = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
-            for ret1, ret2 in executor.map(function_name, *args):
-                output_ds.extend(ret1)
-                output_dmg.extend(ret2)
+            for ret1 in executor.map(function_name, *args):
+                output.extend(ret1)
 
-        return output_ds, output_dmg
+        return output
 
     def epf_repair_cost_bulk_input(self, epfs):
         """Run analysis for multiple epfs.
@@ -91,13 +89,13 @@ class EpfRepairCost(BaseAnalysis):
         """
         # read in the damage ratio tables
         substation_dmg_ratios_csv = self.get_input_dataset("substation_dmg_ratios").get_csv_reader()
-        substation_dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(substation_dmg_ratios_csv)
+        substation_dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(substation_dmg_ratios_csv, ignore_first_row=False)
 
         circuit_dmg_ratios_csv = self.get_input_dataset("substation_dmg_ratios").get_csv_reader()
-        circuit_dmg_ratios_tbl = AnalysisUtil.get_csv_table_rows(circuit_dmg_ratios_csv)
+        circuit_dmg_ratios_tbl = AnalysisUtil.get_csv_table_rows(circuit_dmg_ratios_csv, ignore_first_row=False)
 
         generation_plant_dmg_ratios_csv = self.get_input_dataset("substation_dmg_ratios").get_csv_reader()
-        generation_plant_dmg_ratios_tbl = AnalysisUtil.get_csv_table_rows(generation_plant_dmg_ratios_csv)
+        generation_plant_dmg_ratios_tbl = AnalysisUtil.get_csv_table_rows(generation_plant_dmg_ratios_csv, ignore_first_row=False)
 
         epf_substation_types = ["ESSL", "ESSM", "ESSH"]
         if not self.get_parameter("epf_substation_types") is None:
@@ -141,7 +139,7 @@ class EpfRepairCost(BaseAnalysis):
             for n, ds in enumerate(sample_damage_states):
                 for dmg_ratio_row in dmg_ratio_tbl:
                     if dmg_ratio_row["Damage State"] == ds:
-                        dr = dmg_ratio_row["Best Mean Damage Ratio"]
+                        dr = float(dmg_ratio_row["Best Mean Damage Ratio"])
                         repair_cost[n] = str(epf["replacement_cost"] * dr)
 
             rc["p_budget"] = ','.join(repair_cost)

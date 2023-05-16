@@ -4,14 +4,14 @@ import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
-    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
+    # client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
+    client = IncoreClient()
+
+    epf_repair_cost = EpfRepairCost(client)
 
     # Seaside EPF
-    epf_dataset_id = "6189c103d5b02930aa3efc35"
-
-    # Run epf damage
-    epf_repair_cost = EpfRepairCost(client)
-    epf_repair_cost.load_remote_input_dataset("epfs", epf_dataset_id)
+    # epf_repair_cost.load_remote_input_dataset("epfs", "5eebcaa17a00803abc85ec11")  # d
+    epf_repair_cost.load_remote_input_dataset("epfs", "5d263f08b9219cf93c056c68")  # prod
 
     replacement_cost = Dataset.from_file("data/replacement_cost.csv", "incore:replacementCost")
     epf_repair_cost.set_input_dataset("replacement_cost", replacement_cost)
