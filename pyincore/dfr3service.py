@@ -232,6 +232,7 @@ class Dfr3Service:
 
                         # use the first match
                         break
+
                 # for new format rule matching {"AND/OR":[]}
                 # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
                 elif isinstance(m.rules, dict):
@@ -245,7 +246,9 @@ class Dfr3Service:
 
                         # use the first match
                         break
+
         batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
+
         # replace the curve id in dfr3_sets to the dfr3 curve
         for inventory_id, curve_item in dfr3_sets.items():
             if isinstance(curve_item, FragilityCurveSet):
@@ -302,6 +305,7 @@ class Dfr3Service:
 
                         # use the first match
                         break
+                    
         batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
 
         # replace the curve id in dfr3_sets to the dfr3 curve

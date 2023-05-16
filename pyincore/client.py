@@ -253,18 +253,23 @@ class IncoreClient(Client):
 
         logger.warning("Authentication failed.")
         exit(0)
+
     def store_authorization_in_file(self, authorization: str):
         """Store the access token in local file. If the file does not exist, this function creates it.
+
         Args:
             authorization (str): An authorization in the format "bearer access_token".
+
         """
         try:
             with open(self.token_file, 'w') as f:
                 f.write(authorization)
         except IOError as e:
             logger.warning(e)
+
     def retrieve_token_from_file(self):
         """Attempts to retrieve authorization from a local file, if it exists.
+
         Returns:
             None if token file does not exist
             dict: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
@@ -285,13 +290,16 @@ class IncoreClient(Client):
                 return None
             except OSError:
                 return None
+            
     def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
         """Get server connection response.
+
         Args:
             url (str): Service url.
             params (obj): Session parameters.
             timeout (int): Session timeout.
             **kwargs: A dictionary of external parameters.
+
         Returns:
             obj: HTTP response.
         """
@@ -312,6 +320,7 @@ class IncoreClient(Client):
             **kwargs: A dictionary of external parameters.
         Returns:
             obj: HTTP response.
+
         """
         r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
 
@@ -323,27 +332,34 @@ class IncoreClient(Client):
 
     def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
         """Put data on the server.
+
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
             timeout (int): Session timeout.
             **kwargs: A dictionary of external parameters.
+
         Returns:
             obj: HTTP response.
+
         """
         r = self.session.put(url, data=data, timeout=timeout, **kwargs)
         if r.status_code == 401:
             self.login()
             r = self.session.put(url, data=data, timeout=timeout, **kwargs)
         return self.return_http_response(r)
+    
     def delete(self, url: str, timeout=(30, 600), **kwargs):
         """Delete data on the server.
+
         Args:
             url (str): Service url.
             timeout (int): Session timeout.
             **kwargs: A dictionary of external parameters.
+
         Returns:
             obj: HTTP response.
+
         """
         r = self.session.delete(url, timeout=timeout, **kwargs)
         if r.status_code == 401:
@@ -360,6 +376,7 @@ class IncoreClient(Client):
         if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
             logger.warning("User data cache does not exist")
             return None
+        
         for root, dirs, files in os.walk(pyglobals.PYINCORE_USER_DATA_CACHE):
             for d in dirs:
                 shutil.rmtree(os.path.join(root, d))
@@ -369,7 +386,9 @@ class IncoreClient(Client):
     def clear_cache(self):
         """
             This function helps clear the data cache for a specific repository or the entire cache
+
             Returns: None
+
         """
         # incase cache_data folder doesn't exist
         if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
@@ -382,11 +401,15 @@ class IncoreClient(Client):
         # clear entry from service.json
         update_hash_entry("edit", hashed_url=self.hashed_service_url)
         return
+    
+
 class InsecureIncoreClient(Client):
     """IN-CORE service client class that bypasses Ambassador auth. It contains token and service root url.
+
         Args:
             service_url (str): Service url.
             username (str): Username string.
+            
         """
 
     def __init__(self, service_url: str = None, username: str = None):
