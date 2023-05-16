@@ -28,9 +28,12 @@ class EpfRepairCost(BaseAnalysis):
 
         epf_df = self.get_input_dataset("epfs").get_dataframe_from_shapefile()
         sample_damage_states_df = self.get_input_dataset("sample_damage_states").get_dataframe_from_csv()
+        replacement_cost = self.get_input_dataset("replacement_cost").get_dataframe_from_csv()
 
-        # join damage result with original inventory
-        epf_set = epf_df.merge(sample_damage_states_df, on="guid").to_dict(orient="records")
+        # join damage state, replacement cost, with original inventory
+        epf_df = epf_df.merge(sample_damage_states_df, on="guid")
+        epf_df = epf_df.merge(replacement_cost, on="guid")
+        epf_set = epf_df.to_dict(orient="records")
 
         user_defined_cpu = 1
         if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
@@ -46,9 +49,9 @@ class EpfRepairCost(BaseAnalysis):
             inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        repair_cost = self.epf_repair_cost_concurrent_future(self.epf_repair_cost_bulk_input, num_workers,
-                                                             inventory_args)
-        self.set_result_csv_data("result", repair_cost, name=self.get_parameter("result_name") + "_repair_cost")
+        repair_costs = self.epf_repair_cost_concurrent_future(self.epf_repair_cost_bulk_input, num_workers,
+                                                              inventory_args)
+        self.set_result_csv_data("result", repair_costs, name=self.get_parameter("result_name") + "_repair_cost")
 
         return True
 
@@ -108,11 +111,14 @@ class EpfRepairCost(BaseAnalysis):
         if not self.get_parameter("epf_generation_plant_types") is None:
             epf_substation_types = self.get_parameter("epf_generation_plant_types")
 
-        for epf in epfs:
-            epf_type = epf["utilfcltyc"]
-            epf_id = int(epf["nodenwid"])
+        repair_costs = []
 
-            reptime_func_node = nodes_reptime_func[nodes_reptime_func["Type"] == node_type]
+        for epf in epfs:
+            rc = dict()
+            rc["guid"] = epf["guid"]
+
+            epf_type = epf["utilfcltyc"]
+            dmg_ratio_tbl = []
 
             # substations
             for epf_substation_type in epf_substation_types:
@@ -130,19 +136,20 @@ class EpfRepairCost(BaseAnalysis):
                 if epf_generation_plant_type in epf_type:
                     dmg_ratio_tbl = generation_plant_dmg_ratios_tbl
 
-            dr_data = nodes_damge_ratio[nodes_damge_ratio["Type"] == node_type]
-            repair_cost = 0
             sample_damage_states = epf["sample_damage_states"].split(",")
+            repair_cost = ["0"] * len(sample_damage_states)
+            for n, ds in enumerate(sample_damage_states):
+                for dmg_ratio_row in dmg_ratio_tbl:
+                    if dmg_ratio_row["Damage State"] == ds:
+                        dr = dmg_ratio_row["Best Mean Damage Ratio"]
+                        repair_cost[n] = str(epf["q_ds_3"] * dr)
 
-                ds = dmg_sce_data[dmg_sce_data["name"] == node_name].iloc[0][sample_num + 1]
-                rep_time = reptime_func_node.iloc[0]["ds_" + ds + "_mean"]  # we can use the 100% instead of mean
-                dr = dr_data.iloc[0]["dr_" + ds + "_be"]
-                repair_cost = v[1]["q_ds_3"] * dr
-            node_data.loc[v[0], "p_time"] = rep_time if rep_time > 0 else 0
-            node_data.loc[v[0], "p_budget"] = repair_cost
-            node_data.loc[v[0], "q"] = repair_cost
+            rc["p_budget"] = ','.join(repair_cost)
+            rc["q"] = ','.join(repair_cost)
 
-        return ds_results, damage_results
+            repair_costs.append(rc)
+
+        return repair_costs
 
     def get_spec(self):
         """Get specifications of the epf damage analysis.
@@ -195,6 +202,12 @@ class EpfRepairCost(BaseAnalysis):
                              "ergo:epf",
                              "incore:epfVer2"
                              ],
+                },
+                {
+                    "id": "replacement_cost",
+                    "required": True,
+                    "description": "Repair cost of the node in the complete damage state (= Replacement cost)",
+                    "type": ["incore:replacementCost"],
                 },
                 {
                     "id": "sample_damage_states",
