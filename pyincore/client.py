@@ -353,6 +353,7 @@ class IncoreClient(Client):
         if r.status_code == 401:
             self.login()
             r = self.session.put(url, data=data, timeout=timeout, **kwargs)
+
         return self.return_http_response(r)
 
     def delete(self, url: str, timeout=(30, 600), **kwargs):
@@ -368,10 +369,11 @@ class IncoreClient(Client):
 
         """
         r = self.session.delete(url, timeout=timeout, **kwargs)
-        
+
         if r.status_code == 401:
             self.login()
             r = self.session.delete(url, timeout=timeout, **kwargs)
+
         return self.return_http_response(r)
 
     def create_service_json_entry(self):
@@ -405,6 +407,7 @@ class IncoreClient(Client):
         if not os.path.isdir(self.hashed_svc_data_dir):
             logger.warning("Cached folder doesn't exist")
             return None
+
         shutil.rmtree(self.hashed_svc_data_dir)
         # clear entry from service.json
         update_hash_entry("edit", hashed_url=self.hashed_service_url)
