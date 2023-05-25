@@ -106,12 +106,7 @@ class SpaceService:
 
         """
         r = self.client.get(self.base_space_url, params={"name": space_name})
-        if r.status_code == 200:
-            return r.json()
-        else:
-            # throw an error instead of returning the empty result
-            # return []
-            raise r.exceptions.HTTPError("There is no matching name or you don't have a privilege to view the space.")
+        return self.return_http_response(r).json()
 
     def update_space(self, space_id: str, space_json):
         """Updates a Space.

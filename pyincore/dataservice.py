@@ -448,8 +448,8 @@ class DataService:
 
         # obtain file name
         r = self.client.get(request_str, timeout=timeout, **kwargs)
-        r = self.return_http_response(r)
-        first_filename = r.json()["fileDescriptors"][0]["filename"]
+        r = self.return_http_response(r).json()
+        first_filename = r["fileDescriptors"][0]["filename"]
         filename = os.path.splitext(first_filename)[0]
         kwargs["stream"] = True
 
