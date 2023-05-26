@@ -78,8 +78,6 @@ class EpfRepairCost(BaseAnalysis):
 
         Args:
             epfs (list): Multiple epfs from input inventory set.
-            hazard_type (str): A type of hazard exposure (earthquake, tsunami, tornado, or hurricane).
-            hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
             list: A list of ordered dictionaries with epf repair cost values and other data/metadata.
