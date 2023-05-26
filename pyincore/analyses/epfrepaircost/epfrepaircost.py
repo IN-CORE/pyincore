@@ -88,62 +88,27 @@ class EpfRepairCost(BaseAnalysis):
 
         """
         # read in the damage ratio tables
-        substation_dmg_ratios_csv = self.get_input_dataset("substation_dmg_ratios").get_csv_reader()
-        substation_dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(substation_dmg_ratios_csv, ignore_first_row=False)
-
-        circuit_dmg_ratios_csv = self.get_input_dataset("substation_dmg_ratios").get_csv_reader()
-        circuit_dmg_ratios_tbl = AnalysisUtil.get_csv_table_rows(circuit_dmg_ratios_csv, ignore_first_row=False)
-
-        generation_plant_dmg_ratios_csv = self.get_input_dataset("substation_dmg_ratios").get_csv_reader()
-        generation_plant_dmg_ratios_tbl = AnalysisUtil.get_csv_table_rows(generation_plant_dmg_ratios_csv, ignore_first_row=False)
-
-        epf_substation_types = ["ESSL", "ESSM", "ESSH"]
-        if not self.get_parameter("epf_substation_types") is None:
-            epf_substation_types = self.get_parameter("epf_substation_types")
-
-        epf_circuit_types = ["EDC"]
-        if not self.get_parameter("epf_circuit_types") is None:
-            epf_substation_types = self.get_parameter("epf_circuit_types")
-
-        epf_generation_plant_types = ["EPPL", "EPPM", "EPPS"]
-        if not self.get_parameter("epf_generation_plant_types") is None:
-            epf_substation_types = self.get_parameter("epf_generation_plant_types")
+        epf_dmg_ratios_csv = self.get_input_dataset("epf_dmg_ratios").get_csv_reader()
+        dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(epf_dmg_ratios_csv, ignore_first_row=False)
 
         repair_costs = []
 
         for epf in epfs:
             rc = dict()
             rc["guid"] = epf["guid"]
-
             epf_type = epf["utilfcltyc"]
-            dmg_ratio_tbl = []
-
-            # substations
-            for epf_substation_type in epf_substation_types:
-                # partial match since some times it's ESSL2
-                if epf_substation_type in epf_type:
-                    dmg_ratio_tbl = substation_dmg_ratio_tbl
-
-            # distribution circuits
-            for epf_circuit_type in epf_circuit_types:
-                if epf_circuit_type in epf_type:
-                    dmg_ratio_tbl = circuit_dmg_ratios_tbl
-
-            # generation plant
-            for epf_generation_plant_type in epf_generation_plant_types:
-                if epf_generation_plant_type in epf_type:
-                    dmg_ratio_tbl = generation_plant_dmg_ratios_tbl
 
             sample_damage_states = epf["sample_damage_states"].split(",")
             repair_cost = ["0"] * len(sample_damage_states)
             for n, ds in enumerate(sample_damage_states):
                 for dmg_ratio_row in dmg_ratio_tbl:
-                    if dmg_ratio_row["Damage State"] == ds:
+                    # use "in" instead of "==" since some inventory has pending number (e.g. EDC2)
+                    if dmg_ratio_row["Inventory Type"] in epf_type and dmg_ratio_row["Damage State"] == ds:
                         dr = float(dmg_ratio_row["Best Mean Damage Ratio"])
                         repair_cost[n] = str(epf["replacement_cost"] * dr)
 
-            rc["p_budget"] = ','.join(repair_cost)
-            rc["q"] = ','.join(repair_cost)
+            rc["budget"] = ','.join(repair_cost)
+            rc["repair_cost"] = ','.join(repair_cost)
 
             repair_costs.append(rc)
 
@@ -172,24 +137,6 @@ class EpfRepairCost(BaseAnalysis):
                     "description": "If using parallel execution, the number of cpus to request.",
                     "type": int
                 },
-                {
-                    "id": "epf_substation_types",
-                    "required": False,
-                    "description": "EPF substation types. Default to HAZUS code ESSL, ESSM, ESSH",
-                    "type": list
-                },
-                {
-                    "id": "epf_circuit_types",
-                    "required": False,
-                    "description": "EPF circuit types. Default to HAZUS code EDC",
-                    "type": list
-                },
-                {
-                    "id": "epf_generation_plant_types",
-                    "required": False,
-                    "description": "EPF substation types. Default to HAZUS code EPPL, EPPM, EPPS",
-                    "type": list
-                },
             ],
             "input_datasets": [
                 {
@@ -214,19 +161,7 @@ class EpfRepairCost(BaseAnalysis):
                     "type": ["incore:sampleDamageState"]
                 },
                 {
-                    "id": "substation_dmg_ratios",
-                    "required": True,
-                    "description": "Damage Ratios table",
-                    "type": ["incore:epfDamageRatios"]
-                },
-                {
-                    "id": "circuit_dmg_ratios",
-                    "required": True,
-                    "description": "Damage Ratios table",
-                    "type": ["incore:epfDamageRatios"]
-                },
-                {
-                    "id": "generation_plant_dmg_ratios",
+                    "id": "epf_dmg_ratios",
                     "required": True,
                     "description": "Damage Ratios table",
                     "type": ["incore:epfDamageRatios"]
