@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Added a name extension for combined wind, wave, surge building damage analysis [#308](https://github.com/IN-CORE/pyincore/issues/308)
+- Electric Power Facility Repair Cost Analysis [#345](https://github.com/IN-CORE/pyincore/issues/345)
 
 ### Fixed
 - TransportationRecovery analysis fails to run with concatentation error [#292](https://github.com/IN-CORE/pyincore/issues/292)
