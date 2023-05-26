@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, Dataset
+from pyincore import IncoreClient
 from pyincore.analyses.epfrepaircost import EpfRepairCost
 import pyincore.globals as pyglobals
 

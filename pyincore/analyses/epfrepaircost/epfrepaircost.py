@@ -5,11 +5,9 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import concurrent.futures
-from itertools import repeat
 
-from pyincore import AnalysisUtil, GeoUtil
-from pyincore import BaseAnalysis, HazardService, FragilityService
-from pyincore.models.dfr3curve import DFR3Curve
+from pyincore import AnalysisUtil
+from pyincore import BaseAnalysis
 
 
 class EpfRepairCost(BaseAnalysis):
