@@ -13,17 +13,13 @@ def run_with_base_class():
     epf_repair_cost.load_remote_input_dataset("epfs", "5eebcaa17a00803abc85ec11")  # dev
     # epf_repair_cost.load_remote_input_dataset("epfs", "5d263f08b9219cf93c056c68")  # prod
 
-    replacement_cost = Dataset.from_file("data/replacement_cost.csv", "incore:replacementCost")
-    epf_repair_cost.set_input_dataset("replacement_cost", replacement_cost)
+    epf_repair_cost.load_remote_input_dataset("replacement_cost", "6470c09a5bc8b26ddf99bb59")
 
     # can be chained with MCS
-    sample_damage_states = Dataset.from_file("data/mc_electric_cumulative_1000yr_sample_damage_states.csv",
-                                             "incore:sampleDamageState")
-    epf_repair_cost.set_input_dataset("sample_damage_states", sample_damage_states)
-    
+    epf_repair_cost.load_remote_input_dataset("sample_damage_states", "6470c23d5bc8b26ddf99bb65")
+
     # substation_dmg_ratios
-    epf_dmg_ratios = Dataset.from_file("data/epf_dmg_ratios.csv", "incore:epfDamageRatios")
-    epf_repair_cost.set_input_dataset("epf_dmg_ratios", epf_dmg_ratios)
+    epf_repair_cost.load_remote_input_dataset("epf_dmg_ratios", "6470c1c35bc8b26ddf99bb5f")
 
     epf_repair_cost.set_parameter("result_name", "seaside_epf")
     epf_repair_cost.set_parameter("num_cpu", 4)
