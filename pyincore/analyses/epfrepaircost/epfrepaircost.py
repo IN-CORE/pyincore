@@ -64,7 +64,7 @@ class EpfRepairCost(BaseAnalysis):
             *args: All the arguments in order to pass into parameter function_name.
 
         Returns:
-            list: A list of ordered dictionaries with epf damage values and other data/metadata.
+            list: A list of ordered dictionaries with epf repair cost values and other data/metadata.
 
         """
 
@@ -84,7 +84,7 @@ class EpfRepairCost(BaseAnalysis):
             hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
-            list: A list of ordered dictionaries with epf damage values and other data/metadata.
+            list: A list of ordered dictionaries with epf repair cost values and other data/metadata.
 
         """
         # read in the damage ratio tables
@@ -115,15 +115,15 @@ class EpfRepairCost(BaseAnalysis):
         return repair_costs
 
     def get_spec(self):
-        """Get specifications of the epf damage analysis.
+        """Get specifications of the epf repair cost analysis.
 
         Returns:
-            obj: A JSON object of specifications of the epf damage analysis.
+            obj: A JSON object of specifications of the epf repair cost analysis.
 
         """
         return {
-            "name": "epf-damage",
-            "description": "Electric Power Facility damage analysis.",
+            "name": "epf-repair-cost",
+            "description": "Electric Power Facility repair cost analysis.",
             "input_parameters": [
                 {
                     "id": "result_name",
