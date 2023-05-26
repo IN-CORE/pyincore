@@ -108,7 +108,7 @@ class EpfRepairCost(BaseAnalysis):
                         repair_cost[n] = str(epf["replacement_cost"] * dr)
 
             rc["budget"] = ','.join(repair_cost)
-            rc["repair_cost"] = ','.join(repair_cost)
+            rc["repaircost"] = ','.join(repair_cost)
 
             repair_costs.append(rc)
 
