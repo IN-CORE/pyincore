@@ -1,31 +1,37 @@
-from pyincore import IncoreClient
-from pyincore.analyses.epfrepaircost import EpfRepairCost
+from pyincore import IncoreClient, Dataset
+from pyincore.analyses.waterfacilityrepaircost import WaterFacilityRepairCost
 import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
-    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
-    # client = IncoreClient()
+    client = IncoreClient()
+    # client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
-    epf_repair_cost = EpfRepairCost(client)
+    wf_repair_cost = WaterFacilityRepairCost(client)
 
-    # Seaside EPF
-    epf_repair_cost.load_remote_input_dataset("epfs", "5eebcaa17a00803abc85ec11")  # dev
-    # epf_repair_cost.load_remote_input_dataset("epfs", "5d263f08b9219cf93c056c68")  # prod
+    # Seaside wf
+    wf_repair_cost.load_remote_input_dataset("water_facilities", "60e5e91960b3f41243faa3b2")  # prod
+    # wf_repair_cost.load_remote_input_dataset("water_facilities", "60e5e91960b3f41243faa3b2")  # prod
 
-    epf_repair_cost.load_remote_input_dataset("replacement_cost", "6470c09a5bc8b26ddf99bb59")
+    # wf_repair_cost.load_remote_input_dataset("replacement_cost", "6470c09a5bc8b26ddf99bb59")
+    replacement_cost = Dataset.from_file("data/waterfacility_replacement_cost.csv", "incore:replacementCost")
+    wf_repair_cost.set_input_dataset("replacement_cost", replacement_cost)
 
     # can be chained with MCS
-    epf_repair_cost.load_remote_input_dataset("sample_damage_states", "6470c23d5bc8b26ddf99bb65")
+    # wf_repair_cost.load_remote_input_dataset("sample_damage_states", "6470c23d5bc8b26ddf99bb65")
+    sample_damage_states = Dataset.from_file("data/mc_wterfclty_cumulative_1000yr_sample_damage_states.csv", "incore:sampleDamageState")
+    wf_repair_cost.set_input_dataset("sample_damage_states", sample_damage_states)
 
-    # substation_dmg_ratios
-    epf_repair_cost.load_remote_input_dataset("epf_dmg_ratios", "6470c1c35bc8b26ddf99bb5f")
+    # dmg ratios
+    # wf_repair_cost.load_remote_input_dataset("wf_dmg_ratios", "6470c1c35bc8b26ddf99bb5f")
+    wf_dmg_ratios = Dataset.from_file("data/wf_dmg_ratios.csv", "incore:waterFacilityDamageRatios")
+    wf_repair_cost.set_input_dataset("wf_dmg_ratios", wf_dmg_ratios)
 
-    epf_repair_cost.set_parameter("result_name", "seaside_epf")
-    epf_repair_cost.set_parameter("num_cpu", 4)
+    wf_repair_cost.set_parameter("result_name", "seaside_wf")
+    wf_repair_cost.set_parameter("num_cpu", 4)
 
     # Run Analysis
-    epf_repair_cost.run_analysis()
+    wf_repair_cost.run_analysis()
 
 
 if __name__ == "__main__":
