@@ -168,7 +168,7 @@ class EpfRepairCost(BaseAnalysis):
                     "id": "result",
                     "parent_type": "epfs",
                     "description": "A csv file with repair cost for each electric power facility",
-                    "type": "incore:epfRepairCost"
+                    "type": "incore:repairCost"
                 }
             ]
         }
