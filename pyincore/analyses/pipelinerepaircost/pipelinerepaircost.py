@@ -87,24 +87,60 @@ class PipelineRepairCost(BaseAnalysis):
         pipeline_dmg_ratios_csv = self.get_input_dataset("pipeline_dmg_ratios").get_csv_reader()
         dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(pipeline_dmg_ratios_csv, ignore_first_row=False)
 
+        segment_length = self.get_parameter("segment_length")
+        if segment_length is None:
+            segment_length = 20  # 20 feet
+
+        diameter = self.get_parameter("diameter")
+        if diameter is None:
+            diameter = 20  # 20 inch
+
         repair_costs = []
 
         for pipeline in pipelines:
+            pipe_length = pipeline["length_km"]
+            pipe_length_ft = pipeline["length"]
+
             rc = dict()
             rc["guid"] = pipeline["guid"]
-            pipeline_type = pipeline["utilfcltyc"]
 
-            sample_damage_states = pipeline["sample_damage_states"].split(",")
-            repair_cost = ["0"] * len(sample_damage_states)
-            for n, ds in enumerate(sample_damage_states):
-                for dmg_ratio_row in dmg_ratio_tbl:
-                    # use "in" instead of "==" since some inventory has pending number (e.g. EDC2)
-                    if dmg_ratio_row["Inventory Type"] in pipeline_type and dmg_ratio_row["Damage State"] == ds:
-                        dr = float(dmg_ratio_row["Best Mean Damage Ratio"])
-                        repair_cost[n] = str(pipeline["replacement_cost"] * dr)
+            repair_cost = 0
+            dr_break = 0
+            dr_leak = 0
+            for dmg_ratio_row in dmg_ratio_tbl:
+                if pipeline["diameter"] > diameter:
+                    if dmg_ratio_row["Inventory Type"] == ">" + diameter + " in" and \
+                            dmg_ratio_row["Damage State"] == "break":
+                        dr_break = float(dmg_ratio_row["Best Mean Damage Ratio"])
+                    if dmg_ratio_row["Inventory Type"] == ">" + diameter + " in" and \
+                            dmg_ratio_row["Damage State"] == "leak":
+                        dr_leak = float(dmg_ratio_row["Best Mean Damage Ratio"])
+                else:
+                    if dmg_ratio_row["Inventory Type"] == "<" + diameter + " in" and \
+                            dmg_ratio_row["Damage State"] == "break":
+                        dr_break = float(dmg_ratio_row["Best Mean Damage Ratio"])
+                    if dmg_ratio_row["Inventory Type"] == "<" + diameter + " in" and \
+                            dmg_ratio_row["Damage State"] == "leak":
+                        dr_leak = float(dmg_ratio_row["Best Mean Damage Ratio"])
 
-            rc["budget"] = ','.join(repair_cost)
-            rc["repaircost"] = ','.join(repair_cost)
+                rep_rate = {"break": pipeline["breakrate"],
+                            "leak": pipeline["leakrate"]}
+
+                num_20_ft_seg = pipe_length_ft / segment_length
+                num_breaks = rep_rate["break"] * pipe_length
+                if num_breaks > num_20_ft_seg:
+                    repair_cost += pipeline["replacement_cost"] * dr_break
+                else:
+                    repair_cost += pipeline["replacement_cost"] / num_20_ft_seg * num_breaks * dr_break
+                num_leaks = rep_rate["leak"] * pipe_length
+                if num_leaks > num_20_ft_seg:
+                    repair_cost += pipeline["replacement_cost"] * dr_leak
+                else:
+                    repair_cost += pipeline["replacement_cost"] / num_20_ft_seg * num_leaks * dr_leak
+                repair_cost = min(repair_cost, pipeline["replacement_cost"])
+
+            rc["budget"] = ",".join(repair_cost)
+            rc["repaircost"] = ",".join(repair_cost)
 
             repair_costs.append(rc)
 
@@ -133,13 +169,25 @@ class PipelineRepairCost(BaseAnalysis):
                     "description": "If using parallel execution, the number of cpus to request.",
                     "type": int
                 },
+                {
+                    "id": "diameter",
+                    "required": False,
+                    "description": "pipeline diameter cutoff for different damage ratio",
+                    "type": int
+                },
+                {
+                    "id": "segment_length",
+                    "required": False,
+                    "description": " 20-foot segments in the pipeline",
+                    "type": int
+                },
             ],
             "input_datasets": [
                 {
-                    'id': 'pipeline',
-                    'required': True,
-                    'description': 'Pipeline Inventory',
-                    'type': ['ergo:buriedPipelineTopology', 'ergo:pipeline'],
+                    "id": "pipeline",
+                    "required": True,
+                    "description": "Pipeline Inventory",
+                    "type": ["ergo:buriedPipelineTopology", "ergo:pipeline"],
                 },
                 {
                     "id": "replacement_cost",
