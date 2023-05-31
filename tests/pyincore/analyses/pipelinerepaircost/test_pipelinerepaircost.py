@@ -10,7 +10,7 @@ def run_with_base_class():
 
     # Seaside pipeline
     # pipeline_repair_cost.load_remote_input_dataset("pipeline", "")  # dev
-    pipeline = Dataset.from_file("data/", "ergo:buriedPipelineTopology")
+    pipeline = Dataset.from_file("data/seaside_water_pipeline_cleaned_schema.shp", "ergo:buriedPipelineTopology")
     pipeline_repair_cost.set_input_dataset("pipeline", pipeline)
 
     # pipeline_repair_cost.load_remote_input_dataset("replacement_cost", "")
@@ -19,13 +19,13 @@ def run_with_base_class():
 
     # can be chained with pipeline repair rate damage
     # pipeline_repair_cost.load_remote_input_dataset("pipeline_dmg", "")
-    pipeline_dmg = Dataset.from_file("data/.csv", "ergo:pipelineDamageVer3")
+    pipeline_dmg = Dataset.from_file("data/pipe_eq_1000yr.csv", "ergo:pipelineDamageVer3")
     pipeline_repair_cost.set_input_dataset("pipeline_dmg", pipeline_dmg)
 
     # pipeline damage ratio
     # pipeline_repair_cost.load_remote_input_dataset("pipeline_dmg_ratios", "")
     pipeline_dmg_ratios = Dataset.from_file("data/pipeline_dmg_ratios.csv", "incore:pipelineDamageRatios")
-    pipeline_repair_cost.set_input_dataset("wf_dmg_ratios", pipeline_dmg_ratios)
+    pipeline_repair_cost.set_input_dataset("pipeline_dmg_ratios", pipeline_dmg_ratios)
 
     pipeline_repair_cost.set_parameter("result_name", "seaside_pipeline")
     pipeline_repair_cost.set_parameter("num_cpu", 4)

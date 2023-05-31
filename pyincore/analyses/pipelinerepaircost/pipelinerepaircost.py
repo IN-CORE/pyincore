@@ -109,17 +109,17 @@ class PipelineRepairCost(BaseAnalysis):
             dr_leak = 0
             for dmg_ratio_row in dmg_ratio_tbl:
                 if pipeline["diameter"] > diameter:
-                    if dmg_ratio_row["Inventory Type"] == ">" + diameter + " in" and \
+                    if dmg_ratio_row["Inventory Type"] == ">" + str(diameter) + " in" and \
                             dmg_ratio_row["Damage State"] == "break":
                         dr_break = float(dmg_ratio_row["Best Mean Damage Ratio"])
-                    if dmg_ratio_row["Inventory Type"] == ">" + diameter + " in" and \
+                    if dmg_ratio_row["Inventory Type"] == ">" + str(diameter) + " in" and \
                             dmg_ratio_row["Damage State"] == "leak":
                         dr_leak = float(dmg_ratio_row["Best Mean Damage Ratio"])
                 else:
-                    if dmg_ratio_row["Inventory Type"] == "<" + diameter + " in" and \
+                    if dmg_ratio_row["Inventory Type"] == "<" + str(diameter) + " in" and \
                             dmg_ratio_row["Damage State"] == "break":
                         dr_break = float(dmg_ratio_row["Best Mean Damage Ratio"])
-                    if dmg_ratio_row["Inventory Type"] == "<" + diameter + " in" and \
+                    if dmg_ratio_row["Inventory Type"] == "<" + str(diameter) + " in" and \
                             dmg_ratio_row["Damage State"] == "leak":
                         dr_leak = float(dmg_ratio_row["Best Mean Damage Ratio"])
 
