@@ -103,19 +103,21 @@ class PipelineRepairCost(BaseAnalysis):
 
             rc = dict()
             rc["guid"] = pipeline["guid"]
-
             repair_cost = 0
+
+            # read in damage ratio for break and leak
             dr_break = 0
             dr_leak = 0
-            for dmg_ratio_row in dmg_ratio_tbl:
-                if pipeline["diameter"] > diameter:
+            if pipeline["diameter"] > diameter:
+                for dmg_ratio_row in dmg_ratio_tbl:
                     if dmg_ratio_row["Inventory Type"] == ">" + str(diameter) + " in" and \
                             dmg_ratio_row["Damage State"] == "break":
                         dr_break = float(dmg_ratio_row["Best Mean Damage Ratio"])
                     if dmg_ratio_row["Inventory Type"] == ">" + str(diameter) + " in" and \
                             dmg_ratio_row["Damage State"] == "leak":
                         dr_leak = float(dmg_ratio_row["Best Mean Damage Ratio"])
-                else:
+            else:
+                for dmg_ratio_row in dmg_ratio_tbl:
                     if dmg_ratio_row["Inventory Type"] == "<" + str(diameter) + " in" and \
                             dmg_ratio_row["Damage State"] == "break":
                         dr_break = float(dmg_ratio_row["Best Mean Damage Ratio"])
@@ -123,21 +125,21 @@ class PipelineRepairCost(BaseAnalysis):
                             dmg_ratio_row["Damage State"] == "leak":
                         dr_leak = float(dmg_ratio_row["Best Mean Damage Ratio"])
 
-                rep_rate = {"break": pipeline["breakrate"],
-                            "leak": pipeline["leakrate"]}
+            rep_rate = {"break": pipeline["breakrate"],
+                        "leak": pipeline["leakrate"]}
 
-                num_segment = pipe_length_ft / segment_length
-                num_breaks = rep_rate["break"] * pipe_length
-                if num_breaks > num_segment:
-                    repair_cost += pipeline["replacement_cost"] * dr_break
-                else:
-                    repair_cost += pipeline["replacement_cost"] / num_segment * num_breaks * dr_break
-                num_leaks = rep_rate["leak"] * pipe_length
-                if num_leaks > num_segment:
-                    repair_cost += pipeline["replacement_cost"] * dr_leak
-                else:
-                    repair_cost += pipeline["replacement_cost"] / num_segment * num_leaks * dr_leak
-                repair_cost = min(repair_cost, pipeline["replacement_cost"])
+            num_segment = pipe_length_ft / segment_length
+            num_breaks = rep_rate["break"] * pipe_length
+            if num_breaks > num_segment:
+                repair_cost += pipeline["replacement_cost"] * dr_break
+            else:
+                repair_cost += pipeline["replacement_cost"] / num_segment * num_breaks * dr_break
+            num_leaks = rep_rate["leak"] * pipe_length
+            if num_leaks > num_segment:
+                repair_cost += pipeline["replacement_cost"] * dr_leak
+            else:
+                repair_cost += pipeline["replacement_cost"] / num_segment * num_leaks * dr_leak
+            repair_cost = min(repair_cost, pipeline["replacement_cost"])
 
             rc["budget"] = repair_cost
             rc["repaircost"] = repair_cost
