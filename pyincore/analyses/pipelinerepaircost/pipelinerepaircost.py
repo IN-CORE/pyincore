@@ -125,16 +125,15 @@ class PipelineRepairCost(BaseAnalysis):
                             dmg_ratio_row["Damage State"] == "leak":
                         dr_leak = float(dmg_ratio_row["Best Mean Damage Ratio"])
 
-            rep_rate = {"break": pipeline["breakrate"],
-                        "leak": pipeline["leakrate"]}
-
             num_segment = pipe_length_ft / segment_length
-            num_breaks = rep_rate["break"] * pipe_length
+
+            num_breaks = pipeline["breakrate"] * pipe_length
             if num_breaks > num_segment:
                 repair_cost += pipeline["replacement_cost"] * dr_break
             else:
                 repair_cost += pipeline["replacement_cost"] / num_segment * num_breaks * dr_break
-            num_leaks = rep_rate["leak"] * pipe_length
+
+            num_leaks = pipeline["leakrate"] * pipe_length
             if num_leaks > num_segment:
                 repair_cost += pipeline["replacement_cost"] * dr_leak
             else:
