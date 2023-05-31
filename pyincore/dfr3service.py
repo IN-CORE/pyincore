@@ -8,6 +8,11 @@
 import re
 from urllib.parse import urljoin
 from typing import Dict
+import requests
+
+import pyincore.globals as pyglobals
+
+logger = pyglobals.LOGGER
 
 from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
@@ -67,6 +72,27 @@ class Dfr3Service:
         self.client = client
         self.base_mapping_url = urljoin(client.service_url, 'dfr3/api/mappings/')
 
+    @staticmethod
+    def return_http_response(http_response):
+        try:
+            http_response.raise_for_status()
+            return http_response
+        except requests.exceptions.HTTPError:
+            logger.error('A HTTPError has occurred \n' +
+                         'HTTP Status code: ' + str(http_response.status_code) + '\n' +
+                         'Error Message: ' + http_response.content.decode()
+                         )
+            raise
+        except requests.exceptions.ConnectionError:
+            logger.error("ConnectionError: Failed to establish a connection with the server. "
+                         "This might be due to a refused connection. "
+                         "Please check that you are using the right URLs.")
+            raise
+        except requests.exceptions.RequestException:
+            logger.error("RequestException: There was an exception while trying to handle your request. "
+                         "Please go to the end of this message for more specific information about the exception.")
+            raise
+
     def get_dfr3_set(self, dfr3_id: str):
         """Get specific DFR3 set.
 
@@ -80,22 +106,19 @@ class Dfr3Service:
         url = urljoin(self.base_dfr3_url, dfr3_id)
         r = self.client.get(url)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def delete_dfr3_set(self, dfr3_id: str):
         """Delete specific DFR3 set.
-
             Args:
                 dfr3_id (str): ID of the DFR3 set.
-
             Returns:
                 obj: HTTP response with return results.
-
         """
         url = urljoin(self.base_dfr3_url, dfr3_id)
         r = self.client.delete(url)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def batch_get_dfr3_set(self, dfr3_id_lists: list):
         """This method is intended to replace batch_get_dfr3_set in the future. It retrieve dfr3 sets
@@ -143,7 +166,7 @@ class Dfr3Service:
             payload['limit'] = limit
 
         r = self.client.get(url, params=payload)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def create_dfr3_set(self, dfr3_set: dict):
         """Create DFR3 set on the server. POST API endpoint call.
@@ -157,7 +180,7 @@ class Dfr3Service:
         """
         url = self.base_dfr3_url
         r = self.client.post(url, json=dfr3_set)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str, add_info: list = None):
         """This method is intended to replace the match_inventory method in the future. The functionality is same as
@@ -282,7 +305,7 @@ class Dfr3Service:
 
                         # use the first match
                         break
-
+                    
         batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
 
         # replace the curve id in dfr3_sets to the dfr3 curve
@@ -495,7 +518,7 @@ class Dfr3Service:
         url = self.base_mapping_url
         r = self.client.post(url, json=mapping_set)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def get_mappings(self, hazard_type: str = None, inventory_type: str = None, mapping_type: str = None,
                      creator: str = None, space: str = None, skip: int = None, limit: int = None):
@@ -535,7 +558,7 @@ class Dfr3Service:
 
         r = self.client.get(url, params=payload)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def get_mapping(self, mapping_id):
         """Get specific inventory mapping.
@@ -550,7 +573,7 @@ class Dfr3Service:
         url = urljoin(self.base_mapping_url, mapping_id)
         r = self.client.get(url)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def delete_mapping(self, mapping_id):
         """delete specific inventory mappings.
@@ -565,4 +588,4 @@ class Dfr3Service:
         url = urljoin(self.base_mapping_url, mapping_id)
         r = self.client.delete(url)
 
-        return r.json()
+        return self.return_http_response(r).json()

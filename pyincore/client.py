@@ -240,8 +240,8 @@ class IncoreClient(Client):
             r = requests.post(self.token_url, data={'grant_type': 'password',
                                                     'client_id': pyglobals.CLIENT_ID,
                                                     'username': username, 'password': password})
-            if r.status_code == 200:
-                token = r.json()
+            try:
+                token = self.return_http_response(r).json()
                 if token is None or token["access_token"] is None:
                     logger.warning("Authentication Failed.")
                     exit(0)
@@ -249,7 +249,10 @@ class IncoreClient(Client):
                 self.store_authorization_in_file(authorization)
                 self.session.headers['Authorization'] = authorization
                 return True
-            logger.warning("Authentication failed, attempting login again.")
+            except Exception as e:
+                logger.warning("Authentication failed, attempting login again.")
+                print(e)
+
 
         logger.warning("Authentication failed.")
         exit(0)
