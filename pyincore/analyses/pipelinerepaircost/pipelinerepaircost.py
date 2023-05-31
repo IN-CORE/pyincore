@@ -213,7 +213,7 @@ class PipelineRepairCost(BaseAnalysis):
                     "id": "result",
                     "parent_type": "pipelines",
                     "description": "A csv file with repair cost for each pipeline",
-                    "type": "incore:repairCost"
+                    "type": "incore:pipelineRepairCost"
                 }
             ]
         }
