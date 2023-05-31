@@ -98,8 +98,8 @@ class PipelineRepairCost(BaseAnalysis):
         repair_costs = []
 
         for pipeline in pipelines:
-            pipe_length = pipeline["length_km"]
-            pipe_length_ft = pipeline["length"]
+            pipe_length = pipeline["length"]  # kilometre
+            pipe_length_ft = pipeline["length"] * 3280.84  # foot
 
             rc = dict()
             rc["guid"] = pipeline["guid"]
