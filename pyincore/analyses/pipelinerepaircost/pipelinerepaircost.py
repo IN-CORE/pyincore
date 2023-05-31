@@ -25,11 +25,11 @@ class PipelineRepairCost(BaseAnalysis):
         """Executes pipline facility repair cost analysis."""
 
         pipeline_df = self.get_input_dataset("pipeline").get_dataframe_from_shapefile()
-        sample_damage_states_df = self.get_input_dataset("sample_damage_states").get_dataframe_from_csv()
+        pipeline_dmg_df = self.get_input_dataset("pipeline_dmg").get_dataframe_from_csv()
         replacement_cost = self.get_input_dataset("replacement_cost").get_dataframe_from_csv()
 
-        # join damage state, replacement cost, with original inventory
-        pipeline_df = pipeline_df.merge(sample_damage_states_df, on="guid")
+        # join damage, replacement cost, with original inventory
+        pipeline_df = pipeline_df.merge(pipeline_dmg_df, on="guid")
         pipeline_df = pipeline_df.merge(replacement_cost, on="guid")
         pipeline_set = pipeline_df.to_dict(orient="records")
 
@@ -126,21 +126,21 @@ class PipelineRepairCost(BaseAnalysis):
                 rep_rate = {"break": pipeline["breakrate"],
                             "leak": pipeline["leakrate"]}
 
-                num_20_ft_seg = pipe_length_ft / segment_length
+                num_segment = pipe_length_ft / segment_length
                 num_breaks = rep_rate["break"] * pipe_length
-                if num_breaks > num_20_ft_seg:
+                if num_breaks > num_segment:
                     repair_cost += pipeline["replacement_cost"] * dr_break
                 else:
-                    repair_cost += pipeline["replacement_cost"] / num_20_ft_seg * num_breaks * dr_break
+                    repair_cost += pipeline["replacement_cost"] / num_segment * num_breaks * dr_break
                 num_leaks = rep_rate["leak"] * pipe_length
-                if num_leaks > num_20_ft_seg:
+                if num_leaks > num_segment:
                     repair_cost += pipeline["replacement_cost"] * dr_leak
                 else:
-                    repair_cost += pipeline["replacement_cost"] / num_20_ft_seg * num_leaks * dr_leak
+                    repair_cost += pipeline["replacement_cost"] / num_segment * num_leaks * dr_leak
                 repair_cost = min(repair_cost, pipeline["replacement_cost"])
 
-            rc["budget"] = ",".join(repair_cost)
-            rc["repaircost"] = ",".join(repair_cost)
+            rc["budget"] = repair_cost
+            rc["repaircost"] = repair_cost
 
             repair_costs.append(rc)
 
@@ -196,10 +196,10 @@ class PipelineRepairCost(BaseAnalysis):
                     "type": ["incore:replacementCost"],
                 },
                 {
-                    "id": "sample_damage_states",
+                    "id": "pipeline_dmg",
                     "required": True,
-                    "description": "sample damage states from Monte Carlo Simulation",
-                    "type": ["incore:sampleDamageState"]
+                    "description": "pipeline damage from PipelineDamageRepairRate Analysis",
+                    "type": ["ergo:pipelineDamageVer3"]
                 },
                 {
                     "id": "pipeline_dmg_ratios",
