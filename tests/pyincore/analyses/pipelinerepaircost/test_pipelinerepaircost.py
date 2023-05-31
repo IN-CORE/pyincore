@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, Dataset, FragilityService, MappingSet
+from pyincore import IncoreClient
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
 from pyincore.analyses.pipelinerepaircost import PipelineRepairCost
 import pyincore.globals as pyglobals
@@ -9,40 +9,34 @@ def run_with_base_class():
 
     pipeline_repair_cost = PipelineRepairCost(client)
 
-    # Seaside pipeline
-    # pipeline_repair_cost.load_remote_input_dataset("pipeline", "")  # dev
-    pipeline = Dataset.from_file("data/seaside_water_pipeline_cleaned_schema.shp", "ergo:buriedPipelineTopology")
-    pipeline_repair_cost.set_input_dataset("pipeline", pipeline)
+    pipeline_id = "647782045bc8b26ddfa1116c"
 
-    # pipeline_repair_cost.load_remote_input_dataset("replacement_cost", "")
-    replacement_cost = Dataset.from_file("data/pipeline_replacement_cost.csv", "incore:replacementCost")
-    pipeline_repair_cost.set_input_dataset("replacement_cost", replacement_cost)
+    # Seaside pipeline
+    pipeline_repair_cost.load_remote_input_dataset("pipeline", pipeline_id)  # dev
+
+    pipeline_repair_cost.load_remote_input_dataset("replacement_cost", "647782c95bc8b26ddfa11c2f")
 
     # can be chained with pipeline repair rate damage
     test_pipeline_dmg_w_rr = PipelineDamageRepairRate(client)
-    test_pipeline_dmg_w_rr.set_input_dataset("pipeline", pipeline)
+    test_pipeline_dmg_w_rr.load_remote_input_dataset("pipeline", pipeline_id)
 
-    # Load fragility mapping
-    fragility_service = FragilityService(client)
-    mapping_set = MappingSet(fragility_service.get_mapping("5b47c227337d4a38464efea8"))
-    test_pipeline_dmg_w_rr.set_input_dataset('dfr3_mapping_set', mapping_set)
+    # # Load fragility mapping
+    # fragility_service = FragilityService(client)
+    # mapping_set = MappingSet(fragility_service.get_mapping("5b47c227337d4a38464efea8"))
+    # test_pipeline_dmg_w_rr.set_input_dataset('dfr3_mapping_set', mapping_set)
+    #
+    # test_pipeline_dmg_w_rr.set_parameter("result_name", "seaside_eq_pipeline_result")
+    # test_pipeline_dmg_w_rr.set_parameter("fragility_key", "pgv")
+    # test_pipeline_dmg_w_rr.set_parameter("hazard_type", "earthquake")
+    # test_pipeline_dmg_w_rr.set_parameter("hazard_id", "5ba8f2b9ec2309043520906e")  # seaside probability 5000 yr
+    # test_pipeline_dmg_w_rr.set_parameter("num_cpu", 4)
+    # test_pipeline_dmg_w_rr.run_analysis()
+    # pipeline_dmg = test_pipeline_dmg_w_rr.get_output_dataset("result")
 
-    test_pipeline_dmg_w_rr.set_parameter("result_name", "seaside_eq_pipeline_result")
-    test_pipeline_dmg_w_rr.set_parameter("fragility_key", "pgv")
-    test_pipeline_dmg_w_rr.set_parameter("hazard_type", "earthquake")
-    test_pipeline_dmg_w_rr.set_parameter("hazard_id", "5ba8f127ec2309043520906c")  # seaside probability 1000 yr
-    test_pipeline_dmg_w_rr.set_parameter("num_cpu", 4)
-    test_pipeline_dmg_w_rr.run_analysis()
-    pipeline_dmg = test_pipeline_dmg_w_rr.get_output_dataset("result")
-    # pipeline_repair_cost.load_remote_input_dataset("pipeline_dmg", "")
-    # pipeline_dmg = Dataset.from_file("data/pipe_eq_1000yr.csv", "ergo:pipelineDamageVer3")
-
-    pipeline_repair_cost.set_input_dataset("pipeline_dmg", pipeline_dmg)
+    pipeline_repair_cost.load_remote_input_dataset("pipeline_dmg", "647784ca5bc8b26ddfa1437b")
 
     # pipeline damage ratio
-    # pipeline_repair_cost.load_remote_input_dataset("pipeline_dmg_ratios", "")
-    pipeline_dmg_ratios = Dataset.from_file("data/pipeline_dmg_ratios.csv", "incore:pipelineDamageRatios")
-    pipeline_repair_cost.set_input_dataset("pipeline_dmg_ratios", pipeline_dmg_ratios)
+    pipeline_repair_cost.load_remote_input_dataset("pipeline_dmg_ratios", "647783ad5bc8b26ddfa11c5f")
 
     pipeline_repair_cost.set_parameter("result_name", "seaside_pipeline")
     pipeline_repair_cost.set_parameter("num_cpu", 4)
