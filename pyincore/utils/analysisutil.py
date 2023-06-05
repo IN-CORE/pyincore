@@ -59,7 +59,16 @@ class AnalysisUtil:
 
     @staticmethod
     def float_to_decimal(num: float):
-        if isinstance(num, float):
+
+        # Helper function to check if a string is a float
+        def is_float(string):
+            try:
+                float(string)
+                return True
+            except ValueError:
+                return False
+
+        if is_float(num):
             return Decimal(str(num))
         else:
             return np.nan
