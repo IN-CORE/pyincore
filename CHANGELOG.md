@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Added a name extension for combined wind, wave, surge building damage analysis [#308](https://github.com/IN-CORE/pyincore/issues/308)
+- Added error handeling after a request completes in services and the client [#324](https://github.com/IN-CORE/pyincore/issues/324)
 - Electric Power Facility Repair Cost Analysis [#345](https://github.com/IN-CORE/pyincore/issues/345)
 - Water Facility Repair Cost Analysis [#349](https://github.com/IN-CORE/pyincore/issues/349)
 
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fix NCI Functionality float value not iterable error [#291](https://github.com/IN-CORE/pyincore/issues/291)
 - Broken analyses related to pandas 2.0 update [#310](https://github.com/IN-CORE/pyincore/issues/310)
 - Mean damage should handle buildings that don't have damage probabilities [#131](https://github.com/IN-CORE/pyincore/issues/131)
+- Updated check to see if string is float cos outputs where all NaN [#347](https://github.com/IN-CORE/pyincore/issues/347)
 
 ## [1.10.0] - 2023-04-21
 

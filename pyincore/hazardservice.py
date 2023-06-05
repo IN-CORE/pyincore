@@ -8,8 +8,12 @@
 import json
 from typing import List
 from urllib.parse import urljoin
-
 import numpy
+import requests
+
+import pyincore.globals as pyglobals
+
+logger = pyglobals.LOGGER
 
 from pyincore import IncoreClient
 
@@ -36,6 +40,27 @@ class HazardService:
                                                          'hazard/api/hurricaneWindfields/')
         self.base_flood_url = urljoin(client.service_url, 'hazard/api/floods/')
 
+    @staticmethod
+    def return_http_response(http_response):
+        try:
+            http_response.raise_for_status()
+            return http_response
+        except requests.exceptions.HTTPError:
+            logger.error('A HTTPError has occurred \n' +
+                         'HTTP Status code: ' + str(http_response.status_code) + '\n' +
+                         'Error Message: ' + http_response.content.decode()
+                         )
+            raise
+        except requests.exceptions.ConnectionError:
+            logger.error("ConnectionError: Failed to establish a connection with the server. "
+                         "This might be due to a refused connection. "
+                         "Please check that you are using the right URLs.")
+            raise
+        except requests.exceptions.RequestException:
+            logger.error("RequestException: There was an exception while trying to handle your request. "
+                         "Please go to the end of this message for more specific information about the exception.")
+            raise
+
     def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         """Retrieve earthquake metadata list from hazard service. Hazard API endpoint is called.
 
@@ -58,9 +83,8 @@ class HazardService:
             payload['space'] = space
 
         r = self.client.get(url, params=payload)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_earthquake_hazard_metadata(self, hazard_id: str):
         """Retrieve earthquake metadata from hazard service. Hazard API endpoint is called.
@@ -74,9 +98,8 @@ class HazardService:
         """
         url = urljoin(self.base_earthquake_url, hazard_id)
         r = self.client.get(url)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_earthquake_hazard_value_set(self, hazard_id: str, demand_type: str,
                                         demand_unit: str, bbox,
@@ -106,7 +129,7 @@ class HazardService:
                    'maxX': bbox[1][0], 'maxY': bbox[1][1],
                    'gridSpacing': grid_spacing}
         r = self.client.get(url, params=payload)
-        response = r.json()
+        response = self.return_http_response(r).json()
 
         # TODO: need to handle error with the request
         xlist = []
@@ -123,7 +146,7 @@ class HazardService:
         return x, y, hazard_val
 
     def post_earthquake_hazard_values(self, hazard_id: str, payload: list, amplify_hazard=True):
-        """ Retrieve bulk hurricane hazard values from the Hazard service.
+        """Retrieve bulk hurricane hazard values from the Hazard service.
 
         Args:
             hazard_id (str): ID of the Earthquake.
@@ -148,9 +171,8 @@ class HazardService:
         url = urljoin(self.base_earthquake_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload)), ('amplifyHazard', json.dumps(amplify_hazard))}}
         r = self.client.post(url, **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_liquefaction_values(self, hazard_id: str, geology_dataset_id: str,
                                 demand_unit: str, points: List):
@@ -171,11 +193,10 @@ class HazardService:
         payload = {'demandUnits': demand_unit,
                    'geologyDataset': geology_dataset_id, 'point': points}
         r = self.client.get(url, params=payload)
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
 
     def post_liquefaction_values(self, hazard_id: str, geology_dataset_id: str, payload: list):
-        """ Retrieve bulk earthquake liquefaction hazard values from the Hazard service.
+        """Retrieve bulk earthquake liquefaction hazard values from the Hazard service.
 
         Args:
             hazard_id (str): ID of the Tornado.
@@ -187,9 +208,8 @@ class HazardService:
         url = urljoin(self.base_earthquake_url, hazard_id + "/liquefaction/values")
         kwargs = {"files": {('points', json.dumps(payload)), ('geologyDataset', geology_dataset_id)}}
         r = self.client.post(url, **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_soil_amplification_value(self, method: str, dataset_id: str,
                                      site_lat: float, site_long: float,
@@ -217,8 +237,7 @@ class HazardService:
                    "demandType": demand_type, "hazard": hazard,
                    "defaultSiteClass": default_site_class}
         r = self.client.get(url, params=payload)
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
 
     # TODO get_slope_amplification_value needed to be implemented on the server side
     # def get_slope_amplification_value(self)
@@ -232,9 +251,8 @@ class HazardService:
         """
         url = urljoin(self.base_earthquake_url, 'models')
         r = self.client.get(url)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def create_earthquake(self, eq_json, file_paths: List = []):
         """Create earthquake on the server. POST API endpoint is called.
@@ -255,8 +273,7 @@ class HazardService:
             eq_data.add(('file', open(file_path, 'rb')))
         kwargs = {"files": eq_data}
         r = self.client.post(url, **kwargs)
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
 
     def delete_earthquake(self, hazard_id: str):
         """Delete an earthquake by it's id, and it's associated datasets
@@ -270,7 +287,7 @@ class HazardService:
         """
         url = urljoin(self.base_earthquake_url, hazard_id)
         r = self.client.delete(url)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def search_earthquakes(self, text: str, skip: int = None, limit: int = None):
         """Search earthquakes.
@@ -293,10 +310,10 @@ class HazardService:
 
         r = self.client.get(url, params=payload)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def get_earthquake_aleatory_uncertainty(self, hazard_id: str, demand_type: str):
-        """ Gets aleatory uncertainty for an earthquake
+        """Gets aleatory uncertainty for an earthquake
 
         Args:
             hazard_id (str): ID of the Earthquake
@@ -310,7 +327,7 @@ class HazardService:
         payload = {"demandType": demand_type}
 
         r = self.client.get(url, params=payload)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def get_earthquake_variance(self, hazard_id: str, variance_type: str, demand_type: str,
                                 demand_unit: str, points: List):
@@ -331,7 +348,7 @@ class HazardService:
         payload = {"demandType": demand_type, "demandUnits": demand_unit, 'point': points}
 
         r = self.client.get(url, params=payload)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def get_tornado_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         """Retrieve tornado metadata list from hazard service. Hazard API endpoint is called.
@@ -355,9 +372,8 @@ class HazardService:
             payload['space'] = space
 
         r = self.client.get(url, params=payload)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_tornado_hazard_metadata(self, hazard_id: str):
         """Retrieve tornado metadata list from hazard service. Hazard API endpoint is called.
@@ -371,12 +387,11 @@ class HazardService:
         """
         url = urljoin(self.base_tornado_url, hazard_id)
         r = self.client.get(url)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def post_tornado_hazard_values(self, hazard_id: str, payload: list, seed=None):
-        """ Retrieve bulk tornado hazard values from the Hazard service.
+        """Retrieve bulk tornado hazard values from the Hazard service.
 
         Args:
             hazard_id (str): ID of the Tornado.
@@ -394,9 +409,8 @@ class HazardService:
             kwargs = {"files": {('points', json.dumps(payload))}}
 
         r = self.client.post(url, **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def create_tornado_scenario(self, tornado_json, file_paths: List = []):
         """Create tornado on the server. POST API endpoint is called.
@@ -417,8 +431,7 @@ class HazardService:
             tornado_data.add(('file', open(file_path, 'rb')))
         kwargs = {"files": tornado_data}
         r = self.client.post(url, **kwargs)
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
 
     def delete_tornado(self, hazard_id: str):
         """Delete a tornado by it's id, and it's associated datasets
@@ -432,7 +445,7 @@ class HazardService:
         """
         url = urljoin(self.base_tornado_url, hazard_id)
         r = self.client.delete(url)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def search_tornadoes(self, text: str, skip: int = None, limit: int = None):
         """Search tornadoes.
@@ -455,7 +468,7 @@ class HazardService:
 
         r = self.client.get(url, params=payload)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def get_tsunami_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         """Retrieve tsunami metadata list from hazard service. Hazard API endpoint is called.
@@ -479,9 +492,8 @@ class HazardService:
             payload['space'] = space
 
         r = self.client.get(url, params=payload)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_tsunami_hazard_metadata(self, hazard_id: str):
         """Retrieve tsunami metadata list from hazard service. Hazard API endpoint is called.
@@ -495,9 +507,8 @@ class HazardService:
         """
         url = urljoin(self.base_tsunami_url, hazard_id)
         r = self.client.get(url)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def post_tsunami_hazard_values(self, hazard_id: str, payload: list):
         """ Retrieve bulk tsunami hazard values from the Hazard service.
@@ -512,9 +523,8 @@ class HazardService:
         url = urljoin(self.base_tsunami_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload))}}
         r = self.client.post(url, **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def create_tsunami_hazard(self, tsunami_json, file_paths: List):
         """Create tsunami on the server. POST API endpoint is called.
@@ -535,8 +545,7 @@ class HazardService:
             tsunami_data.add(('file', open(file_path, 'rb')))
         kwargs = {"files": tsunami_data}
         r = self.client.post(url, **kwargs)
-        response = r.json()
-        return response
+        return self.return_http_response(r).json()
 
     def delete_tsunami(self, hazard_id: str):
         """Delete a tsunami by it's id, and it's associated datasets
@@ -550,7 +559,7 @@ class HazardService:
         """
         url = urljoin(self.base_tsunami_url, hazard_id)
         r = self.client.delete(url)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def search_tsunamis(self, text: str, skip: int = None, limit: int = None):
         """Search tsunamis.
@@ -573,7 +582,7 @@ class HazardService:
 
         r = self.client.get(url, params=payload)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def create_hurricane(self, hurricane_json, file_paths: List):
         """Create hurricanes on the server. POST API endpoint is called.
@@ -592,9 +601,8 @@ class HazardService:
             hurricane_data.add(('file', open(file_path, 'rb')))
         kwargs = {"files": hurricane_data}
         r = self.client.post(url, **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_hurricane_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         """Retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
@@ -619,9 +627,8 @@ class HazardService:
             payload['space'] = space
 
         r = self.client.get(url, params=payload)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_hurricane_metadata(self, hazard_id):
         """Retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
@@ -635,9 +642,8 @@ class HazardService:
         """
         url = urljoin(self.base_hurricane_url, hazard_id)
         r = self.client.get(url)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def post_hurricane_hazard_values(self, hazard_id: str, payload: list):
         """ Retrieve bulk hurricane hazard values from the Hazard service.
@@ -652,9 +658,8 @@ class HazardService:
         url = urljoin(self.base_hurricane_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload))}}
         r = self.client.post(url, **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def delete_hurricane(self, hazard_id: str):
         """Delete a hurricane by it's id, and it's associated datasets
@@ -668,7 +673,7 @@ class HazardService:
         """
         url = urljoin(self.base_hurricane_url, hazard_id)
         r = self.client.delete(url)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def search_hurricanes(self, text: str, skip: int = None, limit: int = None):
         """Search hurricanes.
@@ -691,7 +696,7 @@ class HazardService:
 
         r = self.client.get(url, params=payload)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def create_flood(self, flood_json, file_paths: List):
         """Create floods on the server. POST API endpoint is called.
@@ -710,9 +715,8 @@ class HazardService:
             flood_data.add(('file', open(file_path, 'rb')))
         kwargs = {"files": flood_data}
         r = self.client.post(url, **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_flood_metadata_list(self, skip: int = None, limit: int = None, space: str = None):
         """Retrieve flood metadata list from hazard service. Hazard API endpoint is called.
@@ -737,9 +741,8 @@ class HazardService:
             payload['space'] = space
 
         r = self.client.get(url, params=payload)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_flood_metadata(self, hazard_id):
         """Retrieve flood metadata list from hazard service. Hazard API endpoint is called.
@@ -753,9 +756,8 @@ class HazardService:
         """
         url = urljoin(self.base_flood_url, hazard_id)
         r = self.client.get(url)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def post_flood_hazard_values(self, hazard_id: str, payload: list):
         """ Retrieve bulk flood hazard values from the Hazard service.
@@ -770,9 +772,8 @@ class HazardService:
         url = urljoin(self.base_flood_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload))}}
         r = self.client.post(url, **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def delete_flood(self, hazard_id: str):
         """Delete a flood by it's id, and it's associated datasets
@@ -786,7 +787,7 @@ class HazardService:
         """
         url = urljoin(self.base_flood_url, hazard_id)
         r = self.client.delete(url)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def search_floods(self, text: str, skip: int = None, limit: int = None):
         """Search floods.
@@ -809,7 +810,7 @@ class HazardService:
 
         r = self.client.get(url, params=payload)
 
-        return r.json()
+        return self.return_http_response(r).json()
 
     def create_hurricane_windfield(self, hurr_wf_inputs):
         """Create wind fields on the server. POST API endpoint is called.
@@ -826,9 +827,8 @@ class HazardService:
         new_headers = {**self.client.session.headers, **headers}
         kwargs = {"headers": new_headers}
         r = self.client.post(url, data=hurr_wf_inputs, timeout=(30, 10800), **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_hurricanewf_metadata_list(self, coast: str = None, category: int = None, skip: int = None,
                                       limit: int = None, space: str = None):
@@ -860,9 +860,8 @@ class HazardService:
             payload['space'] = space
 
         r = self.client.get(url, params=payload)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_hurricanewf_metadata(self, hazard_id):
         """Retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
@@ -876,12 +875,11 @@ class HazardService:
         """
         url = urljoin(self.base_hurricanewf_url, hazard_id)
         r = self.client.get(url)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def post_hurricanewf_hazard_values(self, hazard_id: str, payload: list, elevation: int, roughness: float):
-        """ Retrieve bulk hurricane windfield hazard values from the Hazard service.
+        """Retrieve bulk hurricane windfield hazard values from the Hazard service.
 
         Args:
             hazard_id (str): ID of the hurricanewf.
@@ -895,9 +893,8 @@ class HazardService:
                             ('elevation', json.dumps(elevation)),
                             ('roughness', json.dumps(roughness))}}
         r = self.client.post(url, **kwargs)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def get_hurricanewf_json(self, coast: str, category: int, trans_d: float, land_fall_loc: int, demand_type: str,
                              demand_unit: str, resolution: int = 6, grid_points: int = 80,
@@ -927,9 +924,8 @@ class HazardService:
                    "resolution": resolution, "gridPoints": grid_points,
                    "reductionType": rf_method}
         r = self.client.get(url, params=payload)
-        response = r.json()
 
-        return response
+        return self.return_http_response(r).json()
 
     def delete_hurricanewf(self, hazard_id: str):
         """Delete a hurricane windfield by it's id, and it's associated datasets
@@ -943,7 +939,7 @@ class HazardService:
         """
         url = urljoin(self.base_hurricanewf_url, hazard_id)
         r = self.client.delete(url)
-        return r.json()
+        return self.return_http_response(r).json()
 
     def search_hurricanewf(self, text: str, skip: int = None, limit: int = None):
         """Search hurricanes.
@@ -966,4 +962,4 @@ class HazardService:
 
         r = self.client.get(url, params=payload)
 
-        return r.json()
+        return self.return_http_response(r).json()

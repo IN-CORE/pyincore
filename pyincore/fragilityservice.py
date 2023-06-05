@@ -70,4 +70,4 @@ class FragilityService(Dfr3Service):
             payload['space'] = space
 
         r = self.client.get(url, params=payload)
-        return r.json()
+        return self.return_http_response(r).json()
