@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, Dataset
+from pyincore import IncoreClient
 from pyincore.analyses.waterfacilityrepaircost import WaterFacilityRepairCost
 import pyincore.globals as pyglobals
 
