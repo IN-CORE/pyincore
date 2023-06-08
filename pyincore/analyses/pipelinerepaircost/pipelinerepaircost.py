@@ -11,7 +11,7 @@ from pyincore import BaseAnalysis
 
 
 class PipelineRepairCost(BaseAnalysis):
-    """Computes electric power facility repair cost.
+    """Computes pipeline repair cost.
 
     Args:
         incore_client (IncoreClient): Service authentication.
@@ -98,7 +98,7 @@ class PipelineRepairCost(BaseAnalysis):
         repair_costs = []
 
         for pipeline in pipelines:
-            pipe_length = pipeline["length"]  # kilometre
+            pipe_length = pipeline["length"]  # kilometer
             pipe_length_ft = pipeline["length"] * 3280.84  # foot
 
             rc = dict()
@@ -173,13 +173,13 @@ class PipelineRepairCost(BaseAnalysis):
                 {
                     "id": "diameter",
                     "required": False,
-                    "description": "pipeline diameter cutoff for different damage ratio",
+                    "description": "Pipeline diameter cutoff assumption for different damage ratios. Default is 20 inches",
                     "type": int
                 },
                 {
                     "id": "segment_length",
                     "required": False,
-                    "description": " 20-foot segments in the pipeline",
+                    "description": "Segment length assumption. Default is 20 feet",
                     "type": int
                 },
             ],
