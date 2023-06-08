@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added a name extension for combined wind, wave, surge building damage analysis [#308](https://github.com/IN-CORE/pyincore/issues/308)
 - Added error handeling after a request completes in services and the client [#324](https://github.com/IN-CORE/pyincore/issues/324)
 - Electric Power Facility Repair Cost Analysis [#345](https://github.com/IN-CORE/pyincore/issues/345)
+- Water Pipeline Repair Cost Analysis [#351](https://github.com/IN-CORE/pyincore/issues/351)
 
 ### Fixed
 - TransportationRecovery analysis fails to run with concatentation error [#292](https://github.com/IN-CORE/pyincore/issues/292)
