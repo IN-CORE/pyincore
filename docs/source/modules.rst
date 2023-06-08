@@ -68,6 +68,11 @@ analyses/epfdamage
 ..  autoclass:: epfdamage.epfutil.EpfUtil
     :members:
 
+analyses/epfrepaircost
+==================
+..  autoclass:: epfrepaircost.epfrepaircost.EpfRepairCost
+    :members:
+
 analyses/epnfunctionality
 =========================
 ..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionality
@@ -291,6 +296,11 @@ analyses/transportationrecovery
 analyses/waterfacilitydamage
 ============================
 ..  autoclass:: waterfacilitydamage.waterfacilitydamage.WaterFacilityDamage
+    :members:
+
+analyses/waterfacilityrepaircost
+=================================
+..  autoclass:: waterfacilityrepaircost.waterfacilityrepaircost.WaterFacilityRepairCost
     :members:
 
 analyses/waterfacilityrestoration
