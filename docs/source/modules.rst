@@ -197,6 +197,11 @@ analyses/pipelinefunctionality
 ..  autoclass:: pipelinefunctionality.pipelinefunctionality.PipelineFunctionality
     :members:
 
+analyses/pipelinerepaircost
+============================
+..  autoclass:: pipelinerepaircost.pipelinerepaircost.PipelineRepairCost
+    :members:
+
 analyses/pipelinerestoration
 ============================
 ..  autoclass:: pipelinerestoration.pipelinerestoration.PipelineRestoration
