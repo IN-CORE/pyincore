@@ -173,7 +173,8 @@ class PipelineRepairCost(BaseAnalysis):
                 {
                     "id": "diameter",
                     "required": False,
-                    "description": "Pipeline diameter cutoff assumption for different damage ratios. Default is 20 inches",
+                    "description": "Pipeline diameter cutoff assumption for different damage ratios. Default is 20 "
+                                   "inches",
                     "type": int
                 },
                 {
