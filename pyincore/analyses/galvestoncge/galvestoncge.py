@@ -1962,9 +1962,7 @@ class GalvestonCGEModel(BaseAnalysis):
             data = {'shock':1}
             index = [i]
             df = pd.DataFrame(data=data, index=index)
-
-            sims = sims.append(df)
-
+            sims = pd.concat([sims, df])
 
         # === begin replacing the average shocks on housing services
         HSmean = sims.loc[['HS1I', 'HS2I', 'HS3I']].mean().mean()
