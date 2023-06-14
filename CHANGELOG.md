@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.11.0] - 2023-06-14
 
 ### Added
 - Added a name extension for combined wind, wave, surge building damage analysis [#308](https://github.com/IN-CORE/pyincore/issues/308)
