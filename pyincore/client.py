@@ -102,7 +102,7 @@ class Client:
         Args:
             url (str): Service url.
             params (obj): Session parameters.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -119,7 +119,7 @@ class Client:
             url (str): Service url.
             data (obj): Data to be posted on the server.
             json (obj): Description of the data, metadata json.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -135,7 +135,7 @@ class Client:
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -150,7 +150,7 @@ class Client:
 
         Args:
             url (str): Service url.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -301,7 +301,7 @@ class IncoreClient(Client):
         Args:
             url (str): Service url.
             params (obj): Session parameters.
-            timeout (int): Session timeout.
+            timeout (tuple[int,int]): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -344,7 +344,7 @@ class IncoreClient(Client):
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -364,7 +364,7 @@ class IncoreClient(Client):
 
         Args:
             url (str): Service url.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
