@@ -129,6 +129,7 @@ class FragilityCurveSet:
             ("hurricane", "bridge", 1): FragilityCurveSet._1ls_to_5ds,
             # 3 LS to 4 DS
             ("earthquake", "building", 3): FragilityCurveSet._3ls_to_4ds,
+            ("earthquake+tsunami", "building", 3): FragilityCurveSet._3ls_to_4ds,
             ("tornado", "building", 3): FragilityCurveSet._3ls_to_4ds,
             ("hurricane", "building", 3): FragilityCurveSet._3ls_to_4ds,
             ("flood", "building", 3): FragilityCurveSet._3ls_to_4ds,

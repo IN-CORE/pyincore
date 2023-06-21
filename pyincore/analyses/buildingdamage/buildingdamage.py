@@ -128,6 +128,8 @@ class BuildingDamage(BaseAnalysis):
         geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
         multihazard_vals = {}
+        adjust_demand_types_mapping = {}
+
         for hazard_type, hazard_dataset_id in zip(hazard_types, hazard_dataset_ids):
 
             # Liquefaction
@@ -143,8 +145,10 @@ class BuildingDamage(BaseAnalysis):
                 if bldg_id in fragility_sets:
                     location = GeoUtil.get_location(b)
                     loc = str(location.y) + "," + str(location.x)
-                    original_demands, demands, units = AnalysisUtil.get_hazard_demand_types_units(b, fragility_sets[
+                    demands, units, adjust_to_original = \
+                        AnalysisUtil.get_hazard_demand_types_units(b, fragility_sets[
                         bldg_id], hazard_type)
+                    adjust_demand_types_mapping.update(adjust_to_original)
                     value = {
                         "demands": demands,
                         "units": units,
@@ -218,7 +222,8 @@ class BuildingDamage(BaseAnalysis):
                     # instead  of using what the hazard service returns. There could be a difference "SA" in DFR3 vs
                     # "1.07 SA" from hazard
                     j = 0
-                    for d in selected_fragility_set.demand_types:
+                    for adjusted_demand_type in multihazard_vals[hazard_type][i]["demands"]:
+                        d = adjust_demand_types_mapping[adjusted_demand_type]
                         hval_dict[d] = b_haz_vals[j]
                         j += 1
 
