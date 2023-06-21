@@ -491,10 +491,12 @@ class AnalysisUtil:
         fragility_demand_units = fragility_set.demand_units
         adjusted_demand_types = []
         adjusted_demand_units = []
-        adjust_to_original = {}
+        adjusted_to_original = {}
 
         for index, demand_type in enumerate(fragility_demand_types):
             original_demand_type = demand_type
+            adjusted_to_original[original_demand_type] = original_demand_type
+
             demand_type = demand_type.lower()
             adjusted_demand_type = demand_type
             adjusted_demand_unit = fragility_demand_units[index]
@@ -554,10 +556,10 @@ class AnalysisUtil:
                 else:
                     continue
 
-            adjust_to_original[adjusted_demand_type] = original_demand_type
+            adjusted_to_original[adjusted_demand_type] = original_demand_type
             adjusted_demand_types.append(adjusted_demand_type)
             adjusted_demand_units.append(adjusted_demand_unit)
-        return adjusted_demand_types, adjusted_demand_units, adjust_to_original
+        return adjusted_demand_types, adjusted_demand_units, adjusted_to_original
 
     @staticmethod
     def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):

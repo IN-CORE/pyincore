@@ -145,10 +145,9 @@ class BuildingDamage(BaseAnalysis):
                 if bldg_id in fragility_sets:
                     location = GeoUtil.get_location(b)
                     loc = str(location.y) + "," + str(location.x)
-                    demands, units, adjust_to_original = \
-                        AnalysisUtil.get_hazard_demand_types_units(b, fragility_sets[
-                        bldg_id], hazard_type)
-                    adjust_demand_types_mapping.update(adjust_to_original)
+                    demands, units, adjusted_to_original = AnalysisUtil.get_hazard_demand_types_units(b, fragility_sets[bldg_id],
+                                                                                 hazard_type)
+                    adjust_demand_types_mapping.update(adjusted_to_original)
                     value = {
                         "demands": demands,
                         "units": units,
@@ -180,6 +179,14 @@ class BuildingDamage(BaseAnalysis):
                 hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
             else:
                 raise ValueError("The provided hazard type is not supported yet by this analysis")
+
+            # map demand type from payload to response
+            # worst code I have ever written
+            # e.g. 1.04 Sec Sa --> 1.04 SA --> 1.0 SA
+            for payload, response in zip(values_payload, hazard_vals):
+                for i in range(len(payload["demands"])):
+                    adjust_demand_types_mapping[response["demands"][i]] = adjust_demand_types_mapping[payload[
+                        "demands"][i]]
 
             # record hazard value for each hazard type for later calcu
             multihazard_vals[hazard_type] = hazard_vals
