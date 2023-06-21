@@ -117,6 +117,10 @@ class NonStructBuildingDamage(BaseAnalysis):
         use_liquefaction = self.get_parameter("use_liquefaction")
         use_hazard_uncertainty = self.get_parameter("use_hazard_uncertainty")
 
+        # get allowed demand types for the hazard type
+        allowed_demand_types = [item["demand_type"].lower() for item in self.hazardsvc.get_allowed_demands(
+            hazard_type)]
+
         building_results = []
         damage_results = []
         fragility_sets_as = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
@@ -138,7 +142,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
                 # Acceleration-Sensitive
                 demands_as, units_as, _ = AnalysisUtil.get_hazard_demand_types_units(building, fragility_set_as,
-                                                                                   hazard_type)
+                                                                                     hazard_type, allowed_demand_types)
                 value_as = {
                     "demands": demands_as,
                     "units": units_as,
@@ -148,7 +152,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
                 # Drift-Sensitive
                 demands_ds, units_ds, _ = AnalysisUtil.get_hazard_demand_types_units(building, fragility_set_ds,
-                                                                                  hazard_type)
+                                                                                     hazard_type, allowed_demand_types)
                 value_ds = {
                     "demands": demands_ds,
                     "units": units_ds,

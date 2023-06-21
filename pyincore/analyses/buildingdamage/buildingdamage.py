@@ -131,6 +131,9 @@ class BuildingDamage(BaseAnalysis):
         adjust_demand_types_mapping = {}
 
         for hazard_type, hazard_dataset_id in zip(hazard_types, hazard_dataset_ids):
+            # get allowed demand types for the hazard type
+            allowed_demand_types = [item["demand_type"].lower() for item in self.hazardsvc.get_allowed_demands(
+                hazard_type)]
 
             # Liquefaction
             if hazard_type == "earthquake" and self.get_parameter("use_liquefaction") is not None:
@@ -145,8 +148,11 @@ class BuildingDamage(BaseAnalysis):
                 if bldg_id in fragility_sets:
                     location = GeoUtil.get_location(b)
                     loc = str(location.y) + "," + str(location.x)
-                    demands, units, adjusted_to_original = AnalysisUtil.get_hazard_demand_types_units(b, fragility_sets[bldg_id],
-                                                                                 hazard_type)
+                    demands, units, adjusted_to_original = \
+                        AnalysisUtil.get_hazard_demand_types_units(b,
+                                                                   fragility_sets[bldg_id],
+                                                                   hazard_type,
+                                                                   allowed_demand_types)
                     adjust_demand_types_mapping.update(adjusted_to_original)
                     value = {
                         "demands": demands,

@@ -6,6 +6,7 @@
 
 
 import json
+import os
 from typing import List
 from urllib.parse import urljoin
 import numpy
@@ -1054,3 +1055,13 @@ class HazardService:
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
+
+    # TODO replace this with API endpoint in the future
+    def get_allowed_demands(self, hazard_type=None, timeout=(30, 600), **kwargs):
+        with open(os.path.join(pyglobals.PYINCORE_PACKAGE_HOME, "allowedDemands.json"), "r") as f:
+            allowed_demands = json.load(f)
+
+        if hazard_type:
+            return allowed_demands[hazard_type]
+
+        return allowed_demands

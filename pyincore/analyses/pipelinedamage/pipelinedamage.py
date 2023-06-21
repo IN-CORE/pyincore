@@ -104,6 +104,9 @@ class PipelineDamage(BaseAnalysis):
             dict: An ordered dictionaries with other pipeline data/metadata.
 
         """
+        # get allowed demand types for the hazard type
+        allowed_demand_types = [item["demand_type"].lower() for item in self.hazardsvc.get_allowed_demands(
+            hazard_type)]
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -124,7 +127,8 @@ class PipelineDamage(BaseAnalysis):
                 fragility_set = fragility_sets[pipeline["id"]]
                 location = GeoUtil.get_location(pipeline)
                 loc = str(location.y) + "," + str(location.x)
-                demands, units, _ = AnalysisUtil.get_hazard_demand_types_units(pipeline, fragility_set, hazard_type)
+                demands, units, _ = AnalysisUtil.get_hazard_demand_types_units(pipeline, fragility_set, hazard_type,
+                                                                               allowed_demand_types)
                 value = {
                     "demands": demands,
                     "units": units,

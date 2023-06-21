@@ -469,7 +469,7 @@ class AnalysisUtil:
         return hazard_demand_type
 
     @staticmethod
-    def get_hazard_demand_types_units(building, fragility_set, hazard_type):
+    def get_hazard_demand_types_units(building, fragility_set, hazard_type, allowed_demand_types):
         """
         Get hazard demand type. This method is intended to replace get_hazard_demand_type. Fragility_set is not a
         json but a fragilityCurveSet object now.
@@ -478,6 +478,7 @@ class AnalysisUtil:
             building (obj): A JSON mapping of a geometric object from the inventory: current building.
             fragility_set (obj): FragilityCurveSet object
             hazard_type (str): A hazard type such as earthquake, tsunami etc.
+            allowed_demand_types (list): A list of allowed demand types in lowercase
 
         Returns:
             str: A hazard demand type.
@@ -503,19 +504,15 @@ class AnalysisUtil:
             # TODO: Due to the mismatch in demand types names on DFR3 vs hazard service, we should refactor this before
             # TODO: using expression based fragilities for tsunami & earthquake
             if hazard_type.lower() == "tsunami":
-                # TODO temp fix
-                allowed_demand_types = ["hmax", "vmax", "mmax", "momentumflux", "inundationdepth"]
-                if demand_type in allowed_demand_types:
-                    if demand_type == "momentumflux":
-                        adjusted_demand_type = "mmax"
-                    elif demand_type == "inundationdepth":
-                        adjusted_demand_type = "hmax"
-                else:
+                if demand_type == "momentumflux":
+                    adjusted_demand_type = "mmax"
+                elif demand_type == "inundationdepth":
+                    adjusted_demand_type = "hmax"
+                if adjusted_demand_type not in allowed_demand_types:
                     continue
             elif hazard_type.lower() == "earthquake":
                 # TODO temp fix
                 allowed = False
-                allowed_demand_types = ["pga", "pgv", "pgd", "sa", "sd", "sv"]
                 for allowed_demand_type in allowed_demand_types:
                     if allowed_demand_type in demand_type:
                         allowed = True
@@ -555,7 +552,9 @@ class AnalysisUtil:
                             adjusted_demand_type = str(building_period) + " " + "SA"
                 else:
                     continue
-
+            else:
+                if demand_type not in allowed_demand_types:
+                    continue
             adjusted_to_original[adjusted_demand_type] = original_demand_type
             adjusted_demand_types.append(adjusted_demand_type)
             adjusted_demand_units.append(adjusted_demand_unit)
