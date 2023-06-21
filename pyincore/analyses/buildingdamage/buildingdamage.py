@@ -205,13 +205,15 @@ class BuildingDamage(BaseAnalysis):
             if isinstance(selected_fragility_set.fragility_curves[0], DFR3Curve):
                 # Supports multiple hazard and multiple demand types in same fragility
                 hval_dict = dict()
-
+                b_multihaz_vals = dict()
+                b_demands = dict()
+                b_units = dict()
                 for hazard_type in hazard_types:
                     b_haz_vals = AnalysisUtil.update_precision_of_lists(multihazard_vals[hazard_type][i][
                                                                             "hazardValues"])
-                    b_demands = multihazard_vals[hazard_type][i]["demands"]
-                    b_units = multihazard_vals[hazard_type][i]["units"]
-
+                    b_demands[hazard_type] = multihazard_vals[hazard_type][i]["demands"]
+                    b_units[hazard_type] = multihazard_vals[hazard_type][i]["units"]
+                    b_multihaz_vals[hazard_type] = b_haz_vals
                     # To calculate damage, use demand type name from fragility that will be used in the expression,
                     # instead  of using what the hazard service returns. There could be a difference "SA" in DFR3 vs
                     # "1.07 SA" from hazard
@@ -220,8 +222,12 @@ class BuildingDamage(BaseAnalysis):
                         hval_dict[d] = b_haz_vals[j]
                         j += 1
 
-                for key,item in hval_dict
-                if not AnalysisUtil.do_hazard_values_have_errors(multihazard_vals[i]["hazardValues"]):
+                # catch any of the hazard values error
+                hazard_values_errors = False
+                for key, val in hval_dict.items():
+                    hazard_values_errors = hazard_values_errors or AnalysisUtil.do_hazard_values_have_errors(val)
+
+                if not hazard_values_errors:
                     building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
 
                     building_period = selected_fragility_set.fragility_curves[0].get_building_period(
@@ -236,7 +242,7 @@ class BuildingDamage(BaseAnalysis):
                             AnalysisUtil.adjust_damage_for_liquefaction(dmg_probability, ground_failure_prob))
 
                     dmg_interval = selected_fragility_set.calculate_damage_interval(
-                        dmg_probability, hazard_type=hazard_type, inventory_type="building")
+                        dmg_probability, hazard_type=self.get_parameter("hazard_type"), inventory_type="building")
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
@@ -246,12 +252,18 @@ class BuildingDamage(BaseAnalysis):
 
             ds_result.update(dmg_probability)
             ds_result.update(dmg_interval)
-            ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(b_haz_vals, hazard_type)
+
+            # determine expose from multiple hazard
+            haz_expose = False
+            for hazard_type in hazard_types:
+                haz_expose = haz_expose or AnalysisUtil.get_exposure_from_hazard_values(b_multihaz_vals[
+                                                                                             hazard_type], hazard_type)
+            ds_result['haz_expose'] = haz_expose
 
             damage_result['fragility_id'] = selected_fragility_set.id
             damage_result['demandtype'] = b_demands
             damage_result['demandunits'] = b_units
-            damage_result['hazardval'] = b_haz_vals
+            damage_result['hazardval'] = b_multihaz_vals
 
             if use_liquefaction and geology_dataset_id is not None:
                 damage_result[BuildingUtil.GROUND_FAILURE_PROB] = ground_failure_prob
