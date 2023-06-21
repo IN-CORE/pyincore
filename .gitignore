@@ -51,6 +51,7 @@ original/
 *.json
 !tests/data/*/*.json
 !tests/data/*.json
+!pyincore/alloweddemands.json
 
 # Seaside ipopt constants
 pyincore/analyses/seasidecge/solverconstants/ipopt_cons.py
