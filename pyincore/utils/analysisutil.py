@@ -469,7 +469,7 @@ class AnalysisUtil:
         return hazard_demand_type
 
     @staticmethod
-    def get_hazard_demand_types(building, fragility_set, hazard_type):
+    def get_hazard_demand_types_units(building, fragility_set, hazard_type):
         """
         Get hazard demand type. This method is intended to replace get_hazard_demand_type. Fragility_set is not a
         json but a fragilityCurveSet object now.
@@ -488,54 +488,72 @@ class AnalysisUtil:
         BLDG_PERIOD = "period"
 
         fragility_demand_types = fragility_set.demand_types
+        fragility_demand_units = fragility_set.demand_units
         adjusted_demand_types = []
+        adjusted_demand_units = []
 
-        for demand_type in fragility_demand_types:
+        for index, demand_type in enumerate(fragility_demand_types):
+            demand_type = demand_type.lower()
             adjusted_demand_type = demand_type
+            adjusted_demand_unit = fragility_demand_units[index]
             # TODO: Due to the mismatch in demand types names on DFR3 vs hazard service, we should refactor this before
             # TODO: using expression based fragilities for tsunami & earthquake
             if hazard_type.lower() == "tsunami":
-                demand_type = demand_type.lower()
-                if demand_type == "momentumflux":
-                    adjusted_demand_type = "mmax"
-                elif demand_type == "inundationdepth":
-                    adjusted_demand_type = "hmax"
+                # TODO temp fix
+                allowed_demand_types = ["hmax", "vmax", "mmax", "momentumflux", "inundationdepth"]
+                if demand_type in allowed_demand_types:
+                    if demand_type == "momentumflux":
+                        adjusted_demand_type = "mmax"
+                    elif demand_type == "inundationdepth":
+                        adjusted_demand_type = "hmax"
+                else:
+                    continue
             elif hazard_type.lower() == "earthquake":
-                demand_type = demand_type.lower()
-                num_stories = building[PROPERTIES][BLDG_STORIES]
-                # Get building period from the fragility if possible
-                building_args = fragility_set.construct_expression_args_from_inventory(building)
-                building_period = fragility_set.fragility_curves[0].get_building_period(
-                    fragility_set.curve_parameters, **building_args)
+                # TODO temp fix
+                allowed = False
+                allowed_demand_types = ["pga", "pgv", "pgd", "sa", "sd", "sv"]
+                for allowed_demand_type in allowed_demand_types:
+                    if allowed_demand_type in demand_type:
+                        allowed = True
+                        break
+                if allowed:
+                    num_stories = building[PROPERTIES][BLDG_STORIES]
+                    # Get building period from the fragility if possible
+                    building_args = fragility_set.construct_expression_args_from_inventory(building)
+                    building_period = fragility_set.fragility_curves[0].get_building_period(
+                        fragility_set.curve_parameters, **building_args)
 
-                # TODO: There might be a bug here as this is not handling SD
-                if demand_type.endswith('sa'):
-                    # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
-                    if demand_type != 'sa':
-                        if len(demand_type.split()) > 2:
-                            building_period = demand_type.split()[0]
+                    # TODO: There might be a bug here as this is not handling SD
+                    if demand_type.endswith('sa'):
+                        # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
+                        if demand_type != 'sa':
+                            if len(demand_type.split()) > 2:
+                                building_period = demand_type.split()[0]
+                                adjusted_demand_type = str(building_period) + " " + "SA"
+                        else:
+                            if building_period == 0.0:
+                                if BLDG_PERIOD in building[PROPERTIES] and building[PROPERTIES][BLDG_PERIOD] > 0.0:
+
+                                    building_period = building[PROPERTIES][BLDG_PERIOD]
+                                else:
+                                    # try to calculate the period from the expression
+                                    for param in fragility_set.curve_parameters:
+                                        if param["name"].lower() == "period":
+                                            # TODO: This is a hack and expects a parameter with name "period" present.
+                                            # This can potentially cause naming conflicts in some fragilities
+
+                                            building_period = evaluateexpression.evaluate(param["expression"],
+                                                                                          {"num_stories": num_stories})
+                                            # TODO: num_stories logic is not tested. should find a fragility with
+                                            # periodEqnType = 2 or 3 to test. periodEqnType = 1 doesn't need
+                                            # num_stories.
+
                             adjusted_demand_type = str(building_period) + " " + "SA"
-                    else:
-                        if building_period == 0.0:
-                            if BLDG_PERIOD in building[PROPERTIES] and building[PROPERTIES][BLDG_PERIOD] > 0.0:
-
-                                building_period = building[PROPERTIES][BLDG_PERIOD]
-                            else:
-                                # try to calculate the period from the expression
-                                for param in fragility_set.curve_parameters:
-                                    if param["name"].lower() == "period":
-                                        # TODO: This is a hack and expects a parameter with name "period" present.
-                                        #  This can potentially cause naming conflicts in some fragilities
-
-                                        building_period = evaluateexpression.evaluate(param["expression"],
-                                                                                      {"num_stories": num_stories})
-                                        # TODO: num_stories logic is not tested. should find a fragility with
-                                        #  periodEqnType = 2 or 3 to test. periodEqnType = 1 doesn't need num_stories.
-
-                        adjusted_demand_type = str(building_period) + " " + "SA"
-
+                else:
+                    continue
             adjusted_demand_types.append(adjusted_demand_type)
-        return adjusted_demand_types
+            adjusted_demand_units.append(adjusted_demand_unit)
+        return adjusted_demand_types, adjusted_demand_units
 
     @staticmethod
     def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):

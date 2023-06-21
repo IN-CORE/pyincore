@@ -124,8 +124,7 @@ class PipelineDamage(BaseAnalysis):
                 fragility_set = fragility_sets[pipeline["id"]]
                 location = GeoUtil.get_location(pipeline)
                 loc = str(location.y) + "," + str(location.x)
-                demands = AnalysisUtil.get_hazard_demand_types(pipeline, fragility_set, hazard_type)
-                units = fragility_sets[pipeline["id"]].demand_units
+                demands, units = AnalysisUtil.get_hazard_demand_types_units(pipeline, fragility_set, hazard_type)
                 value = {
                     "demands": demands,
                     "units": units,

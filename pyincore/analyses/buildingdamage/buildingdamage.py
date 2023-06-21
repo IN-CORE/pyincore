@@ -143,8 +143,8 @@ class BuildingDamage(BaseAnalysis):
                 if bldg_id in fragility_sets:
                     location = GeoUtil.get_location(b)
                     loc = str(location.y) + "," + str(location.x)
-                    demands = AnalysisUtil.get_hazard_demand_types(b, fragility_sets[bldg_id], hazard_type)
-                    units = fragility_sets[bldg_id].demand_units
+                    original_demands, demands, units = AnalysisUtil.get_hazard_demand_types_units(b, fragility_sets[
+                        bldg_id], hazard_type)
                     value = {
                         "demands": demands,
                         "units": units,
@@ -162,9 +162,6 @@ class BuildingDamage(BaseAnalysis):
                         values_payload_liq.append(value_liq)
                 else:
                     unmapped_buildings.append(b)
-
-            # not needed anymore as they are already split into mapped and unmapped
-            del buildings
 
             if hazard_type == 'earthquake':
                 hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
@@ -187,6 +184,9 @@ class BuildingDamage(BaseAnalysis):
             if hazard_type == "earthquake" and use_liquefaction and geology_dataset_id is not None:
                 liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
                                                                             values_payload_liq)
+
+        # not needed anymore as they are already split into mapped and unmapped
+        del buildings
 
         ds_results = []
         damage_results = []
