@@ -224,8 +224,9 @@ class BuildingDamage(BaseAnalysis):
 
                 # catch any of the hazard values error
                 hazard_values_errors = False
-                for key, val in hval_dict.items():
-                    hazard_values_errors = hazard_values_errors or AnalysisUtil.do_hazard_values_have_errors(val)
+                for hazard_type in hazard_types:
+                    hazard_values_errors = hazard_values_errors or AnalysisUtil.do_hazard_values_have_errors(
+                        b_multihaz_vals[hazard_type])
 
                 if not hazard_values_errors:
                     building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
