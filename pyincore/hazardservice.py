@@ -31,14 +31,14 @@ class HazardService:
         self.client = client
 
         self.base_earthquake_url = urljoin(client.service_url,
-                                                        'hazard/api/earthquakes/')
+                                           'hazard/api/earthquakes/')
         self.base_tornado_url = urljoin(client.service_url,
-                                                     'hazard/api/tornadoes/')
+                                        'hazard/api/tornadoes/')
         self.base_tsunami_url = urljoin(client.service_url,
-                                                     'hazard/api/tsunamis/')
+                                        'hazard/api/tsunamis/')
         self.base_hurricane_url = urljoin(client.service_url, 'hazard/api/hurricanes/')
         self.base_hurricanewf_url = urljoin(client.service_url,
-                                                         'hazard/api/hurricaneWindfields/')
+                                            'hazard/api/hurricaneWindfields/')
         self.base_flood_url = urljoin(client.service_url, 'hazard/api/floods/')
 
     @staticmethod
@@ -62,7 +62,8 @@ class HazardService:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
-    def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None, timeout: tuple = (30, 600), **kwargs):
+    def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None,
+                                            timeout: tuple = (30, 600), **kwargs):
         """Retrieve earthquake metadata list from hazard service. Hazard API endpoint is called.
 
         Args:
@@ -131,7 +132,7 @@ class HazardService:
         # raster?demandType=0.2+SA&demandUnits=g&minX=-90.3099&minY=34.9942&maxX=-89.6231&maxY=35.4129&gridSpacing=0.01696
         # bbox
         url = urljoin(self.base_earthquake_url,
-                                   hazard_id + "/raster")
+                      hazard_id + "/raster")
         payload = {'demandType': demand_type, 'demandUnits': demand_unit,
                    'minX': bbox[0][0], 'minY': bbox[0][1],
                    'maxX': bbox[1][0], 'maxY': bbox[1][1],
@@ -153,7 +154,8 @@ class HazardService:
 
         return x, y, hazard_val
 
-    def post_earthquake_hazard_values(self, hazard_id: str, payload: list, amplify_hazard=True, timeout=(30, 600), **kwargs):
+    def post_earthquake_hazard_values(self, hazard_id: str, payload: list, amplify_hazard=True, timeout=(30, 600),
+                                      **kwargs):
         """ Retrieve bulk hurricane hazard values from the Hazard service.
 
         Args:
@@ -199,14 +201,15 @@ class HazardService:
 
         """
         url = urljoin(self.base_earthquake_url,
-                                   hazard_id + "/liquefaction/values")
+                      hazard_id + "/liquefaction/values")
         payload = {'demandUnits': demand_unit,
                    'geologyDataset': geology_dataset_id, 'point': points}
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         response = r.json()
         return response
 
-    def post_liquefaction_values(self, hazard_id: str, geology_dataset_id: str, payload: list, timeout=(30, 600), **kwargs):
+    def post_liquefaction_values(self, hazard_id: str, geology_dataset_id: str, payload: list, timeout=(30, 600),
+                                 **kwargs):
         """ Retrieve bulk earthquake liquefaction hazard values from the Hazard service.
 
         Args:
@@ -247,7 +250,7 @@ class HazardService:
 
         """
         url = urljoin(self.base_earthquake_url,
-                                   'soil/amplification')
+                      'soil/amplification')
         payload = {"method": method, "datasetId": dataset_id,
                    "siteLat": site_lat, "siteLong": site_long,
                    "demandType": demand_type, "hazard": hazard,
@@ -783,7 +786,8 @@ class HazardService:
 
         return self.return_http_response(r).json()
 
-    def get_flood_metadata_list(self, skip: int = None, limit: int = None, space: str = None, timeout=(30, 600), **kwargs):
+    def get_flood_metadata_list(self, skip: int = None, limit: int = None, space: str = None, timeout=(30, 600),
+                                **kwargs):
         """Retrieve flood metadata list from hazard service. Hazard API endpoint is called.
 
         Args:
@@ -976,8 +980,8 @@ class HazardService:
         """
         url = urljoin(self.base_hurricanewf_url, hazard_id + "/values")
         kwargs["files"] = {('points', json.dumps(payload)),
-                            ('elevation', json.dumps(elevation)),
-                            ('roughness', json.dumps(roughness))}
+                           ('elevation', json.dumps(elevation)),
+                           ('roughness', json.dumps(roughness))}
         r = self.client.post(url, timeout=timeout, **kwargs)
 
         return self.return_http_response(r).json()
@@ -1058,8 +1062,302 @@ class HazardService:
 
     # TODO replace this with API endpoint in the future
     def get_allowed_demands(self, hazard_type=None, timeout=(30, 600), **kwargs):
-        with open(os.path.join(pyglobals.PYINCORE_PACKAGE_HOME, "alloweddemands.json"), "r") as f:
-            allowed_demands = json.load(f)
+        allowed_demands = {
+            "id": "619281abac0262225b2c2f4f",
+            "earthquake": [
+                {
+                    "demand_type": "pga",
+                    "demand_unit": [
+                        "g",
+                        "in/sec^2",
+                        "m/sec^2"
+                    ],
+                    "description": "Peak ground acceleration"
+                },
+                {
+                    "demand_type": "pgv",
+                    "demand_unit": [
+                        "in/s",
+                        "cm/s"
+                    ],
+                    "description": "Peak ground velocity"
+                },
+                {
+                    "demand_type": "pgd",
+                    "demand_unit": [
+                        "in",
+                        "ft",
+                        "m"
+                    ],
+                    "description": "Peak ground displacement"
+                },
+                {
+                    "demand_type": "sa",
+                    "demand_unit": [
+                        "g",
+                        "in/sec^2",
+                        "m/sec^2"
+                    ],
+                    "description": "Spectral acceleration"
+                },
+                {
+                    "demand_type": "sd",
+                    "demand_unit": [
+                        "in",
+                        "ft",
+                        "m",
+                        "cm"
+                    ],
+                    "description": "Spectral displacement"
+                },
+                {
+                    "demand_type": "sv",
+                    "demand_unit": [
+                        "cm/s",
+                        "in/s"
+                    ],
+                    "description": "Spectral Velocity"
+                }
+            ],
+            "tsunami": [
+                {
+                    "demand_type": "Hmax",
+                    "demand_unit": [
+                        "ft",
+                        "m"
+                    ],
+                    "description": "Onshore: maximum tsunami height above local ground level overland. Offshore: "
+                                   "maximum tsunami height taken crest to trough"
+                },
+                {
+                    "demand_type": "Vmax",
+                    "demand_unit": [
+                        "mph",
+                        "kph",
+                        "ft/sec",
+                        "m/sec"
+                    ],
+                    "description": "Maximum near-coast or overland water velocity due to tsunami"
+                },
+                {
+                    "demand_type": "Mmax",
+                    "demand_unit": [
+                        "m^3/s^2",
+                        "ft^3/s^2"
+                    ],
+                    "description": ""
+                }
+            ],
+            "flood": [
+                {
+                    "demand_type": "inundationDepth",
+                    "demand_unit": [
+                        "ft",
+                        "m"
+                    ],
+                    "description": "Depth of the water surface relative to local ground level"
+                },
+                {
+                    "demand_type": "waterSurfaceElevation",
+                    "demand_unit": [
+                        "ft",
+                        "m"
+                    ],
+                    "description": "Elevation of the water surface above reference datum (e.g. NAVD88, mean sea level)"
+                }
+            ],
+            "tornado": [
+                {
+                    "demand_type": "wind",
+                    "demand_unit": [
+                        "mps",
+                        "mph"
+                    ],
+                    "description": "Defined as a wind velocity below"
+                }
+            ],
+            "hurricaneWindfield": [
+                {
+                    "demand_type": "3s",
+                    "demand_unit": [
+                        "kph",
+                        "mph",
+                        "kt"
+                    ],
+                    "description": "Typically, reported at 10 m above local ground or sea level"
+                },
+                {
+                    "demand_type": "60s",
+                    "demand_unit": [
+                        "kph",
+                        "mph",
+                        "kt"
+                    ],
+                    "description": "Typically, reported at 10 m above local ground or sea level"
+                }
+            ],
+            "hurricane": [
+                {
+                    "demand_type": "waveHeight",
+                    "demand_unit": [
+                        "ft",
+                        "m",
+                        "in",
+                        "cm"
+                    ],
+                    "description": " Height of wave measured crest to trough.  Characteristic wave height is typically"
+                                   " the  average of one third highest waves for a random sea."
+                },
+                {
+                    "demand_type": "surgeLevel",
+                    "demand_unit": [
+                        "ft",
+                        "m",
+                        "in",
+                        "cm"
+                    ],
+                    "description": "Elevation of the water surface above reference datum (e.g. NAVD88, mean sea level)"
+                },
+                {
+                    "demand_type": "inundationDuration",
+                    "demand_unit": [
+                        "hr",
+                        "min",
+                        "s"
+                    ],
+                    "description": "Time that inundation depth exceeds a critical threshold for a given storm"
+                },
+                {
+                    "demand_type": "inundationDepth",
+                    "demand_unit": [
+                        "ft",
+                        "m",
+                        "in",
+                        "cm"
+                    ],
+                    "description": "Depth of the water surface relative to local ground level"
+                },
+                {
+                    "demand_type": "wavePeriod",
+                    "demand_unit": [
+                        "s",
+                        "hr",
+                        "min"
+                    ],
+                    "description": "Time between wave crests.  Characteristic wave period is typically the inverse of "
+                                   "the spectral peak frequency for a random sea"
+                },
+                {
+                    "demand_type": "waveDirection",
+                    "demand_unit": [
+                        "deg",
+                        "rad"
+                    ],
+                    "description": "Principle wave direction associated with the characteristic wave height and period"
+                },
+                {
+                    "demand_type": "waterVelocity",
+                    "demand_unit": [
+                        "ft/s",
+                        "m/s",
+                        "in/s"
+                    ],
+                    "description": ""
+                },
+                {
+                    "demand_type": "windVelocity",
+                    "demand_unit": [
+                        "ft/s",
+                        "m/s",
+                        "in/s",
+                        "m/sec"
+                    ],
+                    "description": ""
+                }
+            ],
+            "earthquake+tsunami": [
+                {
+                    "demand_type": "pga",
+                    "demand_unit": [
+                        "g",
+                        "in/sec^2",
+                        "m/sec^2"
+                    ],
+                    "description": "Peak ground acceleration"
+                },
+                {
+                    "demand_type": "pgv",
+                    "demand_unit": [
+                        "in/s",
+                        "cm/s"
+                    ],
+                    "description": "Peak ground velocity"
+                },
+                {
+                    "demand_type": "pgd",
+                    "demand_unit": [
+                        "in",
+                        "ft",
+                        "m"
+                    ],
+                    "description": "Peak ground displacement"
+                },
+                {
+                    "demand_type": "sa",
+                    "demand_unit": [
+                        "g",
+                        "in/sec^2",
+                        "m/sec^2"
+                    ],
+                    "description": "Spectral acceleration"
+                },
+                {
+                    "demand_type": "sd",
+                    "demand_unit": [
+                        "in",
+                        "ft",
+                        "m",
+                        "cm"
+                    ],
+                    "description": "Spectral displacement"
+                },
+                {
+                    "demand_type": "sv",
+                    "demand_unit": [
+                        "cm/s",
+                        "in/s"
+                    ],
+                    "description": "Spectral Velocity"
+                },
+                {
+                    "demand_type": "Hmax",
+                    "demand_unit": [
+                        "ft",
+                        "m"
+                    ],
+                    "description": "Onshore: maximum tsunami height above local ground level overland. "
+                                   "Offshore: maximum tsunami height taken crest to trough"
+                },
+                {
+                    "demand_type": "Vmax",
+                    "demand_unit": [
+                        "mph",
+                        "kph",
+                        "ft/sec",
+                        "m/sec"
+                    ],
+                    "description": "Maximum near-coast or overland water velocity due to tsunami"
+                },
+                {
+                    "demand_type": "Mmax",
+                    "demand_unit": [
+                        "m^3/s^2",
+                        "ft^3/s^2"
+                    ],
+                    "description": ""
+                }
+            ]
+        }
 
         if hazard_type:
             return allowed_demands[hazard_type]
