@@ -1058,7 +1058,7 @@ class HazardService:
 
     # TODO replace this with API endpoint in the future
     def get_allowed_demands(self, hazard_type=None, timeout=(30, 600), **kwargs):
-        with open(os.path.join(pyglobals.PYINCORE_PACKAGE_HOME, "allowedDemands.json"), "r") as f:
+        with open(os.path.join(pyglobals.PYINCORE_PACKAGE_HOME, "alloweddemands.json"), "r") as f:
             allowed_demands = json.load(f)
 
         if hazard_type:
