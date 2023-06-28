@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Expose all the incore client parameters [#295](https://github.com/IN-CORE/pyincore/issues/295)
+
+### Changed
+- Building Damage supports multiple hazard fragilities [#337](https://github.com/IN-CORE/pyincore/issues/337)
+
 ## [1.11.0] - 2023-06-14
 
 ### Added
