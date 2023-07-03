@@ -31,11 +31,11 @@ def run_with_base_class():
     indp_analysis.set_parameter("solver_engine", "ipopt") # recommended
 
     # input datasets
-    indp_analysis.load_remote_input_dataset("nodes_reptime_func", "61c0f82a837ac508f9a16d79")
-    indp_analysis.load_remote_input_dataset("nodes_damge_ratio", "61c0fe11837ac508f9a16d85")
-    indp_analysis.load_remote_input_dataset("arcs_reptime_func", "61c0f92d837ac508f9a16d7f")
-    indp_analysis.load_remote_input_dataset("arcs_damge_ratio", "61c0fe4b837ac508f9a16d8b")
-    indp_analysis.load_remote_input_dataset("dmg_sce_data", "61c104f0837ac508f9a17e5f")
+    # indp_analysis.load_remote_input_dataset("nodes_reptime_func", "61c0f82a837ac508f9a16d79")
+    # indp_analysis.load_remote_input_dataset("nodes_damge_ratio", "61c0fe11837ac508f9a16d85")
+    # indp_analysis.load_remote_input_dataset("arcs_reptime_func", "61c0f92d837ac508f9a16d7f")
+    # indp_analysis.load_remote_input_dataset("arcs_damge_ratio", "61c0fe4b837ac508f9a16d8b")
+    # indp_analysis.load_remote_input_dataset("dmg_sce_data", "61c104f0837ac508f9a17e5f")
     indp_analysis.load_remote_input_dataset("power_network", "634d99f51f950c126bca46a9")
     indp_analysis.load_remote_input_dataset("water_network", "645d67675bc8b26ddf913565")
 

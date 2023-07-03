@@ -115,11 +115,13 @@ class INDP(BaseAnalysis):
         """
 
         # input files
-        nodes_reptime_func = self.get_input_dataset("nodes_reptime_func").get_dataframe_from_csv(low_memory=False)
-        nodes_damge_ratio = self.get_input_dataset("nodes_damge_ratio").get_dataframe_from_csv(low_memory=False)
-        arcs_reptime_func = self.get_input_dataset("arcs_reptime_func").get_dataframe_from_csv(low_memory=False)
-        arcs_damge_ratio = self.get_input_dataset("arcs_damge_ratio").get_dataframe_from_csv(low_memory=False)
-        dmg_sce_data = self.get_input_dataset("dmg_sce_data").get_dataframe_from_csv(low_memory=False)
+        wf_restoration_time = self.get_input_dataset("wf_resotration_time").get_dataframe_from_csv(low_memory=False)
+        wf_repair_cost = self.get_input_dataset("wf_repair_cost").get_dataframe_from_csv(low_memory=False)
+        epf_restoration_time = self.get_input_dataset("epf_restoration_time").get_dataframe_from_csv(low_memory=False)
+        epf_repair_cost = self.get_input_dataset("epf_repair_cost").get_dataframe_from_csv(low_memory=False)
+        pipeline_restoration_time = self.get_input_dataset("pipeline_restoration_time").get_dataframe_from_csv(low_memory=False)
+        pipeline_repair_cost = self.get_input_dataset("pipeline_repair_cost").get_dataframe_from_csv(low_memory=False)
+
 
         power_network = NetworkDataset.from_dataset(self.get_input_dataset("power_network"))
         power_arcs = power_network.links.get_dataframe_from_shapefile()
@@ -129,7 +131,6 @@ class INDP(BaseAnalysis):
         water_arcs = water_network.links.get_dataframe_from_shapefile()
         water_nodes = water_network.nodes.get_dataframe_from_shapefile()
 
-        pipeline_dmg = self.get_input_dataset("pipeline_dmg").get_dataframe_from_csv(low_memory=False)
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
         initial_node = self.get_input_dataset("initial_node").get_csv_reader()
         initial_link = self.get_input_dataset("initial_link").get_csv_reader()
@@ -168,9 +169,15 @@ class INDP(BaseAnalysis):
                     if params['TIME_RESOURCE']:
                         print('Computing repair times...')
                         water_nodes, water_arcs, power_nodes, power_arcs = \
+                            # INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
+                            #                                     pipeline_dmg, nodes_reptime_func, nodes_damge_ratio,
+                            #                                     arcs_reptime_func, arcs_damge_ratio, dmg_sce_data, i)
+                            # TODO i is sample range; pass here
                             INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
-                                                                pipeline_dmg, nodes_reptime_func, nodes_damge_ratio,
-                                                                arcs_reptime_func, arcs_damge_ratio, dmg_sce_data, i)
+                                                                wf_restoration_time, wf_repair_cost,
+                                                                pipeline_restoration_time, pipeline_repair_cost,
+                                                                epf_restoration_time, epf_repair_cost,
+                                                                i)
 
                     print("Initializing network...")
                     params["N"] = INDPUtil.initialize_network(power_nodes, power_arcs, water_nodes, water_arcs,
@@ -731,34 +738,42 @@ class INDP(BaseAnalysis):
             ],
             'input_datasets': [
                 {
-                    "id": "nodes_reptime_func",
+                    "id": "wf_repair_cost",
                     "required": True,
-                    "description": "repair time curves nodes",
-                    "type": "incore:repairTimeCurvesNodes"
+                    "description": "repair cost for each water facility",
+                    "type": "incore:repairCost"
                 },
                 {
-                    "id": "nodes_damge_ratio",
+                    'id': 'wf_restoration_time',
                     "required": True,
-                    "description": "damage ratio nodes",
-                    "type": "incore:damageRatioNodes"
+                    'description': 'recording repair time at certain functionality recovery for each class '
+                                   'and limit state.',
+                    'type': 'incore:waterFacilityRestorationTime'
                 },
                 {
-                    "id": "arcs_reptime_func",
+                    "id": "epf_repair_cost",
                     "required": True,
-                    "description": "repair time curves arcs",
-                    "type": "incore:repairTimeCurvesArcs"
+                    "description": "repair cost for each electric power facility",
+                    "type": "incore:repairCost"
                 },
                 {
-                    "id": "arcs_damge_ratio",
+                    'id': 'epf_restoration_time',
                     "required": True,
-                    "description": "damage ratio arcs",
-                    "type": "incore:damageRatioArcs"
+                    'description': 'recording repair time at certain functionality recovery for each class '
+                                   'and limit state.',
+                    'type': 'incore:epfRestorationTime'
                 },
                 {
-                    "id": "dmg_sce_data",
+                    "id": "pipeline_repair_cost",
                     "required": True,
-                    "description": "Initial damage states for combined nodes",
-                    "type": "incore:dmgSceData"
+                    "description": "repair cost for each pipeline",
+                    "type": "incore:pipelineRepairCost"
+                },
+                {
+                    'id': 'pipeline_restoration_time',
+                    "required": True,
+                    'description': 'pipeline restoration times',
+                    'type': 'incore:pipelineRestorationVer1'
                 },
                 {
                     'id': 'power_network',
@@ -771,12 +786,6 @@ class INDP(BaseAnalysis):
                     'required': True,
                     'description': 'Water Network Dataset',
                     'type': ['incore:waterNetwork'],
-                },
-                {
-                    "id": "pipeline_dmg",
-                    "required": True,
-                    "description": "Pipeline Repair Rate output",
-                    "type": "ergo:pipelineDamageVer3"
                 },
                 # TODO this is different than any other interdependency dict
                 {
