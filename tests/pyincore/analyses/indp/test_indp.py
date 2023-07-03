@@ -33,52 +33,19 @@ def run_with_base_class():
     # indp_analysis.set_parameter("solver_engine", "glpk")
     indp_analysis.set_parameter("solver_engine", "ipopt")  # recommended
 
-    # TODO run water facility damage
-    # TODO run montecarlo simulation
-
-    # run water facility restoration analysis
-    wf_rest = WaterFacilityRestoration(client)
-    restorationsvc = RestorationService(client)
-    mapping_set = MappingSet(restorationsvc.get_mapping("61f075ee903e515036cee0a5"))  # new format of mapping
-    wf_rest.load_remote_input_dataset("water_facilities", "5a284f2ac7d30d13bc081e52")  # water facility
-    wf_rest.set_input_dataset("damage", wf_dmg.get_output_dataset("result"))
-    wf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
-    wf_rest.set_parameter("discretized_days", [1, 3, 7, 30, 90])
-    wf_rest.set_parameter("result_name", "shelby-water-facility")
-    wf_rest.set_parameter("restoration_key", "Restoration ID Code")
-    wf_rest.set_parameter("end_time", 100.0)
-    wf_rest.set_parameter("time_interval", 1.0)
-    wf_rest.set_parameter("pf_interval", 0.05)
-
-    wf_rest.run_analysis()
-
-    # test utility function
-    wf_util = WaterFacilityRestorationUtil(wf_rest)
-    # TODO iterate through each guid of water facility montecarlo failure state
-    wf_restoration_time_df = pd.DataFrame()
-    time = wf_util.get_restoration_time(guid="e1bce78d-00a1-4605-95f3-3776ff907f73", damage_state="DS_1", pf=0.81)
-    wf_restoration_time_df["guid"] = "guid"
-    wf_restoration_time_df["repair_time"] = time
-
-    wf_restoration_time = Dataset.from_dataframe(wf_restoration_time_df,
-                                                 "data/percentage_of_functionality_indp-water-facility.csv",
-                                                 "incore:waterFacilityRestorationTime")
-
+    wf_restoration_time = Dataset.from_file("data/seaside_wf_repair_time.csv", "incore:restorationTime")
     indp_analysis.set_input_dataset("wf_restoration_time", wf_restoration_time)
 
     wf_repair_cost = Dataset.from_file("data/seaside_wf_repair_cost.csv", "incore:repairCost")
     indp_analysis.set_input_dataset("wf_repair_cost", wf_repair_cost)
 
-    # TODO data not correct
-    epf_restoration_time = Dataset.from_file("data/percentage_of_functionality_memphis-epf.csv",
-                                             "incore:epfRestorationTime")
+    epf_restoration_time = Dataset.from_file("data/seaside_epf_repair_time.csv", "incore:restorationTime")
     indp_analysis.set_input_dataset("epf_restoration_time", epf_restoration_time)
 
     epf_repair_cost = Dataset.from_file("data/seaside_epf_repair_cost.csv", "incore:repairCost")
     indp_analysis.set_input_dataset("epf_repair_cost", epf_repair_cost)
 
-    # TODO data not correct
-    pipeline_restoration_time = Dataset.from_file("data/pipeline_restoration_times.csv",
+    pipeline_restoration_time = Dataset.from_file("data/seaside_pipeline_repair_time.csv",
                                                   "incore:pipelineRestorationVer1")
     indp_analysis.set_input_dataset("pipeline_restoration_time", pipeline_restoration_time)
 

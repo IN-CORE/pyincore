@@ -11,7 +11,7 @@ from pyomo.core import value
 
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 from pyincore.analyses.indp.indpresults import INDPResults
-import pandas as pd
+
 
 class INDPUtil:
 
@@ -91,6 +91,10 @@ class INDPUtil:
         water_arcs['h_budget'].fillna(0, inplace=True)
         water_arcs['f'] = water_arcs['repaircost'].astype(float)
         water_arcs['f'].fillna(0, inplace=True)
+
+        power_arcs['h_time'] = 0
+        power_arcs['h_budget'] = 0
+        power_arcs['f'] = 0
 
         return water_nodes, water_arcs, power_nodes, power_arcs
 

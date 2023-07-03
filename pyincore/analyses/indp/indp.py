@@ -762,7 +762,7 @@ class INDP(BaseAnalysis):
                     "required": True,
                     'description': 'recording repair time at certain functionality recovery for each class '
                                    'and limit state.',
-                    'type': 'incore:waterFacilityRestorationTime'
+                    'type': 'incore:restorationTime'
                 },
                 {
                     "id": "epf_repair_cost",
@@ -775,7 +775,7 @@ class INDP(BaseAnalysis):
                     "required": True,
                     'description': 'recording repair time at certain functionality recovery for each class '
                                    'and limit state.',
-                    'type': 'incore:epfRestorationTime'
+                    'type': 'incore:restorationTime'
                 },
                 {
                     "id": "pipeline_repair_cost",
