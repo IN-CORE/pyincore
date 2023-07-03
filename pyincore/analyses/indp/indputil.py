@@ -11,7 +11,7 @@ from pyomo.core import value
 
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 from pyincore.analyses.indp.indpresults import INDPResults
-
+import pandas as pd
 
 class INDPUtil:
 
@@ -133,8 +133,8 @@ class INDPUtil:
 
     @staticmethod
     def time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes, wf_restoration_time,
-                                   wf_repair_cost, pipeline_restoration_time, pipeline_repair_cost,
-                                   epf_restoration_time, epf_repair_cost, sample_num):
+                                   wf_repair_cost_sample, pipeline_restoration_time, pipeline_repair_cost,
+                                   epf_restoration_time, epf_repair_cost_sample):
         """
         This module calculates the repair time for nodes and arcs for the current scenario based on their damage
         state, and writes them to the input files of INDP. Currently, it is only compatible with NIST testbeds.
@@ -145,11 +145,11 @@ class INDPUtil:
             water_arcs (dataframe):
             water_nodes (dataframe):
             wf_restoration_time (dataframe):
-            wf_repair_cost (dataframe):
+            wf_repair_cost_sample (dataframe):
             pipeline_restoration_time (dataframe):
             pipeline_repair_cost (dataframe):
             epf_restoration_time (dataframe):
-            epf_repair_cost (dataframe):
+            epf_repair_cost_sample (dataframe):
 
         Returns:
             water_nodes:
@@ -158,26 +158,24 @@ class INDPUtil:
             power_arcs:
 
         """
-        for index, row in power_nodes.iterrows():
-            # power_nodes.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0
-            power_nodes.loc[index, 'p_time'] = 0
-            match = epf_repair_cost[epf_repair_cost["guid"] == row["guid"]]
-            power_nodes.loc[index, 'p_budget'] = match["budget"].split(",")[sample_num]
-            power_nodes.loc[index, 'q'] = match["repaircost"].split(",")[sample_num]
+        water_nodes = water_nodes.merge(wf_repair_cost_sample, on='guid', how='left')
+        water_nodes['p_time'] = 0
+        water_nodes['p_budget'] = water_nodes['budget']
+        water_nodes['p_budget'].fillna(0, inplace=True)
+        water_nodes['q'] = water_nodes['repaircost']
+        water_nodes['q'].fillna(0, inplace=True)
 
-        for index, row in water_nodes.iterrows():
-            match = wf_repair_cost[wf_repair_cost["guid"] == row["guid"]]
-            # water_nodes.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0
-            water_nodes.loc[index, 'p_time'] = 0
-            water_nodes.loc[index, 'p_budget'] = match["budget"].split(",")[sample_num]
-            water_nodes.loc[index, 'q'] = match["repaircost"].split(",")[sample_num]
+        power_nodes = power_nodes.merge(epf_repair_cost_sample, on='guid', how='left')
+        power_nodes['p_time'] = 0
+        power_nodes['p_budget'] = power_nodes['budget']
+        power_nodes['p_budget'].fillna(0, inplace=True)
+        power_nodes['q'] = power_nodes['repaircost']
+        power_nodes['q'].fillna(0, inplace=True)
 
-        for index, row in water_arcs.iterrows():
-            match = pipeline_repair_cost[pipeline_repair_cost["guid"] == row["guid"]]
-            # water_arcs.loc[index, 'h_time'] = float(rep_time)
-            # water_arcs.loc[index, 'h_time'] = 0
-            water_arcs.loc[index, 'h_budget'] = match["budget"].split(",")[sample_num]
-            water_arcs.loc[index, 'f'] = match["repaircost"].split(",")[sample_num]
+        water_arcs = water_arcs.merge(pipeline_repair_cost, on='guid', how='left')
+        water_arcs['h_time'] = 0
+        water_arcs['h_budget'] = water_arcs['budget'].astype(float)
+        water_arcs['f'] = water_arcs['repaircost'].astype(float)
 
         return water_nodes, water_arcs, power_nodes, power_arcs
 

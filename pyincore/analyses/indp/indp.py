@@ -119,9 +119,14 @@ class INDP(BaseAnalysis):
         wf_restoration_time = self.get_input_dataset("wf_restoration_time").get_dataframe_from_csv(low_memory=False)
 
         wf_repair_cost = self.get_input_dataset("wf_repair_cost").get_dataframe_from_csv(low_memory=False)
+        wf_repair_cost['budget'] = wf_repair_cost['budget'].str.split(',')
+        wf_repair_cost['repaircost'] = wf_repair_cost['repaircost'].str.split(',')
 
         epf_restoration_time = self.get_input_dataset("epf_restoration_time").get_dataframe_from_csv(low_memory=False)
+
         epf_repair_cost = self.get_input_dataset("epf_repair_cost").get_dataframe_from_csv(low_memory=False)
+        epf_repair_cost['budget'] = epf_repair_cost['budget'].str.split(',')
+        epf_repair_cost['repaircost'] = epf_repair_cost['repaircost'].str.split(',')
 
         pipeline_restoration_time = self.get_input_dataset("pipeline_restoration_time").get_dataframe_from_csv(low_memory=False)
         pipeline_repair_cost = self.get_input_dataset("pipeline_repair_cost").get_dataframe_from_csv(low_memory=False)
@@ -171,12 +176,22 @@ class INDP(BaseAnalysis):
                     print('---Running Magnitude ' + str(m) + ' sample ' + str(i) + '...')
                     if params['TIME_RESOURCE']:
                         print('Computing repair times...')
+
+                        wf_repair_cost_sample = wf_repair_cost.copy()
+                        wf_repair_cost_sample["budget"] = wf_repair_cost_sample['budget'].apply(lambda x: float(x[i]))
+                        wf_repair_cost_sample["repaircost"] = \
+                            wf_repair_cost_sample['repaircost'].apply(lambda x: float(x[i]))
+
+                        epf_repair_cost_sample = epf_repair_cost.copy()
+                        epf_repair_cost_sample["budget"] = epf_repair_cost_sample['budget'].apply(lambda x: float(x[i]))
+                        epf_repair_cost_sample["repaircost"] = \
+                            epf_repair_cost_sample['repaircost'].apply(lambda x: float(x[i]))
+
                         water_nodes, water_arcs, power_nodes, power_arcs = \
                             INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
-                                                                wf_restoration_time, wf_repair_cost,
+                                                                wf_restoration_time, wf_repair_cost_sample,
                                                                 pipeline_restoration_time, pipeline_repair_cost,
-                                                                epf_restoration_time, epf_repair_cost,
-                                                                i)
+                                                                epf_restoration_time, epf_repair_cost_sample)
 
                     print("Initializing network...")
                     params["N"] = INDPUtil.initialize_network(power_nodes, power_arcs, water_nodes, water_arcs,
