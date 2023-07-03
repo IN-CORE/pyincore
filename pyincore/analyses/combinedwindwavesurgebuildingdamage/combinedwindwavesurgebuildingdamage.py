@@ -48,7 +48,7 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
         combined_output = combined_output.apply(lambda x: x.replace(replace_vals_int, regex=True))
 
         # Find maximum among the max_ds columns
-        max_damage_states = {'w_max_ds', 'sw_max_ds', 'f_max_ds'}
+        max_damage_states = ['w_max_ds', 'sw_max_ds', 'f_max_ds']
         max_val = combined_output[max_damage_states].max(axis=1)
 
         # Add maximum of the max damage states

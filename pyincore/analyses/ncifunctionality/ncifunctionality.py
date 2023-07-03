@@ -124,7 +124,8 @@ class NciFunctionality(BaseAnalysis):
         wds_links_updated = self.update_wds_network_links(wds_network_links)
 
         # Generate the functionality data
-        df_functionality_nodes = efp_nodes_updated.append(wds_nodes_updated, ignore_index=True)
+        df_functionality_nodes = pd.concat([efp_nodes_updated, wds_nodes_updated], ignore_index=True)
+        df_functionality_nodes = pd.concat([efp_nodes_updated, wds_nodes_updated], ignore_index=True)
 
         # Create each individual graph
         g_epf = NetworkUtil.create_network_graph_from_dataframes(epf_network_nodes, epf_network_links)

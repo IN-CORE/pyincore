@@ -102,7 +102,7 @@ class Client:
         Args:
             url (str): Service url.
             params (obj): Session parameters.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -119,7 +119,7 @@ class Client:
             url (str): Service url.
             data (obj): Data to be posted on the server.
             json (obj): Description of the data, metadata json.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -135,7 +135,7 @@ class Client:
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -150,7 +150,7 @@ class Client:
 
         Args:
             url (str): Service url.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -240,8 +240,8 @@ class IncoreClient(Client):
             r = requests.post(self.token_url, data={'grant_type': 'password',
                                                     'client_id': pyglobals.CLIENT_ID,
                                                     'username': username, 'password': password})
-            if r.status_code == 200:
-                token = r.json()
+            try:
+                token = self.return_http_response(r).json()
                 if token is None or token["access_token"] is None:
                     logger.warning("Authentication Failed.")
                     exit(0)
@@ -249,7 +249,10 @@ class IncoreClient(Client):
                 self.store_authorization_in_file(authorization)
                 self.session.headers['Authorization'] = authorization
                 return True
-            logger.warning("Authentication failed, attempting login again.")
+            except Exception as e:
+                logger.warning("Authentication failed, attempting login again.")
+                print(e)
+
 
         logger.warning("Authentication failed.")
         exit(0)
@@ -298,7 +301,7 @@ class IncoreClient(Client):
         Args:
             url (str): Service url.
             params (obj): Session parameters.
-            timeout (int): Session timeout.
+            timeout (tuple[int,int]): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -341,7 +344,7 @@ class IncoreClient(Client):
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -361,7 +364,7 @@ class IncoreClient(Client):
 
         Args:
             url (str): Service url.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:

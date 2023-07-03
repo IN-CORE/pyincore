@@ -926,8 +926,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
 
                     # Append to local analysis result
-                    epsilon7_xresult_df = epsilon7_xresult_df.append(newx_df)
-                    epsilon7_yresult_df = epsilon7_yresult_df.append(newy_df)
+                    epsilon7_xresult_df = pd.concat([epsilon7_xresult_df, newx_df])
+                    epsilon7_yresult_df = pd.concat([epsilon7_yresult_df, newy_df])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
@@ -961,7 +961,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         epsilon7_xresult_df['Epsilon'] = 7
         epsilon7_yresult_df['Epsilon'] = 7
 
-        return xresults_df.append(epsilon7_xresult_df), yresults_df.append(epsilon7_yresult_df)
+        return pd.concat([xresults_df, epsilon7_xresult_df]), pd.concat([yresults_df, epsilon7_yresult_df])
 
     def solve_epsilon_model_8(self, model, model_solver_setting, xresults_df, yresults_df):
         starttime = time.time()
@@ -1027,8 +1027,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
 
                     # Append to local analysis result
-                    epsilon8_xresult_df = epsilon8_xresult_df.append(newx_df)
-                    epsilon8_yresult_df = epsilon8_yresult_df.append(newy_df)
+                    epsilon8_xresult_df = pd.concat([epsilon8_xresult_df, newx_df])
+                    epsilon8_yresult_df = pd.concat([epsilon8_yresult_df, newy_df])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
@@ -1062,7 +1062,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         epsilon8_xresult_df['Epsilon'] = 8
         epsilon8_yresult_df['Epsilon'] = 8
 
-        return xresults_df.append(epsilon8_xresult_df), yresults_df.append(epsilon8_yresult_df)
+        return pd.concat([xresults_df, epsilon8_xresult_df]), pd.concat([yresults_df, epsilon8_yresult_df])
 
     def solve_epsilon_model_9(self, model, model_solver_setting, xresults_df, yresults_df):
         starttime = time.time()
@@ -1128,8 +1128,8 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     newy_df = self.assemble_dataframe_from_solution("y_ijkk_prime", y_data, counter)
 
                     # Append to local analysis result
-                    epsilon9_xresult_df = epsilon9_xresult_df.append(newx_df)
-                    epsilon9_yresult_df = epsilon9_yresult_df.append(newy_df)
+                    epsilon9_xresult_df = pd.concat([epsilon9_xresult_df, newx_df])
+                    epsilon9_yresult_df = pd.concat([epsilon9_yresult_df, newy_df])
                 else:
                     print(results.solver.termination_condition)
                     log_infeasible_constraints(model)
@@ -1163,7 +1163,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         epsilon9_xresult_df['Epsilon'] = 9
         epsilon9_yresult_df['Epsilon'] = 9
 
-        return xresults_df.append(epsilon9_xresult_df), yresults_df.append(epsilon9_yresult_df)
+        return pd.concat([xresults_df, epsilon9_xresult_df]), pd.concat([yresults_df, epsilon9_yresult_df])
 
     def compute_optimal_results(self, inactive_submodels, xresults_df, yresults_df):
         # Fixed for the moment, will be expanded to the full model set in later iterations
