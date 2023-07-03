@@ -150,7 +150,6 @@ class INDPUtil:
             pipeline_repair_cost (dataframe):
             epf_restoration_time (dataframe):
             epf_repair_cost (dataframe):
-            sample_num (int):
 
         Returns:
             water_nodes:
@@ -159,68 +158,26 @@ class INDPUtil:
             power_arcs:
 
         """
-        # TODO this is hardcoded?
-        net_names = {'Water': 1, 'Power': 3}
+        for index, row in power_nodes.iterrows():
+            # power_nodes.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0
+            power_nodes.loc[index, 'p_time'] = 0
+            match = epf_repair_cost[epf_repair_cost["guid"] == row["guid"]]
+            power_nodes.loc[index, 'p_budget'] = match["budget"].split(",")[sample_num]
+            power_nodes.loc[index, 'q'] = match["repaircost"].split(",")[sample_num]
 
-        for index, node_data in enumerate([water_nodes, power_nodes]):
-            for v in node_data.iterrows():
-                node_type = v[1]['utilfcltyc']
-                node_id = int(v[1]['nodenwid'])
+        for index, row in water_nodes.iterrows():
+            match = wf_repair_cost[wf_repair_cost["guid"] == row["guid"]]
+            # water_nodes.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0
+            water_nodes.loc[index, 'p_time'] = 0
+            water_nodes.loc[index, 'p_budget'] = match["budget"].split(",")[sample_num]
+            water_nodes.loc[index, 'q'] = match["repaircost"].split(",")[sample_num]
 
-                reptime_func_node = nodes_reptime_func[nodes_reptime_func['Type'] == node_type]
-                dr_data = nodes_damge_ratio[nodes_damge_ratio['Type'] == node_type]
-                rep_time = 0
-                repair_cost = 0
-                if not reptime_func_node.empty:
-                    if index == 0:
-                        node_name = '(' + str(node_id) + ',' + str(net_names["Water"]) + ')'
-                    else:
-                        node_name = '(' + str(node_id) + ',' + str(net_names["Power"]) + ')'
-                    ds = dmg_sce_data[dmg_sce_data['name'] == node_name].iloc[0][sample_num + 1]
-                    rep_time = reptime_func_node.iloc[0]['ds_' + ds + '_mean']  # we can use the 100% instead of mean
-                    dr = dr_data.iloc[0]['dr_' + ds + '_be']
-                    repair_cost = v[1]['q_ds_3'] * dr
-                node_data.loc[v[0], 'p_time'] = rep_time if rep_time > 0 else 0
-                node_data.loc[v[0], 'p_budget'] = repair_cost
-                node_data.loc[v[0], 'q'] = repair_cost
-
-        for arc_data in [water_arcs, power_arcs]:
-            for v in arc_data.iterrows():
-                dmg_data_arc = pipeline_dmg[pipeline_dmg['guid'] == v[1]['guid']]
-                rep_time = 0
-                repair_cost = 0
-                if not dmg_data_arc.empty:
-                    if v[1]['diameter'] > 20:
-                        reptime_func_arc = arcs_reptime_func[arcs_reptime_func['Type'] == '>20 in']
-                        dr_data = arcs_damge_ratio[arcs_damge_ratio['Type'] == '>20 in']
-                    else:
-                        reptime_func_arc = arcs_reptime_func[arcs_reptime_func['Type'] == '<20 in']
-                        dr_data = arcs_damge_ratio[arcs_damge_ratio['Type'] == '<20 in']
-                    pipe_length = v[1]['length_km']
-                    pipe_length_ft = v[1]['Length']
-                    rep_rate = {'break': dmg_data_arc.iloc[0]['breakrate'],
-                                'leak': dmg_data_arc.iloc[0]['leakrate']}
-                    # assuming a 4-person crew per HAZUS
-                    rep_time = (rep_rate['break'] * reptime_func_arc['# Fixed Breaks/Day/Worker'] +
-                                rep_rate['leak'] * reptime_func_arc[
-                                    '# Fixed Leaks/Day/Worker']) * pipe_length / 4
-                    dr = {'break': dr_data.iloc[0]['break_be'], 'leak': dr_data.iloc[0]['leak_be']}
-
-                    num_20_ft_seg = pipe_length_ft / 20
-                    num_breaks = rep_rate['break'] * pipe_length
-                    if num_breaks > num_20_ft_seg:
-                        repair_cost += v[1]['f_ds_3'] * dr['break']
-                    else:
-                        repair_cost += v[1]['f_ds_3'] / num_20_ft_seg * num_breaks * dr['break']
-                    num_leaks = rep_rate['leak'] * pipe_length
-                    if num_leaks > num_20_ft_seg:
-                        repair_cost += v[1]['f_ds_3'] * dr['leak']
-                    else:
-                        repair_cost += v[1]['f_ds_3'] / num_20_ft_seg * num_leaks * dr['leak']
-                    repair_cost = min(repair_cost, v[1]['f_ds_3'])
-                arc_data.loc[v[0], 'h_time'] = float(rep_time)
-                arc_data.loc[v[0], 'h_budget'] = repair_cost
-                arc_data.loc[v[0], 'f'] = repair_cost
+        for index, row in water_arcs.iterrows():
+            match = pipeline_repair_cost[pipeline_repair_cost["guid"] == row["guid"]]
+            # water_arcs.loc[index, 'h_time'] = float(rep_time)
+            # water_arcs.loc[index, 'h_time'] = 0
+            water_arcs.loc[index, 'h_budget'] = match["budget"].split(",")[sample_num]
+            water_arcs.loc[index, 'f'] = match["repaircost"].split(",")[sample_num]
 
         return water_nodes, water_arcs, power_nodes, power_arcs
 

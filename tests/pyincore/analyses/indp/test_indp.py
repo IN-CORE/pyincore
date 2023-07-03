@@ -28,21 +28,29 @@ def run_with_base_class():
     indp_analysis.set_parameter("time_resource", True)
     indp_analysis.set_parameter("save_model", False)
     # indp_analysis.set_parameter("solver_engine", "glpk")
-    indp_analysis.set_parameter("solver_engine", "ipopt") # recommended
+    indp_analysis.set_parameter("solver_engine", "ipopt")  # recommended
 
     # input datasets
-    # indp_analysis.load_remote_input_dataset("nodes_reptime_func", "61c0f82a837ac508f9a16d79")
-    # indp_analysis.load_remote_input_dataset("nodes_damge_ratio", "61c0fe11837ac508f9a16d85")
-    # indp_analysis.load_remote_input_dataset("arcs_reptime_func", "61c0f92d837ac508f9a16d7f")
-    # indp_analysis.load_remote_input_dataset("arcs_damge_ratio", "61c0fe4b837ac508f9a16d8b")
-    # indp_analysis.load_remote_input_dataset("dmg_sce_data", "61c104f0837ac508f9a17e5f")
+    wf_restoration_time = Dataset.from_file("data/percentage_of_functionality_indp-water-facility.csv", "incore:waterFacilityRestorationTime")
+    indp_analysis.set_input_dataset("wf_restoration_time", wf_restoration_time)
+
+    wf_repair_cost = Dataset.from_file("data/seaside_wf_repair_cost.csv", "incore:repairCost")
+    indp_analysis.set_input_dataset("wf_repair_cost", wf_repair_cost)
+
+    epf_restoration_time = Dataset.from_file("data/percentage_of_functionality_memphis-epf.csv", "incore:epfRestorationTime")
+    indp_analysis.set_input_dataset("epf_restoration_time", epf_restoration_time)
+
+    epf_repair_cost = Dataset.from_file("data/seaside_epf_repair_cost.csv", "incore:repairCost")
+    indp_analysis.set_input_dataset("epf_repair_cost", epf_repair_cost)
+
+    pipeline_restoration_time = Dataset.from_file("data/pipeline_restoration_times.csv", "incore:pipelineRestorationVer1")
+    indp_analysis.set_input_dataset("pipeline_restoration_time", pipeline_restoration_time)
+
+    pipeline_repair_cost = Dataset.from_file("data/seaside_pipeline_repair_cost.csv", "incore:pipelineRepairCost")
+    indp_analysis.set_input_dataset("pipeline_repair_cost", pipeline_repair_cost)
+
     indp_analysis.load_remote_input_dataset("power_network", "634d99f51f950c126bca46a9")
     indp_analysis.load_remote_input_dataset("water_network", "645d67675bc8b26ddf913565")
-
-    # TODO this can be chained with pipeline damage
-    pipeline_dmg = Dataset.from_file("data/pipe_dmg.csv", "ergo:pipelineDamageVer3")
-    indp_analysis.set_input_dataset("pipeline_dmg", pipeline_dmg)
-
     indp_analysis.load_remote_input_dataset("interdep", "61c10104837ac508f9a178ef")
     indp_analysis.load_remote_input_dataset("initial_node", "61c1015e837ac508f9a178f5")
     indp_analysis.load_remote_input_dataset("initial_link", "61c101a6837ac508f9a178fb")

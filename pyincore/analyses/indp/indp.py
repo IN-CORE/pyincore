@@ -19,6 +19,7 @@ from pyincore.analyses.indp.dislocationutils import DislocationUtil
 from pyincore.analyses.indp.indpresults import INDPResults
 from pyincore.analyses.indp.indputil import INDPUtil
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
+import numpy as np
 
 
 class INDP(BaseAnalysis):
@@ -115,13 +116,15 @@ class INDP(BaseAnalysis):
         """
 
         # input files
-        wf_restoration_time = self.get_input_dataset("wf_resotration_time").get_dataframe_from_csv(low_memory=False)
+        wf_restoration_time = self.get_input_dataset("wf_restoration_time").get_dataframe_from_csv(low_memory=False)
+
         wf_repair_cost = self.get_input_dataset("wf_repair_cost").get_dataframe_from_csv(low_memory=False)
+
         epf_restoration_time = self.get_input_dataset("epf_restoration_time").get_dataframe_from_csv(low_memory=False)
         epf_repair_cost = self.get_input_dataset("epf_repair_cost").get_dataframe_from_csv(low_memory=False)
+
         pipeline_restoration_time = self.get_input_dataset("pipeline_restoration_time").get_dataframe_from_csv(low_memory=False)
         pipeline_repair_cost = self.get_input_dataset("pipeline_repair_cost").get_dataframe_from_csv(low_memory=False)
-
 
         power_network = NetworkDataset.from_dataset(self.get_input_dataset("power_network"))
         power_arcs = power_network.links.get_dataframe_from_shapefile()
@@ -169,10 +172,6 @@ class INDP(BaseAnalysis):
                     if params['TIME_RESOURCE']:
                         print('Computing repair times...')
                         water_nodes, water_arcs, power_nodes, power_arcs = \
-                            # INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
-                            #                                     pipeline_dmg, nodes_reptime_func, nodes_damge_ratio,
-                            #                                     arcs_reptime_func, arcs_damge_ratio, dmg_sce_data, i)
-                            # TODO i is sample range; pass here
                             INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
                                                                 wf_restoration_time, wf_repair_cost,
                                                                 pipeline_restoration_time, pipeline_repair_cost,
