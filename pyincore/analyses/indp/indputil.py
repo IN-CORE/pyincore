@@ -67,7 +67,7 @@ class INDPUtil:
         """
         water_nodes = water_nodes.merge(wf_repair_cost_sample, on='guid', how='left')
         water_nodes = water_nodes.merge(wf_restoration_time, on='guid', how='left')
-        water_nodes['p_time'] = water_nodes['repair_time']
+        water_nodes['p_time'] = water_nodes['repairtime']
         water_nodes['p_time'].fillna(0, inplace=True)
         water_nodes['p_budget'] = water_nodes['budget']
         water_nodes['p_budget'].fillna(0, inplace=True)
@@ -76,7 +76,7 @@ class INDPUtil:
 
         power_nodes = power_nodes.merge(epf_repair_cost_sample, on='guid', how='left')
         power_nodes = power_nodes.merge(epf_restoration_time, on='guid', how='left')
-        power_nodes['p_time'] = power_nodes['repair_time']
+        power_nodes['p_time'] = power_nodes['repairtime']
         power_nodes['p_time'].fillna(0, inplace=True)
         power_nodes['p_budget'] = power_nodes['budget']
         power_nodes['p_budget'].fillna(0, inplace=True)
@@ -85,7 +85,7 @@ class INDPUtil:
 
         water_arcs = water_arcs.merge(pipeline_repair_cost, on='guid', how='left')
         water_arcs = water_arcs.merge(pipeline_restoration_time, on='guid', how='left')
-        water_arcs['h_time'] = water_arcs["repair_time"]
+        water_arcs['h_time'] = water_arcs["repairtime"]
         water_arcs['h_time'].fillna(0, inplace=True)
         water_arcs['h_budget'] = water_arcs['budget'].astype(float)
         water_arcs['h_budget'].fillna(0, inplace=True)

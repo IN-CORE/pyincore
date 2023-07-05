@@ -187,11 +187,11 @@ class INDP(BaseAnalysis):
                         epf_repair_cost_sample["repaircost"] = \
                             epf_repair_cost_sample['repaircost'].apply(lambda x: float(x[i]))
 
-                        # water_nodes, water_arcs, power_nodes, power_arcs = \
-                        #     INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
-                        #                                         wf_restoration_time, wf_repair_cost_sample,
-                        #                                         pipeline_restoration_time, pipeline_repair_cost,
-                        #                                         epf_restoration_time, epf_repair_cost_sample)
+                        water_nodes, water_arcs, power_nodes, power_arcs = \
+                            INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
+                                                                wf_restoration_time, wf_repair_cost_sample,
+                                                                pipeline_restoration_time, pipeline_repair_cost,
+                                                                epf_restoration_time, epf_repair_cost_sample)
 
                     print("Initializing network...")
                     params["N"] = INDPUtil.initialize_network(power_nodes, power_arcs, water_nodes, water_arcs,
