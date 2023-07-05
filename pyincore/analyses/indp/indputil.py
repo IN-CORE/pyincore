@@ -11,7 +11,7 @@ from pyomo.core import value
 
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 from pyincore.analyses.indp.indpresults import INDPResults
-
+import pandas as pd
 
 class INDPUtil:
 
@@ -567,3 +567,57 @@ class INDPUtil:
             elif sol > 0:
                 current_sol_count = sol
         return sol_pool_results
+
+    @staticmethod
+    def generate_intial_node_failure_state(wf_failure_state_df, epf_failure_state_df, water_nodes,
+                                           power_nodes, sample_range):
+        # todo change those hard coding
+        network_name = {'Water': 1, 'Power': 3}
+        combined_node_failed_states = pd.DataFrame()
+        for node_fail_state, node_data, network_code in zip([wf_failure_state_df, epf_failure_state_df],
+                                                            [water_nodes, power_nodes],
+                                                            network_name.values()):
+            node_fail_state[[str(x) for x in sample_range]] = node_fail_state['failure'].str.split(',', expand=True)[
+                sample_range.start: sample_range.stop]
+            node_fail_state = node_fail_state.drop(columns=['failure'])
+            node_fail_state['name'] = 'nan'
+            for index, row in node_data.iterrows():
+                node_name = '(' + str(int(row['nodenwid'])) + ',' + str(network_code) + ')'
+                if not pd.isna(row['guid']):
+                    node_fail_state.loc[node_fail_state['guid'] == row['guid'], 'name'] = node_name
+                else:
+                    temp_dict = {**{'name': node_name, 'guid': 'nan'}, **{str(x): 1 for x in sample_range}}
+                    node_fail_state = node_fail_state.append(temp_dict, ignore_index=True)
+            combined_node_failed_states = combined_node_failed_states.append(node_fail_state)
+
+        return combined_node_failed_states
+
+    @staticmethod
+    def generate_intial_link_failure_state(pipeline_failure_state_df, water_arcs, power_arcs, sample_range):
+        # TODO remove hardcoded
+        network_name = {'Water': 1, 'Power': 3}
+        combined_arc_failed_states = pd.DataFrame()
+
+        powerline_failure_state_df = pd.DataFrame()
+        powerline_failure_state_df['name'] = 'nan'
+        for index, row in power_arcs.iterrows():
+            temp_dict = {str(x): 1 for x in sample_range}
+            temp_dict['guid'] = row['guid']
+            powerline_failure_state_df = powerline_failure_state_df.append(temp_dict, ignore_index=True)
+            s_node = int(row['fromnode'])
+            e_node = int(row['tonode'])
+            arc_name = '((' + str(s_node) + ',' + str(network_name["Power"]) + '),(' + str(e_node) + ',' + str(
+                network_name["Power"]) + '))'
+            powerline_failure_state_df.loc[powerline_failure_state_df['guid'] == row['guid'], 'name'] = arc_name
+
+        for index, row in water_arcs.iterrows():
+            s_node = int(row['fromnode'])
+            e_node = int(row['tonode'])
+            arc_name = '((' + str(s_node) + ',' + str(network_name["Water"]) + '),(' + str(e_node) + ',' + str(
+                network_name["Water"]) + '))'
+            pipeline_failure_state_df.loc[pipeline_failure_state_df['guid'] == row['guid'], 'name'] = arc_name
+
+        combined_arc_failed_states = combined_arc_failed_states.append(powerline_failure_state_df,
+                                                                       pipeline_failure_state_df)
+
+        return combined_arc_failed_states

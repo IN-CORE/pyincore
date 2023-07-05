@@ -142,8 +142,16 @@ class INDP(BaseAnalysis):
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
 
         # TODO logics to add from node to node to MCS
-        initial_node = self.get_input_dataset("initial_node").get_csv_reader()
-        initial_link = self.get_input_dataset("initial_link").get_csv_reader()
+        wf_failure_state_df = self.get_input_dataset("wf_failure_state").get_csv_reader()
+        pipeline_failure_state_df = self.get_input_dataset("pipeline_failure_state").get_csv_reader()
+        epf_failure_state_df = self.get_input_dataset("epf_failure_state").get_csv_reader()
+
+        sample_range = self.get_parameter("sample_range")
+        initial_node = INDPUtil.generate_intial_node_failure_state(wf_failure_state_df, epf_failure_state_df,
+                                                                   water_nodes, power_nodes, sample_range)
+        initial_link = INDPUtil.generate_intial_node_failure_state(pipeline_failure_state_df,
+                                                                   water_arcs, power_arcs, sample_range)
+
         pop_dislocation = self.get_input_dataset("pop_dislocation").get_dataframe_from_csv(low_memory=False)
 
         # results
@@ -810,19 +818,19 @@ class INDP(BaseAnalysis):
                     "type": "incore:interdep"
                 },
                 {
-                    "id": "wf_mcs_failure_state",
+                    "id": "wf_failure_state",
                     "required": True,
                     "description": "MCS failure state of water facilities",
                     "type": "incore:sampleFailureState"
                 },
                 {
-                    "id": "pipeline_mcs_failure_state",
+                    "id": "pipeline_failure_state",
                     "required": True,
-                    "description": "MCS failure state of pipeline",
+                    "description": "failure state of pipeline from pipeline functionality",
                     "type": "incore:sampleFailureState"
                 },
                 {
-                    "id": "epf_mcs_failure_state",
+                    "id": "epf_failure_state",
                     "required": True,
                     "description": "MCS failure state of electric power facilities",
                     "type": "incore:sampleFailureState"

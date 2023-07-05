@@ -16,5 +16,3 @@ from pyincore.analyses.indp.infrastructurenetwork import InfrastructureNetwork
 from pyincore.analyses.indp.infrastructurenode import InfrastructureNode
 from pyincore.analyses.indp.infrastructurespace import InfrastructureSpace
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
-from pyincore.analyses.indp.net_data_utils import power_net_demand_computation
-from pyincore.analyses.indp.net_data_utils import water_net_demand_computation
