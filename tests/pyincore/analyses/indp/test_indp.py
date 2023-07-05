@@ -19,8 +19,8 @@ def run_with_base_class():
     indp_analysis.set_parameter("return_model", "step_function")
     indp_analysis.set_parameter("testbed_name", "seaside")
     indp_analysis.set_parameter("extra_commodity", {1: ["PW"], 3: []})
-    # indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 70}, {"budget": 300000, "time": 60}])
-    indp_analysis.set_parameter("RC", [{"budget": 2400000, "time": 700}])  # test just one resource increase the
+    indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 70}, {"budget": 300000, "time": 60}])
+    # indp_analysis.set_parameter("RC", [{"budget": 2400000, "time": 700}])  # test just one resource increase the
     # resource will see actions
 
     indp_analysis.set_parameter("layers", [1, 3])
