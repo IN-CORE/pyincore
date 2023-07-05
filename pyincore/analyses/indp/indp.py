@@ -140,6 +140,8 @@ class INDP(BaseAnalysis):
         water_nodes = water_network.nodes.get_dataframe_from_shapefile()
 
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
+
+        # TODO logics to add from node to node to MCS
         initial_node = self.get_input_dataset("initial_node").get_csv_reader()
         initial_link = self.get_input_dataset("initial_link").get_csv_reader()
         pop_dislocation = self.get_input_dataset("pop_dislocation").get_dataframe_from_csv(low_memory=False)
@@ -808,16 +810,22 @@ class INDP(BaseAnalysis):
                     "type": "incore:interdep"
                 },
                 {
-                    "id": "initial_node",
+                    "id": "wf_mcs_failure_state",
                     "required": True,
-                    "description": "Initial damage scenarios failed state for combined nodes",
-                    "type": "incore:initialNode"
+                    "description": "MCS failure state of water facilities",
+                    "type": "incore:sampleFailureState"
                 },
                 {
-                    "id": "initial_link",
+                    "id": "pipeline_mcs_failure_state",
                     "required": True,
-                    "description": "Initial damage scenarios failed state for combined links",
-                    "type": "incore:initialLink"
+                    "description": "MCS failure state of pipeline",
+                    "type": "incore:sampleFailureState"
+                },
+                {
+                    "id": "epf_mcs_failure_state",
+                    "required": True,
+                    "description": "MCS failure state of electric power facilities",
+                    "type": "incore:sampleFailureState"
                 },
                 {
                     "id": "pop_dislocation",
