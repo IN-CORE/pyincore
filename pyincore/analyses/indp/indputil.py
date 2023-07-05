@@ -65,31 +65,31 @@ class INDPUtil:
             power_arcs:
 
         """
-        water_nodes = water_nodes.merge(wf_repair_cost_sample, on='guid', how='left')
-        water_nodes = water_nodes.merge(wf_restoration_time, on='guid', how='left')
-        water_nodes['p_time'] = water_nodes['repairtime']
+        _water_nodes = water_nodes.merge(wf_repair_cost_sample, on='guid', how='left').merge(
+            wf_restoration_time, on='guid', how='left')
+        water_nodes['p_time'] = _water_nodes['repairtime']
         water_nodes['p_time'].fillna(0, inplace=True)
-        water_nodes['p_budget'] = water_nodes['budget']
+        water_nodes['p_budget'] = _water_nodes['budget']
         water_nodes['p_budget'].fillna(0, inplace=True)
-        water_nodes['q'] = water_nodes['repaircost']
+        water_nodes['q'] = _water_nodes['repaircost']
         water_nodes['q'].fillna(0, inplace=True)
 
-        power_nodes = power_nodes.merge(epf_repair_cost_sample, on='guid', how='left')
-        power_nodes = power_nodes.merge(epf_restoration_time, on='guid', how='left')
-        power_nodes['p_time'] = power_nodes['repairtime']
+        _power_nodes = power_nodes.merge(epf_repair_cost_sample, on='guid', how='left').merge(
+            epf_restoration_time, on='guid', how='left')
+        power_nodes['p_time'] = _power_nodes['repairtime']
         power_nodes['p_time'].fillna(0, inplace=True)
-        power_nodes['p_budget'] = power_nodes['budget']
+        power_nodes['p_budget'] = _power_nodes['budget']
         power_nodes['p_budget'].fillna(0, inplace=True)
-        power_nodes['q'] = power_nodes['repaircost']
+        power_nodes['q'] = _power_nodes['repaircost']
         power_nodes['q'].fillna(0, inplace=True)
 
-        water_arcs = water_arcs.merge(pipeline_repair_cost, on='guid', how='left')
-        water_arcs = water_arcs.merge(pipeline_restoration_time, on='guid', how='left')
-        water_arcs['h_time'] = water_arcs["repairtime"]
+        _water_arcs = water_arcs.merge(pipeline_repair_cost, on='guid', how='left').merge(
+            pipeline_restoration_time, on='guid', how='left')
+        water_arcs['h_time'] = _water_arcs["repairtime"]
         water_arcs['h_time'].fillna(0, inplace=True)
-        water_arcs['h_budget'] = water_arcs['budget'].astype(float)
+        water_arcs['h_budget'] = _water_arcs['budget'].astype(float)
         water_arcs['h_budget'].fillna(0, inplace=True)
-        water_arcs['f'] = water_arcs['repaircost'].astype(float)
+        water_arcs['f'] = _water_arcs['repaircost'].astype(float)
         water_arcs['f'].fillna(0, inplace=True)
 
         power_arcs['h_time'] = 0

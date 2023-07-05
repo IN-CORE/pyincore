@@ -27,7 +27,8 @@ def run_with_base_class():
     indp_analysis.set_parameter("method", "INDP")
     # indp_analysis.set_parameter("method", "TDINDP")
 
-    indp_analysis.set_parameter("t_steps", 10)
+    # indp_analysis.set_parameter("t_steps", 10)
+    indp_analysis.set_parameter("t_steps", 1)
     indp_analysis.set_parameter("time_resource", True)
     indp_analysis.set_parameter("save_model", False)
     # indp_analysis.set_parameter("solver_engine", "glpk")

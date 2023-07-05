@@ -801,7 +801,6 @@ class INDP(BaseAnalysis):
                     'description': 'Water Network Dataset',
                     'type': ['incore:waterNetwork'],
                 },
-                # TODO this is different than any other interdependency dict
                 {
                     "id": "interdep",
                     "required": True,
@@ -829,15 +828,13 @@ class INDP(BaseAnalysis):
                 {
                     "id": "bldgs2elec",
                     "required": False,
-                    # TODO need a better decription
-                    "description": "Power/bldgs2elec_Seaside.csv",
+                    "description": "relation between building and electric power facility",
                     "type": "incore:bldgs2elec"
                 },
                 {
                     "id": "bldgs2wter",
                     "required": False,
-                    # TODO need a better decription
-                    "description": "Water/bldgs2wter_Seaside.csv",
+                    "description": "relation between building and water facility",
                     "type": "incore:bldgs2wter"
                 },
             ],
