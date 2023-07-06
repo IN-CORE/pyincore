@@ -55,7 +55,8 @@ class EpfRestoration(BaseAnalysis):
         damage = self.get_input_dataset("damage").get_csv_dict_reader()
         damage_result = AnalysisUtil.get_csv_table_rows(damage, ignore_first_row=False)
 
-        (inventory_restoration_map, pf_results, time_results, func_results) = self.electricpowerfacility_restoration(
+        (inventory_restoration_map, pf_results, time_results, func_results,
+         repair_times) = self.electricpowerfacility_restoration(
             inventory_list, damage_result, mapping_set, restoration_key, end_time, time_interval, pf_interval, 
             discretized_days)
 
@@ -66,6 +67,8 @@ class EpfRestoration(BaseAnalysis):
         self.set_result_csv_data("time_results", pf_results, name="reptime_" + self.get_parameter("result_name"))
         self.set_result_csv_data("func_results", func_results,
                                  name=self.get_parameter("result_name") + "_discretized_restoration")
+        self.set_result_csv_data("repair_times", repair_times, name="full_reptime_" + self.get_parameter(
+            "result_name"))
 
         return True
 
@@ -112,6 +115,7 @@ class EpfRestoration(BaseAnalysis):
 
         time_results = []
         pf_results = []
+        repair_time = {}
 
         for mapping in mapping_set.mappings:
             # get restoration curves
@@ -142,6 +146,8 @@ class EpfRestoration(BaseAnalysis):
                     **new_dict
                 })
 
+            repair_time[restoration_curve_set.id] = restoration_curve_set.calculate_inverse_restoration_rates(time=0.99)
+
         # Compute discretized restoration
         func_result = []
         for dmg in damage_result:
@@ -162,7 +168,11 @@ class EpfRestoration(BaseAnalysis):
 
             func_result.append({"guid": guid, **result_dict})
 
-        return inventory_restoration_map, pf_results, time_results, func_result
+        repair_times = []
+        for inventory in inventory_restoration_map:
+            repair_times.append({"guid": inventory["guid"], **repair_time[inventory["restoration_id"]]})
+
+        return inventory_restoration_map, pf_results, time_results, func_result, repair_times
 
     def get_spec(self):
         return {
@@ -261,6 +271,13 @@ class EpfRestoration(BaseAnalysis):
                     'parent_type': '',
                     'description': 'A csv file recording discretized functionality over time',
                     'type': 'incore:epfDiscretizedRestorationFunc'
+                },
+                {
+                    'id': 'repair_times',
+                    'parent_type': '',
+                    'description': 'A csv file recording repair time at full functionality recovery for each guid '
+                                   'and limit state.',
+                    'type': 'incore:epfRepairTime'
                 }
 
             ]
