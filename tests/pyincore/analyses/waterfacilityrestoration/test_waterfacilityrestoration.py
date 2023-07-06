@@ -64,7 +64,6 @@ def run_with_base_class():
     wf_rest.run_analysis()
 
     # test utility function
-    # test utility function
     inventory_restoration_map = wf_rest.get_output_dataset("inventory_restoration_map")
     pf_results = wf_rest.get_output_dataset("pf_results")
     time_results = wf_rest.get_output_dataset("time_results")

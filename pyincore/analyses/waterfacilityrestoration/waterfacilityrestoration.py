@@ -59,9 +59,9 @@ class WaterFacilityRestoration(BaseAnalysis):
         else:
             damage_result = None
 
-        (inventory_restoration_map, pf_results, time_results, func_results) = self.waterfacility_restoration(
-            inventory_list, damage_result, mapping_set, restoration_key, end_time, time_interval, pf_interval,
-            discretized_days)
+        (inventory_restoration_map, pf_results, time_results, func_results, repair_times) = \
+            self.waterfacility_restoration(inventory_list, damage_result, mapping_set, restoration_key, end_time,
+                                           time_interval, pf_interval, discretized_days)
 
         self.set_result_csv_data("inventory_restoration_map", inventory_restoration_map,
                                  name="inventory_restoration_map_" + self.get_parameter("result_name"))
@@ -70,6 +70,8 @@ class WaterFacilityRestoration(BaseAnalysis):
         self.set_result_csv_data("time_results", pf_results, name="reptime_" + self.get_parameter("result_name"))
         self.set_result_csv_data("func_results", func_results,
                                  name=self.get_parameter("result_name") + "_discretized_restoration")
+        self.set_result_csv_data("repair_times", repair_times, name="full_reptime_" + self.get_parameter(
+            "result_name"))
 
         return True
 
@@ -119,6 +121,8 @@ class WaterFacilityRestoration(BaseAnalysis):
         time_results = []
         pf_results = []
 
+        repair_time = {}
+
         for mapping in mapping_set.mappings:
             # get restoration curves
             # if it's string:id; then need to fetch it from remote and cast to restorationcurveset object
@@ -147,6 +151,10 @@ class WaterFacilityRestoration(BaseAnalysis):
                     "percentage_of_functionality": p,
                     **new_dict
                 })
+
+            repair_time[restoration_curve_set.id] = \
+                restoration_curve_set.calculate_inverse_restoration_rates(time=0.99)
+
         # Compute discretized restoration
         func_result = []
 
@@ -169,7 +177,11 @@ class WaterFacilityRestoration(BaseAnalysis):
 
                 func_result.append({"guid": guid, **result_dict})
 
-        return inventory_restoration_map, pf_results, time_results, func_result
+        repair_times = []
+        for inventory in inventory_restoration_map:
+            repair_times.append({"guid": inventory["guid"], **repair_time[inventory["restoration_id"]]})
+
+        return inventory_restoration_map, pf_results, time_results, func_result, repair_times
 
     def get_spec(self):
         return {
@@ -262,6 +274,13 @@ class WaterFacilityRestoration(BaseAnalysis):
                     'parent_type': '',
                     'description': 'A csv file recording discretized functionality over time',
                     'type': 'incore:waterFacilityDiscretizedRestorationFunc'
+                },
+                {
+                    'id': 'repair_times',
+                    'parent_type': '',
+                    'description': 'A csv file recording repair time at full functionality recovery for each guid '
+                                   'and limit state.',
+                    'type': 'incore:waterFacilityRepairTime'
                 }
             ]
         }
