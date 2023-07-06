@@ -19,7 +19,6 @@ from pyincore.analyses.indp.dislocationutils import DislocationUtil
 from pyincore.analyses.indp.indpresults import INDPResults
 from pyincore.analyses.indp.indputil import INDPUtil
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
-import numpy as np
 
 
 class INDP(BaseAnalysis):
