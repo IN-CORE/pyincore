@@ -577,8 +577,8 @@ class INDPUtil:
         for node_fail_state, node_data, network_code in zip([wf_failure_state_df, epf_failure_state_df],
                                                             [water_nodes, power_nodes],
                                                             network_name.values()):
-            node_fail_state[[str(x) for x in sample_range]] = node_fail_state['failure'].str.split(',', expand=True)[
-                sample_range.start: sample_range.stop]
+            node_fail_state[[str(x) for x in sample_range]] = \
+                node_fail_state['failure'].str.split(',', expand=True).iloc[:, sample_range.start:sample_range.stop]
             node_fail_state = node_fail_state.drop(columns=['failure'])
             node_fail_state['name'] = 'nan'
             for index, row in node_data.iterrows():
@@ -590,7 +590,7 @@ class INDPUtil:
                     node_fail_state = node_fail_state.append(temp_dict, ignore_index=True)
             combined_node_failed_states = combined_node_failed_states.append(node_fail_state)
 
-        return combined_node_failed_states
+        return combined_node_failed_states.dropna(subset=["name"])
 
     @staticmethod
     def generate_intial_link_failure_state(pipeline_failure_state_df, water_arcs, power_arcs, sample_range):
@@ -610,14 +610,23 @@ class INDPUtil:
                 network_name["Power"]) + '))'
             powerline_failure_state_df.loc[powerline_failure_state_df['guid'] == row['guid'], 'name'] = arc_name
 
+        pipeline_failure_state_df[[str(x) for x in sample_range]] = \
+            pipeline_failure_state_df['failure'].str.split(',', expand=True).iloc[:,
+            sample_range.start:sample_range.stop]
+        pipeline_failure_state_df['name'] = 'nan'
+        pipeline_failure_state_df = pipeline_failure_state_df.drop(columns=['failure'])
         for index, row in water_arcs.iterrows():
             s_node = int(row['fromnode'])
             e_node = int(row['tonode'])
             arc_name = '((' + str(s_node) + ',' + str(network_name["Water"]) + '),(' + str(e_node) + ',' + str(
                 network_name["Water"]) + '))'
-            pipeline_failure_state_df.loc[pipeline_failure_state_df['guid'] == row['guid'], 'name'] = arc_name
+            if not pd.isna(row['guid']):
+                pipeline_failure_state_df.loc[pipeline_failure_state_df['guid'] == row['guid'], 'name'] = arc_name
+            else:
+                temp_dict = {**{'name': arc_name, 'guid': 'nan'}, **{str(x): 1 for x in sample_range}}
+                pipeline_failure_state_df = pipeline_failure_state_df.append(temp_dict, ignore_index=True)
 
-        combined_arc_failed_states = combined_arc_failed_states.append(powerline_failure_state_df,
-                                                                       pipeline_failure_state_df)
+        combined_arc_failed_states = combined_arc_failed_states.append(powerline_failure_state_df)
+        combined_arc_failed_states = combined_arc_failed_states.append(pipeline_failure_state_df)
 
-        return combined_arc_failed_states
+        return combined_arc_failed_states.dropna(subset=["name"])

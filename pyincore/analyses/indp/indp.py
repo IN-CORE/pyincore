@@ -142,14 +142,14 @@ class INDP(BaseAnalysis):
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
 
         # TODO logics to add from node to node to MCS
-        wf_failure_state_df = self.get_input_dataset("wf_failure_state").get_csv_reader()
-        pipeline_failure_state_df = self.get_input_dataset("pipeline_failure_state").get_csv_reader()
-        epf_failure_state_df = self.get_input_dataset("epf_failure_state").get_csv_reader()
+        wf_failure_state_df = self.get_input_dataset("wf_failure_state").get_dataframe_from_csv(low_memory=False)
+        pipeline_failure_state_df = self.get_input_dataset("pipeline_failure_state").get_dataframe_from_csv(low_memory=False)
+        epf_failure_state_df = self.get_input_dataset("epf_failure_state").get_dataframe_from_csv(low_memory=False)
 
         sample_range = self.get_parameter("sample_range")
         initial_node = INDPUtil.generate_intial_node_failure_state(wf_failure_state_df, epf_failure_state_df,
                                                                    water_nodes, power_nodes, sample_range)
-        initial_link = INDPUtil.generate_intial_node_failure_state(pipeline_failure_state_df,
+        initial_link = INDPUtil.generate_intial_link_failure_state(pipeline_failure_state_df,
                                                                    water_arcs, power_arcs, sample_range)
 
         pop_dislocation = self.get_input_dataset("pop_dislocation").get_dataframe_from_csv(low_memory=False)

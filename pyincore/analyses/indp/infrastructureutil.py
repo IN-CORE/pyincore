@@ -142,19 +142,15 @@ class InfrastructureUtil:
         None.
 
         """
-        next(initial_node, None)  # skip the headers
-        for row in initial_node:
-            raw_n = row[-1]
-            raw_n = raw_n.split(',')
+        for index, row in initial_node.iterrows():
+            raw_n = row["name"].split(",")
             n = (int(raw_n[0].strip(' )(')), int(raw_n[1].strip(' )(')))
             state = float(row[sample + 1])
             G.G.nodes[n]['data']['inf_data'].functionality = state
             G.G.nodes[n]['data']['inf_data'].repaired = state
 
-        next(initial_link, None)  # skip the headers
-        for row in initial_link:
-            raw_uv = row[-1]
-            raw_uv = raw_uv.split(',')
+        for index, row in initial_link.iterrows():
+            raw_uv = row["name"].split(",")
             u = (int(raw_uv[0].strip(' )(')), int(raw_uv[1].strip(' )(')))
             v = (int(raw_uv[2].strip(' )(')), int(raw_uv[3].strip(' )(')))
             state = float(row[sample + 1])
