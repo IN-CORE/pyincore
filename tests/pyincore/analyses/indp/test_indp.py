@@ -61,6 +61,7 @@ def run_with_base_class():
     wterfclty_mc.set_parameter("result_name", result_name + "_wf")  # name of csv file with results
     wterfclty_mc.run()
     wterfclty_sample_failure_state = wterfclty_mc.get_output_dataset("sample_failure_state")
+    wterfclty_sample_damage_states = wterfclty_mc.get_output_dataset("sample_damage_states")
 
     ###################################################
     # water facility repair time
@@ -127,6 +128,7 @@ def run_with_base_class():
     epf_mc.set_parameter("result_name", result_name + "_epf")  # name of csv file with results
     epf_mc.run()
     epf_sample_failure_state = epf_mc.get_output_dataset("sample_failure_state")
+    epf_sample_damage_states = epf_mc.get_output_dataset("sample_damage_states")
 
     ###################################################
     # pipeline repair rate damage
@@ -209,17 +211,28 @@ def run_with_base_class():
 
     indp_analysis.load_remote_input_dataset("power_network", "634d99f51f950c126bca46a9")
     indp_analysis.load_remote_input_dataset("water_network", "645d67675bc8b26ddf913565")
+
+    powerline_supply_demand_info = Dataset.from_file("data/powerline_supply_demand_info.csv",
+                                                     "incore:powerLineSupplyDemandInfo")
+    indp_analysis.set_input_dataset("powerline_supply_demand_info", powerline_supply_demand_info)
+
+    epf_supply_demand_info = Dataset.from_file("data/epf_supply_demand_info.csv", "incore:epfSupplyDemandInfo")
+    indp_analysis.set_input_dataset("epf_supply_demand_info", epf_supply_demand_info)
+
+    wf_supply_demand_info = Dataset.from_file("data/wf_supply_demand_info.csv", "incore:waterFacilitySupplyDemandInfo")
+    indp_analysis.set_input_dataset("wf_supply_demand_info", wf_supply_demand_info)
+
+    pipeline_supply_demand_info = Dataset.from_file("data/pipeline_supply_demand_info.csv",
+                                                    "incore:pipelineSupplyDemandInfo")
+    indp_analysis.set_input_dataset("pipeline_supply_demand_info", pipeline_supply_demand_info)
+
     indp_analysis.load_remote_input_dataset("interdep", "61c10104837ac508f9a178ef")
 
-    # wterfclty_sample_failure_state = Dataset.from_file("data/seaside_indp_wf_failure_state.csv",
-    #                                                    "incore:sampleFailureState")
     indp_analysis.set_input_dataset("wf_failure_state", wterfclty_sample_failure_state)
-    # pipeline_sample_failure_state = Dataset.from_file("data/seaside_indp_pipeline_failure_state.csv",
-    #                                                   "incore:sampleFailureState")
+    indp_analysis.set_input_dataset("wf_damage_state", wterfclty_sample_damage_states)
     indp_analysis.set_input_dataset("pipeline_failure_state", pipeline_sample_failure_state)
-    # epf_sample_failure_state = Dataset.from_file("data/seaside_indp_epf_failure_state.csv",
-    #                                              "incore:sampleFailureState")
     indp_analysis.set_input_dataset("epf_failure_state", epf_sample_failure_state)
+    indp_analysis.set_input_dataset("epf_damage_state", epf_sample_damage_states)
 
     # # optional inputs
     # indp_analysis.load_remote_input_dataset("bldgs2elec", "61c10219837ac508f9a17904")

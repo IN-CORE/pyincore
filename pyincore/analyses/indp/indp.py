@@ -128,23 +128,32 @@ class INDP(BaseAnalysis):
         epf_repair_cost['budget'] = epf_repair_cost['budget'].str.split(',')
         epf_repair_cost['repaircost'] = epf_repair_cost['repaircost'].str.split(',')
 
-        pipeline_restoration_time = self.get_input_dataset("pipeline_restoration_time").get_dataframe_from_csv(low_memory=False)
+        pipeline_restoration_time = self.get_input_dataset("pipeline_restoration_time").get_dataframe_from_csv(
+            low_memory=False)
         pipeline_repair_cost = self.get_input_dataset("pipeline_repair_cost").get_dataframe_from_csv(low_memory=False)
 
+        powerline_supply_demand_info = self.get_input_dataset("powerline_supply_demand_info").get_dataframe_from_csv(
+            low_memory=False)
+        epf_supply_demand_info = self.get_input_dataset("epf_supply_demand_info").get_dataframe_from_csv(
+            low_memory=False)
         power_network = NetworkDataset.from_dataset(self.get_input_dataset("power_network"))
-        power_arcs = power_network.links.get_dataframe_from_shapefile()
-        power_nodes = power_network.nodes.get_dataframe_from_shapefile()
+        power_arcs = power_network.links.get_dataframe_from_shapefile().merge(epf_supply_demand_info, on="guid")
+        power_nodes = power_network.nodes.get_dataframe_from_shapefile().merge(powerline_supply_demand_info, on="guid")
 
+        pipeline_supply_demand_info = self.get_input_dataset("pipeline_supply_demand_info").get_dataframe_from_csv(
+            low_memory=False)
+        wf_supply_demand_info = self.get_input_dataset("wf_supply_demand_info").get_dataframe_from_csv(low_memory=False)
         water_network = NetworkDataset.from_dataset(self.get_input_dataset("water_network"))
-        water_arcs = water_network.links.get_dataframe_from_shapefile()
-        water_nodes = water_network.nodes.get_dataframe_from_shapefile()
+        water_arcs = water_network.links.get_dataframe_from_shapefile().merge(pipeline_supply_demand_info, on="guid")
+        water_nodes = water_network.nodes.get_dataframe_from_shapefile().merge(wf_supply_demand_info, on="guid")
 
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
 
-        # TODO logics to add from node to node to MCS
         wf_failure_state_df = self.get_input_dataset("wf_failure_state").get_dataframe_from_csv(low_memory=False)
+        wf_damage_state_df = self.get_input_dataset("wf_damage_state").get_dataframe_from_csv(low_memory=False)
         pipeline_failure_state_df = self.get_input_dataset("pipeline_failure_state").get_dataframe_from_csv(low_memory=False)
         epf_failure_state_df = self.get_input_dataset("epf_failure_state").get_dataframe_from_csv(low_memory=False)
+        epf_damage_state_df = self.get_input_dataset("epf_damage_state").get_dataframe_from_csv(low_memory=False)
 
         sample_range = self.get_parameter("sample_range")
         initial_node = INDPUtil.generate_intial_node_failure_state(wf_failure_state_df, epf_failure_state_df,
@@ -198,14 +207,14 @@ class INDP(BaseAnalysis):
                             epf_repair_cost_sample['repaircost'].apply(lambda x: float(x[i]))
 
                         wf_restoration_time_sample = pd.DataFrame()
-                        wf_restoration_time = wf_restoration_time.merge(wf_failure_state_df, on="guid")
+                        wf_restoration_time = wf_restoration_time.merge(wf_damage_state_df, on="guid")
                         for index, row in wf_restoration_time.iterrows():
                             failure_state = row["failure"].split(",")[i].split("_")[1]  # DS_0, DS_1, DS_2
                             wf_restoration_time_sample.append({"guid": row["guid"],
                                                                "repairtime": row["PF_" + failure_state]})
 
                         epf_restoration_time_sample = pd.DataFrame()
-                        epf_restoration_time = epf_restoration_time.merge(epf_failure_state_df, on="guid")
+                        epf_restoration_time = epf_restoration_time.merge(epf_damage_state_df, on="guid")
                         for index, row in epf_restoration_time.iterrows():
                             failure_state = row["failure"].split(",")[i].split("_")[1]  # DS_0, DS_1, DS_2
                             epf_restoration_time_sample.append({"guid": row["guid"],
@@ -826,6 +835,30 @@ class INDP(BaseAnalysis):
                     'type': ['incore:waterNetwork'],
                 },
                 {
+                    'id': 'powerline_supply_demand_info',
+                    'required': True,
+                    'description': 'Supply and demand information for powerlines',
+                    'type': ['incore:powerLineSupplyDemandInfo'],
+                },
+                {
+                    'id': 'epf_supply_demand_info',
+                    'required': True,
+                    'description': 'Supply and demand information for epfs',
+                    'type': ['incore:epfSupplyDemandInfo'],
+                },
+                {
+                    'id': 'wf_supply_demand_info',
+                    'required': True,
+                    'description': 'Supply and demand information for water facilities',
+                    'type': ['incore:waterFacilitySupplyDemandInfo'],
+                },
+                {
+                    'id': 'pipeline_supply_demand_info',
+                    'required': True,
+                    'description': 'Supply and demand information for water pipelines',
+                    'type': ['incore:pipelineSupplyDemandInfo'],
+                },
+                {
                     "id": "interdep",
                     "required": True,
                     "description": "Interdep.csv",
@@ -838,6 +871,12 @@ class INDP(BaseAnalysis):
                     "type": "incore:sampleFailureState"
                 },
                 {
+                    "id": "wf_damage_state",
+                    "required": True,
+                    "description": "MCS damage state of water facilities",
+                    "type": "incore:sampleDamageState"
+                },
+                {
                     "id": "pipeline_failure_state",
                     "required": True,
                     "description": "failure state of pipeline from pipeline functionality",
@@ -848,6 +887,12 @@ class INDP(BaseAnalysis):
                     "required": True,
                     "description": "MCS failure state of electric power facilities",
                     "type": "incore:sampleFailureState"
+                },
+                {
+                    "id": "epf_damage_state",
+                    "required": True,
+                    "description": "MCS damage state of electric power facilities",
+                    "type": "incore:sampleDamageState"
                 },
                 {
                     "id": "pop_dislocation",
