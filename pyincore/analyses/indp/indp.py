@@ -206,21 +206,30 @@ class INDP(BaseAnalysis):
                         epf_repair_cost_sample["repaircost"] = \
                             epf_repair_cost_sample['repaircost'].apply(lambda x: float(x[i]))
 
+                        # logic to read repair time
                         wf_restoration_time_sample = pd.DataFrame()
                         wf_restoration_time = wf_restoration_time.merge(wf_damage_state_df, on="guid")
                         for index, row in wf_restoration_time.iterrows():
-                            failure_state = row["sample_damage_states"].split(",")[i].split("_")[1]  # DS_0, DS_1, DS_2
-                            wf_restoration_time_sample.append({"guid": row["guid"],
-                                                               "repairtime": row["PF_" + failure_state]},
-                                                              ignore_index=True)
+                            failure_state = int(row["sample_damage_states"].split(",")[i].split("_")[1])  # DS_0,1,2,3,4
+                            if failure_state == 0:
+                                repairtime = 0
+                            else:
+                                repairtime = row["PF_" + str(failure_state - 1)]
+                            wf_restoration_time_sample = wf_restoration_time_sample.append({"guid": row["guid"],
+                                                                                            "repairtime": repairtime},
+                                                                                           ignore_index=True)
 
                         epf_restoration_time_sample = pd.DataFrame()
                         epf_restoration_time = epf_restoration_time.merge(epf_damage_state_df, on="guid")
                         for index, row in epf_restoration_time.iterrows():
-                            failure_state = row["sample_damage_states"].split(",")[i].split("_")[1]  # DS_0, DS_1, DS_2
-                            epf_restoration_time_sample.append({"guid": row["guid"],
-                                                               "repairtime": row["PF_" + failure_state]},
-                                                               ignore_index=True)
+                            failure_state = int(row["sample_damage_states"].split(",")[i].split("_")[1])  # DS_0,1,2,3,4
+                            if failure_state == 0:
+                                repairtime = 0
+                            else:
+                                repairtime = row["PF_" + str(failure_state - 1)]
+                            epf_restoration_time_sample = epf_restoration_time_sample.append({"guid": row["guid"],
+                                                                                              "repairtime": repairtime},
+                                                                                             ignore_index=True)
 
                         water_nodes, water_arcs, power_nodes, power_arcs = \
                             INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
