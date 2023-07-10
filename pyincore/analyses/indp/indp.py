@@ -137,8 +137,8 @@ class INDP(BaseAnalysis):
         epf_supply_demand_info = self.get_input_dataset("epf_supply_demand_info").get_dataframe_from_csv(
             low_memory=False)
         power_network = NetworkDataset.from_dataset(self.get_input_dataset("power_network"))
-        power_arcs = power_network.links.get_dataframe_from_shapefile().merge(epf_supply_demand_info, on="guid")
-        power_nodes = power_network.nodes.get_dataframe_from_shapefile().merge(powerline_supply_demand_info, on="guid")
+        power_arcs = power_network.links.get_dataframe_from_shapefile().merge(powerline_supply_demand_info, on="guid")
+        power_nodes = power_network.nodes.get_dataframe_from_shapefile().merge(epf_supply_demand_info, on="guid")
 
         pipeline_supply_demand_info = self.get_input_dataset("pipeline_supply_demand_info").get_dataframe_from_csv(
             low_memory=False)
