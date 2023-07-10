@@ -12,6 +12,7 @@ from pyincore.analyses.pipelinefunctionality import PipelineFunctionality
 from pyincore.analyses.waterfacilityrestoration import WaterFacilityRestoration, WaterFacilityRestorationUtil
 from pyincore.dataservice import DataService
 
+
 def run_with_base_class():
     dev_client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     prod_client = IncoreClient()
@@ -109,42 +110,42 @@ def run_with_base_class():
     ###################################################
     # epf mcs
     ###################################################
-    epf_mc = MonteCarloFailureProbability(prod_client)
-    epf_mc.set_input_dataset("damage", epf_dmg_result)
-    epf_mc.set_parameter("num_cpu", num_cpu)
-    epf_mc.set_parameter("num_samples", sim_number)
-    epf_mc.set_parameter("damage_interval_keys", ["DS_0", "DS_1", "DS_2", "DS_3", "DS_4"])
-    epf_mc.set_parameter("failure_state_keys", ["DS_1", "DS_2", "DS_3", "DS_4"])
-    epf_mc.set_parameter("result_name", result_name + "_epf")  # name of csv file with results
-    epf_mc.run()
-    epf_sample_failure_state = epf_mc.get_output_dataset("sample_failure_state")
+    # epf_mc = MonteCarloFailureProbability(prod_client)
+    # epf_mc.set_input_dataset("damage", epf_dmg_result)
+    # epf_mc.set_parameter("num_cpu", num_cpu)
+    # epf_mc.set_parameter("num_samples", sim_number)
+    # epf_mc.set_parameter("damage_interval_keys", ["DS_0", "DS_1", "DS_2", "DS_3", "DS_4"])
+    # epf_mc.set_parameter("failure_state_keys", ["DS_1", "DS_2", "DS_3", "DS_4"])
+    # epf_mc.set_parameter("result_name", result_name + "_epf")  # name of csv file with results
+    # epf_mc.run()
+    # epf_sample_failure_state = epf_mc.get_output_dataset("sample_failure_state")
 
     ###################################################
     # pipeline repair rate damage
     ###################################################
-    pipeline_dmg = PipelineDamageRepairRate(prod_client)
-    fragility_service = FragilityService(prod_client)
-    pipeline_dmg.load_remote_input_dataset("pipeline", "60e72f9fd3c92a78c89636c7")
-    mapping_id = "5b47c227337d4a38464efea8"
-    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    pipeline_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    pipeline_dmg.set_parameter("hazard_type", hazard_type)
-    pipeline_dmg.set_parameter("fragility_key", 'pgv')
-    pipeline_dmg.set_parameter("num_cpu", num_cpu)
-    pipeline_dmg.set_parameter("hazard_id", hazard_id)
-    pipeline_dmg.set_parameter("result_name", result_name)
-    pipeline_dmg.run_analysis()
-    pipeline_dmg_result = pipeline_dmg.get_output_dataset("result")
+    # pipeline_dmg = PipelineDamageRepairRate(prod_client)
+    # fragility_service = FragilityService(prod_client)
+    # pipeline_dmg.load_remote_input_dataset("pipeline", "60e72f9fd3c92a78c89636c7")
+    # mapping_id = "5b47c227337d4a38464efea8"
+    # mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    # pipeline_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    # pipeline_dmg.set_parameter("hazard_type", hazard_type)
+    # pipeline_dmg.set_parameter("fragility_key", 'pgv')
+    # pipeline_dmg.set_parameter("num_cpu", num_cpu)
+    # pipeline_dmg.set_parameter("hazard_id", hazard_id)
+    # pipeline_dmg.set_parameter("result_name", result_name)
+    # pipeline_dmg.run_analysis()
+    # pipeline_dmg_result = pipeline_dmg.get_output_dataset("result")
 
     ###################################################
     # pipeline functionality
     ###################################################
-    pipeline_func = PipelineFunctionality(prod_client)
-    pipeline_func.set_input_dataset("pipeline_repair_rate_damage", pipeline_dmg_result)
-    pipeline_func.set_parameter("result_name", result_name + "_pipeline")
-    pipeline_func.set_parameter("num_samples", sim_number)
-    pipeline_func.run_analysis()
-    pipeline_sample_failure_state = pipeline_func.get_output_dataset("sample_failure_state")
+    # pipeline_func = PipelineFunctionality(prod_client)
+    # pipeline_func.set_input_dataset("pipeline_repair_rate_damage", pipeline_dmg_result)
+    # pipeline_func.set_parameter("result_name", result_name + "_pipeline")
+    # pipeline_func.set_parameter("num_samples", sim_number)
+    # pipeline_func.run_analysis()
+    # pipeline_sample_failure_state = pipeline_func.get_output_dataset("sample_failure_state")
 
     ###################################################
     # INDP

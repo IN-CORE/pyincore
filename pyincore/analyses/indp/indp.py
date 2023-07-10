@@ -10,6 +10,7 @@ import os
 import sys
 import time
 
+import pandas as pd
 import pyomo.environ as pyo
 from pyomo.opt import SolverFactory, TerminationCondition
 from pyomo.util.infeasible import log_infeasible_constraints
@@ -196,11 +197,25 @@ class INDP(BaseAnalysis):
                         epf_repair_cost_sample["repaircost"] = \
                             epf_repair_cost_sample['repaircost'].apply(lambda x: float(x[i]))
 
+                        wf_restoration_time_sample = pd.DataFrame()
+                        wf_restoration_time = wf_restoration_time.merge(wf_failure_state_df, on="guid")
+                        for index, row in wf_restoration_time.iterrows():
+                            failure_state = row["failure"].split(",")[i].split("_")[1]  # DS_0, DS_1, DS_2
+                            wf_restoration_time_sample.append({"guid": row["guid"],
+                                                               "repairtime": row["PF_" + failure_state]})
+
+                        epf_restoration_time_sample = pd.DataFrame()
+                        epf_restoration_time = epf_restoration_time.merge(epf_failure_state_df, on="guid")
+                        for index, row in epf_restoration_time.iterrows():
+                            failure_state = row["failure"].split(",")[i].split("_")[1]  # DS_0, DS_1, DS_2
+                            epf_restoration_time_sample.append({"guid": row["guid"],
+                                                               "repairtime": row["PF_" + failure_state]})
+
                         water_nodes, water_arcs, power_nodes, power_arcs = \
                             INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
-                                                                wf_restoration_time, wf_repair_cost_sample,
+                                                                wf_restoration_time_sample, wf_repair_cost_sample,
                                                                 pipeline_restoration_time, pipeline_repair_cost,
-                                                                epf_restoration_time, epf_repair_cost_sample)
+                                                                epf_restoration_time_sample, epf_repair_cost_sample)
 
                     print("Initializing network...")
                     params["N"] = INDPUtil.initialize_network(power_nodes, power_arcs, water_nodes, water_arcs,
@@ -771,7 +786,7 @@ class INDP(BaseAnalysis):
                     "required": True,
                     'description': 'recording repair time at certain functionality recovery for each class '
                                    'and limit state.',
-                    'type': 'incore:restorationTime'
+                    'type': 'incore:waterFacilityRepairTime'
                 },
                 {
                     "id": "epf_repair_cost",
@@ -784,7 +799,7 @@ class INDP(BaseAnalysis):
                     "required": True,
                     'description': 'recording repair time at certain functionality recovery for each class '
                                    'and limit state.',
-                    'type': 'incore:restorationTime'
+                    'type': 'incore:epfRepairTime'
                 },
                 {
                     "id": "pipeline_repair_cost",

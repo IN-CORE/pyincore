@@ -39,9 +39,9 @@ class INDPUtil:
         return out_dir_suffix_res
 
     @staticmethod
-    def time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes, wf_restoration_time,
+    def time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes, wf_restoration_time_sample,
                                    wf_repair_cost_sample, pipeline_restoration_time, pipeline_repair_cost,
-                                   epf_restoration_time, epf_repair_cost_sample):
+                                   epf_restoration_time_sample, epf_repair_cost_sample):
         """
         This module calculates the repair time for nodes and arcs for the current scenario based on their damage
         state, and writes them to the input files of INDP. Currently, it is only compatible with NIST testbeds.
@@ -51,11 +51,11 @@ class INDPUtil:
             power_nodes (dataframe):
             water_arcs (dataframe):
             water_nodes (dataframe):
-            wf_restoration_time (dataframe):
+            wf_restoration_time_sample (dataframe):
             wf_repair_cost_sample (dataframe):
             pipeline_restoration_time (dataframe):
             pipeline_repair_cost (dataframe):
-            epf_restoration_time (dataframe):
+            epf_restoration_time_sample (dataframe):
             epf_repair_cost_sample (dataframe):
 
         Returns:
@@ -66,7 +66,7 @@ class INDPUtil:
 
         """
         _water_nodes = water_nodes.merge(wf_repair_cost_sample, on='guid', how='left').merge(
-            wf_restoration_time, on='guid', how='left')
+            wf_restoration_time_sample, on='guid', how='left')
         water_nodes['p_time'] = _water_nodes['repairtime']
         water_nodes['p_time'].fillna(0, inplace=True)
         water_nodes['p_budget'] = _water_nodes['budget']
@@ -75,7 +75,7 @@ class INDPUtil:
         water_nodes['q'].fillna(0, inplace=True)
 
         _power_nodes = power_nodes.merge(epf_repair_cost_sample, on='guid', how='left').merge(
-            epf_restoration_time, on='guid', how='left')
+            epf_restoration_time_sample, on='guid', how='left')
         power_nodes['p_time'] = _power_nodes['repairtime']
         power_nodes['p_time'].fillna(0, inplace=True)
         power_nodes['p_budget'] = _power_nodes['budget']
