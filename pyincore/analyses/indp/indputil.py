@@ -85,7 +85,7 @@ class INDPUtil:
 
         _water_arcs = water_arcs.merge(pipeline_repair_cost, on='guid', how='left').merge(
             pipeline_restoration_time, on='guid', how='left')
-        water_arcs['h_time'] = _water_arcs["repairtime"]
+        water_arcs['h_time'] = _water_arcs["repair_time"]
         water_arcs['h_time'].fillna(0, inplace=True)
         water_arcs['h_budget'] = _water_arcs['budget'].astype(float)
         water_arcs['h_budget'].fillna(0, inplace=True)

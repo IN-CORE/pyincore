@@ -209,8 +209,10 @@ def run_with_base_class():
     pipeline_repair_cost = Dataset.from_file("data/seaside_pipeline_repair_cost.csv", "incore:pipelineRepairCost")
     indp_analysis.set_input_dataset("pipeline_repair_cost", pipeline_repair_cost)
 
-    indp_analysis.load_remote_input_dataset("power_network", "634d99f51f950c126bca46a9")
-    indp_analysis.load_remote_input_dataset("water_network", "645d67675bc8b26ddf913565")
+    # indp_analysis.load_remote_input_dataset("power_network", "634d99f51f950c126bca46a9")
+    indp_analysis.load_remote_input_dataset("power_network", "64ac73694e01de3af8fd8f2b")
+    # indp_analysis.load_remote_input_dataset("water_network", "645d67675bc8b26ddf913565")
+    indp_analysis.load_remote_input_dataset("water_network", "64ac75014e01de3af8fd99eb")
 
     powerline_supply_demand_info = Dataset.from_file("data/powerline_supply_demand_info.csv",
                                                      "incore:powerLineSupplyDemandInfo")
