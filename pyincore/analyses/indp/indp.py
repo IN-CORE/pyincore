@@ -145,7 +145,10 @@ class INDP(BaseAnalysis):
         wf_supply_demand_info = self.get_input_dataset("wf_supply_demand_info").get_dataframe_from_csv(low_memory=False)
         water_network = NetworkDataset.from_dataset(self.get_input_dataset("water_network"))
         water_arcs = water_network.links.get_dataframe_from_shapefile().merge(pipeline_supply_demand_info, on="guid")
-        water_nodes = water_network.nodes.get_dataframe_from_shapefile().merge(wf_supply_demand_info, on="guid")
+        # add fiction nodes in wf_supply_demand_info that's why use right join
+        water_nodes = water_network.nodes.get_dataframe_from_shapefile()
+        water_nodes = INDPUtil.generate_distribution_nodes(water_arcs, water_nodes)
+        water_nodes = water_nodes.merge(wf_supply_demand_info, on="guid", how="right")
 
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
 

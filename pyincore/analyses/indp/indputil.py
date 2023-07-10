@@ -630,3 +630,13 @@ class INDPUtil:
         combined_arc_failed_states = combined_arc_failed_states.append(pipeline_failure_state_df)
 
         return combined_arc_failed_states.dropna(subset=["name"])
+
+    @staticmethod
+    def generate_distribution_nodes(water_arc_df, water_nodes_df):
+        dist_nodes = list(set().union(water_arc_df['tonode'].unique(), water_arc_df['fromnode'].unique()))
+        for node in dist_nodes:
+            if node not in water_nodes_df["nodenwid"]:
+                water_nodes_df = water_nodes_df.append({'utilfcltyc': 'Distribution Node',
+                                                        'nodenwid': node},
+                                                       ignore_index=True)
+        return water_nodes_df
