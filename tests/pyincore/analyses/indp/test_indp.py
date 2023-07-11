@@ -1,11 +1,14 @@
 import pandas as pd
 
 from pyincore import IncoreClient, Dataset, RestorationService, MappingSet, FragilityService, NetworkDataset
+from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore.analyses.epfrepaircost import EpfRepairCost
 from pyincore.analyses.epfrestoration import EpfRestoration
+from pyincore.analyses.housingunitallocation import HousingUnitAllocation
 from pyincore.analyses.indp import INDP
 import pyincore.globals as pyglobals
 from pyincore.analyses.pipelinerepaircost import PipelineRepairCost
+from pyincore.analyses.populationdislocation import PopulationDislocation
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
 from pyincore.analyses.epfdamage import EpfDamage
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
@@ -30,6 +33,9 @@ def run_with_base_class():
     # sample_range = range(0, sim_number)
     sample_range = range(0, 1)
     result_name = "seaside_indp"
+
+    bldg_inv_id = "613ba5ef5d3b1d6461e8c415"
+    seed = 1111
 
     power_network_dataset = Dataset.from_data_service("64ac73694e01de3af8fd8f2b", data_service=dev_datasvc)
     power_network = NetworkDataset.from_dataset(power_network_dataset)
@@ -218,6 +224,50 @@ def run_with_base_class():
     pipeline_repair_cost_result = pipeline_repair_cost.get_output_dataset("result")
 
     ###################################################
+    # building damage
+    ###################################################
+    bldg_dmg = BuildingDamage(prod_client)
+    fragility_service = FragilityService(prod_client)
+    bldg_dmg.load_remote_input_dataset("buildings", bldg_inv_id)
+    mapping_id = "5d2789dbb9219c3c553c7977"  # 4 DS
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bldg_dmg.set_parameter("hazard_type", hazard_type)
+    bldg_dmg.set_parameter("num_cpu", 4)
+    bldg_dmg.set_parameter("hazard_id", hazard_id)
+    bldg_dmg.set_parameter("result_name", result_name + "_bldg_dmg")
+    bldg_dmg.run_analysis()
+    building_dmg_result = bldg_dmg.get_output_dataset("ds_result")
+
+    ###################################################
+    # housing unit allocation
+    ###################################################
+    hua = HousingUnitAllocation(prod_client)
+    housing_unit_inv_id = "5d543087b9219c0689b98234"
+    address_point_inv_id = "5d542fefb9219c0689b981fb"
+    hua.load_remote_input_dataset("housing_unit_inventory", housing_unit_inv_id)
+    hua.load_remote_input_dataset("address_point_inventory", address_point_inv_id)
+    hua.load_remote_input_dataset("buildings", bldg_inv_id)
+    hua.set_parameter("result_name", result_name + "_hua")
+    hua.set_parameter("seed", seed)
+    hua.set_parameter("iterations", 1)
+    hua.run_analysis()
+    hua_result = hua.get_output_dataset("result")
+
+    ###################################################
+    # population dislocation
+    ###################################################
+    pop_dis = PopulationDislocation(prod_client)
+    pop_dis.set_input_dataset("building_dmg", building_dmg_result)
+    pop_dis.set_input_dataset("housing_unit_allocation", hua_result)
+    pop_dis.load_remote_input_dataset("block_group_data", "5d542bd8b9219c0689b90408")
+    pop_dis.load_remote_input_dataset("value_loss_param", "60354810e379f22e16560dbd")
+    pop_dis.set_parameter("result_name", result_name + "_popdislocation")
+    pop_dis.set_parameter("seed", seed)
+    pop_dis.run_analysis()
+    pop_dislocation_result = pop_dis.get_output_dataset("result")
+
+    ###################################################
     # INDP
     ###################################################
     indp_analysis = INDP(dev_client)
@@ -268,14 +318,11 @@ def run_with_base_class():
     indp_analysis.set_input_dataset("pipeline_failure_state", pipeline_sample_failure_state)
     indp_analysis.set_input_dataset("epf_failure_state", epf_sample_failure_state)
     indp_analysis.set_input_dataset("epf_damage_state", epf_sample_damage_states)
+    indp_analysis.set_input_dataset("pop_dislocation", pop_dislocation_result)
 
     # # optional inputs
     # indp_analysis.load_remote_input_dataset("bldgs2elec", "61c10219837ac508f9a17904")
     # indp_analysis.load_remote_input_dataset("bldgs2wter", "c102b0837ac508f9a1790a")
-
-    # TODO this can be chained with population dislocation model
-    pop_dislocation = Dataset.from_file("data/PopDis_results.csv", "incore:popDislocation")
-    indp_analysis.set_input_dataset("pop_dislocation", pop_dislocation)
 
     # Run Analysis
     indp_analysis.run_analysis()
