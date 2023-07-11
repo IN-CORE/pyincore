@@ -253,7 +253,7 @@ class Dataset:
             return 0.0
         return numpy.asscalar(data[row, col])
 
-    def get_csv_dict_reader(self):
+    def get_csv_reader(self):
         """Utility method for reading different standard file formats: csv reader.
 
          Returns:
@@ -272,7 +272,7 @@ class Dataset:
 
         return self.readers["csv"]
 
-    def get_csv_reader(self):
+    def get_csv_reader_std(self):
         """Utility method for reading different standard file formats: csv reader.
 
          Returns:

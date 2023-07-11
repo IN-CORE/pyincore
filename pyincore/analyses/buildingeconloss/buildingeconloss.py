@@ -57,7 +57,7 @@ class BuildingEconLoss(BaseAnalysis):
                 prop_select.append([guid, year_built, occ_type, appr_bldg])
 
             bldg_set_df = pd.DataFrame(prop_select, columns=["guid", "year_built", "occ_type", "appr_bldg"])
-            bldg_dmg_set = self.get_input_dataset("building_mean_dmg").get_csv_dict_reader()
+            bldg_dmg_set = self.get_input_dataset("building_mean_dmg").get_csv_reader()
             bldg_dmg_df = pd.DataFrame(list(bldg_dmg_set))
 
             dmg_set_df = pd.merge(bldg_set_df, bldg_dmg_df, how="outer", left_on="guid", right_on="guid",

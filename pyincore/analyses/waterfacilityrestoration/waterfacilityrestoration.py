@@ -54,7 +54,7 @@ class WaterFacilityRestoration(BaseAnalysis):
             discretized_days = [1, 3, 7, 30, 90]
 
         if self.get_input_dataset("damage") is not None:
-            damage = self.get_input_dataset("damage").get_csv_dict_reader()
+            damage = self.get_input_dataset("damage").get_csv_reader()
             damage_result = AnalysisUtil.get_csv_table_rows(damage, ignore_first_row=False)
         else:
             damage_result = None

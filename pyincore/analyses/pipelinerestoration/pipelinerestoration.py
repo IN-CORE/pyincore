@@ -93,7 +93,7 @@ class PipelineRestoration(BaseAnalysis):
 
         pipelines_df = self.get_input_dataset("pipeline").get_dataframe_from_shapefile()
 
-        pipeline_dmg = self.get_input_dataset("pipeline_damage").get_csv_dict_reader()
+        pipeline_dmg = self.get_input_dataset("pipeline_damage").get_csv_reader()
         pipelines_dmg_df = pd.DataFrame(list(pipeline_dmg))
 
         damage_result = pipelines_dmg_df.merge(pipelines_df, on='guid')
