@@ -74,9 +74,9 @@ class INDP(BaseAnalysis):
             time_resource = True
 
         # save model or not; default to False
-        save_mode = self.get_parameter("save_model")
-        if save_mode is None:
-            save_mode = False
+        save_model = self.get_parameter("save_model")
+        if save_model is None:
+            save_model = False
 
         solver_engine = self.get_parameter("solver_engine")
         if solver_engine is None:
@@ -87,14 +87,14 @@ class INDP(BaseAnalysis):
                                                                      misc={'DYNAMIC_PARAMS': dynamic_params,
                                                                            'EXTRA_COMMODITY': extra_commodity,
                                                                            'TIME_RESOURCE': time_resource},
-                                                                     save_mode=save_mode,
+                                                                     save_model=save_model,
                                                                      solver_engine=solver_engine)
 
         self.set_result_csv_data("action", action_result, name="actions.csv")
         self.set_result_csv_data("cost", cost_result, name="costs.csv")
         self.set_result_csv_data("runtime", runtime_result, name="run_time.csv")
 
-    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None, save_mode=False,
+    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None, save_model=False,
                    solver_engine="glpk"):
         """
         This function runs restoration analysis based on INDP or td-INDP for different numbers of resources.
@@ -109,21 +109,16 @@ class INDP(BaseAnalysis):
             method (str): Algorithm type.
             t_steps (int): Number of time steps of the analysis.
             misc (dict): A dictionary that contains miscellaneous data needed for the analysis
-            save_mode (bool): Flag indicates if the model should be saved or not
+            save_model (bool): Flag indicates if the model should be saved or not
             solver_engine (str): glpk, ipopt, gurobi
         Returns:
 
         """
 
         # input files
-        wf_restoration_time = self.get_input_dataset("wf_restoration_time").get_dataframe_from_csv(low_memory=False)
-
         wf_repair_cost = self.get_input_dataset("wf_repair_cost").get_dataframe_from_csv(low_memory=False)
         wf_repair_cost['budget'] = wf_repair_cost['budget'].str.split(',')
         wf_repair_cost['repaircost'] = wf_repair_cost['repaircost'].str.split(',')
-
-        epf_restoration_time = self.get_input_dataset("epf_restoration_time").get_dataframe_from_csv(low_memory=False)
-
         epf_repair_cost = self.get_input_dataset("epf_repair_cost").get_dataframe_from_csv(low_memory=False)
         epf_repair_cost['budget'] = epf_repair_cost['budget'].str.split(',')
         epf_repair_cost['repaircost'] = epf_repair_cost['repaircost'].str.split(',')
@@ -168,6 +163,12 @@ class INDP(BaseAnalysis):
                                                                    water_arcs, power_arcs, sample_range)
 
         pop_dislocation = self.get_input_dataset("pop_dislocation").get_dataframe_from_csv(low_memory=False)
+
+        wf_restoration_time = self.get_input_dataset("wf_restoration_time").get_dataframe_from_csv(low_memory=False)
+        wf_restoration_time = wf_restoration_time.merge(wf_damage_state_df, on="guid")
+
+        epf_restoration_time = self.get_input_dataset("epf_restoration_time").get_dataframe_from_csv(low_memory=False)
+        epf_restoration_time = epf_restoration_time.merge(epf_damage_state_df, on="guid")
 
         # results
         action_result = []
@@ -214,7 +215,6 @@ class INDP(BaseAnalysis):
 
                         # logic to read repair time
                         wf_restoration_time_sample = pd.DataFrame()
-                        wf_restoration_time = wf_restoration_time.merge(wf_damage_state_df, on="guid")
                         for index, row in wf_restoration_time.iterrows():
                             failure_state = int(row["sample_damage_states"].split(",")[i].split("_")[1])  # DS_0,1,2,3,4
                             if failure_state == 0:
@@ -226,7 +226,6 @@ class INDP(BaseAnalysis):
                                                                                            ignore_index=True)
 
                         epf_restoration_time_sample = pd.DataFrame()
-                        epf_restoration_time = epf_restoration_time.merge(epf_damage_state_df, on="guid")
                         for index, row in epf_restoration_time.iterrows():
                             failure_state = int(row["sample_damage_states"].split(",")[i].split("_")[1])  # DS_0,1,2,3,4
                             if failure_state == 0:
@@ -262,7 +261,7 @@ class INDP(BaseAnalysis):
 
                     if params["ALGORITHM"] == "INDP":
                         indp_results = self.run_indp(params, layers=params['L'], controlled_layers=params['L'],
-                                                     T=params["T"], save_model=save_mode, print_cmd_line=False,
+                                                     T=params["T"], save_model=save_model, print_cmd_line=False,
                                                      co_location=False)
                         for t in indp_results.results:
                             actions = indp_results[t]['actions']

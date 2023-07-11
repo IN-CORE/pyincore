@@ -24,14 +24,12 @@ def run_with_base_class():
     dev_client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     prod_client = IncoreClient()
     dev_datasvc = DataService(dev_client)
-    prod_datasvc = DataService(prod_client)
 
     hazard_type = "earthquake"
     hazard_id = "5dfa3e36b9219c934b64c231"  # 1000 yr eq
     num_cpu = 8
     sim_number = 10
-    # sample_range = range(0, sim_number)
-    sample_range = range(0, 1)
+    sample_range = range(0, sim_number)
     result_name = "seaside_indp"
 
     bldg_inv_id = "613ba5ef5d3b1d6461e8c415"
