@@ -112,11 +112,12 @@ class WaterFacilityRestoration(BaseAnalysis):
 
             inventory_restoration_map.append({"guid": inventory['properties']['guid'],
                                               "restoration_id": restoration_set_id})
-            restoration_curve_set = restoration_sets[inventory["id"]]
+            if inventory["id"] in restoration_sets.keys():
+                restoration_curve_set = restoration_sets[inventory["id"]]
 
-            # For each facility, get the discretized restoration from the continuous curve
-            discretized_restoration = AnalysisUtil.get_discretized_restoration(restoration_curve_set, discretized_days)
-            inventory_class_map[inventory['properties']['guid']] = discretized_restoration
+                # For each facility, get the discretized restoration from the continuous curve
+                discretized_restoration = AnalysisUtil.get_discretized_restoration(restoration_curve_set, discretized_days)
+                inventory_class_map[inventory['properties']['guid']] = discretized_restoration
 
         time_results = []
         pf_results = []
@@ -163,23 +164,25 @@ class WaterFacilityRestoration(BaseAnalysis):
                 guid = dmg['guid']
 
                 # Dictionary of discretized restoration functionality
-                rest_dict = inventory_class_map[guid]
+                if guid in inventory_class_map.keys():
+                    rest_dict = inventory_class_map[guid]
 
-                ds_0, ds_1, ds_2, ds_3, ds_4 = dmg['DS_0'], dmg['DS_1'], dmg['DS_2'], dmg['DS_3'], dmg['DS_4']
-                result_dict = {}
-                for time in discretized_days:
-                    key = "day" + str(time)
-                    # Only compute if we have damage
-                    if ds_0:
-                        functionality = (rest_dict[key][0] * float(ds_0) + rest_dict[key][1] * float(ds_1) + rest_dict[
-                            key][2] * float(ds_2) + rest_dict[key][3] * float(ds_3) + rest_dict[key][4] * float(ds_4))
-                        result_dict.update({str(key): functionality})
+                    ds_0, ds_1, ds_2, ds_3, ds_4 = dmg['DS_0'], dmg['DS_1'], dmg['DS_2'], dmg['DS_3'], dmg['DS_4']
+                    result_dict = {}
+                    for time in discretized_days:
+                        key = "day" + str(time)
+                        # Only compute if we have damage
+                        if ds_0:
+                            functionality = (rest_dict[key][0] * float(ds_0) + rest_dict[key][1] * float(ds_1) + rest_dict[
+                                key][2] * float(ds_2) + rest_dict[key][3] * float(ds_3) + rest_dict[key][4] * float(ds_4))
+                            result_dict.update({str(key): functionality})
 
-                func_result.append({"guid": guid, **result_dict})
+                    func_result.append({"guid": guid, **result_dict})
 
         repair_times = []
         for inventory in inventory_restoration_map:
-            repair_times.append({"guid": inventory["guid"], **repair_time[inventory["restoration_id"]]})
+            if inventory["restoration_id"] is not None:
+                repair_times.append({"guid": inventory["guid"], **repair_time[inventory["restoration_id"]]})
 
         return inventory_restoration_map, pf_results, time_results, func_result, repair_times
 

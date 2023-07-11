@@ -31,6 +31,7 @@ class EpfRepairCost(BaseAnalysis):
         # join damage state, replacement cost, with original inventory
         epf_df = epf_df.merge(sample_damage_states_df, on="guid")
         epf_df = epf_df.merge(replacement_cost, on="guid")
+        epf_df = epf_df.dropna(subset=["sample_damage_states"])
         epf_set = epf_df.to_dict(orient="records")
 
         user_defined_cpu = 1

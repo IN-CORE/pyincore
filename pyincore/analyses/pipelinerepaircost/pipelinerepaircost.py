@@ -31,6 +31,7 @@ class PipelineRepairCost(BaseAnalysis):
         # join damage, replacement cost, with original inventory
         pipeline_df = pipeline_df.merge(pipeline_dmg_df, on="guid")
         pipeline_df = pipeline_df.merge(replacement_cost, on="guid")
+        pipeline_df = pipeline_df.dropna()
         pipeline_set = pipeline_df.to_dict(orient="records")
 
         user_defined_cpu = 1

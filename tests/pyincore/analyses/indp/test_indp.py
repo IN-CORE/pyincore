@@ -1,16 +1,19 @@
 import pandas as pd
 
-from pyincore import IncoreClient, Dataset, RestorationService, MappingSet, FragilityService
+from pyincore import IncoreClient, Dataset, RestorationService, MappingSet, FragilityService, NetworkDataset
+from pyincore.analyses.epfrepaircost import EpfRepairCost
 from pyincore.analyses.epfrestoration import EpfRestoration
 from pyincore.analyses.indp import INDP
 import pyincore.globals as pyglobals
+from pyincore.analyses.pipelinerepaircost import PipelineRepairCost
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
 from pyincore.analyses.epfdamage import EpfDamage
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
 from pyincore.analyses.montecarlofailureprobability import MonteCarloFailureProbability
 from pyincore.analyses.pipelinefunctionality import PipelineFunctionality
 from pyincore.analyses.pipelinerestoration import PipelineRestoration
-from pyincore.analyses.waterfacilityrestoration import WaterFacilityRestoration, WaterFacilityRestorationUtil
+from pyincore.analyses.waterfacilityrepaircost import WaterFacilityRepairCost
+from pyincore.analyses.waterfacilityrestoration import WaterFacilityRestoration
 from pyincore.dataservice import DataService
 
 
@@ -28,9 +31,13 @@ def run_with_base_class():
     sample_range = range(0, 1)
     result_name = "seaside_indp"
 
-    water_facilities = Dataset.from_file("data/RefactoredWaterNodes.shp", "ergo:waterFacilityTopo")
-    epfs = Dataset.from_file("data/RefactoredPowerNodes.shp", "ergo:epf")
-    pipeline = Dataset.from_file("data/RefactoredWaterArcs.shp", "ergo:buriedPipelineTopology")
+    power_network_dataset = Dataset.from_data_service("64ac73694e01de3af8fd8f2b", data_service=dev_datasvc)
+    power_network = NetworkDataset.from_dataset(power_network_dataset)
+    water_network_dataset = Dataset.from_data_service("64ad6abb4e01de3af8fe5201", data_service=dev_datasvc)
+    water_network = NetworkDataset.from_dataset(water_network_dataset)
+    water_facilities = water_network.nodes
+    epfs = power_network.nodes
+    pipeline = water_network.links
 
     ###################################################
     # water facility damage
@@ -82,6 +89,19 @@ def run_with_base_class():
     wf_restoration_time = wterfclty_rest.get_output_dataset("repair_times")
 
     ###################################################
+    # water facility repair cost
+    ###################################################
+    wf_repair_cost = WaterFacilityRepairCost(prod_client)
+    wf_repair_cost.set_input_dataset("water_facilities", water_facilities)
+    wf_repair_cost.load_remote_input_dataset("replacement_cost", "64833bcdd3f39a26a0c8b147")
+    wf_repair_cost.set_input_dataset("sample_damage_states", wterfclty_sample_damage_states)
+    wf_repair_cost.load_remote_input_dataset("wf_dmg_ratios", "647e423d7ae18139d9758607")
+    wf_repair_cost.set_parameter("result_name", result_name + "_wf_repair_cost")
+    wf_repair_cost.set_parameter("num_cpu", 4)
+    wf_repair_cost.run_analysis()
+    wf_repair_cost_result = wf_repair_cost.get_output_dataset("result")
+
+    ###################################################
     # epf damage
     ###################################################
     epf_dmg = EpfDamage(prod_client)
@@ -131,6 +151,19 @@ def run_with_base_class():
     epf_sample_damage_states = epf_mc.get_output_dataset("sample_damage_states")
 
     ###################################################
+    # epf repair cost
+    ###################################################
+    epf_repair_cost = EpfRepairCost(prod_client)
+    epf_repair_cost.set_input_dataset("epfs", epfs)
+    epf_repair_cost.load_remote_input_dataset("replacement_cost", "647dff5b4dd25160127ca192")
+    epf_repair_cost.set_input_dataset("sample_damage_states", epf_sample_damage_states)
+    epf_repair_cost.load_remote_input_dataset("epf_dmg_ratios", "6483354b41181d20004efbd7")
+    epf_repair_cost.set_parameter("result_name", result_name + "_epf_repair_cost")
+    epf_repair_cost.set_parameter("num_cpu", 4)
+    epf_repair_cost.run_analysis()
+    epf_repair_cost_result = epf_repair_cost.get_output_dataset("result")
+
+    ###################################################
     # pipeline repair rate damage
     ###################################################
     pipeline_dmg = PipelineDamageRepairRate(prod_client)
@@ -172,6 +205,19 @@ def run_with_base_class():
     pipeline_restoration_time = pipeline_rest.get_output_dataset("pipeline_restoration")
 
     ###################################################
+    # pipeline repair cost
+    ###################################################
+    pipeline_repair_cost = PipelineRepairCost(prod_client)
+    pipeline_repair_cost.set_input_dataset("pipeline", pipeline)
+    pipeline_repair_cost.load_remote_input_dataset("replacement_cost", "6480a2787ae18139d975e919")
+    pipeline_repair_cost.set_input_dataset("pipeline_dmg", pipeline_dmg_result)
+    pipeline_repair_cost.load_remote_input_dataset("pipeline_dmg_ratios", "6480a2d44dd25160127d2fcc")
+    pipeline_repair_cost.set_parameter("result_name", result_name + "_pipeline_repair_cost")
+    pipeline_repair_cost.set_parameter("num_cpu", 4)
+    pipeline_repair_cost.run_analysis()
+    pipeline_repair_cost_result = pipeline_repair_cost.get_output_dataset("result")
+
+    ###################################################
     # INDP
     ###################################################
     indp_analysis = INDP(dev_client)
@@ -195,24 +241,13 @@ def run_with_base_class():
     indp_analysis.set_parameter("solver_engine", "ipopt")  # recommended
 
     indp_analysis.set_input_dataset("wf_restoration_time", wf_restoration_time)
-
-    wf_repair_cost = Dataset.from_file("data/seaside_wf_repair_cost.csv", "incore:repairCost")
-    indp_analysis.set_input_dataset("wf_repair_cost", wf_repair_cost)
-
+    indp_analysis.set_input_dataset("wf_repair_cost", wf_repair_cost_result)
     indp_analysis.set_input_dataset("epf_restoration_time", epf_restoration_time)
-
-    epf_repair_cost = Dataset.from_file("data/seaside_epf_repair_cost.csv", "incore:repairCost")
-    indp_analysis.set_input_dataset("epf_repair_cost", epf_repair_cost)
-
+    indp_analysis.set_input_dataset("epf_repair_cost", epf_repair_cost_result)
     indp_analysis.set_input_dataset("pipeline_restoration_time", pipeline_restoration_time)
-
-    pipeline_repair_cost = Dataset.from_file("data/seaside_pipeline_repair_cost.csv", "incore:pipelineRepairCost")
-    indp_analysis.set_input_dataset("pipeline_repair_cost", pipeline_repair_cost)
-
-    # indp_analysis.load_remote_input_dataset("power_network", "634d99f51f950c126bca46a9")
-    indp_analysis.load_remote_input_dataset("power_network", "64ac73694e01de3af8fd8f2b")
-    # indp_analysis.load_remote_input_dataset("water_network", "645d67675bc8b26ddf913565")
-    indp_analysis.load_remote_input_dataset("water_network", "64ac75014e01de3af8fd99eb")
+    indp_analysis.set_input_dataset("pipeline_repair_cost", pipeline_repair_cost_result)
+    indp_analysis.set_input_dataset("power_network", power_network_dataset)
+    indp_analysis.set_input_dataset("water_network", water_network_dataset)  # with distribution noes
 
     powerline_supply_demand_info = Dataset.from_file("data/powerline_supply_demand_info.csv",
                                                      "incore:powerLineSupplyDemandInfo")
@@ -227,9 +262,7 @@ def run_with_base_class():
     pipeline_supply_demand_info = Dataset.from_file("data/pipeline_supply_demand_info.csv",
                                                     "incore:pipelineSupplyDemandInfo")
     indp_analysis.set_input_dataset("pipeline_supply_demand_info", pipeline_supply_demand_info)
-
     indp_analysis.load_remote_input_dataset("interdep", "61c10104837ac508f9a178ef")
-
     indp_analysis.set_input_dataset("wf_failure_state", wterfclty_sample_failure_state)
     indp_analysis.set_input_dataset("wf_damage_state", wterfclty_sample_damage_states)
     indp_analysis.set_input_dataset("pipeline_failure_state", pipeline_sample_failure_state)

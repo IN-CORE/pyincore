@@ -145,18 +145,21 @@ class INDP(BaseAnalysis):
         wf_supply_demand_info = self.get_input_dataset("wf_supply_demand_info").get_dataframe_from_csv(low_memory=False)
         water_network = NetworkDataset.from_dataset(self.get_input_dataset("water_network"))
         water_arcs = water_network.links.get_dataframe_from_shapefile().merge(pipeline_supply_demand_info, on="guid")
-        # add fiction nodes in wf_supply_demand_info that's why use right join
         water_nodes = water_network.nodes.get_dataframe_from_shapefile()
-        water_nodes = INDPUtil.generate_distribution_nodes(water_arcs, water_nodes)
-        water_nodes = water_nodes.merge(wf_supply_demand_info, on="guid", how="right")
+        water_nodes = water_nodes.merge(wf_supply_demand_info, on="guid")
 
         interdep = self.get_input_dataset("interdep").get_dataframe_from_csv(low_memory=False)
 
-        wf_failure_state_df = self.get_input_dataset("wf_failure_state").get_dataframe_from_csv(low_memory=False)
-        wf_damage_state_df = self.get_input_dataset("wf_damage_state").get_dataframe_from_csv(low_memory=False)
-        pipeline_failure_state_df = self.get_input_dataset("pipeline_failure_state").get_dataframe_from_csv(low_memory=False)
-        epf_failure_state_df = self.get_input_dataset("epf_failure_state").get_dataframe_from_csv(low_memory=False)
-        epf_damage_state_df = self.get_input_dataset("epf_damage_state").get_dataframe_from_csv(low_memory=False)
+        # get rid of distribution nodes
+        wf_failure_state_df = self.get_input_dataset("wf_failure_state").get_dataframe_from_csv(
+            low_memory=False).dropna()
+        wf_damage_state_df = self.get_input_dataset("wf_damage_state").get_dataframe_from_csv(low_memory=False).dropna()
+        pipeline_failure_state_df = self.get_input_dataset("pipeline_failure_state").get_dataframe_from_csv(
+            low_memory=False).dropna()
+        epf_failure_state_df = self.get_input_dataset("epf_failure_state").get_dataframe_from_csv(
+            low_memory=False).dropna()
+        epf_damage_state_df = self.get_input_dataset("epf_damage_state").get_dataframe_from_csv(
+            low_memory=False).dropna()
 
         sample_range = self.get_parameter("sample_range")
         initial_node = INDPUtil.generate_intial_node_failure_state(wf_failure_state_df, epf_failure_state_df,
