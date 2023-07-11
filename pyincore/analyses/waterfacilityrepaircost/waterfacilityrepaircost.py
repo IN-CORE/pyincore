@@ -31,7 +31,6 @@ class WaterFacilityRepairCost(BaseAnalysis):
         # join damage state, replacement cost, with original inventory
         wf_df = wf_df.merge(sample_damage_states_df, on="guid")
         wf_df = wf_df.merge(replacement_cost, on="guid")
-        wf_df = wf_df.dropna(subset=["sample_damage_states"])
         wf_set = wf_df.to_dict(orient="records")
 
         user_defined_cpu = 1
