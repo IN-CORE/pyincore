@@ -298,20 +298,10 @@ def run_with_base_class():
     indp_analysis.set_input_dataset("pipeline_repair_cost", pipeline_repair_cost_result)
     indp_analysis.set_input_dataset("power_network", power_network_dataset)
     indp_analysis.set_input_dataset("water_network", water_network_dataset)  # with distribution noes
-
-    powerline_supply_demand_info = Dataset.from_file("data/powerline_supply_demand_info.csv",
-                                                     "incore:powerLineSupplyDemandInfo")
-    indp_analysis.set_input_dataset("powerline_supply_demand_info", powerline_supply_demand_info)
-
-    epf_supply_demand_info = Dataset.from_file("data/epf_supply_demand_info.csv", "incore:epfSupplyDemandInfo")
-    indp_analysis.set_input_dataset("epf_supply_demand_info", epf_supply_demand_info)
-
-    wf_supply_demand_info = Dataset.from_file("data/wf_supply_demand_info.csv", "incore:waterFacilitySupplyDemandInfo")
-    indp_analysis.set_input_dataset("wf_supply_demand_info", wf_supply_demand_info)
-
-    pipeline_supply_demand_info = Dataset.from_file("data/pipeline_supply_demand_info.csv",
-                                                    "incore:pipelineSupplyDemandInfo")
-    indp_analysis.set_input_dataset("pipeline_supply_demand_info", pipeline_supply_demand_info)
+    indp_analysis.load_remote_input_dataset("powerline_supply_demand_info", "64ad8b434e01de3af8fea0ba")
+    indp_analysis.load_remote_input_dataset("epf_supply_demand_info", "64ad9ea54e01de3af8fea0f2")
+    indp_analysis.load_remote_input_dataset("wf_supply_demand_info", "64ad9e704e01de3af8fea0ec")
+    indp_analysis.load_remote_input_dataset("pipeline_supply_demand_info", "64ad9e274e01de3af8fea0e5")
     indp_analysis.load_remote_input_dataset("interdep", "61c10104837ac508f9a178ef")
     indp_analysis.set_input_dataset("wf_failure_state", wterfclty_sample_failure_state)
     indp_analysis.set_input_dataset("wf_damage_state", wterfclty_sample_damage_states)
