@@ -1,5 +1,3 @@
-import pandas as pd
-
 from pyincore import IncoreClient, Dataset, RestorationService, MappingSet, FragilityService, NetworkDataset
 from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore.analyses.epfrepaircost import EpfRepairCost
@@ -28,7 +26,7 @@ def run_with_base_class():
     hazard_type = "earthquake"
     hazard_id = "5dfa3e36b9219c934b64c231"  # 1000 yr eq
     num_cpu = 8
-    sim_number = 10
+    sim_number = 2
     sample_range = range(0, sim_number)
     result_name = "seaside_indp"
 
@@ -276,13 +274,11 @@ def run_with_base_class():
     indp_analysis.set_parameter("return_model", "step_function")
     indp_analysis.set_parameter("testbed_name", "seaside")
     indp_analysis.set_parameter("extra_commodity", {1: ["PW"], 3: []})
-    # indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 70}, {"budget": 300000, "time": 60}])
-    indp_analysis.set_parameter("RC", [{"budget": 2400000, "time": 700}])  # test just one resource increase the
+    indp_analysis.set_parameter("RC", [{"budget": 2400000, "time": 700}, {"budget": 3000000, "time": 600}])
     indp_analysis.set_parameter("layers", [1, 3])
     indp_analysis.set_parameter("method", "INDP")
     # indp_analysis.set_parameter("method", "TDINDP")
-    # indp_analysis.set_parameter("t_steps", 10)
-    indp_analysis.set_parameter("t_steps", 1)
+    indp_analysis.set_parameter("t_steps", 10)
     indp_analysis.set_parameter("time_resource", True)
     indp_analysis.set_parameter("save_model", False)
     # indp_analysis.set_parameter("solver_engine", "glpk")
