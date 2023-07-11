@@ -179,8 +179,8 @@ class INDP(BaseAnalysis):
                 params = {"NUM_ITERATIONS": t_steps, "OUTPUT_DIR": 'indp_results', "V": v,
                           "T": 1, 'L': layers, "ALGORITHM": "INDP", "SOLVER": solver_engine}
             elif method == 'TDINDP':
-                params = {"OUTPUT_DIR": 'tdindp_results', "V": v, "T": t_steps, 'L': layers,
-                          "ALGORITHM": "INDP"}
+                params = {"NUM_ITERATIONS": t_steps, "OUTPUT_DIR": 'tdindp_results', "V": v,
+                          "T": t_steps, 'L': layers, "ALGORITHM": "INDP", "SOLVER": solver_engine}
                 if 'WINDOW_LENGTH' in misc.keys():
                     params["WINDOW_LENGTH"] = misc['WINDOW_LENGTH']
             else:
