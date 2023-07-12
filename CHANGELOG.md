@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Method to get allow Hazard demands from hazard service [#363](https://github.com/IN-CORE/pyincore/issues/363)
+
 ### Fixed
 - Expose all the incore client parameters [#295](https://github.com/IN-CORE/pyincore/issues/295)
 

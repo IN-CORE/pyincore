@@ -482,3 +482,23 @@ def test_get_hurricanewf_json(hazardsvc):
                                            "circular")
 
     assert len(hjson["hurricaneSimulations"]) > 0
+
+
+def test_get_allowed_demands(hazardsvc):
+    allowed_demands = hazardsvc.get_allowed_demands("earthquake")
+    assert len(allowed_demands) > 0
+
+    allowed_demands = hazardsvc.get_allowed_demands("hurricane")
+    assert len(allowed_demands) > 0
+
+    allowed_demands = hazardsvc.get_allowed_demands("flood")
+    assert len(allowed_demands) > 0
+
+    allowed_demands = hazardsvc.get_allowed_demands("tsunami")
+    assert len(allowed_demands) > 0
+
+    allowed_demands = hazardsvc.get_allowed_demands("tornado")
+    assert len(allowed_demands) > 0
+
+    hazardsvc.get_allowed_demands("hurricaneWindfield")
+    assert len(allowed_demands) > 0
