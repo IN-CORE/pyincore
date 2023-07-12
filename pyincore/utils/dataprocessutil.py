@@ -202,6 +202,10 @@ class DataProcessUtil:
         # unify mcs and bldg func naming
         bldg_func.rename(columns={"building_guid": "guid", "samples": "failure"}, inplace=True)
 
+        # drop nan but count their numbers
+        count_nan = bldg_func.isnull().sum()
+        bldg_func = bldg_func.dropna(subset=func_state, how="all")
+
         func_merged = pd.merge(inventory, bldg_func, on="guid")
         mapped_df = pd.merge(func_merged, arch_mapping, on=arch_col)
         unique_categories = arch_mapping.groupby(by=["category"], sort=False, as_index=False).count()["category"]
@@ -249,7 +253,7 @@ class DataProcessUtil:
         json_by_cluster = json.loads(cluster_records)
         json_by_category = json.loads(category_records)
 
-        return {"by_cluster": json_by_cluster, "by_category": json_by_category}
+        return {"by_cluster": json_by_cluster, "by_category": json_by_category, "nan_count": count_nan}
 
     @staticmethod
     def get_max_damage_state(dmg_result):
