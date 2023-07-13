@@ -38,7 +38,7 @@ jobs:
       - name: Install miniconda
         uses: conda-incubator/setup-miniconda@v2.2.0
         with:
-          miniconda-version: "23.5.0"
+          miniconda-version: "Miniconda3-py39_23.5.0-3-MacOSX-x86_64.sh"
           mamba-version: "*"
           use-mamba: true
           python-version: ${{ matrix.python-version }}
