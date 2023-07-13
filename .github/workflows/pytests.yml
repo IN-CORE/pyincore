@@ -42,7 +42,8 @@ jobs:
           mamba-version: "*"
           use-mamba: true
           python-version: ${{ matrix.python-version }}
-          activate-environment: base
+          auto-activate-base: true
+          activate-environment: ""
           environment-file: environment.yml
           use-only-tar-bz2: true
 
