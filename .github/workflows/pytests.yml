@@ -42,8 +42,8 @@ jobs:
           mamba-version: "*"
           use-mamba: true
           python-version: ${{ matrix.python-version }}
-          auto-activate-base: true
-          activate-environment: ""
+          auto-update-conda: true
+          activate-environment: base
           environment-file: environment.yml
           use-only-tar-bz2: true
 
