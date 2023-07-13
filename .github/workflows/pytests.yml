@@ -39,10 +39,9 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2.2.0
         with:
           miniconda-version: "latest"
-          mamba-version: "*"
-          use-mamba: true
+#          mamba-version: "*"
+#          use-mamba: true
           python-version: ${{ matrix.python-version }}
-          auto-update-conda: true
           activate-environment: base
           environment-file: environment.yml
           use-only-tar-bz2: true
