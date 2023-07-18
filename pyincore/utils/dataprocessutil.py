@@ -203,8 +203,8 @@ class DataProcessUtil:
         bldg_func.rename(columns={"building_guid": "guid", "samples": "failure"}, inplace=True)
 
         # drop nan but count their numbers
-        count_nan = bldg_func.isnull().sum()
-        bldg_func = bldg_func.dropna(subset=func_state, how="all")
+        count_null = (bldg_func["failure"] == "").sum()
+        bldg_func = bldg_func[bldg_func['failure'] != ""]
 
         func_merged = pd.merge(inventory, bldg_func, on="guid")
         mapped_df = pd.merge(func_merged, arch_mapping, on=arch_col)
@@ -253,7 +253,7 @@ class DataProcessUtil:
         json_by_cluster = json.loads(cluster_records)
         json_by_category = json.loads(category_records)
 
-        return {"by_cluster": json_by_cluster, "by_category": json_by_category, "nan_count": count_nan}
+        return {"by_cluster": json_by_cluster, "by_category": json_by_category, "NA": int(count_null)}
 
     @staticmethod
     def get_max_damage_state(dmg_result):
