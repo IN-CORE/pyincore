@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Post-processing cluster fuction handle empty rows from mcs [#365](https://github.com/IN-CORE/pyincore/issues/365)
 - Expose all the incore client parameters [#295](https://github.com/IN-CORE/pyincore/issues/295)
 
 ### Changed
