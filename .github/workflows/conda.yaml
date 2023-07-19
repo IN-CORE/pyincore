@@ -54,7 +54,7 @@ jobs:
         with:
           miniconda-version: "latest"
           python-version: 3.8
-          use-mamba: true
+#          use-mamba: true
           mamba-version: "*"
           channels: conda-forge
           use-only-tar-bz2: true
