@@ -35,12 +35,10 @@ jobs:
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
             hashFiles('environment.yml') }}
 
-      - name: Install miniconda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install miniconda with mamba
+        uses: mamba-org/setup-mamba@v10
         with:
-          miniconda-version: "latest"
-          mamba-version: "*"
-#          use-mamba: true
+          mamba-version: "latest"
           python-version: ${{ matrix.python-version }}
           activate-environment: base
           environment-file: environment.yml

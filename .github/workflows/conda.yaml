@@ -49,16 +49,14 @@ jobs:
           key:
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
 
-      - name: Install miniconda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install miniconda with mamba
+        uses: mamba-org/setup-mamba@v10
         with:
-          miniconda-version: "latest"
-          python-version: 3.8
-#          use-mamba: true
-          mamba-version: "*"
-          channels: conda-forge
+          mamba-version: "latest"
+          python-version: ${{ matrix.python-version }}
+          activate-environment: base
+          environment-file: environment.yml
           use-only-tar-bz2: true
-          conda-build-version: "*"
 
       - name: Build conda package
         run: |
