@@ -24,17 +24,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v2
 
-#      - name: Cache conda
-#        uses: actions/cache@v3
-#        env:
-#          # Increase this value to reset cache if environment.yml has not changed
-#          CACHE_NUMBER: 0
-#        with:
-#          path: ~/conda_pkgs_dir
-#          key:
-#            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
-#            hashFiles('environment.yml') }}
-
       - name: Install miniconda with mamba
         uses: mamba-org/setup-micromamba@v1
         with:
@@ -46,7 +35,7 @@ jobs:
           create-args: >-
             python=${{ matrix.python-version }}
           cache-environment: true
-          post-cleanup: 'all'
+          post-cleanup: 'none'
 
       - name: Run tests with pytest
         run: |
