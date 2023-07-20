@@ -15,6 +15,7 @@ on:
 
 jobs:
   unit_test:
+    platform: linux/x86_64
     runs-on: ubuntu-latest
     strategy:
       matrix:
