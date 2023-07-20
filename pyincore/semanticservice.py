@@ -129,7 +129,6 @@ class SemanticService:
         """
 
         url = f'{self.base_url}/{type_name}'
-        print(url)
         response = self.client.get(url, timeout=timeout, **kwargs)
         data = self.return_http_response(response).json()
 
