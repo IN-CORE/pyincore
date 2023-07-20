@@ -36,7 +36,7 @@ jobs:
             hashFiles('environment.yml') }}
 
       - name: Install miniconda
-        uses: conda-incubator/setup-miniconda@v2.2.0
+        uses: conda-incubator/setup-miniconda@v2
         with:
           miniforge-version: "latest"
           mamba-version: "*"
