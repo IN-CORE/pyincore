@@ -187,6 +187,9 @@ def test_create_and_delete_earthquake(hazardsvc):
     model_response = hazardsvc.create_earthquake(eqmodel_json)
     assert model_response["id"] is not None
 
+    del_response = hazardsvc.delete_earthquake(model_response["id"])
+    assert del_response["id"] is not None
+
 
 def test_get_earthquake_aleatory_uncertainty(hazardsvc):
     hazard_id = "5c535f57c5c0e4ccead71a1a"
