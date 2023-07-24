@@ -1062,7 +1062,6 @@ class HazardService:
 
     # TODO replace this with API endpoint in the future
     def get_allowed_demands(self, hazard_type, timeout=(30, 600), **kwargs):
-        url = ""
         if hazard_type == 'earthquake':
             url = urljoin(self.base_earthquake_url, "demands")
         elif hazard_type == 'tornado':
@@ -1075,8 +1074,9 @@ class HazardService:
             url = urljoin(self.base_hurricanewf_url, "demands")
         elif hazard_type == 'flood':
             url = urljoin(self.base_flood_url, "demands")
-        if url != "":
-            r = self.client.get(url, timeout=timeout, **kwargs)
-            return self.return_http_response(r).json()
         else:
-            return []
+            raise ValueError("Unknown hazard type!")
+
+        r = self.client.get(url, timeout=timeout, **kwargs)
+        return self.return_http_response(r).json()
+
