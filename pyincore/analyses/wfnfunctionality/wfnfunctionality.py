@@ -193,13 +193,13 @@ class WfnFunctionality(BaseAnalysis):
                     'id': 'wf_sample_failure_state',
                     'required': True,
                     'description': 'CSV file of failure state for each sample. Output from MCS analysis',
-                    'type': 'incore:sampleFailureState'
+                    'type': ['incore:sampleFailureState']
                 },
                 {
                     'id': 'pp_sample_failure_state',
                     'required': True,
                     'description': 'CSV file of failure state for each sample. Output from MCS analysis',
-                    'type': 'incore:sampleFailureState'
+                    'type': ['incore:sampleFailureState']
                 }
             ],
             'output_datasets': [

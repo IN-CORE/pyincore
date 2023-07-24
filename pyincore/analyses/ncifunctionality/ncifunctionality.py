@@ -330,63 +330,63 @@ class NciFunctionality(BaseAnalysis):
                     'id': 'epf_network',
                     'required': True,
                     'description': 'EPN network',
-                    'type': 'incore:epnNetwork',
+                    'type': ['incore:epnNetwork'],
                 },
                 {
                     'id': 'wds_network',
                     'required': True,
                     'description': 'WDS network',
-                    'type': 'incore:waterNetwork',
+                    'type': ['incore:waterNetwork'],
                 },
                 {
                     'id': 'epf_wds_intdp_table',
                     'required': True,
                     'description': 'Table containing interdependency information from EPN to WDS networks',
-                    'type': 'incore:networkInterdependencyTable'
+                    'type': ['incore:networkInterdependencyTable']
                 },
                 {
                     'id': 'wds_epf_intdp_table',
                     'required': True,
                     'description': 'Table containing interdependency information from WDS to EPF networks',
-                    'type': 'incore:networkInterdependencyTable'
+                    'type': ['incore:networkInterdependencyTable']
                 },
                 {
                     'id': 'epf_subst_failure_results',
                     'required': True,
                     'description': 'EPF substation failure results',
-                    'type': 'incore:failureProbability'
+                    'type': ['incore:failureProbability']
                 },
                 {
                     'id': 'epf_inventory_rest_map',
                     'required': True,
                     'description': 'EPF inventory restoration map',
-                    'type': 'incore:inventoryRestorationMap'
+                    'type': ['incore:inventoryRestorationMap']
                 },
                 {
 
                     'id': 'epf_time_results',
                     'required': True,
                     'description': 'A csv file recording repair time for EPF per class and limit state',
-                    'type': 'incore:epfRestorationTime'
+                    'type': ['incore:epfRestorationTime']
                 },
                 {
                     'id': 'wds_dmg_results',
                     'required': True,
                     'description': 'WDS damage results',
-                    'type': 'ergo:waterFacilityDamageVer6'
+                    'type': ['ergo:waterFacilityDamageVer6']
                 },
                 {
                     'id': 'wds_inventory_rest_map',
                     'required': True,
                     'description': 'WDS inventory restoration map',
-                    'type': 'incore:inventoryRestorationMap'
+                    'type': ['incore:inventoryRestorationMap']
                 },
                 {
 
                     'id': 'wds_time_results',
                     'required': True,
                     'description': 'A csv file recording repair time for WDS per class and limit state',
-                    'type': 'incore:waterFacilityRestorationTime'
+                    'type': ['incore:waterFacilityRestorationTime']
                 }
             ],
             'output_datasets': [
