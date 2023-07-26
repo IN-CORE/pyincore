@@ -68,10 +68,10 @@ class SemanticService:
         limit: int = 50,
         detail: bool = False,
         save_json: bool = False,
-        json_path: str = None,
+        json_path: str = "",
         timeout: Tuple[int, int] = (30, 600),
         **kwargs,
-    ) -> Union[list, dict]:
+    ) -> list:
         """Get all semantic types.
 
         Args:
@@ -105,12 +105,6 @@ class SemanticService:
         data = self.return_http_response(response).json()
 
         if save_json:
-            # if json_path is None: then save to the default location (incore cache folder)
-            if json_path is None:
-                json_path = os.path.join(
-                    pyglobals.PYINCORE_USER_CACHE,
-                    f"semantic_types_ord_{order}_sk_{skip}_lim_{limit}.json",
-                )
             with open(json_path, "w") as f:
                 json.dump(data, f, indent=4)
 
@@ -120,10 +114,10 @@ class SemanticService:
         self,
         type_name: str,
         save_json: bool = False,
-        json_path: str = None,
+        json_path: str = "",
         timeout: Tuple[int, int] = (30, 600),
         **kwargs,
-    ) -> Union[list, dict]:
+    ) -> list:
         """Get semantic type by name.
 
         Args:
@@ -144,11 +138,6 @@ class SemanticService:
         data = self.return_http_response(response).json()
 
         if save_json:
-            # if json_path is None: then save to the default location (incore cache folder)
-            if json_path is None:
-                json_path = os.path.join(
-                    pyglobals.PYINCORE_USER_CACHE, f"{type_name}.json"
-                )
             with open(json_path, "w") as f:
                 json.dump(data, f, indent=4)
 
@@ -156,7 +145,7 @@ class SemanticService:
 
     def search_semantic_type(
         self, query: str, timeout: Tuple[int, int] = (30, 600), **kwargs
-    ) -> Union[list, dict]:
+    ) -> list:
         """Search for a semantic type.
 
         Args:
@@ -170,7 +159,7 @@ class SemanticService:
 
         """
 
-        url = self.base_url + "/search"
+        url = f"{self.base_url}/search"
         payload = {"text": query}
         response = self.client.get(
             url, params=payload, timeout=timeout, **kwargs
