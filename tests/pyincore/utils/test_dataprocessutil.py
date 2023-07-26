@@ -69,8 +69,9 @@ def _functionality_cluster(client, archetype_mapping="5fca915fb34b193f7a44059b",
     bldg_func_state = pd.read_csv(bldg_func_state_dataset_path)
 
     # manufacturing the nan rows for testing
-    bldg_func_state.loc[0, "failure"] = ""
-    bldg_func_state.loc[1, "failure"] = ""
+    if "failure" in bldg_func_state.columns:
+        bldg_func_state.loc[0, "failure"] = ""
+        bldg_func_state.loc[1, "failure"] = ""
 
     ret_json = util.create_mapped_func_result(buildings, bldg_func_state, arch_mapping, arch_column)
 
