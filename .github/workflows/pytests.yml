@@ -57,4 +57,4 @@ jobs:
       - name: Run tests with pytest
         run: |
           echo "${{secrets.PYTEST_USER_TOKEN}}" > tests/pyincore/.incorepw
-          $CONDA/bin/python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
+          python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
