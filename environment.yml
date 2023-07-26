@@ -20,4 +20,4 @@ dependencies:
   - rtree>=0.8.3
   - scipy>=1.2.0
   - shapely>=1.7.1
-  - wntr==v1.0.0
+  - wntr>=v1.0.0
