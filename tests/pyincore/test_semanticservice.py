@@ -35,7 +35,7 @@ def test_get_all_semantic_types(semanticsvc):
         skip=skip, 
         limit=limit
     )
-    assert len(semantic_types) == limit and len(semantic_types[0].split("//")) < 1, "Should not have hyperlink"
+    assert len(semantic_types) == limit and len(semantic_types[0].split("/")) <= 1, "Should not have hyperlink"
 
     # get all semantic types with hyperlink
     hyperlink = True
@@ -45,11 +45,11 @@ def test_get_all_semantic_types(semanticsvc):
         skip=skip, 
         limit=limit
     )
-    assert len(semantic_types) == limit and len(semantic_types[0].split("//")) > 1, "Should have hyperlink"
+    assert len(semantic_types) == limit and len(semantic_types[0].split("/")) > 1, "Should have hyperlink"
 
 
 def test_get_semantic_type_by_name(semanticsvc):
-    semantic_type_exists = "incore:wildFireDamageRaster"
+    semantic_type_exists = "ncsa:wildfireDamageRaster"
     semantic_type_not_exists = "wildFireDamageRaster"
 
     # find semantic type by name which exists
