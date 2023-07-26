@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Add Semantic Module to interact with Semantic service [#361](https://github.com/IN-CORE/pyincore/issues/361)
+- Method to get allow Hazard demands from hazard service [#363](https://github.com/IN-CORE/pyincore/issues/363)
 
 ### Fixed
 - Expose all the incore client parameters [#295](https://github.com/IN-CORE/pyincore/issues/295)
+- Fixed testing datasets not being cleaned in the database [#367](https://github.com/IN-CORE/pyincore/issues/367)
 
 ### Changed
 - Building Damage supports multiple hazard fragilities [#337](https://github.com/IN-CORE/pyincore/issues/337)
