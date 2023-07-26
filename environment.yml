@@ -4,20 +4,20 @@ channels:
   - defaults
 dependencies:
   - ipopt>=3.11
-  - fiona>=1.8.4
+  - fiona>=1.8.19
   - geopandas>=0.6.1
   - matplotlib>=2.1.0
   - networkx>=2.2
-  - numpy>=1.16.6,<2.0a0
+  - numpy>=1.21.6,<2.0a0
   - pandas>=1.1.0
   - pycodestyle>=2.6.0
   - pyomo>=5.6
-  - pyproj>=1.9.6
+  - pyproj>=3.0.1
   - pytest>=3.9.0
   - python-jose>=3.0
   - rasterio>=1.0.18
   - requests>=2.20.0
   - rtree>=0.8.3
   - scipy>=1.2.0
-  - shapely>=1.6.4.post1
-  - wntr>=0.1.6
+  - shapely>=1.7.1
+  - wntr==v1.0.0
