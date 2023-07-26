@@ -38,6 +38,8 @@ jobs:
       - name: Install micromamba
         uses: mamba-org/setup-micromamba@v1
         with:
+          mamba-version: "*"
+          use-mamba: true
           python-version: ${{ matrix.python-version }}
           activate-environment: base
           environment-file: environment.yml
