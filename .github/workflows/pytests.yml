@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.8', '3.9', '3.10' ] # 3.10 and 3.11 have conflicts with environment.yml
+        python-version: [ '3.8', '3.9', '3.10' ] # 3.11 have conflicts with environment.yml
     name: Python ${{ matrix.python-version }} Test
     steps:
       - name: Checkout source code
@@ -41,9 +41,7 @@ jobs:
           create-args: >-
             python=${{ matrix.python-version }}
             pytest
-          activate-environment: base
           environment-file: environment.yml
-          use-only-tar-bz2: true
           generate-run-shell: true
 
       - name: Run tests with pytest
