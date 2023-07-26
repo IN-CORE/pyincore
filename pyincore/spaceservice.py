@@ -45,7 +45,7 @@ class SpaceService:
                          "Please go to the end of this message for more specific information about the exception.")
             raise
 
-    def create_space(self, space_json):
+    def create_space(self, space_json, timeout=(30, 600), **kwargs):
         """Creates a Space.
 
         Args:
@@ -59,7 +59,7 @@ class SpaceService:
         """
         url = self.base_space_url
         space_data = {('space', space_json)}
-        kwargs = {"files": space_data}
+        kwargs["files"] = space_data
         r = self.client.post(url, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()
 
@@ -129,7 +129,7 @@ class SpaceService:
         """
         url = urljoin(self.base_space_url, space_id)
         space_data = {('space', space_json)}
-        kwargs = {"files": space_data}
+        kwargs["files"] = space_data
         r = self.client.put(url, timeout=timeout, **kwargs)
         return self.return_http_response(r).json()
 

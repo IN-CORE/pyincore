@@ -6,9 +6,7 @@
 import os
 
 import pytest
-
-from pyincore import globals as pyglobals
-from pyincore import IncoreClient, SpaceService
+import json
 
 
 @pytest.fixture
@@ -19,10 +17,35 @@ def spacesvc(monkeypatch):
 @pytest.mark.parametrize("space,expected", [
     ({'mettadatta': {'name': 'bad'}}, 400),
 ])
-def test_create_space(spacesvc, space, expected):
+def test_create_space_failed(spacesvc, space, expected):
     # assert that trying to create a space with invalid data throws an error
     with pytest.raises(Exception):
         assert spacesvc.create_space(space)
+
+
+@pytest.mark.skip(reason="No delete endpoint to clean up test spaces")
+def test_create_update_and_delete_space(spacesvc):
+    # assert that trying to create a space with invalid data throws an error
+    space_json = {
+        "privileges": {
+            "groupPrivileges": {
+                "incore_admin": "ADMIN",
+                "incore_ncsa": "ADMIN"
+            }
+        },
+        "metadata": {
+            "name": "test-space"
+        },
+        "members": []
+    }
+    create_json = spacesvc.create_space(json.dumps(space_json))
+    assert create_json["id"] is not None
+    assert create_json["metadata"]["name"] == "test-space"
+
+    # update the space
+    update_json = spacesvc.update_space(create_json["id"], json.dumps({'metadata': {'name': 'test-space-updated'}}))
+    assert update_json["id"] is not None
+    assert update_json["metadata"]["name"] == "test-space-updated"
 
 
 @pytest.mark.skip(reason="Need to debug")
