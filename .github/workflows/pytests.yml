@@ -6,7 +6,6 @@ name: pytests
 
 on:
   push:
-
   pull_request:
      types: [opened, reopened]
 
@@ -15,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        vars: [ {version: '3.8', sleep: '0s'}, {version: '3.9', sleep: '60s'}, {version: '3.10', sleep: '120s'}, {version: '3.11', sleep: '180s'} ]
+        vars: [ {version: '3.8', sleep: '0s'}, {version: '3.9', sleep: '60s'}, {version: '3.10', sleep: '120s'},
+                {version: '3.11', sleep: '180s'} ]
     name: Python ${{ matrix.vars.version }} Test
     steps:
       - name: Checkout source code
