@@ -4,9 +4,6 @@ name: pytests
 #  - any push to any branch
 #  - when a PR is opened/reopened - this is just for additional safety and covers the case of main -> develop PRs without new pushes
 
-# TODO: Use mamba instead of conda for installing packages. Improves on ~5mins it takes to install requirements.
-#  https://github.com/mamba-org/provision-with-micromamba
-
 on:
   push:
 
@@ -16,13 +13,10 @@ on:
 jobs:
   unit_test:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.repository }}-concurrency-for-job
-      cancel-in-progress: false
     strategy:
       matrix:
-        python-version: [ '3.8', '3.9', '3.10', '3.11' ]
-    name: Python ${{ matrix.python-version }} Test
+        vars: [ {version: '3.8', sleep: '0s'}, {version: '3.9', sleep: '5s'}, {version: '3.10', sleep: '10s'}, {version: '3.11', sleep: '15s'} ]
+    name: Python ${{ matrix.vars.version }} Test
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -42,15 +36,16 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           create-args: >-
-            python=${{ matrix.python-version }}
+            python=${{ matrix.vars.version }}
             pytest
           environment-file: environment.yml
           generate-run-shell: true
 
-#      - name: Sleep for 30 seconds
-#        uses: jakejarvis/wait-action@master
-#        with:
-#          time: '30s'
+      # Avoid multiple pytests run concurrently
+      - name: Sleep for ${{ matrix.vars.sleep }}
+        uses: jakejarvis/wait-action@master
+        with:
+          time: ${{ matrix.vars.sleep }}
 
       - name: Run tests with pytest
         run: |
