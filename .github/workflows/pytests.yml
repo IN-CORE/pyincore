@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        vars: [ {version: '3.8', sleep: '0s'}, {version: '3.9', sleep: '5s'}, {version: '3.10', sleep: '10s'}, {version: '3.11', sleep: '15s'} ]
+        vars: [ {version: '3.8', sleep: '0s'}, {version: '3.9', sleep: '60s'}, {version: '3.10', sleep: '120s'}, {version: '3.11', sleep: '180s'} ]
     name: Python ${{ matrix.vars.version }} Test
     steps:
       - name: Checkout source code
@@ -41,8 +41,7 @@ jobs:
           environment-file: environment.yml
           generate-run-shell: true
 
-      # Avoid multiple pytests run concurrently
-      - name: Sleep for ${{ matrix.vars.sleep }}
+      - name: Sleep for ${{ matrix.vars.sleep }} to avoid multiple pytests run concurrently
         uses: jakejarvis/wait-action@master
         with:
           time: ${{ matrix.vars.sleep }}
