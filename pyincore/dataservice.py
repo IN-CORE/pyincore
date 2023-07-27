@@ -147,7 +147,7 @@ class DataService:
         else:
             return local_filename
 
-    def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None,timeout=(30, 600), **kwargs):
+    def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None, timeout=(30, 600), **kwargs):
         # construct url for file download
         url = urljoin(self.base_url, dataset_id + '/blob')
         kwargs["stream"] = True
