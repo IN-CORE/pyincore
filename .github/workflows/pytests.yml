@@ -16,9 +16,12 @@ on:
 jobs:
   unit_test:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.repository }}-concurrency-for-job
+      cancel-in-progress: false
     strategy:
       matrix:
-        python-version: [ '3.8', '3.9' ]
+        python-version: [ '3.8', '3.9', '3.10', '3.11' ]
     name: Python ${{ matrix.python-version }} Test
     steps:
       - name: Checkout source code
@@ -35,18 +38,22 @@ jobs:
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
             hashFiles('environment.yml') }}
 
-      - name: Install miniconda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install micromamba
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-version: "latest"
-          mamba-version: "*"
-          use-mamba: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: base
+          create-args: >-
+            python=${{ matrix.python-version }}
+            pytest
           environment-file: environment.yml
-          use-only-tar-bz2: true
+          generate-run-shell: true
+
+#      - name: Sleep for 30 seconds
+#        uses: jakejarvis/wait-action@master
+#        with:
+#          time: '30s'
 
       - name: Run tests with pytest
         run: |
           echo "${{secrets.PYTEST_USER_TOKEN}}" > tests/pyincore/.incorepw
-          $CONDA/bin/python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
+          python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
+        shell: micromamba-shell {0}
