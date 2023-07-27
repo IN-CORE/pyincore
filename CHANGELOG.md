@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Expose all the incore client parameters [#295](https://github.com/IN-CORE/pyincore/issues/295)
 - Fixed testing datasets not being cleaned in the database [#367](https://github.com/IN-CORE/pyincore/issues/367)
 - Space services methods missing timeout parameters [#375](https://github.com/IN-CORE/pyincore/issues/375)
+- Fixed conda dependency issues for Python 3.10 and 3.11 [#376](https://github.com/IN-CORE/pyincore/pull/376/files)
 
 ### Changed
 - Building Damage supports multiple hazard fragilities [#337](https://github.com/IN-CORE/pyincore/issues/337)
