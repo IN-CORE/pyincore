@@ -117,7 +117,7 @@ class SemanticService:
         json_path: str = "",
         timeout: Tuple[int, int] = (30, 600),
         **kwargs,
-    ) -> list:
+    ) -> dict:
         """Get semantic type by name.
 
         Args:
