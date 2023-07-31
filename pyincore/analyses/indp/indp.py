@@ -811,7 +811,7 @@ class INDP(BaseAnalysis):
                     'id': 'solver_time_limit',
                     'required': False,
                     'description': "solver time limit in seconds",
-                    'type': str
+                    'type': int
                 },
             ],
             'input_datasets': [
