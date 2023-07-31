@@ -438,7 +438,7 @@ class INDP(BaseAnalysis):
         return indp_results
 
     def indp(self, N, v_r, T=1, layers=None, controlled_layers=None, functionality=None, fixed_nodes=None,
-             print_cmd=True, time_limit=3600, co_location=True):
+             print_cmd=True, co_location=True):
         """
         INDP optimization problem in Pyomo. It also solves td-INDP if T > 1.
 
@@ -465,8 +465,6 @@ class INDP(BaseAnalysis):
             It fixes the functionality of given elements to a given value. The default is None.
         print_cmd : bool, optional
             If true, analysis information is written to the console. The default is True.
-        time_limit : int, optional
-            Time limit for the optimizer to stop. The default is None.
         co_location : bool, optional
             If false, exclude geographical interdependency from the optimization. The default is True.
         Returns
@@ -669,14 +667,16 @@ class INDP(BaseAnalysis):
         if solver_path is None:
             solver_path = pyglobals.GLPK_PATH
 
+        solver_time_limit = self.get_parameter("solver_time_limit")
+
         print(
             "Solving... using %s solver (%d cont. vars, %d binary vars)" %
             (solver_engine, num_cont_vars, num_integer_vars))
 
         if solver_engine == "gurobi":
-            solver = SolverFactory(solver_engine, timelimit=time_limit)
+            solver = SolverFactory(solver_engine, timelimit=solver_time_limit)
         else:
-            solver = SolverFactory(solver_engine, timelimit=time_limit, executable=solver_path)
+            solver = SolverFactory(solver_engine, timelimit=solver_time_limit, executable=solver_path)
 
         solution = solver.solve(m)
         run_time = time.time() - start_time
@@ -806,7 +806,13 @@ class INDP(BaseAnalysis):
                     'required': False,
                     'description': "Solver to use for optimization model. Such as gurobi/glpk",
                     'type': str
-                }
+                },
+                {
+                    'id': 'solver_time_limit',
+                    'required': False,
+                    'description': "solver time limit in seconds",
+                    'type': str
+                },
             ],
             'input_datasets': [
                 {
