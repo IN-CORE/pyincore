@@ -674,9 +674,9 @@ class INDP(BaseAnalysis):
             (solver_engine, num_cont_vars, num_integer_vars))
 
         if solver_engine == "gurobi":
-            solver = SolverFactory(solver_engine, solver_io="python", timelimit=time_limit)
+            solver = SolverFactory(solver_engine, timelimit=time_limit)
         else:
-            solver = SolverFactory(solver_engine, solver_io="lp", timelimit=time_limit, executable=solver_path)
+            solver = SolverFactory(solver_engine, timelimit=time_limit, executable=solver_path)
 
         solution = solver.solve(m)
         run_time = time.time() - start_time
