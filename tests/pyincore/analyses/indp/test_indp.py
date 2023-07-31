@@ -277,7 +277,7 @@ def run_with_base_class():
     indp_analysis.set_parameter("return_model", "step_function")
     indp_analysis.set_parameter("testbed_name", "seaside")
     indp_analysis.set_parameter("extra_commodity", {1: ["PW"], 3: []})
-    indp_analysis.set_parameter("RC", [{"budget": 2400000, "time": 700}, {"budget": 3000000, "time": 600}])
+    indp_analysis.set_parameter("RC", [{"budget": 240000, "time": 700}, {"budget": 300000, "time": 600}])
     indp_analysis.set_parameter("layers", [1, 3])
     indp_analysis.set_parameter("method", "INDP")
     # indp_analysis.set_parameter("method", "TDINDP")
@@ -288,7 +288,8 @@ def run_with_base_class():
     # indp_analysis.set_parameter("solver_engine", "glpk")  # recommended
     # indp_analysis.set_parameter("solver_path", "/usr/local/bin/glpsol")  # recommended
     # indp_analysis.set_parameter("solver_engine", "scip")
-    # indp_analysis.set_parameter("solver_engine", "gurobi")
+    # indp_analysis.set_parameter("solver_path", "/usr/local/bin/scip")  # recommended
+    indp_analysis.set_parameter("solver_engine", "gurobi")
 
     indp_analysis.set_input_dataset("wf_restoration_time", wf_restoration_time)
     indp_analysis.set_input_dataset("wf_repair_cost", wf_repair_cost_result)
