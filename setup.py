@@ -67,7 +67,6 @@ setup(
         'rtree>=0.8.3',
         'scipy>=1.2.0',
         'shapely>=1.6.4.post1',
-        'wntr>=0.1.6',
     ],
 
     extras_require={
