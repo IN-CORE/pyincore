@@ -285,9 +285,10 @@ def run_with_base_class():
     indp_analysis.set_parameter("time_resource", True)
     # indp_analysis.set_parameter("save_model", False)
     indp_analysis.set_parameter("save_model", True)
-    indp_analysis.set_parameter("solver_engine", "glpk")
+    # indp_analysis.set_parameter("solver_engine", "glpk")  # recommended
+    # indp_analysis.set_parameter("solver_path", "/usr/local/bin/glpsol")  # recommended
     # indp_analysis.set_parameter("solver_engine", "scip")
-    # indp_analysis.set_parameter("solver_engine", "ipopt")  # recommended
+    # indp_analysis.set_parameter("solver_engine", "gurobi")
 
     indp_analysis.set_input_dataset("wf_restoration_time", wf_restoration_time)
     indp_analysis.set_input_dataset("wf_repair_cost", wf_repair_cost_result)

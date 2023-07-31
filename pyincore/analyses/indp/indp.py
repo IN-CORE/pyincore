@@ -80,24 +80,18 @@ class INDP(BaseAnalysis):
         if save_model is None:
             save_model = False
 
-        solver_engine = self.get_parameter("solver_engine")
-        if solver_engine is None:
-            solver_engine = "glpk"
-
         action_result, cost_result, runtime_result = self.run_method(fail_sce_param, RC, layers, method=method,
                                                                      t_steps=t_steps,
                                                                      misc={'DYNAMIC_PARAMS': dynamic_params,
                                                                            'EXTRA_COMMODITY': extra_commodity,
                                                                            'TIME_RESOURCE': time_resource},
-                                                                     save_model=save_model,
-                                                                     solver_engine=solver_engine)
+                                                                     save_model=save_model)
 
         self.set_result_csv_data("action", action_result, name="actions.csv")
         self.set_result_csv_data("cost", cost_result, name="costs.csv")
         self.set_result_csv_data("runtime", runtime_result, name="run_time.csv")
 
-    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None, save_model=False,
-                   solver_engine="glpk"):
+    def run_method(self, fail_sce_param, v_r, layers, method, t_steps=10, misc=None, save_model=False):
         """
         This function runs restoration analysis based on INDP or td-INDP for different numbers of resources.
 
@@ -112,7 +106,6 @@ class INDP(BaseAnalysis):
             t_steps (int): Number of time steps of the analysis.
             misc (dict): A dictionary that contains miscellaneous data needed for the analysis
             save_model (bool): Flag indicates if the model should be saved or not
-            solver_engine (str): glpk, ipopt, gurobi
         Returns:
 
         """
@@ -179,10 +172,10 @@ class INDP(BaseAnalysis):
         for v_i, v in enumerate(v_r):
             if method == 'INDP':
                 params = {"NUM_ITERATIONS": t_steps, "OUTPUT_DIR": 'indp_results', "V": v,
-                          "T": 1, 'L': layers, "ALGORITHM": "INDP", "SOLVER": solver_engine}
+                          "T": 1, 'L': layers, "ALGORITHM": "INDP"}
             elif method == 'TDINDP':
                 params = {"NUM_ITERATIONS": t_steps, "OUTPUT_DIR": 'tdindp_results', "V": v,
-                          "T": t_steps, 'L': layers, "ALGORITHM": "INDP", "SOLVER": solver_engine}
+                          "T": t_steps, 'L': layers, "ALGORITHM": "INDP"}
                 if 'WINDOW_LENGTH' in misc.keys():
                     params["WINDOW_LENGTH"] = misc['WINDOW_LENGTH']
             else:
@@ -373,7 +366,7 @@ class INDP(BaseAnalysis):
                                                    params['DYNAMIC_PARAMS']['DEMAND_DATA'])
             v_0 = {x: 0 for x in params["V"].keys()}
             results = self.indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
-                                functionality=functionality, co_location=co_location, solver_engine=params['SOLVER'])
+                                functionality=functionality, co_location=co_location)
             indp_results = results[1]
             if save_model:
                 INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", 0)
@@ -383,8 +376,7 @@ class INDP(BaseAnalysis):
                     DislocationUtil.dynamic_parameters(interdependent_net, original_N, i + 1,
                                                        params['DYNAMIC_PARAMS']['DEMAND_DATA'])
                 results = self.indp(interdependent_net, params["V"], T, layers, controlled_layers=controlled_layers,
-                                    co_location=co_location, functionality=functionality,
-                                    solver_engine=params['SOLVER'])
+                                    co_location=co_location, functionality=functionality)
                 indp_results.extend(results[1], t_offset=i + 1)
                 if save_model:
                     INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", i + 1)
@@ -405,7 +397,7 @@ class INDP(BaseAnalysis):
             # Initial percolation calculations.
             v_0 = {x: 0 for x in params["V"].keys()}
             results = self.indp(interdependent_net, v_0, 1, layers, controlled_layers=controlled_layers,
-                                functionality=functionality, co_location=co_location, solver_engine=params['SOLVER'])
+                                functionality=functionality, co_location=co_location)
             indp_results = results[1]
             if save_model:
                 INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", 0)
@@ -425,7 +417,7 @@ class INDP(BaseAnalysis):
                 # Run td-INDP.
                 results = self.indp(interdependent_net, params["V"], time_window_length + 1, layers,
                                     controlled_layers=controlled_layers, functionality=functionality_t,
-                                    co_location=co_location, solver_engine=params['SOLVER'])
+                                    co_location=co_location)
                 if save_model:
                     INDPUtil.save_indp_model_to_file(results[0], output_dir + "/Model", n + 1)
                 if "WINDOW_LENGTH" in params:
@@ -446,7 +438,7 @@ class INDP(BaseAnalysis):
         return indp_results
 
     def indp(self, N, v_r, T=1, layers=None, controlled_layers=None, functionality=None, fixed_nodes=None,
-             print_cmd=True, time_limit=None, co_location=True, solver_engine='glpk'):
+             print_cmd=True, time_limit=3600, co_location=True):
         """
         INDP optimization problem in Pyomo. It also solves td-INDP if T > 1.
 
@@ -477,10 +469,6 @@ class INDP(BaseAnalysis):
             Time limit for the optimizer to stop. The default is None.
         co_location : bool, optional
             If false, exclude geographical interdependency from the optimization. The default is True.
-        solver_engine : str, optional
-            Name of the solver engine. Options are 'gurobi' (commercial optimizer), 'glpk' or 'ipopt'(open-source
-            optimizer).
-            The default is 'glpk'.
         Returns
         -------
         : list
@@ -672,14 +660,24 @@ class INDP(BaseAnalysis):
         '''Solve'''
         num_cont_vars = len([v for v in m.component_data_objects(pyo.Var) if v.domain == pyo.NonNegativeReals])
         num_integer_vars = len([v for v in m.component_data_objects(pyo.Var) if v.domain == pyo.Binary])
-        print(
-            "Solving... using %s solver (%d cont. vars, %d binary vars)" %
-            (solver_engine, num_cont_vars, num_integer_vars))
+
+        solver_engine = self.get_parameter("solver_engine")
+        if solver_engine is None:
+            solver_engine = "glpk"
+
         solver_path = self.get_parameter("solver_path")
         if solver_path is None:
             solver_path = pyglobals.GLPK_PATH
-        solver = SolverFactory(solver_engine, solver_io="nl", timelimit=time_limit, executable=solver_path)
-        # solver = SolverFactory(solver_engine, solver_io="python", timelimit=time_limit)
+
+        print(
+            "Solving... using %s solver (%d cont. vars, %d binary vars)" %
+            (solver_engine, num_cont_vars, num_integer_vars))
+
+        if solver_engine == "gurobi":
+            solver = SolverFactory(solver_engine, solver_io="python", timelimit=time_limit)
+        else:
+            solver = SolverFactory(solver_engine, solver_io="lp", timelimit=time_limit, executable=solver_path)
+
         solution = solver.solve(m)
         run_time = time.time() - start_time
 
@@ -800,13 +798,13 @@ class INDP(BaseAnalysis):
                 {
                     'id': 'solver_engine',
                     'required': False,
-                    'description': "Solver to use for optimization model. Such as ipopt/gurobi/glpk",
+                    'description': "Solver to use for optimization model. Such as gurobi/glpk",
                     'type': str
                 },
                 {
                     'id': 'solver_path',
                     'required': False,
-                    'description': "Solver to use for optimization model. Such as ipopt/gurobi/glpk",
+                    'description': "Solver to use for optimization model. Such as gurobi/glpk",
                     'type': str
                 }
             ],
