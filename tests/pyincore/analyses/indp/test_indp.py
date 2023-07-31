@@ -25,12 +25,14 @@ def run_with_base_class():
 
     hazard_type = "earthquake"
     hazard_id = "5dfa3e36b9219c934b64c231"  # 1000 yr eq
+    hazard_id_dev = "5ba8f127ec2309043520906c"  # 1000 yr eq dev
     num_cpu = 8
     sim_number = 2
     sample_range = range(0, sim_number)
     result_name = "seaside_indp"
 
-    bldg_inv_id = "613ba5ef5d3b1d6461e8c415"
+    bldg_inv_id = "613ba5ef5d3b1d6461e8c415"  # prod
+    bldg_inv_id_dev= "64c7d058a62b20774f4107b5"  # dev
     seed = 1111
 
     power_network_dataset = Dataset.from_data_service("64ac73694e01de3af8fd8f2b", data_service=dev_datasvc)
@@ -222,15 +224,16 @@ def run_with_base_class():
     ###################################################
     # building damage
     ###################################################
-    bldg_dmg = BuildingDamage(prod_client)
-    fragility_service = FragilityService(prod_client)
-    bldg_dmg.load_remote_input_dataset("buildings", bldg_inv_id)
-    mapping_id = "5d2789dbb9219c3c553c7977"  # 4 DS
+    bldg_dmg = BuildingDamage(dev_client)
+    fragility_service = FragilityService(dev_client)
+    bldg_dmg.load_remote_input_dataset("buildings", bldg_inv_id_dev)
+    mapping_id = "5e99c86d6129af000136defa"  # 4 DS dev
+    # mapping_id = "5d2789dbb9219c3c553c7977"  # 4 DS prod
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("num_cpu", 4)
-    bldg_dmg.set_parameter("hazard_id", hazard_id)
+    bldg_dmg.set_parameter("hazard_id", hazard_id_dev)
     bldg_dmg.set_parameter("result_name", result_name + "_bldg_dmg")
     bldg_dmg.run_analysis()
     building_dmg_result = bldg_dmg.get_output_dataset("ds_result")
@@ -280,9 +283,11 @@ def run_with_base_class():
     # indp_analysis.set_parameter("method", "TDINDP")
     indp_analysis.set_parameter("t_steps", 10)
     indp_analysis.set_parameter("time_resource", True)
-    indp_analysis.set_parameter("save_model", False)
-    # indp_analysis.set_parameter("solver_engine", "glpk")
-    indp_analysis.set_parameter("solver_engine", "ipopt")  # recommended
+    # indp_analysis.set_parameter("save_model", False)
+    indp_analysis.set_parameter("save_model", True)
+    indp_analysis.set_parameter("solver_engine", "glpk")
+    # indp_analysis.set_parameter("solver_engine", "scip")
+    # indp_analysis.set_parameter("solver_engine", "ipopt")  # recommended
 
     indp_analysis.set_input_dataset("wf_restoration_time", wf_restoration_time)
     indp_analysis.set_input_dataset("wf_repair_cost", wf_repair_cost_result)

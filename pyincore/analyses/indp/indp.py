@@ -21,6 +21,8 @@ from pyincore.analyses.indp.indpresults import INDPResults
 from pyincore.analyses.indp.indputil import INDPUtil
 from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 
+from pyincore import globals as pyglobals
+
 
 class INDP(BaseAnalysis):
 
@@ -673,7 +675,11 @@ class INDP(BaseAnalysis):
         print(
             "Solving... using %s solver (%d cont. vars, %d binary vars)" %
             (solver_engine, num_cont_vars, num_integer_vars))
-        solver = SolverFactory(solver_engine, solver_io="python", timelimit=time_limit)
+        solver_path = self.get_parameter("solver_path")
+        if solver_path is None:
+            solver_path = pyglobals.GLPK_PATH
+        solver = SolverFactory(solver_engine, solver_io="nl", timelimit=time_limit, executable=solver_path)
+        # solver = SolverFactory(solver_engine, solver_io="python", timelimit=time_limit)
         solution = solver.solve(m)
         run_time = time.time() - start_time
 
@@ -796,8 +802,13 @@ class INDP(BaseAnalysis):
                     'required': False,
                     'description': "Solver to use for optimization model. Such as ipopt/gurobi/glpk",
                     'type': str
+                },
+                {
+                    'id': 'solver_path',
+                    'required': False,
+                    'description': "Solver to use for optimization model. Such as ipopt/gurobi/glpk",
+                    'type': str
                 }
-
             ],
             'input_datasets': [
                 {

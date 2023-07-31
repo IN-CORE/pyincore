@@ -40,5 +40,6 @@ TEST_DATA_DIR = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data")
 MAX_LOGIN_ATTEMPTS = 3
 
 IPOPT_PATH = shutil.which("ipopt")
+GLPK_PATH = shutil.which("glpsol")
 
 DAMAGE_PRECISION = 10
