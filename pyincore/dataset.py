@@ -15,7 +15,6 @@ import numpy
 import pandas as pd
 import geopandas as gpd
 import rasterio
-import wntr
 import warnings
 from pyincore import DataService
 
@@ -196,21 +195,6 @@ class Dataset:
                 return fiona.open(filename, layer=layers[0])
         else:
             return fiona.open(filename)
-
-    def get_EPAnet_inp_reader(self):
-        """Utility method for reading different standard file formats: EPAnet reader.
-
-        Returns:
-            obj: A Winter model.
-
-        """
-        filename = self.local_file_path
-        if os.path.isdir(filename):
-            files = glob.glob(filename + "/*.inp")
-            if len(files) > 0:
-                filename = files[0]
-        wn = wntr.network.WaterNetworkModel(filename)
-        return wn
 
     def get_json_reader(self):
         """Utility method for reading different standard file formats: json reader.

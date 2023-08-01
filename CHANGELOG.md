@@ -7,13 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Method to get allow Hazard demands from hazard service [#363](https://github.com/IN-CORE/pyincore/issues/363)
+
 ### Fixed
+- Post-processing cluster fuction handle empty rows from mcs [#365](https://github.com/IN-CORE/pyincore/issues/365)
 - Expose all the incore client parameters [#295](https://github.com/IN-CORE/pyincore/issues/295)
 - Fixed testing datasets not being cleaned in the database [#367](https://github.com/IN-CORE/pyincore/issues/367)
 - Mismatching spec types in the get_spec method [#383](https://github.com/IN-CORE/pyincore/issues/383)
+- Space services methods missing timeout parameters [#375](https://github.com/IN-CORE/pyincore/issues/375)
+- Fixed conda dependency issues for Python 3.10 and 3.11 [#376](https://github.com/IN-CORE/pyincore/pull/376/files)
 
 ### Changed
 - Building Damage supports multiple hazard fragilities [#337](https://github.com/IN-CORE/pyincore/issues/337)
+- Changed github workflow pytests base from miniconda to micromamba [#378](https://github.com/IN-CORE/pyincore/issues/378)
 
 ## [1.11.0] - 2023-06-14
 
