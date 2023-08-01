@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Method to get allow Hazard demands from hazard service [#363](https://github.com/IN-CORE/pyincore/issues/363)
 
 ### Fixed
+- Post-processing cluster fuction handle empty rows from mcs [#365](https://github.com/IN-CORE/pyincore/issues/365)
 - Expose all the incore client parameters [#295](https://github.com/IN-CORE/pyincore/issues/295)
 - Fixed testing datasets not being cleaned in the database [#367](https://github.com/IN-CORE/pyincore/issues/367)
 - Space services methods missing timeout parameters [#375](https://github.com/IN-CORE/pyincore/issues/375)
