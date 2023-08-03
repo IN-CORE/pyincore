@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Building Damage supports multiple hazard fragilities [#337](https://github.com/IN-CORE/pyincore/issues/337)
 - Changed github workflow pytests base from miniconda to micromamba [#378](https://github.com/IN-CORE/pyincore/issues/378)
+- Moved `return_http_response` to a single file in utils named `http_util.py` [#384](https://github.com/IN-CORE/pyincore/issues/384)
 
 
 ## [1.11.0] - 2023-06-14

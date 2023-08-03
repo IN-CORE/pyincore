@@ -7,6 +7,7 @@
 from urllib.parse import urljoin
 from pyincore import IncoreClient
 import pyincore.globals as pyglobals
+from pyincore.utils import return_http_response
 import requests
 
 logger = pyglobals.LOGGER
@@ -24,27 +25,6 @@ class SpaceService:
         self.client = client
         self.base_space_url = urljoin(client.service_url, "space/api/spaces/")
 
-    @staticmethod
-    def return_http_response(http_response):
-        try:
-            http_response.raise_for_status()
-            return http_response
-        except requests.exceptions.HTTPError:
-            logger.error('A HTTPError has occurred \n' +
-                         'HTTP Status code: ' + str(http_response.status_code) + '\n' +
-                         'Error Message: ' + http_response.content.decode()
-                         )
-            raise
-        except requests.exceptions.ConnectionError:
-            logger.error("ConnectionError: Failed to establish a connection with the server. "
-                         "This might be due to a refused connection. "
-                         "Please check that you are using the right URLs.")
-            raise
-        except requests.exceptions.RequestException:
-            logger.error("RequestException: There was an exception while trying to handle your request. "
-                         "Please go to the end of this message for more specific information about the exception.")
-            raise
-
     def create_space(self, space_json, timeout=(30, 600), **kwargs):
         """Creates a Space.
 
@@ -61,7 +41,7 @@ class SpaceService:
         space_data = {('space', space_json)}
         kwargs["files"] = space_data
         r = self.client.post(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def get_spaces(self, dataset_id: str = None, timeout=(30, 600), **kwargs):
         """Retrieve  a Space with the dataset.
@@ -82,7 +62,7 @@ class SpaceService:
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def get_space_by_id(self, space_id: str, timeout=(30, 600), **kwargs):
         """Get space information.
@@ -97,7 +77,7 @@ class SpaceService:
         url = urljoin(self.base_space_url, space_id)
         r = self.client.get(url, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def get_space_by_name(self, space_name: str, timeout=(30, 600), **kwargs):
         """Get space information by querying the name of space.
@@ -112,7 +92,7 @@ class SpaceService:
 
         """
         r = self.client.get(self.base_space_url, params={"name": space_name}, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def update_space(self, space_id: str, space_json, timeout=(30, 600), **kwargs):
         """Updates a Space.
@@ -131,7 +111,7 @@ class SpaceService:
         space_data = {('space', space_json)}
         kwargs["files"] = space_data
         r = self.client.put(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def add_to_space_by_name(self, space_name: str, dataset_id: str):
         """Add dataset to a space by using space name and dataset id.
@@ -183,7 +163,7 @@ class SpaceService:
         url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
 
         r = self.client.delete(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def add_dataset_to_space(self, space_id: str, dataset_id: str, timeout=(30, 600), **kwargs):
         """Add member to a Space.
@@ -201,7 +181,7 @@ class SpaceService:
         url = urljoin(self.base_space_url, space_id + "/members/" + dataset_id)
 
         r = self.client.post(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def grant_privileges_to_space(self, space_id: str, privileges_json, timeout=(30, 600), **kwargs):
         """Updates a Space.
@@ -221,4 +201,4 @@ class SpaceService:
         kwargs["files"] = space_privileges
         r = self.client.post(url, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
