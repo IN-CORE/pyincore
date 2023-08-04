@@ -9,6 +9,7 @@ import urllib
 
 from pyincore import IncoreClient
 from pyincore.dfr3service import Dfr3Service
+from pyincore.utils import return_http_response
 
 
 class FragilityService(Dfr3Service):
@@ -73,4 +74,4 @@ class FragilityService(Dfr3Service):
             payload['space'] = space
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()

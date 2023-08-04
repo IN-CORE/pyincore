@@ -11,6 +11,7 @@ from typing import Tuple, Union
 
 import pyincore.globals as pyglobals
 from pyincore import IncoreClient
+from pyincore.utils import return_http_response
 from urllib.parse import urljoin
 import requests
 
@@ -31,34 +32,6 @@ class SemanticService:
         self.client = client
         self.base_url = urljoin(client.service_url, "semantics/api/types")
 
-    @staticmethod
-    def return_http_response(http_response):
-        try:
-            http_response.raise_for_status()
-            return http_response
-        except requests.exceptions.HTTPError:
-            logger.error(
-                "A HTTPError has occurred \n"
-                + "HTTP Status code: "
-                + str(http_response.status_code)
-                + "\n"
-                + "Error Message: "
-                + http_response.content.decode()
-            )
-            raise
-        except requests.exceptions.ConnectionError:
-            logger.error(
-                "ConnectionError: Failed to establish a connection with the server. "
-                "This might be due to a refused connection. "
-                "Please check that you are using the right URLs."
-            )
-            raise
-        except requests.exceptions.RequestException:
-            logger.error(
-                "RequestException: There was an exception while trying to handle your request. "
-                "Please go to the end of this message for more specific information about the exception."
-            )
-            raise
 
     def get_all_semantic_types(
         self,
@@ -102,7 +75,7 @@ class SemanticService:
         response = self.client.get(
             url, params=payload, timeout=timeout, **kwargs
         )
-        data = self.return_http_response(response).json()
+        data = return_http_response(response).json()
 
         if save_json:
             with open(json_path, "w") as f:
@@ -135,7 +108,7 @@ class SemanticService:
 
         url = f"{self.base_url}/{type_name}"
         response = self.client.get(url, timeout=timeout, **kwargs)
-        data = self.return_http_response(response).json()
+        data = return_http_response(response).json()
 
         if save_json:
             with open(json_path, "w") as f:
@@ -164,4 +137,4 @@ class SemanticService:
         response = self.client.get(
             url, params=payload, timeout=timeout, **kwargs
         )
-        return self.return_http_response(response).json()
+        return return_http_response(response).json()
