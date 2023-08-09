@@ -5,7 +5,7 @@ set -o noglob
 #TESTPYPI="--extra-index-url https://test.pypi.org/simple/ --pre"
 
 MODULE="pyincore"
-CONDA_IMPORTS="ipopt>=3.11"
+CONDA_IMPORTS="ipopt>=3.11 scip>=8.0.0"
 
 # setup pip-compile to resolve dependencies, also is minimal version of python
 if [ ! -d /tmp/pyincore-requirements ]; then

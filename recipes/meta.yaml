@@ -40,6 +40,7 @@ requirements:
   run:
     - python>=3.6
     - ipopt>=3.11
+    - scip>=8.0.0
     - {{ pin_compatible('numpy') }}
     - fiona>=1.8.4
     - geopandas>=0.6.1
