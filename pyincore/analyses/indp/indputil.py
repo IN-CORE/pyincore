@@ -587,8 +587,8 @@ class INDPUtil:
                     node_fail_state.loc[node_fail_state['guid'] == row['guid'], 'name'] = node_name
                 else:
                     temp_dict = {**{'name': node_name, 'guid': 'nan'}, **{str(x): 1 for x in sample_range}}
-                    node_fail_state = node_fail_state.append(temp_dict, ignore_index=True)
-            combined_node_failed_states = combined_node_failed_states.append(node_fail_state)
+                    node_fail_state = pd.concat([node_fail_state, pd.DataFrame([temp_dict])], ignore_index=True)
+            combined_node_failed_states = pd.concat([combined_node_failed_states, node_fail_state])
 
         return combined_node_failed_states.dropna(subset=["name"])
 
@@ -603,7 +603,8 @@ class INDPUtil:
         for index, row in power_arcs.iterrows():
             temp_dict = {str(x): 1 for x in sample_range}
             temp_dict['guid'] = row['guid']
-            powerline_failure_state_df = powerline_failure_state_df.append(temp_dict, ignore_index=True)
+            powerline_failure_state_df = pd.concat([powerline_failure_state_df, pd.DataFrame([temp_dict])],
+                                                   ignore_index=True)
             s_node = int(row['fromnode'])
             e_node = int(row['tonode'])
             arc_name = '((' + str(s_node) + ',' + str(network_name["Power"]) + '),(' + str(e_node) + ',' + str(
@@ -624,10 +625,11 @@ class INDPUtil:
                 pipeline_failure_state_df.loc[pipeline_failure_state_df['guid'] == row['guid'], 'name'] = arc_name
             else:
                 temp_dict = {**{'name': arc_name, 'guid': 'nan'}, **{str(x): 1 for x in sample_range}}
-                pipeline_failure_state_df = pipeline_failure_state_df.append(temp_dict, ignore_index=True)
+                pipeline_failure_state_df = pd.concat([pipeline_failure_state_df, pd.DataFrame([temp_dict])],
+                                                      ignore_index=True)
 
-        combined_arc_failed_states = combined_arc_failed_states.append(powerline_failure_state_df)
-        combined_arc_failed_states = combined_arc_failed_states.append(pipeline_failure_state_df)
+        combined_arc_failed_states = pd.concat([combined_arc_failed_states, powerline_failure_state_df])
+        combined_arc_failed_states = pd.concat([combined_arc_failed_states, pipeline_failure_state_df])
 
         return combined_arc_failed_states.dropna(subset=["name"])
 
@@ -636,7 +638,6 @@ class INDPUtil:
         dist_nodes = list(set().union(water_arc_df['tonode'].unique(), water_arc_df['fromnode'].unique()))
         for node in dist_nodes:
             if node not in water_nodes_df["nodenwid"]:
-                water_nodes_df = water_nodes_df.append({'utilfcltyc': 'Distribution Node',
-                                                        'nodenwid': node},
-                                                       ignore_index=True)
+                water_nodes_df = pd.concat([water_nodes_df, pd.DataFrame([{'utilfcltyc': 'Distribution Node',
+                                                                          'nodenwid': node}])], ignore_index=True)
         return water_nodes_df

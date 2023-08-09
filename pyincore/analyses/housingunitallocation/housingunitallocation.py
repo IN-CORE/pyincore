@@ -220,7 +220,7 @@ class HousingUnitAllocation(BaseAnalysis):
                                   how='outer', left_on=["blockid", "randommergeorder"],
                                   right_on=["blockid", "randommergeorder"],
                                   sort=True, suffixes=("_x", "_y"),
-                                  copy=True, indicator=True, validate="1:1")
+                                  copy=True, indicator=True)
         huap_inventory = huap_inventory.rename(columns={"_merge": "aphumerge"})
         # check for duplicate columns from merge
         huap_inventory = self.compare_merges(sorted_housing_unit.columns,

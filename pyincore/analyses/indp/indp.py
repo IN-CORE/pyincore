@@ -216,10 +216,10 @@ class INDP(BaseAnalysis):
                                 repairtime = 0
                             else:
                                 repairtime = row["PF_" + str(failure_state - 1)]
-                            wf_restoration_time_sample = wf_restoration_time_sample.append({"guid": row["guid"],
-                                                                                            "repairtime": repairtime},
-                                                                                           ignore_index=True)
-
+                            wf_restoration_time_sample = pd.concat([wf_restoration_time_sample,
+                                                                    pd.DataFrame([{"guid": row["guid"],
+                                                                                  "repairtime": repairtime}])],
+                                                                   ignore_index=True)
                         epf_restoration_time_sample = pd.DataFrame()
                         for index, row in epf_restoration_time.iterrows():
                             failure_state = int(row["sample_damage_states"].split(",")[i].split("_")[1])  # DS_0,1,2,3,4
@@ -227,9 +227,10 @@ class INDP(BaseAnalysis):
                                 repairtime = 0
                             else:
                                 repairtime = row["PF_" + str(failure_state - 1)]
-                            epf_restoration_time_sample = epf_restoration_time_sample.append({"guid": row["guid"],
-                                                                                              "repairtime": repairtime},
-                                                                                             ignore_index=True)
+                            epf_restoration_time_sample = pd.concat([epf_restoration_time_sample,
+                                                                     pd.DataFrame([{"guid": row["guid"],
+                                                                                   "repairtime":repairtime}])],
+                                                                    ignore_index=True)
 
                         water_nodes, water_arcs, power_nodes, power_arcs = \
                             INDPUtil.time_resource_usage_curves(power_arcs, power_nodes, water_arcs, water_nodes,
