@@ -1413,14 +1413,14 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                     'id': 'building_related_data',
                     'required': True,
                     'description': 'A csv file with building related data required to evaluate retrofit strategies',
-                    'type': 'incore:multiobjectiveBuildingRelatedData'
+                    'type': ['incore:multiobjectiveBuildingRelatedData']
                 },
                 {
                     'id': 'strategy_costs_data',
                     'required': True,
                     'description': 'A csv file with strategy cost data'
                                    'per building',
-                    'type': 'incore:multiobjectiveStrategyCosts'
+                    'type': ['incore:multiobjectiveStrategyCosts']
                 },
             ],
             'output_datasets': [

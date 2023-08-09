@@ -49,19 +49,18 @@ jobs:
           key:
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
 
-      - name: Install miniconda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install micromamba
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-version: "latest"
-          python-version: 3.8
-          use-mamba: true
-          mamba-version: "*"
-          channels: conda-forge
-          use-only-tar-bz2: true
-          conda-build-version: "*"
+          create-args: >-
+            python=3.8
+            conda
+          environment-file: environment.yml
+          generate-run-shell: true
 
       - name: Build conda package
         run: |
+          conda install conda-build
           mkdir dist
           conda build --output-folder dist \
                       --label ${{ env.LABEL }} \

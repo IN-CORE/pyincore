@@ -14,6 +14,7 @@ import ntpath
 
 import pyincore.globals as pyglobals
 from pyincore import IncoreClient
+from pyincore.utils import return_http_response
 from urllib.parse import urljoin
 import requests
 
@@ -35,26 +36,6 @@ class DataService:
         self.base_earthquake_url = urljoin(client.service_url, 'hazard/api/earthquakes/')
         self.base_tornado_url = urljoin(client.service_url, 'hazard/api/tornadoes/')
 
-    @staticmethod
-    def return_http_response(http_response):
-        try:
-            http_response.raise_for_status()
-            return http_response
-        except requests.exceptions.HTTPError:
-            logger.error('A HTTPError has occurred \n' +
-                         'HTTP Status code: ' + str(http_response.status_code) + '\n' +
-                         'Error Message: ' + http_response.content.decode()
-                         )
-            raise
-        except requests.exceptions.ConnectionError:
-            logger.error("ConnectionError: Failed to establish a connection with the server. "
-                         "This might be due to a refused connection. "
-                         "Please check that you are using the right URLs.")
-            raise
-        except requests.exceptions.RequestException:
-            logger.error("RequestException: There was an exception while trying to handle your request. "
-                         "Please go to the end of this message for more specific information about the exception.")
-            raise
 
     def get_dataset_metadata(self, dataset_id: str, timeout=(30, 600), **kwargs):
         """Retrieve metadata from data service. Dataset API endpoint is called.
@@ -70,7 +51,7 @@ class DataService:
         # construct url with service, dataset api, and id
         url = urljoin(self.base_url, dataset_id)
         r = self.client.get(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def get_dataset_files_metadata(self, dataset_id: str, timeout=(30, 600), **kwargs):
         """Retrieve metadata of all files associated with the dataset. Files API endpoint is called.
@@ -86,7 +67,7 @@ class DataService:
         """
         url = urljoin(self.base_url, dataset_id + '/files')
         r = self.client.get(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def get_dataset_file_metadata(self, dataset_id: str, file_id: str, timeout=(30, 600), **kwargs):
         """Retrieve metadata of all files associated with the dataset. Files API endpoint is called.
@@ -104,7 +85,7 @@ class DataService:
         url = urljoin(self.base_url,
                                    dataset_id + "/files/" + file_id)
         r = self.client.get(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def get_dataset_blob(self, dataset_id: str, join=None, timeout=(30, 600), **kwargs):
         """Retrieve a blob of the dataset. Blob API endpoint is called.
@@ -210,7 +191,7 @@ class DataService:
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         # need to handle there is no datasets
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def create_dataset(self, properties: dict, timeout=(30, 600), **kwargs):
         """Create datasets. Post API endpoint is called.
@@ -227,7 +208,7 @@ class DataService:
         url = self.base_url
         kwargs["files"] = payload
         r = self.client.post(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def update_dataset(self, dataset_id, property_name: str,
                        property_value: str, timeout=(30, 600), **kwargs):
@@ -249,7 +230,7 @@ class DataService:
                                          "property value": property_value})}
         kwargs["files"] = payload
         r = self.client.put(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def add_files_to_dataset(self, dataset_id: str, filepaths: list, timeout=(30, 600), **kwargs):
         """Add files to the dataset. Post API endpoint is called.
@@ -277,7 +258,7 @@ class DataService:
         for tuple in listfiles:
             tuple[1].close()
 
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def add_files_to_network_dataset(self, dataset_id: str, filepaths: list,
                                      nodename: str, linkname: str, graphname: str, timeout=(30, 600), **kwargs):
@@ -320,7 +301,7 @@ class DataService:
         for tuple in listfiles:
             tuple[1].close()
 
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def delete_dataset(self, dataset_id: str, timeout=(30, 600), **kwargs):
         """Delete dataset. Delete API endpoint is called.
@@ -336,7 +317,7 @@ class DataService:
         """
         url = urljoin(self.base_url, dataset_id)
         r = self.client.delete(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def get_files(self, timeout=(30, 600), **kwargs):
         """Get all files. Files API endpoint is called.
@@ -351,7 +332,7 @@ class DataService:
         """
         url = self.files_url
         r = self.client.get(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def get_file_metadata(self, file_id: str, timeout=(30, 600), **kwargs):
         """Function to retrieve metadata of a file defined by id. Files API endpoint is called.
@@ -367,7 +348,7 @@ class DataService:
         """
         url = urljoin(self.files_url, file_id)
         r = self.client.get(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()
 
     def get_file_blob(self, file_id: str, timeout=(30, 600), **kwargs):
         """Function to retrieve a blob of the file. Blob API endpoint is called.
@@ -386,7 +367,7 @@ class DataService:
         kwargs["stream"] = True
         r = self.client.get(url, timeout=timeout, **kwargs)
 
-        r = self.return_http_response(r)
+        r = return_http_response(r)
 
         # extract filename
         disposition = r.headers['content-disposition']
@@ -449,13 +430,13 @@ class DataService:
 
         # obtain file name
         r = self.client.get(request_str, timeout=timeout, **kwargs)
-        r = self.return_http_response(r).json()
+        r = return_http_response(r).json()
         first_filename = r["fileDescriptors"][0]["filename"]
         filename = os.path.splitext(first_filename)[0]
         kwargs["stream"] = True
 
         r = self.client.get(request_str_zip, timeout=timeout, **kwargs)
-        r = self.return_http_response(r)
+        r = return_http_response(r)
         z = zipfile.ZipFile(io.BytesIO(r.content))
         z.extractall(dirname)
         # print(r.status_code)
@@ -478,7 +459,7 @@ class DataService:
         request_str = self.base_tornado_url + fileid
         r = self.client.get(request_str, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r).json()["tornadoDatasetId"]
+        return return_http_response(r).json()["tornadoDatasetId"]
 
     def search_datasets(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Function to search datasets.
@@ -503,4 +484,4 @@ class DataService:
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r).json()
+        return return_http_response(r).json()

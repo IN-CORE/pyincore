@@ -454,27 +454,27 @@ class HousingRecoverySequential(BaseAnalysis):
                     'required': True,
                     'description': 'A csv file with population dislocation result '
                                    'aggregated to the block group level',
-                    'type': 'incore:popDislocation'
+                    'type': ['incore:popDislocation']
                 },
                 {
                     'id': 'tpm',
                     'required': True,
                     'description': 'Transition probability matrix in CSV format that specifies '
                                    'the corresponding Markov chain per social vulnerability level.',
-                    'type': 'incore:houseRecTransitionProbMatrix'
+                    'type': ['incore:houseRecTransitionProbMatrix']
                 },
                 {
                     'id': 'initial_stage_probabilities',
                     'required': True,
                     'description': 'initial mass probability function for stage 0 of the Markov Chain',
-                    'type': 'incore:houseRecInitialStageProbability'
+                    'type': ['incore:houseRecInitialStageProbability']
                 },
                 {
                     'id': 'sv_result',
                     'required': True,
                     'description': 'A csv file with zones containing demographic factors'
                                    'qualified by a social vulnerability score',
-                    'type': 'incore:socialVulnerabilityScore'
+                    'type': ['incore:socialVulnerabilityScore']
                 }
             ],
             'output_datasets': [
