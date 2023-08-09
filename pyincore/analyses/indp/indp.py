@@ -662,11 +662,11 @@ class INDP(BaseAnalysis):
 
         solver_engine = self.get_parameter("solver_engine")
         if solver_engine is None:
-            solver_engine = "glpk"
+            solver_engine = "scip"
 
         solver_path = self.get_parameter("solver_path")
         if solver_path is None:
-            solver_path = pyglobals.GLPK_PATH
+            solver_path = pyglobals.SCIP_PATH
 
         solver_time_limit = self.get_parameter("solver_time_limit")
 
@@ -751,7 +751,7 @@ class INDP(BaseAnalysis):
                     'description': 'list of resource caps or the number of available resources in each step of the '
                                    'analysis. Each item of the list is a dictionary whose items show the type of '
                                    'resource and the available number of that type of resource. For example: '
-                                   '* If `FAIL_SCE_PARAM[TYPE]`=*from_csv*, you have two options:* if, for example, '
+                                   '* If `network_type`=*from_csv*, you have two options:* if, for example, '
                                    '`R_c`= [{"budget": 3}, {"budget": 6}], then the analysis is done for the cases '
                                    'when there are 3 and 6 resources available of type "budget" '
                                    '(total resource assignment).* if, for example, `R_c`= [{"budget": {1:1, 2:1}}, '
@@ -799,13 +799,13 @@ class INDP(BaseAnalysis):
                 {
                     'id': 'solver_engine',
                     'required': False,
-                    'description': "Solver to use for optimization model. Such as gurobi/glpk",
+                    'description': "Solver to use for optimization model. Such as gurobi/glpk/scip, default to scip.",
                     'type': str
                 },
                 {
                     'id': 'solver_path',
                     'required': False,
-                    'description': "Solver to use for optimization model. Such as gurobi/glpk",
+                    'description': "Solver to use for optimization model. Such as gurobi/glpk/scip, default to scip.",
                     'type': str
                 },
                 {
@@ -820,39 +820,39 @@ class INDP(BaseAnalysis):
                     "id": "wf_repair_cost",
                     "required": True,
                     "description": "repair cost for each water facility",
-                    "type": "incore:repairCost"
+                    "type": ["incore:repairCost"]
                 },
                 {
                     'id': 'wf_restoration_time',
                     "required": True,
                     'description': 'recording repair time at certain functionality recovery for each class '
                                    'and limit state.',
-                    'type': 'incore:waterFacilityRepairTime'
+                    'type': ['incore:waterFacilityRepairTime']
                 },
                 {
                     "id": "epf_repair_cost",
                     "required": True,
                     "description": "repair cost for each electric power facility",
-                    "type": "incore:repairCost"
+                    "type": ["incore:repairCost"]
                 },
                 {
                     'id': 'epf_restoration_time',
                     "required": True,
                     'description': 'recording repair time at certain functionality recovery for each class '
                                    'and limit state.',
-                    'type': 'incore:epfRepairTime'
+                    'type': ['incore:epfRepairTime']
                 },
                 {
                     "id": "pipeline_repair_cost",
                     "required": True,
                     "description": "repair cost for each pipeline",
-                    "type": "incore:pipelineRepairCost"
+                    "type": ["incore:pipelineRepairCost"]
                 },
                 {
                     'id': 'pipeline_restoration_time',
                     "required": True,
                     'description': 'pipeline restoration times',
-                    'type': 'incore:pipelineRestorationVer1'
+                    'type': ['incore:pipelineRestorationVer1']
                 },
                 {
                     'id': 'power_network',
@@ -893,7 +893,7 @@ class INDP(BaseAnalysis):
                 {
                     "id": "interdep",
                     "required": True,
-                    "description": "Interdep.csv",
+                    "description": "Interdepenency between water and electric power facilities",
                     "type": "incore:interdep"
                 },
                 {

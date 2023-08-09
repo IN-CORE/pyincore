@@ -41,5 +41,6 @@ MAX_LOGIN_ATTEMPTS = 3
 
 IPOPT_PATH = shutil.which("ipopt")
 GLPK_PATH = shutil.which("glpsol")
+SCIP_PATH = shutil.which("scip")
 
 DAMAGE_PRECISION = 10

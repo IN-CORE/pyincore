@@ -32,7 +32,7 @@ def run_with_base_class():
     result_name = "seaside_indp"
 
     bldg_inv_id = "613ba5ef5d3b1d6461e8c415"  # prod
-    bldg_inv_id_dev= "64c7d058a62b20774f4107b5"  # dev
+    bldg_inv_id_dev = "64c7d058a62b20774f4107b5"  # dev
     seed = 1111
 
     power_network_dataset = Dataset.from_data_service("64ac73694e01de3af8fd8f2b", data_service=dev_datasvc)
@@ -291,15 +291,15 @@ def run_with_base_class():
     # indp_analysis.set_parameter("solver_path", "/usr/local/bin/glpsol")
 
     # scip
-    indp_analysis.set_parameter("solver_engine", "scip")
-    indp_analysis.set_parameter("solver_path", "/usr/local/bin/scip")
+    # indp_analysis.set_parameter("solver_engine", "scip")
+    # indp_analysis.set_parameter("solver_path", "/usr/local/bin/scip")
 
     # cbc
     # indp_analysis.set_parameter("solver_engine", "cbc")
     # indp_analysis.set_parameter("solver_path", "/usr/local/bin/cbc")
 
     # gurobi
-    # indp_analysis.set_parameter("solver_engine", "gurobi")
+    indp_analysis.set_parameter("solver_engine", "gurobi")
 
     indp_analysis.set_parameter("solver_time_limit", 3600)  # if not set default to never timeout
 
