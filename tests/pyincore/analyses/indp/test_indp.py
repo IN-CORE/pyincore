@@ -286,20 +286,20 @@ def run_with_base_class():
     # indp_analysis.set_parameter("save_model", False)
     indp_analysis.set_parameter("save_model", True)
 
-    # glpk
-    # indp_analysis.set_parameter("solver_engine", "glpk")  # recommended
-    # indp_analysis.set_parameter("solver_path", "/usr/local/bin/glpsol")
-
     # scip
-    # indp_analysis.set_parameter("solver_engine", "scip")
+    # indp_analysis.set_parameter("solver_engine", "scip") # recommended
     # indp_analysis.set_parameter("solver_path", "/usr/local/bin/scip")
 
     # cbc
     # indp_analysis.set_parameter("solver_engine", "cbc")
     # indp_analysis.set_parameter("solver_path", "/usr/local/bin/cbc")
 
+    # glpk
+    # indp_analysis.set_parameter("solver_engine", "glpk")
+    # indp_analysis.set_parameter("solver_path", "/usr/local/bin/glpsol")
+
     # gurobi
-    indp_analysis.set_parameter("solver_engine", "gurobi")
+    # indp_analysis.set_parameter("solver_engine", "gurobi")
 
     indp_analysis.set_parameter("solver_time_limit", 3600)  # if not set default to never timeout
 
