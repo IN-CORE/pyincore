@@ -894,55 +894,55 @@ class INDP(BaseAnalysis):
                     "id": "interdep",
                     "required": True,
                     "description": "Interdepenency between water and electric power facilities",
-                    "type": "incore:interdep"
+                    "type": ["incore:interdep"]
                 },
                 {
                     "id": "wf_failure_state",
                     "required": True,
                     "description": "MCS failure state of water facilities",
-                    "type": "incore:sampleFailureState"
+                    "type": ["incore:sampleFailureState"]
                 },
                 {
                     "id": "wf_damage_state",
                     "required": True,
                     "description": "MCS damage state of water facilities",
-                    "type": "incore:sampleDamageState"
+                    "type": ["incore:sampleDamageState"]
                 },
                 {
                     "id": "pipeline_failure_state",
                     "required": True,
                     "description": "failure state of pipeline from pipeline functionality",
-                    "type": "incore:sampleFailureState"
+                    "type": ["incore:sampleFailureState"]
                 },
                 {
                     "id": "epf_failure_state",
                     "required": True,
                     "description": "MCS failure state of electric power facilities",
-                    "type": "incore:sampleFailureState"
+                    "type": ["incore:sampleFailureState"]
                 },
                 {
                     "id": "epf_damage_state",
                     "required": True,
                     "description": "MCS damage state of electric power facilities",
-                    "type": "incore:sampleDamageState"
+                    "type": ["incore:sampleDamageState"]
                 },
                 {
                     "id": "pop_dislocation",
                     "required": True,
                     "description": "Population dislocation output",
-                    "type": "incore:popDislocation"
+                    "type": ["incore:popDislocation"]
                 },
                 {
                     "id": "bldgs2elec",
                     "required": False,
                     "description": "relation between building and electric power facility",
-                    "type": "incore:bldgs2elec"
+                    "type": ["incore:bldgs2elec"]
                 },
                 {
                     "id": "bldgs2wter",
                     "required": False,
                     "description": "relation between building and water facility",
-                    "type": "incore:bldgs2wter"
+                    "type": ["incore:bldgs2wter"]
                 },
             ],
             'output_datasets': [
