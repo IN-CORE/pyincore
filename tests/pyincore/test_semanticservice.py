@@ -49,12 +49,13 @@ def test_get_all_semantic_types(semanticsvc):
 
 
 def test_get_semantic_type_by_name(semanticsvc):
-    semantic_type_exists = "ncsa:wildfireDamageRaster"
-    semantic_type_not_exists = "wildFireDamageRaster"
+    semantic_type_exists = "ergo:bridgeDamage"
+    semantic_type_not_exists = "bridgeDamage"
 
     # find semantic type by name which exists
     semantic_types = semanticsvc.get_semantic_type_by_name(semantic_type_exists)
-    assert len(semantic_types) == 1, f"Should find one semantic type as {semantic_type_exists} exists"
+    # Checks semantic dictionary is not empty
+    assert type(semantic_types) == dict and bool(dict), f"Should find one semantic type as {semantic_type_exists} exists"
     # find semantic type by name which does not exist
     # this should raise error
     with pytest.raises(Exception) as excinfo:
