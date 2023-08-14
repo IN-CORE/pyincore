@@ -25,6 +25,19 @@ from pyincore import globals as pyglobals
 
 
 class INDP(BaseAnalysis):
+    """
+        This class runs INDP or td-INDP for a given number of time steps and input parameters.This analysis takes a
+        decentralized approach to solve the Interdependent Network Design Problem (INDP), a family of
+        centralized Mixed-Integer Programming (MIP) models, which find the optimal restoration strategy of disrupted
+        networked systems subject to budget and operational constraints.
+
+        Contributors
+            | Science: Hesam Talebiyan
+            | Implementation: Chen Wang and NCSA IN-CORE Dev Team
+
+        Args:
+            incore_client (IncoreClient): Service authentication.
+        """
 
     def __init__(self, incore_client):
         super(INDP, self).__init__(incore_client)
