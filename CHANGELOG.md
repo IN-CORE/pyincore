@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.12.0] - 2023-08-16
 
 ### Added
 - Add Semantic Module to interact with Semantic service [#361](https://github.com/IN-CORE/pyincore/issues/361)
@@ -17,10 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed testing datasets not being cleaned in the database [#367](https://github.com/IN-CORE/pyincore/issues/367)
 - Mismatching spec types in the get_spec method [#383](https://github.com/IN-CORE/pyincore/issues/383)
 - Space services methods missing timeout parameters [#375](https://github.com/IN-CORE/pyincore/issues/375)
-- Fixed conda dependency issues for Python 3.10 and 3.11 [#376](https://github.com/IN-CORE/pyincore/pull/376/files)
+- Fixed conda dependency issues for Python 3.10 and 3.11 [#343](https://github.com/IN-CORE/pyincore/issues/343)
+- Fixed semantic service unit test to handle response object [#386](https://github.com/IN-CORE/pyincore/issues/386)
+- Fixed conda publish action [#381](https://github.com/IN-CORE/pyincore/issues/381)
+
 
 ### Changed
-- Building Damage supports multiple hazard fragilities [#337](https://github.com/IN-CORE/pyincore/issues/337)
 - Changed github workflow pytests base from miniconda to micromamba [#378](https://github.com/IN-CORE/pyincore/issues/378)
 - Moved `return_http_response` to a single file in utils named `http_util.py` [#384](https://github.com/IN-CORE/pyincore/issues/384)
 
