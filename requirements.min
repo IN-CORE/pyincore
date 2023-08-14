@@ -1,6 +1,7 @@
 fiona>=1.8.4
 geopandas>=0.6.1
 ipopt>=3.11
+scip>=8.0.0
 matplotlib>=2.1.0
 networkx>=2.2
 numpy>=1.16.6,<2.0a0

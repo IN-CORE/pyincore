@@ -256,6 +256,25 @@ class Dataset:
 
         return self.readers["csv"]
 
+    def get_csv_reader_std(self):
+        """Utility method for reading different standard file formats: csv reader.
+
+         Returns:
+             obj: CSV reader.
+
+         """
+        if "csv" not in self.readers:
+            filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.csv")
+                if len(files) > 0:
+                    filename = files[0]
+
+            csvfile = open(filename, 'r')
+            return csv.reader(csvfile)
+
+        return self.readers["csv"]
+
     def get_file_path(self, type='csv'):
         """Utility method for reading different standard file formats: file path.
 
@@ -274,7 +293,7 @@ class Dataset:
 
         return filename
 
-    def get_dataframe_from_csv(self, low_memory=True):
+    def get_dataframe_from_csv(self, low_memory=True, delimiter=None):
         """Utility method for reading different standard file formats: Pandas DataFrame from csv.
 
         Args:
@@ -288,7 +307,7 @@ class Dataset:
         filename = self.get_file_path('csv')
         df = pd.DataFrame()
         if os.path.isfile(filename):
-            df = pd.read_csv(filename, header="infer", low_memory=low_memory)
+            df = pd.read_csv(filename, header="infer", low_memory=low_memory, delimiter=delimiter)
         return df
 
     def get_dataframe_from_shapefile(self):
