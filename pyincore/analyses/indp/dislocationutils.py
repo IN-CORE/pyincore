@@ -71,7 +71,7 @@ class DislocationUtil:
                             total_pop_node += hh['numprec'] if ~np.isnan(hh['numprec']) else 0
                             if hh['dislocated']:
                                 # ..todo Lumebrton dislocation time model. Replace with that of Seaside when available
-                                return_time = DislocationUtil.lumberton_disloc_time_mode(hh)
+                                return_time = DislocationUtil.disloc_time_mode(hh)
                                 for t in range(return_time):
                                     if t <= T and return_type == 'step_function':
                                         num_dilocated[t] += hh['numprec'] if ~np.isnan(hh['numprec']) else 0
@@ -109,7 +109,7 @@ class DislocationUtil:
                                 if ~np.isnan(hh['numprec']) else 0
                             if hh['dislocated']:
                                 # ..todo Lumebrton dislocation time model. Replace with that of Seaside when available
-                                return_time = DislocationUtil.lumberton_disloc_time_mode(hh)
+                                return_time = DislocationUtil.disloc_time_mode(hh)
                                 for t in range(return_time):
                                     if t <= T and return_type == 'step_function':
                                         node_pop[start_node]['num_dilocated'][t] += hh['numprec'] / 4 \
@@ -129,7 +129,7 @@ class DislocationUtil:
         return dynamic_params
 
     @staticmethod
-    def lumberton_disloc_time_mode(household_data):
+    def disloc_time_mode(household_data):
         dt_params = {'DS0': 1.00, 'DS1': 2.33, 'DS2': 2.49, 'DS3': 3.62,
                      'white': 0.78, 'black': 0.88, 'hispanic': 0.83,
                      'income': -0.00, 'insurance': 1.06}
