@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add Semantic Module to interact with Semantic service [#361](https://github.com/IN-CORE/pyincore/issues/361)
 - Method to get allow Hazard demands from hazard service [#363](https://github.com/IN-CORE/pyincore/issues/363)
 - Interdependent Network Design Problem (INDP) [#49](https://github.com/IN-CORE/pyincore/issues/49)
-- 
+
 ### Fixed
 - Post-processing cluster fuction handle empty rows from mcs [#365](https://github.com/IN-CORE/pyincore/issues/365)
 - Expose all the incore client parameters [#295](https://github.com/IN-CORE/pyincore/issues/295)
