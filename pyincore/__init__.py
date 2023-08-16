@@ -19,6 +19,7 @@ from pyincore.fragilityservice import FragilityService
 from pyincore.repairservice import RepairService
 from pyincore.restorationservice import RestorationService
 from pyincore.spaceservice import SpaceService
+from pyincore.semanticservice import SemanticService
 from pyincore.utils.analysisutil import AnalysisUtil
 from pyincore.utils.popdisloutputprocess import PopDislOutputProcess
 from pyincore.utils.cgeoutputprocess import CGEOutputProcess

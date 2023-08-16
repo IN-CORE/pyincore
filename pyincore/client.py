@@ -14,6 +14,7 @@ import urllib.parse
 import requests
 
 from pyincore import globals as pyglobals
+from pyincore.utils import return_http_response
 
 logger = pyglobals.LOGGER
 
@@ -102,7 +103,7 @@ class Client:
         Args:
             url (str): Service url.
             params (obj): Session parameters.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -110,7 +111,7 @@ class Client:
 
         """
         r = self.session.get(url, params=params, timeout=timeout, **kwargs)
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
         """Post data on the server.
@@ -119,7 +120,7 @@ class Client:
             url (str): Service url.
             data (obj): Data to be posted on the server.
             json (obj): Description of the data, metadata json.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -127,7 +128,7 @@ class Client:
 
         """
         r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
         """Put data on the server.
@@ -135,7 +136,7 @@ class Client:
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -143,14 +144,14 @@ class Client:
 
         """
         r = self.session.put(url, data=data, timeout=timeout, **kwargs)
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def delete(self, url: str, timeout=(30, 600), **kwargs):
         """Delete data on the server.
 
         Args:
             url (str): Service url.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -158,28 +159,7 @@ class Client:
 
         """
         r = self.session.delete(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r)
-
-    @staticmethod
-    def return_http_response(http_response):
-        try:
-            http_response.raise_for_status()
-            return http_response
-        except requests.exceptions.HTTPError:
-            logger.error('A HTTPError has occurred \n' +
-                         'HTTP Status code: ' + str(http_response.status_code) + '\n' +
-                         'Error Message: ' + http_response.content.decode()
-                         )
-            raise
-        except requests.exceptions.ConnectionError:
-            logger.error("ConnectionError: Failed to establish a connection with the server. "
-                         "This might be due to a refused connection. "
-                         "Please check that you are using the right URLs.")
-            raise
-        except requests.exceptions.RequestException:
-            logger.error("RequestException: There was an exception while trying to handle your request. "
-                         "Please go to the end of this message for more specific information about the exception.")
-            raise
+        return return_http_response(r)
 
 
 class IncoreClient(Client):
@@ -241,7 +221,7 @@ class IncoreClient(Client):
                                                     'client_id': pyglobals.CLIENT_ID,
                                                     'username': username, 'password': password})
             try:
-                token = self.return_http_response(r).json()
+                token = return_http_response(r).json()
                 if token is None or token["access_token"] is None:
                     logger.warning("Authentication Failed.")
                     exit(0)
@@ -301,7 +281,7 @@ class IncoreClient(Client):
         Args:
             url (str): Service url.
             params (obj): Session parameters.
-            timeout (int): Session timeout.
+            timeout (tuple[int,int]): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -314,7 +294,7 @@ class IncoreClient(Client):
             self.login()
             r = self.session.get(url, params=params, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
         """Post data on the server.
@@ -336,7 +316,7 @@ class IncoreClient(Client):
             self.login()
             r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
         """Put data on the server.
@@ -344,7 +324,7 @@ class IncoreClient(Client):
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -357,14 +337,14 @@ class IncoreClient(Client):
             self.login()
             r = self.session.put(url, data=data, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def delete(self, url: str, timeout=(30, 600), **kwargs):
         """Delete data on the server.
 
         Args:
             url (str): Service url.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -377,7 +357,7 @@ class IncoreClient(Client):
             self.login()
             r = self.session.delete(url, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def create_service_json_entry(self):
         update_hash_entry("add", hashed_url=self.hashed_service_url, service_url=self.service_url)

@@ -125,6 +125,31 @@ analyses/housingunitallocation
 ..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
     :members:
 
+analyses/indp
+==============================
+..  autoclass:: indp.indp.INDP
+    :members:
+..  autoclass:: indp.dislocationutils.DislocationUtil
+    :members:
+..  autoclass:: indp.indpcomponents.INDPComponents
+    :members:
+..  autoclass:: indp.indpresults.INDPResults
+    :members:
+..  autoclass:: indp.indputil.INDPUtil
+    :members:
+..  autoclass:: indp.infrastructurearc.InfrastructureArc
+    :members:
+..  autoclass:: indp.infrastructureinterdeparc.InfrastructureInterdepArc
+    :members:
+..  autoclass:: indp.infrastructurenetwork.InfrastructureNetwork
+    :members:
+..  autoclass:: indp.infrastructurenode.InfrastructureNode
+    :members:
+..  autoclass:: indp.infrastructurespace.InfrastructureSpace
+    :members:
+..  autoclass:: indp.infrastructureutil.InfrastructureUtil
+    :members:
+
 analyses/joplincge
 ==================
 ..  autoclass:: joplincge.joplincge.JoplinCGEModel

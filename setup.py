@@ -7,7 +7,7 @@
 from setuptools import setup, find_packages
 
 # version number of pyincore
-version = '1.11.0'
+version = '1.12.0'
 
 with open("README.rst", encoding="utf-8") as f:
     readme = f.read()
@@ -67,7 +67,6 @@ setup(
         'rtree>=0.8.3',
         'scipy>=1.2.0',
         'shapely>=1.6.4.post1',
-        'wntr>=0.1.6',
     ],
 
     extras_require={
