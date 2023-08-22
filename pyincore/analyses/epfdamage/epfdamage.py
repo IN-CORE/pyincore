@@ -187,6 +187,8 @@ class EpfDamage(BaseAnalysis):
             hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
         elif hazard_type == 'tsunami':
             hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'flood':
+            hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
         else:
             raise ValueError("Missing hazard type.")
 
