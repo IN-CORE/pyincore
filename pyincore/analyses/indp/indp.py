@@ -178,6 +178,13 @@ class INDP(BaseAnalysis):
         epf_restoration_time = self.get_input_dataset("epf_restoration_time").get_dataframe_from_csv(low_memory=False)
         epf_restoration_time = epf_restoration_time.merge(epf_damage_state_df, on="guid")
 
+        dt_params_dataset = self.get_input_dataset("dt_params")
+        if dt_params_dataset is not None:
+            dt_params = dt_params_dataset.get_json_reader()
+        else:
+            dt_params = {'DS0': 1.00, 'DS1': 2.33, 'DS2': 2.49, 'DS3': 3.62, 'white': 0.78, 'black': 0.88,
+                         'hispanic': 0.83, 'income': -0.00, 'insurance': 1.06}
+
         # results
         action_result = []
         cost_result = []
@@ -257,8 +264,8 @@ class INDP(BaseAnalysis):
 
                     if params['DYNAMIC_PARAMS']:
                         print("Computing dynamic demand based on dislocation data...")
-                        dyn_dmnd = DislocationUtil.create_dynamic_param(params, pop_dislocation, N=params["N"],
-                                                                        T=params["NUM_ITERATIONS"])
+                        dyn_dmnd = DislocationUtil.create_dynamic_param(params, pop_dislocation, dt_params,
+                                                                        N=params["N"], T=params["NUM_ITERATIONS"])
                         params['DYNAMIC_PARAMS']['DEMAND_DATA'] = dyn_dmnd
 
                     if fail_sce_param['TYPE'] == 'from_csv':
@@ -938,6 +945,12 @@ class INDP(BaseAnalysis):
                     "required": True,
                     "description": "MCS damage state of electric power facilities",
                     "type": ["incore:sampleDamageState"]
+                },
+                {
+                    "id": "dt_params",
+                    "required": False,
+                    "description": "Parameters for population dislocation time",
+                    "type": ["incore:dTParams"]
                 },
                 {
                     "id": "pop_dislocation",
