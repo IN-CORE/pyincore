@@ -287,6 +287,7 @@ class NonStructBuildingDamage(BaseAnalysis):
             hazard_exposure_as = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_as, hazard_type)
             hazard_exposure_ds = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_ds, hazard_type)
             haz_expose = NonStructBuildingUtil.determine_haz_exposure(hazard_exposure_as, hazard_exposure_ds)
+            building_result['haz_expose'] = haz_expose
 
             # put damage results in dictionary
             damage_result = dict()
@@ -300,7 +301,6 @@ class NonStructBuildingDamage(BaseAnalysis):
             damage_result['hazardtype'] = hazard_type
             damage_result['hazardvals_as'] = hazard_vals_as
             damage_result['hazardvals_ds'] = hazard_vals_ds
-            damage_result['haz_expose'] = haz_expose
 
             building_results.append(building_result)
             damage_results.append(damage_result)
