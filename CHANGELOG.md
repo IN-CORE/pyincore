@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Aggregate hazard exposure column for non-structural building damage analysis to avoid column name cutoff and 
+  chaining issue with mean damage [#393](https://github.com/IN-CORE/pyincore/issues/393)
+
+
 ## [1.12.0] - 2023-08-16
 
 ### Added
