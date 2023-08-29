@@ -69,10 +69,13 @@ class CommercialBuildingRecovery(BaseAnalysis):
         redi_delay_factors = self.get_input_dataset("delay_factors").get_dataframe_from_csv(low_memory=False)
 
         # Returns dataframe
-        total_delay, recovery, time_stepping_recovery = self.commercial_recovery(buildings, sample_damage_states, mcs_failure, redi_delay_factors, num_samples)
+        total_delay, recovery, time_stepping_recovery = self.commercial_recovery(buildings, sample_damage_states,
+                                                                                 mcs_failure, redi_delay_factors,
+                                                                                 num_samples)
         self.set_result_csv_data("total_delay", total_delay, result_name + "_delay", "dataframe")
         self.set_result_csv_data("recovery", recovery, result_name + "_recovery", "dataframe")
-        self.set_result_csv_data("time_stepping_recovery", time_stepping_recovery, result_name + "_time_stepping_recovery", "dataframe")
+        self.set_result_csv_data("time_stepping_recovery", time_stepping_recovery,
+                                 result_name + "_time_stepping_recovery", "dataframe")
 
         return True
 
@@ -93,7 +96,8 @@ class CommercialBuildingRecovery(BaseAnalysis):
         """
 
         start_total_delay = time.process_time()
-        total_delay = CommercialBuildingRecovery.total_delay(buildings, sample_damage_states, mcs_failure, redi_delay_factors, num_samples)
+        total_delay = CommercialBuildingRecovery.total_delay(buildings, sample_damage_states, mcs_failure,
+                                                             redi_delay_factors, num_samples)
         end_total_delay = time.process_time()
         print("Finished executing total_delay() in " + str(end_total_delay - start_total_delay) + " secs")
 
@@ -105,8 +109,6 @@ class CommercialBuildingRecovery(BaseAnalysis):
         end_time_stepping_recovery = time.process_time()
         print("Finished executing time_stepping_recovery() in " +
               str(end_time_stepping_recovery - end_recovery) + " secs")
-
-        #result = time_stepping_recovery
 
         end_time = time.process_time()
         print("Analysis completed in " + str(end_time - start_total_delay) + " secs")
@@ -132,9 +134,10 @@ class CommercialBuildingRecovery(BaseAnalysis):
         # Obtain the commercial buildings in damage
         damage = mcs_failure[mcs_failure['haz_expose'] == 'yes']
         commercial = []
+        commercial_archetypes = [6, 7, 8, 15, 16, 18, 19]
         for i, b in enumerate(buildings):
-            if b['properties']['archetype'] in (6, 7, 8, 15, 16, 18, 19):
-               commercial.append(b['properties']['guid'])
+            if b['properties']['archetype'] in commercial_archetypes:
+                commercial.append(b['properties']['guid'])
         commercial_pd = pd.DataFrame(commercial, columns=['guid'])
         commercial_damage = pd.merge(damage, commercial_pd, on='guid')
 
@@ -241,11 +244,11 @@ class CommercialBuildingRecovery(BaseAnalysis):
         num_buildings = samples_np.shape[0]
 
         # Generate a long numpy matrix for combined N1, N2 samples
-        samples_n1_n2 = np.zeros((num_buildings, num_samples*num_samples))
+        samples_n1_n2 = np.zeros((num_buildings, num_samples * num_samples))
 
         # Now, we define an internal function to take care of the index for the prior case
         def idx(x, y):
-            return x*num_samples + y
+            return x * num_samples + y
 
         for build in range(0, num_buildings):
             # Obtain the damage states
@@ -261,20 +264,12 @@ class CommercialBuildingRecovery(BaseAnalysis):
             # Now, perform the two nested loops, using the indexing function to simplify the syntax.
             for i in range(0, num_samples):
                 state = samples_mcs_ds[i]
-                #lognormal_mean = mapped_repair.repair_curves[state].alpha
-                #lognormal_sdv = mapped_repair.repair_curves[state].beta
-
-                # Generate a vector of random values to use in the inner loop
-                #rand_vals = np.random.random(num_samples)
-                #repair_time = lognorm.ppf(rand_vals, lognormal_sdv, scale=np.exp(lognormal_mean)) / 7
-
                 percent_func = np.random.random(num_samples)
                 # NOTE: Even though the kwarg name is "repair_time", it actually takes  percent of functionality. DFR3
                 # system currently doesn't have a way to represent the name correctly when calculating the inverse.
                 repair_time = mapped_repair.repair_curves[state].solve_curve_for_inverse(
                     hazard_values={}, curve_parameters=mapped_repair.curve_parameters, **{"repair_time": percent_func}
-                                                                                        ) / 7
-
+                ) / 7
 
                 for j in range(0, num_samples):
                     samples_n1_n2[build, idx(i, j)] = round(samples_np[build, i] + repair_time[j], 1)
@@ -402,12 +397,12 @@ class CommercialBuildingRecovery(BaseAnalysis):
                 {
                     'id': 'total_delay',
                     'description': 'CSV file of commercial building delay time',
-                    'type': 'incore:buildingRecovery'
+                    'type': 'incore:buildingRecoveryDelay'
                 },
                 {
                     'id': 'recovery',
                     'description': 'CSV file of commercial building recovery time',
-                    'type': 'incore:buildingRecovery'
+                    'type': 'incore:buildingRecoveryTime'
                 },
                 {
                     'id': 'time_stepping_recovery',
