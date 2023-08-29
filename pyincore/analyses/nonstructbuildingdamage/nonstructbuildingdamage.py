@@ -284,10 +284,10 @@ class NonStructBuildingDamage(BaseAnalysis):
             building_result['DS_DS_1'] = dmg_interval_ds['DS_1']
             building_result['DS_DS_2'] = dmg_interval_ds['DS_2']
             building_result['DS_DS_3'] = dmg_interval_ds['DS_3']
-            building_result['hazard_exposure_as'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_as,
-                                                                                                 hazard_type)
-            building_result['hazard_exposure_ds'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_ds,
-                                                                                                 hazard_type)
+            hazard_exposure_as = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_as, hazard_type)
+            hazard_exposure_ds = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_ds, hazard_type)
+            haz_expose = NonStructBuildingUtil.determine_haz_exposure(hazard_exposure_as, hazard_exposure_ds)
+            building_result['haz_expose'] = haz_expose
 
             # put damage results in dictionary
             damage_result = dict()
