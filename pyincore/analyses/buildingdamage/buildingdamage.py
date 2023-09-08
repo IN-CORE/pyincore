@@ -171,8 +171,10 @@ class BuildingDamage(BaseAnalysis):
                         values_payload_liq.append(value_liq)
                 else:
                     unmapped_buildings.append(b)
-
-            if hazard_type == 'earthquake':
+            if hazard_type is None:
+                hazard_obj = self.get_input_hazard("hazard")
+                hazard_vals = hazard_obj.read_hazard_values(values_payload)
+            elif hazard_type == 'earthquake':
                 hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
             elif hazard_type == 'tornado':
                 hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload,
@@ -325,13 +327,13 @@ class BuildingDamage(BaseAnalysis):
                 },
                 {
                     'id': 'hazard_type',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard Type (e.g. earthquake)',
                     'type': str
                 },
                 {
                     'id': 'hazard_id',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard ID',
                     'type': str
                 },
@@ -371,6 +373,13 @@ class BuildingDamage(BaseAnalysis):
                     'description': 'Geology dataset id',
                     'type': str,
                 }
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': True,
+                    'description': 'Hazard Object'
+                },
             ],
             'input_datasets': [
                 {

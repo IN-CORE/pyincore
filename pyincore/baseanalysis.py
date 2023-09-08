@@ -34,6 +34,11 @@ class BaseAnalysis:
         for input_dataset in self.spec['input_datasets']:
             self.input_datasets[input_dataset['id']] = {'spec': input_dataset, 'value': None}
 
+        self.input_hazards = {}
+        if 'input_hazards' in self.spec:
+            for input_hazards in self.spec['input_hazards']:
+                self.input_hazards[input_hazards['id']] = {'spec': input_hazards, 'value': None}
+
         self.output_datasets = {}
         for output_dataset in self.spec['output_datasets']:
             self.output_datasets[output_dataset['id']] = {'spec': output_dataset, 'value': None}
@@ -124,6 +129,23 @@ class BaseAnalysis:
         else:
             print(result[1])
             return False
+
+    def get_input_hazards(self):
+        """Get the dictionary of the input hazards of an analysis."""
+        inputs = {}
+        for key in self.input_hazards.keys():
+            inputs[key] = self.input_hazards[key]['value']
+        return inputs
+
+    def get_input_hazard(self, hz_id):
+        """Get or set the analysis dataset. Setting the hazard to a new value
+        will return True or False on error."""
+        return self.input_hazards[hz_id]['value']
+
+    def set_input_hazard(self, hz_id, hazard):
+        # TODO figure out how to validate
+        self.input_hazards[hz_id]['value'] = hazard
+        return True
 
     def get_output_datasets(self):
         """Get the output dataset of the analysis."""
