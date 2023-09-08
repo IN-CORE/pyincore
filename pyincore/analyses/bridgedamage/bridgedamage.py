@@ -33,7 +33,6 @@ class BridgeDamage(BaseAnalysis):
         # Bridge dataset
         bridge_set = self.get_input_dataset("bridges").get_inventory_reader()
 
-        # Get hazard input
         hazard_type = self.get_parameter("hazard_type")
         hazard_dataset_id = self.get_parameter("hazard_id")
         user_defined_cpu = 1
@@ -101,6 +100,11 @@ class BridgeDamage(BaseAnalysis):
             list: A list of ordered dictionaries with bridge damage values and other data/metadata.
 
         """
+        # Get Hazard
+        hazard = self.get_input_hazard("hazard")
+        if hazard is not None:
+            hazard_type = hazard.hazard_type
+
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
@@ -161,18 +165,21 @@ class BridgeDamage(BaseAnalysis):
         # not needed anymore as they are already split into mapped and unmapped
         del bridges
 
-        if hazard_type == 'earthquake':
-            hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'tornado':
-            hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'tsunami':
-            hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'hurricane':
-            hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'flood':
-            hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
+        if hazard is not None:
+            hazard_vals = hazard.read_hazard_values(values_payload)
         else:
-            raise ValueError("The provided hazard type is not supported yet by this analysis")
+            if hazard_type == 'earthquake':
+                hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
+            elif hazard_type == 'tornado':
+                hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
+            elif hazard_type == 'tsunami':
+                hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
+            elif hazard_type == 'hurricane':
+                hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
+            elif hazard_type == 'flood':
+                hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
+            else:
+                raise ValueError("The provided hazard type is not supported yet by this analysis")
 
         # Check if liquefaction is applicable
         if use_liquefaction and geology_dataset_id is not None:
@@ -304,13 +311,13 @@ class BridgeDamage(BaseAnalysis):
                 },
                 {
                     'id': 'hazard_type',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard Type (e.g. earthquake)',
                     'type': str
                 },
                 {
                     'id': 'hazard_id',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard ID',
                     'type': str
                 },
@@ -343,6 +350,13 @@ class BridgeDamage(BaseAnalysis):
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
+                },
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': True,
+                    'description': 'hazard object',
                 },
             ],
             'input_datasets': [

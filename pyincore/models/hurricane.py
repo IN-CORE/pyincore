@@ -16,6 +16,7 @@ class Hurricane(Hazard):
         self.hazardDatasets = []
         for hazardDataset in metadata["hazardDatasets"]:
             self.hazardDatasets.append(HurricaneDataset(hazardDataset))
+        self.hazard_type = "hurricane"
 
     @classmethod
     def from_hazard_service(cls, id: str, hazard_service: HazardService):
