@@ -5,18 +5,15 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-import csv
 import glob
 import json
 import os
 
 import fiona
 import numpy
-import pandas as pd
-import geopandas as gpd
 import rasterio
 import warnings
-from pyincore import DataService, HazardService
+from pyincore import HazardService
 
 warnings.filterwarnings("ignore", "", UserWarning)
 
@@ -41,24 +38,7 @@ class Hazard:
         self.readers = {}
 
     @classmethod
-    def from_hazard_service(cls, id: str, hazard_service: HazardService):
-        """Get Hazard from hazard service, get metadata as well.
-
-        Args:
-            id (str): ID of the Hazard.
-            hazard_service (obj): Hazard service.
-
-        Returns:
-            obj: Hazard from Data service.
-
-        """
-        metadata = hazard_service(id)
-        instance = cls(metadata)
-        instance.cache_files(hazard_service)
-        return instance
-
-    @classmethod
-    def from_json_str(cls, json_str, hazard_service: DataService = None, file_path=None):
+    def from_json_str(cls, json_str, hazard_service: HazardService = None, file_path=None):
         """Get Hazard from json string.
 
         Args:
