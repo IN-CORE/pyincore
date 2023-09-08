@@ -5,15 +5,8 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-import glob
 import json
-import os
-
-import fiona
-import numpy
-import rasterio
 import warnings
-from pyincore import HazardService
 
 warnings.filterwarnings("ignore", "", UserWarning)
 

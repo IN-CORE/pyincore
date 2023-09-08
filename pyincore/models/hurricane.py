@@ -3,9 +3,10 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-from pyincore import HazardService, DataService, Dataset
+from pyincore import HazardService, Dataset
 from pyincore.models.hazard import Hazard
 from pyincore.models.hazardDataset import HurricaneDataset
+from pyincore.models.units import Units
 
 
 class Hurricane(Hazard):
@@ -64,23 +65,23 @@ class Hurricane(Hazard):
         # match demand types with raster file
         for req in payload:
             hazard_values = []
-            for demand_type in req["demands"]:
+            for index, demand_type in enumerate(req["demands"]):
                 for hazard_dataset in self.hazardDatasets:
                     if hazard_dataset.dataset is None or not isinstance(hazard_dataset.dataset, Dataset):
                         raise Exception("Hazard dataset is not properly attached to the hazard object.")
 
                     # find matching raster file (Dataset) to read value from
-                    # TODO need to consider not matching demand types
-                    # TODO need to consider not matching demand units
-                    # TODO need to consider unit conversion
                     if demand_type.lower() == hazard_dataset.demand_type.lower():
-                        hazard_values.append(hazard_dataset.dataset.get_raster_value(
-                            x=float(req["loc"].split(",")[1]), y=float(req["loc"].split(",")[0])))
+                        raw_raster_value = hazard_dataset.dataset.get_raster_value(
+                            x=float(req["loc"].split(",")[1]), y=float(req["loc"].split(",")[0]))
+
+                        # some basic unit conversion
+                        converted_raster_value = Units.convert_hazard(raw_raster_value,
+                                                                      original_demand_units=hazard_dataset.demand_units,
+                                                                      requested_demand_units=req["units"][index])
+                        hazard_values.append(converted_raster_value)
 
             req.update({"hazardValues": hazard_values})
             response.append(req)
 
         return response
-
-
-

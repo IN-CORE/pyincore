@@ -81,12 +81,12 @@ def test_read_hazard_values_from_local():
         },
         {
             "demands": ["waveHeight", "surgeLevel"],
-            "units": ["cm", "cm"],
-            "loc": "29.23,-95.05"
+            "units": ["cm", "in"],
+            "loc": "29.22,-95.06"
         },
         {
-            "demands": ["waveHeight", "inundationDuration"],
-            "units": ["in", "hr"],
+            "demands": ["inundationDuration", "inundationDuration"],
+            "units": ["hr", "s"],
             "loc": "29.22,-95.06"
         }
     ]
@@ -100,12 +100,11 @@ def test_read_hazard_values_from_local():
     hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))
 
     values = hurricane.read_hazard_values(payload)
-    assert len(values) == len(payload) \
-           and len(values[0]['demands']) == len(payload[0]['demands']) \
-           and values[0]['units'] == payload[0]['units'] \
-           and len(values[0]['hazardValues']) == len(values[0]['demands']) \
-           and all(isinstance(hazardval, float) for hazardval in values[0]['hazardValues']) \
-           and values[0]['hazardValues'] == [1.54217780024576, 3.663398872786693]
-
-
-
+    assert len(values) == len(payload)
+    assert len(values[0]['demands']) == len(payload[0]['demands'])
+    assert values[0]['units'] == payload[0]['units']
+    assert len(values[0]['hazardValues']) == len(values[0]['demands'])
+    assert all(isinstance(hazardval, float) for hazardval in values[0]['hazardValues'])
+    assert values[0]['hazardValues'] == [1.54217780024576, 3.663398872786693]
+    assert values[1]['hazardValues'] == [1.54217780024576*100, 3.663398872786693*39.3701]  # unit conversion
+    assert values[2]['hazardValues'] == [18.346923306935572, 18.346923306935572*3600]  # unit conversion
