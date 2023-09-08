@@ -1,12 +1,15 @@
 import pytest
-
+import os
 from pyincore import Dataset
 
 from pyincore.models.hazardDataset import HurricaneDataset
 from pyincore.models.hurricane import Hurricane
 
+from pyincore import globals as pyglobals
+
 hazardsvc = pytest.hazardsvc
 datasvc = pytest.datasvc
+
 
 def get_remote_hurricane(hurricane_id: str):
     hurricane = Hurricane.from_hazard_service(hurricane_id, hazardsvc)
@@ -22,6 +25,23 @@ def test_create_hurricane_from_remote():
     hurricane.hazardDatasets[0].from_data_service(datasvc)
     assert isinstance(hurricane.hazardDatasets[0].dataset, Dataset)
     assert hurricane.hazardDatasets[1].dataset is None
+
+
+def test_create_hurricane_from_local():
+
+    # create the hurricane object
+    hurricane = Hurricane.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "hurricane-dataset.json"))
+
+    # attach dataset from local file
+    hurricane.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")))
+    hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"))
+    hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))
+
+    assert len(hurricane.hazardDatasets) != 0
+    assert isinstance(hurricane.hazardDatasets[0], HurricaneDataset)
+    assert isinstance(hurricane.hazardDatasets[0].dataset, Dataset)
+    assert isinstance(hurricane.hazardDatasets[1].dataset, Dataset)
+    assert isinstance(hurricane.hazardDatasets[2].dataset, Dataset)
 
 
 def test_read_hazard_values_from_remote():
@@ -71,11 +91,13 @@ def test_read_hazard_values_from_local():
         }
     ]
 
-    # TODO replace below with local hazard construction once ready
-    hurricane = get_remote_hurricane("5f10837c01d3241d77729a4f")
-    hurricane.hazardDatasets[0].from_data_service(datasvc)
-    hurricane.hazardDatasets[1].from_data_service(datasvc)
-    hurricane.hazardDatasets[2].from_data_service(datasvc)
+    # create the hurricane object
+    hurricane = Hurricane.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "hurricane-dataset.json"))
+
+    # attach dataset from local file
+    hurricane.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")))
+    hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"))
+    hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))
 
     values = hurricane.read_hazard_values(payload)
     assert len(values) == len(payload) \
@@ -86,7 +108,4 @@ def test_read_hazard_values_from_local():
            and values[0]['hazardValues'] == [1.54217780024576, 3.663398872786693]
 
 
-def test_create_hurricane():
-    pass
-    # fragility_set = get_fragility_set("fragility_curve.json")
-    # assert len(fragility_set.fragility_curves) != 0
+

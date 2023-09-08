@@ -34,3 +34,32 @@ class Hazard:
         self.date = metadata['date'] if "date" in metadata else ""
         self.creator = metadata["creator"] if "creator" in metadata else ""
         self.spaces = metadata["spaces"] if "spaces" in metadata else []
+
+    @classmethod
+    def from_json_str(cls, json_str):
+        """Create hazard object from json string.
+
+        Args:
+            json_str (str): JSON of the Dataset.
+
+        Returns:
+            obj: Hazard
+
+        """
+        return cls(json.loads(json_str))
+
+    @classmethod
+    def from_json_file(cls, file_path):
+        """Get hazard from the file.
+
+        Args:
+            file_path (str): json file path that holds the definition of a hazard.
+
+        Returns:
+            obj: Hazard
+
+        """
+        with open(file_path, "r") as f:
+            instance = cls(json.load(f))
+
+        return instance

@@ -3,7 +3,7 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-from pyincore import HazardService, DataService
+from pyincore import HazardService, DataService, Dataset
 from pyincore.models.hazard import Hazard
 from pyincore.models.hazardDataset import HurricaneDataset
 
@@ -66,6 +66,9 @@ class Hurricane(Hazard):
             hazard_values = []
             for demand_type in req["demands"]:
                 for hazard_dataset in self.hazardDatasets:
+                    if hazard_dataset.dataset is None or not isinstance(hazard_dataset.dataset, Dataset):
+                        raise Exception("Hazard dataset is not properly attached to the hazard object.")
+
                     # find matching raster file (Dataset) to read value from
                     # TODO need to consider not matching demand types
                     # TODO need to consider not matching demand units
