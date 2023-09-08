@@ -10,25 +10,52 @@ from pyincore.models.hazardDataset import HurricaneDataset
 
 class Hurricane(Hazard):
 
-    def __init__(self, metadata, data_service=None):
+    def __init__(self, metadata):
         super().__init__(metadata)
         self.hazardDatasets = []
         for hazardDataset in metadata["hazardDatasets"]:
-            self.hazardDatasets.append(HurricaneDataset(hazardDataset, data_service))
+            self.hazardDatasets.append(HurricaneDataset(hazardDataset))
 
     @classmethod
-    def from_hazard_service(cls, id: str, hazard_service: HazardService, data_service: DataService = None):
+    def from_hazard_service(cls, id: str, hazard_service: HazardService):
         """Get Hazard from hazard service, get metadata as well.
 
         Args:
             id (str): ID of the Hazard.
             hazard_service (obj): Hazard service.
-            data_service (obj): Data service.
 
         Returns:
             obj: Hazard from Data service.
 
         """
         metadata = hazard_service.get_hurricane_metadata(id)
-        instance = cls(metadata, data_service)
+        instance = cls(metadata)
         return instance
+
+    def read_hazard_values(self, payload: list, hazard_service=None, timeout=(30, 600), **kwargs):
+        """ Retrieve bulk hurricane hazard values either from the Hazard service or read it from local Dataset
+
+        Args:
+            payload (list):
+            hazard_service (obj): Hazard service.
+            timeout (tuple): Timeout for the request.
+            kwargs (dict): Keyword arguments.
+        Returns:
+            obj: Hazard values.
+
+        """
+        if hazard_service is not None:
+            return hazard_service.post_hurricane_hazard_values(self.id, payload, timeout, **kwargs)
+        else:
+            return self.read_local_hazard_values(payload)
+
+    def read_local_hazard_values(self, payload: list):
+        """ Read local hurricane hazard values from Dataset
+
+        Args:
+            payload (list):
+        Returns:
+            obj: Hazard values.
+
+        """
+
