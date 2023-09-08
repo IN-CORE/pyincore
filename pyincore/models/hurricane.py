@@ -44,7 +44,7 @@ class Hurricane(Hazard):
             obj: Hazard values.
 
         """
-        if hazard_service is not None:
+        if self.id and self.id != "" and hazard_service is not None:
             return hazard_service.post_hurricane_hazard_values(self.id, payload, timeout, **kwargs)
         else:
             return self.read_local_hazard_values(payload)
