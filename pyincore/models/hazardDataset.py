@@ -30,3 +30,19 @@ class HurricaneDataset(HazardDataset):
     def from_data_service(self, data_service):
         """Get hurricane dataset from the data service."""
         self.dataset = Dataset.from_data_service(self.dataset_id, data_service)
+
+
+class EarthquakeDataset(HazardDataset):
+    pass
+
+
+class TsunamiDataset(HazardDataset):
+    pass
+
+
+class TorndaoDataset(HazardDataset):
+    pass
+
+
+class FloodDataset(HazardDataset):
+    pass
