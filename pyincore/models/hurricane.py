@@ -59,3 +59,25 @@ class Hurricane(Hazard):
 
         """
 
+        response = []
+
+        # match demand types with raster file
+        for req in payload:
+            hazard_values = []
+            for demand_type in req["demands"]:
+                for hazard_dataset in self.hazardDatasets:
+                    # find matching raster file (Dataset) to read value from
+                    # TODO need to consider not matching demand types
+                    # TODO need to consider not matching demand units
+                    # TODO need to consider unit conversion
+                    if demand_type.lower() == hazard_dataset.demand_type.lower():
+                        hazard_values.append(hazard_dataset.dataset.get_raster_value(
+                            x=float(req["loc"].split(",")[1]), y=float(req["loc"].split(",")[0])))
+
+            req.update({"hazardValues": hazard_values})
+            response.append(req)
+
+        return response
+
+
+

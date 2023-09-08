@@ -52,6 +52,40 @@ def test_read_hazard_values_from_remote():
            and values[0]['hazardValues'] == [1.54217780024576, 3.663398872786693]
 
 
+def test_read_hazard_values_from_local():
+    payload = [
+        {
+            "demands": ["waveHeight", "surgeLevel"],
+            "units": ["m", "m"],
+            "loc": "29.22,-95.06"
+        },
+        {
+            "demands": ["waveHeight", "surgeLevel"],
+            "units": ["cm", "cm"],
+            "loc": "29.23,-95.05"
+        },
+        {
+            "demands": ["waveHeight", "inundationDuration"],
+            "units": ["in", "hr"],
+            "loc": "29.22,-95.06"
+        }
+    ]
+
+    # TODO replace below with local hazard construction once ready
+    hurricane = get_remote_hurricane("5f10837c01d3241d77729a4f")
+    hurricane.hazardDatasets[0].from_data_service(datasvc)
+    hurricane.hazardDatasets[1].from_data_service(datasvc)
+    hurricane.hazardDatasets[2].from_data_service(datasvc)
+
+    values = hurricane.read_hazard_values(payload)
+    assert len(values) == len(payload) \
+           and len(values[0]['demands']) == len(payload[0]['demands']) \
+           and values[0]['units'] == payload[0]['units'] \
+           and len(values[0]['hazardValues']) == len(values[0]['demands']) \
+           and all(isinstance(hazardval, float) for hazardval in values[0]['hazardValues']) \
+           and values[0]['hazardValues'] == [1.54217780024576, 3.663398872786693]
+
+
 def test_create_hurricane():
     pass
     # fragility_set = get_fragility_set("fragility_curve.json")
