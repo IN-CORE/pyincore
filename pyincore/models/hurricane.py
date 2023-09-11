@@ -74,12 +74,25 @@ class Hurricane(Hazard):
                     # find matching raster file (Dataset) to read value from
                     if demand_type.lower() == hazard_dataset.demand_type.lower():
                         raw_raster_value = hazard_dataset.dataset.get_raster_value(
-                            x=float(req["loc"].split(",")[1]), y=float(req["loc"].split(",")[0]))
+                            x=float(req["loc"].split(",")[1]),
+                            y=float(req["loc"].split(",")[0]))
 
                         # some basic unit conversion
                         converted_raster_value = Units.convert_hazard(raw_raster_value,
                                                                       original_demand_units=hazard_dataset.demand_units,
                                                                       requested_demand_units=req["units"][index])
+
+                        # compare with threshold (optional)
+                        threshold_value = hazard_dataset.threshold_value
+                        threshold_unit = hazard_dataset.threshold_unit if hazard_dataset.threshold_unit else \
+                            hazard_dataset.demand_units  # if didn't specify threshold unit, default to demand unit
+                        if threshold_value is not None:
+                            converted_threshold_value = Units.convert_hazard(threshold_value,
+                                                                             original_demand_units=threshold_unit,
+                                                                             requested_demand_units=req["units"][index])
+                            if converted_raster_value < converted_threshold_value:
+                                converted_raster_value = None
+
                         hazard_values.append(converted_raster_value)
 
             req.update({"hazardValues": hazard_values})

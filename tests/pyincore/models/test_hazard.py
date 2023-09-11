@@ -88,6 +88,11 @@ def test_read_hazard_values_from_local():
             "demands": ["inundationDuration", "inundationDuration"],
             "units": ["hr", "s"],
             "loc": "29.22,-95.06"
+        },
+        {
+            "demands": ["waveHeight", "surgeLevel"],
+            "units": ["m", "m"],
+            "loc": "29.34,-94.94"
         }
     ]
 
@@ -96,6 +101,8 @@ def test_read_hazard_values_from_local():
 
     # attach dataset from local file
     hurricane.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")))
+    hurricane.hazardDatasets[0].set_threshold(threshold_value=3.28084, threshold_unit="ft")
+
     hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"))
     hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))
 
@@ -108,3 +115,5 @@ def test_read_hazard_values_from_local():
     assert values[0]['hazardValues'] == [1.54217780024576, 3.663398872786693]
     assert values[1]['hazardValues'] == [1.54217780024576*100, 3.663398872786693*39.3701]  # unit conversion
     assert values[2]['hazardValues'] == [18.346923306935572, 18.346923306935572*3600]  # unit conversion
+    assert values[3]['hazardValues'] == [None, 3.471035889851387]  # test threshold
+

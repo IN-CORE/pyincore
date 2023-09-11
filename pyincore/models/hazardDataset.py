@@ -14,6 +14,20 @@ class HazardDataset:
             if "demandUnits" in hazard_datasets_metadata else ""
         self.dataset_id = hazard_datasets_metadata["datasetId"] if "datasetId" in hazard_datasets_metadata else ""
         self.dataset = None
+        self.threshold_value = None
+        self.threshold_unit = None
+
+    def set_threshold(self, threshold_value, threshold_unit):
+        """
+        Set threshold value for the hazard to determine exposure or not
+        Args:
+            threshold_value: threshold_value
+            threshold_unit: threshold_unit
+        Returns:
+
+        """
+        self.threshold_value = threshold_value
+        self.threshold_unit = threshold_unit
 
 
 class HurricaneDataset(HazardDataset):

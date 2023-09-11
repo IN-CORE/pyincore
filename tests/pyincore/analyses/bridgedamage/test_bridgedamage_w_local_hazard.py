@@ -1,6 +1,6 @@
 import os
 
-from pyincore import IncoreClient, FragilityService, MappingSet, Hurricane
+from pyincore import IncoreClient, FragilityService, MappingSet, Hurricane, HazardService
 from pyincore.analyses.bridgedamage import BridgeDamage
 import pyincore.globals as pyglobals
 
@@ -29,8 +29,17 @@ def run_with_base_class():
     # test with local hurricane
     hurricane = Hurricane.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "hurricane-dataset.json"))
     hurricane.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")))
+    # Optional: set threshold to determine exposure or not
+    hurricane.hazardDatasets[0].set_threshold(threshold_value=0.3, threshold_unit="m")
+
     hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"))
+    # Optional: set threshold to determine exposure or not
+    hurricane.hazardDatasets[0].set_threshold(threshold_value=0.3, threshold_unit="m")
+
     hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))
+    # Optional: set threshold to determine exposure or not
+    hurricane.hazardDatasets[2].set_threshold(threshold_value=1, threshold_unit="hr")
+
     bridge_dmg.set_input_hazard("hazard", hurricane)
 
     # Set analysis parameters
