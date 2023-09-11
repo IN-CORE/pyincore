@@ -28,15 +28,18 @@ def run_with_base_class():
     # try local hurricane
     # test with local hurricane
     hurricane = Hurricane.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "hurricane-dataset.json"))
-    hurricane.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")))
+    hurricane.hazardDatasets[0].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif"),
+                                          data_type="ncsa:probabilisticHurricaneRaster")
     # Optional: set threshold to determine exposure or not
     hurricane.hazardDatasets[0].set_threshold(threshold_value=0.3, threshold_unit="m")
 
-    hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"))
+    hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"),
+                                          data_type="ncsa:probabilisticHurricaneRaster")
     # Optional: set threshold to determine exposure or not
     hurricane.hazardDatasets[0].set_threshold(threshold_value=0.3, threshold_unit="m")
 
-    hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))
+    hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"),
+                                          data_type="ncsa:probabilisticHurricaneRaster")
     # Optional: set threshold to determine exposure or not
     hurricane.hazardDatasets[2].set_threshold(threshold_value=1, threshold_unit="hr")
 

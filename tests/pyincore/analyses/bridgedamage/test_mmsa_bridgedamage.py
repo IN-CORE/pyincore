@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, FragilityService, MappingSet
+from pyincore import IncoreClient, FragilityService, MappingSet, Earthquake, HazardService
 from pyincore.analyses.bridgedamage import BridgeDamage
 import pyincore.globals as pyglobals
 
@@ -7,9 +7,8 @@ def run_with_base_class():
     client = IncoreClient()
 
     # New madrid earthquake using Atkinson Boore 1995
-    hazard_type = "earthquake"
-    hazard_id = "5b902cb273c3371e1236b36b"
-
+    hazard_service = HazardService(client)
+    eq = Earthquake.from_hazard_service("5b902cb273c3371e1236b36b", hazard_service=hazard_service)
     # mmsa highway bridges
     highway_bridges_id_list = {
         "Highway_Bridges": "60e86d6b544e944c3ce622d2"
@@ -65,10 +64,10 @@ def run_with_base_class():
             mapping_set = MappingSet(fragility_service.get_mapping(highway_bridge_mapping_id))
             bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
+            bridge_dmg.set_input_hazard("hazard", eq)
+
             # Set analysis parameters
             bridge_dmg.set_parameter("result_name", bridge_name + "_" + component_name)
-            bridge_dmg.set_parameter("hazard_type", hazard_type)
-            bridge_dmg.set_parameter("hazard_id", hazard_id)
             bridge_dmg.set_parameter("num_cpu", 4)
 
             # Run bridge damage analysis
@@ -84,10 +83,10 @@ def run_with_base_class():
             mapping_set = MappingSet(fragility_service.get_mapping(railway_bridge_mapping_id))
             bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
+            bridge_dmg.set_input_hazard("hazard", eq)
+
             # Set analysis parameters
             bridge_dmg.set_parameter("result_name", bridge_name + "_" + component_name)
-            bridge_dmg.set_parameter("hazard_type", hazard_type)
-            bridge_dmg.set_parameter("hazard_id", hazard_id)
             bridge_dmg.set_parameter("num_cpu", 4)
 
             # Run bridge damage analysis

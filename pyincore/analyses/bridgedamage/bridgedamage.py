@@ -157,7 +157,7 @@ class BridgeDamage(BaseAnalysis):
         # not needed anymore as they are already split into mapped and unmapped
         del bridges
 
-        hazard_vals = hazard.read_hazard_values(values_payload)
+        hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
 
         # Check if liquefaction is applicable
         if use_liquefaction and geology_dataset_id is not None:
@@ -173,6 +173,7 @@ class BridgeDamage(BaseAnalysis):
             damage_result = dict()
             dmg_probability = dict()
             dmg_intervals = dict()
+            ground_failure_prob = None
             selected_fragility_set = fragility_set[bridge["id"]]
 
             if isinstance(selected_fragility_set.fragility_curves[0], DFR3Curve):
