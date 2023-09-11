@@ -33,8 +33,6 @@ class BridgeDamage(BaseAnalysis):
         # Bridge dataset
         bridge_set = self.get_input_dataset("bridges").get_inventory_reader()
 
-        hazard_type = self.get_parameter("hazard_type")
-        hazard_dataset_id = self.get_parameter("hazard_id")
         user_defined_cpu = 1
 
         if not self.get_parameter("num_cpu") is None and self.get_parameter(
@@ -54,9 +52,7 @@ class BridgeDamage(BaseAnalysis):
             count += avg_bulk_input_size
 
         (ds_results, damage_results) = self.bridge_damage_concurrent_future(
-            self.bridge_damage_analysis_bulk_input, num_workers,
-            inventory_args, repeat(hazard_type),
-            repeat(hazard_dataset_id))
+            self.bridge_damage_analysis_bulk_input, num_workers, inventory_args)
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
         self.set_result_json_data("metadata",
@@ -87,23 +83,19 @@ class BridgeDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def bridge_damage_analysis_bulk_input(self, bridges, hazard_type,
-                                          hazard_dataset_id):
+    def bridge_damage_analysis_bulk_input(self, bridges):
         """Run analysis for multiple bridges.
 
         Args:
             bridges (list): Multiple bridges from input inventory set.
-            hazard_type (str): Hazard type, either earthquake, tornado, tsunami, or hurricane.
-            hazard_dataset_id (str): An id of the hazard exposure.
 
         Returns:
             list: A list of ordered dictionaries with bridge damage values and other data/metadata.
 
         """
-        # Get Hazard
+        # get input hazard
         hazard = self.get_input_hazard("hazard")
-        if hazard is not None:
-            hazard_type = hazard.hazard_type
+        hazard_type = hazard.hazard_type
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -165,25 +157,11 @@ class BridgeDamage(BaseAnalysis):
         # not needed anymore as they are already split into mapped and unmapped
         del bridges
 
-        if hazard is not None:
-            hazard_vals = hazard.read_hazard_values(values_payload)
-        else:
-            if hazard_type == 'earthquake':
-                hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
-            elif hazard_type == 'tornado':
-                hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
-            elif hazard_type == 'tsunami':
-                hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
-            elif hazard_type == 'hurricane':
-                hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
-            elif hazard_type == 'flood':
-                hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
-            else:
-                raise ValueError("The provided hazard type is not supported yet by this analysis")
+        hazard_vals = hazard.read_hazard_values(values_payload)
 
         # Check if liquefaction is applicable
         if use_liquefaction and geology_dataset_id is not None:
-            liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
+            liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard.id, geology_dataset_id,
                                                                         values_payload_liq)
 
         ds_results = []
@@ -310,18 +288,6 @@ class BridgeDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'hazard_type',
-                    'required': False,
-                    'description': 'Hazard Type (e.g. earthquake)',
-                    'type': str
-                },
-                {
-                    'id': 'hazard_id',
-                    'required': False,
-                    'description': 'Hazard ID',
-                    'type': str
-                },
-                {
                     'id': 'fragility_key',
                     'required': False,
                     'description': 'Fragility key to use in mapping dataset',
@@ -356,7 +322,8 @@ class BridgeDamage(BaseAnalysis):
                 {
                     'id': 'hazard',
                     'required': True,
-                    'description': 'hazard object',
+                    'description': 'Hazard object',
+                    'type': ["earthquake", "tornado", "hurricane", "flood", "tsunami"]
                 },
             ],
             'input_datasets': [

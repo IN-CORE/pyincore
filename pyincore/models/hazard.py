@@ -27,6 +27,7 @@ class Hazard:
         self.date = metadata['date'] if "date" in metadata else ""
         self.creator = metadata["creator"] if "creator" in metadata else ""
         self.spaces = metadata["spaces"] if "spaces" in metadata else []
+        self.hazard_type = metadata["hazard_type"] if "hazard_type" in metadata else ""
 
     @classmethod
     def from_json_str(cls, json_str):

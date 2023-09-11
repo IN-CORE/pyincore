@@ -143,9 +143,13 @@ class BaseAnalysis:
         return self.input_hazards[hz_id]['value']
 
     def set_input_hazard(self, hz_id, hazard):
-        # TODO figure out how to validate
-        self.input_hazards[hz_id]['value'] = hazard
-        return True
+        result = self.validate_input_hazard(self.input_hazards[hz_id]['spec'], hazard)
+        if result[0]:
+            self.input_hazards[hz_id]['value'] = hazard
+            return True
+        else:
+            print(result[1])
+            return False
 
     def get_output_datasets(self):
         """Get the output dataset of the analysis."""
@@ -240,6 +244,38 @@ class BaseAnalysis:
                 # if dataset is 'required', return false
                 is_valid = False
                 err_msg = 'required dataset is missing - spec: ' + str(dataset_spec)
+        return is_valid, err_msg
+
+    @staticmethod
+    def validate_input_hazard(hazard_spec, hazard):
+        """Validate input hazard.
+
+        Args:
+            hazard_spec (obj): Specifications of hazard.
+            hazard (obj): Hazard description.
+
+        Returns:
+            bool, str: Hazard validity, True if valid, False otherwise. Error message.
+
+        """
+        is_valid = True
+        err_msg = ''
+
+        if not isinstance(hazard, type(None)):
+            # if hazard is not none, check hazard instance type
+            is_valid = False
+            for hazard_type in hazard_spec['type']:
+                if hazard.hazard_type == hazard_type:
+                    is_valid = True
+                    break
+            if not is_valid:
+                err_msg = 'hazard type does not match - ' + 'given type: ' + \
+                          hazard.hazard_type + ' spec types: ' + str(hazard_spec['type'])
+        else:
+            # if hazard is none, check 'requirement'
+            if hazard_spec['required']:
+                is_valid = False
+                err_msg = 'required hazard is missing - spec: ' + str(hazard_spec)
         return is_valid, err_msg
 
     @staticmethod

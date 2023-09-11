@@ -239,7 +239,8 @@ class Dataset:
         data = hazard.read(1)
         xmin, ymin, xmax, ymax = hazard.bounds
         if x < xmin or x > xmax or y < ymin or y > ymax:
-            return 0.0
+            return None
+        # TODO check threshold
         return float(data[row, col])
 
     def get_csv_reader(self):
