@@ -3,10 +3,11 @@ import os
 from pyincore import Dataset
 from pyincore.models.flood import Flood
 
-from pyincore.models.hazardDataset import HurricaneDataset, FloodDataset
+from pyincore.models.hazardDataset import HurricaneDataset, FloodDataset, TsunamiDataset
 from pyincore.models.hurricane import Hurricane
 
 from pyincore import globals as pyglobals
+from pyincore.models.tsunami import Tsunami
 
 hazardsvc = pytest.hazardsvc
 datasvc = pytest.datasvc
@@ -55,10 +56,10 @@ def test_create_flood_from_local():
 
     payload = [
         {
-            "demands": ["inundationDepth", "waterSurfaceElevation"],
-            "units": ["ft", "m"],
-            "loc": "34.61,-79.04"
-        },
+            "demands": ["waterSurfaceElevation"],
+            "units": ["m"],
+            "loc": "34.60,-79.16"
+        }
     ]
     assert len(flood.hazardDatasets) != 0
     assert not isinstance(flood.hazardDatasets[0], HurricaneDataset)
@@ -66,7 +67,32 @@ def test_create_flood_from_local():
     assert isinstance(flood.hazardDatasets[0].dataset, Dataset)
 
     values = flood.read_hazard_values(payload)
-    assert values[0]['hazardValues'] == [4.114662170410156, 37.26129305419922]
+    assert values[0]['hazardValues'] == [41.970442822265625]
+
+
+def test_create_tsunami_from_local():
+
+    tsunami = Tsunami.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "tsunami.json"))
+
+    # attach dataset from local file
+    tsunami.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Vmax.tif")))
+    tsunami.hazardDatasets[1].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Mmax.tif")))
+    tsunami.hazardDatasets[2].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Hmax.tif")))
+
+    payload = [
+        {
+            "demands": ["hmax"],
+            "units": ["m"],
+            "loc": "46.006,-123.935"
+        }
+    ]
+    assert len(tsunami.hazardDatasets) != 0
+    assert not isinstance(tsunami.hazardDatasets[0], FloodDataset)
+    assert isinstance(tsunami.hazardDatasets[0], TsunamiDataset)
+    assert isinstance(tsunami.hazardDatasets[0].dataset, Dataset)
+
+    values = tsunami.read_hazard_values(payload)
+    assert values[0]['hazardValues'] == [2.9000000953674316]
 
 
 def test_read_hazard_values_from_remote():

@@ -5,18 +5,18 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore import HazardService, Dataset
 from pyincore.models.hazard import Hazard
-from pyincore.models.hazardDataset import FloodDataset
+from pyincore.models.hazardDataset import TsunamiDataset
 from pyincore.models.units import Units
 
 
-class Flood(Hazard):
+class Tsunami(Hazard):
 
     def __init__(self, metadata):
         super().__init__(metadata)
         self.hazardDatasets = []
         for hazardDataset in metadata["hazardDatasets"]:
-            self.hazardDatasets.append(FloodDataset(hazardDataset))
-        self.hazard_type = "flood"
+            self.hazardDatasets.append(TsunamiDataset(hazardDataset))
+        self.hazard_type = "tsunami"
 
     @classmethod
     def from_hazard_service(cls, id: str, hazard_service: HazardService):
@@ -30,12 +30,12 @@ class Flood(Hazard):
             obj: Hazard from Data service.
 
         """
-        metadata = hazard_service.get_flood_metadata(id)
+        metadata = hazard_service.get_tsunami_hazard_metadata(id)
         instance = cls(metadata)
         return instance
 
     def read_hazard_values(self, payload: list, hazard_service=None, timeout=(30, 600), **kwargs):
-        """ Retrieve bulk flood hazard values either from the Hazard service or read it from local Dataset
+        """ Retrieve bulk tsunami hazard values either from the Hazard service or read it from local Dataset
 
         Args:
             payload (list):
@@ -47,7 +47,7 @@ class Flood(Hazard):
 
         """
         if self.id and self.id != "" and hazard_service is not None:
-            return hazard_service.post_flood_hazard_values(self.id, payload, timeout, **kwargs)
+            return hazard_service.post_tsunami_hazard_values(self.id, payload, timeout, **kwargs)
         else:
             return self.read_local_raster_hazard_values(payload)
 

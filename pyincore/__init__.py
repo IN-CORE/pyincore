@@ -36,6 +36,8 @@ from pyincore.models.hazardDataset import HazardDataset, HurricaneDataset, Earth
     TorndaoDataset, FloodDataset
 from pyincore.models.hazard import Hazard
 from pyincore.models.hurricane import Hurricane
+from pyincore.models.flood import Flood
+from pyincore.models.tsunami import Tsunami
 from pyincore.models.units import Units
 from pyincore.networkdata import NetworkData
 from pyincore.baseanalysis import BaseAnalysis

@@ -84,8 +84,7 @@ class Hurricane(Hazard):
 
                         # compare with threshold (optional)
                         threshold_value = hazard_dataset.threshold_value
-                        threshold_unit = hazard_dataset.threshold_unit if hazard_dataset.threshold_unit else \
-                            hazard_dataset.demand_units  # if didn't specify threshold unit, default to demand unit
+                        threshold_unit = hazard_dataset.threshold_unit
                         if threshold_value is not None:
                             converted_threshold_value = Units.convert_hazard(threshold_value,
                                                                              original_demand_units=threshold_unit,

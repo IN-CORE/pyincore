@@ -14,8 +14,11 @@ class HazardDataset:
             if "demandUnits" in hazard_datasets_metadata else ""
         self.dataset_id = hazard_datasets_metadata["datasetId"] if "datasetId" in hazard_datasets_metadata else ""
         self.dataset = None
-        self.threshold_value = None
-        self.threshold_unit = None
+
+        # default threshold value and unit if exist
+        self.threshold_value = hazard_datasets_metadata["threshold"] if "threshold" in hazard_datasets_metadata \
+            else None
+        self.threshold_unit = self.demand_units
 
     def set_threshold(self, threshold_value, threshold_unit):
         """
@@ -29,11 +32,14 @@ class HazardDataset:
         self.threshold_value = threshold_value
         self.threshold_unit = threshold_unit
 
+    def from_data_service(self, data_service):
+        """Get hazard dataset from the data service."""
+        self.dataset = Dataset.from_data_service(self.dataset_id, data_service)
+
 
 class HurricaneDataset(HazardDataset):
     def __init__(self, hazard_datasets_metadata):
         super().__init__(hazard_datasets_metadata)
-        self.threshold = hazard_datasets_metadata["threshold"] if "threshold" in hazard_datasets_metadata else None
         self.hurricane_parameters = hazard_datasets_metadata["hurricaneParameters"] \
             if "hurricaneParameters" in hazard_datasets_metadata else {}
 
@@ -41,17 +47,22 @@ class HurricaneDataset(HazardDataset):
         """Get hurricane dataset from the file."""
         self.dataset = Dataset.from_file(file_path, data_type)
 
-    def from_data_service(self, data_service):
-        """Get hurricane dataset from the data service."""
-        self.dataset = Dataset.from_data_service(self.dataset_id, data_service)
-
 
 class EarthquakeDataset(HazardDataset):
     pass
 
 
 class TsunamiDataset(HazardDataset):
-    pass
+    def __init__(self, hazard_datasets_metadata):
+        super().__init__(hazard_datasets_metadata)
+        self.recurrence_interval = hazard_datasets_metadata["recurrenceInterval"] \
+            if "recurrenceInterval" in hazard_datasets_metadata else 100
+        self.recurrence_unit = hazard_datasets_metadata["recurrenceUnit"] if "recurrenceUnit" in \
+                                                                             hazard_datasets_metadata else "years"
+
+    def from_file(self, file_path, data_type="ncsa:probabilisticTsunamiRaster"):
+        """Get tsunami dataset from the file."""
+        self.dataset = Dataset.from_file(file_path, data_type)
 
 
 class TorndaoDataset(HazardDataset):
@@ -61,14 +72,9 @@ class TorndaoDataset(HazardDataset):
 class FloodDataset(HazardDataset):
     def __init__(self, hazard_datasets_metadata):
         super().__init__(hazard_datasets_metadata)
-        self.threshold = hazard_datasets_metadata["threshold"] if "threshold" in hazard_datasets_metadata else None
         self.flood_parameters = hazard_datasets_metadata["floodParameters"] \
             if "floodParameters" in hazard_datasets_metadata else {}
 
     def from_file(self, file_path, data_type="ncsa:deterministicFloodRaster"):
-        """Get hurricane dataset from the file."""
+        """Get flood dataset from the file."""
         self.dataset = Dataset.from_file(file_path, data_type)
-
-    def from_data_service(self, data_service):
-        """Get hurricane dataset from the data service."""
-        self.dataset = Dataset.from_data_service(self.dataset_id, data_service)
