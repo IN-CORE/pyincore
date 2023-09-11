@@ -34,7 +34,7 @@ class Tornado(Hazard):
         self.tornado_type = metadata["tornadoType"] if "tornadoType" in metadata else ""
         # tornado has very different shape than other hazards
         self.hazardDatasets = [
-            TornadoDataset({"threshold": metadata["threshold"],
+            TornadoDataset({"threshold": metadata["threshold"] if "threshold" in metadata else None,
                             "demandType": "wind",
                             "demandUnits": metadata["thresholdUnit"] if "thresholdUnit" in metadata else "mph",
                             "datasetId": metadata["datasetId"] if "datasetId" in metadata else ""})
@@ -61,20 +61,19 @@ class Tornado(Hazard):
         instance = cls(metadata)
         return instance
 
-    def read_hazard_values(self, payload: list, hazard_service=None, timeout=(30, 600), **kwargs):
+    def read_hazard_values(self, payload: list, hazard_service=None, **kwargs):
         """ Retrieve bulk earthquake hazard values either from the Hazard service or read it from local Dataset
 
         Args:
             payload (list):
             hazard_service (obj): Hazard service.
-            timeout (tuple): Timeout for the request.
             kwargs (dict): Keyword arguments.
         Returns:
             obj: Hazard values.
 
         """
         if self.id and self.id != "" and hazard_service is not None:
-            return hazard_service.post_tornado_hazard_values(self.id, payload, timeout, **kwargs)
+            return hazard_service.post_tornado_hazard_values(self.id, payload, **kwargs)
         else:
             return self.calculate_wind_speed_uniform_random_dist(payload)
 

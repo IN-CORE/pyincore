@@ -13,8 +13,9 @@ class Hurricane(Hazard):
     def __init__(self, metadata):
         super().__init__(metadata)
         self.hazardDatasets = []
-        for hazardDataset in metadata["hazardDatasets"]:
-            self.hazardDatasets.append(HurricaneDataset(hazardDataset))
+        if "hazardDatasets" in metadata:
+            for hazardDataset in metadata["hazardDatasets"]:
+                self.hazardDatasets.append(HurricaneDataset(hazardDataset))
         self.hazard_type = "hurricane"
 
     @classmethod
@@ -33,7 +34,7 @@ class Hurricane(Hazard):
         instance = cls(metadata)
         return instance
 
-    def read_hazard_values(self, payload: list, hazard_service=None, timeout=(30, 600), **kwargs):
+    def read_hazard_values(self, payload: list, hazard_service=None, **kwargs):
         """ Retrieve bulk hurricane hazard values either from the Hazard service or read it from local Dataset
 
         Args:
@@ -46,6 +47,6 @@ class Hurricane(Hazard):
 
         """
         if self.id and self.id != "" and hazard_service is not None:
-            return hazard_service.post_hurricane_hazard_values(self.id, payload, timeout, **kwargs)
+            return hazard_service.post_hurricane_hazard_values(self.id, payload, **kwargs)
         else:
             return self.read_local_raster_hazard_values(payload)
