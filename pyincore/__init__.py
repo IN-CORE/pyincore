@@ -33,7 +33,7 @@ from pyincore.models.mappingset import MappingSet
 from pyincore.models.mapping import Mapping
 from pyincore.models.networkdataset import NetworkDataset
 from pyincore.models.hazardDataset import HazardDataset, HurricaneDataset, EarthquakeDataset, TsunamiDataset, \
-    TorndaoDataset, FloodDataset
+    TornadoDataset, FloodDataset
 from pyincore.models.hazard import Hazard
 from pyincore.models.hurricane import Hurricane
 from pyincore.models.flood import Flood

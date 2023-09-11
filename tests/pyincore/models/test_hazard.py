@@ -1,7 +1,7 @@
 import pytest
 import os
 from pyincore import Dataset, HurricaneDataset, FloodDataset, TsunamiDataset, Hurricane, Flood, Earthquake, \
-    EarthquakeDataset
+    EarthquakeDataset, Tornado, TornadoDataset
 
 from pyincore import globals as pyglobals
 from pyincore.models.tsunami import Tsunami
@@ -124,6 +124,31 @@ def test_create_eq_from_local():
 
     values = eq.read_hazard_values(payload)
     assert values[0]['hazardValues'] == [0.3149999976158142, -9999.2, -9999.2, 0.4729999899864197, -9999.2]
+
+
+def test_create_tornado_from_local():
+
+    tornado = Tornado.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "tornado_dataset.json"))
+
+    # attach dataset from local file
+    tornado.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "joplin_tornado/joplin_path_wgs84.shp")),
+                                        data_type="incore:tornadoWindfield")
+
+    payload = [
+        {
+            "demands": ["wind"],
+            "units": ["mph"],
+            "loc": "-94.37, 37.04"
+        }
+    ]
+    assert len(tornado.hazardDatasets) != 0
+    assert isinstance(tornado.hazardDatasets[0], TornadoDataset)
+    assert isinstance(tornado.hazardDatasets[0].dataset, Dataset)
+
+    values = tornado.read_hazard_values(payload)
+    # Should be an EF1
+    assert values[0]['hazardValues'][0] > tornado.EF_WIND_SPEED[1]
+    assert values[0]['hazardValues'][0] < tornado.EF_WIND_SPEED[2]
 
 
 def test_read_hazard_values_from_remote():

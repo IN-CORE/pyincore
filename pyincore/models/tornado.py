@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore import HazardService, Dataset
 from pyincore.models.hazard import Hazard
-from pyincore.models.hazardDataset import TorndaoDataset
+from pyincore.models.hazardDataset import TornadoDataset
 from pyincore.models.units import Units
 
 from shapely.geometry import Point
@@ -34,10 +34,10 @@ class Tornado(Hazard):
         self.tornado_type = metadata["tornadoType"] if "tornadoType" in metadata else ""
         # tornado has very different shape than other hazards
         self.hazardDatasets = [
-            TorndaoDataset({"threshold": metadata["threshold"],
+            TornadoDataset({"threshold": metadata["threshold"],
                             "demandType": "wind",
                             "demandUnits": metadata["thresholdUnit"] if "thresholdUnit" in metadata else "mph",
-                            "datasetId": metadata["datasetId"]})
+                            "datasetId": metadata["datasetId"] if "datasetId" in metadata else ""})
         ]
         self.hazard_type = "tornado"
         self.EF_RATING_FIELD = ef_rating_field
@@ -103,9 +103,10 @@ class Tornado(Hazard):
                     if req_demand_type.lower() == hazard_dataset.demand_type.lower():
                         hazard_df = hazard_dataset.dataset.get_dataframe_from_shapefile()
                         ef_box = -1
-                        x = float(req["loc"].split(",")[1])
-                        y = float(req["loc"].split(",")[0])
+                        x = float(req["loc"].split(",")[0])
+                        y = float(req["loc"].split(",")[1])
                         location = Point(x, y)
+
                         for _, feature in hazard_df.iterrows():
                             polygon = feature['geometry']
                             if location.within(polygon):

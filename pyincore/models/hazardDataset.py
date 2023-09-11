@@ -69,7 +69,7 @@ class TsunamiDataset(HazardDataset):
 
 
 # TODO: Tornado dataset has very different shape
-class TorndaoDataset(HazardDataset):
+class TornadoDataset(HazardDataset):
     def __init__(self, hazard_datasets_metadata):
         super().__init__(hazard_datasets_metadata)
 
