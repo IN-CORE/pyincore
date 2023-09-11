@@ -1,10 +1,7 @@
 import pytest
 import os
-from pyincore import Dataset
-from pyincore.models.flood import Flood
-
-from pyincore.models.hazardDataset import HurricaneDataset, FloodDataset, TsunamiDataset
-from pyincore.models.hurricane import Hurricane
+from pyincore import Dataset, HurricaneDataset, FloodDataset, TsunamiDataset, Hurricane, Flood, Earthquake, \
+    EarthquakeDataset
 
 from pyincore import globals as pyglobals
 from pyincore.models.tsunami import Tsunami
@@ -35,9 +32,12 @@ def test_create_hurricane_from_local():
     hurricane = Hurricane.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "hurricane-dataset.json"))
 
     # attach dataset from local file
-    hurricane.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")))
-    hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"))
-    hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))
+    hurricane.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")),
+                                          data_type="ncsa:deterministicHurricaneRaster")
+    hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"),
+                                          data_type="ncsa:deterministicHurricaneRaster")
+    hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"),
+                                          data_type="ncsa:deterministicHurricaneRaster")
 
     assert len(hurricane.hazardDatasets) != 0
     assert isinstance(hurricane.hazardDatasets[0], HurricaneDataset)
@@ -51,8 +51,10 @@ def test_create_flood_from_local():
     flood = Flood.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "flood-dataset.json"))
 
     # attach dataset from local file
-    flood.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "flood-inundationDepth-50ft.tif")))
-    flood.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "flood-WSE-50ft.tif"))
+    flood.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "flood-inundationDepth-50ft.tif")),
+                                      data_type="ncsa:probabilisticFloodRaster")
+    flood.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "flood-WSE-50ft.tif"),
+                                      data_type="ncsa:probabilisticFloodRaster")
 
     payload = [
         {
@@ -75,9 +77,12 @@ def test_create_tsunami_from_local():
     tsunami = Tsunami.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "tsunami.json"))
 
     # attach dataset from local file
-    tsunami.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Vmax.tif")))
-    tsunami.hazardDatasets[1].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Mmax.tif")))
-    tsunami.hazardDatasets[2].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Hmax.tif")))
+    tsunami.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Vmax.tif")),
+                                        data_type="ncsa:probabilisticTsunamiRaster")
+    tsunami.hazardDatasets[1].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Mmax.tif")),
+                                        data_type="ncsa:probabilisticTsunamiRaster")
+    tsunami.hazardDatasets[2].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Tsu_100yr_Hmax.tif")),
+                                        data_type="ncsa:probabilisticTsunamiRaster")
 
     payload = [
         {
@@ -93,6 +98,32 @@ def test_create_tsunami_from_local():
 
     values = tsunami.read_hazard_values(payload)
     assert values[0]['hazardValues'] == [2.9000000953674316]
+
+
+def test_create_eq_from_local():
+
+    eq = Earthquake.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset.json"))
+
+    # attach dataset from local file
+    eq.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset-SA.tif")),
+                                   data_type="ergo:probabilisticEarthquakeRaster")
+    eq.hazardDatasets[1].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "eq-dataset-PGA.tif")),
+                                   data_type="ergo:probabilisticEarthquakeRaster")
+
+    payload = [
+        {
+            "demands": ["pga", "0.2 SD", "0.9 SA", "0.2 SA", "PGV"],
+            "units": ["g", "cm", "g", "g", "in/s"],
+            "loc": "35.03,-89.93"
+        }
+    ]
+    assert len(eq.hazardDatasets) != 0
+    assert not isinstance(eq.hazardDatasets[0], FloodDataset)
+    assert isinstance(eq.hazardDatasets[0], EarthquakeDataset)
+    assert isinstance(eq.hazardDatasets[0].dataset, Dataset)
+
+    values = eq.read_hazard_values(payload)
+    assert values[0]['hazardValues'] == [0.3149999976158142, -9999.2, -9999.2, -9999.2, -9999.2]
 
 
 def test_read_hazard_values_from_remote():
@@ -151,11 +182,14 @@ def test_read_hazard_values_from_local():
     hurricane = Hurricane.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "hurricane-dataset.json"))
 
     # attach dataset from local file
-    hurricane.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")))
+    hurricane.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif")),
+                                          data_type="ncsa:deterministicHurricaneRaster")
     hurricane.hazardDatasets[0].set_threshold(threshold_value=3.28084, threshold_unit="ft")
 
-    hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"))
-    hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"))
+    hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"),
+                                          data_type="ncsa:deterministicHurricaneRaster")
+    hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"),
+                                          data_type="ncsa:deterministicHurricaneRaster")
 
     values = hurricane.read_hazard_values(payload)
     assert len(values) == len(payload)

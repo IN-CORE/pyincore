@@ -20,6 +20,11 @@ class HazardDataset:
             else None
         self.threshold_unit = self.demand_units
 
+    def from_file(self, file_path, data_type):
+        """Get hurricane dataset from the file.
+        """
+        self.dataset = Dataset.from_file(file_path, data_type)
+
     def set_threshold(self, threshold_value, threshold_unit):
         """
         Set threshold value for the hazard to determine exposure or not
@@ -43,13 +48,15 @@ class HurricaneDataset(HazardDataset):
         self.hurricane_parameters = hazard_datasets_metadata["hurricaneParameters"] \
             if "hurricaneParameters" in hazard_datasets_metadata else {}
 
-    def from_file(self, file_path, data_type="ncsa:deterministicHurricaneRaster"):
-        """Get hurricane dataset from the file."""
-        self.dataset = Dataset.from_file(file_path, data_type)
-
 
 class EarthquakeDataset(HazardDataset):
-    pass
+    def __init__(self, hazard_datasets_metadata):
+        super().__init__(hazard_datasets_metadata)
+        self.period = hazard_datasets_metadata["period"] if "period" in hazard_datasets_metadata else 0
+        self.recurrence_interval = hazard_datasets_metadata["recurrenceInterval"] if "recurrenceInterval" in  \
+                                                                                     hazard_datasets_metadata else 10000
+        self.recurrence_unit = hazard_datasets_metadata["recurrenceUnit"] if "recurrenceUnit" in \
+                                                                             hazard_datasets_metadata else "years"
 
 
 class TsunamiDataset(HazardDataset):
@@ -60,13 +67,11 @@ class TsunamiDataset(HazardDataset):
         self.recurrence_unit = hazard_datasets_metadata["recurrenceUnit"] if "recurrenceUnit" in \
                                                                              hazard_datasets_metadata else "years"
 
-    def from_file(self, file_path, data_type="ncsa:probabilisticTsunamiRaster"):
-        """Get tsunami dataset from the file."""
-        self.dataset = Dataset.from_file(file_path, data_type)
 
-
+# TODO: Tornado dataset has very different shape
 class TorndaoDataset(HazardDataset):
-    pass
+    def __init__(self, hazard_datasets_metadata):
+        super().__init__(hazard_datasets_metadata)
 
 
 class FloodDataset(HazardDataset):
@@ -75,6 +80,3 @@ class FloodDataset(HazardDataset):
         self.flood_parameters = hazard_datasets_metadata["floodParameters"] \
             if "floodParameters" in hazard_datasets_metadata else {}
 
-    def from_file(self, file_path, data_type="ncsa:deterministicFloodRaster"):
-        """Get flood dataset from the file."""
-        self.dataset = Dataset.from_file(file_path, data_type)

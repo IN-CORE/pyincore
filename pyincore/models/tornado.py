@@ -3,64 +3,53 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
-
-import json
-import warnings
-
+from pyincore import HazardService, Dataset
+from pyincore.models.hazard import Hazard
+from pyincore.models.hazardDataset import EarthquakeDataset
 from pyincore.models.units import Units
-from pyincore.dataset import Dataset
-
-warnings.filterwarnings("ignore", "", UserWarning)
 
 
-class Hazard:
-    """Hazard.
-
-    Args:
-        metadata (dict): Hazard metadata.
-
-    """
+class Tornado(Hazard):
 
     def __init__(self, metadata):
-
-        self.id = metadata["id"] if "id" in metadata else ""
-        self.name = metadata['name'] if "name" in metadata else ""
-        self.description = metadata['description'] if "description" in metadata else ""
-        self.date = metadata['date'] if "date" in metadata else ""
-        self.creator = metadata["creator"] if "creator" in metadata else ""
-        self.spaces = metadata["spaces"] if "spaces" in metadata else []
-        self.hazard_type = metadata["hazard_type"] if "hazard_type" in metadata else ""
+        super().__init__(metadata)
         self.hazardDatasets = []
+        for hazardDataset in metadata["hazardDatasets"]:
+            self.hazardDatasets.append(EarthquakeDataset(hazardDataset))
+        self.hazard_type = "earthquake"
 
     @classmethod
-    def from_json_str(cls, json_str):
-        """Create hazard object from json string.
+    def from_hazard_service(cls, id: str, hazard_service: HazardService):
+        """Get Hazard from hazard service, get metadata as well.
 
         Args:
-            json_str (str): JSON of the Dataset.
+            id (str): ID of the Hazard.
+            hazard_service (obj): Hazard service.
 
         Returns:
-            obj: Hazard
+            obj: Hazard from Data service.
 
         """
-        return cls(json.loads(json_str))
-
-    @classmethod
-    def from_json_file(cls, file_path):
-        """Get hazard from the file.
-
-        Args:
-            file_path (str): json file path that holds the definition of a hazard.
-
-        Returns:
-            obj: Hazard
-
-        """
-        with open(file_path, "r") as f:
-            instance = cls(json.load(f))
-
+        metadata = hazard_service.get_earthquake_hazard_metadata(id)
+        instance = cls(metadata)
         return instance
+
+    def read_hazard_values(self, payload: list, hazard_service=None, timeout=(30, 600), **kwargs):
+        """ Retrieve bulk earthquake hazard values either from the Hazard service or read it from local Dataset
+
+        Args:
+            payload (list):
+            hazard_service (obj): Hazard service.
+            timeout (tuple): Timeout for the request.
+            kwargs (dict): Keyword arguments.
+        Returns:
+            obj: Hazard values.
+
+        """
+        if self.id and self.id != "" and hazard_service is not None:
+            return hazard_service.post_earthquake_hazard_values(self.id, payload, timeout, **kwargs)
+        else:
+            return self.read_local_raster_hazard_values(payload)
 
     def read_local_raster_hazard_values(self, payload: list):
         """ Read local hazard values from raster dataset
@@ -78,7 +67,6 @@ class Hazard:
         for req in payload:
             hazard_values = []
             for index, demand_type in enumerate(req["demands"]):
-                match = False
                 for hazard_dataset in self.hazardDatasets:
                     if hazard_dataset.dataset is None or not isinstance(hazard_dataset.dataset, Dataset):
                         raise Exception("Hazard dataset is not properly attached to the hazard object.")
@@ -109,11 +97,6 @@ class Hazard:
                                     converted_raster_value = None
 
                         hazard_values.append(converted_raster_value)
-                        match = True
-                        break
-
-                if not match:
-                    hazard_values.append(-9999.2)  # invalid demand type
 
             req.update({"hazardValues": hazard_values})
             response.append(req)

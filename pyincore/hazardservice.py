@@ -42,7 +42,6 @@ class HazardService:
                                             'hazard/api/hurricaneWindfields/')
         self.base_flood_url = urljoin(client.service_url, 'hazard/api/floods/')
 
-
     def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None,
                                             timeout: tuple = (30, 600), **kwargs):
         """Retrieve earthquake metadata list from hazard service. Hazard API endpoint is called.

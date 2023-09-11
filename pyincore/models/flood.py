@@ -6,7 +6,6 @@
 from pyincore import HazardService, Dataset
 from pyincore.models.hazard import Hazard
 from pyincore.models.hazardDataset import FloodDataset
-from pyincore.models.units import Units
 
 
 class Flood(Hazard):
@@ -50,54 +49,3 @@ class Flood(Hazard):
             return hazard_service.post_flood_hazard_values(self.id, payload, timeout, **kwargs)
         else:
             return self.read_local_raster_hazard_values(payload)
-
-    def read_local_raster_hazard_values(self, payload: list):
-        """ Read local hazard values from raster dataset
-
-        Args:
-            payload (list):
-        Returns:
-            obj: Hazard values.
-
-        """
-
-        response = []
-
-        # match demand types with raster file
-        for req in payload:
-            hazard_values = []
-            for index, demand_type in enumerate(req["demands"]):
-                for hazard_dataset in self.hazardDatasets:
-                    if hazard_dataset.dataset is None or not isinstance(hazard_dataset.dataset, Dataset):
-                        raise Exception("Hazard dataset is not properly attached to the hazard object.")
-
-                    # find matching raster file (Dataset) to read value from
-                    if demand_type.lower() == hazard_dataset.demand_type.lower():
-                        raw_raster_value = hazard_dataset.dataset.get_raster_value(
-                            x=float(req["loc"].split(",")[1]),
-                            y=float(req["loc"].split(",")[0]))
-
-                        if raw_raster_value is None:
-                            converted_raster_value = raw_raster_value
-                        else:
-                            # some basic unit conversion
-                            converted_raster_value = Units.convert_hazard(raw_raster_value,
-                                                                          original_demand_units=hazard_dataset.demand_units,
-                                                                          requested_demand_units=req["units"][index])
-
-                            # compare with threshold (optional)
-                            threshold_value = hazard_dataset.threshold_value
-                            threshold_unit = hazard_dataset.threshold_unit
-                            if threshold_value is not None:
-                                converted_threshold_value = Units.convert_hazard(threshold_value,
-                                                                                 original_demand_units=threshold_unit,
-                                                                                 requested_demand_units=req["units"][index])
-                                if converted_raster_value < converted_threshold_value:
-                                    converted_raster_value = None
-
-                        hazard_values.append(converted_raster_value)
-
-            req.update({"hazardValues": hazard_values})
-            response.append(req)
-
-        return response

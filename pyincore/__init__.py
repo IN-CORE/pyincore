@@ -38,6 +38,8 @@ from pyincore.models.hazard import Hazard
 from pyincore.models.hurricane import Hurricane
 from pyincore.models.flood import Flood
 from pyincore.models.tsunami import Tsunami
+from pyincore.models.earthquake import Earthquake
+from pyincore.models.tornado import Tornado
 from pyincore.models.units import Units
 from pyincore.networkdata import NetworkData
 from pyincore.baseanalysis import BaseAnalysis
