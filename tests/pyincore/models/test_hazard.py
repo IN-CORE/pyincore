@@ -123,7 +123,7 @@ def test_create_eq_from_local():
     assert isinstance(eq.hazardDatasets[0].dataset, Dataset)
 
     values = eq.read_hazard_values(payload)
-    assert values[0]['hazardValues'] == [0.3149999976158142, -9999.2, -9999.2, -9999.2, -9999.2]
+    assert values[0]['hazardValues'] == [0.3149999976158142, -9999.2, -9999.2, 0.4729999899864197, -9999.2]
 
 
 def test_read_hazard_values_from_remote():

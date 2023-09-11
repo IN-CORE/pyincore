@@ -77,15 +77,22 @@ class Hazard:
         # match demand types with raster file
         for req in payload:
             hazard_values = []
-            for index, demand_type in enumerate(req["demands"]):
+            for index, req_demand_type in enumerate(req["demands"]):
                 match = False
                 for hazard_dataset in self.hazardDatasets:
                     if hazard_dataset.dataset is None or not isinstance(hazard_dataset.dataset, Dataset):
                         raise Exception("Hazard dataset is not properly attached to the hazard object.")
 
+                    # TODO Consider how to get the closest period
+                    # TODO consider pga, pgv, sd conversions
+                    if "sa" in req_demand_type.lower():
+                        period = req_demand_type.split(" ")[0]
+                    else:
+                        period = None
+
                     # find matching raster file (Dataset) to read value from
-                    # TODO: need to consider how to get the closest period
-                    if demand_type.lower() == hazard_dataset.demand_type.lower():
+                    if req_demand_type.lower() == hazard_dataset.demand_type.lower() or \
+                            (hasattr(hazard_dataset, 'period') and period == hazard_dataset.period):
                         raw_raster_value = hazard_dataset.dataset.get_raster_value(
                             x=float(req["loc"].split(",")[1]),
                             y=float(req["loc"].split(",")[0]))
