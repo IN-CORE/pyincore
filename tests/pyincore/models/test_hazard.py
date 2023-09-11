@@ -1,8 +1,9 @@
 import pytest
 import os
 from pyincore import Dataset
+from pyincore.models.flood import Flood
 
-from pyincore.models.hazardDataset import HurricaneDataset
+from pyincore.models.hazardDataset import HurricaneDataset, FloodDataset
 from pyincore.models.hurricane import Hurricane
 
 from pyincore import globals as pyglobals
@@ -42,6 +43,30 @@ def test_create_hurricane_from_local():
     assert isinstance(hurricane.hazardDatasets[0].dataset, Dataset)
     assert isinstance(hurricane.hazardDatasets[1].dataset, Dataset)
     assert isinstance(hurricane.hazardDatasets[2].dataset, Dataset)
+
+
+def test_create_flood_from_local():
+
+    flood = Flood.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "flood-dataset.json"))
+
+    # attach dataset from local file
+    flood.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "flood-inundationDepth-50ft.tif")))
+    flood.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "flood-WSE-50ft.tif"))
+
+    payload = [
+        {
+            "demands": ["inundationDepth", "waterSurfaceElevation"],
+            "units": ["ft", "m"],
+            "loc": "34.61,-79.04"
+        },
+    ]
+    assert len(flood.hazardDatasets) != 0
+    assert not isinstance(flood.hazardDatasets[0], HurricaneDataset)
+    assert isinstance(flood.hazardDatasets[0], FloodDataset)
+    assert isinstance(flood.hazardDatasets[0].dataset, Dataset)
+
+    values = flood.read_hazard_values(payload)
+    assert values[0]['hazardValues'] == [4.114662170410156, 37.26129305419922]
 
 
 def test_read_hazard_values_from_remote():
@@ -116,4 +141,3 @@ def test_read_hazard_values_from_local():
     assert values[1]['hazardValues'] == [1.54217780024576*100, 3.663398872786693*39.3701]  # unit conversion
     assert values[2]['hazardValues'] == [18.346923306935572, 18.346923306935572*3600]  # unit conversion
     assert values[3]['hazardValues'] == [None, 3.471035889851387]  # test threshold
-

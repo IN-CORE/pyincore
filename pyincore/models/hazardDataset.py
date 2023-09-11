@@ -59,4 +59,16 @@ class TorndaoDataset(HazardDataset):
 
 
 class FloodDataset(HazardDataset):
-    pass
+    def __init__(self, hazard_datasets_metadata):
+        super().__init__(hazard_datasets_metadata)
+        self.threshold = hazard_datasets_metadata["threshold"] if "threshold" in hazard_datasets_metadata else None
+        self.flood_parameters = hazard_datasets_metadata["floodParameters"] \
+            if "floodParameters" in hazard_datasets_metadata else {}
+
+    def from_file(self, file_path, data_type="ncsa:deterministicFloodRaster"):
+        """Get hurricane dataset from the file."""
+        self.dataset = Dataset.from_file(file_path, data_type)
+
+    def from_data_service(self, data_service):
+        """Get hurricane dataset from the data service."""
+        self.dataset = Dataset.from_data_service(self.dataset_id, data_service)
