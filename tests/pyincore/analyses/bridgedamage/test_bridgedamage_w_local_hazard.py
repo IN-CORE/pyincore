@@ -1,6 +1,6 @@
 import os
 
-from pyincore import IncoreClient, FragilityService, MappingSet, Hurricane, HazardService
+from pyincore import IncoreClient, FragilityService, MappingSet, Hurricane
 from pyincore.analyses.bridgedamage import BridgeDamage
 import pyincore.globals as pyglobals
 
@@ -48,6 +48,7 @@ def run_with_base_class():
     # Set analysis parameters
     bridge_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
     bridge_dmg.set_parameter("result_name", "galveston_bridge_dmg_result_local_hazard")
+
     bridge_dmg.set_parameter("num_cpu", 4)
 
     # Run bridge damage analysis

@@ -57,6 +57,8 @@ class EarthquakeDataset(HazardDataset):
                                                                                      hazard_datasets_metadata else 10000
         self.recurrence_unit = hazard_datasets_metadata["recurrenceUnit"] if "recurrenceUnit" in \
                                                                              hazard_datasets_metadata else "years"
+        self.eq_parameters = hazard_datasets_metadata["eqParameters"] if "eqParameters" in hazard_datasets_metadata \
+            else {}
 
 
 class TsunamiDataset(HazardDataset):

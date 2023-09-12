@@ -4,7 +4,7 @@ from pyincore import Dataset, HurricaneDataset, FloodDataset, TsunamiDataset, Hu
     EarthquakeDataset, Tornado, TornadoDataset
 
 from pyincore import globals as pyglobals
-from pyincore.models.tsunami import Tsunami
+from pyincore.models.hazard.tsunami import Tsunami
 
 hazardsvc = pytest.hazardsvc
 datasvc = pytest.datasvc
@@ -263,7 +263,7 @@ def test_read_hazard_values_from_remote():
         }
     ]
     hurricane = Hurricane.from_hazard_service("5f10837c01d3241d77729a4f", hazardsvc)
-    values = hurricane.read_hazard_values(payload, hazard_service=hazardsvc, timeout=(30, 600))
+    values = hurricane.read_hazard_values(payload, hazard_service=hazardsvc)
     assert len(values) == len(payload) \
            and len(values[0]['demands']) == len(payload[0]['demands']) \
            and values[0]['units'] == payload[0]['units'] \

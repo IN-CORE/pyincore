@@ -32,14 +32,14 @@ from pyincore.models.dfr3curve import DFR3Curve
 from pyincore.models.mappingset import MappingSet
 from pyincore.models.mapping import Mapping
 from pyincore.models.networkdataset import NetworkDataset
-from pyincore.models.hazardDataset import HazardDataset, HurricaneDataset, EarthquakeDataset, TsunamiDataset, \
+from pyincore.models.hazard.hazardDataset import HazardDataset, HurricaneDataset, EarthquakeDataset, TsunamiDataset, \
     TornadoDataset, FloodDataset
-from pyincore.models.hazard import Hazard
-from pyincore.models.hurricane import Hurricane
-from pyincore.models.flood import Flood
-from pyincore.models.tsunami import Tsunami
-from pyincore.models.earthquake import Earthquake
-from pyincore.models.tornado import Tornado
+from pyincore.models.hazard.hazard import Hazard
+from pyincore.models.hazard.hurricane import Hurricane
+from pyincore.models.hazard.flood import Flood
+from pyincore.models.hazard.tsunami import Tsunami
+from pyincore.models.hazard.earthquake import Earthquake
+from pyincore.models.hazard.tornado import Tornado
 from pyincore.models.units import Units
 from pyincore.networkdata import NetworkData
 from pyincore.baseanalysis import BaseAnalysis

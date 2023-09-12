@@ -4,8 +4,8 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore import HazardService, Dataset
-from pyincore.models.hazard import Hazard
-from pyincore.models.hazardDataset import TornadoDataset
+from pyincore.models.hazard.hazard import Hazard
+from pyincore.models.hazard.hazardDataset import TornadoDataset
 from pyincore.models.units import Units
 
 from shapely.geometry import Point

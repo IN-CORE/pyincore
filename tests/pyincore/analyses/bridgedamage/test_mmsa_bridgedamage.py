@@ -1,6 +1,5 @@
 from pyincore import IncoreClient, FragilityService, MappingSet, Earthquake, HazardService
 from pyincore.analyses.bridgedamage import BridgeDamage
-import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
