@@ -95,7 +95,16 @@ class BridgeDamage(BaseAnalysis):
         """
         # get input hazard
         hazard = self.get_input_hazard("hazard")
-        hazard_type = hazard.hazard_type
+        hazard_type = self.get_parameter("hazard_type")
+        hazard_dataset_id = self.get_parameter("hazard_id")
+        if hazard is None and (hazard_type is None or hazard_dataset_id is None):
+            raise ValueError("Either hazard object or hazard id + hazard type must be provided")
+
+        if hazard_type is None:
+            hazard_type = hazard.hazard_type
+
+        if hazard_dataset_id is None:
+            hazard_dataset_id = hazard.id
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -156,12 +165,25 @@ class BridgeDamage(BaseAnalysis):
 
         # not needed anymore as they are already split into mapped and unmapped
         del bridges
-
-        hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
+        if hazard is not None:
+            hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
+        else:
+            if hazard_type == 'earthquake':
+                hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
+            elif hazard_type == 'tornado':
+                hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
+            elif hazard_type == 'tsunami':
+                hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
+            elif hazard_type == 'hurricane':
+                hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
+            elif hazard_type == 'flood':
+                hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
+            else:
+                raise ValueError("The provided hazard type is not supported yet by this analysis")
 
         # Check if liquefaction is applicable
         if use_liquefaction and geology_dataset_id is not None:
-            liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard.id, geology_dataset_id,
+            liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
                                                                         values_payload_liq)
 
         ds_results = []
@@ -317,6 +339,18 @@ class BridgeDamage(BaseAnalysis):
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
+                },
+                {
+                    'id': 'hazard_id',
+                    'required': False,
+                    'description': 'Hazard object id',
+                    'type': str
+                },
+                {
+                    'id': 'hazard_type',
+                    'required': False,
+                    'description': 'Hazards type',
+                    'type': str
                 },
             ],
             'input_hazards': [
