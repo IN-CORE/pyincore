@@ -218,6 +218,11 @@ def test_create_model_based_tornado_from_remote():
            and len(response[0]['hazardValues']) == len(response[0]['demands']) \
            and response[0]['hazardValues'] == [None]
 
+    # this should fail
+    with pytest.raises(ValueError) as exc_info:
+        tornado.read_hazard_values(payload)
+        assert str(exc_info.value) == "Local Tornado type \"model\" is not supported yet"
+
 
 def test_create_tornado_from_local():
 

@@ -78,8 +78,10 @@ class Tornado(Hazard):
         if self.id and self.id != "" and hazard_service is not None:
             return hazard_service.post_tornado_hazard_values(self.id, payload, **kwargs)
         else:
-            return self.calculate_wind_speed_uniform_random_dist(payload)
-
+            if self.tornado_type == "dataset":
+                return self.calculate_wind_speed_uniform_random_dist(payload)
+            else:
+                raise ValueError("Local Tornado type \"" + self.tornado_type + "\" is not supported yet.")
 
     def calculate_wind_speed_uniform_random_dist(self, payload):
         """ Read local hazard values from shapefile dataset
