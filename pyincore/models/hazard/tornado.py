@@ -108,7 +108,6 @@ class Tornado(Hazard):
                     if req_demand_type.lower() == hazard_dataset.demand_type.lower():
                         hazard_df = hazard_dataset.dataset.get_dataframe_from_shapefile()
                         ef_box = -1
-                        len_fraction = 0.0
                         x = float(req["loc"].split(",")[0])
                         y = float(req["loc"].split(",")[1])
                         location = Point(x, y)
@@ -118,9 +117,6 @@ class Tornado(Hazard):
                             if location.within(polygon):
                                 ef_rating = feature[self.EF_RATING_FIELD]
                                 ef_box = Tornado.get_ef_rating(ef_rating)
-                                dist_pt = tornadoPath.distance(location)
-                                box_width = polygon.bounds[2] - polygon.bounds[0]
-                                len_fraction = dist_pt / box_width
                                 break
 
                         if ef_box < 0:
@@ -133,13 +129,9 @@ class Tornado(Hazard):
                             bottom_speed = self.EF_WIND_SPEED[ef_box]
                             top_speed = self.EF_WIND_SPEED[ef_box + 1]
 
-                        # Either generate random wind speed
-                        if True:
-                            random.seed(self.SEED)
-                            raw_wind_speed = random.uniform(bottom_speed, top_speed)
-                        # or interpolate based on distance from center of box
-                        else:
-                            raw_wind_speed = ((top_speed - bottom_speed) * (1 - len_fraction)) + bottom_speed
+                        # generate random wind speed
+                        random.seed(self.SEED)
+                        raw_wind_speed = random.uniform(bottom_speed, top_speed)
 
                         if raw_wind_speed is None:
                             converted_wind_speed = raw_wind_speed
