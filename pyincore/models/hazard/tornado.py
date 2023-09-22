@@ -174,7 +174,7 @@ class Tornado(Hazard):
             seed = self.tornado_parameters["randomSeed"]
 
         # If no seed value provided OR model seed value was never set by the user, use current system time
-        else:
+        if self.SEED == -1:
             seed = int(time.time() * 1000)  # Current system time in milliseconds
 
         # Use 4 decimal places for getting unique seed values from lat/long
