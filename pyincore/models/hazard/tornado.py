@@ -10,6 +10,8 @@ from pyincore.models.units import Units
 
 from shapely.geometry import Point
 import random
+import time
+import math
 
 
 class Tornado(Hazard):
@@ -29,7 +31,7 @@ class Tornado(Hazard):
     """
 
     def __init__(self, metadata, ef_rating_field="ef_rating", ef_wind_speed=(65, 86, 111, 136, 166, 200),
-                 max_wind_speed=250.0, seed=1234):
+                 max_wind_speed=250.0, seed=-1):
         super().__init__(metadata)
         self.tornado_type = metadata["tornadoType"] if "tornadoType" in metadata else ""
         # tornado has very different shape than other hazards
@@ -46,6 +48,7 @@ class Tornado(Hazard):
         self.EF_RATING_FIELD = ef_rating_field
         self.EF_WIND_SPEED = ef_wind_speed
         self.MAX_WIND_SPEED = max_wind_speed
+        self.tornado_parameters = metadata["TornadoParameters"] if "TornadoParameters" in metadata else {}
         self.SEED = seed
 
     @classmethod
@@ -130,7 +133,7 @@ class Tornado(Hazard):
                             top_speed = self.EF_WIND_SPEED[ef_box + 1]
 
                         # generate random wind speed
-                        random.seed(self.SEED)
+                        random.seed(self.get_random_seed(location))
                         raw_wind_speed = random.uniform(bottom_speed, top_speed)
 
                         if raw_wind_speed is None:
@@ -163,6 +166,25 @@ class Tornado(Hazard):
             response.append(req)
 
         return response
+
+    def get_random_seed(self, location):
+
+        # Get seed from the model and override if no value specified
+        if self.SEED == -1 and self.tornado_parameters is not {} and "randomSeed" in self.tornado_parameters:
+            seed = self.tornado_parameters["randomSeed"]
+
+        # If no seed value provided OR model seed value was never set by the user, use current system time
+        else:
+            seed = int(time.time() * 1000)  # Current system time in milliseconds
+
+        # Use 4 decimal places for getting unique seed values from lat/long
+        try:
+            seed = seed + int(abs((location.x + location.y) * 10000))
+        except OverflowError:
+            print("Seed + abs((location.x + location.y) * 10000) exceeds max value, capping at Maximum value")
+            seed = float('inf')  # Cap at positive infinity for maximum value
+
+        return seed
 
     @staticmethod
     def get_ef_rating(ef_rating):
