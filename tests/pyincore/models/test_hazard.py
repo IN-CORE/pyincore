@@ -195,8 +195,10 @@ def test_create_tornado_from_remote():
             "loc": "-94.37, 37.04"
         }
     ]
+    seed = 1234
+
     # Should be an EF1
-    values = tornado.read_hazard_values(payload)
+    values = tornado.read_hazard_values(payload, seed=seed)
     assert values[0]['hazardValues'][0] > tornado.EF_WIND_SPEED[1]
     assert values[0]['hazardValues'][0] < tornado.EF_WIND_SPEED[2]
 
@@ -243,7 +245,7 @@ def test_create_tornado_from_local():
     assert isinstance(tornado.hazardDatasets[0], TornadoDataset)
     assert isinstance(tornado.hazardDatasets[0].dataset, Dataset)
 
-    values = tornado.read_hazard_values(payload)
+    values = tornado.read_hazard_values(payload, seed=1234)
     # Should be an EF1
     assert values[0]['hazardValues'][0] > tornado.EF_WIND_SPEED[1]
     assert values[0]['hazardValues'][0] < tornado.EF_WIND_SPEED[2]

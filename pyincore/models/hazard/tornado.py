@@ -31,7 +31,7 @@ class Tornado(Hazard):
     """
 
     def __init__(self, metadata, ef_rating_field="ef_rating", ef_wind_speed=(65, 86, 111, 136, 166, 200),
-                 max_wind_speed=250.0, seed=-1):
+                 max_wind_speed=250.0):
         super().__init__(metadata)
         self.tornado_type = metadata["tornadoType"] if "tornadoType" in metadata else ""
         # tornado has very different shape than other hazards
@@ -49,7 +49,6 @@ class Tornado(Hazard):
         self.EF_WIND_SPEED = ef_wind_speed
         self.MAX_WIND_SPEED = max_wind_speed
         self.tornado_parameters = metadata["TornadoParameters"] if "TornadoParameters" in metadata else {}
-        self.SEED = seed
 
     @classmethod
     def from_hazard_service(cls, id: str, hazard_service: HazardService):
@@ -67,11 +66,12 @@ class Tornado(Hazard):
         instance = cls(metadata)
         return instance
 
-    def read_hazard_values(self, payload: list, hazard_service=None, **kwargs):
+    def read_hazard_values(self, payload: list, seed=None, hazard_service=None, **kwargs):
         """ Retrieve bulk earthquake hazard values either from the Hazard service or read it from local Dataset
 
         Args:
             payload (list):
+            seed: (None or int): Seed value for random values.
             hazard_service (obj): Hazard service.
             kwargs (dict): Keyword arguments.
         Returns:
@@ -79,18 +79,19 @@ class Tornado(Hazard):
 
         """
         if self.id and self.id != "" and hazard_service is not None:
-            return hazard_service.post_tornado_hazard_values(self.id, payload, **kwargs)
+            return hazard_service.post_tornado_hazard_values(self.id, payload, seed=seed, **kwargs)
         else:
             if self.tornado_type == "dataset":
-                return self.calculate_wind_speed_uniform_random_dist(payload)
+                return self.calculate_wind_speed_uniform_random_dist(payload, seed)
             else:
                 raise ValueError("Local Tornado type \"" + self.tornado_type + "\" is not supported yet.")
 
-    def calculate_wind_speed_uniform_random_dist(self, payload):
+    def calculate_wind_speed_uniform_random_dist(self, payload, seed=-1):
         """ Read local hazard values from shapefile dataset
 
                 Args:
                     payload (list):
+                    seed: (None or int): Seed value for random values.
                 Returns:
                     obj: Hazard values.
 
@@ -133,7 +134,7 @@ class Tornado(Hazard):
                             top_speed = self.EF_WIND_SPEED[ef_box + 1]
 
                         # generate random wind speed
-                        random.seed(self.get_random_seed(location))
+                        random.seed(self.get_random_seed(location, seed))
                         raw_wind_speed = random.uniform(bottom_speed, top_speed)
 
                         if raw_wind_speed is None:
@@ -167,14 +168,14 @@ class Tornado(Hazard):
 
         return response
 
-    def get_random_seed(self, location):
+    def get_random_seed(self, location, seed=-1):
 
         # Get seed from the model and override if no value specified
-        if self.SEED == -1 and self.tornado_parameters is not {} and "randomSeed" in self.tornado_parameters:
+        if (seed is None or seed == -1) and self.tornado_parameters is not {} and "randomSeed" in self.tornado_parameters:
             seed = self.tornado_parameters["randomSeed"]
 
         # If no seed value provided OR model seed value was never set by the user, use current system time
-        if self.SEED == -1:
+        if seed is None or seed == -1:
             seed = int(time.time() * 1000)  # Current system time in milliseconds
 
         # Use 4 decimal places for getting unique seed values from lat/long
