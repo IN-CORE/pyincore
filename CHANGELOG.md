@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Add commercial recovery analysis [#395](https://github.com/IN-CORE/pyincore/issues/395)
+
+
 ### Fixed
 - Aggregate hazard exposure column for non-structural building damage analysis to avoid column name cutoff and 
   chaining issue with mean damage [#393](https://github.com/IN-CORE/pyincore/issues/393)
-
 
 ## [1.12.0] - 2023-08-16
 
