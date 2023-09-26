@@ -7,7 +7,7 @@
 
 from pyincore.models.hazard.earthquake import Earthquake
 from pyincore.models.hazard.hazard import Hazard
-from pyincore.models.hazard.hazardDataset import HazardDataset
+from pyincore.models.hazard.hazarddataset import HazardDataset
 from pyincore.models.hazard.flood import Flood
 from pyincore.models.hazard.tornado import Tornado
 from pyincore.models.hazard.tsunami import Tsunami

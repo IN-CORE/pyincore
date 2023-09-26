@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore import HazardService
 from pyincore.models.hazard.hazard import Hazard
-from pyincore.models.hazard.hazardDataset import TsunamiDataset
+from pyincore.models.hazard.hazarddataset import TsunamiDataset
 
 
 class Tsunami(Hazard):
