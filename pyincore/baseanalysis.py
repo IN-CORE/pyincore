@@ -340,6 +340,16 @@ class BaseAnalysis:
                 print("Error reading dataset: " + result[1])
                 return result
 
+        # TODO: We will iteratively roll out input hazard; once it's done, we will remove this if block
+        if 'input_hazards' in self.spec:
+            for hazard_spec in self.spec['input_hazards']:
+                hz_id = hazard_spec["id"]
+                result = self.validate_input_hazard(hazard_spec, self.input_hazards[hz_id]["value"])
+
+                if not result[0]:
+                    print("Error reading hazard: " + result[1])
+                    return result
+
         for parameter_spec in self.spec['input_parameters']:
             par_id = parameter_spec["id"]
             result = self.validate_parameter(parameter_spec, self.get_parameter(par_id))

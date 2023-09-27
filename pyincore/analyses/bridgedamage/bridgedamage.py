@@ -356,7 +356,7 @@ class BridgeDamage(BaseAnalysis):
             'input_hazards': [
                 {
                     'id': 'hazard',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard object',
                     'type': ["earthquake", "tornado", "hurricane", "flood", "tsunami"]
                 },
