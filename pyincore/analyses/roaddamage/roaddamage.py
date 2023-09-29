@@ -36,11 +36,8 @@ class RoadDamage(BaseAnalysis):
         if fragility_key is None:
             fragility_key = self.DEFAULT_FRAGILITY_KEY
 
-        # Get hazard input
-        hazard_dataset_id = self.get_parameter("hazard_id")
-
-        # Get hazard type
-        hazard_type = self.get_parameter("hazard_type")
+        # get input hazard
+        hazard, hazard_type, hazard_dataset_id = self.create_hazard_object_from_input_params()
 
         # Liquefaction
         use_liquefaction = False
@@ -74,6 +71,7 @@ class RoadDamage(BaseAnalysis):
         (ds_results, damage_results) = self.road_damage_concurrent_future(self.road_damage_analysis_bulk_input,
                                                                           num_workers,
                                                                           inventory_args,
+                                                                          repeat(hazard),
                                                                           repeat(hazard_type),
                                                                           repeat(hazard_dataset_id),
                                                                           repeat(use_hazard_uncertainty),
@@ -111,12 +109,13 @@ class RoadDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def road_damage_analysis_bulk_input(self, roads, hazard_type, hazard_dataset_id, use_hazard_uncertainty,
+    def road_damage_analysis_bulk_input(self, roads, hazard, hazard_type, hazard_dataset_id, use_hazard_uncertainty,
                                         geology_dataset_id, fragility_key, use_liquefaction):
         """Run analysis for multiple roads.
 
         Args:
             roads (list): Multiple roads from input inventory set.
+            hazard (obj): A hazard object.
             hazard_type (str): A hazard type of the hazard exposure (earthquake or tsunami).
             hazard_dataset_id (str): An id of the hazard exposure.
             use_hazard_uncertainty(bool): Flag to indicate use uncertainty or not
@@ -162,16 +161,14 @@ class RoadDamage(BaseAnalysis):
 
         # get hazard and liquefaction values
         if hazard_type == 'earthquake':
-            hazard_resp = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
+            hazard_resp = hazard.read_hazard_values(values_payload, self.hazardsvc)
 
             if pgd_flag and use_liquefaction and geology_dataset_id is not None:
                 liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
                                                                             values_payload)
 
-        elif hazard_type == 'tsunami':
-            hazard_resp = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'hurricane':
-            hazard_resp = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
+        elif hazard_type == 'tsunami' or 'hurricane':
+            hazard_resp = hazard.read_hazard_values(values_payload, self.hazardsvc)
         else:
             raise ValueError("The provided hazard type is not supported yet by this analysis")
 
@@ -288,13 +285,13 @@ class RoadDamage(BaseAnalysis):
                 },
                 {
                     'id': 'hazard_type',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard Type (e.g. earthquake)',
                     'type': str
                 },
                 {
                     'id': 'hazard_id',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard ID',
                     'type': str
                 },
@@ -328,6 +325,14 @@ class RoadDamage(BaseAnalysis):
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
+                },
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': False,
+                    'description': 'Hazard object',
+                    'type': ["earthquake", "hurricane", "tsunami"]
                 },
             ],
             'input_datasets': [
