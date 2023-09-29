@@ -51,6 +51,11 @@ analyses/combinedwindwavesurgebuildingloss
 ..  autoclass:: pyincore.analyses.combinedwindwavesurgebuildingloss.CombinedWindWaveSurgeBuildingLoss
     :members:
 
+analyses/commercialbuildingrecovery
+===================================
+..  autoclass:: commercialbuildingrecovery.commercialbuildingrecovery.CommercialBuildingRecovery
+    :members:
+
 analyses/cumulativebuildingdamage
 =================================
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
