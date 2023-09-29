@@ -143,7 +143,10 @@ class PipelineDamage(BaseAnalysis):
         # not needed anymore as they are already split into mapped and unmapped
         del pipelines
 
-        hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
+        if hazard_type == 'earthquake' or "tsunami":
+            hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
+        else:
+            raise ValueError("The provided hazard type is not supported yet by this analysis")
 
         pipeline_results = []
         damage_results = []
@@ -262,7 +265,7 @@ class PipelineDamage(BaseAnalysis):
                     'id': 'hazard',
                     'required': False,
                     'description': 'Hazard object',
-                    'type': ["earthquake", "tornado", "hurricane", "flood", "tsunami"]
+                    'type': ["earthquake", "tsunami"]
                 },
             ],
             'input_datasets': [

@@ -39,11 +39,9 @@ class PipelineDamageRepairRate(BaseAnalysis):
         pipeline_dataset = self.get_input_dataset(
             "pipeline").get_inventory_reader()
 
-        # Get hazard type
-        hazard_type = self.get_parameter("hazard_type")
+        # get input hazard
+        hazard, hazard_type, hazard_dataset_id = self.create_hazard_object_from_input_params()
 
-        # Get hazard input
-        hazard_dataset_id = self.get_parameter("hazard_id")
         user_defined_cpu = 1
 
         if not self.get_parameter("num_cpu") is None and self.get_parameter(
@@ -66,7 +64,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
 
         (ds_results, damage_results) = self.pipeline_damage_concurrent_future(
             self.pipeline_damage_analysis_bulk_input, num_workers,
-            inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
+            inventory_args, repeat(hazard), repeat(hazard_type), repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
         self.set_result_json_data("metadata",
@@ -97,12 +95,12 @@ class PipelineDamageRepairRate(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def pipeline_damage_analysis_bulk_input(self, pipelines, hazard_type,
-                                            hazard_dataset_id):
+    def pipeline_damage_analysis_bulk_input(self, pipelines, hazard, hazard_type, hazard_dataset_id):
         """Run pipeline damage analysis for multiple pipelines.
 
         Args:
             pipelines (list): multiple pipelines from pieline dataset.
+            hazard (obj): Hazard object
             hazard_type (str): Hazard type
             hazard_dataset_id (str): An id of the hazard exposure.
 
@@ -180,10 +178,8 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 unmapped_pipelines.append(pipeline)
         del pipelines
 
-        if hazard_type == 'earthquake':
-            hazard_resp = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'tsunami':
-            hazard_resp = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
+        if hazard_type == 'earthquake' or hazard_type == 'tsunami':
+            hazard_resp = hazard.read_hazard_values(values_payload, self.hazardsvc)
         else:
             raise ValueError("The provided hazard type is not supported yet by this analysis")
 
@@ -372,13 +368,13 @@ class PipelineDamageRepairRate(BaseAnalysis):
                 },
                 {
                     'id': 'hazard_type',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard Type (e.g. earthquake)',
                     'type': str
                 },
                 {
                     'id': 'hazard_id',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard ID',
                     'type': str
                 },
@@ -412,6 +408,14 @@ class PipelineDamageRepairRate(BaseAnalysis):
                     'description': 'Geology dataset id',
                     'type': str,
                 }
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': False,
+                    'description': 'Hazard object',
+                    'type': ["earthquake", "tsunami"]
+                },
             ],
             'input_datasets': [
                 {
