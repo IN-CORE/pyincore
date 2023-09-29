@@ -406,7 +406,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'hazard',
                     'required': False,
                     'description': 'Hazard object',
-                    'type': ["earthquake", "tornado", "hurricane", "flood", "tsunami"]
+                    'type': ["earthquake"]
                 },
             ],
             'input_datasets': [
