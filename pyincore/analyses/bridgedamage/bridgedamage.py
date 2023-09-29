@@ -8,7 +8,7 @@
 import concurrent.futures
 from itertools import repeat
 
-from pyincore import AnalysisUtil, GeoUtil
+from pyincore import AnalysisUtil, GeoUtil, Earthquake, Tornado, Tsunami, Hurricane, Flood
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
 from pyincore.models.dfr3curve import DFR3Curve
@@ -33,6 +33,9 @@ class BridgeDamage(BaseAnalysis):
         # Bridge dataset
         bridge_set = self.get_input_dataset("bridges").get_inventory_reader()
 
+        # get input hazard
+        hazard, hazard_type, hazard_dataset_id = self.create_hazard_object_from_input_params()
+
         user_defined_cpu = 1
 
         if not self.get_parameter("num_cpu") is None and self.get_parameter(
@@ -52,7 +55,8 @@ class BridgeDamage(BaseAnalysis):
             count += avg_bulk_input_size
 
         (ds_results, damage_results) = self.bridge_damage_concurrent_future(
-            self.bridge_damage_analysis_bulk_input, num_workers, inventory_args)
+            self.bridge_damage_analysis_bulk_input, num_workers, inventory_args, repeat(hazard), repeat(hazard_type),
+            repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
         self.set_result_json_data("metadata",
@@ -83,28 +87,19 @@ class BridgeDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def bridge_damage_analysis_bulk_input(self, bridges):
+    def bridge_damage_analysis_bulk_input(self, bridges, hazard, hazard_type, hazard_dataset_id):
         """Run analysis for multiple bridges.
 
         Args:
             bridges (list): Multiple bridges from input inventory set.
+            hazard (obj): Hazard object.
+            hazard_type (str): Type of hazard.
+            hazard_dataset_id (str): ID of hazard.
 
         Returns:
             list: A list of ordered dictionaries with bridge damage values and other data/metadata.
 
         """
-        # get input hazard
-        hazard = self.get_input_hazard("hazard")
-        hazard_type = self.get_parameter("hazard_type")
-        hazard_dataset_id = self.get_parameter("hazard_id")
-        if hazard is None and (hazard_type is None or hazard_dataset_id is None):
-            raise ValueError("Either hazard object or hazard id + hazard type must be provided")
-
-        if hazard_type is None:
-            hazard_type = hazard.hazard_type
-
-        if hazard_dataset_id is None:
-            hazard_dataset_id = hazard.id
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
@@ -165,21 +160,8 @@ class BridgeDamage(BaseAnalysis):
 
         # not needed anymore as they are already split into mapped and unmapped
         del bridges
-        if hazard is not None:
-            hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
-        else:
-            if hazard_type == 'earthquake':
-                hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
-            elif hazard_type == 'tornado':
-                hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
-            elif hazard_type == 'tsunami':
-                hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
-            elif hazard_type == 'hurricane':
-                hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
-            elif hazard_type == 'flood':
-                hazard_vals = self.hazardsvc.post_flood_hazard_values(hazard_dataset_id, values_payload)
-            else:
-                raise ValueError("The provided hazard type is not supported yet by this analysis")
+
+        hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
 
         # Check if liquefaction is applicable
         if use_liquefaction and geology_dataset_id is not None:
