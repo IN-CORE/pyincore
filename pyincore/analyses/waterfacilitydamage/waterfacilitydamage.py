@@ -43,11 +43,8 @@ class WaterFacilityDamage(BaseAnalysis):
         inventory_set = self.get_input_dataset(
             "water_facilities").get_inventory_reader()
 
-        # Get hazard input
-        hazard_dataset_id = self.get_parameter("hazard_id")
-
-        # Hazard type of the exposure
-        hazard_type = self.get_parameter("hazard_type")
+        # get input hazard
+        hazard, hazard_type, hazard_dataset_id = self.create_hazard_object_from_input_params()
 
         user_defined_cpu = 1
 
@@ -70,7 +67,7 @@ class WaterFacilityDamage(BaseAnalysis):
 
         (ds_results, damage_results) = self.waterfacility_damage_concurrent_futures(
             self.waterfacilityset_damage_analysis_bulk_input, num_workers,
-            inventory_args, repeat(hazard_type), repeat(hazard_dataset_id))
+            inventory_args, repeat(hazard), repeat(hazard_type), repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
         self.set_result_json_data("metadata",
@@ -105,12 +102,12 @@ class WaterFacilityDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def waterfacilityset_damage_analysis_bulk_input(self, facilities, hazard_type,
-                                                    hazard_dataset_id):
+    def waterfacilityset_damage_analysis_bulk_input(self, facilities, hazard, hazard_type, hazard_dataset_id):
         """Gets applicable fragilities and calculates damage
 
         Args:
             facilities (list): Multiple water facilities from input inventory set.
+            hazard (object): A hazard object.
             hazard_type (str): A hazard type of the hazard exposure (earthquake, tsunami, tornado, or hurricane).
             hazard_dataset_id (str): An id of the hazard exposure.
 
@@ -212,10 +209,8 @@ class WaterFacilityDamage(BaseAnalysis):
 
         del facilities
 
-        if hazard_type == 'earthquake':
-            hazard_resp = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'tsunami':
-            hazard_resp = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
+        if hazard_type == 'earthquake' or 'tsunami':
+            hazard_resp = hazard.read_hazard_values(values_payload, self.hazardsvc)
         else:
             raise ValueError("The provided hazard type is not supported yet by this analysis")
 
@@ -352,13 +347,13 @@ class WaterFacilityDamage(BaseAnalysis):
                 },
                 {
                     'id': 'hazard_type',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard Type (e.g. earthquake)',
                     'type': str
                 },
                 {
                     'id': 'hazard_id',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard ID',
                     'type': str
                 },
@@ -399,6 +394,14 @@ class WaterFacilityDamage(BaseAnalysis):
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
+                },
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': False,
+                    'description': 'Hazard object',
+                    'type': ["earthquake", "tsunami"]
                 },
             ],
             'input_datasets': [
