@@ -34,6 +34,11 @@ class BaseAnalysis:
         for input_dataset in self.spec['input_datasets']:
             self.input_datasets[input_dataset['id']] = {'spec': input_dataset, 'value': None}
 
+        self.input_hazards = {}
+        if 'input_hazards' in self.spec:
+            for input_hazards in self.spec['input_hazards']:
+                self.input_hazards[input_hazards['id']] = {'spec': input_hazards, 'value': None}
+
         self.output_datasets = {}
         for output_dataset in self.spec['output_datasets']:
             self.output_datasets[output_dataset['id']] = {'spec': output_dataset, 'value': None}
@@ -120,6 +125,27 @@ class BaseAnalysis:
         result = self.validate_input_dataset(self.input_datasets[ds_id]['spec'], dataset)
         if result[0]:
             self.input_datasets[ds_id]['value'] = dataset
+            return True
+        else:
+            print(result[1])
+            return False
+
+    def get_input_hazards(self):
+        """Get the dictionary of the input hazards of an analysis."""
+        inputs = {}
+        for key in self.input_hazards.keys():
+            inputs[key] = self.input_hazards[key]['value']
+        return inputs
+
+    def get_input_hazard(self, hz_id):
+        """Get or set the analysis dataset. Setting the hazard to a new value
+        will return True or False on error."""
+        return self.input_hazards[hz_id]['value']
+
+    def set_input_hazard(self, hz_id, hazard):
+        result = self.validate_input_hazard(self.input_hazards[hz_id]['spec'], hazard)
+        if result[0]:
+            self.input_hazards[hz_id]['value'] = hazard
             return True
         else:
             print(result[1])
@@ -221,6 +247,38 @@ class BaseAnalysis:
         return is_valid, err_msg
 
     @staticmethod
+    def validate_input_hazard(hazard_spec, hazard):
+        """Validate input hazard.
+
+        Args:
+            hazard_spec (obj): Specifications of hazard.
+            hazard (obj): Hazard description.
+
+        Returns:
+            bool, str: Hazard validity, True if valid, False otherwise. Error message.
+
+        """
+        is_valid = True
+        err_msg = ''
+
+        if not isinstance(hazard, type(None)):
+            # if hazard is not none, check hazard instance type
+            is_valid = False
+            for hazard_type in hazard_spec['type']:
+                if hazard.hazard_type == hazard_type:
+                    is_valid = True
+                    break
+            if not is_valid:
+                err_msg = 'hazard type does not match - ' + 'given type: ' + \
+                          hazard.hazard_type + ' spec types: ' + str(hazard_spec['type'])
+        else:
+            # if hazard is none, check 'requirement'
+            if hazard_spec['required']:
+                is_valid = False
+                err_msg = 'required hazard is missing - spec: ' + str(hazard_spec)
+        return is_valid, err_msg
+
+    @staticmethod
     def validate_output_dataset(dataset_spec, dataset):
         """Match output dataset by type.
 
@@ -281,6 +339,16 @@ class BaseAnalysis:
             if not result[0]:
                 print("Error reading dataset: " + result[1])
                 return result
+
+        # TODO: We will iteratively roll out input hazard; once it's done, we will remove this if block
+        if 'input_hazards' in self.spec:
+            for hazard_spec in self.spec['input_hazards']:
+                hz_id = hazard_spec["id"]
+                result = self.validate_input_hazard(hazard_spec, self.input_hazards[hz_id]["value"])
+
+                if not result[0]:
+                    print("Error reading hazard: " + result[1])
+                    return result
 
         for parameter_spec in self.spec['input_parameters']:
             par_id = parameter_spec["id"]
