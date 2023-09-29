@@ -14,7 +14,7 @@ import pandas as pd
 class DislocationUtil:
 
     @staticmethod
-    def create_dynamic_param(params, pop_dislocation, T=1, N=None):
+    def create_dynamic_param(params, pop_dislocation, dt_params, T=1, N=None):
         """
         This function computes the change of demand values over time based on population dislocation models.
 
@@ -71,7 +71,7 @@ class DislocationUtil:
                             total_pop_node += hh['numprec'] if ~np.isnan(hh['numprec']) else 0
                             if hh['dislocated']:
                                 # ..todo Lumebrton dislocation time model. Replace with that of Seaside when available
-                                return_time = DislocationUtil.disloc_time_mode(hh)
+                                return_time = DislocationUtil.disloc_time_mode(hh, dt_params)
                                 for t in range(return_time):
                                     if t <= T and return_type == 'step_function':
                                         num_dilocated[t] += hh['numprec'] if ~np.isnan(hh['numprec']) else 0
@@ -109,7 +109,7 @@ class DislocationUtil:
                                 if ~np.isnan(hh['numprec']) else 0
                             if hh['dislocated']:
                                 # ..todo Lumebrton dislocation time model. Replace with that of Seaside when available
-                                return_time = DislocationUtil.disloc_time_mode(hh)
+                                return_time = DislocationUtil.disloc_time_mode(hh, dt_params)
                                 for t in range(return_time):
                                     if t <= T and return_type == 'step_function':
                                         node_pop[start_node]['num_dilocated'][t] += hh['numprec'] / 4 \
@@ -129,18 +129,15 @@ class DislocationUtil:
         return dynamic_params
 
     @staticmethod
-    def disloc_time_mode(household_data):
-        dt_params = {'DS0': 1.00, 'DS1': 2.33, 'DS2': 2.49, 'DS3': 3.62,
-                     'white': 0.78, 'black': 0.88, 'hispanic': 0.83,
-                     'income': -0.00, 'insurance': 1.06}
+    def disloc_time_mode(household_data, dt_params):
         race_white = 1 if household_data['race'] == 1 else 0
-        race_balck = 1 if household_data['race'] == 2 else 0
+        race_black = 1 if household_data['race'] == 2 else 0
         hispan = household_data['hispan'] if ~np.isnan(household_data['hispan']) else 0
         # ..todo verify that the explanatory variable correspond to columns in dt_params
         # ..todo Replace random insurance assumption
         linear_term = household_data['DS_0'] * dt_params['DS0'] + household_data['DS_1'] * dt_params['DS1'] + \
             household_data['DS_2'] * dt_params['DS2'] + household_data['DS_3'] * dt_params[
-                          'DS3'] + race_white * dt_params['white'] + race_balck * dt_params['black'] + hispan * \
+                          'DS3'] + race_white * dt_params['white'] + race_black * dt_params['black'] + hispan * \
             dt_params['hispanic'] + np.random.choice([0, 1], p=[.15, .85]) * dt_params['insurance']
         # household_data['randincome']/1000*dt_params['income']+\#!!! income data
         disloc_time = np.exp(linear_term)
