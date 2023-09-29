@@ -8,7 +8,7 @@
 import concurrent.futures
 from itertools import repeat
 
-from pyincore import AnalysisUtil, GeoUtil, Earthquake, Tornado, Tsunami, Hurricane, Flood
+from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore.analyses.bridgedamage.bridgeutil import BridgeUtil
 from pyincore.models.dfr3curve import DFR3Curve
