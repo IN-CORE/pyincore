@@ -89,7 +89,13 @@ class TornadoEpnDamage(BaseAnalysis):
 
     def run(self):
         network_dataset = NetworkDataset.from_dataset(self.get_input_dataset("epn_network"))
+        tornado = self.get_input_hazard("hazard")
         tornado_id = self.get_parameter('tornado_id')
+        if tornado is None and tornado_id is None:
+            raise ValueError("Either tornado hazard object or tornado id must be provided")
+        elif tornado_id is None:
+            tornado_id = tornado.id
+
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
         self.load_remote_input_dataset("tornado", tornado_metadata["datasetId"])
         tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
@@ -516,7 +522,7 @@ class TornadoEpnDamage(BaseAnalysis):
                 },
                 {
                     'id': 'tornado_id',
-                    'required': True,
+                    'required': False,
                     'description': 'Tornado hazard id',
                     'type': str
                 },
@@ -526,6 +532,14 @@ class TornadoEpnDamage(BaseAnalysis):
                     'description': 'Initial seed for the tornado hazard value',
                     'type': int
                 }
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': False,
+                    'description': 'Hazard object',
+                    'type': ["tornado"]
+                },
             ],
             'input_datasets': [
                 {

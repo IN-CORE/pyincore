@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 # TODO: exception handling for validation and set methods
-from pyincore import DataService, AnalysisUtil
+from pyincore import DataService, AnalysisUtil, Earthquake, Tornado, Tsunami, Hurricane, Flood
 from pyincore.dataset import Dataset
 import typing
 
@@ -150,6 +150,38 @@ class BaseAnalysis:
         else:
             print(result[1])
             return False
+
+    def create_hazard_object_from_input_params(self):
+        """Create hazard object from input parameters."""
+        hazard_object = self.get_input_hazard("hazard")
+        hazard_type = self.get_parameter("hazard_type")
+        hazard_dataset_id = self.get_parameter("hazard_id")
+
+        # either hazard object or hazard id + hazard type must be provided
+        if hazard_object is None and (hazard_type is None or hazard_dataset_id is None):
+            raise ValueError("Either hazard object or hazard id + hazard type must be provided")
+
+        # create hazard object from remote
+        elif hazard_object is None and hazard_type is not None and hazard_dataset_id is not None:
+            if hazard_type == "earthquake":
+                hazard_object = Earthquake.from_hazard_service(hazard_dataset_id, self.hazardsvc)
+            elif hazard_type == "tornado":
+                hazard_object = Tornado.from_hazard_service(hazard_dataset_id, self.hazardsvc)
+            elif hazard_type == "tsunami":
+                hazard_object = Tsunami.from_hazard_service(hazard_dataset_id, self.hazardsvc)
+            elif hazard_type == "hurricane":
+                hazard_object = Hurricane.from_hazard_service(hazard_dataset_id, self.hazardsvc)
+            elif hazard_type == "flood":
+                hazard_object = Flood.from_hazard_service(hazard_dataset_id, self.hazardsvc)
+            else:
+                raise ValueError("The provided hazard type is not supported.")
+
+        # use hazard object
+        else:
+            hazard_type = hazard_object.hazard_type
+            hazard_dataset_id = hazard_object.id
+
+        return hazard_object, hazard_type, hazard_dataset_id
 
     def get_output_datasets(self):
         """Get the output dataset of the analysis."""

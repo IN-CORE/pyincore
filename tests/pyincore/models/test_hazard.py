@@ -11,7 +11,7 @@ datasvc = pytest.datasvc
 
 
 def test_create_hurricane_from_remote():
-    hurricane = Hurricane.from_hazard_service("64e904cea88e824e009a1aa2", hazardsvc)
+    hurricane = Hurricane.from_hazard_service("5f11e50cc6491311a814584c", hazardsvc)
     assert len(hurricane.hazardDatasets) != 0
     assert isinstance(hurricane.hazardDatasets[0], HurricaneDataset)
 
