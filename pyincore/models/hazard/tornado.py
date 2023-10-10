@@ -66,7 +66,7 @@ class Tornado(Hazard):
         instance = cls(metadata)
         return instance
 
-    def read_hazard_values(self, payload: list, seed=None, hazard_service=None, **kwargs):
+    def read_hazard_values(self, payload: list, hazard_service=None, seed=None, **kwargs):
         """ Retrieve bulk earthquake hazard values either from the Hazard service or read it from local Dataset
 
         Args:
