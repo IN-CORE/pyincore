@@ -215,27 +215,33 @@ class Dataset:
 
         return self.readers["json"]
 
-    def get_raster_value(self, location):
+    def get_raster_value(self, x, y):
         """Utility method for reading different standard file formats: raster value.
 
         Args:
-            location (obj): A point defined as location.x and location.y.
-
+            x (float): X coordinate.
+            y (float): Y coordinate.
         Returns:
             numpy.array: Hazard values.
 
         """
         if "raster" not in self.readers:
             filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.tif")
+                if len(files) > 0:
+                    filename = files[0]
             self.readers["raster"] = rasterio.open(filename)
 
         hazard = self.readers["raster"]
-        row, col = hazard.index(location.x, location.y)
+        row, col = hazard.index(x, y)
         # assume that there is only 1 band
         data = hazard.read(1)
-        if row < 0 or col < 0 or row >= hazard.height or col >= hazard.width:
-            return 0.0
-        return numpy.asscalar(data[row, col])
+        xmin, ymin, xmax, ymax = hazard.bounds
+        if x < xmin or x > xmax or y < ymin or y > ymax:
+            return None
+        # TODO check threshold
+        return float(data[row, col])
 
     def get_csv_reader(self):
         """Utility method for reading different standard file formats: csv reader.

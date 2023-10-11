@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.13.0] - 2023-10-11
+
+### Changed
+- Refactoring the INDP dislocation time mode function to accept different parameters as input [#388](https://github.com/IN-CORE/pyincore/issues/388)
+
+### Added
+- Add commercial recovery analysis [#395](https://github.com/IN-CORE/pyincore/issues/395)
+- Capability to support for local hazard [#404](https://github.com/IN-CORE/pyincore/issues/404)
+- Add support for local hazard with backward compatibility to analyses [#415](https://github.com/IN-CORE/pyincore/issues/415)
+
+
+### Fixed
+- Aggregate hazard exposure column for non-structural building damage analysis to avoid column name cutoff and chaining issue with mean damage [#393](https://github.com/IN-CORE/pyincore/issues/393)
+
+
 ## [1.12.0] - 2023-08-16
 
 ### Added

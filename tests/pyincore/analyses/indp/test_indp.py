@@ -326,6 +326,8 @@ def run_with_base_class():
     # # optional inputs
     # indp_analysis.load_remote_input_dataset("bldgs2elec", "61c10219837ac508f9a17904")
     # indp_analysis.load_remote_input_dataset("bldgs2wter", "c102b0837ac508f9a1790a")
+    # dt_params = Dataset.from_file("dt_params.json", data_type="incore:dTParams")
+    # indp_analysis.set_input_dataset("dt_params", dt_params)
 
     # Run Analysis
     indp_analysis.run_analysis()
