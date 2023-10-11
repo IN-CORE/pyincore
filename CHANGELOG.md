@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.13.0] - 2023-10-11
 
 ### Changed
 - Refactoring the INDP dislocation time mode function to accept different parameters as input [#388](https://github.com/IN-CORE/pyincore/issues/388)
