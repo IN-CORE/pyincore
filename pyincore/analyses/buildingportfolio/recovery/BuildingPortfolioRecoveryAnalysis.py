@@ -117,6 +117,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 {
                     'id': 'result',
                     'parent_type': 'buildingPortfolio',
+                    'description': 'Building portfolio recovery result.',
                     'type': 'incore:portfolioRecovery'
                 }
             ]

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [Unreleased]
+
+### Changed
+- Properly set the output dataset in Building Portfolio Recovery Analysis [#423](https://github.com/IN-CORE/pyincore/issues/423)
+
+
 ## [1.13.0] - 2023-10-11
 
 ### Changed
@@ -14,7 +21,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add commercial recovery analysis [#395](https://github.com/IN-CORE/pyincore/issues/395)
 - Capability to support for local hazard [#404](https://github.com/IN-CORE/pyincore/issues/404)
 - Add support for local hazard with backward compatibility to analyses [#415](https://github.com/IN-CORE/pyincore/issues/415)
-
 
 ### Fixed
 - Aggregate hazard exposure column for non-structural building damage analysis to avoid column name cutoff and chaining issue with mean damage [#393](https://github.com/IN-CORE/pyincore/issues/393)
