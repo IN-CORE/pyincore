@@ -35,6 +35,7 @@ if __name__ == "__main__":
         bldg_portfolio_recovery.load_remote_input_dataset("coefFL", coefFL_dataset)
 
         bldg_portfolio_recovery.run_analysis()
+        bldg_portfolio_recovery.get_output_dataset("result").read_dataframe_from_csv().head()
 
     except EnvironmentError:
         raise

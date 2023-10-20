@@ -11,7 +11,7 @@ import scipy.stats
 import concurrent.futures
 
 from pyincore.analyses.buildingportfolio.recovery.BuildingData import BuildingData
-from pyincore import BaseAnalysis
+from pyincore import BaseAnalysis, Dataset
 
 
 class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
@@ -230,8 +230,8 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # Trajectory for Best Line Functionality and Full Functionality
         mean_recovery_output = sum(recovery_fp) / sample_size
 
-        output_file = output_base_name + 'building-recovery' + '.csv'
-        with open(output_file, 'w+', newline='') as output_file:
+        output_file_name = output_base_name + 'building-recovery' + '.csv'
+        with open(output_file_name, 'w+', newline='') as output_file:
             spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             spam_writer.writerow(['Building_ID', 'Building_Lon', 'Building_Lat']
                                  + list(range(1, time_steps + 1)))
@@ -239,6 +239,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 spam_writer.writerow([building_data['Build_ID_X'][i], building_data['X_Lon'][i],
                                       building_data['Y_Lat'][i]] + list(recovery_fp[i]))
 
+        output_file_name = output_base_name + 'portfolio-recovery' + '.csv'
         if uncertainty:
             # START: Additional Code for uncertainty analysis
             mean_u = np.zeros(sample_size)
@@ -343,9 +344,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                         upper_bound95[t] = 1
 
             # END: Additional Code for uncertainty Analysis
-
-            output_file = output_base_name + 'portfolio-recovery' + '.csv'
-            with open(output_file, 'w+', newline='') as output_file:
+            with open(output_file_name, 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', '75P_Upper_Bound',
                                       '75P_Lower_Bound', '95P_Upper_Bound', '95P_Lower_Bound',
@@ -356,13 +355,15 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                                           lower_bound95[i], upper_bound95[i]] + list(mean_recovery[i]) +
                                          [pdf[i]])
         else:
-            output_file = output_base_name + 'portfolio-recovery' + '.csv'
-            with open(output_file, 'w+', newline='') as output_file:
+            with open(output_file_name, 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', 'RecPercent_RE',
                                       'RecPercent_RU', 'RecPercent_RO', 'RecPercent_BF', 'RecPercent_FF'])
                 for i in range(time_steps):
                     spam_writer.writerow([i + 1, mean_recovery_output[i]] + list(mean_recovery[i]))
+
+        self.set_output_dataset("result", Dataset.from_file(output_file_name, data_type=self.output_datasets["result"][
+            "spec"]["type"]))
 
         # Not needed as graphs are generated in jupyter notebook
         # fig2 = plt.figure(2)
