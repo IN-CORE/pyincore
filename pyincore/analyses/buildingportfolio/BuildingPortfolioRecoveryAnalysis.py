@@ -10,7 +10,7 @@ import scipy as sp
 import scipy.stats
 import concurrent.futures
 
-from pyincore.analyses.buildingportfolio.recovery.BuildingData import BuildingData
+from pyincore.analyses.buildingportfolio.BuildingData import BuildingData
 from pyincore import BaseAnalysis, Dataset
 
 
@@ -231,8 +231,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
         # Trajectory for Best Line Functionality and Full Functionality
         mean_recovery_output = sum(recovery_fp) / sample_size
 
-        output_file_name = output_base_name + 'building-recovery' + '.csv'
-        with open(output_file_name, 'w+', newline='') as output_file:
+        with open(output_base_name + '_building-recovery.csv', 'w+', newline='') as output_file:
             spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             spam_writer.writerow(['Building_ID', 'Building_Lon', 'Building_Lat']
                                  + list(range(1, time_steps + 1)))
@@ -240,7 +239,6 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                 spam_writer.writerow([building_data['Build_ID_X'][i], building_data['X_Lon'][i],
                                       building_data['Y_Lat'][i]] + list(recovery_fp[i]))
 
-        output_file_name = output_base_name + 'portfolio-recovery' + '.csv'
         if uncertainty:
             # START: Additional Code for uncertainty analysis
             mean_u = np.zeros(sample_size)
@@ -345,7 +343,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                         upper_bound95[t] = 1
 
             # END: Additional Code for uncertainty Analysis
-            with open(output_file_name, 'w+', newline='') as output_file:
+            with open(output_base_name + '_portfolio-recovery.csv', 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', '75P_Upper_Bound',
                                       '75P_Lower_Bound', '95P_Upper_Bound', '95P_Lower_Bound',
@@ -356,30 +354,15 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                                           lower_bound95[i], upper_bound95[i]] + list(mean_recovery[i]) +
                                          [pdf[i]])
         else:
-            with open(output_file_name, 'w+', newline='') as output_file:
+            with open(output_base_name + '_portfolio-recovery.csv', 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', 'RecPercent_RE',
                                       'RecPercent_RU', 'RecPercent_RO', 'RecPercent_BF', 'RecPercent_FF'])
                 for i in range(time_steps):
                     spam_writer.writerow([i + 1, mean_recovery_output[i]] + list(mean_recovery[i]))
 
-        self.set_output_dataset("result", Dataset.from_file(output_file_name, data_type=self.output_datasets["result"][
-            "spec"]["type"]))
-
-        # Not needed as graphs are generated in jupyter notebook
-        # fig2 = plt.figure(2)
-        # plt.plot(range(time_steps), mean_recovery_output, color="black")
-        # if uncertainty:
-        #     plt.plot(range(time_steps), lower_bound75, color="red")
-        #     plt.plot(range(time_steps), upper_bound75, color="red")
-        #     plt.plot(range(time_steps), lower_bound95, color="blue")
-        #     plt.plot(range(time_steps), upper_bound95, color="blue")
-        # plt.xlabel('Expected recovery time (weeks)')
-        # plt.ylabel('Percentage of Buildings Recovered')
-        # plt.title('Building Portfolio Recovery Analysis with uncertainty')
-        #
-        # output_image2 = output_base_name + 'portfolio-recovery' + '.png'
-        # fig2.savefig(output_image2)
+        self.set_output_dataset("result", Dataset.from_file(output_base_name + '_portfolio-recovery.csv',
+                                                            data_type=self.output_datasets["result"]["spec"]["type"]))
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
 
