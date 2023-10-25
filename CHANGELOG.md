@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [Unreleased]
+
+### Changed
+- Properly set the output dataset in Building Portfolio Recovery Analysis [#423](https://github.com/IN-CORE/pyincore/issues/423)
+
+
 ## [1.13.0] - 2023-10-11
 
 ### Changed
