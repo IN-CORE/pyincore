@@ -749,7 +749,7 @@ class GalvestonCGEModel(BaseAnalysis):
 
         CG0T.loc[I, GN] = SAM.loc[I, GN].div(P0.loc[I], axis='index')
 
-        DEPR = float((SAM.loc[IG, ["INVES"]].sum(0)) / (KS0.loc[K, IG].sum(1).sum(0)))
+        DEPR = float(((SAM.loc[IG, ["INVES"]].sum(0)) / (KS0.loc[K, IG].sum(1).sum(0))).iloc[0])
 
         N0.loc[K, IG] = KS0.loc[K, IG] * DEPR
 
