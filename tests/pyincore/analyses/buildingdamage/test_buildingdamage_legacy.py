@@ -7,6 +7,7 @@ import pyincore.globals as pyglobals
 
 def run_with_base_class():
     result_folder = "legacy"
+    os.mkdir(result_folder)
 
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 

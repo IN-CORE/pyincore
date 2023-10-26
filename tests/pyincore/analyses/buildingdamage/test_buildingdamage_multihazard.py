@@ -22,7 +22,9 @@ def run_with_base_class():
     hazard_type = "earthquake+tsunami"
     hazard_id = "5ba8f127ec2309043520906c+5bc9eaf7f7b08533c7e610e1"
 
-    result_name = os.path.join("mutliple_hazards", "seaside_multihazard")
+    result_folder = "mutliple_hazards"
+    os.mkdir(result_folder)
+    result_name = os.path.join(result_folder, "seaside_multihazard")
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
