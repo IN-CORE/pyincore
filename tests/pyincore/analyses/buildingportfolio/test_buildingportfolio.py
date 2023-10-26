@@ -3,7 +3,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.buildingportfolio.recovery import BuildingPortfolioRecoveryAnalysis
+from pyincore.analyses.buildingportfolio import BuildingPortfolioRecoveryAnalysis
 from pyincore import IncoreClient
 import pyincore.globals as pyglobals
 
@@ -25,6 +25,7 @@ if __name__ == "__main__":
         bldg_portfolio_recovery.set_parameter("random_sample_size", 50)  # default 10000
         bldg_portfolio_recovery.set_parameter("no_of_weeks", 100)  # default 250
         bldg_portfolio_recovery.set_parameter("num_cpu", 1)
+        bldg_portfolio_recovery.set_parameter("result_name", "memphis")
 
         bldg_portfolio_recovery.load_remote_input_dataset("building_data", bldg_data_dataset)
         bldg_portfolio_recovery.load_remote_input_dataset("occupancy_mapping", occupancy_dataset)
@@ -35,6 +36,7 @@ if __name__ == "__main__":
         bldg_portfolio_recovery.load_remote_input_dataset("coefFL", coefFL_dataset)
 
         bldg_portfolio_recovery.run_analysis()
+        print(bldg_portfolio_recovery.get_output_dataset("result").get_dataframe_from_csv().head())
 
     except EnvironmentError:
         raise
