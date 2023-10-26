@@ -1,9 +1,13 @@
+import os
+
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
+    result_folder = "legacy"
+
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     # Memphis Earthquake damage
@@ -29,7 +33,7 @@ def run_with_base_class():
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
-    result_name = "memphis_eq_bldg_dmg_result"
+    result_name = os.path.join(result_folder, "memphis_eq_bldg_dmg_result")
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
@@ -58,7 +62,7 @@ def run_with_base_class():
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
-    result_name = "seaside_tsunami_dmg_result"
+    result_name = os.path.join(result_folder, "seaside_tsunami_dmg_result")
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
@@ -84,7 +88,7 @@ def run_with_base_class():
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
     bldg_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
 
-    result_name = "galveston_hurr_dmg_result"
+    result_name = os.path.join(result_folder, "galveston_hurr_dmg_result")
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
@@ -109,7 +113,7 @@ def run_with_base_class():
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
     bldg_dmg.set_parameter("fragility_key", "Lumberton Flood Building Fragility ID Code")
 
-    result_name = "lumberton_flood_dmg_result"
+    result_name = os.path.join(result_folder, "lumberton_flood_dmg_result")
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
@@ -135,7 +139,7 @@ def run_with_base_class():
 
     hazard_type = "tornado"
     hazard_id = "5dfa32bbc0601200080893fb"
-    result_name = "joplin_tornado_dmg_result_w_retrofit"
+    result_name = os.path.join(result_folder, "joplin_tornado_dmg_result_w_retrofit")
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)

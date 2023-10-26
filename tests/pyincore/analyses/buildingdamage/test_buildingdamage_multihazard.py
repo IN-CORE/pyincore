@@ -1,3 +1,5 @@
+import os
+
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
@@ -8,7 +10,7 @@ def run_with_base_class():
 
     bldg_dmg = BuildingDamage(client)
 
-    # seaside multihazard
+    # seaside multi-hazard
     bldg_dmg.load_remote_input_dataset("buildings", "5bcf2fcbf242fe047ce79dad")
 
     mapping_id = "648a3f88c687ae511a1814e2"  # earthquake+tsunami mapping
@@ -19,7 +21,8 @@ def run_with_base_class():
 
     hazard_type = "earthquake+tsunami"
     hazard_id = "5ba8f127ec2309043520906c+5bc9eaf7f7b08533c7e610e1"
-    result_name = "seaside_multihazard"
+
+    result_name = os.path.join("mutliple_hazards", "seaside_multihazard")
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("hazard_id", hazard_id)
