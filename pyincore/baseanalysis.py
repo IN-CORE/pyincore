@@ -163,18 +163,7 @@ class BaseAnalysis:
 
         # create hazard object from remote
         elif hazard_object is None and hazard_type is not None and hazard_dataset_id is not None:
-            if hazard_type == "earthquake":
-                hazard_object = Earthquake.from_hazard_service(hazard_dataset_id, self.hazardsvc)
-            elif hazard_type == "tornado":
-                hazard_object = Tornado.from_hazard_service(hazard_dataset_id, self.hazardsvc)
-            elif hazard_type == "tsunami":
-                hazard_object = Tsunami.from_hazard_service(hazard_dataset_id, self.hazardsvc)
-            elif hazard_type == "hurricane":
-                hazard_object = Hurricane.from_hazard_service(hazard_dataset_id, self.hazardsvc)
-            elif hazard_type == "flood":
-                hazard_object = Flood.from_hazard_service(hazard_dataset_id, self.hazardsvc)
-            else:
-                raise ValueError("The provided hazard type is not supported.")
+            hazard_object = BaseAnalysis._create_hazard_object(hazard_type, hazard_dataset_id, self.hazardsvc)
 
         # use hazard object
         else:
@@ -182,6 +171,24 @@ class BaseAnalysis:
             hazard_dataset_id = hazard_object.id
 
         return hazard_object, hazard_type, hazard_dataset_id
+
+    @staticmethod
+    def _create_hazard_object(hazard_type, hazard_dataset_id, hazardsvc):
+        """Helper function to create hazard object from hazard type and hazard dataset id."""
+        if hazard_type == "earthquake":
+            hazard_object = Earthquake.from_hazard_service(hazard_dataset_id, hazardsvc)
+        elif hazard_type == "tornado":
+            hazard_object = Tornado.from_hazard_service(hazard_dataset_id, hazardsvc)
+        elif hazard_type == "tsunami":
+            hazard_object = Tsunami.from_hazard_service(hazard_dataset_id, hazardsvc)
+        elif hazard_type == "hurricane":
+            hazard_object = Hurricane.from_hazard_service(hazard_dataset_id, hazardsvc)
+        elif hazard_type == "flood":
+            hazard_object = Flood.from_hazard_service(hazard_dataset_id, hazardsvc)
+        else:
+            raise ValueError("The provided hazard type is not supported.")
+
+        return hazard_object
 
     def get_output_datasets(self):
         """Get the output dataset of the analysis."""

@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Properly set the output dataset in Building Portfolio Recovery Analysis [#423](https://github.com/IN-CORE/pyincore/issues/423)
 
+### Added
+- Add support for hazard object input from local and remote for building damage analysis [#427](https://github.com/IN-CORE/pyincore/issues/427)
+
 ### Fixed
 - CGE warning that using series is deprecated and will raise a type error [#357](https://github.com/IN-CORE/pyincore/issues/357)
 
