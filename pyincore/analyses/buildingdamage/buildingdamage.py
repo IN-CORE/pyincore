@@ -264,7 +264,7 @@ class BuildingDamage(BaseAnalysis):
                             AnalysisUtil.adjust_damage_for_liquefaction(dmg_probability, ground_failure_prob))
 
                     dmg_interval = selected_fragility_set.calculate_damage_interval(
-                        dmg_probability, hazard_type=self.get_parameter("hazard_type"), inventory_type="building")
+                        dmg_probability, hazard_type="+".join(hazard_types), inventory_type="building")
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
