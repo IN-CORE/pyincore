@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- CGE warning that using series is deprecated and will raise a type error [#357](https://github.com/IN-CORE/pyincore/issues/357)
+
+
 ## [1.13.0] - 2023-10-11
 
 ### Changed
