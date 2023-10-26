@@ -42,8 +42,9 @@ def run_with_base_class():
     bldg_dmg.set_input_hazard("hazard", hurricane)
 
     result_folder = "local_hazard"
-    os.mkdir(result_folder)
-    result_name = os.path.join(result_folder, "galveston_hurr_dmg_result")
+    if not os.path.exists(result_folder):
+        os.mkdir(result_folder)
+    result_name = os.path.join(result_folder, "galveston_local_hurr_dmg_result")
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
