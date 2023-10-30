@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [Unreleased]
+## [1.14.0] - 2023-11-02
 
 ### Changed
 - Properly set the output dataset in Building Portfolio Recovery Analysis [#423](https://github.com/IN-CORE/pyincore/issues/423)
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - CGE warning that using series is deprecated and will raise a type error [#357](https://github.com/IN-CORE/pyincore/issues/357)
+- Pytest fix in workflow [#425](https://github.com/IN-CORE/pyincore/issues/425)
 
 
 ## [1.13.0] - 2023-10-11
@@ -30,7 +31,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Aggregate hazard exposure column for non-structural building damage analysis to avoid column name cutoff and chaining issue with mean damage [#393](https://github.com/IN-CORE/pyincore/issues/393)
-- Pytest fix in workflow [#425](https://github.com/IN-CORE/pyincore/issues/425)
 
 
 ## [1.12.0] - 2023-08-16
