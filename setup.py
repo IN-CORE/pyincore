@@ -52,14 +52,14 @@ setup(
         '': ['*.ini']
     },
 
-    python_requires=">=3.6",
+    python_requires=">=3.8",
 
     install_requires=[
-        'fiona>=1.8.4',
+        'fiona>=1.8.19',
         'geopandas>=0.6.1',
         'matplotlib>=2.1.0',
         'networkx>=2.2,<3.2',
-        'numpy>=1.16.6,<2.0a0',
+        'numpy>=1.22.0,<2.0a0',
         'pandas>=1.1.0',
         'pyomo>=5.6',
         'pyproj>=1.9.6',
