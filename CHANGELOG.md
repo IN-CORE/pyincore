@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - CGE warning that using series is deprecated and will raise a type error [#357](https://github.com/IN-CORE/pyincore/issues/357)
+- Upgrade the env of conda build from python 3.8 to 3.10 [#432](https://github.com/IN-CORE/pyincore/issues/432)
 
 
 ## [1.13.0] - 2023-10-11
