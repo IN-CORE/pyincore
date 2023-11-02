@@ -1,6 +1,6 @@
 import os
 
-from pyincore import IncoreClient, FragilityService, MappingSet, Hurricane
+from pyincore import IncoreClient, FragilityService, MappingSet, Hurricane, Tornado
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
 
@@ -45,6 +45,34 @@ def run_with_base_class():
     if not os.path.exists(result_folder):
         os.mkdir(result_folder)
     result_name = os.path.join(result_folder, "galveston_local_hurr_dmg_result")
+    bldg_dmg.set_parameter("result_name", result_name)
+    bldg_dmg.set_parameter("num_cpu", 4)
+    bldg_dmg.run_analysis()
+
+    ###########################
+    # local tornado
+    tornado = Tornado.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "tornado_dataset.json"))
+
+    # attach dataset from local file
+    tornado.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "joplin_tornado/joplin_path_wgs84.shp")),
+                                        data_type="incore:tornadoWindfield")
+
+    bldg_dataset_id = "5df7d0de425e0b00092d0082"
+
+    bldg_dmg = BuildingDamage(client)
+    bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
+
+    mapping_id = "5e8e3a21eaa8b80001f04f1c"
+    fragility_service = FragilityService(client)
+    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
+    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+
+    bldg_dmg.set_input_hazard("hazard", tornado)
+
+    result_folder = "local_hazard"
+    if not os.path.exists(result_folder):
+        os.mkdir(result_folder)
+    result_name = os.path.join(result_folder, "joplin_tornado_bldg_dmg")
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
