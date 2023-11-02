@@ -17,7 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - CGE warning that using series is deprecated and will raise a type error [#357](https://github.com/IN-CORE/pyincore/issues/357)
 - Pytest fix in workflow [#425](https://github.com/IN-CORE/pyincore/issues/425)
-
+- Mapping rule to match local repair curve
+- Local tornado x and y axis reversed
 
 ## [1.13.0] - 2023-10-11
 
