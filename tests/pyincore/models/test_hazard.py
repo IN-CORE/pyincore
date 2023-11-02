@@ -192,7 +192,7 @@ def test_create_tornado_from_remote():
         {
             "demands": ["wind"],
             "units": ["mph"],
-            "loc": "-94.37, 37.04"
+            "loc": "37.04, -94.37"
         }
     ]
     seed = 1234
@@ -238,7 +238,7 @@ def test_create_tornado_from_local():
         {
             "demands": ["wind"],
             "units": ["mph"],
-            "loc": "-94.37, 37.04"
+            "loc": "37.04, -94.37"
         }
     ]
     assert len(tornado.hazardDatasets) != 0
