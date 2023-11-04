@@ -8,7 +8,6 @@ pandas
 pyomo
 pyproj
 rasterio
-requests
 rtree
 scipy
 shapely
