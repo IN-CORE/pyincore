@@ -28,7 +28,7 @@ build:
  
 requirements:
   build:
-    - python>=3.8
+    - python>=3.9
     - pip
     - numpy>=1.26.0,<2.0a0
  
