@@ -7,7 +7,7 @@
 from setuptools import setup, find_packages
 
 # version number of pyincore
-version = '1.13.0'
+version = '1.14.0'
 
 with open("README.rst", encoding="utf-8") as f:
     readme = f.read()
@@ -55,18 +55,18 @@ setup(
     python_requires=">=3.6",
 
     install_requires=[
-        'fiona>=1.8.4',
-        'geopandas>=0.6.1',
-        'matplotlib>=2.1.0',
-        'networkx>=2.2,<3.2',
-        'numpy>=1.16.6,<2.0a0',
-        'pandas>=1.1.0',
-        'pyomo>=5.6',
-        'pyproj>=1.9.6',
-        'rasterio>=1.0.18',
-        'rtree>=0.8.3',
-        'scipy>=1.2.0',
-        'shapely>=1.6.4.post1',
+        'fiona>=1.9.5',
+        'geopandas>=0.14.0',
+        'matplotlib>=3.8.0',
+        'networkx>=3.2.1',
+        'numpy>=1.26.0,<2.0a0',
+        'pandas>=2.1.2',
+        'pyomo>=6.6.2',
+        'pyproj>=3.6.1',
+        'rasterio>=1.3.9',
+        'rtree>=1.1.0',
+        'scipy>=1.11.3',
+        'shapely>=2.0.2',
     ],
 
     extras_require={
