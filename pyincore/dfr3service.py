@@ -241,7 +241,8 @@ class Dfr3Service:
 
         # replace the curve id in dfr3_sets to the dfr3 curve
         for inventory_id, curve_item in dfr3_sets.items():
-            if isinstance(curve_item, FragilityCurveSet):
+            if isinstance(curve_item, FragilityCurveSet) or isinstance(curve_item, RepairCurveSet) \
+                    or isinstance(curve_item, RestorationCurveSet):
                 pass
             elif isinstance(curve_item, str):
                 dfr3_sets[inventory_id] = batch_dfr3_sets[curve_item]

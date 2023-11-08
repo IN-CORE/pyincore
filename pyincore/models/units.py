@@ -17,6 +17,7 @@ class Units:
     ms_to_fts = 3.28084
     msec_to_fts = 3.28084
     ms_to_mph = 2.23694
+    mps_to_mph = 2.23694
     msec_to_mph = 2.23694
 
     ins_to_msec = 0.0254
@@ -32,6 +33,7 @@ class Units:
     mph_to_ins = 17.6
     mph_to_fts = 1.46667
     mph_to_ms = 0.44704
+    mph_to_mps = 0.44704
     mph_to_msec = 0.44704
 
     m_to_cm = 100.0

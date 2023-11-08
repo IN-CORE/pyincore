@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        vars: [ {python-version: '3.8', sleep: '0s'}, {python-version: '3.9', sleep: '60s'},
-                {python-version: '3.10', sleep: '120s'}, {python-version: '3.11', sleep: '180s'} ]
+        vars: [ {python-version: '3.9', sleep: '0s'}, {python-version: '3.10', sleep: '60s'},
+                {python-version: '3.11', sleep: '120s'}, {python-version: '3.12', sleep: '180s'} ]
     name: Python ${{ matrix.vars.python-version }} Test
     steps:
       - name: Checkout source code

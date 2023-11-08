@@ -112,8 +112,8 @@ class Tornado(Hazard):
                     if req_demand_type.lower() == hazard_dataset.demand_type.lower():
                         hazard_df = hazard_dataset.dataset.get_dataframe_from_shapefile()
                         ef_box = -1
-                        x = float(req["loc"].split(",")[0])
-                        y = float(req["loc"].split(",")[1])
+                        x = float(req["loc"].split(",")[1])
+                        y = float(req["loc"].split(",")[0])
                         location = Point(x, y)
 
                         for _, feature in hazard_df.iterrows():
@@ -124,18 +124,17 @@ class Tornado(Hazard):
                                 break
 
                         if ef_box < 0:
-                            return None
-
-                        if ef_box == 5:  # EF5
+                            raw_wind_speed = None
+                        elif ef_box == 5:  # EF5
                             bottom_speed = self.EF_WIND_SPEED[ef_box]
                             top_speed = self.MAX_WIND_SPEED
+                            random.seed(self.get_random_seed(location, seed))
+                            raw_wind_speed = random.uniform(bottom_speed, top_speed)
                         else:
                             bottom_speed = self.EF_WIND_SPEED[ef_box]
                             top_speed = self.EF_WIND_SPEED[ef_box + 1]
-
-                        # generate random wind speed
-                        random.seed(self.get_random_seed(location, seed))
-                        raw_wind_speed = random.uniform(bottom_speed, top_speed)
+                            random.seed(self.get_random_seed(location, seed))
+                            raw_wind_speed = random.uniform(bottom_speed, top_speed)
 
                         if raw_wind_speed is None:
                             converted_wind_speed = raw_wind_speed

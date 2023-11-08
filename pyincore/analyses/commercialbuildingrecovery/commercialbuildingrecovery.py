@@ -224,7 +224,11 @@ class CommercialBuildingRecovery(BaseAnalysis):
 
         # This is sort of a workaround until we define Repair Curve models and abstract this out there
         for i, b in enumerate(buildings):
-            repair_sets_by_guid[b["properties"]['guid']] = repair_sets[str(i)]
+            # if building id has a matched repair curve set
+            if b['id'] in repair_sets.keys():
+                repair_sets_by_guid[b["properties"]['guid']] = repair_sets[b['id']]
+            else:
+                repair_sets_by_guid[b["properties"]['guid']] = None
 
         # Obtain the column names
         colnames = list(total_delay.columns)[1:]
@@ -267,10 +271,13 @@ class CommercialBuildingRecovery(BaseAnalysis):
                 percent_func = np.random.random(num_samples)
                 # NOTE: Even though the kwarg name is "repair_time", it actually takes  percent of functionality. DFR3
                 # system currently doesn't have a way to represent the name correctly when calculating the inverse.
-                repair_time = mapped_repair.repair_curves[state].solve_curve_for_inverse(
-                    hazard_values={}, curve_parameters=mapped_repair.curve_parameters, **{"repair_time": percent_func}
-                ) / 7
-
+                if mapped_repair is not None:
+                    repair_time = mapped_repair.repair_curves[state].solve_curve_for_inverse(
+                        hazard_values={}, curve_parameters=mapped_repair.curve_parameters, **{"repair_time": percent_func}
+                    ) / 7
+                else:
+                    repair_time = np.full(num_samples, np.nan)
+                    
                 for j in range(0, num_samples):
                     samples_n1_n2[build, idx(i, j)] = round(samples_np[build, i] + repair_time[j], 1)
 
