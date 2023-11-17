@@ -52,7 +52,7 @@ setup(
         '': ['*.ini']
     },
 
-    python_requires=">=3.6",
+    python_requires=">=3.9",
 
     install_requires=[
         'fiona>=1.9.5',

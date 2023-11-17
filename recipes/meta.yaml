@@ -33,12 +33,12 @@ requirements:
     - numpy>=1.26.0,<2.0a0
  
   host:
-    - python>=3.6
+    - python>=3.9
     - pip
     - numpy>=1.26.0,<2.0a0
 
   run:
-    - python>=3.6
+    - python>=3.9
     - ipopt>=3.11
     - scip>=8.0.0
     - {{ pin_compatible('numpy') }}
