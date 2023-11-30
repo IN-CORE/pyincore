@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Upgrade python version from 3.6 to 3.9 [#447](https://github.com/IN-CORE/pyincore/issues/447)
+- Enable offline mode for pyincore [#455](https://github.com/IN-CORE/pyincore/issues/455)
 
-
+- 
 ## [1.14.0] - 2023-11-08
 
 ### Changed
