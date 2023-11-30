@@ -1042,21 +1042,27 @@ class HazardService:
 
     # TODO replace this with API endpoint in the future
     def get_allowed_demands(self, hazard_type, timeout=(30, 600), **kwargs):
-        if hazard_type == 'earthquake':
-            url = urljoin(self.base_earthquake_url, "demands")
-        elif hazard_type == 'tornado':
-            url = urljoin(self.base_tornado_url, "demands")
-        elif hazard_type == 'tsunami':
-            url = urljoin(self.base_tsunami_url, "demands")
-        elif hazard_type == 'hurricane':
-            url = urljoin(self.base_hurricane_url, "demands")
-        elif hazard_type == 'hurricaneWindfield':
-            url = urljoin(self.base_hurricanewf_url, "demands")
-        elif hazard_type == 'flood':
-            url = urljoin(self.base_flood_url, "demands")
+        if self.client.offline:
+            if hazard_type in pyglobals.DEFAULT_ALLOWED_DEMANDS.keys():
+                return pyglobals.DEFAULT_ALLOWED_DEMANDS.get(hazard_type)
+            else:
+                raise ValueError("Unknown hazard type!")
         else:
-            raise ValueError("Unknown hazard type!")
+            if hazard_type == 'earthquake':
+                url = urljoin(self.base_earthquake_url, "demands")
+            elif hazard_type == 'tornado':
+                url = urljoin(self.base_tornado_url, "demands")
+            elif hazard_type == 'tsunami':
+                url = urljoin(self.base_tsunami_url, "demands")
+            elif hazard_type == 'hurricane':
+                url = urljoin(self.base_hurricane_url, "demands")
+            elif hazard_type == 'hurricaneWindfield':
+                url = urljoin(self.base_hurricanewf_url, "demands")
+            elif hazard_type == 'flood':
+                url = urljoin(self.base_flood_url, "demands")
+            else:
+                raise ValueError("Unknown hazard type!")
 
-        r = self.client.get(url, timeout=timeout, **kwargs)
-        return return_http_response(r).json()
+            r = self.client.get(url, timeout=timeout, **kwargs)
+            return return_http_response(r).json()
 

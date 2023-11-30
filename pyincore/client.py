@@ -171,43 +171,53 @@ class IncoreClient(Client):
 
     """
 
-    def __init__(self, service_url: str = None, token_file_name: str = None):
+    def __init__(self, service_url: str = None, token_file_name: str = None, offline: bool = False):
         super().__init__()
-        if service_url is None or len(service_url.strip()) == 0:
-            service_url = pyglobals.INCORE_API_PROD_URL
-        self.service_url = service_url
-        self.token_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_AUTH_PATH)
+        self.offline = offline
 
-        # hashlib requires bytes array for hash operations
-        byte_url_string = str.encode(self.service_url)
-        self.hashed_service_url = hashlib.sha256(byte_url_string).hexdigest()
+        if not offline:
+            if service_url is None or len(service_url.strip()) == 0:
+                service_url = pyglobals.INCORE_API_PROD_URL
+            self.service_url = service_url
+            self.token_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_AUTH_PATH)
 
-        self.create_service_json_entry()
+            # hashlib requires bytes array for hash operations
+            byte_url_string = str.encode(self.service_url)
+            self.hashed_service_url = hashlib.sha256(byte_url_string).hexdigest()
 
-        # construct local directory and filename
-        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
-        if not os.path.exists(cache_data):
-            os.makedirs(cache_data)
+            self.create_service_json_entry()
 
-        self.hashed_svc_data_dir = os.path.join(cache_data, self.hashed_service_url)
+            # construct local directory and filename
+            cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
+            if not os.path.exists(cache_data):
+                os.makedirs(cache_data)
 
-        if not os.path.exists(self.hashed_svc_data_dir):
-            os.makedirs(self.hashed_svc_data_dir)
+            self.hashed_svc_data_dir = os.path.join(cache_data, self.hashed_service_url)
 
-        # store the token file in the respective repository's directory
-        if token_file_name is None or len(token_file_name.strip()) == 0:
-            token_file_name = "." + self.hashed_service_url + "_token"
-        self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
+            if not os.path.exists(self.hashed_svc_data_dir):
+                os.makedirs(self.hashed_svc_data_dir)
 
-        authorization = self.retrieve_token_from_file()
-        if authorization is not None:
-            self.session.headers["Authorization"] = authorization
-            print("Connection successful to IN-CORE services.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
+            # store the token file in the respective repository's directory
+            if token_file_name is None or len(token_file_name.strip()) == 0:
+                token_file_name = "." + self.hashed_service_url + "_token"
+            self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
 
+            authorization = self.retrieve_token_from_file()
+            if authorization is not None:
+                self.session.headers["Authorization"] = authorization
+                print("Connection successful to IN-CORE services.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
+
+            else:
+                if self.login():
+                    print("Connection successful to IN-CORE services.", "pyIncore version detected:",
+                          pyglobals.PACKAGE_VERSION)
         else:
-            if self.login():
-                print("Connection successful to IN-CORE services.", "pyIncore version detected:",
-                      pyglobals.PACKAGE_VERSION)
+            self.service_url = ""
+            self.token_url = ""
+            self.hashed_service_url = ""
+            self.hashed_svc_data_dir = ""
+            self.token_file = ""
+            print("You are working with the offline version of IN-CORE.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
 
     def login(self):
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
