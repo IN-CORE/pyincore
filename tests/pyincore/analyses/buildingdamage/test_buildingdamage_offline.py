@@ -1,6 +1,6 @@
 import os
 
-from pyincore import IncoreClient, FragilityCurveSet, MappingSet, Tornado, GeoUtil, Dataset, Mapping, FragilityService
+from pyincore import IncoreClient, FragilityCurveSet, MappingSet, Tornado, Dataset, Mapping
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
 
@@ -54,7 +54,6 @@ def run_with_base_class():
     bldg_dmg.set_input_dataset("buildings", buildings)
 
     # Load fragility mapping
-    fragility_service = FragilityService(client)
     bldg_dmg.set_input_dataset("dfr3_mapping_set", fragility_mapping_set)
 
     # Set hazard
