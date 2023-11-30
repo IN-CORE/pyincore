@@ -3,13 +3,11 @@ import os
 from pyincore import IncoreClient, FragilityCurveSet, MappingSet, Tornado, GeoUtil, Dataset, Mapping, FragilityService
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
-import pandas as pd
-import geopandas as gpd
 
 
 def run_with_base_class():
     client = IncoreClient(offline=True)
-    # client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
+    # client = IncoreClient(pyglobals.INCORE_API_DEV_URL, offline=False)
     # client.clear_cache()
 
     # building
@@ -72,5 +70,6 @@ def run_with_base_class():
     bldg_dmg.set_parameter("num_cpu", 2)
     bldg_dmg.run_analysis()
 
-    if __name__ == '__main__':
-        run_with_base_class()
+
+if __name__ == '__main__':
+    run_with_base_class()
