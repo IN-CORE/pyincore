@@ -265,7 +265,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
 
         # failure probability
         fp_result = collections.OrderedDict()
-        fp_result.update(dmg)
+        fp_result['guid'] = dmg['guid']
 
         ds_sample = self.sample_damage_interval(dmg, damage_interval_keys,
                                                 num_samples, seed)
