@@ -163,15 +163,16 @@ class Client:
 
 
 class IncoreClient(Client):
-    """IN-CORE service client class. It contains token and service root url.
-
-    Args:
-        service_url (str): Service url.
-        token_file_name (str): Path to file containing the authorization token.
-
-    """
+    """IN-CORE service client class. It contains token and service root url."""
 
     def __init__(self, service_url: str = None, token_file_name: str = None, offline: bool = False):
+        """
+
+        Args:
+            service_url (str): Service url.
+            token_file_name (str): Path to file containing the authorization token.
+            offline (bool): Flag to indicate offline mode or not.
+        """
         super().__init__()
         self.offline = offline
 
