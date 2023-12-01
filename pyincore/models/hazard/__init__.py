@@ -12,4 +12,3 @@ from pyincore.models.hazard.flood import Flood
 from pyincore.models.hazard.tornado import Tornado
 from pyincore.models.hazard.tsunami import Tsunami
 from pyincore.models.hazard.hurricane import Hurricane
-from pyincore.models.hazard.hazardconstant import HazardConstant
