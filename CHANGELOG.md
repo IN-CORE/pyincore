@@ -10,8 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Add hazard models to documentation [#448](https://github.com/IN-CORE/pyincore/issues/448)
 
+### Changed
+- Upgrade python version from 3.6 to 3.9 [#447](https://github.com/IN-CORE/pyincore/issues/447)
 
-## [1.14.0] - 2023-11-02
+
+## [1.14.0] - 2023-11-08
 
 ### Changed
 - Properly set the output dataset in Building Portfolio Recovery Analysis [#423](https://github.com/IN-CORE/pyincore/issues/423)
