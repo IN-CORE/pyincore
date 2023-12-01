@@ -41,6 +41,7 @@ from pyincore.models.hazard.tsunami import Tsunami
 from pyincore.models.hazard.earthquake import Earthquake
 from pyincore.models.hazard.tornado import Tornado
 from pyincore.models.units import Units
+from pyincore.models.hazard.hazardconstant import HazardConstant
 from pyincore.networkdata import NetworkData
 from pyincore.baseanalysis import BaseAnalysis
 import pyincore.globals

@@ -6,18 +6,16 @@
 
 
 import json
-import os
 from typing import List
 from urllib.parse import urljoin
 import numpy
-import requests
 
 import pyincore.globals as pyglobals
+from pyincore.models.hazard import HazardConstant
 from pyincore.utils import return_http_response
+from pyincore import IncoreClient, HazardConstant
 
 logger = pyglobals.LOGGER
-
-from pyincore import IncoreClient
 
 
 class HazardService:
@@ -1043,8 +1041,8 @@ class HazardService:
     # TODO replace this with API endpoint in the future
     def get_allowed_demands(self, hazard_type, timeout=(30, 600), **kwargs):
         if self.client.offline:
-            if hazard_type in pyglobals.DEFAULT_ALLOWED_DEMANDS.keys():
-                return pyglobals.DEFAULT_ALLOWED_DEMANDS.get(hazard_type)
+            if hazard_type in HazardConstant.DEFAULT_ALLOWED_DEMANDS.keys():
+                return HazardConstant.DEFAULT_ALLOWED_DEMANDS.get(hazard_type)
             else:
                 raise ValueError("Unknown hazard type!")
         else:
