@@ -24,11 +24,14 @@ def run_with_base_class():
     sample_damage_states = "64ee146456b25759cfc599ac"  # 10 samples 28k buildings - MCS output format
     mcs_failure = '64ee144256b25759cfc599a5'
     delay_factors = "64ee10e756b25759cfc53243"
+    bld_dmg = '65723c3f9bc3c806024c69b0'
 
     # Load input datasets
     com_recovery.load_remote_input_dataset("sample_damage_states", sample_damage_states)
     com_recovery.load_remote_input_dataset("mcs_failure", mcs_failure)
     com_recovery.load_remote_input_dataset("delay_factors", delay_factors)
+    com_recovery.load_remote_input_dataset("damages", bld_dmg)
+
 
 
     # Input parameters
