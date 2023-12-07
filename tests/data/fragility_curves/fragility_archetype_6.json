@@ -1,0 +1,79 @@
+{
+  "authors": [
+    "M. Memari N. Attary H. Masoomi J.W. van de Lindt  S.F. Pilkington M.R. Ameri & H. Mahmoud"
+  ],
+  "curveParameters": [
+    {
+      "description": "wind value from hazard servic",
+      "expression": null,
+      "fullName": "wind",
+      "name": "wind",
+      "unit": "mps"
+    }
+  ],
+  "demandTypes": [
+    "wind"
+  ],
+  "demandUnits": [
+    "mps"
+  ],
+  "description": "Business and retail building (strip mall)",
+  "fragilityCurves": [
+    {
+      "curveParameters": null,
+      "description": "legacy - StandardFragilityCurve - Moderate",
+      "returnType": {
+        "description": "LS_0",
+        "type": "Limit State",
+        "unit": ""
+      },
+      "rules": [
+        {
+          "condition": [
+            "wind > 0"
+          ],
+          "expression": "scipy.stats.norm.cdf((math.log(wind) - (3.625))/(0.11))"
+        }
+      ]
+    },
+    {
+      "curveParameters": null,
+      "description": "legacy - StandardFragilityCurve - Extensive",
+      "returnType": {
+        "description": "LS_1",
+        "type": "Limit State",
+        "unit": ""
+      },
+      "rules": [
+        {
+          "condition": [
+            "wind > 0"
+          ],
+          "expression": "scipy.stats.norm.cdf((math.log(wind) - (3.895))/(0.11))"
+        }
+      ]
+    },
+    {
+      "curveParameters": null,
+      "description": "legacy - StandardFragilityCurve - Complete",
+      "returnType": {
+        "description": "LS_2",
+        "type": "Limit State",
+        "unit": ""
+      },
+      "rules": [
+        {
+          "condition": [
+            "wind > 0"
+          ],
+          "expression": "scipy.stats.norm.cdf((math.log(wind) - (4.075))/(0.21))"
+        }
+      ]
+    }
+  ],
+  "hazardType": "tornado",
+  "inventoryType": "building",
+  "paperReference": null,
+  "resultType": "Limit State",
+  "resultUnit": null
+}
