@@ -30,7 +30,7 @@ def run_with_base_class():
     com_recovery.load_remote_input_dataset("sample_damage_states", sample_damage_states)
     com_recovery.load_remote_input_dataset("mcs_failure", mcs_failure)
     com_recovery.load_remote_input_dataset("delay_factors", delay_factors)
-    com_recovery.load_remote_input_dataset("damages", bld_dmg)
+    com_recovery.load_remote_input_dataset("building_dmg", bld_dmg)
 
 
 

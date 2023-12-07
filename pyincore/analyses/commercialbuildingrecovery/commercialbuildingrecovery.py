@@ -67,12 +67,12 @@ class CommercialBuildingRecovery(BaseAnalysis):
         sample_damage_states = self.get_input_dataset("sample_damage_states").get_dataframe_from_csv(low_memory=False)
         mcs_failure = self.get_input_dataset("mcs_failure").get_dataframe_from_csv(low_memory=False)
         redi_delay_factors = self.get_input_dataset("delay_factors").get_dataframe_from_csv(low_memory=False)
-        damages = self.get_input_dataset("damages").get_dataframe_from_csv(low_memory=False)
+        building_dmg = self.get_input_dataset("building_dmg").get_dataframe_from_csv(low_memory=False)
 
         # Returns dataframe
         total_delay, recovery, time_stepping_recovery = self.commercial_recovery(buildings, sample_damage_states,
                                                                                  mcs_failure, redi_delay_factors,
-                                                                                 damages, num_samples)
+                                                                                 building_dmg, num_samples)
         self.set_result_csv_data("total_delay", total_delay, result_name + "_delay", "dataframe")
         self.set_result_csv_data("recovery", recovery, result_name + "_recovery", "dataframe")
         self.set_result_csv_data("time_stepping_recovery", time_stepping_recovery,
@@ -80,7 +80,7 @@ class CommercialBuildingRecovery(BaseAnalysis):
 
         return True
 
-    def commercial_recovery(self, buildings, sample_damage_states, mcs_failure, redi_delay_factors, damages, num_samples):
+    def commercial_recovery(self, buildings, sample_damage_states, mcs_failure, redi_delay_factors, building_dmg, num_samples):
         """
         Calculates commercial building recovery for buildings
 
@@ -89,7 +89,7 @@ class CommercialBuildingRecovery(BaseAnalysis):
             sample_damage_states (pd.DataFrame): Sample damage states
             redi_delay_factors (pd.DataFrame): Delay factors based on REDi framework
             mcs_failure (pd.DataFrame): Building inventory failure probabilities
-            damages (pd.DataFrame): Building damage states
+            building_dmg (pd.DataFrame): Building damage states
             num_samples (int): number of sample scenarios to use
 
         Returns:
@@ -99,7 +99,7 @@ class CommercialBuildingRecovery(BaseAnalysis):
 
         start_total_delay = time.process_time()
         total_delay = CommercialBuildingRecovery.total_delay(buildings, sample_damage_states, mcs_failure,
-                                                             redi_delay_factors, damages, num_samples)
+                                                             redi_delay_factors, building_dmg, num_samples)
         end_total_delay = time.process_time()
         print("Finished executing total_delay() in " + str(end_total_delay - start_total_delay) + " secs")
 
@@ -403,7 +403,7 @@ class CommercialBuildingRecovery(BaseAnalysis):
                     'type': ['incore:buildingRecoveryFactors']
                 },
                 {
-                    'id': 'damages',
+                    'id': 'building_dmg',
                     'required': True,
                     'description': 'damage result that has damage intervals',
                     'type': ['ergo:buildingDamageVer6']
