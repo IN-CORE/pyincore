@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Upgrade python version from 3.6 to 3.9 [#447](https://github.com/IN-CORE/pyincore/issues/447)
 - Enable offline mode for pyincore [#455](https://github.com/IN-CORE/pyincore/issues/455)
 - Update MCS analysis to output only required columns for `failure_probability` [#401](https://github.com/IN-CORE/pyincore/issues/401)
+- Update CommercialBuildingRecovery to input damage results as a required dataset [#460](https://github.com/IN-CORE/pyincore/issues/460)
 
 
 ## [1.14.0] - 2023-11-08
