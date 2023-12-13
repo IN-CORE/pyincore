@@ -6,7 +6,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [1.14.0] - 2023-11-02
+## [1.15.0] - 2023-12-13
+
+### Added
+- Add hazard models to documentation [#448](https://github.com/IN-CORE/pyincore/issues/448)
+
+### Changed
+- Upgrade python version from 3.6 to 3.9 [#447](https://github.com/IN-CORE/pyincore/issues/447)
+- Enable offline mode for pyincore [#455](https://github.com/IN-CORE/pyincore/issues/455)
+- Update MCS analysis to output only required columns for `failure_probability` [#401](https://github.com/IN-CORE/pyincore/issues/401)
+- Update CommercialBuildingRecovery to input damage results as a required dataset [#460](https://github.com/IN-CORE/pyincore/issues/460)
+
+
+## [1.14.0] - 2023-11-08
 
 ### Changed
 - Properly set the output dataset in Building Portfolio Recovery Analysis [#423](https://github.com/IN-CORE/pyincore/issues/423)

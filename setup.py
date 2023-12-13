@@ -7,7 +7,7 @@
 from setuptools import setup, find_packages
 
 # version number of pyincore
-version = '1.14.0'
+version = '1.15.0'
 
 with open("README.rst", encoding="utf-8") as f:
     readme = f.read()
@@ -52,7 +52,7 @@ setup(
         '': ['*.ini']
     },
 
-    python_requires=">=3.6",
+    python_requires=">=3.9",
 
     install_requires=[
         'fiona>=1.9.5',

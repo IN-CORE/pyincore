@@ -346,6 +346,51 @@ analyses/wfnfunctionality
 models
 ^^^^^^
 
+models/hazard/earthquake
+===================
+..  autoclass:: models.earthquake.Earthquake
+    :members:
+
+models/hazard/flood
+===================
+..  autoclass:: models.flood.Flood
+    :members:
+
+models/hazard/hazard
+===================
+..  autoclass:: models.hazard.Hazard
+    :members:
+
+models/hazard/hazarddataset
+===========================
+..  autoclass:: models.hazarddataset.HazardDataset
+    :members:
+..  autoclass:: models.hazarddataset.HurricaneDataset
+    :members:
+..  autoclass:: models.hazarddataset.EarthquakeDataset
+    :members:
+..  autoclass:: models.hazarddataset.TsunamiDataset
+    :members:
+..  autoclass:: models.hazarddataset.TornadoDataset
+    :members:
+..  autoclass:: models.hazarddataset.FloodDataset
+    :members:
+
+models/hazard/hurricane
+=======================
+..  autoclass:: models.hurricane.Hurricane
+    :members:
+
+models/hazard/tornado
+=====================
+..  autoclass:: models.tornado.Tornado
+    :members:
+
+models/hazard/tsunami
+=====================
+..  autoclass:: models.tsunami.Tsunami
+    :members:
+
 models/dfr3curve.py
 ===================
 ..  autoclass:: models.dfr3curve.DFR3Curve
@@ -366,6 +411,11 @@ models/mappingset
 ..  autoclass:: models.mappingset.MappingSet
     :members:
 
+models/networkdataset
+=================
+..  autoclass:: models.networkdataset.NetworkDataset
+    :members:
+
 models/repaircurveset
 =====================
 ..  autoclass:: models.repaircurveset.RepairCurveSet
@@ -374,6 +424,11 @@ models/repaircurveset
 models/restorationcurveset
 ==========================
 ..  autoclass:: models.restorationcurveset.RestorationCurveSet
+    :members:
+
+models/units
+==========================
+..  autoclass:: models.units.Units
     :members:
 
 utilities
