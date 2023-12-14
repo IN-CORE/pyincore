@@ -5,7 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore import BaseAnalysis, NetworkDataset
 from pyincore.utils.networkutil import NetworkUtil
-from numpy.linalg import inv
 from typing import List
 from scipy import stats
 import networkx as nx
@@ -128,7 +127,6 @@ class NciFunctionality(BaseAnalysis):
         wds_links_updated = self.update_wds_network_links(wds_network_links)
 
         # Generate the functionality data
-        df_functionality_nodes = pd.concat([efp_nodes_updated, wds_nodes_updated], ignore_index=True)
         df_functionality_nodes = pd.concat([efp_nodes_updated, wds_nodes_updated], ignore_index=True)
 
         # Create each individual graph
