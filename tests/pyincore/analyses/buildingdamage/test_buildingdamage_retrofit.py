@@ -42,7 +42,7 @@ def run_with_base_class():
             {
                 "legacyEntry": {},
                 "entry": {
-                    "Fragility ID Code": "5e4ca22b9578290001e59005",
+                    "Non-Retrofit Fragility ID Code": "5e4ca22b9578290001e59005",
                 },
                 "rules": {
                     "AND": [
@@ -53,7 +53,7 @@ def run_with_base_class():
             {
                 "legacyEntry": {},
                 "entry": {
-                    "Retrofitting Strategies": "5e4ca29e1eb25200014abc29",
+                    "retrofit_method": "5e4ca29e1eb25200014abc29",
                 },
                 "rules": {
                     "AND": [
@@ -65,7 +65,7 @@ def run_with_base_class():
             {
                 "legacyEntry": {},
                 "entry": {
-                    "Retrofitting Strategies": "5e4ca2f51eb25200014abc9d",
+                    "retrofit_method": "5e4ca2f51eb25200014abc9d",
                 },
                 "rules": {
                     "AND": [

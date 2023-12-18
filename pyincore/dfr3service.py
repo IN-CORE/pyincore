@@ -206,8 +206,9 @@ class Dfr3Service:
                     if inventory["properties"].get("guid") is not None and \
                             add_info_row.get("guid") is not None and \
                             inventory["properties"].get("guid") == add_info_row.get("guid"):
-                        # convert {"retrofit_key":xxx, retrofit_value:yyy} to {xxx:yyy}
+                        # convert {"retrofit_key":xxx, retrofit_value:yyy} to {retrofit_key:xxx, xxx:yyy}
                         inventory["properties"].update({
+                            "retrofit_key": add_info_row["retrofit_key"],
                             add_info_row["retrofit_key"]: add_info_row["retrofit_value"]})
                         break  # assume no duplicated guid
 
@@ -218,7 +219,7 @@ class Dfr3Service:
                     if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
                         # if retrofit key exist, use retrofit key
                         if "retrofit_key" in inventory["properties"]:
-                            entry_key = "retrofit_key"
+                            entry_key = inventory["properties"]["retrofit_key"]
 
                         curve = m.entry[entry_key]
                         dfr3_sets[inventory['id']] = curve
