@@ -206,7 +206,9 @@ class Dfr3Service:
                     if inventory["properties"].get("guid") is not None and \
                             add_info_row.get("guid") is not None and \
                             inventory["properties"].get("guid") == add_info_row.get("guid"):
-                        inventory["properties"].update(add_info_row)
+                        # convert {"retrofit_key":xxx, retrofit_value:yyy} to {xxx:yyy}
+                        inventory["properties"].update({
+                            add_info_row["retrofit_key"]: add_info_row["retrofit_value"]})
                         break  # assume no duplicated guid
 
             for m in mapping.mappings:

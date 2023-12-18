@@ -22,6 +22,10 @@ class MappingSet:
         self.name = metadata["name"]
         self.hazard_type = metadata["hazardType"]
         self.inventory_type = metadata['inventoryType']
+        if "retrofitDefinition" in metadata:
+            self.retrofit_definitions = metadata['retrofitDefinitions']
+        else:
+            self.retrofit_definitions = []
 
         if 'dataType' in metadata:
             self.data_type = metadata["dataType"]
