@@ -180,8 +180,9 @@ class Dfr3Service:
         Args:
             mapping (obj): MappingSet Object that has the rules and entries.
             inventories (list): A list of inventories. Each item is a casted fiona object
-            entry_key (str): keys such as PGA, pgd, and etc.
-            add_info (None, dict): additional information that used to match rules, e.g. retrofit strategy per building.
+            entry_key (str): keys such as Drift-Sensitive Fragility ID Code, Parametric Non-Retrofit Fragility ID
+            Code, etc.
+            add_info (None, list): additional information that used to match rules, e.g. retrofit strategy per building.
 
         Returns:
              dict: A dictionary of {"inventory id": FragilityCurveSet object}.
@@ -213,6 +214,10 @@ class Dfr3Service:
                 # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
                     if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
+                        # if retrofit key exist, use retrofit key
+                        if "retrofit_key" in inventory["properties"]:
+                            entry_key = "retrofit_key"
+
                         curve = m.entry[entry_key]
                         dfr3_sets[inventory['id']] = curve
 
