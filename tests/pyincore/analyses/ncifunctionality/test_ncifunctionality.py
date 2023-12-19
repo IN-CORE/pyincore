@@ -138,6 +138,7 @@ def run_with_base_class():
     nic_func.set_input_dataset("wds_dmg_results", wds_dmg_results)
     nic_func.set_input_dataset("wds_inventory_rest_map", wds_inventory_rest_map)
     nic_func.set_input_dataset("wds_time_results", wds_time_results)
+    nic_func.set_input_dataset("epf_damage", substation_dmg_result)
     nic_func.run_analysis()
 
 
