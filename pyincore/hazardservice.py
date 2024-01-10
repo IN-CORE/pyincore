@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 import numpy
 
 import pyincore.globals as pyglobals
-from pyincore.dectorators import forbid_offline
+from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
 from pyincore import IncoreClient
 

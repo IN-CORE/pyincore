@@ -7,7 +7,7 @@
 from urllib.parse import urljoin
 from pyincore import IncoreClient
 import pyincore.globals as pyglobals
-from pyincore.dectorators import forbid_offline
+from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
 import requests
 

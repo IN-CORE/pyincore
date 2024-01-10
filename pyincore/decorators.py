@@ -4,7 +4,7 @@ def forbid_offline(func):
     Returns:
     """
     def wrapper(self, *args, **kwargs):
-        if self.offline:
+        if self.client.offline:
             raise ValueError("Service is not available in offline mode.")
         return func(self, *args, **kwargs)
 

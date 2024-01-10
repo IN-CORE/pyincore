@@ -8,7 +8,7 @@
 from urllib.parse import urljoin
 
 from pyincore import IncoreClient
-from pyincore.dectorators import forbid_offline
+from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
 from pyincore.utils import return_http_response
 

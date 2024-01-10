@@ -11,7 +11,7 @@ from typing import Dict
 import requests
 
 import pyincore.globals as pyglobals
-from pyincore.dectorators import forbid_offline
+from pyincore.decorators import forbid_offline
 
 logger = pyglobals.LOGGER
 
