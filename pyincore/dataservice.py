@@ -14,6 +14,7 @@ import ntpath
 
 import pyincore.globals as pyglobals
 from pyincore import IncoreClient
+from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
 from urllib.parse import urljoin
 import requests
@@ -36,7 +37,7 @@ class DataService:
         self.base_earthquake_url = urljoin(client.service_url, 'hazard/api/earthquakes/')
         self.base_tornado_url = urljoin(client.service_url, 'hazard/api/tornadoes/')
 
-
+    @forbid_offline
     def get_dataset_metadata(self, dataset_id: str, timeout=(30, 600), **kwargs):
         """Retrieve metadata from data service. Dataset API endpoint is called.
 
@@ -53,6 +54,7 @@ class DataService:
         r = self.client.get(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_dataset_files_metadata(self, dataset_id: str, timeout=(30, 600), **kwargs):
         """Retrieve metadata of all files associated with the dataset. Files API endpoint is called.
 
@@ -69,6 +71,7 @@ class DataService:
         r = self.client.get(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_dataset_file_metadata(self, dataset_id: str, file_id: str, timeout=(30, 600), **kwargs):
         """Retrieve metadata of all files associated with the dataset. Files API endpoint is called.
 
@@ -87,6 +90,7 @@ class DataService:
         r = self.client.get(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_dataset_blob(self, dataset_id: str, join=None, timeout=(30, 600), **kwargs):
         """Retrieve a blob of the dataset. Blob API endpoint is called.
 
@@ -128,6 +132,7 @@ class DataService:
         else:
             return local_filename
 
+    @forbid_offline
     def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None, timeout=(30, 600), **kwargs):
         # construct url for file download
         url = urljoin(self.base_url, dataset_id + '/blob')
@@ -155,6 +160,7 @@ class DataService:
 
         return local_filename
 
+    @forbid_offline
     def get_datasets(self, datatype: str = None, title: str = None, creator: str = None, skip: int = None,
                      limit: int = None, space: str = None, timeout=(30, 600), **kwargs):
         """Function to get datasets. Blob API endpoint is called.
@@ -193,6 +199,7 @@ class DataService:
         # need to handle there is no datasets
         return return_http_response(r).json()
 
+    @forbid_offline
     def create_dataset(self, properties: dict, timeout=(30, 600), **kwargs):
         """Create datasets. Post API endpoint is called.
 
@@ -210,6 +217,7 @@ class DataService:
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def update_dataset(self, dataset_id, property_name: str,
                        property_value: str, timeout=(30, 600), **kwargs):
         """Update dataset. Put API endpoint is called.
@@ -232,6 +240,7 @@ class DataService:
         r = self.client.put(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def add_files_to_dataset(self, dataset_id: str, filepaths: list, timeout=(30, 600), **kwargs):
         """Add files to the dataset. Post API endpoint is called.
 
@@ -260,6 +269,7 @@ class DataService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def add_files_to_network_dataset(self, dataset_id: str, filepaths: list,
                                      nodename: str, linkname: str, graphname: str, timeout=(30, 600), **kwargs):
         """Add files to the network dataset. Post API endpoint is called.
@@ -303,6 +313,7 @@ class DataService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def delete_dataset(self, dataset_id: str, timeout=(30, 600), **kwargs):
         """Delete dataset. Delete API endpoint is called.
 
@@ -319,6 +330,7 @@ class DataService:
         r = self.client.delete(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_files(self, timeout=(30, 600), **kwargs):
         """Get all files. Files API endpoint is called.
         Args:
@@ -334,6 +346,7 @@ class DataService:
         r = self.client.get(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_file_metadata(self, file_id: str, timeout=(30, 600), **kwargs):
         """Function to retrieve metadata of a file defined by id. Files API endpoint is called.
 
@@ -350,6 +363,7 @@ class DataService:
         r = self.client.get(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_file_blob(self, file_id: str, timeout=(30, 600), **kwargs):
         """Function to retrieve a blob of the file. Blob API endpoint is called.
 
@@ -412,6 +426,7 @@ class DataService:
         zip_ref.close()
         return foldername
 
+    @forbid_offline
     def get_shpfile_from_service(self, fileid, dirname, timeout=(30, 600), **kwargs):
         """Function to obtain a shape file from Data service.
 
@@ -443,6 +458,7 @@ class DataService:
 
         return filename
 
+    @forbid_offline
     def get_tornado_dataset_id_from_service(self, fileid, timeout=(30, 600), **kwargs):
         """Function to obtain a tornado dataset Id from Data service.
 
@@ -461,6 +477,7 @@ class DataService:
 
         return return_http_response(r).json()["tornadoDatasetId"]
 
+    @forbid_offline
     def search_datasets(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Function to search datasets.
 
