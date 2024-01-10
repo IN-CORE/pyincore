@@ -108,7 +108,6 @@ class Dfr3Service:
 
         return return_http_response(r).json()
 
-    @forbid_offline
     def batch_get_dfr3_set(self, dfr3_id_lists: list):
         """This method is intended to replace batch_get_dfr3_set in the future. It retrieve dfr3 sets
         from services using id and instantiate DFR3Curveset objects in bulk.
