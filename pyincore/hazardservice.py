@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 import numpy
 
 import pyincore.globals as pyglobals
+from pyincore.dectorators import forbid_offline
 from pyincore.utils import return_http_response
 from pyincore import IncoreClient
 
@@ -39,6 +40,7 @@ class HazardService:
                                             'hazard/api/hurricaneWindfields/')
         self.base_flood_url = urljoin(client.service_url, 'hazard/api/floods/')
 
+    @forbid_offline
     def get_earthquake_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None,
                                             timeout: tuple = (30, 600), **kwargs):
         """Retrieve earthquake metadata list from hazard service. Hazard API endpoint is called.
@@ -67,6 +69,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_earthquake_hazard_metadata(self, hazard_id: str, timeout=(30, 600), **kwargs):
         """Retrieve earthquake metadata from hazard service. Hazard API endpoint is called.
 
@@ -84,6 +87,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_earthquake_hazard_value_set(self, hazard_id: str, demand_type: str,
                                         demand_unit: str, bbox,
                                         grid_spacing: float,
@@ -131,6 +135,7 @@ class HazardService:
 
         return x, y, hazard_val
 
+    @forbid_offline
     def post_earthquake_hazard_values(self, hazard_id: str, payload: list, amplify_hazard=True, timeout=(30, 600),
                                       **kwargs):
         """ Retrieve bulk hurricane hazard values from the Hazard service.
@@ -157,10 +162,11 @@ class HazardService:
         """
         url = urljoin(self.base_earthquake_url, hazard_id + "/values")
         kwargs = {"files": {('points', json.dumps(payload)), ('amplifyHazard', json.dumps(amplify_hazard))}}
-        r = self.client.post(url, **kwargs)
+        r = self.client.post(url, timeout=timeout, **kwargs)
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_liquefaction_values(self, hazard_id: str, geology_dataset_id: str,
                                 demand_unit: str, points: List, timeout=(30, 600), **kwargs):
         """Retrieve earthquake liquefaction values.
@@ -185,6 +191,7 @@ class HazardService:
         response = r.json()
         return response
 
+    @forbid_offline
     def post_liquefaction_values(self, hazard_id: str, geology_dataset_id: str, payload: list, timeout=(30, 600),
                                  **kwargs):
         """ Retrieve bulk earthquake liquefaction hazard values from the Hazard service.
@@ -204,6 +211,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_soil_amplification_value(self, method: str, dataset_id: str,
                                      site_lat: float, site_long: float,
                                      demand_type: str, hazard: float,
@@ -238,6 +246,7 @@ class HazardService:
     # TODO get_slope_amplification_value needed to be implemented on the server side
     # def get_slope_amplification_value(self)
 
+    @forbid_offline
     def get_supported_earthquake_models(self, timeout=(30, 600), **kwargs):
         """Retrieve suported earthquake models.
 
@@ -254,6 +263,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def create_earthquake(self, eq_json, file_paths: List = [], timeout=(30, 600), **kwargs):
         """Create earthquake on the server. POST API endpoint is called.
 
@@ -277,6 +287,7 @@ class HazardService:
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def delete_earthquake(self, hazard_id: str, timeout=(30, 600), **kwargs):
         """Delete an earthquake by it's id, and it's associated datasets
 
@@ -293,6 +304,7 @@ class HazardService:
         r = self.client.delete(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def search_earthquakes(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Search earthquakes.
 
@@ -318,6 +330,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_earthquake_aleatory_uncertainty(self, hazard_id: str, demand_type: str, timeout=(30, 600), **kwargs):
         """ Gets aleatory uncertainty for an earthquake
 
@@ -337,6 +350,7 @@ class HazardService:
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_earthquake_variance(self, hazard_id: str, variance_type: str, demand_type: str,
                                 demand_unit: str, points: List, timeout=(30, 600), **kwargs):
         """Gets total and epistemic variance for a model based earthquake
@@ -360,6 +374,7 @@ class HazardService:
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_tornado_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None,
                                          timeout=(30, 600), **kwargs):
         """Retrieve tornado metadata list from hazard service. Hazard API endpoint is called.
@@ -388,6 +403,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_tornado_hazard_metadata(self, hazard_id: str, timeout=(30, 600), **kwargs):
         """Retrieve tornado metadata list from hazard service. Hazard API endpoint is called.
 
@@ -405,6 +421,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def post_tornado_hazard_values(self, hazard_id: str, payload: list, seed=None, timeout=(30, 600), **kwargs):
         """ Retrieve bulk tornado hazard values from the Hazard service.
 
@@ -427,6 +444,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def create_tornado_scenario(self, tornado_json, file_paths: List = [], timeout=(30, 600), **kwargs):
         """Create tornado on the server. POST API endpoint is called.
 
@@ -450,6 +468,7 @@ class HazardService:
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def delete_tornado(self, hazard_id: str, timeout=(30, 600), **kwargs):
         """Delete a tornado by it's id, and it's associated datasets
 
@@ -466,6 +485,7 @@ class HazardService:
         r = self.client.delete(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def search_tornadoes(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Search tornadoes.
 
@@ -491,6 +511,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_tsunami_hazard_metadata_list(self, skip: int = None, limit: int = None, space: str = None,
                                          timeout=(30, 600), **kwargs):
         """Retrieve tsunami metadata list from hazard service. Hazard API endpoint is called.
@@ -519,6 +540,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_tsunami_hazard_metadata(self, hazard_id: str, timeout=(30, 600), **kwargs):
         """Retrieve tsunami metadata list from hazard service. Hazard API endpoint is called.
 
@@ -536,6 +558,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def post_tsunami_hazard_values(self, hazard_id: str, payload: list, timeout=(30, 600), **kwargs):
         """ Retrieve bulk tsunami hazard values from the Hazard service.
 
@@ -554,6 +577,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def create_tsunami_hazard(self, tsunami_json, file_paths: List, timeout=(30, 600), **kwargs):
         """Create tsunami on the server. POST API endpoint is called.
 
@@ -577,6 +601,7 @@ class HazardService:
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def delete_tsunami(self, hazard_id: str, timeout=(30, 600), **kwargs):
         """Delete a tsunami by it's id, and it's associated datasets
 
@@ -593,6 +618,7 @@ class HazardService:
         r = self.client.delete(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def search_tsunamis(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Search tsunamis.
 
@@ -618,6 +644,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def create_hurricane(self, hurricane_json, file_paths: List, timeout=(30, 600), **kwargs):
         """Create hurricanes on the server. POST API endpoint is called.
 
@@ -641,6 +668,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_hurricane_metadata_list(self, skip: int = None, limit: int = None, space: str = None,
                                     timeout=(30, 600), **kwargs):
         """Retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
@@ -670,6 +698,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_hurricane_metadata(self, hazard_id, timeout=(30, 600), **kwargs):
         """Retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
 
@@ -687,6 +716,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def post_hurricane_hazard_values(self, hazard_id: str, payload: list, timeout=(30, 600), **kwargs):
         """ Retrieve bulk hurricane hazard values from the Hazard service.
 
@@ -703,6 +733,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def delete_hurricane(self, hazard_id: str, timeout=(30, 600), **kwargs):
         """Delete a hurricane by it's id, and it's associated datasets
 
@@ -719,6 +750,7 @@ class HazardService:
         r = self.client.delete(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def search_hurricanes(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Search hurricanes.
 
@@ -743,6 +775,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def create_flood(self, flood_json, file_paths: List, timeout=(30, 600), **kwargs):
         """Create floods on the server. POST API endpoint is called.
 
@@ -763,6 +796,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_flood_metadata_list(self, skip: int = None, limit: int = None, space: str = None, timeout=(30, 600),
                                 **kwargs):
         """Retrieve flood metadata list from hazard service. Hazard API endpoint is called.
@@ -792,6 +826,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_flood_metadata(self, hazard_id, timeout=(30, 600), **kwargs):
         """Retrieve flood metadata list from hazard service. Hazard API endpoint is called.
 
@@ -808,6 +843,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def post_flood_hazard_values(self, hazard_id: str, payload: list, timeout=(30, 600), **kwargs):
         """ Retrieve bulk flood hazard values from the Hazard service.
 
@@ -826,6 +862,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def delete_flood(self, hazard_id: str, timeout=(30, 600), **kwargs):
         """Delete a flood by it's id, and it's associated datasets
 
@@ -842,6 +879,7 @@ class HazardService:
         r = self.client.delete(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def search_floods(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Search floods.
 
@@ -867,6 +905,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def create_hurricane_windfield(self, hurr_wf_inputs, timeout=(30, 10800), **kwargs):
         """Create wind fields on the server. POST API endpoint is called.
 
@@ -887,6 +926,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_hurricanewf_metadata_list(self, coast: str = None, category: int = None, skip: int = None,
                                       limit: int = None, space: str = None, timeout=(30, 600), **kwargs):
         """Retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
@@ -922,6 +962,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_hurricanewf_metadata(self, hazard_id, timeout=(30, 600), **kwargs):
         """Retrieve hurricane metadata list from hazard service. Hazard API endpoint is called.
 
@@ -939,6 +980,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def post_hurricanewf_hazard_values(self, hazard_id: str, payload: list, elevation: int, roughness: float,
                                        timeout=(30, 600), **kwargs):
 
@@ -963,6 +1005,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_hurricanewf_json(self, coast: str, category: int, trans_d: float, land_fall_loc: int, demand_type: str,
                              demand_unit: str, resolution: int = 6, grid_points: int = 80,
                              rf_method: str = "circular", timeout=(30, 600), **kwargs):
@@ -996,6 +1039,7 @@ class HazardService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def delete_hurricanewf(self, hazard_id: str, timeout=(30, 600), **kwargs):
         """Delete a hurricane windfield by it's id, and it's associated datasets
 
@@ -1012,6 +1056,7 @@ class HazardService:
         r = self.client.delete(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def search_hurricanewf(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Search hurricanes.
 
@@ -1037,7 +1082,6 @@ class HazardService:
 
         return return_http_response(r).json()
 
-    # TODO replace this with API endpoint in the future
     def get_allowed_demands(self, hazard_type, timeout=(30, 600), **kwargs):
         if self.client.offline:
             if hazard_type in HazardConstant.DEFAULT_ALLOWED_DEMANDS.keys():
