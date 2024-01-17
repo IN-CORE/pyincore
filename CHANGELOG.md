@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] 
 
+### Added
+- Add CoreCGEML module and MMSA Shelby County CGE ML analysis [#468](https://github.com/IN-CORE/pyincore/issues/468)
+
 ### Fixed
 - Fix NCI Functionality [#463](https://github.com/IN-CORE/pyincore/issues/463)
 
