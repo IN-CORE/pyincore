@@ -61,6 +61,16 @@ class Units:
     hr_to_s = 3600
     s_to_hr = 0.00028
 
+    sa_pgv = "sapgv"
+    pga_pgd = "pgapgd"
+    pga_pga = "pgapga"
+    sa_sa = "sasa"
+    sa_sv = "sasv"
+    sa_sd = "sasd"
+    sd_sd = "sdsd"
+    pgv_pgv = "pgvpgv"
+    sv_sv = "svsv"
+
     units_percg = "%g"
     units_g = "g"
 
@@ -92,6 +102,37 @@ class Units:
             return converted_hazard_value
 
         return converted_hazard_value
+
+    @staticmethod
+    def convert_eq_hazard(hazard_value, from_unit, t, from_type, to_unit, to_type):
+        if hazard_value is None:
+            return None
+
+        concat = from_type.lower() + to_type.lower()
+        if concat == Units.sa_pgv.lower():
+            pgv_from_sa = Units.convert_sa_to_pgv(hazard_value, from_unit)
+            return Units.convert_eq_hazard_type(pgv_from_sa, Units.units_cms, 0.0, "PGV", to_unit, "PGV")
+        elif concat == Units.pga_pga.lower():
+            hazard_value = Units.get_correct_units_of_pga(hazard_value, from_unit, to_unit)
+        elif concat == Units.sa_sa.lower():
+            hazard_value = Units.get_correct_units_of_sa(hazard_value, from_unit, to_unit)
+        elif concat == Units.sa_sd.lower():
+            hazard_value = Units.convert_sa_to_sd(hazard_value, t, from_unit, to_unit)
+        elif concat == Units.sa_sv.lower():
+            hazard_value = Units.convert_sa_to_sv(hazard_value, t, from_unit, to_unit)
+        elif concat == Units.sd_sd.lower():
+            hazard_value = Units.get_correct_units_of_sd(hazard_value, from_unit, to_unit)
+        elif concat == Units.pga_pgd.lower():
+            hazard_value = Units.convert_pga_to_pgd(hazard_value, from_unit, to_unit)
+        elif concat == Units.pgv_pgv.lower():
+            hazard_value = Units.get_correct_units_of_pgv(hazard_value, from_unit, to_unit)
+        elif concat == Units.sv_sv.lower():
+            hazard_value = Units.get_correct_units_of_sv(hazard_value, from_unit, to_unit)
+
+        if hazard_value is not None and not math.isnan(hazard_value):
+            hazard_value = 0.0 if math.isinf(hazard_value) else hazard_value
+
+        return hazard_value
 
     @staticmethod
     def convert_sa_to_pgv(sa_value, sa_unit):
@@ -191,3 +232,16 @@ class Units:
         else:
             print("Unknown SV unit, returning unconverted sv value")
             return sv_value
+
+    @staticmethod
+    def get_correct_units_of_pgv(pgv_value, from_unit, to_unit):
+        if to_unit is not None and to_unit.lower() == from_unit.lower():
+            return pgv_value
+        elif Units.units_ins.lower() == to_unit.lower() and Units.units_cms.lower() == from_unit.lower():
+            return pgv_value / 2.54
+        elif Units.units_cms.lower() == to_unit.lower() and Units.units_ins.lower() == from_unit.lower():
+            return pgv_value * 2.54
+        else:
+            print("Unknown PGV unit, returning unconverted pgv value")
+            return pgv_value
+
