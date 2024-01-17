@@ -49,7 +49,7 @@ setup(
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     package_data={
-        'pkg': ['*.ini', "*.csv", "*.xlsx"]
+        '': ['*.ini', "*.csv"]
     },
 
     python_requires=">=3.9",

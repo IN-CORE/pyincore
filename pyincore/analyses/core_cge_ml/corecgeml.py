@@ -161,7 +161,11 @@ class CoreCGEML(BaseAnalysis):
 
         # check if the shape of base_cap and capital_shocks match
         if base_cap.shape != capital_shocks.shape:
-            raise ValueError("The shape of base_cap and capital_shocks do not match.")
+            raise ValueError(
+                "The shape of base_cap and capital_shocks do not match. Base Cap shape {}, Capital Shocks shape {}".format(
+                    base_cap.shape, capital_shocks.shape
+                )
+            )
 
         # Convert capital_shocks to capital percent loss and then to capital loss in dollar amount
         capital_loss = (1 - capital_shocks) * base_cap
@@ -203,35 +207,45 @@ class CoreCGEML(BaseAnalysis):
             self.set_result_csv_data(
                 "domestic-supply",
                 pd.DataFrame(constructed_outputs["ds"]),
-                name="domestic-supply",
+                name=self.get_parameter("domestic_supply_fname")
+                if self.get_parameter("domestic_supply_fname") is not None
+                else "domestic-supply",
                 source="dataframe",
             )
         if constructed_outputs.get("gi", None) is not None:
             self.set_result_csv_data(
                 "gross-income",
                 pd.DataFrame(constructed_outputs["gi"]),
-                name="gross-income",
+                name=self.get_parameter("gross_income_fname")
+                if self.get_parameter("gross_income_fname") is not None
+                else "gross-income",
                 source="dataframe",
             )
         if constructed_outputs.get("hh", None) is not None:
             self.set_result_csv_data(
                 "household-count",
                 pd.DataFrame(constructed_outputs["hh"]),
-                name="household-count",
+                name=self.get_parameter("household_count_fname")
+                if self.get_parameter("household_count_fname") is not None
+                else "household-count",
                 source="dataframe",
             )
         if constructed_outputs.get("prefd", None) is not None:
             self.set_result_csv_data(
                 "pre-disaster-factor-demand",
                 pd.DataFrame(constructed_outputs["prefd"]),
-                name="pre-disaster-factor-demand",
+                name=self.get_parameter("pre_factor_demand_fname")
+                if self.get_parameter("pre_factor_demand_fname") is not None
+                else "pre-disaster-factor-demand",
                 source="dataframe",
             )
         if constructed_outputs.get("postfd", None) is not None:
             self.set_result_csv_data(
                 "post-disaster-factor-demand",
                 pd.DataFrame(constructed_outputs["postfd"]),
-                name="post-disaster-factor-demand",
+                name=self.get_parameter("post_factor_demand_fname")
+                if self.get_parameter("post_factor_demand_fname") is not None
+                else "post-disaster-factor-demand",
                 source="dataframe",
             )
 

@@ -18,5 +18,6 @@ capital_shocks = Dataset.from_file(
 
 
 mmsacge.set_input_dataset("sector_shocks", capital_shocks)
+mmsacge.set_parameter("domestic_supply_fname", "mmsa_shelby_county_domestic_supply.csv")
 
 mmsacge.run_analysis()
