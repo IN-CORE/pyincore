@@ -3,7 +3,9 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-from pyincore import HazardService
+import re
+
+from pyincore import HazardService, Units
 from pyincore.models.hazard.hazard import Hazard
 from pyincore.models.hazard.hazarddataset import EarthquakeDataset
 
@@ -49,3 +51,146 @@ class Earthquake(Hazard):
             return hazard_service.post_earthquake_hazard_values(self.id, payload, **kwargs)
         else:
             return self.read_local_raster_hazard_values(payload)
+
+    @staticmethod
+    def get_ground_motion_at_site(earthquake, hazard_value, site, period, demand_type, demand_units,
+                                  amplify_hazard=None,
+                                  site_class_fc=None, ):
+        if demand_units is None:
+            raise ValueError("Missing demand units cannot be None")
+
+        if amplify_hazard and site_class_fc is not None:
+            # TODO logic to amplify hazard
+            raise ValueError("Amplify hazard is not supported yet.")
+
+        if demand_type.lower() == "sd":
+            supported = Earthquake._supports_hazard(earthquake, period, demand_type, True)
+            if not supported:
+                result = Earthquake.compute_ground_motion_at_site(earthquake, hazard_value, period, "sa", demand_units)
+                updated_hazard_value = None
+                if result is not None:
+                    updated_hazard_value = Units.convert_eq_hazard(result["hazard_value"], result["units"],
+                                                                   float(result["period"]), "sa", demand_units, "sd")
+                return {"hazard_value": updated_hazard_value, "period": result["period"], "units": "sd",
+                        "demand": demand_units}
+            else:
+                return Earthquake.compute_ground_motion_at_site(earthquake, hazard_value, period, demand_type.lower(),
+                                                                demand_units)
+        elif demand_type.lower() == "pgv":
+            supported = Earthquake._supports_hazard(earthquake, period, demand_type, True)
+            if not supported:
+                supported = Earthquake._supports_hazard(earthquake, "1.0", "Sa", True)
+                if not supported:
+                    raise ValueError(
+                        f"{demand_type} is not supported and cannot be converted given the defined earthquake")
+                result = Earthquake.compute_ground_motion_at_site(earthquake, site, "1.0", "Sa", None)
+                updated_hazard_value = None
+                if result["hazard_value"] is not None:
+                    updated_hazard_value = Units.convert_eq_hazard(result["hazard_value"], "g", 1.0, "sa",
+                                                                   demand_units, "pgv")
+                return {"hazard_value": updated_hazard_value, "period": "0.0", "units": "pgv",
+                        "demand": demand_units}
+        else:
+            supported = Earthquake._supports_hazard(earthquake, period, demand_type, False)
+            if not supported:
+                print(f"{demand_type} is not supported by the defined earthquake.")
+                return None
+
+        return Earthquake.compute_ground_motion_at_site(earthquake, hazard_value, period, demand_type.lower(),
+                                                        demand_units)
+
+    @staticmethod
+    def compute_ground_motion_at_site(earthquake, hazard_value, period, demand, demand_units):
+        hazard_dataset = Earthquake._find_hazard(earthquake.hazardDatasets, demand, period, False)
+        closest_hazard_period = str(hazard_dataset.period)
+
+        if hazard_value is not None:
+            converted_hazard_val = Units.convert_eq_hazard(hazard_value, hazard_dataset.demand_units,
+                                                           float(period), hazard_dataset.demand_type,
+                                                           demand_units, demand)
+            return {
+                "hazard_value": converted_hazard_val,
+                "period": closest_hazard_period,
+                "units": demand_units,
+                "demand": demand
+            }
+
+        return None
+
+    @staticmethod
+    def _find_hazard(hazard_datasets, demand_hazard, period, exact_only=False):
+        demand_hazard_motion = Earthquake._strip_period(demand_hazard)
+        matches = []
+
+        for dataset in hazard_datasets:
+            if dataset.demand_type.lower() == demand_hazard_motion.lower():
+                matches.append(dataset)
+
+        if not matches:
+            for dataset in hazard_datasets:
+                raster_period = dataset.period
+                conversions = Earthquake._find_hazard_conversion_types(dataset.demand_type, raster_period)
+                if demand_hazard_motion.lower() in map(str.lower, conversions):
+                    if dataset not in matches:
+                        matches.append(dataset)
+
+        if exact_only:
+            for raster_dataset in matches:
+                raster_period = raster_dataset.period
+                if abs(raster_period - period) < 0.001:
+                    return raster_dataset
+            return None
+
+        if not matches:
+            print("Did not find appropriate hazard or a conversion")
+            print("Fragility curve requires hazard type: " + demand_hazard)
+            print("Here are the hazard types we have: ")
+            for dataset in hazard_datasets:
+                print(dataset.demand_type)
+            return None
+        elif len(matches) == 1:
+            return matches[0]
+        else:
+            return_val = matches[0]
+            period_diff = abs(period - return_val.period)
+
+            for i in range(1, len(matches)):
+                tmp = abs(period - matches[i].period)
+                if tmp < period_diff:
+                    period_diff = tmp
+                    return_val = matches[i]
+
+            return return_val
+
+    @staticmethod
+    def _strip_period(demand_type):
+        demand_type = re.sub(r'[0-9]*', '', demand_type)
+        demand_type = re.sub(r'\.*', '', demand_type)
+        demand_type = re.sub(r'sec', '', demand_type)
+        demand_type = demand_type.replace(' ', '')
+        if demand_type == '':
+            demand_type = 'Sa'
+
+        return demand_type
+
+    @staticmethod
+    def _find_hazard_conversion_types(demand_type, period):
+        if demand_type.lower() == "pga":
+            return ["pga", "pgd"]
+        elif demand_type.lower() == "sa":
+            if period == 1.0:
+                return ["sa", "sd", "sv", "pgv"]
+            else:
+                return ["sa", "sd", "sv"]
+        else:
+            return [demand_type]
+
+    @staticmethod
+    def _supports_hazard(earthquake, period, demand_type, exact_only):
+        can_output_hazard = True
+        hazard_dataset = Earthquake._find_hazard(earthquake.hazardDatasets, demand_type, period, exact_only)
+        if hazard_dataset is None:
+            can_output_hazard = False
+
+        return can_output_hazard
+

@@ -111,7 +111,7 @@ class Units:
         concat = from_type.lower() + to_type.lower()
         if concat == Units.sa_pgv.lower():
             pgv_from_sa = Units.convert_sa_to_pgv(hazard_value, from_unit)
-            return Units.convert_eq_hazard_type(pgv_from_sa, Units.units_cms, 0.0, "PGV", to_unit, "PGV")
+            return Units.convert_eq_hazard(pgv_from_sa, Units.units_cms, 0.0, "PGV", to_unit, "PGV")
         elif concat == Units.pga_pga.lower():
             hazard_value = Units.get_correct_units_of_pga(hazard_value, from_unit, to_unit)
         elif concat == Units.sa_sa.lower():
