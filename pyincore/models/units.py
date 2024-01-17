@@ -4,6 +4,8 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
+import math
+
 
 class Units:
 
@@ -59,6 +61,21 @@ class Units:
     hr_to_s = 3600
     s_to_hr = 0.00028
 
+    units_percg = "%g"
+    units_g = "g"
+
+    # Metric
+    units_m = "meters"
+    units_m_abbr = "m"
+    units_cm = "cm"
+    units_cms = "cm/s"
+    units_ins = "in/s"
+
+    # Imperial
+    units_in = "in"
+    units_ft = "feet"
+    units_ft_abbr = "ft"
+
     @staticmethod
     def convert_hazard(hazard_value, original_demand_units, requested_demand_units):
         converted_hazard_value = hazard_value
@@ -75,3 +92,102 @@ class Units:
             return converted_hazard_value
 
         return converted_hazard_value
+
+    @staticmethod
+    def convert_sa_to_pgv(sa_value, sa_unit):
+        if sa_unit.lower() == Units.units_percg.lower():
+            sa_value /= 100.0
+
+        return ((386.4 * sa_value) / (2 * math.pi)) * 2.54 / 1.65
+
+    @staticmethod
+    def convert_pga_to_pgd(pga_value, pga_unit, pgd_unit):
+        if pga_unit.lower() == Units.units_g.lower():
+            pga_value *= 9.80
+        elif pga_unit.lower() == Units.units_percg.lower():
+            pga_value = pga_value * 9.8 / 100.0
+        else:
+            print("unknown units in converting PGA to PGD, returning base hazard value:", pga_value)
+            return pga_value
+
+        return Units.get_correct_units_of_pgd(Units._convert_pga_to_pgd_core(pga_value, 1.2, 0.5, 2.0), "m", pgd_unit)
+
+    @staticmethod
+    def _convert_pga_to_pgd_core(pga, s, t_c, t_d):
+        return 0.025 * pga * s * t_c * t_d
+
+    @staticmethod
+    def convert_sa_to_sd(sa_value, t, sa_unit, sd_unit):
+        sa_value = Units.get_correct_units_of_sa(sa_value, sa_unit, Units.units_g)
+        return Units.get_correct_units_of_sd(sa_value * 9.78 * math.pow(t, 2) * 2.54, Units.units_cm, sd_unit)
+
+    @staticmethod
+    def convert_sa_to_sv(sa_value, t, sa_unit, sv_unit):
+        sa_value = Units.get_correct_units_of_sa(sa_value, sa_unit, Units.units_g)
+        return Units.get_correct_units_of_sv(sa_value * 9.8 * t / (2 * math.pi), Units.units_cms, sv_unit)
+
+    @staticmethod
+    def get_correct_units_of_sa(sa_value, from_unit, to_unit):
+        if to_unit is not None and to_unit.lower() == from_unit.lower():
+            return sa_value
+        elif Units.units_g.lower() == to_unit.lower() and Units.units_percg.lower() == from_unit.lower():
+            return sa_value / 100.0
+        else:
+            print("Unknown SA unit, returning unconverted sa value")
+            return sa_value
+
+    @staticmethod
+    def get_correct_units_of_sd(sd_value, from_unit, to_unit):
+        if to_unit is not None and to_unit.lower() == from_unit.lower():
+            return sd_value
+        elif Units.units_in.lower() == to_unit.lower() and Units.units_cm.lower() == from_unit.lower():
+            return sd_value / 2.54
+        elif Units.units_m_abbr.lower() == to_unit.lower() and Units.units_cm.lower() == from_unit.lower():
+            return sd_value / 100.0
+        elif Units.units_ft_abbr.lower() == to_unit.lower() and Units.units_cm.lower() == from_unit.lower():
+            return sd_value / 30.48
+        elif Units.units_cm.lower() == to_unit.lower() and Units.units_in.lower() == from_unit.lower():
+            return sd_value * 2.54
+        elif Units.units_m_abbr.lower() == to_unit.lower() and Units.units_in.lower() == from_unit.lower():
+            return sd_value * 0.0254
+        elif Units.units_ft_abbr.lower() == to_unit.lower() and Units.units_in.lower() == from_unit.lower():
+            return sd_value / 12.0
+        else:
+            print("Unknown SD unit, returning unconverted sd_value value")
+            return sd_value
+
+    @staticmethod
+    def get_correct_units_of_pga(pga_value, from_unit, to_unit):
+        if to_unit is not None and to_unit.lower() == from_unit.lower():
+            return pga_value
+        elif to_unit.lower() == Units.units_g.lower() and from_unit.lower() == Units.units_percg.lower():
+            return pga_value / 100.0
+        else:
+            print("Unknown PGA unit, returning unconverted pga value")
+            return pga_value
+
+    @staticmethod
+    def get_correct_units_of_pgd(pgd_value, from_unit, to_unit):
+        if from_unit is not None and from_unit.lower() == to_unit.lower():
+            return pgd_value
+        elif Units.units_m.lower() == from_unit.lower() or ("m".lower() == from_unit.lower() and Units.units_ft.lower()
+                                                            == to_unit.lower()):
+            return pgd_value * 3.2808399
+        elif Units.units_m.lower() == from_unit.lower() or ("m".lower() == from_unit.lower() and
+                                                            Units.units_cm.lower() == to_unit.lower()):
+            return pgd_value * 100
+        else:
+            print("Unknown PGD unit, returning unconverted pgd value")
+            return pgd_value
+
+    @staticmethod
+    def get_correct_units_of_sv(sv_value, from_unit, to_unit):
+        if to_unit is not None and to_unit.lower() == from_unit.lower():
+            return sv_value
+        elif Units.units_ins.lower() == to_unit.lower() and Units.units_cms.lower() == from_unit.lower():
+            return sv_value / 2.54
+        elif Units.units_cms.lower() == to_unit.lower() and Units.units_ins.lower() == from_unit.lower():
+            return sv_value * 2.54
+        else:
+            print("Unknown SV unit, returning unconverted sv value")
+            return sv_value
