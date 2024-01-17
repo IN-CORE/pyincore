@@ -50,12 +50,12 @@ class Earthquake(Hazard):
         if self.id and self.id != "" and hazard_service is not None:
             return hazard_service.post_earthquake_hazard_values(self.id, payload, **kwargs)
         else:
-            return self.read_local_raster_hazard_values(payload)
+            return self.get_ground_motion_at_site(hazard_value, site, period, demand_type, demand_units,
+                                                  amplify_hazard=None, site_class_fc=None)
 
-    @staticmethod
-    def get_ground_motion_at_site(earthquake, hazard_value, site, period, demand_type, demand_units,
+    def get_ground_motion_at_site(self, hazard_value, site, period, demand_type, demand_units,
                                   amplify_hazard=None,
-                                  site_class_fc=None, ):
+                                  site_class_fc=None):
         if demand_units is None:
             raise ValueError("Missing demand units cannot be None")
 
@@ -64,9 +64,9 @@ class Earthquake(Hazard):
             raise ValueError("Amplify hazard is not supported yet.")
 
         if demand_type.lower() == "sd":
-            supported = Earthquake._supports_hazard(earthquake, period, demand_type, True)
+            supported = self._supports_hazard(period, demand_type, True)
             if not supported:
-                result = Earthquake.compute_ground_motion_at_site(earthquake, hazard_value, period, "sa", demand_units)
+                result = self.compute_ground_motion_at_site(hazard_value, period, "sa", demand_units)
                 updated_hazard_value = None
                 if result is not None:
                     updated_hazard_value = Units.convert_eq_hazard(result["hazard_value"], result["units"],
@@ -74,16 +74,15 @@ class Earthquake(Hazard):
                 return {"hazard_value": updated_hazard_value, "period": result["period"], "units": "sd",
                         "demand": demand_units}
             else:
-                return Earthquake.compute_ground_motion_at_site(earthquake, hazard_value, period, demand_type.lower(),
-                                                                demand_units)
+                return self.compute_ground_motion_at_site(hazard_value, period, demand_type.lower(), demand_units)
         elif demand_type.lower() == "pgv":
-            supported = Earthquake._supports_hazard(earthquake, period, demand_type, True)
+            supported = self._supports_hazard(period, demand_type, True)
             if not supported:
-                supported = Earthquake._supports_hazard(earthquake, "1.0", "Sa", True)
+                supported = self._supports_hazard("1.0", "Sa", True)
                 if not supported:
                     raise ValueError(
                         f"{demand_type} is not supported and cannot be converted given the defined earthquake")
-                result = Earthquake.compute_ground_motion_at_site(earthquake, site, "1.0", "Sa", None)
+                result = self.compute_ground_motion_at_site(site, "1.0", "Sa", None)
                 updated_hazard_value = None
                 if result["hazard_value"] is not None:
                     updated_hazard_value = Units.convert_eq_hazard(result["hazard_value"], "g", 1.0, "sa",
@@ -91,17 +90,15 @@ class Earthquake(Hazard):
                 return {"hazard_value": updated_hazard_value, "period": "0.0", "units": "pgv",
                         "demand": demand_units}
         else:
-            supported = Earthquake._supports_hazard(earthquake, period, demand_type, False)
+            supported = self._supports_hazard(period, demand_type, False)
             if not supported:
                 print(f"{demand_type} is not supported by the defined earthquake.")
                 return None
 
-        return Earthquake.compute_ground_motion_at_site(earthquake, hazard_value, period, demand_type.lower(),
-                                                        demand_units)
+        return self.compute_ground_motion_at_site(hazard_value, period, demand_type.lower(), demand_units)
 
-    @staticmethod
-    def compute_ground_motion_at_site(earthquake, hazard_value, period, demand, demand_units):
-        hazard_dataset = Earthquake._find_hazard(earthquake.hazardDatasets, demand, period, False)
+    def compute_ground_motion_at_site(self, hazard_value, period, demand, demand_units):
+        hazard_dataset = Earthquake._find_hazard(self.hazardDatasets, demand, period, False)
         closest_hazard_period = str(hazard_dataset.period)
 
         if hazard_value is not None:
@@ -185,10 +182,9 @@ class Earthquake(Hazard):
         else:
             return [demand_type]
 
-    @staticmethod
-    def _supports_hazard(earthquake, period, demand_type, exact_only):
+    def _supports_hazard(self, period, demand_type, exact_only):
         can_output_hazard = True
-        hazard_dataset = Earthquake._find_hazard(earthquake.hazardDatasets, demand_type, period, exact_only)
+        hazard_dataset = Earthquake._find_hazard(self.hazardDatasets, demand_type, period, exact_only)
         if hazard_dataset is None:
             can_output_hazard = False
 
