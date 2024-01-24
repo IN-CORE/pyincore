@@ -9,13 +9,14 @@ import numpy as np
 from scipy.spatial import KDTree
 import sys
 import pyproj
+import geopandas as gpd
 
 from rtree import index
 from shapely.geometry import shape, Point, MultiLineString, LineString
 
 import fiona
 import uuid
-import copy
+import os
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
@@ -228,49 +229,61 @@ class GeoUtil:
         return idx
 
     @staticmethod
-    def add_guid(inshp_filename, outshp_filename):
-        """Add guid to shapefile
+    def add_guid(infile, outfile):
+        """Add uuid to shapefile or geopackage
 
         Args:
-            inshp_filename (str):  Full path and filename of Input Shapefile 
-            outshp_filename (str): Full path and filename of Ouptut shapefile
+            infile (str):  Full path and filename of Input file
+            outfile (str): Full path and filename of Ouptut file
 
         Returns:
-            bool: A success or fail to add guid.
+            bool: A success or fail to add uuid.
 
         """
-
         # TODO:
         # - need to handle when there is existing GUID
         # - need to handle when there is existing GUID and some missing guid for some rows
         # - need to handle when input and output are same
 
-        shape_property_list = []
-        schema = None
-        incrs = None
+        # check if the input file is a shapefile or geopackage
+        is_success = False
+        is_shapefile = False
+        is_geopackage = False
 
-        try:
-            infile = fiona.open(inshp_filename)
-            incrs = infile.crs
-            # create list of each shapefile entry
-            schema = infile.schema.copy()
-            schema['properties']['guid'] = 'str:30'
-            for in_feature in infile:
-                # build shape feature
-                tmp_feature = copy.deepcopy(in_feature)
-                tmp_feature['properties']['guid'] = str(uuid.uuid4())
-                shape_property_list.append(tmp_feature)
-        except:
-            logging.exception("Error reading/processing feature %s:", inshp_filename)
+        if infile.lower().endswith('.shp'):
+            is_shapefile = True
+        elif infile.lower().endswith('.gpkg'):
+            is_geopackage = True
+        else:
+            logging.error("Error: Input file format is not supported.")
+            print("Error: Input file format is not supported.")
             return False
 
-        try:
-            with fiona.open(outshp_filename, 'w', crs=incrs, driver='ESRI Shapefile', schema=schema) as output:
-                for i in range(len(shape_property_list)):
-                    new_feature = shape_property_list[i]
-                    output.write(new_feature)
-        except:
-            logging.exception("Error writing features %s:", outshp_filename)
-            return False
+        # get the filename without extension so it can be used for layer name
+        outfile_name = os.path.splitext(os.path.basename(outfile))[0]
 
-        return True
+        if is_shapefile:
+            gdf = gpd.read_file(infile)
+            gdf['guid'] = gdf.apply(lambda x: str(uuid.uuid4()), axis=1)
+            gdf.to_file(f"{outfile}", driver='ESRI Shapefile')
+            is_success = True
+        elif is_geopackage:
+            if GeoUtil.is_vector_gpkg(infile):
+                gdf = gpd.read_file(infile)
+                gdf['guid'] = gdf.apply(lambda x: str(uuid.uuid4()), axis=1)
+                gdf.to_file(outfile, layer=outfile_name, driver='GPKG')
+                is_success = True
+            else:
+                logging.error("Error: The GeoPackage contains raster data, which is not supported.")
+                print("Error: The GeoPackage contains raster data, which is not supported.")
+                return False
+
+        return is_success
+
+    @staticmethod
+    def is_vector_gpkg(filepath):
+        try:
+            with fiona.open(filepath) as src:
+                return src.schema['geometry'] is not None
+        except fiona.errors.DriverError:
+            return False
