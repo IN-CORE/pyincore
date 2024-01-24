@@ -237,7 +237,7 @@ class GeoUtil:
             outfile (str): Full path and filename of Ouptut file
 
         Returns:
-            bool: A success or fail to add uuid.
+            bool: A success or fail to add guid.
 
         """
         # TODO:
