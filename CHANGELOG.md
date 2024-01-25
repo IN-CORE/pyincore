@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Create GUID field in geopackage file [#478](https://github.com/IN-CORE/pyincore/issues/478)
 
+### Changed
+- Tornado and Earthquake model [#474](https://github.com/IN-CORE/pyincore/issues/474)
+
+### Fixed
+- Fix semantics search pytest by switching to an existing search term 
+
 
 ## [1.15.1] - 2023-12-20 
 
