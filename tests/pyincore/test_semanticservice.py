@@ -64,7 +64,7 @@ def test_get_semantic_type_by_name(semanticsvc):
 
 
 def test_search_semantic_types(semanticsvc):
-    search_term_exists = "wildFireDamageRaster"
+    search_term_exists = "buildingDamage"
     search_term_not_exists = "asdwerueidj"
     # search for term that should find an entry
     semantic_types = semanticsvc.search_semantic_type(search_term_exists)
