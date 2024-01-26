@@ -8,12 +8,9 @@
 import re
 from urllib.parse import urljoin
 from typing import Dict
-import requests
 
 import pyincore.globals as pyglobals
 from pyincore.decorators import forbid_offline
-
-logger = pyglobals.LOGGER
 
 from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
@@ -21,6 +18,8 @@ from pyincore.models.repaircurveset import RepairCurveSet
 from pyincore.models.restorationcurveset import RestorationCurveSet
 from pyincore.models.mappingset import MappingSet
 from pyincore.utils import return_http_response
+
+logger = pyglobals.LOGGER
 
 # add more types if needed
 known_types = {

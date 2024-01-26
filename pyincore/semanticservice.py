@@ -14,7 +14,6 @@ from pyincore import IncoreClient
 from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
 from urllib.parse import urljoin
-import requests
 
 logger = pyglobals.LOGGER
 
