@@ -6,8 +6,7 @@
 
 
 import json
-import os
-from typing import Tuple, Union
+from typing import Tuple
 
 import pyincore.globals as pyglobals
 from pyincore import IncoreClient
