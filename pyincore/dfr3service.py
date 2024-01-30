@@ -224,16 +224,21 @@ class Dfr3Service:
                         # updated
                         target_column = None
                         expression = None
+                        type = None
                         for m in mapping.mappingEntryKeys:
                             if m["name"] == add_info_row["retrofit_key"]:
                                 target_column = m["config"]["targetColumn"] if ("config" in m and "targetColumn" in
                                                                                 m["config"]) else None
                                 expression = m["config"]["expression"] if ("config" in m and "expression" in m[
                                     "config"]) else None
+                                type = m["config"]["type"] if ("config" in m and "type" in m["config"]) else None
                         if target_column is not None and expression is not None:
                             if target_column in inventory["properties"].keys():
                                 retrofit_value = add_info_row["retrofit_value"]
-                                inventory['properties'][target_column] = eval(expression)
+                                if type and type == "number":
+                                    retrofit_value = float(retrofit_value)
+                                inventory['properties'][target_column] += retrofit_value
+                                # eval(f"inventory['properties'][target_column] {expression}")
                             else:
                                 raise ValueError("targetColumn: " + target_column + " not found in inventory "
                                                                                     "properties!")

@@ -1,0 +1,217 @@
+{
+  "id": "602f3cf981bd2c09ad8f4f9d",
+  "name": "Lumberton flood fragilities for 15 archetype building",
+  "hazardType": "flood",
+  "inventoryType": "building",
+  "mappings": [
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f31f381bd2c09ad8efcb4",
+        "Lumberton Flood Building Fragility ID Code": "602f31f381bd2c09ad8efcb4"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 1"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f32cf81bd2c09ad8efcd5",
+        "Lumberton Flood Building Fragility ID Code": "602f32cf81bd2c09ad8efcd5"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 2"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f336c81bd2c09ad8efcf6",
+        "Lumberton Flood Building Fragility ID Code": "602f336c81bd2c09ad8efcf6"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 3"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f358681bd2c09ad8efd17",
+        "Lumberton Flood Building Fragility ID Code": "602f358681bd2c09ad8efd17"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 4"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f361881bd2c09ad8efd38",
+        "Lumberton Flood Building Fragility ID Code": "602f361881bd2c09ad8efd38"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 5"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f366f81bd2c09ad8efd59",
+        "Lumberton Flood Building Fragility ID Code": "602f366f81bd2c09ad8efd59"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 6"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f36e681bd2c09ad8efd7a",
+        "Lumberton Flood Building Fragility ID Code": "602f36e681bd2c09ad8efd7a"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 7"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f37c681bd2c09ad8efd9b",
+        "Lumberton Flood Building Fragility ID Code": "602f37c681bd2c09ad8efd9b"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 8"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f381981bd2c09ad8efdbc",
+        "Lumberton Flood Building Fragility ID Code": "602f381981bd2c09ad8efdbc"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 9"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f385f81bd2c09ad8efddd",
+        "Lumberton Flood Building Fragility ID Code": "602f385f81bd2c09ad8efddd"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 10"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f38a381bd2c09ad8efdfe",
+        "Lumberton Flood Building Fragility ID Code": "602f38a381bd2c09ad8efdfe"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 11"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f38ec81bd2c09ad8efe1f",
+        "Lumberton Flood Building Fragility ID Code": "602f38ec81bd2c09ad8efe1f"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 12"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f393381bd2c09ad8efe40",
+        "Lumberton Flood Building Fragility ID Code": "602f393381bd2c09ad8efe40"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 13"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f397b81bd2c09ad8efe61",
+        "Lumberton Flood Building Fragility ID Code": "602f397b81bd2c09ad8efe61"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 14"
+        ]
+      ]
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "elevation": "602f39c781bd2c09ad8efe82",
+        "Lumberton Flood Building Fragility ID Code": "602f39c781bd2c09ad8efe82"
+      },
+      "rules": [
+        [
+          "int archetype EQUALS 15"
+        ]
+      ]
+    }
+  ],
+  "mappingEntryKeys": [
+    {
+      "name": "elevation",
+      "description": "Apply elevation of the lowest horizontal structural member (ft) coming from building inventory.",
+      "default": false,
+      "config": {
+        "unit": "feet",
+        "type": "number",
+        "targetColumn": "ffe_elev",
+        "expression": "+= retrofit_value"
+      }
+    },
+    {
+      "name": "Lumberton Flood Building Fragility ID Code",
+      "description": "Lumberton Flood Building Fragility ID Code",
+      "default": true,
+      "config": {
+        "unit": "unitless",
+        "type": null
+      }
+    }
+  ],
+  "creator": "cwang138",
+  "owner": "cwang138",
+  "spaces": [
+    "cwang138",
+    "incore"
+  ],
+  "mappingType": "fragility"
+}
