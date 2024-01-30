@@ -6,14 +6,13 @@
 
 
 import json
-import os
-from typing import Tuple, Union
+from typing import Tuple
 
 import pyincore.globals as pyglobals
 from pyincore import IncoreClient
+from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
 from urllib.parse import urljoin
-import requests
 
 logger = pyglobals.LOGGER
 
@@ -33,6 +32,7 @@ class SemanticService:
         self.base_url = urljoin(client.service_url, "semantics/api/types")
 
 
+    @forbid_offline
     def get_all_semantic_types(
         self,
         hyperlink: bool = False,
@@ -83,6 +83,7 @@ class SemanticService:
 
         return data
 
+    @forbid_offline
     def get_semantic_type_by_name(
         self,
         type_name: str,
@@ -116,6 +117,7 @@ class SemanticService:
 
         return data
 
+    @forbid_offline
     def search_semantic_type(
         self, query: str, timeout: Tuple[int, int] = (30, 600), **kwargs
     ) -> list:

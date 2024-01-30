@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fix semantics search pytest by switching to an existing search term 
 
 
+## [Unreleased]
+
+### Changed
+- Disable methods interact with services if in offline mode [#458](https://github.com/IN-CORE/pyincore/issues/458)
+
+
 ## [1.15.1] - 2023-12-20 
 
 ### Fixed
