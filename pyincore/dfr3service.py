@@ -237,8 +237,10 @@ class Dfr3Service:
                                 retrofit_value = add_info_row["retrofit_value"]
                                 if type and type == "number":
                                     retrofit_value = float(retrofit_value)
-                                inventory['properties'][target_column] += retrofit_value
-                                # eval(f"inventory['properties'][target_column] {expression}")
+
+                                # Dangerous!
+                                exec(f"inventory['properties'][target_column]{expression}")
+
                             else:
                                 raise ValueError("targetColumn: " + target_column + " not found in inventory "
                                                                                     "properties!")
