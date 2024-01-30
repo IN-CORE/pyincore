@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Create GUID field in geopackage file [#478](https://github.com/IN-CORE/pyincore/issues/478)
 
 ### Changed
 - Tornado and Earthquake model [#474](https://github.com/IN-CORE/pyincore/issues/474)
