@@ -129,7 +129,7 @@ def test_create_tsunami_from_local():
 
 def test_create_eq_from_remote():
     eq = Earthquake.from_hazard_service("5b902cb273c3371e1236b36b", hazardsvc)
-    assert len(eq.hazardDatasets) == 0  # test model based eq compatibility
+    assert len(eq.hazardDatasets) == 1  # test model based eq compatibility
 
     payload = [
         {
