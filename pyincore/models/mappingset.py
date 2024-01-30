@@ -18,14 +18,15 @@ class MappingSet:
     """
 
     def __init__(self, metadata):
+
         self.id = metadata["id"]
         self.name = metadata["name"]
         self.hazard_type = metadata["hazardType"]
         self.inventory_type = metadata['inventoryType']
-        if "retrofitDefinition" in metadata:
-            self.retrofit_definitions = metadata['retrofitDefinitions']
+        if "mappingEntryKeys" in metadata and metadata["mappingEntryKeys"] is not None:
+            self.mappingEntryKeys = metadata["mappingEntryKeys"]
         else:
-            self.retrofit_definitions = []
+            self.mappingEntryKeys = []
 
         if 'dataType' in metadata:
             self.data_type = metadata["dataType"]

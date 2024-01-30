@@ -8,7 +8,8 @@
 import re
 from urllib.parse import urljoin
 from typing import Dict
-import requests
+import math
+import scipy
 
 import pyincore.globals as pyglobals
 
@@ -172,16 +173,15 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
-    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str, add_info: list = None):
+    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str = None, add_info: list = None):
         """This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
         FragilityCurveSet Object.
 
         Args:
             mapping (obj): MappingSet Object that has the rules and entries.
-            inventories (list): A list of inventories. Each item is a casted fiona object
-            entry_key (str): keys such as Drift-Sensitive Fragility ID Code, Parametric Non-Retrofit Fragility ID
-            Code, etc.
+            inventories (list): A list of inventories. Each item is a fiona object
+            entry_key (None, str): Mapping Entry Key e.g. Non-retrofit Fragility ID Code, retrofit_method_1, etc.
             add_info (None, list): additional information that used to match rules, e.g. retrofit strategy per building.
 
         Returns:
@@ -189,6 +189,15 @@ class Dfr3Service:
 
         """
         dfr3_sets = {}
+
+        # find default mapping entry key if not provided
+        if entry_key is None:
+            for m in mapping.mappingEntryKeys:
+                if "defaultKey" in m and m["defaultKey"] is True:
+                    entry_key = m["name"]
+                    break
+        if entry_key is None:
+            raise ValueError("Entry key not provided and no default entry key found in the mapping!")
 
         # loop through inventory to match the rules
         matched_curve_ids = []
@@ -200,24 +209,42 @@ class Dfr3Service:
                     inventory["properties"]["efacility"] is None:
                 inventory["properties"]["efacility"] = ""
 
-            # if additional information presented, merge inventory properties with that additional information
+            # if additional information e.g. Retrofit presented, merge inventory properties with that additional
+            # information
             if add_info is not None:
                 for add_info_row in add_info:
+                    # assume no duplicated guid
                     if inventory["properties"].get("guid") is not None and \
                             add_info_row.get("guid") is not None and \
                             inventory["properties"].get("guid") == add_info_row.get("guid"):
-                        # convert {"retrofit_key":xxx, retrofit_value:yyy} to {retrofit_key:xxx, xxx:yyy}
-                        inventory["properties"].update({
-                            "retrofit_key": add_info_row["retrofit_key"],
-                            add_info_row["retrofit_key"]: add_info_row["retrofit_value"]})
-                        break  # assume no duplicated guid
+                        # merging { "retrofit_key":xxx, "retrofit_value": yyy }
+                        inventory["properties"].update(add_info_row)
+
+                        # For retrofit: if targetColumn and expression exist, building inventory properties will be
+                        # updated
+                        target_column = None
+                        expression = None
+                        for m in mapping.mappingEntryKeys:
+                            if m["name"] == add_info_row["retrofit_key"]:
+                                target_column = m["config"]["targetColumn"] if ("config" in m and "targetColumn" in
+                                                                                m["config"]) else None
+                                expression = m["config"]["expression"] if ("config" in m and "expression" in m[
+                                    "config"]) else None
+                        if target_column is not None and expression is not None:
+                            if target_column in inventory["properties"].keys():
+                                retrofit_value = add_info_row["retrofit_value"]
+                                inventory['properties'][target_column] = eval(expression)
+                            else:
+                                raise ValueError("targetColumn: " + target_column + " not found in inventory "
+                                                                                    "properties!")
+                        break
 
             for m in mapping.mappings:
                 # for old format rule matching [[]]
                 # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
                     if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
-                        # if retrofit key exist, use retrofit key
+                        # if retrofit key exist, use retrofit key otherwise use default key
                         if "retrofit_key" in inventory["properties"]:
                             entry_key = inventory["properties"]["retrofit_key"]
 
@@ -260,20 +287,29 @@ class Dfr3Service:
 
         return dfr3_sets
 
-    def match_list_of_dicts(self, mapping: MappingSet, inventories: list, entry_key: str):
+    def match_list_of_dicts(self, mapping: MappingSet, inventories: list, entry_key: str = None):
         """This method is same as match_inventory, except it takes a simple list of dictionaries that contains the items
         to be mapped in the rules. The match_inventory method takes a list of fiona objects
 
         Args:
             mapping (obj): MappingSet Object that has the rules and entries.
             inventories (list): A list of inventories. Each item of the list is a simple dictionary
-            entry_key (str): keys such as PGA, pgd, and etc.
+            entry_key (None, str): Mapping Entry Key e.g. Non-retrofit Fragility ID Code, retrofit_method_1, etc.
 
         Returns:
              dict: A dictionary of {"inventory id": FragilityCurveSet object}.
 
         """
         dfr3_sets = {}
+
+        # find default mapping entry key if not provided
+        if entry_key is None:
+            for m in mapping.mappingEntryKeys:
+                if "defaultKey" in m and m["defaultKey"] is True:
+                    entry_key = m["name"]
+                    break
+        if entry_key is None:
+            raise ValueError("Entry key not provided and no default entry key found in the mapping!")
 
         # loop through inventory to match the rules
         matched_curve_ids = []
