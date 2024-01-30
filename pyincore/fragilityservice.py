@@ -8,6 +8,7 @@
 import urllib
 
 from pyincore import IncoreClient
+from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
 from pyincore.utils import return_http_response
 
@@ -26,6 +27,7 @@ class FragilityService(Dfr3Service):
 
         super(FragilityService, self).__init__(client)
 
+    @forbid_offline
     def get_dfr3_sets(self, demand_type: str = None,
                       hazard_type: str = None, inventory_type: str = None,
                       author: str = None, legacy_id: str = None,
