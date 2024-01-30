@@ -11,7 +11,7 @@ def run_with_base_class():
 
     # dfr3 mapping
     fragility_mapping_set = MappingSet.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR,
-                                                                              "retrofit/tornado_retrofit_mapping.json"))
+                                                                   "retrofit/tornado_retrofit_mapping.json"))
 
     # Building Damage
     # Create building damage
@@ -21,7 +21,7 @@ def run_with_base_class():
     bldg_dataset_id = "5dbc8478b9219c06dd242c0d"  # joplin building v6 prod
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
     retrofit_strategy_plan1 = Dataset.from_file(os.path.join(pyglobals.TEST_DATA_DIR,
-                                                             "retrofit/tornado_retrofit_mapping.csv"),
+                                                             "retrofit/tornado_retrofit_plan.csv"),
                                                 data_type="incore:retrofitStrategy")
     bldg_dmg.set_input_dataset("retrofit_strategy", retrofit_strategy_plan1)
 

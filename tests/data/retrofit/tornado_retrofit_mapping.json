@@ -6,9 +6,9 @@
     {
       "legacyEntry": {},
       "entry": {
-        "retrofit_method_1": "5e4ca29e1eb25200014abc29",
-        "retrofit_method_2": "5e4ca2f51eb25200014abc9d",
-        "Non-retrofit Fragility ID Code": "5e4ca22b9578290001e59005"
+        "retrofit_method_0": "5e4ca29e1eb25200014abc29",
+        "retrofit_method_1": "5e4ca2f51eb25200014abc9d",
+        "Non-Retrofit Fragility ID Code": "5e4ca22b9578290001e59005"
       },
       "rules": {
         "AND": [
@@ -52,8 +52,8 @@
     {
       "legacyEntry": {},
       "entry": {
-        "retrofit_method_1": "5e4ca2e31eb25200014abc80",
-        "retrofit_method_2": "5e4ca3321eb25200014abcf4",
+        "retrofit_method_0": "5e4ca2e31eb25200014abc80",
+        "retrofit_method_1": "5e4ca3321eb25200014abcf4",
         "Non-Retrofit Fragility ID Code": "5e4ca2831eb25200014abc0c"
       },
       "rules": {
@@ -233,6 +233,15 @@
       "name": "retrofit_method_2",
       "description": "Roof covering with asphalt shingles, and roof sheathing with 8d C6/6, and roof-to-wall connection type with two H2.5 clips.",
       "defaultKey": false,
+      "config": {
+        "unit": "unitless",
+        "type": null
+      }
+    },
+    {
+      "name": "Non-Retrofit Fragility ID Code",
+      "description": "Non-Retrofit Fragility",
+      "defaultKey": true,
       "config": {
         "unit": "unitless",
         "type": null

@@ -19,19 +19,16 @@ class MappingSet:
 
     def __init__(self, metadata):
 
-        self.id = metadata["id"]
-        self.name = metadata["name"]
-        self.hazard_type = metadata["hazardType"]
-        self.inventory_type = metadata['inventoryType']
+        self.id = metadata["id"] if "id" in metadata else ""
+        self.name = metadata["name"] if "name" in metadata else ""
+        self.hazard_type = metadata["hazardType"] if "hazardType" in metadata else ""
+        self.inventory_type = metadata['inventoryType'] if "inventoryType" in metadata else ""
         if "mappingEntryKeys" in metadata and metadata["mappingEntryKeys"] is not None:
             self.mappingEntryKeys = metadata["mappingEntryKeys"]
         else:
             self.mappingEntryKeys = []
 
-        if 'dataType' in metadata:
-            self.data_type = metadata["dataType"]
-        else:
-            self.data_type = "incore:dfr3MappingSet"
+        self.data_type = metadata["dataType"] if "dataType" in metadata else "incore:dfr3MappingSet"
 
         mappings = []
         for m in metadata['mappings']:
@@ -59,7 +56,7 @@ class MappingSet:
         return cls(json.loads(json_str))
 
     @classmethod
-    def from_json_file(cls, file_path, data_type):
+    def from_json_file(cls, file_path, data_type="incore:dfr3MappingSet"):
         """Get dfr3 mapping from the file.
 
         Args:
