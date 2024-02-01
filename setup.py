@@ -67,6 +67,7 @@ setup(
         'rtree>=1.1.0',
         'scipy>=1.11.3',
         'shapely>=2.0.2',
+        'openssl<=3.2.0'
     ],
 
     extras_require={
