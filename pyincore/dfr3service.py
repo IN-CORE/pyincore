@@ -230,35 +230,36 @@ class Dfr3Service:
 
         # prepare retrofit definition into pandas dataframe
         mapping_entry_keys_df = pd.DataFrame(mapping.mappingEntryKeys)
-        mapping_entry_keys_df.set_index('name', inplace=True)
-        inventory_df = pd.merge(inventory_df, mapping_entry_keys_df, left_on='retrofit_key', right_index=True, how='left')
-
-        # # For retrofit: if targetColumn and expression exist, building inventory properties will be
-        # # updated
-        # target_column = None
-        # expression = None
-        # type = None
-        # for m in mapping.mappingEntryKeys:
-        #     if m["name"] == add_info_row["retrofit_key"]:
-        #         target_column = m["config"]["targetColumn"] if ("config" in m and "targetColumn" in
-        #                                                         m["config"]) else None
-        #         expression = m["config"]["expression"] if ("config" in m and "expression" in m[
-        #             "config"]) else None
-        #         type = m["config"]["type"] if ("config" in m and "type" in m["config"]) else None
-        # if target_column is not None and expression is not None:
-        #     if target_column in inventory["properties"].keys():
-        #         retrofit_value = add_info_row["retrofit_value"]
-        #         if type and type == "number":
-        #             retrofit_value = float(retrofit_value)
-        #
-        #         # Dangerous!
-        #         exec(f"inventory['properties'][target_column]{expression}")
-        #
-        #     else:
-        #         raise ValueError("targetColumn: " + target_column + " not found in inventory "
-        #                                                             "properties!")
+        # add suffix to avoid conflict
+        mapping_entry_keys_df.columns = [col + '_mappingEntryKey' for col in mapping_entry_keys_df.columns]
+        mapping_entry_keys_df.set_index('name_mappingEntryKey', inplace=True)
+        inventory_df = pd.merge(inventory_df, mapping_entry_keys_df, left_on='retrofit_key', right_index=True,
+                                how='left')
 
         for i, inventory in inventory_df.iterrows():
+            # For retrofit: if targetColumn and expression exist, building inventory properties will be
+            target_column = inventory["config_mappingEntryKey"]["targetColumn"] \
+                if ("config_mappingEntryKey" in inventory.index and inventory["config_mappingEntryKey"] is not None and
+                    "targetColumn" in inventory["config_mappingEntryKey"].keys()) else None
+            expression = inventory["config_mappingEntryKey"]["expression"] \
+                if ("config_mappingEntryKey" in inventory.index and inventory["config_mappingEntryKey"] is not None
+                    and "expression" in inventory["config_mappingEntryKey"].keys()) else None
+            type = inventory["config_mappingEntryKey"]["type"] \
+                if ("config_mappingEntryKey" in inventory.index and inventory["config_mappingEntryKey"] is not None
+                    and "type" in inventory["config_mappingEntryKey"].keys()) else None
+
+            if target_column is not None and expression is not None:
+                if target_column in inventory.index:
+                    retrofit_value = inventory["retrofit_value"]
+                    if type and type == "number":
+                        retrofit_value = float(retrofit_value)
+
+                    # Dangerous!!! Need to be careful with the expression!!!
+                    # e.g. inventory.at[i, "ffe_elev"] = eval("inventory[target_column] + retrofit_value")
+                    new_value = eval(f"inventory[target_column]{expression}")
+                    inventory.at[target_column] = new_value
+                else:
+                    raise ValueError("targetColumn: " + target_column + " not found in inventory properties!")
 
             # if retrofit key exist, use retrofit key otherwise use default key
             retrofit_entry_key = inventory["retrofit_key"] if "retrofit_key" in inventory.index else None

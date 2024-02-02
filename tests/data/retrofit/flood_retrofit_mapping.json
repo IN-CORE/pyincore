@@ -194,7 +194,7 @@
         "unit": "feet",
         "type": "number",
         "targetColumn": "ffe_elev",
-        "expression": "+= retrofit_value"
+        "expression": "+ retrofit_value"
       }
     },
     {
