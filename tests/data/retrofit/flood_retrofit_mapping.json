@@ -189,7 +189,7 @@
     {
       "name": "elevation",
       "description": "Apply elevation of the lowest horizontal structural member (ft) coming from building inventory.",
-      "default": false,
+      "defaultKey": false,
       "config": {
         "unit": "feet",
         "type": "number",
@@ -200,7 +200,7 @@
     {
       "name": "Lumberton Flood Building Fragility ID Code",
       "description": "Lumberton Flood Building Fragility ID Code",
-      "default": true,
+      "defaultKey": true,
       "config": {
         "unit": "unitless",
         "type": null

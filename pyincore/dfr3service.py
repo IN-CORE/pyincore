@@ -20,6 +20,7 @@ from pyincore.models.repaircurveset import RepairCurveSet
 from pyincore.models.restorationcurveset import RestorationCurveSet
 from pyincore.models.mappingset import MappingSet
 from pyincore.utils import return_http_response
+import pandas as pd
 
 logger = pyglobals.LOGGER
 
@@ -205,6 +206,8 @@ class Dfr3Service:
 
         # loop through inventory to match the rules
         matched_curve_ids = []
+
+        inventory_list = []
         for inventory in inventories:
             if "occ_type" in inventory["properties"] and \
                     inventory["properties"]["occ_type"] is None:
@@ -212,54 +215,59 @@ class Dfr3Service:
             if "efacility" in inventory["properties"] and \
                     inventory["properties"]["efacility"] is None:
                 inventory["properties"]["efacility"] = ""
+            # need to fiona raw object id for later calculation
+            inventory["properties"]["id"] = inventory["id"]
+            inventory_list.append(inventory["properties"])
+        # turn to pands dataframe
+        inventory_df = pd.DataFrame(inventory_list)
+        inventory_df.set_index('guid', inplace=True)
 
-            # if additional information e.g. Retrofit presented, merge inventory properties with that additional
-            # information
-            if add_info is not None:
-                for add_info_row in add_info:
-                    # assume no duplicated guid
-                    if inventory["properties"].get("guid") is not None and \
-                            add_info_row.get("guid") is not None and \
-                            inventory["properties"].get("guid") == add_info_row.get("guid"):
-                        # merging { "retrofit_key":xxx, "retrofit_value": yyy }
-                        inventory["properties"].update(add_info_row)
+        # if additional information e.g. Retrofit presented, merge inventory properties with that additional
+        # information
+        add_info_df = pd.DataFrame(add_info)
+        add_info_df.set_index('guid', inplace=True)
+        inventory_df = pd.merge(inventory_df, add_info_df, left_index=True, right_index=True, how='left')
 
-                        # For retrofit: if targetColumn and expression exist, building inventory properties will be
-                        # updated
-                        target_column = None
-                        expression = None
-                        type = None
-                        for m in mapping.mappingEntryKeys:
-                            if m["name"] == add_info_row["retrofit_key"]:
-                                target_column = m["config"]["targetColumn"] if ("config" in m and "targetColumn" in
-                                                                                m["config"]) else None
-                                expression = m["config"]["expression"] if ("config" in m and "expression" in m[
-                                    "config"]) else None
-                                type = m["config"]["type"] if ("config" in m and "type" in m["config"]) else None
-                        if target_column is not None and expression is not None:
-                            if target_column in inventory["properties"].keys():
-                                retrofit_value = add_info_row["retrofit_value"]
-                                if type and type == "number":
-                                    retrofit_value = float(retrofit_value)
+        # prepare retrofit definition into pandas dataframe
+        mapping_entry_keys_df = pd.DataFrame(mapping.mappingEntryKeys)
+        mapping_entry_keys_df.set_index('name', inplace=True)
+        inventory_df = pd.merge(inventory_df, mapping_entry_keys_df, left_on='retrofit_key', right_index=True, how='left')
 
-                                # Dangerous!
-                                exec(f"inventory['properties'][target_column]{expression}")
+        # # For retrofit: if targetColumn and expression exist, building inventory properties will be
+        # # updated
+        # target_column = None
+        # expression = None
+        # type = None
+        # for m in mapping.mappingEntryKeys:
+        #     if m["name"] == add_info_row["retrofit_key"]:
+        #         target_column = m["config"]["targetColumn"] if ("config" in m and "targetColumn" in
+        #                                                         m["config"]) else None
+        #         expression = m["config"]["expression"] if ("config" in m and "expression" in m[
+        #             "config"]) else None
+        #         type = m["config"]["type"] if ("config" in m and "type" in m["config"]) else None
+        # if target_column is not None and expression is not None:
+        #     if target_column in inventory["properties"].keys():
+        #         retrofit_value = add_info_row["retrofit_value"]
+        #         if type and type == "number":
+        #             retrofit_value = float(retrofit_value)
+        #
+        #         # Dangerous!
+        #         exec(f"inventory['properties'][target_column]{expression}")
+        #
+        #     else:
+        #         raise ValueError("targetColumn: " + target_column + " not found in inventory "
+        #                                                             "properties!")
 
-                            else:
-                                raise ValueError("targetColumn: " + target_column + " not found in inventory "
-                                                                                    "properties!")
-                        break
+        for i, inventory in inventory_df.iterrows():
 
             # if retrofit key exist, use retrofit key otherwise use default key
-            retrofit_entry_key = None
-            if "retrofit_key" in inventory["properties"]:
-                retrofit_entry_key = inventory["properties"]["retrofit_key"]
+            retrofit_entry_key = inventory["retrofit_key"] if "retrofit_key" in inventory.index else None
 
             for m in mapping.mappings:
                 # for old format rule matching [[]]
                 # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
-                    if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
+                    if self._property_match_legacy(rules=m.rules, properties=inventory.to_dict()):
                         if retrofit_entry_key is not None and retrofit_entry_key in m.entry.keys():
                             curve = m.entry[retrofit_entry_key]
                         else:
@@ -276,7 +284,7 @@ class Dfr3Service:
                 # for new format rule matching {"AND/OR":[]}
                 # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
                 elif isinstance(m.rules, dict):
-                    if self._property_match(rules=m.rules, properties=inventory["properties"]):
+                    if self._property_match(rules=m.rules, properties=inventory.to_dict()):
                         if retrofit_entry_key is not None and retrofit_entry_key in m.entry.keys():
                             curve = m.entry[retrofit_entry_key]
                         else:
