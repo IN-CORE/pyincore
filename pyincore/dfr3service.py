@@ -7,7 +7,7 @@
 
 import re
 from urllib.parse import urljoin
-from typing import Dict
+from typing import Dict, Optional
 
 import pyincore.globals as pyglobals
 from pyincore.decorators import forbid_offline
@@ -175,7 +175,7 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
-    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str = None):
+    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: Optional[str] = None):
         """This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
         FragilityCurveSet Object.
