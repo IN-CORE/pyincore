@@ -8,8 +8,6 @@
 import re
 from urllib.parse import urljoin
 from typing import Dict
-import math
-import scipy
 
 import pyincore.globals as pyglobals
 from pyincore.decorators import forbid_offline
@@ -20,7 +18,6 @@ from pyincore.models.repaircurveset import RepairCurveSet
 from pyincore.models.restorationcurveset import RestorationCurveSet
 from pyincore.models.mappingset import MappingSet
 from pyincore.utils import return_http_response
-import pandas as pd
 
 logger = pyglobals.LOGGER
 
@@ -178,7 +175,7 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
-    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str = None, add_info: list = None):
+    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str = None):
         """This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
         FragilityCurveSet Object.
@@ -187,12 +184,11 @@ class Dfr3Service:
             mapping (obj): MappingSet Object that has the rules and entries.
             inventories (list): A list of inventories. Each item is a fiona object
             entry_key (None, str): Mapping Entry Key e.g. Non-retrofit Fragility ID Code, retrofit_method_1, etc.
-            add_info (None, list): additional information that used to match rules, e.g. retrofit strategy per building.
 
         Returns:
              dict: A dictionary of {"inventory id": FragilityCurveSet object}.
-
         """
+
         dfr3_sets = {}
 
         # find default mapping entry key if not provided
@@ -206,8 +202,6 @@ class Dfr3Service:
 
         # loop through inventory to match the rules
         matched_curve_ids = []
-
-        inventory_list = []
         for inventory in inventories:
             if "occ_type" in inventory["properties"] and \
                     inventory["properties"]["occ_type"] is None:
@@ -215,51 +209,6 @@ class Dfr3Service:
             if "efacility" in inventory["properties"] and \
                     inventory["properties"]["efacility"] is None:
                 inventory["properties"]["efacility"] = ""
-            # need to fiona raw object id for later calculation
-            inventory["properties"]["id"] = inventory["id"]
-            inventory_list.append(inventory["properties"])
-        # turn to pands dataframe
-        inventory_df = pd.DataFrame(inventory_list)
-        inventory_df.set_index('guid', inplace=True)
-
-        # if additional information e.g. Retrofit presented, merge inventory properties with that additional
-        # information
-        add_info_df = pd.DataFrame(add_info)
-        add_info_df.set_index('guid', inplace=True)
-        inventory_df = pd.merge(inventory_df, add_info_df, left_index=True, right_index=True, how='left')
-
-        # prepare retrofit definition into pandas dataframe
-        mapping_entry_keys_df = pd.DataFrame(mapping.mappingEntryKeys)
-        # add suffix to avoid conflict
-        mapping_entry_keys_df.columns = [col + '_mappingEntryKey' for col in mapping_entry_keys_df.columns]
-        mapping_entry_keys_df.set_index('name_mappingEntryKey', inplace=True)
-        inventory_df = pd.merge(inventory_df, mapping_entry_keys_df, left_on='retrofit_key', right_index=True,
-                                how='left')
-
-        for i, inventory in inventory_df.iterrows():
-            # For retrofit: if targetColumn and expression exist, building inventory properties will be
-            target_column = inventory["config_mappingEntryKey"]["targetColumn"] \
-                if ("config_mappingEntryKey" in inventory.index and inventory["config_mappingEntryKey"] is not None and
-                    "targetColumn" in inventory["config_mappingEntryKey"].keys()) else None
-            expression = inventory["config_mappingEntryKey"]["expression"] \
-                if ("config_mappingEntryKey" in inventory.index and inventory["config_mappingEntryKey"] is not None
-                    and "expression" in inventory["config_mappingEntryKey"].keys()) else None
-            type = inventory["config_mappingEntryKey"]["type"] \
-                if ("config_mappingEntryKey" in inventory.index and inventory["config_mappingEntryKey"] is not None
-                    and "type" in inventory["config_mappingEntryKey"].keys()) else None
-
-            if target_column is not None and expression is not None:
-                if target_column in inventory.index:
-                    retrofit_value = inventory["retrofit_value"]
-                    if type and type == "number":
-                        retrofit_value = float(retrofit_value)
-
-                    # Dangerous!!! Need to be careful with the expression!!!
-                    # e.g. inventory.at[i, "ffe_elev"] = eval("inventory[target_column] + retrofit_value")
-                    new_value = eval(f"inventory[target_column]{expression}")
-                    inventory.at[target_column] = new_value
-                else:
-                    raise ValueError("targetColumn: " + target_column + " not found in inventory properties!")
 
             # if retrofit key exist, use retrofit key otherwise use default key
             retrofit_entry_key = inventory["retrofit_key"] if "retrofit_key" in inventory.index else None
@@ -367,7 +316,7 @@ class Dfr3Service:
 
                         # use the first match
                         break
-                    
+
         batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
 
         # replace the curve id in dfr3_sets to the dfr3 curve
