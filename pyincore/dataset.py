@@ -33,6 +33,8 @@ class Dataset:
         self.metadata = metadata
 
         # For convenience instead of having to dig through the metadata for these
+        self.title = metadata["title"] if "title" in metadata else None
+        self.description = metadata["description"] if "description" in metadata else None
         self.data_type = metadata["dataType"]
         self.format = metadata["format"]
         self.id = metadata["id"]

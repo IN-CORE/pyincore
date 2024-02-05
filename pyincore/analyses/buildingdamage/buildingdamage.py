@@ -47,7 +47,7 @@ class BuildingDamage(BaseAnalysis):
                                                                     add_info_dataset=retrofit_strategy_dataset,
                                                                     mapping=dfr3_mapping_set)
 
-        bldg_dataset.get_inventory_reader()
+        bldg_set = bldg_dataset.get_inventory_reader()
 
         # Accommodating to multi-hazard
         hazards = []  # hazard objects
@@ -125,8 +125,7 @@ class BuildingDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def building_damage_analysis_bulk_input(self, buildings, hazards, hazard_types,
-                                            hazard_dataset_ids):
+    def building_damage_analysis_bulk_input(self, buildings, hazards, hazard_types, hazard_dataset_ids):
         """Run analysis for multiple buildings.
 
         Args:
@@ -141,8 +140,8 @@ class BuildingDamage(BaseAnalysis):
         """
 
         fragility_key = self.get_parameter("fragility_key")
-        fragility_sets, buildings_inventory_df = self.fragilitysvc.match_inventory(self.get_input_dataset(
-            "dfr3_mapping_set"), buildings, fragility_key)
+        fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
+                                                           fragility_key)
         use_liquefaction = False
         liquefaction_resp = None
         # Get geology dataset id containing liquefaction susceptibility

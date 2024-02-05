@@ -102,39 +102,39 @@ class DatasetUtil:
                 mapping_entry_keys_df.set_index('name_mappingEntryKey', inplace=True)
                 inventory_df = pd.merge(inventory_df, mapping_entry_keys_df, left_on='retrofit_key', right_index=True,
                                         how='left')
+                inventory_df.drop(columns=['defaultKey_mappingEntryKey'], inplace=True)
             else:
                 raise ValueError("Missing proper definition for mappingEntryKeys in the mapping!")
 
-            for i, inventory in inventory_df.iterrows():
-                # For retrofit: if targetColumn and expression exist, update the targetColumn with the expression
-                # TODO wrap to function
-                target_column = inventory["config_mappingEntryKey"]["targetColumn"] \
-                    if ("config_mappingEntryKey" in inventory.index and
-                        isinstance(inventory["config_mappingEntryKey"], dict) and
-                        "targetColumn" in inventory["config_mappingEntryKey"].keys()) else None
-                expression = inventory["config_mappingEntryKey"]["expression"] \
-                    if ("config_mappingEntryKey" in inventory.index and
-                        isinstance(inventory["config_mappingEntryKey"], dict) and
-                        "expression" in inventory["config_mappingEntryKey"].keys()) else None
-                type = inventory["config_mappingEntryKey"]["type"] \
-                    if ("config_mappingEntryKey" in inventory.index and
-                        isinstance(inventory["config_mappingEntryKey"], dict) and
-                        "type" in inventory["config_mappingEntryKey"].keys()) else None
+            def _apply_retrofit_value(row):
+                config_mapping = row.get("config_mappingEntryKey", {})
+                target_column = config_mapping.get("targetColumn")
+                expression = config_mapping.get("expression")
+                type = config_mapping.get("type")
 
-                if target_column is not None and expression is not None:
-                    if target_column in inventory.index:
-                        retrofit_value = inventory["retrofit_value"]
-                        if type and type == "number":
-                            retrofit_value = float(retrofit_value)
+                if target_column and expression:
+                    if target_column in row.index:
+                        retrofit_value = float(row["retrofit_value"]) if type == "number" else row["retrofit_value"]
 
-                        # Dangerous!!! Need to be careful with the expression!!!
-                        # e.g. inventory.at["ffe_elev"] = eval("inventory[target_column] + retrofit_value")
-                        inventory[target_column] = eval(f"inventory[target_column]{expression}")
+                        # Dangerous! Be careful with the expression
+                        row[target_column] = eval(f"row[target_column]{expression}")
                     else:
-                        raise ValueError("targetColumn: " + target_column + " not found in inventory properties!")
+                        raise ValueError(f"targetColumn: {target_column} not found in inventory properties!")
+
+                return row
+
+            inventory_df = inventory_df.apply(_apply_retrofit_value, axis=1)
+
+        # rename columns to fit the character limit of shapefile
+        inventory_df.rename(columns={
+            'retrofit_key': 'retrofit_k',
+            'retrofit_value': 'retrofit_v',
+            'description_mappingEntryKey': 'descr_map',
+            'config_mappingEntryKey': 'config_map'
+        }, inplace=True)
 
         # save the updated inventory to a new shapefile
-        file_path = "tmp_retrofitted_inventory.shp"
+        file_path = f"tmp_updated_{inventory_dataset.id}.shp"
         inventory_df.to_file(file_path)
 
         # return the updated inventory dataset in geoDataframe for future consumption

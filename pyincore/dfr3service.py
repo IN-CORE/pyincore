@@ -211,20 +211,21 @@ class Dfr3Service:
                 inventory["properties"]["efacility"] = ""
 
             # if retrofit key exist, use retrofit key otherwise use default key
-            retrofit_entry_key = inventory["retrofit_key"] if "retrofit_key" in inventory.index else None
+            retrofit_entry_key = inventory["properties"]["retrofit_k"] if "retrofit_k" in \
+                                                                          inventory["properties"] else None
 
             for m in mapping.mappings:
                 # for old format rule matching [[]]
                 # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
-                    if self._property_match_legacy(rules=m.rules, properties=inventory.to_dict()):
+                    if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
                         if retrofit_entry_key is not None and retrofit_entry_key in m.entry.keys():
                             curve = m.entry[retrofit_entry_key]
                         else:
                             curve = m.entry[entry_key]
                         dfr3_sets[inventory['id']] = curve
 
-                        # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
+                        # if it's string:id; then need to fetch it from remote and cast to dfr3curve object
                         if isinstance(curve, str) and curve not in matched_curve_ids:
                             matched_curve_ids.append(curve)
 
@@ -234,7 +235,7 @@ class Dfr3Service:
                 # for new format rule matching {"AND/OR":[]}
                 # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
                 elif isinstance(m.rules, dict):
-                    if self._property_match(rules=m.rules, properties=inventory.to_dict()):
+                    if self._property_match(rules=m.rules, properties=inventory["properties"]):
                         if retrofit_entry_key is not None and retrofit_entry_key in m.entry.keys():
                             curve = m.entry[retrofit_entry_key]
                         else:

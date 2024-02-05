@@ -11,6 +11,11 @@ def run_with_base_class():
     hazardsvc = HazardService(client)
     dev_hazardsvc = HazardService(dev_client)
 
+    # Set analysis parameters
+    result_folder = "retrofit"
+    if not os.path.exists(result_folder):
+        os.mkdir(result_folder)
+
     ##############################
     # dfr3 mapping
     tornado_fragility_mapping_set = MappingSet.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR,
@@ -37,10 +42,6 @@ def run_with_base_class():
     # Set hazard
     tornado_bldg_dmg.set_input_hazard("hazard", tornado)
 
-    # Set analysis parameters
-    result_folder = "retrofit"
-    if not os.path.exists(result_folder):
-        os.mkdir(result_folder)
     result_name = os.path.join(result_folder, "joplin_tornado_commerical_bldg_dmg_w_retrofit")
     tornado_bldg_dmg.set_parameter("result_name", result_name)
     tornado_bldg_dmg.set_parameter("num_cpu", 8)
