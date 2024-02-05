@@ -107,10 +107,18 @@ class DatasetUtil:
                 raise ValueError("Missing proper definition for mappingEntryKeys in the mapping!")
 
             def _apply_retrofit_value(row):
-                config_mapping = row.get("config_mappingEntryKey", {})
-                target_column = config_mapping.get("targetColumn")
-                expression = config_mapping.get("expression")
-                type = config_mapping.get("type")
+                target_column = row["config_mappingEntryKey"]["targetColumn"] \
+                    if ("config_mappingEntryKey" in row.index and
+                        isinstance(row["config_mappingEntryKey"], dict) and
+                        "targetColumn" in row["config_mappingEntryKey"].keys()) else None
+                expression = row["config_mappingEntryKey"]["expression"] \
+                    if ("config_mappingEntryKey" in row.index and
+                        isinstance(row["config_mappingEntryKey"], dict) and
+                        "expression" in row["config_mappingEntryKey"].keys()) else None
+                type = row["config_mappingEntryKey"]["type"] \
+                    if ("config_mappingEntryKey" in row.index and
+                        isinstance(row["config_mappingEntryKey"], dict) and
+                        "type" in row["config_mappingEntryKey"].keys()) else None
 
                 if target_column and expression:
                     if target_column in row.index:
