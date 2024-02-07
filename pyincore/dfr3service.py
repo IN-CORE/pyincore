@@ -175,6 +175,32 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    def match_per_inventory(self, mapping: MappingSet, inventory, entry_key):
+        if "occ_type" in inventory["properties"] and \
+                inventory["properties"]["occ_type"] is None:
+            inventory["properties"]["occ_type"] = ""
+        if "efacility" in inventory["properties"] and \
+                inventory["properties"]["efacility"] is None:
+            inventory["properties"]["efacility"] = ""
+
+        for m in mapping.mappings:
+            # for old format rule matching [[]]
+            # [[ and ] or [ and ]]
+            if isinstance(m.rules, list):
+                if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
+                    curve = m.entry[entry_key]
+                    # use the first match
+                    break
+
+            # for new format rule matching {"AND/OR":[]}
+            # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
+            elif isinstance(m.rules, dict):
+                if self._property_match(rules=m.rules, properties=inventory["properties"]):
+                    curve = m.entry[entry_key]
+
+                    # use the first match
+                    break
+
     def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str, add_info: list = None):
         """This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in

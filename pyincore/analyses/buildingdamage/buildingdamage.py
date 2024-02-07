@@ -146,6 +146,11 @@ class BuildingDamage(BaseAnalysis):
         adjust_demand_types_mapping = {}
 
         for hazard, hazard_type, hazard_dataset_id in zip(hazards, hazard_types, hazard_dataset_ids):
+            for b in buildings:
+
+
+
+
             # get allowed demand types for the hazard type
             allowed_demand_types = [item["demand_type"].lower() for item in self.hazardsvc.get_allowed_demands(
                 hazard_type)]
