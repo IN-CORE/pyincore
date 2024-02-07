@@ -264,7 +264,7 @@ class Dfr3Service:
 
         return dfr3_sets
 
-    def match_list_of_dicts(self, mapping: MappingSet, inventories: list, entry_key: str = None):
+    def match_list_of_dicts(self, mapping: MappingSet, inventories: list, entry_key: Optional[str] = None):
         """This method is same as match_inventory, except it takes a simple list of dictionaries that contains the items
         to be mapped in the rules. The match_inventory method takes a list of fiona objects
 

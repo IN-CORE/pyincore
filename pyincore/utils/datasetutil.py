@@ -83,10 +83,10 @@ class DatasetUtil:
             Dataset: Updated inventory dataset
             gpd.GeoDataFrame: Updated inventory geodataframe
         """
-        inventory_df = inventory_dataset.get_dataframe_from_shapefile()
-        inventory_df.set_index('guid', inplace=True)
-
         if add_info_dataset is not None:
+            inventory_df = inventory_dataset.get_dataframe_from_shapefile()
+            inventory_df.set_index('guid', inplace=True)
+
             add_info_df = add_info_dataset.get_dataframe_from_csv()
             add_info_df.set_index('guid', inplace=True)
 
@@ -133,17 +133,20 @@ class DatasetUtil:
 
             inventory_df = inventory_df.apply(_apply_retrofit_value, axis=1)
 
-        # rename columns to fit the character limit of shapefile
-        inventory_df.rename(columns={
-            'retrofit_key': 'retrofit_k',
-            'retrofit_value': 'retrofit_v',
-            'description_mappingEntryKey': 'descr_map',
-            'config_mappingEntryKey': 'config_map'
-        }, inplace=True)
+            # rename columns to fit the character limit of shapefile
+            inventory_df.rename(columns={
+                'retrofit_key': 'retrofit_k',
+                'retrofit_value': 'retrofit_v',
+                'description_mappingEntryKey': 'descr_map',
+                'config_mappingEntryKey': 'config_map'
+            }, inplace=True)
 
-        # save the updated inventory to a new shapefile
-        file_path = f"tmp_updated_{inventory_dataset.id}.shp"
-        inventory_df.to_file(file_path)
+            # save the updated inventory to a new shapefile
+            file_path = f"tmp_updated_{inventory_dataset.id}.shp"
+            inventory_df.to_file(file_path)
 
-        # return the updated inventory dataset in geoDataframe for future consumption
-        return Dataset.from_file(file_path, inventory_dataset.data_type), inventory_df
+            # return the updated inventory dataset in geoDataframe for future consumption
+            return Dataset.from_file(file_path, inventory_dataset.data_type), inventory_df
+        else:
+            # return original dataset
+            return inventory_dataset, None
