@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [1.16.0] - 2024-02-07
+
+### Added
+- Create GUID field in geopackage file [#478](https://github.com/IN-CORE/pyincore/issues/478)
+
+### Changed
+- Tornado and Earthquake model [#474](https://github.com/IN-CORE/pyincore/issues/474)
+- Disable methods interact with services if in offline mode [#458](https://github.com/IN-CORE/pyincore/issues/458)
+
+### Fixed
+- Fix semantics search pytest by switching to an existing search term 
+
+
 ## [1.15.1] - 2023-12-20 
 
 ### Fixed
