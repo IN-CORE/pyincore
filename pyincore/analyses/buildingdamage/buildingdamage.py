@@ -135,8 +135,8 @@ class BuildingDamage(BaseAnalysis):
         """
 
         fragility_key = self.get_parameter("fragility_key")
-        fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
-                                                           fragility_key, retrofit_strategy)
+        # fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
+        #                                                    fragility_key, retrofit_strategy)
         use_liquefaction = False
         liquefaction_resp = None
         # Get geology dataset id containing liquefaction susceptibility
@@ -145,12 +145,8 @@ class BuildingDamage(BaseAnalysis):
         multihazard_vals = {}
         adjust_demand_types_mapping = {}
 
+        # loop through multiple hazard scenario
         for hazard, hazard_type, hazard_dataset_id in zip(hazards, hazard_types, hazard_dataset_ids):
-            for b in buildings:
-
-
-
-
             # get allowed demand types for the hazard type
             allowed_demand_types = [item["demand_type"].lower() for item in self.hazardsvc.get_allowed_demands(
                 hazard_type)]
@@ -159,20 +155,27 @@ class BuildingDamage(BaseAnalysis):
             if hazard_type == "earthquake" and self.get_parameter("use_liquefaction") is not None:
                 use_liquefaction = self.get_parameter("use_liquefaction")
 
+            # loop through each building
             values_payload = []
             values_payload_liq = []  # for liquefaction, if used
             unmapped_buildings = []
-            mapped_buildings = []
+            mapped_buildings = {}
             for b in buildings:
-                bldg_id = b["id"]
-                if bldg_id in fragility_sets:
+                fragility_set = self.fragilitysvc.match_per_inventory(self.get_input_dataset("dfr3_mapping_set"), b,
+                                                                      fragility_key)
+                # found match
+                if fragility_set is not None:
+                    # register the found fragility map in the hashtable
+                    mapped_buildings[b["guid"]] = {
+                        "building": b,
+                        "fragility_set": fragility_set
+                    }
+
+                    # append to hazard value payload
                     location = GeoUtil.get_location(b)
                     loc = str(location.y) + "," + str(location.x)
                     demands, units, adjusted_to_original = \
-                        AnalysisUtil.get_hazard_demand_types_units(b,
-                                                                   fragility_sets[bldg_id],
-                                                                   hazard_type,
-                                                                   allowed_demand_types)
+                        AnalysisUtil.get_hazard_demand_types_units(b, fragility_set, hazard_type, allowed_demand_types)
                     adjust_demand_types_mapping.update(adjusted_to_original)
                     value = {
                         "demands": demands,
@@ -180,8 +183,6 @@ class BuildingDamage(BaseAnalysis):
                         "loc": loc
                     }
                     values_payload.append(value)
-                    mapped_buildings.append(b)
-
                     if use_liquefaction and geology_dataset_id is not None:
                         value_liq = {
                             "demands": [""],
@@ -189,6 +190,8 @@ class BuildingDamage(BaseAnalysis):
                             "loc": loc
                         }
                         values_payload_liq.append(value_liq)
+
+                # couldn't find any fragility match
                 else:
                     unmapped_buildings.append(b)
 
@@ -217,13 +220,12 @@ class BuildingDamage(BaseAnalysis):
         damage_results = []
 
         i = 0
-        for b in mapped_buildings:
+        for b in mapped_buildings.keys():
             ds_result = dict()
             damage_result = dict()
             dmg_probability = dict()
             dmg_interval = dict()
-            b_id = b["id"]
-            selected_fragility_set = fragility_sets[b_id]
+            selected_fragility_set = b["fragility_sets"]
             ground_failure_prob = None
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
