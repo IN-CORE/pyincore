@@ -128,14 +128,11 @@ def run_with_base_class():
     print(f"Lumberton Flood damage run time: {time5 - time4}")
 
     ##########################################################
-    # joplin tornado with retrofit strategy
+    # joplin tornado
     bldg_dataset_id = "5df7d0de425e0b00092d0082"  # joplin building v6
-    # retrofit_strategy_id = "6091d5a8daa06e14ee96d502"  # plan 1
-    # retrofit_strategy_id = "6091d5ffdaa06e14ee96d5ef" # plan 2
 
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    # bldg_dmg.load_remote_input_dataset("retrofit_strategy", retrofit_strategy_id)
 
     # lumberton building mapping (with equation)
     mapping_id = "6091d9fbb53ed4646fd276ca"  # 19 archetype with retrofit
@@ -148,7 +145,7 @@ def run_with_base_class():
     tornado = Tornado.from_hazard_service("5dfa32bbc0601200080893fb", hazardsvc)
     bldg_dmg.set_input_hazard("hazard", tornado)
 
-    result_name = "joplin_tornado_dmg_result_w_retrofit"
+    result_name = "joplin_tornado_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.set_parameter("seed", 1000)
