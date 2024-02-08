@@ -9,7 +9,7 @@ import concurrent.futures
 from itertools import repeat
 
 from pyincore import BaseAnalysis, HazardService, \
-    FragilityService, AnalysisUtil, GeoUtil
+    FragilityService, AnalysisUtil, GeoUtil, FragilityCurveSet
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 from pyincore.models.dfr3curve import DFR3Curve
 
@@ -135,8 +135,7 @@ class BuildingDamage(BaseAnalysis):
         """
 
         fragility_key = self.get_parameter("fragility_key")
-        # fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
-        #                                                    fragility_key, retrofit_strategy)
+
         use_liquefaction = False
         liquefaction_resp = None
         # Get geology dataset id containing liquefaction susceptibility
@@ -144,6 +143,9 @@ class BuildingDamage(BaseAnalysis):
 
         multihazard_vals = {}
         adjust_demand_types_mapping = {}
+
+        # keep a registry of unique fragility set objects so we don't query services all the time
+        unique_fragility_sets = {}
 
         # loop through multiple hazard scenario
         for hazard, hazard_type, hazard_dataset_id in zip(hazards, hazard_types, hazard_dataset_ids):
@@ -165,6 +167,20 @@ class BuildingDamage(BaseAnalysis):
                                                                       fragility_key)
                 # found match
                 if fragility_set is not None:
+
+                    # if return is only fragility set id, need to instantiate to fragility object
+                    # this helps minimize traffic to dfr3 services
+                    if isinstance(fragility_set, str):
+                        if fragility_set not in unique_fragility_sets.keys():
+                            fragility_set_json = self.fragilitysvc.get_dfr3_set(fragility_set)
+                            fragility_set = FragilityCurveSet(fragility_set_json)
+                            unique_fragility_sets[fragility_set.id] = fragility_set
+                        else:
+                            fragility_set = unique_fragility_sets[fragility_set]
+                    else:
+                        # it's already a dfr3 object; pass
+                        pass
+
                     # register the found fragility map in the hashtable
                     mapped_buildings.append({"building": b, "fragility_set": fragility_set})
 

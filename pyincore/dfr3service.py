@@ -176,7 +176,7 @@ class Dfr3Service:
         return return_http_response(r).json()
 
     def match_per_inventory(self, mapping: MappingSet, inventory, entry_key):
-        dfr3_set = None
+        curve = None
 
         if "occ_type" in inventory["properties"] and \
                 inventory["properties"]["occ_type"] is None:
@@ -190,18 +190,7 @@ class Dfr3Service:
             # [[ and ] or [ and ]]
             if isinstance(m.rules, list):
                 if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
-                    curve_id = m.entry[entry_key]
-                    dfr3_set_json = self.get_dfr3_set(curve_id)
-                    instance = self.__class__.__name__
-                    if instance == 'FragilityService':
-                        dfr3_set = FragilityCurveSet(dfr3_set_json)
-                    elif instance == 'RepairService':
-                        dfr3_set = RepairCurveSet(dfr3_set_json)
-                    elif instance == 'RestorationService':
-                        dfr3_set = RestorationCurveSet(dfr3_set_json)
-                    else:
-                        raise ValueError("Only fragility, repair, and restoration services are currently supported")
-
+                    curve = m.entry[entry_key]
                     # use the first match
                     break
 
@@ -209,22 +198,11 @@ class Dfr3Service:
             # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
             elif isinstance(m.rules, dict):
                 if self._property_match(rules=m.rules, properties=inventory["properties"]):
-                    curve_id = m.entry[entry_key]
-                    dfr3_set_json = self.get_dfr3_set(curve_id)
-                    instance = self.__class__.__name__
-                    if instance == 'FragilityService':
-                        dfr3_set = FragilityCurveSet(dfr3_set_json)
-                    elif instance == 'RepairService':
-                        dfr3_set = RepairCurveSet(dfr3_set_json)
-                    elif instance == 'RestorationService':
-                        dfr3_set = RestorationCurveSet(dfr3_set_json)
-                    else:
-                        raise ValueError("Only fragility, repair, and restoration services are currently supported")
-
+                    curve = m.entry[entry_key]
                     # use the first match
                     break
 
-        return dfr3_set
+        return curve
 
     def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str, add_info: list = None):
         """This method is intended to replace the match_inventory method in the future. The functionality is same as
