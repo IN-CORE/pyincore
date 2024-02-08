@@ -2,12 +2,14 @@ from pyincore import IncoreClient, FragilityService, MappingSet, Earthquake, Haz
     Tornado
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
+import time
 
 
 def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     hazardsvc = HazardService(client)
 
+    time1 = time.time()
     ##########################################################
     # Memphis Earthquake damage
     # New madrid earthquake using Atkinson Boore 1995
@@ -41,6 +43,8 @@ def run_with_base_class():
 
     # Run Analysis
     bldg_dmg.run_analysis()
+    time2 = time.time()
+    print(f"Memphis Earthquake damage run time: {time2-time1}")
 
     ##########################################################
     # TSUNAMI
@@ -63,6 +67,9 @@ def run_with_base_class():
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
+
+    time3 = time.time()
+    print(f"Seaside Tsunami damage run time: {time3-time2}")
 
     ##########################################################
     # Hurricane
@@ -89,6 +96,9 @@ def run_with_base_class():
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
 
+    time4 = time.time()
+    print(f"Galveston Hurricane damage run time: {time4 - time3}")
+
     ##########################################################
     # lumberton flood
     flood = Flood.from_hazard_service("5f4d02e99f43ee0dde768406", hazardsvc)
@@ -114,15 +124,18 @@ def run_with_base_class():
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
 
+    time5 = time.time()
+    print(f"Lumberton Flood damage run time: {time5 - time4}")
+
     ##########################################################
     # joplin tornado with retrofit strategy
     bldg_dataset_id = "5df7d0de425e0b00092d0082"  # joplin building v6
-    retrofit_strategy_id = "6091d5a8daa06e14ee96d502"  # plan 1
+    # retrofit_strategy_id = "6091d5a8daa06e14ee96d502"  # plan 1
     # retrofit_strategy_id = "6091d5ffdaa06e14ee96d5ef" # plan 2
 
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    bldg_dmg.load_remote_input_dataset("retrofit_strategy", retrofit_strategy_id)
+    # bldg_dmg.load_remote_input_dataset("retrofit_strategy", retrofit_strategy_id)
 
     # lumberton building mapping (with equation)
     mapping_id = "6091d9fbb53ed4646fd276ca"  # 19 archetype with retrofit
@@ -140,6 +153,9 @@ def run_with_base_class():
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.set_parameter("seed", 1000)
     bldg_dmg.run_analysis()
+
+    time6 = time.time()
+    print(f"Joplin Tornado damage run time: {time6 - time5}")
 
 
 if __name__ == '__main__':
