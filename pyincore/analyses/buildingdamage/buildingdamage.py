@@ -159,17 +159,14 @@ class BuildingDamage(BaseAnalysis):
             values_payload = []
             values_payload_liq = []  # for liquefaction, if used
             unmapped_buildings = []
-            mapped_buildings = {}
+            mapped_buildings = []
             for b in buildings:
                 fragility_set = self.fragilitysvc.match_per_inventory(self.get_input_dataset("dfr3_mapping_set"), b,
                                                                       fragility_key)
                 # found match
                 if fragility_set is not None:
                     # register the found fragility map in the hashtable
-                    mapped_buildings[b["guid"]] = {
-                        "building": b,
-                        "fragility_set": fragility_set
-                    }
+                    mapped_buildings.append({"building": b, "fragility_set": fragility_set})
 
                     # append to hazard value payload
                     location = GeoUtil.get_location(b)
@@ -220,12 +217,12 @@ class BuildingDamage(BaseAnalysis):
         damage_results = []
 
         i = 0
-        for b in mapped_buildings.keys():
+        for b in mapped_buildings:
             ds_result = dict()
             damage_result = dict()
             dmg_probability = dict()
             dmg_interval = dict()
-            selected_fragility_set = b["fragility_sets"]
+            selected_fragility_set = b["fragility_set"]
             ground_failure_prob = None
 
             # TODO: Once all fragilities are migrated to new format, we can remove this condition
@@ -257,7 +254,7 @@ class BuildingDamage(BaseAnalysis):
                         b_multihaz_vals[hazard_type])
 
                 if not hazard_values_errors:
-                    building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
+                    building_args = selected_fragility_set.construct_expression_args_from_inventory(b["building"])
 
                     building_period = selected_fragility_set.fragility_curves[0].get_building_period(
                         selected_fragility_set.curve_parameters, **building_args)
@@ -276,8 +273,8 @@ class BuildingDamage(BaseAnalysis):
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
 
-            ds_result['guid'] = b['properties']['guid']
-            damage_result['guid'] = b['properties']['guid']
+            ds_result['guid'] = b["building"]['properties']['guid']
+            damage_result['guid'] = b["building"]['properties']['guid']
 
             ds_result.update(dmg_probability)
             ds_result.update(dmg_interval)

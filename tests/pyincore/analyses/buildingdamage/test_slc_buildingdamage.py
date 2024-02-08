@@ -15,7 +15,7 @@ if __name__ == "__main__":
     start_time = time.time()
     bldg_dmg = BuildingDamage(client)
 
-    mapping_set = MappingSet.from_json_file("SLC_plus_retrofit.json", data_type="incore:dfr3MappingSet")
+    mapping_set = MappingSet(fragility_services.get_mapping("6309005ad76c6d0e1f6be081"))
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
     bldg_dmg.load_remote_input_dataset("buildings", "62fea288f5438e1f8c515ef8")  # Salt Lake County All Building
