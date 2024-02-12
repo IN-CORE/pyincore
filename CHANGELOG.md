@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Changed
+- Retrofitted Building Damage [#469](https://github.com/IN-CORE/pyincore/issues/469) 
+
+
 ## [1.16.0] - 2024-02-07
 
 ### Added
