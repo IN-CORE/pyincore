@@ -5,7 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 from pyincore import BaseAnalysis, NetworkDataset
 from pyincore.utils.networkutil import NetworkUtil
-from numpy.linalg import inv
 from typing import List
 from scipy import stats
 import networkx as nx
@@ -75,12 +74,15 @@ class NciFunctionality(BaseAnalysis):
         wds_dmg_results = self.get_input_dataset('wds_dmg_results').get_dataframe_from_csv()
         wds_inventory_rest_map = self.get_input_dataset('wds_inventory_rest_map').get_dataframe_from_csv()
 
+        # Load limit state probabilities and damage states for each electric power facility
+        epf_damage = self.get_input_dataset('epf_damage').get_dataframe_from_csv()
+
         epf_cascading_functionality = self.nci_functionality(discretized_days, epf_network_nodes, epf_network_links,
                                                              wds_network_nodes, wds_network_links,
                                                              epf_wds_intdp_table, wds_epf_intdp_table,
                                                              epf_subst_failure_results, epf_inventory_rest_map,
                                                              epf_time_results, wds_dmg_results,  wds_inventory_rest_map,
-                                                             wds_time_results)
+                                                             wds_time_results, epf_damage)
 
         result_name = self.get_parameter("result_name")
         self.set_result_csv_data("epf_cascading_functionality", epf_cascading_functionality, name=result_name,
@@ -91,7 +93,7 @@ class NciFunctionality(BaseAnalysis):
     def nci_functionality(self, discretized_days, epf_network_nodes, epf_network_links, wds_network_nodes,
                           wds_network_links, epf_wds_intdp_table, wds_epf_intdp_table, epf_subst_failure_results,
                           epf_inventory_rest_map, epf_time_results, wds_dmg_results, wds_inventory_rest_map,
-                          wds_time_results):
+                          wds_time_results, epf_damage):
         """Compute EPF and WDS cascading functionality outcomes
 
         Args:
@@ -108,6 +110,7 @@ class NciFunctionality(BaseAnalysis):
             wds_dmg_results (pd.DataFrame): damage results for WDS network
             wds_inventory_rest_map (pd.DataFrame): inventory restoration map for WDS network
             wds_time_results (pd.DataFrame): time results for WDS network
+            epf_damage (pd.DataFrame): limit state probabilities and damage states for each guid
 
         Returns:
             (pd.DataFrame, pd.DataFrame): results for EPF and WDS networks
@@ -115,7 +118,7 @@ class NciFunctionality(BaseAnalysis):
 
         # Compute updated EPF and WDS node information
         efp_nodes_updated = self.update_epf_discretized_func(epf_network_nodes, epf_subst_failure_results,
-                                                             epf_inventory_rest_map, epf_time_results)
+                                                             epf_inventory_rest_map, epf_time_results, epf_damage)
 
         wds_nodes_updated = self.update_wds_discretized_func(wds_network_nodes, wds_dmg_results,
                                                              wds_inventory_rest_map, wds_time_results)
@@ -124,7 +127,6 @@ class NciFunctionality(BaseAnalysis):
         wds_links_updated = self.update_wds_network_links(wds_network_links)
 
         # Generate the functionality data
-        df_functionality_nodes = pd.concat([efp_nodes_updated, wds_nodes_updated], ignore_index=True)
         df_functionality_nodes = pd.concat([efp_nodes_updated, wds_nodes_updated], ignore_index=True)
 
         # Create each individual graph
@@ -156,12 +158,14 @@ class NciFunctionality(BaseAnalysis):
 
     @staticmethod
     def update_epf_discretized_func(epf_nodes, epf_subst_failure_results, epf_inventory_restoration_map,
-                                    epf_time_results):
+                                    epf_time_results, epf_damage):
         epf_time_results = epf_time_results.loc[
             (epf_time_results['time'] == 1) | (epf_time_results['time'] == 3) | (epf_time_results['time'] == 7) | (
                         epf_time_results['time'] == 30) | (epf_time_results['time'] == 90)]
         epf_time_results.insert(2, 'PF_00', list(
             np.ones(len(epf_time_results))))  # PF_00, PF_0, PF_1, PF_2, PF_3  ---> DS_0, DS_1, DS_2, DS_3, DS_4
+
+        epf_subst_failure_results = pd.merge(epf_damage, epf_subst_failure_results, on='guid', how='outer')
 
         epf_nodes_updated = pd.merge(epf_nodes[['nodenwid', 'utilfcltyc', 'guid']], epf_subst_failure_results[
             ['guid', 'DS_0', 'DS_1', 'DS_2', 'DS_3', 'DS_4', 'failure_probability']], on='guid', how='outer')
@@ -387,6 +391,12 @@ class NciFunctionality(BaseAnalysis):
                     'required': True,
                     'description': 'A csv file recording repair time for WDS per class and limit state',
                     'type': ['incore:waterFacilityRestorationTime']
+                },
+                {
+                    'id': 'epf_damage',
+                    'required': True,
+                    'description': 'A csv file with limit state probabilities and damage states for each electric power facility',
+                    'type': ['incore:epfDamageVer3']
                 }
             ],
             'output_datasets': [

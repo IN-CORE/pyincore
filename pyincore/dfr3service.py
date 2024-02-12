@@ -8,11 +8,9 @@
 import re
 from urllib.parse import urljoin
 from typing import Dict
-import requests
 
 import pyincore.globals as pyglobals
-
-logger = pyglobals.LOGGER
+from pyincore.decorators import forbid_offline
 
 from pyincore import IncoreClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
@@ -20,6 +18,8 @@ from pyincore.models.repaircurveset import RepairCurveSet
 from pyincore.models.restorationcurveset import RestorationCurveSet
 from pyincore.models.mappingset import MappingSet
 from pyincore.utils import return_http_response
+
+logger = pyglobals.LOGGER
 
 # add more types if needed
 known_types = {
@@ -73,7 +73,7 @@ class Dfr3Service:
         self.client = client
         self.base_mapping_url = urljoin(client.service_url, 'dfr3/api/mappings/')
 
-
+    @forbid_offline
     def get_dfr3_set(self, dfr3_id: str, timeout=(30, 600), **kwargs):
         """Get specific DFR3 set.
 
@@ -91,6 +91,7 @@ class Dfr3Service:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def delete_dfr3_set(self, dfr3_id: str, timeout=(30, 600), **kwargs):
         """Delete specific DFR3 set.
             Args:
@@ -132,6 +133,7 @@ class Dfr3Service:
 
         return batch_dfr3_sets
 
+    @forbid_offline
     def search_dfr3_sets(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Search DFR3 sets based on a specific text.
 
@@ -156,6 +158,7 @@ class Dfr3Service:
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def create_dfr3_set(self, dfr3_set: dict, timeout=(30, 600), **kwargs):
         """Create DFR3 set on the server. POST API endpoint call.
 
@@ -495,6 +498,7 @@ class Dfr3Service:
             else:
                 raise ValueError("boolean " + boolean + " not supported!")
 
+    @forbid_offline
     def create_mapping(self, mapping_set: dict, timeout=(30, 600), **kwargs):
         """Create DFR3 mapping on the server. POST API endpoint call.
 
@@ -513,6 +517,7 @@ class Dfr3Service:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_mappings(self, hazard_type: str = None, inventory_type: str = None, mapping_type: str = None,
                      creator: str = None, space: str = None, skip: int = None, limit: int = None,
                      timeout=(30, 600), **kwargs):
@@ -556,6 +561,7 @@ class Dfr3Service:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_mapping(self, mapping_id, timeout=(30, 600), **kwargs):
         """Get specific inventory mapping.
 
@@ -573,6 +579,7 @@ class Dfr3Service:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def delete_mapping(self, mapping_id, timeout=(30, 600), **kwargs):
         """delete specific inventory mappings.
 

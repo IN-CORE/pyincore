@@ -3,5 +3,12 @@
   "description": "Joplin tornado hazard",
   "tornadoType": "dataset",
   "threshold": null,
-  "thresholdUnit": "mph"
+  "thresholdUnit": "mph",
+  "hazardDatasets": [
+    {
+        "demandType": "wind",
+        "demandUnits": "mph",
+        "threshold": null
+    }
+  ]
 }
