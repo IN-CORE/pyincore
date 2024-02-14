@@ -43,7 +43,7 @@ class BuildingDamage(BaseAnalysis):
         dfr3_mapping_set = self.get_input_dataset("dfr3_mapping_set")
 
         # Update the building inventory dataset if applicable
-        bldg_dataset, _ = DatasetUtil.construct_updated_inventories(bldg_dataset,
+        bldg_dataset, tmpdirname, _ = DatasetUtil.construct_updated_inventories(bldg_dataset,
                                                                     add_info_dataset=retrofit_strategy_dataset,
                                                                     mapping=dfr3_mapping_set)
 
@@ -101,6 +101,10 @@ class BuildingDamage(BaseAnalysis):
         self.set_result_json_data("damage_result",
                                   damage_results,
                                   name=self.get_parameter("result_name") + "_additional_info")
+
+        # clean up temp folder if applicable
+        if tmpdirname is not None:
+            bldg_dataset.delete_temp_folder()
 
         return True
 

@@ -6,6 +6,7 @@
 
 import geopandas as gpd
 import pandas as pd
+import tempfile
 
 from pyincore import Dataset, DataService, MappingSet
 
@@ -142,11 +143,12 @@ class DatasetUtil:
             }, inplace=True)
 
             # save the updated inventory to a new shapefile
-            file_path = f"tmp_updated_{inventory_dataset.id}.shp"
+            tmpdirname = tempfile.mkdtemp()
+            file_path = f"{tmpdirname}/tmp_updated_{inventory_dataset.id}.shp"
             inventory_df.to_file(file_path)
 
             # return the updated inventory dataset in geoDataframe for future consumption
-            return Dataset.from_file(file_path, inventory_dataset.data_type), inventory_df
+            return Dataset.from_file(file_path, inventory_dataset.data_type), tmpdirname, inventory_df
         else:
             # return original dataset
-            return inventory_dataset, None
+            return inventory_dataset, None, None
