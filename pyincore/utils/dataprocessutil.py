@@ -452,7 +452,7 @@ class DataProcessUtil:
             Remap the Damage States to Affected, Minor, Major, Destroyed:
             - DS_0 and DS_1 are Affected
             - DS_2 is Minor
-            - DS_3 is Major
+            - DS_3 is Major if it is not DS_3 in the sw_max_ds column
             - and if DS_3 in the max_dmg_result["sw_max_ds"] then set it as Destroyed
 
             To do this, map DS_1 -> DS_0, DS_2 -> DS_1, DS_3 -> DS_2 and create a new DS_3 based on the sw_max_ds column value.
@@ -461,7 +461,7 @@ class DataProcessUtil:
 
         max_dmg_result.loc[max_dmg_result["max_state"] == "DS_1", "max_state"] = "DS_0"
         max_dmg_result.loc[max_dmg_result["max_state"] == "DS_2", "max_state"] = "DS_1"
-        max_dmg_result.loc[max_dmg_result["max_state"] == "DS_3", "max_state"] = "DS_2"
+        max_dmg_result.loc[((max_dmg_result["max_state"] == "DS_3") and max_dmg_result["sw_max_ds"] != "DS_3"), "max_state"] = "DS_2"
         max_dmg_result.loc[max_dmg_result["sw_max_ds"] == "DS_3", "max_state"] = "DS_3"
 
         result_by_cluster, result_by_category = DataProcessUtil.create_mapped_dmg(
