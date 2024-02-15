@@ -461,7 +461,13 @@ class DataProcessUtil:
 
         max_dmg_result.loc[max_dmg_result["max_state"] == "DS_1", "max_state"] = "DS_0"
         max_dmg_result.loc[max_dmg_result["max_state"] == "DS_2", "max_state"] = "DS_1"
-        max_dmg_result.loc[((max_dmg_result["max_state"] == "DS_3") and max_dmg_result["sw_max_ds"] != "DS_3"), "max_state"] = "DS_2"
+        max_dmg_result.loc[
+            (
+                (max_dmg_result["max_state"] == "DS_3")
+                & (max_dmg_result["sw_max_ds"] != "DS_3")
+            ),
+            "max_state",
+        ] = "DS_2"
         max_dmg_result.loc[max_dmg_result["sw_max_ds"] == "DS_3", "max_state"] = "DS_3"
 
         result_by_cluster, result_by_category = DataProcessUtil.create_mapped_dmg(
