@@ -259,8 +259,28 @@ class DataProcessUtil:
             ret_json: JSON of the results ordered by cluster and category.
 
         """
+
         result_by_cluster, result_by_category = DataProcessUtil.create_mapped_dmg(
             inventory, dmg_result, arch_mapping, groupby_col_name, arch_col
+        )
+
+        result_by_cluster.rename(
+            columns={
+                "DS_0": "Insignificant",
+                "DS_1": "Moderate",
+                "DS_2": "Extensive",
+                "DS_3": "Complete",
+            },
+            inplace=True,
+        )
+        result_by_category.rename(
+            columns={
+                "DS_0": "Insignificant",
+                "DS_1": "Moderate",
+                "DS_2": "Extensive",
+                "DS_3": "Complete",
+            },
+            inplace=True,
         )
 
         cluster_records = result_by_cluster.to_json(orient="records")
@@ -459,38 +479,26 @@ class DataProcessUtil:
             Then rename them to their respective categories.
         """
 
-        max_dmg_result.loc[max_dmg_result["max_state"] == "DS_1", "max_state"] = "DS_0"
-        max_dmg_result.loc[max_dmg_result["max_state"] == "DS_2", "max_state"] = "DS_1"
+        max_dmg_result.loc[max_dmg_result["max_state"] == "DS_0", "max_state"] = (
+            "Affected"
+        )
+        max_dmg_result.loc[max_dmg_result["max_state"] == "DS_1", "max_state"] = (
+            "Affected"
+        )
+        max_dmg_result.loc[max_dmg_result["max_state"] == "DS_2", "max_state"] = "Minor"
         max_dmg_result.loc[
             (
                 (max_dmg_result["max_state"] == "DS_3")
                 & (max_dmg_result["sw_max_ds"] != "DS_3")
             ),
             "max_state",
-        ] = "DS_2"
-        max_dmg_result.loc[max_dmg_result["sw_max_ds"] == "DS_3", "max_state"] = "DS_3"
+        ] = "Major"
+        max_dmg_result.loc[max_dmg_result["sw_max_ds"] == "DS_3", "max_state"] = (
+            "Destroyed"
+        )
 
         result_by_cluster, result_by_category = DataProcessUtil.create_mapped_dmg(
             inventory, max_dmg_result, arch_mapping, groupby_col_name, arch_col
-        )
-
-        result_by_cluster.rename(
-            columns={
-                "DS_0": "Affected",
-                "DS_1": "Minor",
-                "DS_2": "Major",
-                "DS_3": "Destroyed",
-            },
-            inplace=True,
-        )
-        result_by_category.rename(
-            columns={
-                "DS_0": "Affected",
-                "DS_1": "Minor",
-                "DS_2": "Major",
-                "DS_3": "Destroyed",
-            },
-            inplace=True,
         )
 
         cluster_records = result_by_cluster.to_json(orient="records")
