@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- New function in DataprocessUtil to generate FEMA table for Galveston Community App [#488](https://github.com/IN-CORE/pyincore/issues/488)
+
 ### Fixed
 - Refactoring tornadoepndamage for hazardDatasets [#495](https://github.com/IN-CORE/pyincore/issues/495)
 
