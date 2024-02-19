@@ -278,7 +278,7 @@ class DataProcessUtil:
 
         guids = dmg_result[["guid"]]
         max_val = dmg_result[dmg_states].max(axis=1)
-        max_key = dmg_result[dmg_states].idxmax(axis=1)
+        max_key = dmg_result[dmg_states].dropna(how='all').idxmax(axis=1)
         dmg_concat = pd.concat([guids, max_val, max_key], axis=1)
         dmg_concat.rename(columns={0: "max_prob", 1: "max_state"}, inplace=True)
 
