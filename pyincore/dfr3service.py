@@ -7,7 +7,7 @@
 
 import re
 from urllib.parse import urljoin
-from typing import Dict
+from typing import Dict, Optional
 
 import pyincore.globals as pyglobals
 from pyincore.decorators import forbid_offline
@@ -56,7 +56,7 @@ class MappingRequest(object):
 
 
 class MappingResponse(object):
-    def __init__(self, sets: Dict[str, any]=dict(), mapping: Dict[str, str]=dict()):
+    def __init__(self, sets: Dict[str, any] = dict(), mapping: Dict[str, str] = dict()):
         self.sets = sets
         self.mapping = mapping
 
@@ -175,22 +175,30 @@ class Dfr3Service:
         r = self.client.post(url, json=dfr3_set, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
-    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: str, add_info: list = None):
+    def match_inventory(self, mapping: MappingSet, inventories: list, entry_key: Optional[str] = None):
         """This method is intended to replace the match_inventory method in the future. The functionality is same as
         match_inventory but instead of dfr3_sets in plain json, dfr3 curves will be represented in
         FragilityCurveSet Object.
 
         Args:
             mapping (obj): MappingSet Object that has the rules and entries.
-            inventories (list): A list of inventories. Each item is a casted fiona object
-            entry_key (str): keys such as PGA, pgd, and etc.
-            add_info (None, dict): additional information that used to match rules, e.g. retrofit strategy per building.
+            inventories (list): A list of inventories. Each item is a fiona object
+            entry_key (None, str): Mapping Entry Key e.g. Non-retrofit Fragility ID Code, retrofit_method_1, etc.
 
         Returns:
              dict: A dictionary of {"inventory id": FragilityCurveSet object}.
-
         """
+
         dfr3_sets = {}
+
+        # find default mapping entry key if not provided
+        if entry_key is None:
+            for m in mapping.mappingEntryKeys:
+                if "defaultKey" in m and m["defaultKey"] is True:
+                    entry_key = m["name"]
+                    break
+        if entry_key is None:
+            raise ValueError("Entry key not provided and no default entry key found in the mapping!")
 
         # loop through inventory to match the rules
         matched_curve_ids = []
@@ -202,24 +210,22 @@ class Dfr3Service:
                     inventory["properties"]["efacility"] is None:
                 inventory["properties"]["efacility"] = ""
 
-            # if additional information presented, merge inventory properties with that additional information
-            if add_info is not None:
-                for add_info_row in add_info:
-                    if inventory["properties"].get("guid") is not None and \
-                            add_info_row.get("guid") is not None and \
-                            inventory["properties"].get("guid") == add_info_row.get("guid"):
-                        inventory["properties"].update(add_info_row)
-                        break  # assume no duplicated guid
+            # if retrofit key exist, use retrofit key otherwise use default key
+            retrofit_entry_key = inventory["properties"]["retrofit_k"] if "retrofit_k" in \
+                                                                          inventory["properties"] else None
 
             for m in mapping.mappings:
                 # for old format rule matching [[]]
                 # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
                     if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
-                        curve = m.entry[entry_key]
+                        if retrofit_entry_key is not None and retrofit_entry_key in m.entry.keys():
+                            curve = m.entry[retrofit_entry_key]
+                        else:
+                            curve = m.entry[entry_key]
                         dfr3_sets[inventory['id']] = curve
 
-                        # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
+                        # if it's string:id; then need to fetch it from remote and cast to dfr3curve object
                         if isinstance(curve, str) and curve not in matched_curve_ids:
                             matched_curve_ids.append(curve)
 
@@ -230,10 +236,13 @@ class Dfr3Service:
                 # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
                 elif isinstance(m.rules, dict):
                     if self._property_match(rules=m.rules, properties=inventory["properties"]):
-                        curve = m.entry[entry_key]
+                        if retrofit_entry_key is not None and retrofit_entry_key in m.entry.keys():
+                            curve = m.entry[retrofit_entry_key]
+                        else:
+                            curve = m.entry[entry_key]
                         dfr3_sets[inventory['id']] = curve
 
-                        # if it's string:id; then need to fetch it from remote and cast to fragility3curve object
+                        # if it's string:id; then need to fetch it from remote and cast to dfr3 curve object
                         if isinstance(curve, str) and curve not in matched_curve_ids:
                             matched_curve_ids.append(curve)
 
@@ -255,20 +264,29 @@ class Dfr3Service:
 
         return dfr3_sets
 
-    def match_list_of_dicts(self, mapping: MappingSet, inventories: list, entry_key: str):
+    def match_list_of_dicts(self, mapping: MappingSet, inventories: list, entry_key: Optional[str] = None):
         """This method is same as match_inventory, except it takes a simple list of dictionaries that contains the items
         to be mapped in the rules. The match_inventory method takes a list of fiona objects
 
         Args:
             mapping (obj): MappingSet Object that has the rules and entries.
             inventories (list): A list of inventories. Each item of the list is a simple dictionary
-            entry_key (str): keys such as PGA, pgd, and etc.
+            entry_key (None, str): Mapping Entry Key e.g. Non-retrofit Fragility ID Code, retrofit_method_1, etc.
 
         Returns:
              dict: A dictionary of {"inventory id": FragilityCurveSet object}.
 
         """
         dfr3_sets = {}
+
+        # find default mapping entry key if not provided
+        if entry_key is None:
+            for m in mapping.mappingEntryKeys:
+                if "defaultKey" in m and m["defaultKey"] is True:
+                    entry_key = m["name"]
+                    break
+        if entry_key is None:
+            raise ValueError("Entry key not provided and no default entry key found in the mapping!")
 
         # loop through inventory to match the rules
         matched_curve_ids = []
@@ -299,7 +317,7 @@ class Dfr3Service:
 
                         # use the first match
                         break
-                    
+
         batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
 
         # replace the curve id in dfr3_sets to the dfr3 curve
@@ -446,7 +464,8 @@ class Dfr3Service:
         """This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
 
         Args:
-            rules (list): The outer list is applying "OR" rule and the inner list is applying an "AND" rule. e.g. list(["java.lang.String utilfcltyc EQUALS 'PWT2'"],["java.lang.String utilfcltyc EQUALS 'PPP1'"])
+            rules (list): The outer list is applying "OR" rule and the inner list is applying an "AND" rule.
+            e.g. list(["java.lang.String utilfcltyc EQUALS 'PWT2'"],["java.lang.String utilfcltyc EQUALS 'PPP1'"])
 
         Returns:
             inventory_class (str): extracted inventory class name. "/" stands for or and "+" stands for and
@@ -471,7 +490,8 @@ class Dfr3Service:
         """This method will extract the inventory class name from a mapping rule. E.g. PWT2/PPP1
 
         Args:
-            rules (dict): e.g. { "AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'", "java.lang.String utilfcltyc EQUALS 'PPP1'"]}
+            rules (dict): e.g. { "AND": ["java.lang.String utilfcltyc EQUALS 'PWT2'",
+            "java.lang.String utilfcltyc EQUALS 'PPP1'"]}
 
         Returns:
             inventory_class (str): extracted inventory class name. "/" stands for or and "+" stands for and

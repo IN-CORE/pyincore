@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Refactoring tornadoepndamage for hazardDatasets [#495](https://github.com/IN-CORE/pyincore/issues/495)
 
+## [Unreleased]
+
+### Changed
+- Retrofitted Building Damage [#469](https://github.com/IN-CORE/pyincore/issues/469) 
+
+
 ## [1.16.0] - 2024-02-07
 
 ### Added
