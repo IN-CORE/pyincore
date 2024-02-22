@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [1.17.0] - 2024-02-22
+
+### Added
+- New function in DataprocessUtil to generate FEMA table for Galveston Community App [#488](https://github.com/IN-CORE/pyincore/issues/488)
+
+### Fixed
+- Refactoring tornadoepndamage for hazardDatasets [#495](https://github.com/IN-CORE/pyincore/issues/495)
+
+### Changed
+- Retrofitted Building Damage [#469](https://github.com/IN-CORE/pyincore/issues/469) 
+
+
 ## [1.16.0] - 2024-02-07
 
 ### Added

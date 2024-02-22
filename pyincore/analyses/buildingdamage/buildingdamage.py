@@ -12,6 +12,7 @@ from pyincore import BaseAnalysis, HazardService, \
     FragilityService, AnalysisUtil, GeoUtil
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 from pyincore.models.dfr3curve import DFR3Curve
+from pyincore.utils.datasetutil import DatasetUtil
 
 
 class BuildingDamage(BaseAnalysis):
@@ -31,15 +32,22 @@ class BuildingDamage(BaseAnalysis):
 
     def run(self):
         """Executes building damage analysis."""
+
         # Building dataset
-        bldg_set = self.get_input_dataset("buildings").get_inventory_reader()
+        bldg_dataset = self.get_input_dataset("buildings")
 
         # building retrofit strategy
         retrofit_strategy_dataset = self.get_input_dataset("retrofit_strategy")
-        if retrofit_strategy_dataset is not None:
-            retrofit_strategy = list(retrofit_strategy_dataset.get_csv_reader())
-        else:
-            retrofit_strategy = None
+
+        # mapping
+        dfr3_mapping_set = self.get_input_dataset("dfr3_mapping_set")
+
+        # Update the building inventory dataset if applicable
+        bldg_dataset, tmpdirname, _ = DatasetUtil.construct_updated_inventories(bldg_dataset,
+                                                                    add_info_dataset=retrofit_strategy_dataset,
+                                                                    mapping=dfr3_mapping_set)
+
+        bldg_set = bldg_dataset.get_inventory_reader()
 
         # Accommodating to multi-hazard
         hazards = []  # hazard objects
@@ -85,7 +93,6 @@ class BuildingDamage(BaseAnalysis):
         (ds_results, damage_results) = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
                                                                               num_workers,
                                                                               inventory_args,
-                                                                              repeat(retrofit_strategy),
                                                                               repeat(hazards),
                                                                               repeat(hazard_types),
                                                                               repeat(hazard_dataset_ids))
@@ -94,6 +101,10 @@ class BuildingDamage(BaseAnalysis):
         self.set_result_json_data("damage_result",
                                   damage_results,
                                   name=self.get_parameter("result_name") + "_additional_info")
+
+        # clean up temp folder if applicable
+        if tmpdirname is not None:
+            bldg_dataset.delete_temp_folder()
 
         return True
 
@@ -118,13 +129,11 @@ class BuildingDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def building_damage_analysis_bulk_input(self, buildings, retrofit_strategy, hazards, hazard_types,
-                                            hazard_dataset_ids):
+    def building_damage_analysis_bulk_input(self, buildings, hazards, hazard_types, hazard_dataset_ids):
         """Run analysis for multiple buildings.
 
         Args:
             buildings (list): Multiple buildings from input inventory set.
-            retrofit_strategy (list): building guid and its retrofit level 0, 1, 2, etc. This is Optional
             hazards (list): List of hazard objects.
             hazard_types (list): List of Hazard type, either earthquake, tornado, or tsunami.
             hazard_dataset_ids (list): List of id of the hazard exposure.
@@ -136,7 +145,7 @@ class BuildingDamage(BaseAnalysis):
 
         fragility_key = self.get_parameter("fragility_key")
         fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
-                                                           fragility_key, retrofit_strategy)
+                                                           fragility_key)
         use_liquefaction = False
         liquefaction_resp = None
         # Get geology dataset id containing liquefaction susceptibility
