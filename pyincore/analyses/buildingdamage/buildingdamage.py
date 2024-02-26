@@ -13,6 +13,8 @@ from pyincore import BaseAnalysis, HazardService, \
 from pyincore.analyses.buildingdamage.buildingutil import BuildingUtil
 from pyincore.models.dfr3curve import DFR3Curve
 from pyincore.utils.datasetutil import DatasetUtil
+import geopandas as gpd
+import pandas as pd
 
 
 class BuildingDamage(BaseAnalysis):
@@ -43,11 +45,9 @@ class BuildingDamage(BaseAnalysis):
         dfr3_mapping_set = self.get_input_dataset("dfr3_mapping_set")
 
         # Update the building inventory dataset if applicable
-        bldg_dataset, tmpdirname, _ = DatasetUtil.construct_updated_inventories(bldg_dataset,
-                                                                    add_info_dataset=retrofit_strategy_dataset,
-                                                                    mapping=dfr3_mapping_set)
-
-        bldg_set = bldg_dataset.get_inventory_reader()
+        bldg_dataset, tmpdirname, inventory_df = DatasetUtil.construct_updated_inventories(bldg_dataset,
+                                                                                add_info_dataset=retrofit_strategy_dataset,
+                                                                                mapping=dfr3_mapping_set)
 
         # Accommodating to multi-hazard
         hazards = []  # hazard objects
@@ -80,22 +80,28 @@ class BuildingDamage(BaseAnalysis):
         if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(bldg_set), user_defined_cpu)
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(inventory_df), user_defined_cpu)
 
-        avg_bulk_input_size = int(len(bldg_set) / num_workers)
-        inventory_args = []
-        count = 0
-        inventory_list = list(bldg_set)
-        while count < len(inventory_list):
-            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
-            count += avg_bulk_input_size
+        # Calculate the number of rows per worker
+        avg_bulk_input_size = int(len(inventory_df) / num_workers)
 
-        (ds_results, damage_results) = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
-                                                                              num_workers,
-                                                                              inventory_args,
-                                                                              repeat(hazards),
-                                                                              repeat(hazard_types),
-                                                                              repeat(hazard_dataset_ids))
+        # Initialize the list to hold DataFrame chunks
+        inventory_chunks = []
+
+        # Create chunks from the DataFrame
+        for start_row in range(0, len(inventory_df), avg_bulk_input_size):
+            # Use .iloc to slice the DataFrame and create chunks
+            chunk = inventory_df.iloc[start_row:start_row + avg_bulk_input_size]
+            inventory_chunks.append(chunk)
+
+        (ds_results, damage_results) = self.building_damage_concurrent_future(
+            self.building_damage_analysis_bulk_input,
+            num_workers,
+            inventory_chunks,  # Pass the chunks of GeoDataFrame
+            repeat(hazards),
+            repeat(hazard_types),
+            repeat(hazard_dataset_ids)
+        )
 
         self.set_result_csv_data("ds_result", ds_results, name=self.get_parameter("result_name"))
         self.set_result_json_data("damage_result",
@@ -133,7 +139,7 @@ class BuildingDamage(BaseAnalysis):
         """Run analysis for multiple buildings.
 
         Args:
-            buildings (list): Multiple buildings from input inventory set.
+            buildings (geopandas dataframe): Multiple buildings from input inventory set.
             hazards (list): List of hazard objects.
             hazard_types (list): List of Hazard type, either earthquake, tornado, or tsunami.
             hazard_dataset_ids (list): List of id of the hazard exposure.
@@ -144,8 +150,7 @@ class BuildingDamage(BaseAnalysis):
         """
 
         fragility_key = self.get_parameter("fragility_key")
-        fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
-                                                           fragility_key)
+
         use_liquefaction = False
         liquefaction_resp = None
         # Get geology dataset id containing liquefaction susceptibility
@@ -167,13 +172,9 @@ class BuildingDamage(BaseAnalysis):
             if hazard_type == "earthquake" and self.get_parameter("use_liquefaction") is not None:
                 use_liquefaction = self.get_parameter("use_liquefaction")
 
-            # loop through each building
-            values_payload = []
-            values_payload_liq = []  # for liquefaction, if used
-            unmapped_buildings = []
-            mapped_buildings = []
-            for b in buildings:
-                fragility_set = self.fragilitysvc.match_per_inventory(self.get_input_dataset("dfr3_mapping_set"), b,
+            def _building_calc_prep(b):
+                fragility_set = self.fragilitysvc.match_per_inventory(self.get_input_dataset("dfr3_mapping_set"),
+                                                                      b,
                                                                       fragility_key)
                 # found match
                 if fragility_set is not None:
@@ -191,33 +192,43 @@ class BuildingDamage(BaseAnalysis):
                         # it's already a dfr3 object; pass
                         pass
 
-                    # register the found fragility map in the hashtable
-                    mapped_buildings.append({"building": b, "fragility_set": fragility_set})
+                    b["fragility_set"] = fragility_set
 
                     # append to hazard value payload
                     location = GeoUtil.get_location(b)
                     loc = str(location.y) + "," + str(location.x)
                     demands, units, adjusted_to_original = \
-                        AnalysisUtil.get_hazard_demand_types_units(b, fragility_set, hazard_type, allowed_demand_types)
+                        AnalysisUtil.get_hazard_demand_types_units_df(b, fragility_set, hazard_type, allowed_demand_types)
                     adjust_demand_types_mapping.update(adjusted_to_original)
                     value = {
                         "demands": demands,
                         "units": units,
                         "loc": loc
                     }
-                    values_payload.append(value)
+                    b["values_payload"] = value
                     if use_liquefaction and geology_dataset_id is not None:
                         value_liq = {
                             "demands": [""],
                             "units": [""],
                             "loc": loc
                         }
-                        values_payload_liq.append(value_liq)
+                        b["values_payload_liq"] = value_liq
+                    else:
+                        b["values_payload_liq"] = None
 
                 # couldn't find any fragility match
                 else:
-                    unmapped_buildings.append(b)
+                    b["values_payload"] = None
+                    b["values_payload_liq"] = None
+                    b["fragility_set"] = None
 
+                return b
+
+            buildings = buildings.apply(_building_calc_prep, axis=1)
+
+            mapped_buildings = buildings[buildings['fragility_set'].notna()].reset_index(drop=True)
+            values_payload = mapped_buildings["values_payload"].tolist()
+            values_payload_liq = mapped_buildings["values_payload_liq"].tolist()
             hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
 
             # map demand type from payload to response
@@ -236,14 +247,7 @@ class BuildingDamage(BaseAnalysis):
                 liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
                                                                             values_payload_liq)
 
-        # not needed anymore as they are already split into mapped and unmapped
-        del buildings
-
-        ds_results = []
-        damage_results = []
-
-        i = 0
-        for b in mapped_buildings:
+        def _mapped_building_calc(b):
             ds_result = dict()
             damage_result = dict()
             dmg_probability = dict()
@@ -259,16 +263,16 @@ class BuildingDamage(BaseAnalysis):
                 b_demands = dict()
                 b_units = dict()
                 for hazard_type in hazard_types:
-                    b_haz_vals = AnalysisUtil.update_precision_of_lists(multihazard_vals[hazard_type][i][
+                    b_haz_vals = AnalysisUtil.update_precision_of_lists(multihazard_vals[hazard_type][b.name][
                                                                             "hazardValues"])
-                    b_demands[hazard_type] = multihazard_vals[hazard_type][i]["demands"]
-                    b_units[hazard_type] = multihazard_vals[hazard_type][i]["units"]
+                    b_demands[hazard_type] = multihazard_vals[hazard_type][b.name]["demands"]
+                    b_units[hazard_type] = multihazard_vals[hazard_type][b.name]["units"]
                     b_multihaz_vals[hazard_type] = b_haz_vals
                     # To calculate damage, use demand type name from fragility that will be used in the expression,
                     # instead  of using what the hazard service returns. There could be a difference "SA" in DFR3 vs
                     # "1.07 SA" from hazard
                     j = 0
-                    for adjusted_demand_type in multihazard_vals[hazard_type][i]["demands"]:
+                    for adjusted_demand_type in multihazard_vals[hazard_type][b.name]["demands"]:
                         d = adjust_demand_types_mapping[adjusted_demand_type]
                         hval_dict[d] = b_haz_vals[j]
                         j += 1
@@ -280,7 +284,7 @@ class BuildingDamage(BaseAnalysis):
                         b_multihaz_vals[hazard_type])
 
                 if not hazard_values_errors:
-                    building_args = selected_fragility_set.construct_expression_args_from_inventory(b["building"])
+                    building_args = selected_fragility_set.construct_expression_args_from_inventory_df(b.to_dict())
 
                     building_period = selected_fragility_set.fragility_curves[0].get_building_period(
                         selected_fragility_set.curve_parameters, **building_args)
@@ -289,7 +293,7 @@ class BuildingDamage(BaseAnalysis):
                         hval_dict, **building_args, period=building_period)
 
                     if use_liquefaction and geology_dataset_id is not None and liquefaction_resp is not None:
-                        ground_failure_prob = liquefaction_resp[i][BuildingUtil.GROUND_FAILURE_PROB]
+                        ground_failure_prob = liquefaction_resp[b.name][BuildingUtil.GROUND_FAILURE_PROB]
                         dmg_probability = AnalysisUtil.update_precision_of_dicts(
                             AnalysisUtil.adjust_damage_for_liquefaction(dmg_probability, ground_failure_prob))
 
@@ -299,8 +303,8 @@ class BuildingDamage(BaseAnalysis):
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
 
-            ds_result['guid'] = b["building"]['properties']['guid']
-            damage_result['guid'] = b["building"]['properties']['guid']
+            ds_result['guid'] = b['guid']
+            damage_result['guid'] = b['guid']
 
             ds_result.update(dmg_probability)
             ds_result.update(dmg_interval)
@@ -320,22 +324,38 @@ class BuildingDamage(BaseAnalysis):
             if use_liquefaction and geology_dataset_id is not None:
                 damage_result[BuildingUtil.GROUND_FAILURE_PROB] = ground_failure_prob
 
-            ds_results.append(ds_result)
-            damage_results.append(damage_result)
-            i += 1
+            b["ds_result"] = ds_result
+            b["damage_result"] = damage_result
 
-        for b in unmapped_buildings:
-            ds_result = dict()
-            damage_result = dict()
-            ds_result['guid'] = b['properties']['guid']
-            damage_result['guid'] = b['properties']['guid']
-            damage_result['fragility_id'] = None
-            damage_result['demandtype'] = None
-            damage_result['demandunits'] = None
-            damage_result['hazardval'] = None
+            return b
 
-            ds_results.append(ds_result)
-            damage_results.append(damage_result)
+        mapped_buildings = mapped_buildings.apply(_mapped_building_calc, axis=1)
+        ds_results_mapped = mapped_buildings["ds_result"]
+        damage_results_mapped = mapped_buildings["damage_result"]
+
+        # TODO work with unmapped buildings
+        def _unmapped_building_calc(b):
+            b["ds_result"] = b["guid"]
+            b["damage_result"] = {
+                "guid": b["guid"],
+                "fragility_id": None,
+                "demandtype": None,
+                "demandunits": None,
+                "hazardval": None
+            }
+
+            return b
+
+        unmapped_buildings = buildings[buildings['fragility_set'].isna()]
+        if not unmapped_buildings.empty:
+            unmapped_buildings = unmapped_buildings.apply(_unmapped_building_calc, axis=1)
+            ds_results_unmapped = unmapped_buildings['ds_result']
+            damage_results_unmapped = unmapped_buildings['damage_result']
+            ds_results = pd.concat([ds_results_mapped, ds_results_unmapped])
+            damage_results = pd.concat([damage_results_mapped, damage_results_unmapped])
+        else:
+            ds_results = ds_results_mapped
+            damage_results = damage_results_mapped
 
         return ds_results, damage_results
 

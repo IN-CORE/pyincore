@@ -197,6 +197,46 @@ class FragilityCurveSet:
                 kwargs_dict[parameters['name']] = inventory_unit['properties'][parameters['name']]
         return kwargs_dict
 
+    def construct_expression_args_from_inventory_df(self, inventory_unit: dict):
+        """
+
+        Args:
+            inventory_unit (dict): An inventory set.
+
+        Returns:
+            dict: Function parameters.
+
+        """
+        kwargs_dict = {}
+        for parameters in self.curve_parameters:
+
+            if parameters['name'] == "age_group" and ('age_group' not in inventory_unit.keys() or
+                                                      inventory_unit['age_group'] == ""):
+                if 'year_built' in inventory_unit.keys() and inventory_unit['year_built'] \
+                        is not None:
+                    try:
+                        yr_built = int(inventory_unit['year_built'])
+                    except ValueError:
+                        print("Non integer value found in year_built")
+                        raise
+                    age_group = 4  # for yr_built >= 2008
+                    if yr_built < 1974:
+                        age_group = 1
+                    elif 1974 <= yr_built < 1987:
+                        age_group = 2
+                    elif 1987 <= yr_built < 1995:
+                        age_group = 3
+                    elif 1995 <= yr_built < 2008:
+                        age_group = 4
+
+                    kwargs_dict['age_group'] = age_group
+
+            if parameters['name'] in inventory_unit.keys() and \
+                    inventory_unit[parameters['name']] is not None and \
+                    inventory_unit[parameters['name']] != "":
+                kwargs_dict[parameters['name']] = inventory_unit[parameters['name']]
+        return kwargs_dict
+
     @staticmethod
     def _3ls_to_4ds(limit_states):
         """

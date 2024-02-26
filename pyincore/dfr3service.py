@@ -177,19 +177,19 @@ class Dfr3Service:
 
     def match_per_inventory(self, mapping: MappingSet, inventory, entry_key):
         curve = None
-
-        if "occ_type" in inventory["properties"] and \
-                inventory["properties"]["occ_type"] is None:
-            inventory["properties"]["occ_type"] = ""
-        if "efacility" in inventory["properties"] and \
-                inventory["properties"]["efacility"] is None:
-            inventory["properties"]["efacility"] = ""
+        #
+        # if "occ_type" in inventory["properties"] and \
+        #         inventory["properties"]["occ_type"] is None:
+        #     inventory["properties"]["occ_type"] = ""
+        # if "efacility" in inventory["properties"] and \
+        #         inventory["properties"]["efacility"] is None:
+        #     inventory["properties"]["efacility"] = ""
 
         for m in mapping.mappings:
             # for old format rule matching [[]]
             # [[ and ] or [ and ]]
             if isinstance(m.rules, list):
-                if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
+                if self._property_match_legacy(rules=m.rules, properties=inventory.to_dict()):
                     curve = m.entry[entry_key]
                     # use the first match
                     break
@@ -197,7 +197,7 @@ class Dfr3Service:
             # for new format rule matching {"AND/OR":[]}
             # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
             elif isinstance(m.rules, dict):
-                if self._property_match(rules=m.rules, properties=inventory["properties"]):
+                if self._property_match(rules=m.rules, properties=inventory.to_dict()):
                     curve = m.entry[entry_key]
                     # use the first match
                     break

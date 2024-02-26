@@ -84,10 +84,10 @@ class DatasetUtil:
             Dataset: Updated inventory dataset
             gpd.GeoDataFrame: Updated inventory geodataframe
         """
-        if add_info_dataset is not None:
-            inventory_df = inventory_dataset.get_dataframe_from_shapefile()
-            inventory_df.set_index('guid', inplace=True)
+        inventory_df = inventory_dataset.get_dataframe_from_shapefile()
+        inventory_df.set_index('guid')
 
+        if add_info_dataset is not None:
             add_info_df = add_info_dataset.get_dataframe_from_csv()
             add_info_df.set_index('guid', inplace=True)
 
@@ -151,4 +151,4 @@ class DatasetUtil:
             return Dataset.from_file(file_path, inventory_dataset.data_type), tmpdirname, inventory_df
         else:
             # return original dataset
-            return inventory_dataset, None, None
+            return inventory_dataset, None, inventory_df
