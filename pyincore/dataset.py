@@ -11,12 +11,13 @@ import json
 import os
 
 import fiona
-import numpy
 import pandas as pd
 import geopandas as gpd
 import rasterio
 import warnings
 from pyincore import DataService
+from pathlib import Path
+import shutil
 
 warnings.filterwarnings("ignore", "", UserWarning)
 
@@ -33,6 +34,8 @@ class Dataset:
         self.metadata = metadata
 
         # For convenience instead of having to dig through the metadata for these
+        self.title = metadata["title"] if "title" in metadata else None
+        self.description = metadata["description"] if "description" in metadata else None
         self.data_type = metadata["dataType"]
         self.format = metadata["format"]
         self.id = metadata["id"]
@@ -328,6 +331,20 @@ class Dataset:
         gdf = gpd.read_file(self.local_file_path)
 
         return gdf
+
+    def delete_temp_file(self):
+        """Delete temporary folder.
+        """
+        if os.path.exists(self.local_file_path):
+            os.remove(self.local_file_path)
+
+    def delete_temp_folder(self):
+        """Delete temporary folder.
+        """
+        path = Path(self.local_file_path)
+        absolute_path = path.parent.absolute()
+        if os.path.isdir(absolute_path):
+            shutil.rmtree(absolute_path)
 
     def close(self):
         for key in self.readers:

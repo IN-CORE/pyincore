@@ -128,13 +128,12 @@ def run_with_base_class():
     print(f"Lumberton Flood damage run time: {time5 - time4}")
 
     ##########################################################
-    # joplin tornado
+    # joplin tornado without strategy
     bldg_dataset_id = "5df7d0de425e0b00092d0082"  # joplin building v6
 
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
 
-    # lumberton building mapping (with equation)
     mapping_id = "6091d9fbb53ed4646fd276ca"  # 19 archetype with retrofit
     # mapping_id = "60994a1906d63d5ded1d6dcc" # 19 archetype with retrofit new format mapping
     fragility_service = FragilityService(client)
