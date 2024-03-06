@@ -50,9 +50,6 @@ class DataProcessUtil:
         dmg_result = dmg_result_dataset.get_dataframe_from_csv()
 
         bldg_func_df = bldg_func_dataset.get_dataframe_from_csv()
-        bldg_func_df.rename(
-            columns={"building_guid": "guid", "samples": "failure"}, inplace=True
-        )
 
         arch_mapping = Dataset.from_data_service(
             archetype_mapping_id, DataService(client)
@@ -106,9 +103,6 @@ class DataProcessUtil:
 
         bldg_func_dataset = Dataset.from_data_service(bldg_func_id, DataService(client))
         bldg_func_df = bldg_func_dataset.get_dataframe_from_csv()
-        bldg_func_df.rename(
-            columns={"building_guid": "guid", "samples": "failure"}, inplace=True
-        )
 
         archtype_mapping_dataset = Dataset.from_data_service(
             archetype_mapping_id, DataService(client)
@@ -154,9 +148,6 @@ class DataProcessUtil:
         inventory = pd.DataFrame(gpd.read_file("zip://" + inventory_path))
         dmg_result = pd.read_csv(dmg_result_path)
         bldg_func_df = pd.read_csv(func_result_path)
-        bldg_func_df.rename(
-            columns={"building_guid": "guid", "samples": "failure"}, inplace=True
-        )
         arch_mapping = pd.read_csv(archetype_mapping_path)
 
         max_state_df = DataProcessUtil.get_max_damage_state(dmg_result)
@@ -316,11 +307,6 @@ class DataProcessUtil:
             "num_functional",
             "num_non_functional",
         ]
-
-        # unify mcs and bldg func naming
-        bldg_func.rename(
-            columns={"building_guid": "guid", "samples": "failure"}, inplace=True
-        )
 
         # drop nan but count their numbers
         count_null = (bldg_func["failure"] == "").sum()
