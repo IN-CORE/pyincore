@@ -352,16 +352,10 @@ class Dfr3Service:
 
         else:
             # rules = [[A and B], OR [C and D], OR [E and F]]
-            or_matched = [False for i in range(len(rules))]  # initiate all false state outer list
-            for i, and_rules in enumerate(rules):
-                and_matched = [False for j in range(len(and_rules))]  # initialte all false state for inner list
-                for j, rule in enumerate(and_rules):
-                    # evaluate, return True or False. And place it in the corresponding place
-                    and_matched[j] = Dfr3Service._eval_criterion(rule, properties)
-
-                # for inner list, AND boolean applied
-                if all(and_matched):
-                    or_matched[i] = True
+            or_matched = [
+                all(map(lambda rule: Dfr3Service._eval_criterion(rule, properties), and_rules))
+                for and_rules in rules
+            ]
 
         # for outer list, OR boolean is appied
         return any(or_matched)
