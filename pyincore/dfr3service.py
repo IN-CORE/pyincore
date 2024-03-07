@@ -190,6 +190,7 @@ class Dfr3Service:
         """
 
         dfr3_sets = {}
+        dfr3_sets_cache = {}
 
         # find default mapping entry key if not provided
         if entry_key is None:
@@ -213,41 +214,52 @@ class Dfr3Service:
             # if retrofit key exist, use retrofit key otherwise use default key
             retrofit_entry_key = inventory["properties"]["retrofit_k"] if "retrofit_k" in \
                                                                           inventory["properties"] else None
+            
+            cached_curve = self._check_cache(dfr3_sets_cache, inventory["properties"])
 
-            for m in mapping.mappings:
-                # for old format rule matching [[]]
-                # [[ and ] or [ and ]]
-                if isinstance(m.rules, list):
-                    if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
-                        if retrofit_entry_key is not None and retrofit_entry_key in m.entry:
-                            curve = m.entry[retrofit_entry_key]
-                        else:
-                            curve = m.entry[entry_key]
-                        dfr3_sets[inventory['id']] = curve
+            if cached_curve is not None:
+                dfr3_sets[inventory['id']] = cached_curve
 
-                        # if it's string:id; then need to fetch it from remote and cast to dfr3curve object
-                        if isinstance(curve, str) and curve not in matched_curve_ids:
-                            matched_curve_ids.append(curve)
+            else:
+                for m in mapping.mappings:
+                    # for old format rule matching [[]]
+                    # [[ and ] or [ and ]]
+                    if isinstance(m.rules, list):
+                        if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
+                            if retrofit_entry_key is not None and retrofit_entry_key in m.entry:
+                                curve = m.entry[retrofit_entry_key]
+                            else:
+                                curve = m.entry[entry_key]
+                                
+                            dfr3_sets[inventory['id']] = curve
 
-                        # use the first match
-                        break
+                            matched_properties_dict = self._convert_properties_to_dict(m.rules, inventory["properties"])
+                            # Add the matched inventory properties so other matching inventory can avoid rule matching
+                            dfr3_sets_cache[curve] = matched_properties_dict
 
-                # for new format rule matching {"AND/OR":[]}
-                # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
-                elif isinstance(m.rules, dict):
-                    if self._property_match(rules=m.rules, properties=inventory["properties"]):
-                        if retrofit_entry_key is not None and retrofit_entry_key in m.entry:
-                            curve = m.entry[retrofit_entry_key]
-                        else:
-                            curve = m.entry[entry_key]
-                        dfr3_sets[inventory['id']] = curve
+                            # if it's string:id; then need to fetch it from remote and cast to dfr3curve object
+                            if isinstance(curve, str) and curve not in matched_curve_ids:
+                                matched_curve_ids.append(curve)
 
-                        # if it's string:id; then need to fetch it from remote and cast to dfr3 curve object
-                        if isinstance(curve, str) and curve not in matched_curve_ids:
-                            matched_curve_ids.append(curve)
+                            # use the first match
+                            break
 
-                        # use the first match
-                        break
+                    # for new format rule matching {"AND/OR":[]}
+                    # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
+                    elif isinstance(m.rules, dict):
+                        if self._property_match(rules=m.rules, properties=inventory["properties"]):
+                            if retrofit_entry_key is not None and retrofit_entry_key in m.entry:
+                                curve = m.entry[retrofit_entry_key]
+                            else:
+                                curve = m.entry[entry_key]
+                            dfr3_sets[inventory['id']] = curve
+
+                            # if it's string:id; then need to fetch it from remote and cast to dfr3 curve object
+                            if isinstance(curve, str) and curve not in matched_curve_ids:
+                                matched_curve_ids.append(curve)
+
+                            # use the first match
+                            break
 
         batch_dfr3_sets = self.batch_get_dfr3_set(matched_curve_ids)
 
@@ -334,6 +346,50 @@ class Dfr3Service:
         return dfr3_sets
 
     @staticmethod
+    def _check_cache(dfr3_sets_dict, properties):
+        """A method to see if we already have matched an inventory with the same properties to a fragility curve
+
+                Args:
+                    dfr3_sets_dict (dict): {"fragility-curve-id-1": {"struct_typ": "W1", "no_stories": "2"}, etc.}
+                    properties (obj): A fiona Properties object that contains properties of the inventory row.
+
+                Returns:
+                    Fragility curve id if a match is found 
+
+        """
+        if not dfr3_sets_dict:
+            return None
+
+        for entry_key in dfr3_sets_dict:
+            inventory_dict = {}
+            entry_dict = dfr3_sets_dict[entry_key]
+            for rule_key in entry_dict:
+                inventory_dict[rule_key] = properties[rule_key]
+
+            if entry_dict == inventory_dict:
+                return entry_key
+
+    @staticmethod
+    def _convert_properties_to_dict(rules, properties):
+        """A method to convert properties to a dictionary with only the matched values in the rule set
+
+        Args:
+            rules (obj): [[A and B] or [C and D]]
+            properties (dict): A dictionary that contains properties of the inventory row.
+
+        Returns:
+            Dictionary of property values for the inventory object so the matched fragility can be cached
+
+        """
+
+        matched_properties = {}
+        for i, and_rules in enumerate(rules):
+            for j, rule in enumerate(and_rules):
+                matched_properties.update(Dfr3Service._eval_property_from_inventory(rule, properties))
+
+        return matched_properties
+
+    @staticmethod
     def _property_match_legacy(rules, properties):
         """A method to determine whether current set of rules rules applied to the inventory row (legacy rule format).
 
@@ -397,6 +453,25 @@ class Dfr3Service:
                 return any(matches)
             else:
                 raise ValueError("boolean " + boolean + " not supported!")
+
+    @staticmethod
+    def _eval_property_from_inventory(rule, properties):
+        """A method to evaluate individual rule and get the property from the inventory properties.
+
+               Args:
+                   rule (str): # e.g. "int no_stories EQ 1",
+                   properties (dict): dictionary of properties of an inventory item. e.g. {"guid":xxx,
+                   "num_stories":xxx, ...}
+
+               Returns:
+                    dictionary entry with the inventory property value that matched the rule
+
+        """
+        elements = rule.split(" ", 3)
+        property_key = elements[1]
+
+        matched_props = {property_key: properties[property_key]}
+        return matched_props
 
     @staticmethod
     def _eval_criterion(rule, properties):
