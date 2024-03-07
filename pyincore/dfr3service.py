@@ -254,6 +254,10 @@ class Dfr3Service:
                                 curve = m.entry[entry_key]
                             dfr3_sets[inventory['id']] = curve
 
+                            matched_properties_dict = self._convert_properties_to_dict(m.rules, inventory["properties"])
+                            # Add the matched inventory properties so other matching inventory can avoid rule matching
+                            dfr3_sets_cache[curve] = matched_properties_dict
+
                             # if it's string:id; then need to fetch it from remote and cast to dfr3 curve object
                             if isinstance(curve, str) and curve not in matched_curve_ids:
                                 matched_curve_ids.append(curve)
