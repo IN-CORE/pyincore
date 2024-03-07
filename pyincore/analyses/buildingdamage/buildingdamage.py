@@ -202,9 +202,10 @@ class BuildingDamage(BaseAnalysis):
             # worst code I have ever written
             # e.g. 1.04 Sec Sa --> 1.04 SA --> 1.0 SA
             for payload, response in zip(values_payload, hazard_vals):
-                for i in range(len(payload["demands"])):
-                    adjust_demand_types_mapping[response["demands"][i]] = adjust_demand_types_mapping[payload[
-                        "demands"][i]]
+                adjust_demand_types_mapping.update({
+                    response_demand: adjust_demand_types_mapping[payload_demand]
+                    for payload_demand, response_demand in zip(payload["demands"], response["demands"])
+                })
 
             # record hazard value for each hazard type for later calcu
             multihazard_vals[hazard_type] = hazard_vals
