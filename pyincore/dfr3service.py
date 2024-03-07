@@ -419,18 +419,18 @@ class Dfr3Service:
         # e.g. "java.lang.String struct_typ EQUALS W2"
 
         rule_type = elements[0]  # e.g. int, str, double, java.lang.String, etc...
-        if rule_type not in known_types.keys():
+        if rule_type not in known_types:
             raise ValueError(rule_type + " Unknown. Cannot parse the rules of this mapping!")
 
         rule_key = elements[1]  # e.g. no_storeis, year_built, etc...
 
         rule_operator = elements[2]  # e.g. EQ, GE, LE, EQUALS
-        if rule_operator not in known_operators.keys():
+        if rule_operator not in known_operators:
             raise ValueError(rule_operator + " Unknown. Cannot parse the rules of this mapping!")
 
         rule_value = elements[3].strip('\'').strip('\"')
 
-        if rule_key in properties.keys():
+        if rule_key in properties:
             # validate if the rule is written correctly by comparing variable type, e.g. no_stories properties
             # should be integer
             if isinstance(properties[rule_key], eval(known_types[rule_type])):
