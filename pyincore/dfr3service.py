@@ -219,7 +219,7 @@ class Dfr3Service:
                 # [[ and ] or [ and ]]
                 if isinstance(m.rules, list):
                     if self._property_match_legacy(rules=m.rules, properties=inventory["properties"]):
-                        if retrofit_entry_key is not None and retrofit_entry_key in m.entry.keys():
+                        if retrofit_entry_key is not None and retrofit_entry_key in m.entry:
                             curve = m.entry[retrofit_entry_key]
                         else:
                             curve = m.entry[entry_key]
@@ -236,7 +236,7 @@ class Dfr3Service:
                 # {"AND": [xx, "OR": [yy, yy], "AND": {"OR":["zz", "zz"]]}
                 elif isinstance(m.rules, dict):
                     if self._property_match(rules=m.rules, properties=inventory["properties"]):
-                        if retrofit_entry_key is not None and retrofit_entry_key in m.entry.keys():
+                        if retrofit_entry_key is not None and retrofit_entry_key in m.entry:
                             curve = m.entry[retrofit_entry_key]
                         else:
                             curve = m.entry[entry_key]
