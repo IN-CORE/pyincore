@@ -214,7 +214,7 @@ class Dfr3Service:
             # if retrofit key exist, use retrofit key otherwise use default key
             retrofit_entry_key = inventory["properties"]["retrofit_k"] if "retrofit_k" in \
                                                                           inventory["properties"] else None
-            
+
             cached_curve = self._check_cache(dfr3_sets_cache, inventory["properties"])
 
             if cached_curve is not None:
@@ -234,6 +234,9 @@ class Dfr3Service:
                             dfr3_sets[inventory['id']] = curve
 
                             matched_properties_dict = self._convert_properties_to_dict(m.rules, inventory["properties"])
+
+                            if retrofit_entry_key is not None:
+                                matched_properties_dict["retrofit_k"] = retrofit_entry_key
                             # Add the matched inventory properties so other matching inventory can avoid rule matching
                             dfr3_sets_cache[curve] = matched_properties_dict
 
@@ -364,11 +367,15 @@ class Dfr3Service:
         if not dfr3_sets_dict:
             return None
 
+        retrofit_entry_key = properties["retrofit_k"] if "retrofit_k" in properties else None
         for entry_key in dfr3_sets_dict:
             inventory_dict = {}
             entry_dict = dfr3_sets_dict[entry_key]
             for rule_key in entry_dict:
                 inventory_dict[rule_key] = properties[rule_key]
+
+            if retrofit_entry_key is not None:
+                inventory_dict["retrofit_k"] = retrofit_entry_key
 
             if entry_dict == inventory_dict:
                 return entry_key
