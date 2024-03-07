@@ -385,11 +385,28 @@ class Dfr3Service:
             Dictionary of property values for the inventory object so the matched fragility can be cached
 
         """
-
         matched_properties = {}
-        for i, and_rules in enumerate(rules):
-            for j, rule in enumerate(and_rules):
-                matched_properties.update(Dfr3Service._eval_property_from_inventory(rule, properties))
+        # Handle legacy rules
+        if isinstance(rules, list):
+            for i, and_rules in enumerate(rules):
+                for j, rule in enumerate(and_rules):
+                    matched_properties.update(Dfr3Service._eval_property_from_inventory(rule, properties))
+        elif isinstance(rules, dict):
+            # Handles new style of rules
+            boolean = list(rules.keys())[0]  # AND or OR
+            criteria = rules[boolean]
+
+            for criterion in criteria:
+                # Recursively parse and evaluate the rules with boolean
+                if isinstance(criterion, dict):
+                    for criteria in criterion:
+                        for rule_criteria in criterion[criteria]:
+                            matched_properties.update(Dfr3Service._eval_property_from_inventory(rule_criteria,
+                                                                                                properties))
+                elif isinstance(criterion, str):
+                    matched_properties.update(Dfr3Service._eval_property_from_inventory(criterion, properties))
+                else:
+                    raise ValueError("Cannot evaluate criterion, unsupported format!")
 
         return matched_properties
 
