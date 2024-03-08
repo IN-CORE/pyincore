@@ -5,15 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+
+## [1.18.0] - 2024-04-03
 
 ### Changed
 - Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
-
-
-## [Unreleased] 
-
-### Changed
 - Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
 
 
