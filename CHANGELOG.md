@@ -7,14 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-### Changed
-- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
-
-
-## [Unreleased] 
+### Added
+- Add MMSA Shelby County CGE ML analysis [#521](https://github.com/IN-CORE/pyincore/issues/521)
 
 ### Changed
 - Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
 
 
 ## [1.17.0] - 2024-02-22
