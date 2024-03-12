@@ -97,7 +97,7 @@ class TornadoEpnDamage(BaseAnalysis):
             tornado_id = tornado.id
 
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
-        self.load_remote_input_dataset("tornado", tornado_metadata["datasetId"])
+        self.load_remote_input_dataset("tornado", tornado_metadata["hazardDatasets"][0].get("datasetId"))
         tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
         ds_results, damage_results = self.get_damage(network_dataset, tornado_dataset, tornado_id)
 

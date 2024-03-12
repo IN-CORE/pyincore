@@ -7,8 +7,8 @@
 from urllib.parse import urljoin
 from pyincore import IncoreClient
 import pyincore.globals as pyglobals
+from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
-import requests
 
 logger = pyglobals.LOGGER
 
@@ -25,6 +25,7 @@ class SpaceService:
         self.client = client
         self.base_space_url = urljoin(client.service_url, "space/api/spaces/")
 
+    @forbid_offline
     def create_space(self, space_json, timeout=(30, 600), **kwargs):
         """Creates a Space.
 
@@ -43,6 +44,7 @@ class SpaceService:
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_spaces(self, dataset_id: str = None, timeout=(30, 600), **kwargs):
         """Retrieve  a Space with the dataset.
 
@@ -64,6 +66,7 @@ class SpaceService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_space_by_id(self, space_id: str, timeout=(30, 600), **kwargs):
         """Get space information.
 
@@ -79,6 +82,7 @@ class SpaceService:
 
         return return_http_response(r).json()
 
+    @forbid_offline
     def get_space_by_name(self, space_name: str, timeout=(30, 600), **kwargs):
         """Get space information by querying the name of space.
 
@@ -94,6 +98,7 @@ class SpaceService:
         r = self.client.get(self.base_space_url, params={"name": space_name}, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def update_space(self, space_id: str, space_json, timeout=(30, 600), **kwargs):
         """Updates a Space.
 
@@ -113,6 +118,7 @@ class SpaceService:
         r = self.client.put(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def add_to_space_by_name(self, space_name: str, dataset_id: str):
         """Add dataset to a space by using space name and dataset id.
 
@@ -130,6 +136,7 @@ class SpaceService:
 
         return response
 
+    @forbid_offline
     def remove_from_space_by_name(self, space_name: str, dataset_id: str):
         """Remove dataset from a space by using space name and dataset id.
 
@@ -147,6 +154,7 @@ class SpaceService:
 
         return response
 
+    @forbid_offline
     def remove_dataset_from_space(self, space_id: str, dataset_id: str, timeout=(30, 600), **kwargs):
         """Remove dataset from the space using dataset id and space id
 
@@ -165,6 +173,7 @@ class SpaceService:
         r = self.client.delete(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def add_dataset_to_space(self, space_id: str, dataset_id: str, timeout=(30, 600), **kwargs):
         """Add member to a Space.
 
@@ -183,6 +192,7 @@ class SpaceService:
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
+    @forbid_offline
     def grant_privileges_to_space(self, space_id: str, privileges_json, timeout=(30, 600), **kwargs):
         """Updates a Space.
 

@@ -16,5 +16,12 @@
     ],
     "windSpeedMethod": "1",
     "numSimulations": "1"
-  }
+  },
+  "hazardDatasets": [
+    {
+        "demandType": "wind",
+        "demandUnits": "mph",
+        "threshold": null
+    }
+  ]
 }

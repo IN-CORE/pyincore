@@ -8,6 +8,7 @@
 import urllib
 
 from pyincore import IncoreClient
+from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
 
 
@@ -26,6 +27,7 @@ class RepairService(Dfr3Service):
 
         super(RepairService, self).__init__(client)
 
+    @forbid_offline
     def get_dfr3_sets(self, hazard_type: str = None, inventory_type: str = None,
                       author: str = None, creator: str = None, space: str = None,
                       skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):

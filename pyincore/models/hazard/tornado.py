@@ -27,23 +27,17 @@ class Tornado(Hazard):
         "xxx"
     ],
     "date": "2020-08-14T16:22:32+0000",
-    "datasetId": "xxx"
+    "hazardDatasets":[]
     """
 
     def __init__(self, metadata, ef_rating_field="ef_rating", ef_wind_speed=(65, 86, 111, 136, 166, 200),
                  max_wind_speed=250.0):
         super().__init__(metadata)
         self.tornado_type = metadata["tornadoType"] if "tornadoType" in metadata else ""
-        # tornado has very different shape than other hazards
-        if self.tornado_type == "dataset":
-            self.hazardDatasets = [
-                TornadoDataset({"threshold": metadata["threshold"] if "threshold" in metadata else None,
-                                "demandType": "wind",
-                                "demandUnits": metadata["thresholdUnit"] if "thresholdUnit" in metadata else "mph",
-                                "datasetId": metadata["datasetId"] if "datasetId" in metadata else ""})
-            ]
-        else:
-            self.hazardDatasets = []
+        self.hazardDatasets = []
+        if "hazardDatasets" in metadata:
+            for hazardDataset in metadata["hazardDatasets"]:
+                self.hazardDatasets.append(TornadoDataset(hazardDataset))
         self.hazard_type = "tornado"
         self.EF_RATING_FIELD = ef_rating_field
         self.EF_WIND_SPEED = ef_wind_speed
