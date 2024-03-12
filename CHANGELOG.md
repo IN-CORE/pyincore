@@ -5,10 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] 
+## [Unreleased]
 
 ### Added
-- Add CoreCGEML module and MMSA Shelby County CGE ML analysis [#468](https://github.com/IN-CORE/pyincore/issues/468)
+- Add CoreCGEML module [#468](https://github.com/IN-CORE/pyincore/issues/468)
+
+### Changed
+- Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
+
+
+## [1.17.0] - 2024-02-22
+
+### Added
+- New function in DataprocessUtil to generate FEMA table for Galveston Community App [#488](https://github.com/IN-CORE/pyincore/issues/488)
+
+### Fixed
+- Refactoring tornadoepndamage for hazardDatasets [#495](https://github.com/IN-CORE/pyincore/issues/495)
+
+### Changed
+- Retrofitted Building Damage [#469](https://github.com/IN-CORE/pyincore/issues/469) 
+- Optimize building damage performance [#513](https://github.com/IN-CORE/pyincore/issues/513)
+
+
+## [1.16.0] - 2024-02-07
+
+### Added
+- Create GUID field in geopackage file [#478](https://github.com/IN-CORE/pyincore/issues/478)
+
+### Changed
+- Tornado and Earthquake model [#474](https://github.com/IN-CORE/pyincore/issues/474)
+- Disable methods interact with services if in offline mode [#458](https://github.com/IN-CORE/pyincore/issues/458)
+
+### Fixed
+- Fix semantics search pytest by switching to an existing search term 
+
+
+## [1.15.1] - 2023-12-20 
 
 ### Fixed
 - Fix NCI Functionality [#463](https://github.com/IN-CORE/pyincore/issues/463)
