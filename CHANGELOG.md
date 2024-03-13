@@ -9,12 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
-
-
-## [Unreleased] 
-
-### Changed
 - Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+
+### Fixed
+- Population dislocation postprocess place name filtering [#523](https://github.com/IN-CORE/pyincore/issues/523)
 
 
 ## [1.17.0] - 2024-02-22

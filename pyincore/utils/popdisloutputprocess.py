@@ -40,32 +40,41 @@ class PopDislOutputProcess:
             pd_result = pop_disl_result.get_dataframe_from_csv(low_memory=False)
         pd_result["geometry"] = pd_result["geometry"].apply(wkt.loads)
 
+        place_column_name = None
+        if filter_name is not None:
+            if 'plcname10' in pd_result.columns:
+                place_column_name = 'plcname10'
+            elif 'placeName10' in pd_result.columns:
+                place_column_name = 'placeName10'
+            else:
+                raise ValueError("Neither 'plcname10' nor 'placeName10' columns are present in the DataFrame.")
+
         # keep only inventory with guid; filter for Joplin since only Joplin inventory has guids
         if filter_guid:
             if filter_name:
                 pd_result_flag = pd_result[(pd_result["guid"].notnull()) &
                                            (pd_result["numprec"].notnull()) &
-                                           (pd_result["plcname10"] == filter_name)]
+                                           (pd_result[place_column_name] == filter_name)]
                 # only keep guid, place and dislocated
                 pd_result_shp = pd_result[(pd_result["dislocated"]) &
                                           (pd_result["guid"].notnull()) &
                                           (pd_result["numprec"].notnull()) &
-                                          (pd_result["plcname10"] == filter_name)]
+                                          (pd_result[place_column_name] == filter_name)]
             else:
                 pd_result_flag = pd_result[(pd_result["guid"].notnull()) &
-                                           (pd_result["numprec"].notnull())]
+                                           (pd_result[place_column_name].notnull())]
                 # only keep guid and dislocated
                 pd_result_shp = pd_result[(pd_result["dislocated"]) &
                                           (pd_result["guid"].notnull()) &
-                                          (pd_result["numprec"].notnull())]
+                                          (pd_result[place_column_name].notnull())]
         else:
             if filter_name:
                 pd_result_flag = pd_result[(pd_result["numprec"].notnull()) &
-                                           (pd_result["plcname10"] == filter_name)]
+                                           (pd_result[place_column_name] == filter_name)]
                 # only keep guid, place and dislocated
                 pd_result_shp = pd_result[(pd_result["dislocated"]) &
                                           (pd_result["numprec"].notnull()) &
-                                          (pd_result["plcname10"] == filter_name)]
+                                          (pd_result[place_column_name] == filter_name)]
             else:
                 pd_result_flag = pd_result[(pd_result["numprec"].notnull())]
                 # only keep guid and dislocated
