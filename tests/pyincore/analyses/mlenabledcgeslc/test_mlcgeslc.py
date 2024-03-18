@@ -11,7 +11,7 @@ curr_dir = os.path.dirname(__file__)
 capital_shocks = Dataset.from_file(
     os.path.join(
         curr_dir,
-        "slc_capital_shocks.csv",
+        "sector_shocks.csv",
     ),
     data_type="incore:capitalShocks",
 )

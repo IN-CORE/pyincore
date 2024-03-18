@@ -1,1 +1,1 @@
-from mlcgeslc import MlEnabledCgeSlc
+from pyincore.analyses.mlenabledcgeslc.mlcgeslc import MlEnabledCgeSlc

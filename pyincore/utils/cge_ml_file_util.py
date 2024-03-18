@@ -2,6 +2,7 @@ from typing import Tuple, List, Dict
 
 import pandas as pd
 import numpy as np
+import os
 
 from pyincore import globals as pyglobals
 
@@ -41,6 +42,7 @@ def parse_coeff(
         model_coeffs[factor] = np.float32(
             model_coeff_df[model_coeff_df.columns[4:]].to_numpy()[1:, :]
         )  # skip the first row as it contains the total value model and its not needed in output
+        # logger.info(f"factor: {factor} - model_coeff shape: {model_coeffs[factor].shape}")
 
     return model_coeffs, sectors, base_cap_sector_order
 
@@ -102,11 +104,13 @@ def parse_base_vals(
     base_cap: np.ndarray = parse_csv(filenames[-1], ds_sectors).reshape(
         1, -1
     )  # 1 x K array K = number of sectors in the model
+    # logger.info(f"base_cap shape: {base_cap.shape}")
 
     for filename, sector_order in zip(filenames[:-1], base_cap_sector_order.values()):
         base_cap_factors.append(
             parse_csv(filename, sector_order).reshape(-1, 1)
         )  # k_i x 1 array k_i = number of sectors k for a factor i
+        # logger.info(f"{os.path.basename(filename)} shape: {base_cap_factors[-1].shape}")
 
     return base_cap_factors, base_cap
 
@@ -136,6 +140,7 @@ def parse_files(
         2. base_cap_factors: List of numpy arrays containing the base capital for each factor
         3. base_cap: Numpy array containing the base capital
         4. model_coeffs: Dictionary containing the model coefficients for each factor
+        5. sectors["ds"]: List of sectors for the domestic supply
     """
     logger.info("Parsing input files...")
 
@@ -146,4 +151,4 @@ def parse_files(
     )
     logger.info("Parsing input files completed.")
 
-    return base_cap_sector_ordering, base_cap_factors, base_cap, model_coeffs
+    return base_cap_sector_ordering, base_cap_factors, base_cap, model_coeffs, sectors["ds"]

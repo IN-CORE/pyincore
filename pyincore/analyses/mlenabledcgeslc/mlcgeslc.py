@@ -17,10 +17,14 @@ class MlEnabledCgeSlc(CoreCGEML):
     model = "Machine Learning Enabled Computable General Equilibrium - Salt Lake City "
 
     #### Coefficients files
-    DDS_coefficients_file = "DDS_coefficients.csv"
-    DY_coefficients_file = "DY_coefficients.csv"
-    MIGT_coefficients_file = "MIGT_coefficients.csv"
-    DFFD_coefficients_file = "DFFD_coefficients.csv"
+    DDS_coefficients_file = "DDS_coefficients_n.csv"
+    DY_coefficients_file = "DY_coefficients_n.csv"
+    MIGT_coefficients_file = "MIGT_coefficients_n.csv"
+    DFFD_coefficients_file = "DFFD_coefficients_n.csv"
+    # DDS_coefficients_file = "DDS_coefficients.csv"
+    # DY_coefficients_file = "DY_coefficients.csv"
+    # MIGT_coefficients_file = "MIGT_coefficients.csv"
+    # DFFD_coefficients_file = "DFFD_coefficients.csv"
 
     #### Base value files
     DS_base_val_file = "DS_base_val.csv"
@@ -49,6 +53,10 @@ class MlEnabledCgeSlc(CoreCGEML):
             base_file_path,
             MIGT_coefficients_file,
         ),
+        "dffd": os.path.join(
+            base_file_path,
+            DFFD_coefficients_file,
+        ),
     }
 
     filenames = [
@@ -75,11 +83,12 @@ class MlEnabledCgeSlc(CoreCGEML):
     ]
 
     def __init__(self, incore_client: IncoreClient):
-        sectors, base_cap_factors, base_cap, model_coeffs = parse_files(self.model_filenames, self.filenames)
+        sectors, base_cap_factors, base_cap, model_coeffs, cap_shock_sectors = parse_files(self.model_filenames, self.filenames)
         self.base_cap_factors = base_cap_factors
         self.base_cap = base_cap
         self.model_coeffs = model_coeffs
-        super(MlEnabledCgeSlc, self).__init__(incore_client, sectors)
+        self.cap_shock_sectors = cap_shock_sectors
+        super(MlEnabledCgeSlc, self).__init__(incore_client, sectors, labor_groups=[f"L{gp}" for gp in range(1, 5)]) # 4 labor groups
 
     def get_spec(self):
         return {
@@ -167,19 +176,22 @@ class MlEnabledCgeSlc(CoreCGEML):
         )
         # arrange the capital shocks in the same order as the sectors
         shocks = []
-        for sector in self.sectors["ds"]:
+
+        for sector in self.cap_shock_sectors:
             if sector.upper() not in [v.upper() for v in sector_shocks["sector"]]:
                 raise ValueError(
-                    f"Sector {sector} not found in the sector shocks file with {sector_shocks['sector']} sectors. Please make sure you have used the correct capital shocks"
+                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors. \nPlease make sure you have used the correct capital shocks"
                 )
             shocks.append(
                 sector_shocks.loc[sector_shocks["sector"] == sector.upper()]["shock"]
             )
         capital_shocks = np.array(shocks, dtype=np.float32).reshape(1, -1)
+        # logger.info(f"capital_shocks shape: {capital_shocks.shape}")
+        
         super().run_core_cge_ml(
             self.base_cap,
             capital_shocks,
             self.model_coeffs,
-            self.base_cap_factors[:1],  # need to remove this slice for full release
+            self.base_cap_factors,
         )
         logger.info(f"Running {self.model} model completed.")

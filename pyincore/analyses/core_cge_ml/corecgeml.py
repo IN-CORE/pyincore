@@ -1,5 +1,5 @@
 """ Core CGE ML """
-from typing import List, Dict
+from typing import List, Dict, Optional
 from collections import defaultdict
 import numpy as np
 import pandas as pd
@@ -17,6 +17,7 @@ class CoreCGEML(BaseAnalysis):
         self,
         incore_client,
         sectors: Dict[str, List[str]],
+        labor_groups: Optional[List[str]] = None
     ):
         super(CoreCGEML, self).__init__(incore_client)
 
@@ -27,7 +28,7 @@ class CoreCGEML(BaseAnalysis):
             "factor_demand",
         ]
         self.sectors = sectors
-        self.labor_groups = ["L1", "L2", "L3"]
+        self.labor_groups = ["L1", "L2", "L3"] if labor_groups is None else labor_groups
 
     def construct_output(self, predictions: dict) -> Dict[str, Dict[str, list]]:
         """construct_output will construct the output in the format required by the pyincore.
@@ -78,21 +79,20 @@ class CoreCGEML(BaseAnalysis):
                 "DS0": predictions["ds"]["before"],
                 "DSL": predictions["ds"]["after"],
             }
-        if predictions.get("gi", None) is not None:
-            constructed_outputs["gi"] = {
-                "Household Group": self.sectors["gi"],
-                "Y0": predictions["gi"]["before"],
-                "YL": predictions["gi"]["after"],
+        if predictions.get("dy", None) is not None:
+            constructed_outputs["dy"] = {
+                "Household Group": self.sectors["dy"],
+                "Y0": predictions["dy"]["before"],
+                "YL": predictions["dy"]["after"],
             }
-        if predictions.get("hh", None) is not None:
-            constructed_outputs["hh"] = {
-                "Household Group": self.sectors["hh"],
-                "HH0": predictions["hh"]["before"],
-                "HHL": predictions["hh"]["after"],
+        if predictions.get("migt", None) is not None:
+            constructed_outputs["migt"] = {
+                "Household Group": self.sectors["migt"],
+                "HH0": predictions["migt"]["before"],
+                "HHL": predictions["migt"]["after"],
             }
         if (
-            predictions.get("prefd", None) is not None
-            and predictions.get("postfd", None) is not None
+            predictions.get("dffd", None) is not None
         ):
             prefd = {
                 "Labor Group": self.labor_groups,
@@ -101,20 +101,34 @@ class CoreCGEML(BaseAnalysis):
                 "Labor Group": self.labor_groups,
             }
 
-            temp_prefd: Dict[str, list] = defaultdict(list)
-            temp_postfd: Dict[str, list] = defaultdict(list)
-            for i, fd_sector in enumerate(self.sectors["fd"]):
-                sector, grp = fd_sector.split("_")
-                temp_prefd[sector].push((grp, predictions["fd"]["before"][i]))
-                temp_postfd[sector].push((grp, predictions["fd"]["after"][i]))
+            temp_prefd: Dict[str, Dict[str, float]] = defaultdict(dict)
+            temp_postfd: Dict[str, Dict[str, float]] = defaultdict(dict)
+            for i, fd_sector in enumerate(self.sectors["dffd"]):
+                splits = fd_sector.split("_")
+                if len(splits) > 2:
+                    sector = "_".join(splits[:-1])
+                    grp = splits[-1]
+
+                temp_prefd[sector][grp] = predictions["dffd"]["before"][i]
+                temp_postfd[sector][grp] = predictions["dffd"]["after"][i]
 
             for sector in temp_prefd.keys():
-                prefd[sector] = [
-                    x[1] for x in sorted(temp_prefd[sector], key=lambda x: x[0])
-                ]
-                postfd[sector] = [
-                    x[1] for x in sorted(temp_postfd[sector], key=lambda x: x[0])
-                ]
+                prefd_l = []
+                postfd_l = []
+                for grp in self.labor_groups:
+                    
+                    if temp_prefd[sector].get(grp, None) is None:
+                        prefd_l.append(0)
+                    else:
+                        prefd_l.append(temp_prefd[sector][grp])
+                    
+                    if temp_postfd[sector].get(grp, None) is None:
+                        postfd_l.append(0)
+                    else:
+                        postfd_l.append(temp_postfd[sector][grp])
+
+                prefd[sector] = prefd_l
+                postfd[sector] = postfd_l
 
             constructed_outputs["prefd"] = prefd
             constructed_outputs["postfd"] = postfd
@@ -189,7 +203,7 @@ class CoreCGEML(BaseAnalysis):
             assert (
                 factor_capital_loss.shape == factor_base_cap_before.shape
             ), "Number of sectors in models and base_cap_factors do not match. required shape {}, observed shape {}".format(
-                factor_capital_loss[1:, :].shape, factor_base_cap_before.shape
+                factor_capital_loss.shape, factor_base_cap_before.shape
             )
             # add the predicted change in capital stock to the base_cap_factors
             factor_base_cap_after: np.ndarray = (
@@ -212,19 +226,19 @@ class CoreCGEML(BaseAnalysis):
                 else "domestic-supply",
                 source="dataframe",
             )
-        if constructed_outputs.get("gi", None) is not None:
+        if constructed_outputs.get("dy", None) is not None:
             self.set_result_csv_data(
                 "gross-income",
-                pd.DataFrame(constructed_outputs["gi"]),
+                pd.DataFrame(constructed_outputs["dy"]),
                 name=self.get_parameter("gross_income_fname")
                 if self.get_parameter("gross_income_fname") is not None
                 else "gross-income",
                 source="dataframe",
             )
-        if constructed_outputs.get("hh", None) is not None:
+        if constructed_outputs.get("migt", None) is not None:
             self.set_result_csv_data(
                 "household-count",
-                pd.DataFrame(constructed_outputs["hh"]),
+                pd.DataFrame(constructed_outputs["migt"]),
                 name=self.get_parameter("household_count_fname")
                 if self.get_parameter("household_count_fname") is not None
                 else "household-count",
