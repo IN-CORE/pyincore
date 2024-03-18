@@ -7,7 +7,6 @@ import os
 from pyincore import globals as pyglobals
 
 logger = pyglobals.LOGGER
-from pprint import pprint
 
 
 def parse_coeff(
@@ -151,4 +150,10 @@ def parse_files(
     )
     logger.info("Parsing input files completed.")
 
-    return base_cap_sector_ordering, base_cap_factors, base_cap, model_coeffs, sectors["ds"]
+    return (
+        base_cap_sector_ordering,
+        base_cap_factors,
+        base_cap,
+        model_coeffs,
+        sectors["ds"],
+    )
