@@ -50,16 +50,12 @@ class PopDislOutputProcess:
                 pd_result_shp = pd_result[(pd_result["guid"].notnull()) &
                                           (pd_result["numprec"].notnull()) &
                                           (pd_result["plcname10"] == filter_name)]
-                # Update "numprec" to 0 where "dislocated" is False
-                pd_result_shp.loc[pd_result_shp["dislocated"] == False, "numprec"] = 0
             else:
                 pd_result_flag = pd_result[(pd_result["guid"].notnull()) &
                                            (pd_result["numprec"].notnull())]
                 # only keep guid and dislocated
                 pd_result_shp = pd_result[(pd_result["guid"].notnull()) &
                                           (pd_result["numprec"].notnull())]
-                # Update "numprec" to 0 where "dislocated" is False
-                pd_result_shp.loc[pd_result_shp["dislocated"] == False, "numprec"] = 0
         else:
             if filter_name:
                 pd_result_flag = pd_result[(pd_result["numprec"].notnull()) &
@@ -67,14 +63,13 @@ class PopDislOutputProcess:
                 # only keep guid, place
                 pd_result_shp = pd_result[(pd_result["numprec"].notnull()) &
                                           (pd_result["plcname10"] == filter_name)]
-                # Update "numprec" to 0 where "dislocated" is False
-                pd_result_shp.loc[pd_result_shp["dislocated"] == False, "numprec"] = 0
             else:
                 pd_result_flag = pd_result[(pd_result["numprec"].notnull())]
                 # only keep guid
                 pd_result_shp = pd_result[(pd_result["numprec"].notnull())]
-                # Update "numprec" to 0 where "dislocated" is False
-                pd_result_shp.loc[pd_result_shp["dislocated"] == False, "numprec"] = 0
+
+        # Update "numprec" to 0 where "dislocated" is False
+        pd_result_shp.loc[pd_result_shp["dislocated"], "numprec"] = 0
 
         self.vacant_disl = vacant_disl
         self.pop_disl_result = pd_result_flag
@@ -95,6 +90,8 @@ class PopDislOutputProcess:
         # save as shapefile
         gdf = gpd.GeoDataFrame(df, crs='epsg:4326')
         gdf = gdf[["guid", "numprec", "geometry"]]
+        # set numprec as integer
+        gdf["numprec"] = gdf["numprec"].fillna(0).astype(int)
         gdf.to_file(filename)
 
         return filename
