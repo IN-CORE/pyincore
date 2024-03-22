@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
+
+
+## [Unreleased] 
+
+### Changed
+- Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+
 
 ## [1.17.0] - 2024-02-22
 
@@ -16,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Retrofitted Building Damage [#469](https://github.com/IN-CORE/pyincore/issues/469) 
+- Optimize building damage performance [#513](https://github.com/IN-CORE/pyincore/issues/513)
 
 
 ## [1.16.0] - 2024-02-07

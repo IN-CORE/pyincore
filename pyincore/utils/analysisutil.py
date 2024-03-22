@@ -261,14 +261,17 @@ class AnalysisUtil:
         keys = list(limit_state_probabilities.keys())
         adjusted_limit_state_probabilities = collections.OrderedDict()
 
-        for i in range(len(keys)):
+        ground_failure_probabilities_len = len(ground_failure_probabilities)
+        keys_len = len(keys)
+
+        for i in range(keys_len):
             # check and see...if we are trying to use the last ground failure
             # number for something other than the
             # last limit-state-probability, then we should use the
             # second-to-last probability of ground failure instead.
 
-            if i > len(ground_failure_probabilities) - 1:
-                prob_ground_failure = ground_failure_probabilities[len(ground_failure_probabilities) - 2]
+            if i > ground_failure_probabilities_len - 1:
+                prob_ground_failure = ground_failure_probabilities[ground_failure_probabilities_len - 2]
             else:
                 prob_ground_failure = ground_failure_probabilities[i]
 
