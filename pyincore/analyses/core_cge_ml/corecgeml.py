@@ -217,49 +217,42 @@ class CoreCGEML(BaseAnalysis):
 
         constructed_outputs = self.construct_output(predictions)
 
+        file_prefix = self.get_parameter("result_name") if self.get_parameter("result_name") is not None else ""
+        file_prefix += "_"
+        
         if constructed_outputs.get("ds", None) is not None:
             self.set_result_csv_data(
                 "domestic-supply",
                 pd.DataFrame(constructed_outputs["ds"]),
-                name=self.get_parameter("domestic_supply_fname")
-                if self.get_parameter("domestic_supply_fname") is not None
-                else "domestic-supply",
+                name=f"{file_prefix}domestic-supply",
                 source="dataframe",
             )
         if constructed_outputs.get("dy", None) is not None:
             self.set_result_csv_data(
                 "gross-income",
                 pd.DataFrame(constructed_outputs["dy"]),
-                name=self.get_parameter("gross_income_fname")
-                if self.get_parameter("gross_income_fname") is not None
-                else "gross-income",
+                name=f"{file_prefix}gross-income",
                 source="dataframe",
             )
         if constructed_outputs.get("migt", None) is not None:
             self.set_result_csv_data(
                 "household-count",
                 pd.DataFrame(constructed_outputs["migt"]),
-                name=self.get_parameter("household_count_fname")
-                if self.get_parameter("household_count_fname") is not None
-                else "household-count",
+                name=f"{file_prefix}household-count",
                 source="dataframe",
             )
         if constructed_outputs.get("prefd", None) is not None:
             self.set_result_csv_data(
                 "pre-disaster-factor-demand",
                 pd.DataFrame(constructed_outputs["prefd"]),
-                name=self.get_parameter("pre_factor_demand_fname")
-                if self.get_parameter("pre_factor_demand_fname") is not None
-                else "pre-disaster-factor-demand",
+                name=f"{file_prefix}pre-disaster-factor-demand",
                 source="dataframe",
             )
         if constructed_outputs.get("postfd", None) is not None:
             self.set_result_csv_data(
                 "post-disaster-factor-demand",
                 pd.DataFrame(constructed_outputs["postfd"]),
-                name=self.get_parameter("post_factor_demand_fname")
-                if self.get_parameter("post_factor_demand_fname") is not None
-                else "post-disaster-factor-demand",
+                name=f"{file_prefix}post-disaster-factor-demand",
                 source="dataframe",
             )
 

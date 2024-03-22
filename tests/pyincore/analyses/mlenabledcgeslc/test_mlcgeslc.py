@@ -1,27 +1,16 @@
 import os
 
-from pyincore import IncoreClient, Dataset, globals as pyglobals
+from pyincore import IncoreClient, globals as pyglobals
 from pyincore.analyses.mlenabledcgeslc import MlEnabledCgeSlc
 
-client = IncoreClient()
+client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
 mlcgeslc = MlEnabledCgeSlc(client)
 
-curr_dir = os.path.dirname(__file__)
-capital_shocks = Dataset.from_file(
-    os.path.join(
-        curr_dir,
-        "sector_shocks.csv",
-    ),
-    data_type="incore:capitalShocks",
-)
+sector_shocks = "65fdeed7e42f3b0da56c4eef"
 
-
-mlcgeslc.set_input_dataset("sector_shocks", capital_shocks)
-mlcgeslc.set_parameter("domestic_supply_fname", "slc_7_region_domestic_supply_negated_coeffs.csv")
-mlcgeslc.set_parameter("gross_income_fname", "slc_7_region_gross_income_negated_coeffs.csv")
-mlcgeslc.set_parameter("household_count_fname", "slc_7_region_household_count_negated_coeffs.csv")
-mlcgeslc.set_parameter("pre_factor_demand_fname", "slc_7_region_pre_factor_demand_negated_coeffs.csv")
-mlcgeslc.set_parameter("post_factor_demand_fname", "slc_7_region_post_factor_demand_negated_coeffs.csv")
+mlcgeslc.load_remote_input_dataset("sector_shocks", sector_shocks)
+# optional
+mlcgeslc.set_parameter("result_name", "slc_7_region")
 
 mlcgeslc.run_analysis()

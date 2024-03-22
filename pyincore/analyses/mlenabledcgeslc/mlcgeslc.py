@@ -17,14 +17,10 @@ class MlEnabledCgeSlc(CoreCGEML):
     model = "Machine Learning Enabled Computable General Equilibrium - Salt Lake City "
 
     #### Coefficients files
-    DDS_coefficients_file = "DDS_coefficients_n.csv"
-    DY_coefficients_file = "DY_coefficients_n.csv"
-    MIGT_coefficients_file = "MIGT_coefficients_n.csv"
-    DFFD_coefficients_file = "DFFD_coefficients_n.csv"
-    # DDS_coefficients_file = "DDS_coefficients.csv"
-    # DY_coefficients_file = "DY_coefficients.csv"
-    # MIGT_coefficients_file = "MIGT_coefficients.csv"
-    # DFFD_coefficients_file = "DFFD_coefficients.csv"
+    DDS_coefficients_file = "DDS_coefficients.csv"
+    DY_coefficients_file = "DY_coefficients.csv"
+    MIGT_coefficients_file = "MIGT_coefficients.csv"
+    DFFD_coefficients_file = "DFFD_coefficients.csv"
 
     #### Base value files
     DS_base_val_file = "DS_base_val.csv"
@@ -96,35 +92,11 @@ class MlEnabledCgeSlc(CoreCGEML):
             'description': 'CGE model for Salt Lake City.',
             'input_parameters': [
                 {
-                    "id": "domestic_supply_fname",
-                    "required": False,
-                    "description": "Name of the domestic supply output file with extension",
-                    "type": str,
-                },
-                {
-                    "id": "gross_income_fname",
-                    "required": False,
-                    "description": "Name of gross income output file with extension",
-                    "type": str,
-                },
-                {
-                    "id": "household_count_fname",
-                    "required": False,
-                    "description": "Name of the household count output file with extension",
-                    "type": str,
-                },
-                {
-                    "id": "pre_factor_demand_fname",
-                    "required": False,
-                    "description": "Name of the pre-factor demand output file with extension",
-                    "type": str,
-                },
-                {
-                    "id": "post_factor_demand_fname",
-                    "required": False,
-                    "description": "Name of the post-factor demand output file with extension",
-                    "type": str,
-                },
+                    'id': 'result_name',
+                    'required': False,
+                    'description': 'Result CSV dataset name prefix',
+                    'type': str
+                }
 
             ],
             'input_datasets': [
