@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - ipopt>=3.11
+  - scip>=8.0.0
   - fiona>=1.9.5
   - geopandas>=0.14.0
   - matplotlib>=3.8.0

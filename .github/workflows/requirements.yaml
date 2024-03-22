@@ -3,10 +3,6 @@ name: requirements
 # This will check to see if there are new requirements and will
 # automatically create a pull request.
 on:
-  push:
-    branches:
-      - main
-
   schedule:
     - cron: '0 0 * * *'
 
@@ -19,7 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
 
       # check all requirements
       - name: requirements check
@@ -29,9 +27,10 @@ jobs:
       # try and create a PR
       - name: create PR if needed
         if: github.repository == env.MAIN_REPO
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v5
         with:
           commit-message: "Updated requirements"
           title: "Updated requirements"
           reviewers: IN-CORE/core-dev
           delete-branch: true
+          base: develop
