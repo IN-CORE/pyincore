@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
 - Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+- Update the post-processing step for generating population dislocation map layer [#526](https://github.com/IN-CORE/pyincore/issues/526)
 
 
 ## [1.17.0] - 2024-02-22
