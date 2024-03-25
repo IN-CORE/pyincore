@@ -93,7 +93,7 @@ class DatasetUtil:
 
             # if additional information e.g. Retrofit presented, merge inventory properties with that additional
             # information
-            inventory_df = pd.merge(inventory_df, add_info_df, left_index=True, right_index=True, how='inner')
+            inventory_df = pd.merge(inventory_df, add_info_df, left_index=True, right_index=True, how='left')
 
             # prepare retrofit definition into pandas dataframe; need to work with retrofit
             if len(mapping.mappingEntryKeys) > 0:
@@ -102,7 +102,7 @@ class DatasetUtil:
                 mapping_entry_keys_df.columns = [col + '_mappingEntryKey' for col in mapping_entry_keys_df.columns]
                 mapping_entry_keys_df.set_index('name_mappingEntryKey', inplace=True)
                 inventory_df = pd.merge(inventory_df, mapping_entry_keys_df, left_on='retrofit_key', right_index=True,
-                                        how='inner')
+                                        how='left')
                 inventory_df.drop(columns=['defaultKey_mappingEntryKey'], inplace=True)
             else:
                 raise ValueError("Missing proper definition for mappingEntryKeys in the mapping!")

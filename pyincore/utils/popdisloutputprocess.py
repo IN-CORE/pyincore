@@ -46,31 +46,28 @@ class PopDislOutputProcess:
                 pd_result_flag = pd_result[(pd_result["guid"].notnull()) &
                                            (pd_result["numprec"].notnull()) &
                                            (pd_result["plcname10"] == filter_name)]
-                # only keep guid, place and dislocated
-                pd_result_shp = pd_result[(pd_result["dislocated"]) &
-                                          (pd_result["guid"].notnull()) &
+                # only keep guid and place
+                pd_result_shp = pd_result[(pd_result["guid"].notnull()) &
                                           (pd_result["numprec"].notnull()) &
                                           (pd_result["plcname10"] == filter_name)]
             else:
                 pd_result_flag = pd_result[(pd_result["guid"].notnull()) &
                                            (pd_result["numprec"].notnull())]
-                # only keep guid and dislocated
-                pd_result_shp = pd_result[(pd_result["dislocated"]) &
-                                          (pd_result["guid"].notnull()) &
+                # only keep guid
+                pd_result_shp = pd_result[(pd_result["guid"].notnull()) &
                                           (pd_result["numprec"].notnull())]
         else:
             if filter_name:
                 pd_result_flag = pd_result[(pd_result["numprec"].notnull()) &
                                            (pd_result["plcname10"] == filter_name)]
-                # only keep guid, place and dislocated
-                pd_result_shp = pd_result[(pd_result["dislocated"]) &
-                                          (pd_result["numprec"].notnull()) &
+                # only keep guid and place
+                pd_result_shp = pd_result[(pd_result["numprec"].notnull()) &
                                           (pd_result["plcname10"] == filter_name)]
             else:
                 pd_result_flag = pd_result[(pd_result["numprec"].notnull())]
-                # only keep guid and dislocated
-                pd_result_shp = pd_result[(pd_result["dislocated"]) &
-                                          (pd_result["numprec"].notnull())]
+                # only keep guid
+                pd_result_shp = pd_result[(pd_result["numprec"].notnull())]
+
         self.vacant_disl = vacant_disl
         self.pop_disl_result = pd_result_flag
         self.pop_disl_result_shp = pd_result_shp
@@ -89,7 +86,17 @@ class PopDislOutputProcess:
 
         # save as shapefile
         gdf = gpd.GeoDataFrame(df, crs='epsg:4326')
-        gdf = gdf[["guid", "numprec", "geometry"]]
+        gdf = gdf[["guid", "numprec", "geometry", "dislocated"]]
+
+        # keep original dislocated results
+        gdf["numprec_dislocated"] = gdf["numprec"].copy()
+
+        # set numprec = 0 if dislocated is False
+        gdf.loc[~gdf["dislocated"], "numprec_dislocated"] = 0
+
+        # set numprec numprec_dislocated and  as integer
+        gdf["numprec"] = gdf["numprec"].fillna(0).astype(int)
+        gdf["numprec_dislocated"] = gdf["numprec_dislocated"].fillna(0).astype(int)
         gdf.to_file(filename)
 
         return filename

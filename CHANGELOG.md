@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [1.18.0] - 2024-04-03
+
+### Changed
+- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
+- Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+- Update the post-processing step for generating population dislocation map layer [#526](https://github.com/IN-CORE/pyincore/issues/526)
+
+
 ## [1.17.0] - 2024-02-22
 
 ### Added
@@ -16,6 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Retrofitted Building Damage [#469](https://github.com/IN-CORE/pyincore/issues/469) 
+- Optimize building damage performance [#513](https://github.com/IN-CORE/pyincore/issues/513)
 
 
 ## [1.16.0] - 2024-02-07
