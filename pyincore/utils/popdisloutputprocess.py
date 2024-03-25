@@ -94,8 +94,9 @@ class PopDislOutputProcess:
         # set numprec = 0 if dislocated is False
         gdf.loc[~gdf["dislocated"], "numprec"] = 0
 
-        # set numprec as integer
+        # set numprec numprec_dislocated and  as integer
         gdf["numprec"] = gdf["numprec"].fillna(0).astype(int)
+        gdf["numprec_dislocated"] = gdf["numprec_dislocated"].fillna(0).astype(int)
         gdf.to_file(filename)
 
         return filename
