@@ -1,5 +1,3 @@
-import os
-
 from pyincore import IncoreClient, globals as pyglobals
 from pyincore.analyses.mlenabledcgeslc import MlEnabledCgeSlc
 
