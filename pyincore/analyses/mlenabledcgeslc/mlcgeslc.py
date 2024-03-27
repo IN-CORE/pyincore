@@ -161,7 +161,7 @@ class MlEnabledCgeSlc(CoreCGEML):
             shocks.append(
                 sector_shocks.loc[sector_shocks["sector"] == sector.upper()]["shock"]
             )
-        capital_shocks = np.array(shocks, dtype=np.float32).reshape(1, -1)
+        capital_shocks = np.array(shocks, dtype=np.float64).reshape(1, -1)
         # logger.info(f"capital_shocks shape: {capital_shocks.shape}")
         
         super().run_core_cge_ml(

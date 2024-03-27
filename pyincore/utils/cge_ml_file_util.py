@@ -38,7 +38,7 @@ def parse_coeff(
         base_cap_sector_order[factor] = [
             s.split(" ")[-1].upper() for s in list(model_coeff_df["Model_Name"])[1:]
         ]
-        model_coeffs[factor] = np.float32(
+        model_coeffs[factor] = np.float64(
             model_coeff_df[model_coeff_df.columns[4:]].to_numpy()[1:, :]
         )  # skip the first row as it contains the total value model and its not needed in output
         # logger.info(f"factor: {factor} - model_coeff shape: {model_coeffs[factor].shape}")
@@ -72,7 +72,7 @@ def parse_csv(file_name: str, sectors: List[str]) -> np.ndarray:
     # Sort the DataFrame based on the 'names' column
     df = df.sort_values(by=col_name)
 
-    return np.array(df[val_col], dtype=np.float32)
+    return np.array(df[val_col], dtype=np.float64)
 
 
 def parse_base_vals(
