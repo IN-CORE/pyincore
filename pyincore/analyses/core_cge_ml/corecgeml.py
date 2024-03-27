@@ -118,12 +118,12 @@ class CoreCGEML(BaseAnalysis):
                 for grp in self.labor_groups:
                     
                     if temp_prefd[sector].get(grp, None) is None:
-                        prefd_l.append(0)
+                        prefd_l.append(-1)
                     else:
                         prefd_l.append(temp_prefd[sector][grp])
                     
                     if temp_postfd[sector].get(grp, None) is None:
-                        postfd_l.append(0)
+                        postfd_l.append(-1)
                     else:
                         postfd_l.append(temp_postfd[sector][grp])
 
