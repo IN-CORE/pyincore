@@ -145,7 +145,7 @@ class MlEnabledCgeSlc(CoreCGEML):
             ]
         }
 
-    def run_analysis(self) -> None:
+    def run(self) -> None:
         logger.info(f"Running {self.model} model...")
         sector_shocks = pd.read_csv(
             self.get_input_dataset("sector_shocks").get_file_path("csv")
