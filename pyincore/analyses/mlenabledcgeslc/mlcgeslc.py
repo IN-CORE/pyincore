@@ -83,67 +83,16 @@ class MlEnabledCgeSlc(CoreCGEML):
     ]
 
     def __init__(self, incore_client: IncoreClient):
-        sectors, base_cap_factors, base_cap, model_coeffs, cap_shock_sectors = parse_files(self.model_filenames, self.filenames)
+        sectors, base_cap_factors, base_cap, model_coeffs, cap_shock_sectors = (
+            parse_files(self.model_filenames, self.filenames)
+        )
         self.base_cap_factors = base_cap_factors
         self.base_cap = base_cap
         self.model_coeffs = model_coeffs
         self.cap_shock_sectors = cap_shock_sectors
-        super(MlEnabledCgeSlc, self).__init__(incore_client, sectors, labor_groups=[f"L{gp}" for gp in range(1, 5)]) # 4 labor groups
-
-    def get_spec(self):
-        return {
-            'name': 'Salt-Lake-cge',
-            'description': 'CGE model for Salt Lake City.',
-            'input_parameters': [
-                {
-                    'id': 'result_name',
-                    'required': False,
-                    'description': 'Result CSV dataset name prefix',
-                    'type': str
-                }
-
-            ],
-            'input_datasets': [
-                {
-                    'id': 'sector_shocks',
-                    'required': True,
-                    'description': 'Aggregation of building functionality states to capital shocks per sector',
-                    'type': ['incore:capitalShocks']
-                }
-            ],
-            'output_datasets': [
-                {
-                    'id': 'domestic-supply',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting domestic supply',
-                    'type': 'incore:Employment'
-                },
-                {
-                    'id': 'gross-income',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting gross income',
-                    'type': 'incore:Employment'
-                },
-                {
-                    'id': 'pre-disaster-factor-demand',
-                    'parent_type': '',
-                    'description': 'CSV file of factor demand before disaster',
-                    'type': 'incore:FactorDemand'
-                },
-                {
-                    'id': 'post-disaster-factor-demand',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting factor-demand',
-                    'type': 'incore:FactorDemand'
-                },
-                {
-                    'id': 'household-count',
-                    'parent_type': '',
-                    'description': 'CSV file of household count',
-                    'type': 'incore:HouseholdCount'
-                }
-            ]
-        }
+        super(MlEnabledCgeSlc, self).__init__(
+            incore_client, sectors, labor_groups=[f"L{gp}" for gp in range(1, 5)]
+        )  # 4 labor groups
 
     def run(self) -> bool:
         logger.info(f"Running {self.model} model...")
@@ -163,7 +112,7 @@ class MlEnabledCgeSlc(CoreCGEML):
             )
         capital_shocks = np.array(shocks, dtype=np.float64).reshape(1, -1)
         # logger.info(f"capital_shocks shape: {capital_shocks.shape}")
-        
+
         super().run_core_cge_ml(
             self.base_cap,
             capital_shocks,
@@ -173,3 +122,57 @@ class MlEnabledCgeSlc(CoreCGEML):
         logger.info(f"Running {self.model} model completed.")
 
         return True
+
+    def get_spec(self):
+        return {
+            "name": "Salt-Lake-cge",
+            "description": "CGE model for Salt Lake City.",
+            "input_parameters": [
+                {
+                    "id": "result_name",
+                    "required": False,
+                    "description": "Result CSV dataset name prefix",
+                    "type": str,
+                }
+            ],
+            "input_datasets": [
+                {
+                    "id": "sector_shocks",
+                    "required": True,
+                    "description": "Aggregation of building functionality states to capital shocks per sector",
+                    "type": ["incore:capitalShocks"],
+                }
+            ],
+            "output_datasets": [
+                {
+                    "id": "domestic-supply",
+                    "parent_type": "",
+                    "description": "CSV file of resulting domestic supply",
+                    "type": "incore:Employment",
+                },
+                {
+                    "id": "gross-income",
+                    "parent_type": "",
+                    "description": "CSV file of resulting gross income",
+                    "type": "incore:Employment",
+                },
+                {
+                    "id": "pre-disaster-factor-demand",
+                    "parent_type": "",
+                    "description": "CSV file of factor demand before disaster",
+                    "type": "incore:FactorDemand",
+                },
+                {
+                    "id": "post-disaster-factor-demand",
+                    "parent_type": "",
+                    "description": "CSV file of resulting factor-demand",
+                    "type": "incore:FactorDemand",
+                },
+                {
+                    "id": "household-count",
+                    "parent_type": "",
+                    "description": "CSV file of household count",
+                    "type": "incore:HouseholdCount",
+                },
+            ],
+        }
