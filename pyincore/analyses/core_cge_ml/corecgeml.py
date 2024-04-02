@@ -1,4 +1,5 @@
 """ Core CGE ML """
+
 from typing import List, Dict, Optional
 from collections import defaultdict
 import numpy as np
@@ -17,7 +18,7 @@ class CoreCGEML(BaseAnalysis):
         self,
         incore_client,
         sectors: Dict[str, List[str]],
-        labor_groups: Optional[List[str]] = None
+        labor_groups: Optional[List[str]] = None,
     ):
         super(CoreCGEML, self).__init__(incore_client)
 
@@ -91,9 +92,7 @@ class CoreCGEML(BaseAnalysis):
                 "HH0": predictions["migt"]["before"],
                 "HHL": predictions["migt"]["after"],
             }
-        if (
-            predictions.get("dffd", None) is not None
-        ):
+        if predictions.get("dffd", None) is not None:
             prefd = {
                 "Labor Group": self.labor_groups,
             }
@@ -116,14 +115,14 @@ class CoreCGEML(BaseAnalysis):
                 prefd_l = []
                 postfd_l = []
                 for grp in self.labor_groups:
-                    
+
                     if temp_prefd[sector].get(grp, None) is None:
-                        prefd_l.append(0)
+                        prefd_l.append(-1)
                     else:
                         prefd_l.append(temp_prefd[sector][grp])
-                    
+
                     if temp_postfd[sector].get(grp, None) is None:
-                        postfd_l.append(0)
+                        postfd_l.append(-1)
                     else:
                         postfd_l.append(temp_postfd[sector][grp])
 
@@ -143,9 +142,12 @@ class CoreCGEML(BaseAnalysis):
         base_cap_factors: List[np.ndarray],
     ) -> None:
         """run_core_cge_ml will use the model coefficients to predict the change in capital stock for each sector.
-        The predicted change will then be added to base_cap_factors to get the final capital stock for each sector after a disaster.
-        The model requires capital stock loss in dollar amount, hence the base_cap will be used to calculate the loss in dollar amount.
-        The capital_shocks is the percentage of capital stock that remains and hence to get the loss we use 1 - capital_shocks.
+        The predicted change will then be added to base_cap_factors to get the final capital stock for each sector 
+        after a disaster.
+        The model requires capital stock loss in dollar amount, hence the base_cap will be used to 
+        calculate the loss in dollar amount.
+        The capital_shocks is the percentage of capital stock that remains and hence to get the loss we 
+        use 1 - capital_shocks.
 
         Some variables for parameters:
         - n: number of factors
@@ -165,7 +167,8 @@ class CoreCGEML(BaseAnalysis):
         capital_shocks : (1 X K) np.ndarray
             This is the capital shock for each sector in percentage. This is a (1, K) array with K elements.
         model_coeffs : Dict[str, np.ndarray]
-            This is a dictionary of 2D arrays with shape [n, (k_i, l_i)]. Each entry in the dictionary corresponds to a factor and each factor has k_i number of models.
+            This is a dictionary of 2D arrays with shape [n, (k_i, l_i)]. 
+            Each entry in the dictionary corresponds to a factor and each factor has k_i number of models.
             It is assumed that the intercept term is included in the model coefficients and is at the 0th column.
         base_cap_factors : List[np.ndarray]
             This is a list of 1D array with each entry corresponding to a factor representing its base capital by sectors.
@@ -217,49 +220,46 @@ class CoreCGEML(BaseAnalysis):
 
         constructed_outputs = self.construct_output(predictions)
 
+        file_prefix = (
+            self.get_parameter("result_name")
+            if self.get_parameter("result_name") is not None
+            else ""
+        )
+        file_prefix += "_"
+
         if constructed_outputs.get("ds", None) is not None:
             self.set_result_csv_data(
                 "domestic-supply",
                 pd.DataFrame(constructed_outputs["ds"]),
-                name=self.get_parameter("domestic_supply_fname")
-                if self.get_parameter("domestic_supply_fname") is not None
-                else "domestic-supply",
+                name=f"{file_prefix}domestic-supply",
                 source="dataframe",
             )
         if constructed_outputs.get("dy", None) is not None:
             self.set_result_csv_data(
                 "gross-income",
                 pd.DataFrame(constructed_outputs["dy"]),
-                name=self.get_parameter("gross_income_fname")
-                if self.get_parameter("gross_income_fname") is not None
-                else "gross-income",
+                name=f"{file_prefix}gross-income",
                 source="dataframe",
             )
         if constructed_outputs.get("migt", None) is not None:
             self.set_result_csv_data(
                 "household-count",
                 pd.DataFrame(constructed_outputs["migt"]),
-                name=self.get_parameter("household_count_fname")
-                if self.get_parameter("household_count_fname") is not None
-                else "household-count",
+                name=f"{file_prefix}household-count",
                 source="dataframe",
             )
         if constructed_outputs.get("prefd", None) is not None:
             self.set_result_csv_data(
                 "pre-disaster-factor-demand",
                 pd.DataFrame(constructed_outputs["prefd"]),
-                name=self.get_parameter("pre_factor_demand_fname")
-                if self.get_parameter("pre_factor_demand_fname") is not None
-                else "pre-disaster-factor-demand",
+                name=f"{file_prefix}pre-disaster-factor-demand",
                 source="dataframe",
             )
         if constructed_outputs.get("postfd", None) is not None:
             self.set_result_csv_data(
                 "post-disaster-factor-demand",
                 pd.DataFrame(constructed_outputs["postfd"]),
-                name=self.get_parameter("post_factor_demand_fname")
-                if self.get_parameter("post_factor_demand_fname") is not None
-                else "post-disaster-factor-demand",
+                name=f"{file_prefix}post-disaster-factor-demand",
                 source="dataframe",
             )
 

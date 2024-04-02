@@ -38,9 +38,10 @@ def parse_coeff(
         base_cap_sector_order[factor] = [
             s.split(" ")[-1].upper() for s in list(model_coeff_df["Model_Name"])[1:]
         ]
-        model_coeffs[factor] = np.float32(
+        model_coeffs[factor] = np.float64(
             model_coeff_df[model_coeff_df.columns[4:]].to_numpy()[1:, :]
         )  # skip the first row as it contains the total value model and its not needed in output
+        # logger.info(f"factor: {factor} - model_coeff shape: {model_coeffs[factor].shape}")
 
     return model_coeffs, sectors, base_cap_sector_order
 
@@ -71,7 +72,7 @@ def parse_csv(file_name: str, sectors: List[str]) -> np.ndarray:
     # Sort the DataFrame based on the 'names' column
     df = df.sort_values(by=col_name)
 
-    return np.array(df[val_col], dtype=np.float32)
+    return np.array(df[val_col], dtype=np.float64)
 
 
 def parse_base_vals(
@@ -83,7 +84,7 @@ def parse_base_vals(
 
     Parameters
     ----------
-    file_name : str
+    filenames : List[str]
         Paths to the .csv files containing the base values. It has to be organized this order, starting from:
         1. Domestic Supply
         2. Gross Income
@@ -102,11 +103,13 @@ def parse_base_vals(
     base_cap: np.ndarray = parse_csv(filenames[-1], ds_sectors).reshape(
         1, -1
     )  # 1 x K array K = number of sectors in the model
+    # logger.info(f"base_cap shape: {base_cap.shape}")
 
     for filename, sector_order in zip(filenames[:-1], base_cap_sector_order.values()):
         base_cap_factors.append(
             parse_csv(filename, sector_order).reshape(-1, 1)
         )  # k_i x 1 array k_i = number of sectors k for a factor i
+        # logger.info(f"{os.path.basename(filename)} shape: {base_cap_factors[-1].shape}")
 
     return base_cap_factors, base_cap
 
@@ -130,7 +133,7 @@ def parse_files(
 
     Returns
     -------
-    Tuple[Dict[str, List[str]], np.ndarray, np.ndarray, Dict[str, np.ndarray], List[str]]
+    Tuple[Dict[str, List[str]], np.ndarray, np.ndarray, Dict[str, np.ndarray]]
         Returns a tuple containing the following:
         1. sectors: Dictionary containing the sectors for each factor
         2. base_cap_factors: List of numpy arrays containing the base capital for each factor
