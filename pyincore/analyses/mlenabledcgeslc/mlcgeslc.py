@@ -20,13 +20,13 @@ class MlEnabledCgeSlc(CoreCGEML):
 
     model = "Machine Learning Enabled Computable General Equilibrium - Salt Lake City "
 
-    #### Coefficients files
+    # Coefficients files
     DDS_coefficients_file = "DDS_coefficients.csv"
     DY_coefficients_file = "DY_coefficients.csv"
     MIGT_coefficients_file = "MIGT_coefficients.csv"
     DFFD_coefficients_file = "DFFD_coefficients.csv"
 
-    #### Base value files
+    # Base value files
     DS_base_val_file = "DS_base_val.csv"
     GI_base_val_file = "GI_base_val.csv"
     HH_base_val_file = "HH_base_val.csv"
@@ -105,7 +105,8 @@ class MlEnabledCgeSlc(CoreCGEML):
         for sector in self.cap_shock_sectors:
             if sector.upper() not in [v.upper() for v in sector_shocks["sector"]]:
                 raise ValueError(
-                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors. \nPlease make sure you have used the correct capital shocks"
+                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors. 
+                    \nPlease make sure you have used the correct capital shocks"
                 )
             shocks.append(
                 sector_shocks.loc[sector_shocks["sector"] == sector.upper()]["shock"]
