@@ -105,8 +105,8 @@ class MlEnabledCgeSlc(CoreCGEML):
         for sector in self.cap_shock_sectors:
             if sector.upper() not in [v.upper() for v in sector_shocks["sector"]]:
                 raise ValueError(
-                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors. 
-                    \nPlease make sure you have used the correct capital shocks"
+                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors.\n" + 
+                    "Please make sure you have used the correct capital shocks"
                 )
             shocks.append(
                 sector_shocks.loc[sector_shocks["sector"] == sector.upper()]["shock"]
