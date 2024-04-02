@@ -145,7 +145,7 @@ class MlEnabledCgeSlc(CoreCGEML):
             ]
         }
 
-    def run(self) -> None:
+    def run(self) -> bool:
         logger.info(f"Running {self.model} model...")
         sector_shocks = pd.read_csv(
             self.get_input_dataset("sector_shocks").get_file_path("csv")
@@ -171,3 +171,5 @@ class MlEnabledCgeSlc(CoreCGEML):
             self.base_cap_factors,
         )
         logger.info(f"Running {self.model} model completed.")
+
+        return True
