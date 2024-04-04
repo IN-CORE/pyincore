@@ -15,7 +15,7 @@ def client():
 def test_get_mapped_result(client):
     bldg_dataset_id = "5f9091df3e86721ed82f701d"
     bldg_dmg_dataset_id = "5f9868c00ace240b22a7f2a5"
-    bldg_func_state_dataset_id = "642f66e5f27db6680103c4ad"
+    bldg_func_state_dataset_id = "660d9435ce705a7e547a664e"
     archetype_id = "5fca915fb34b193f7a44059b"
 
     dmg_ret_json, func_ret_json, max_state_df = util.get_mapped_result_from_dataset_id(
@@ -35,7 +35,7 @@ def test_get_mapped_result_from_analysis(client):
 
     archetype_id = "5fca915fb34b193f7a44059b"
 
-    bldg_func_state_dataset_id = "642f66e5f27db6680103c4ad"
+    bldg_func_state_dataset_id = "660d9435ce705a7e547a664e"
     bldg_func_state_dataset = Dataset.from_data_service(bldg_func_state_dataset_id, DataService(client))
 
     dmg_ret_json, func_ret_json, max_state_df = util.get_mapped_result_from_analysis(
@@ -90,7 +90,7 @@ def test_joplin_mcs_cluster(client):
 def test_joplin_bldg_func_cluster(client):
     _functionality_cluster(client, archetype_mapping="5fca915fb34b193f7a44059b",
                            building_dataset_id="5fa0b132cc6848728b66948d",
-                           bldg_func_state_id="642f66e5f27db6680103c4ad",
+                           bldg_func_state_id="660d9435ce705a7e547a664e",
                            arch_column="archetype",
                            title="joplin_bldg_func")
 
@@ -98,7 +98,7 @@ def test_joplin_bldg_func_cluster(client):
 def test_galveston_mcs_cluster(client):
     _functionality_cluster(client, archetype_mapping="6420befbb18d026e7c7dbafc",
                            building_dataset_id="63ff69a96d3b2a308baaca12",
-                           bldg_func_state_id="642f6230f27db66801038964",
+                           bldg_func_state_id="660d95bece705a7e547a6654",
                            arch_column="arch_wind",
                            title="galveston_mcs")
 
@@ -106,6 +106,6 @@ def test_galveston_mcs_cluster(client):
 def test_galveston_bldg_func_cluster(client):
     _functionality_cluster(client, archetype_mapping="6420befbb18d026e7c7dbafc",
                            building_dataset_id="63ff69a96d3b2a308baaca12",
-                           bldg_func_state_id="642f6495f27db66801039434",
+                           bldg_func_state_id="660d97bfce705a7e547a6659",
                            arch_column="arch_wind",
                            title="galveston_bldg_func")
