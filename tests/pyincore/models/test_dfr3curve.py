@@ -1,9 +1,11 @@
 import json
+import math
 import os
 import collections
 
 import numpy
 import pytest
+from pyincore.utils import evaluateexpression
 
 from pyincore import globals as pyglobals, FragilityCurveSet, RepairCurveSet,  RestorationCurveSet, AnalysisUtil
 import numpy as np
@@ -149,3 +151,17 @@ def test_calculate_pipeline_restoration_rates(restoration_set, args, expected):
     else:
         assert result["RT"] == expected
 
+
+def test_fragility_eval():
+    expression = "round(ffe_elev) == 0"
+    parameters = {"ffe_elev": 0.1}
+    assert evaluateexpression.evaluate(expression, parameters) is True
+    expression = "sum((ffe_elev, g_elev)) == 3"
+
+    parameters = {"ffe_elev": 1, "g_elev": 2}
+    assert evaluateexpression.evaluate(expression, parameters) is True
+
+    # test unsupported built-in functions
+    expression = "bytes(1)"
+    parameters = {}
+    assert math.isnan(evaluateexpression.evaluate(expression, parameters)) is True
