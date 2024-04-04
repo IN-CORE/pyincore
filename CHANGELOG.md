@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.18.0] - 2024-04-03
 
+### Added
+- Add CoreCGEML module [#468](https://github.com/IN-CORE/pyincore/issues/468)
+- Add ML enabled SLC CGE [#508](https://github.com/IN-CORE/pyincore/issues/508)
+
 ### Changed
-- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
 - Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
 - Update the post-processing step for generating population dislocation map layer [#526](https://github.com/IN-CORE/pyincore/issues/526)
 
 
