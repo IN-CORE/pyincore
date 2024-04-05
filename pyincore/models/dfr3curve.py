@@ -82,8 +82,9 @@ class DFR3Curve:
             else:
                 conditions_met = []
                 for condition in rule["condition"]:
-                    if not math.isnan(evaluateexpression.evaluate(condition, parameters)):
-                        conditions_met.append(True)
+                    eval_result = evaluateexpression.evaluate(condition, parameters)
+                    if not math.isnan(eval_result) and eval_result:
+                        conditions_met.append(eval_result)
                     else:
                         conditions_met.append(False)
                         break

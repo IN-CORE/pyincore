@@ -79,12 +79,12 @@ def get_restoration_set(restoration_dir: str):
     (get_remote_fragility_set("606221fe618178207f6608a1"),
      {"waveHeight": 1.1111, "surgeLevel": 3},
      {"clearance": 4, "span_mass": 12, "g_elev": 0.2},
-     0.562879188),
+     0.142618908),
     # test case sensitivity
     (get_remote_fragility_set("606221fe618178207f6608a1"),
      {"WAVEheight": 1.1111, "sURgeLEVEL": 3},
      {"CLEARANCE": 4, "span_maSS": 12, "g_ELEV": 0.2},
-     0.562879188),
+     0.142618908),
     (get_fragility_set("fragility_curves/PeriodStandardFragilityCurve_refactored.json"), {"0.2 sec Sa": 4}, {},
      0.9905435183),
     # test liquefaction
