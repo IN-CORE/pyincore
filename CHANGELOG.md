@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Add CoreCGEML module [#468](https://github.com/IN-CORE/pyincore/issues/468)
 - Add ML enabled SLC CGE [#508](https://github.com/IN-CORE/pyincore/issues/508)
+- More mathematical functions for the DFR3 expression evaluation [#531](https://github.com/IN-CORE/pyincore/issues/531)
 
 ### Changed
 - Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)

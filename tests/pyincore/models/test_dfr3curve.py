@@ -1,9 +1,11 @@
 import json
+import math
 import os
 import collections
 
 import numpy
 import pytest
+from pyincore.utils import evaluateexpression
 
 from pyincore import globals as pyglobals, FragilityCurveSet, RepairCurveSet,  RestorationCurveSet, AnalysisUtil
 import numpy as np
@@ -55,16 +57,19 @@ def get_repair_set(repair_dir: str):
     repair_set = RepairCurveSet(repair_curveset)
     return repair_set
 
+
 def get_remote_repair_set(repair_id: str):
     dfr3svc = pytest.repairsvc
     repair_set = RepairCurveSet(dfr3svc.get_dfr3_set(repair_id))
     return repair_set
+
 
 def get_restoration_set(restoration_dir: str):
     with open(os.path.join(pyglobals.TEST_DATA_DIR, restoration_dir), 'r', encoding='utf-8') as f:
         restoration_curveset = json.load(f)
     restoration_set = RestorationCurveSet(restoration_curveset)
     return restoration_set
+
 
 @pytest.mark.parametrize("fragility_set,hazard_values,args,expected", [
     (get_fragility_set("fragility_curve.json"), {}, {}, 0.2619967240482869),
@@ -74,12 +79,12 @@ def get_restoration_set(restoration_dir: str):
     (get_remote_fragility_set("606221fe618178207f6608a1"),
      {"waveHeight": 1.1111, "surgeLevel": 3},
      {"clearance": 4, "span_mass": 12, "g_elev": 0.2},
-     0.142618908),
+     0.562879188),
     # test case sensitivity
     (get_remote_fragility_set("606221fe618178207f6608a1"),
      {"WAVEheight": 1.1111, "sURgeLEVEL": 3},
      {"CLEARANCE": 4, "span_maSS": 12, "g_ELEV": 0.2},
-     0.142618908),
+     0.562879188),
     (get_fragility_set("fragility_curves/PeriodStandardFragilityCurve_refactored.json"), {"0.2 sec Sa": 4}, {},
      0.9905435183),
     # test liquefaction
@@ -137,6 +142,7 @@ def test_calculate_restoration_rates(restoration_set, args, expected):
     else:
         assert False
 
+
 @pytest.mark.parametrize("restoration_set,args,expected", [
     (get_restoration_set("pipe_restorationset.json"), {"break_rate": 0.2, "leak_rate": 0.4,
                                                        "pipe_length": 80, "num_workers": 8}, 3.3000000000000003)
@@ -149,3 +155,17 @@ def test_calculate_pipeline_restoration_rates(restoration_set, args, expected):
     else:
         assert result["RT"] == expected
 
+
+def test_fragility_eval():
+    expression = "round(ffe_elev) == 0"
+    parameters = {"ffe_elev": 0.1}
+    assert evaluateexpression.evaluate(expression, parameters) is True
+    expression = "sum((ffe_elev, g_elev)) == 3"
+
+    parameters = {"ffe_elev": 1, "g_elev": 2}
+    assert evaluateexpression.evaluate(expression, parameters) is True
+
+    # test unsupported built-in functions
+    expression = "bytes(1)"
+    parameters = {}
+    assert math.isnan(evaluateexpression.evaluate(expression, parameters)) is True
