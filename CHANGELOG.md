@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
 - Update the post-processing step for generating population dislocation map layer [#526](https://github.com/IN-CORE/pyincore/issues/526)
 
+### Fixed
+- Fixed JWT token validation [#529](https://github.com/IN-CORE/pyincore/issues/529)
 
 ## [1.17.0] - 2024-02-22
 
