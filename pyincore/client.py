@@ -3,16 +3,15 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
+import base64
 import getpass
 import hashlib
 import json
 import os
 import shutil
 import urllib.parse
-
+from datetime import datetime, timezone
 import requests
-
 from pyincore import globals as pyglobals
 from pyincore.utils import return_http_response
 
@@ -261,6 +260,22 @@ class IncoreClient(Client):
         except IOError as e:
             logger.warning(e)
 
+    def is_token_expired(self, token):
+        """Check if the token has expired
+
+        Returns:
+             True if the token has expired, False otherwise
+        """
+        # Split the token to get payload
+        _, payload_encoded, _ = token.split('.')
+        # Decode the payload
+        payload = base64.urlsafe_b64decode(payload_encoded + '==')  # Padding just in case
+        payload_json = json.loads(payload)
+        now = datetime.now(timezone.utc)
+        current_time = now.timestamp()
+        # Compare current time with exp claim
+        return current_time > payload_json['exp']
+
     def retrieve_token_from_file(self):
         """Attempts to retrieve authorization from a local file, if it exists.
 
@@ -276,9 +291,7 @@ class IncoreClient(Client):
                 with open(self.token_file, 'r') as f:
                     auth = f.read().splitlines()
                     # check if token is valid
-                    userinfo_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_USERINFO_PATH)
-                    r = requests.get(userinfo_url, headers={'Authorization': auth[0]})
-                    if r.status_code != 200:
+                    if self.is_token_expired(auth[0]):
                         return None
                 return auth[0]
             except IndexError:

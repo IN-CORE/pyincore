@@ -165,36 +165,35 @@ class BuildingDamage(BaseAnalysis):
 
             values_payload = []
             values_payload_liq = []  # for liquefaction, if used
-            unmapped_buildings = []
-            mapped_buildings = []
-            for b in buildings:
+
+            # Pre-filter buildings that are in fragility_sets to reduce the number of iterations
+            mapped_buildings = [b for b in buildings if b["id"] in fragility_sets]
+            unmapped_buildings = [b for b in buildings if b["id"] not in fragility_sets]
+
+            for b in mapped_buildings:
                 bldg_id = b["id"]
-                if bldg_id in fragility_sets:
-                    location = GeoUtil.get_location(b)
-                    loc = str(location.y) + "," + str(location.x)
-                    demands, units, adjusted_to_original = \
-                        AnalysisUtil.get_hazard_demand_types_units(b,
-                                                                   fragility_sets[bldg_id],
-                                                                   hazard_type,
-                                                                   allowed_demand_types)
-                    adjust_demand_types_mapping.update(adjusted_to_original)
-                    value = {
-                        "demands": demands,
-                        "units": units,
+                location = GeoUtil.get_location(b)
+                loc = str(location.y) + "," + str(location.x)
+                demands, units, adjusted_to_original = \
+                    AnalysisUtil.get_hazard_demand_types_units(b,
+                                                               fragility_sets[bldg_id],
+                                                               hazard_type,
+                                                               allowed_demand_types)
+                adjust_demand_types_mapping.update(adjusted_to_original)
+                value = {
+                    "demands": demands,
+                    "units": units,
+                    "loc": loc
+                }
+                values_payload.append(value)
+
+                if use_liquefaction and geology_dataset_id is not None:
+                    value_liq = {
+                        "demands": [""],
+                        "units": [""],
                         "loc": loc
                     }
-                    values_payload.append(value)
-                    mapped_buildings.append(b)
-
-                    if use_liquefaction and geology_dataset_id is not None:
-                        value_liq = {
-                            "demands": [""],
-                            "units": [""],
-                            "loc": loc
-                        }
-                        values_payload_liq.append(value_liq)
-                else:
-                    unmapped_buildings.append(b)
+                    values_payload_liq.append(value_liq)
 
             hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
 
@@ -202,9 +201,10 @@ class BuildingDamage(BaseAnalysis):
             # worst code I have ever written
             # e.g. 1.04 Sec Sa --> 1.04 SA --> 1.0 SA
             for payload, response in zip(values_payload, hazard_vals):
-                for i in range(len(payload["demands"])):
-                    adjust_demand_types_mapping[response["demands"][i]] = adjust_demand_types_mapping[payload[
-                        "demands"][i]]
+                adjust_demand_types_mapping.update({
+                    response_demand: adjust_demand_types_mapping[payload_demand]
+                    for payload_demand, response_demand in zip(payload["demands"], response["demands"])
+                })
 
             # record hazard value for each hazard type for later calcu
             multihazard_vals[hazard_type] = hazard_vals

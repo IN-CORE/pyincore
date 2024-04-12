@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [1.18.0] - 2024-04-03
+
+### Added
+- Add CoreCGEML module [#468](https://github.com/IN-CORE/pyincore/issues/468)
+- Add ML enabled SLC CGE [#508](https://github.com/IN-CORE/pyincore/issues/508)
+- More mathematical functions for the DFR3 expression evaluation [#531](https://github.com/IN-CORE/pyincore/issues/531)
+
+### Changed
+- Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
+- Update the post-processing step for generating population dislocation map layer [#526](https://github.com/IN-CORE/pyincore/issues/526)
+
+### Fixed
+- Fixed JWT token validation [#529](https://github.com/IN-CORE/pyincore/issues/529)
+
 ## [1.17.0] - 2024-02-22
 
 ### Added
@@ -16,6 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Retrofitted Building Damage [#469](https://github.com/IN-CORE/pyincore/issues/469) 
+- Optimize building damage performance [#513](https://github.com/IN-CORE/pyincore/issues/513)
 
 
 ## [1.16.0] - 2024-02-07
