@@ -7,7 +7,7 @@
 from setuptools import setup, find_packages
 
 # version number of pyincore
-version = '1.17.0'
+version = '1.18.0'
 
 with open("README.rst", encoding="utf-8") as f:
     readme = f.read()
@@ -49,7 +49,7 @@ setup(
     packages=find_packages(where=".", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     package_data={
-        '': ['*.ini']
+        '': ['*.ini', "*.csv"]
     },
 
     python_requires=">=3.9",

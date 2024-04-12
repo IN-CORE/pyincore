@@ -5,17 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
 
-### Changed
-- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
+## [1.18.0] - 2024-04-03
 
-
-## [Unreleased] 
+### Added
+- Add CoreCGEML module [#468](https://github.com/IN-CORE/pyincore/issues/468)
+- Add ML enabled SLC CGE [#508](https://github.com/IN-CORE/pyincore/issues/508)
+- More mathematical functions for the DFR3 expression evaluation [#531](https://github.com/IN-CORE/pyincore/issues/531)
 
 ### Changed
 - Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
+- Update the post-processing step for generating population dislocation map layer [#526](https://github.com/IN-CORE/pyincore/issues/526)
 
+### Fixed
+- Fixed JWT token validation [#529](https://github.com/IN-CORE/pyincore/issues/529)
 
 ## [1.17.0] - 2024-02-22
 
