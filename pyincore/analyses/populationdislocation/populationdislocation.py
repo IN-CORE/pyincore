@@ -116,12 +116,32 @@ class PopulationDislocation(BaseAnalysis):
         value_loss = self.get_input_dataset("value_loss_param").get_dataframe_from_csv(low_memory=False)
         value_loss.set_index('damagestate', inplace=True)
 
+        # Get choice_dislocation and unsafe_occupancy variables
+        choice_dislocation = self.get_parameter("choice_dislocation")
+        unsafe_occupancy = self.get_parameter("unsafe_occupancy")
+
         merged_block_inv = PopulationDislocationUtil.merge_damage_housing_block(
             building_dmg, housing_unit_alloc, bg_data
         )
 
         # Returns dataframe
         merged_final_inv = self.get_dislocation(seed_i, merged_block_inv, value_loss)
+
+        # Choice dislocation and unsafe occupancy calculations
+        if choice_dislocation:
+            choice_dislocation_cutoff = self.get_parameter("choice_dislocation_cutoff") or 0.5
+            choice_dislocation_ds = self.get_parameter("choice_dislocation_ds") or "DS_0"
+            merged_final_inv = PopulationDislocationUtil.get_choice_dislocation(
+                merged_final_inv, choice_dislocation_cutoff, choice_dislocation_ds
+            )
+
+        if unsafe_occupancy:
+            unsafe_occupancy_cutoff = self.get_parameter("unsafe_occupancy_cutoff") or 0.5
+            unsafe_occupancy_ds = self.get_parameter("unsafe_occupancy_ds") or "DS_3"
+            merged_final_inv = PopulationDislocationUtil.get_unsafe_occupancy(
+                merged_final_inv, unsafe_occupancy_cutoff, unsafe_occupancy_ds
+            )
+
         csv_source = "dataframe"
         self.set_result_csv_data("result", merged_final_inv, result_name, "dataframe")
 
