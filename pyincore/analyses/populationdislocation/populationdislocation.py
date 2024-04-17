@@ -47,6 +47,42 @@ class PopulationDislocation(BaseAnalysis):
                     'description': 'Seed to ensure replication if run as part of a probabilistic analysis, '
                                    'for example in connection with Housing Unit Allocation analysis.',
                     'type': int
+                },
+                {
+                    'id': 'choice_dislocation',
+                    'required': False,
+                    'description': 'Flag to calculate choice dislocation',
+                    'type': bool
+                },
+                {
+                    'id': 'choice_dislocation_cutoff',
+                    'required': False,
+                    'description': 'Choice dislocation cutoff',
+                    'type': float
+                },
+                {
+                    'id': 'choice_dislocation_ds',
+                    'required': False,
+                    'description': 'Damage state to use for choice dislocation ',
+                    'type': str
+                },
+                {
+                    'id': 'unsafe_occupancy',
+                    'required': False,
+                    'description': 'Flag to calculate unsafe occupancy',
+                    'type': bool
+                },
+                {
+                    'id': 'unsafe_occupancy_cutoff',
+                    'required': False,
+                    'description': 'Unsafe occupancy cutoff',
+                    'type': float
+                },
+                {
+                    'id': 'unsafe_occupancy_ds',
+                    'required': False,
+                    'description': 'Damage state to use for unsafe occupancy ',
+                    'type': str
                 }
             ],
             'input_datasets': [
@@ -131,16 +167,12 @@ class PopulationDislocation(BaseAnalysis):
         if choice_dislocation:
             choice_dislocation_cutoff = self.get_parameter("choice_dislocation_cutoff") or 0.5
             choice_dislocation_ds = self.get_parameter("choice_dislocation_ds") or "DS_0"
-            merged_final_inv = PopulationDislocationUtil.get_choice_dislocation(
-                merged_final_inv, choice_dislocation_cutoff, choice_dislocation_ds
-            )
+            PopulationDislocationUtil.get_choice_dislocation(merged_final_inv, choice_dislocation_cutoff, choice_dislocation_ds)
 
         if unsafe_occupancy:
             unsafe_occupancy_cutoff = self.get_parameter("unsafe_occupancy_cutoff") or 0.5
             unsafe_occupancy_ds = self.get_parameter("unsafe_occupancy_ds") or "DS_3"
-            merged_final_inv = PopulationDislocationUtil.get_unsafe_occupancy(
-                merged_final_inv, unsafe_occupancy_cutoff, unsafe_occupancy_ds
-            )
+            PopulationDislocationUtil.get_unsafe_occupancy(merged_final_inv, unsafe_occupancy_cutoff, unsafe_occupancy_ds)
 
         csv_source = "dataframe"
         self.set_result_csv_data("result", merged_final_inv, result_name, "dataframe")
