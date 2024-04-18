@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Permission error when deleting dataset related files [#544](https://github.com/IN-CORE/pyincore/issues/544)
 
 ## [1.18.0] - 2024-04-03
 
