@@ -18,7 +18,7 @@ import warnings
 from pyincore import DataService
 from pathlib import Path
 import shutil
-import psutil
+
 
 warnings.filterwarnings("ignore", "", UserWarning)
 
@@ -346,44 +346,10 @@ class Dataset:
         absolute_path = path.parent.absolute()
 
         if os.path.isdir(absolute_path):
-            # Close the dataset if it's open
-            self.close()
-
-            # Try to delete the folder
             try:
                 shutil.rmtree(absolute_path)
             except PermissionError as e:
-                print(f"Error deleting temporary folder: {e}")
-
-                # If deletion fails due to permission error, check if any process is using the files
-                for proc in psutil.process_iter():
-                    try:
-                        for file in proc.open_files():
-                            if absolute_path in file.path:
-                                print(f"Process {proc.pid} is using {file.path}")
-                                # Terminate the process
-                                proc.terminate()
-                    except Exception as e:
-                        print(f"Error while checking process: {e}")
-
-                # Attempt deletion again
-                try:
-                    shutil.rmtree(absolute_path)
-                except Exception as e:
-                    print(f"Error deleting temporary folder after terminating processes: {e}")
-
-    def delete_directory_contents(self, directory):
-        """
-        Delete all files and subdirectories within the specified directory.
-        """
-        for item in directory.iterdir():
-            try:
-                if item.is_file():
-                    item.unlink()  # Delete the file
-                elif item.is_dir():
-                    shutil.rmtree(item)  # Recursively delete subdirectory
-            except PermissionError as e:
-                print(f"Error deleting {item}: {e}")
+                print(f"Error deleting : {e}")
 
     def close(self):
         for key in self.readers:
