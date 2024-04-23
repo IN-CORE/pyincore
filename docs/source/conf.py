@@ -152,7 +152,6 @@ html_static_path = []
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pyincoredoc'
 
-
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
@@ -180,7 +179,6 @@ latex_documents = [
     (master_doc, 'pyincore.tex', 'pyincore Documentation',
      'ISDA NCSA', 'manual'),
 ]
-
 
 # -- Options for manual page output ------------------------------------------
 
@@ -234,7 +232,12 @@ napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
 
+
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for inter sphinx: refer to the Python standard library.
 # intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+
+# -- Add Google Analytics tracking code -------------------------------------
+def setup(app):
+    app.add_js_file('https://www.googletagmanager.com/gtag/js?id=G-VT38KCDFTM')
