@@ -19,7 +19,7 @@ COPY . ./
 RUN sphinx-build -v -b html docs/source docs/build
 
 # Copy analytics.js into the build directory
-COPY docs/sourc/_static/analytics.js docs/_static/
+COPY docs/source/_static/analytics.js docs/_static/
 
 # ----------------------------------------------------------------------
 # Building actual container
