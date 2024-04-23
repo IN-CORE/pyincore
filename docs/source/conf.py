@@ -152,6 +152,7 @@ html_static_path = []
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pyincoredoc'
 
+
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
@@ -179,6 +180,7 @@ latex_documents = [
     (master_doc, 'pyincore.tex', 'pyincore Documentation',
      'ISDA NCSA', 'manual'),
 ]
+
 
 # -- Options for manual page output ------------------------------------------
 
@@ -231,7 +233,6 @@ napoleon_use_admonition_for_references = False
 napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
-
 
 # -- Options for intersphinx extension ---------------------------------------
 
