@@ -91,6 +91,7 @@ jobs:
       - name: Copy Documentation to Docker Build Directory
         run: |
           echo "Copying documentation files from docs/build to /src/docs/html"
+          mkdir -p /src/docs/html
           cp -r docs/build /src/docs/html
           echo "Documentation files copied successfully"
 
