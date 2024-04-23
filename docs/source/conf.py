@@ -237,9 +237,3 @@ napoleon_use_rtype = True
 
 # Example configuration for inter sphinx: refer to the Python standard library.
 # intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
-
-# -- Add Google Analytics tracking code -------------------------------------
-def setup(app):
-    app.add_js_file('https://www.googletagmanager.com/gtag/js?id=G-VT38KCDFTM', position='head')
-    app.add_js_file('analytics.js', position='head')
-

@@ -61,6 +61,20 @@ jobs:
             echo "TAGS=${BRANCH}" >> $GITHUB_ENV
           fi
 
+      # build documentation
+      - name: Build Sphinx Documentation
+        run: |
+          pip install -r docs/requirements.txt
+          sphinx-build -b html docs/source docs/build
+
+      # Insert Google Analytics code into HTML files
+      - name: Insert Google Analytics Code
+        run: python insert_ga_to_header.py
+
+      # copy built documentation to Docker build directory
+      - name: Copy Documentation to Docker Build Directory
+        run: cp -r docs/build $GITHUB_WORKSPACE/html
+
       # build image
       - name: Build image
         uses: elgohr/Publish-Docker-Github-Action@3.04
