@@ -23,6 +23,7 @@ ga_code = f"""
 for filename in os.listdir(build_dir):
     if filename.endswith(".html"):
         filepath = os.path.join(build_dir, filename)
+        print(f"Processing file: {filepath}")
 
         # Read the content of the HTML file
         with open(filepath, "r", encoding="utf-8") as file:
@@ -34,8 +35,11 @@ for filename in os.listdir(build_dir):
         # Find the <head> tag and insert the Google Analytics code before it
         head_tag = soup.find("head")
         if head_tag:
+            print("Inserting Google Analytics code...")
             head_tag.insert(0, BeautifulSoup(ga_code, "html.parser"))
 
         # Write the modified HTML content back to the file
         with open(filepath, "w", encoding="utf-8") as file:
             file.write(str(soup))
+
+print("Google Analytics code insertion completed.")
