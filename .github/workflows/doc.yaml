@@ -31,7 +31,7 @@ jobs:
       # checkout source code
       - uses: actions/checkout@v2
 
-      # Install Python and pip
+      # install Python and pip
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -67,19 +67,23 @@ jobs:
             echo "TAGS=${BRANCH}" >> $GITHUB_ENV
           fi
 
-      # Install Sphinx and other dependencies
+      # install Sphinx and other dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt --user
           pip install sphinx sphinx_rtd_theme --user
 
-      # Build Sphinx documentation
+      # build Sphinx documentation
       - name: Build documentation
         run: |
           sphinx-build -b html docs/source docs/build
 
-      # Insert Google Analytics code into HTML files
+      # install BeautifulSoup4 for inserting Google Analytics code
+      - name: Install dependencies
+        run: pip install beautifulsoup4
+
+      # insert Google Analytics code into HTML files
       - name: Insert Google Analytics Code
         run: python docs/source/insert_ga_to_header.py
 
