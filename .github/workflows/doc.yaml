@@ -87,13 +87,13 @@ jobs:
       - name: Insert Google Analytics Code
         run: python docs/source/insert_ga_to_header.py
 
-      # copy built documentation to Docker build directory
-      - name: Copy Documentation to Docker Build Directory
-        run: |
-          echo "Copying documentation files from docs/build to /src/docs/html"
-          mkdir -p /src/docs/html
-          cp -r docs/build /src/docs/html
-          echo "Documentation files copied successfully"
+#      # copy built documentation to Docker build directory
+#      - name: Copy Documentation to Docker Build Directory
+#        run: |
+#          echo "Copying documentation files from docs/build to /src/docs/html"
+#          mkdir -p /src/docs/html
+#          cp -r docs/build /src/docs/html
+#          echo "Documentation files copied successfully"
 
       # build image
       - name: Build image
