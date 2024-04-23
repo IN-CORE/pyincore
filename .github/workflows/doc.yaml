@@ -31,6 +31,12 @@ jobs:
       # checkout source code
       - uses: actions/checkout@v2
 
+      # Install Python and pip
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
       # calculate some variables that are used later
       - name: version information
         run: |
@@ -61,10 +67,16 @@ jobs:
             echo "TAGS=${BRANCH}" >> $GITHUB_ENV
           fi
 
-      # build documentation
-      - name: Build Sphinx Documentation
+      # Install Sphinx and other dependencies
+      - name: Install dependencies
         run: |
-          pip install -r requirements.txt --user
+          python -m pip install --upgrade pip
+          pip install -r docs/requirements.txt --user
+          pip install sphinx --user
+
+      # Build Sphinx documentation
+      - name: Build documentation
+        run: |
           sphinx-build -b html docs/source docs/build
 
       # Insert Google Analytics code into HTML files
