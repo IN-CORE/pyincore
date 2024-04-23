@@ -64,7 +64,7 @@ jobs:
       # build documentation
       - name: Build Sphinx Documentation
         run: |
-          pip install -r docs/requirements.txt --user
+          pip install -r requirements.txt --user
           sphinx-build -b html docs/source docs/build
 
       # Insert Google Analytics code into HTML files
