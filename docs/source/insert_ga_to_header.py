@@ -5,7 +5,11 @@ from bs4 import BeautifulSoup
 build_dir = "docs/build"
 
 # Google Analytics tracking ID
-ga_key = "G-VT38KCDFTM"
+ga_key = os.environ.get("GA_KEY")
+
+# Ensure GA_KEY is provided
+if not ga_key:
+    raise ValueError("Google Analytics tracking ID (GA_KEY) not provided.")
 
 # Google Analytics code snippet to insert into the HTML files
 ga_code = f"""
@@ -38,7 +42,6 @@ for filename in os.listdir(build_dir):
             print(f"Found <head> tag in {filename}:")
             print("Inserting Google Analytics code...")
             head_tag.insert(0, BeautifulSoup(ga_code, "html.parser"))
-            print(head_tag.prettify())
 
         # Write the modified HTML content back to the file
         with open(filepath, "w", encoding="utf-8") as file:
