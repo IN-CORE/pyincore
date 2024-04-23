@@ -241,4 +241,3 @@ napoleon_use_rtype = True
 # -- Add Google Analytics tracking code -------------------------------------
 def setup(app):
     app.add_js_file('https://www.googletagmanager.com/gtag/js?id=G-VT38KCDFTM')
-    app.add_js_file('_static/analytics.js')
