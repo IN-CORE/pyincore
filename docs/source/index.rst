@@ -19,3 +19,7 @@ To **update** pyIncore run the following command:
 
    mod_top
    refs
+
+.. raw:: html
+
+   <script src="_static/analytics.js"></script>
