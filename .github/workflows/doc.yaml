@@ -87,6 +87,10 @@ jobs:
       - name: Insert Google Analytics Code
         run: python docs/source/insert_ga_to_header.py
 
+      # print out the content of one of the modified HTML files
+      - name: Print Modified HTML File
+        run: cat docs/build/index.html
+
 #      # copy built documentation to Docker build directory
 #      - name: Copy Documentation to Docker Build Directory
 #        run: |
