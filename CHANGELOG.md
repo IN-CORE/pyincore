@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Added
+- Google Analytics to the documentation site [#547](https://github.com/IN-CORE/pyincore/issues/547)
+
 ## [1.18.0] - 2024-04-03
 
 ### Added
