@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Unnecessary dependency in setup.py [#519](https://github.com/IN-CORE/pyincore/issues/519)
 
 
+## [Unreleased]
+
+### Changed
+
+- Name of Joplin Empirical Restoration Analysis to Joplin Empirical Building Restoration Analysis [#538](https://github.com/IN-CORE/pyincore/issues/538)
+
+
 ## [1.18.0] - 2024-04-03
 
 ### Added

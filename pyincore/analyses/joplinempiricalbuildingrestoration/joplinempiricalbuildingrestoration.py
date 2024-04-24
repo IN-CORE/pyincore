@@ -8,11 +8,11 @@ import numpy as np
 import pandas as pd
 
 from pyincore import BaseAnalysis
-from pyincore.analyses.joplinempiricalrestoration.joplinempirrestor_util import JoplinEmpirRestorUtil
+from pyincore.analyses.joplinempiricalbuildingrestoration.joplinempirrestor_util import JoplinEmpirRestorUtil
 
 
-class JoplinEmpiricalRestoration(BaseAnalysis):
-    """ Joplin Empirical Restoration Model generates a random realization for the restoration time of
+class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
+    """ Joplin Empirical Building Restoration Model generates a random realization for the restoration time of
     a building damaged in a tornado event to be restored to a certain functionality level. Functionality
     levels in this model are defined according to Koliou and van de Lindt (2020) and range from Functionality
     Level 4 (FL4, the lowest functionality) to Functionality Level 0 (FL0, full functionality).
@@ -23,10 +23,10 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
     """
 
     def __init__(self, incore_client):
-        super(JoplinEmpiricalRestoration, self).__init__(incore_client)
+        super(JoplinEmpiricalBuildingRestoration, self).__init__(incore_client)
 
     def run(self):
-        """ Executes Joplin empirical restoration model analysis.
+        """ Executes Joplin empirical building restoration model analysis.
 
         Returns:
             bool: True if successful, False otherwise.
@@ -124,14 +124,14 @@ class JoplinEmpiricalRestoration(BaseAnalysis):
         return initial_func_level, restoration_days
 
     def get_spec(self):
-        """Get specifications of the Joplin empirical restoration analysis.
+        """Get specifications of the Joplin empirical building restoration analysis.
 
         Returns:
-            obj: A JSON object of specifications of the Joplin empirical restoration analysis.
+            obj: A JSON object of specifications of the Joplin empirical building restoration analysis.
 
         """
         return {
-            "name": "joplin-empirical-restoration",
+            "name": "joplin-empirical-building-restoration",
             "description": "Values (in days) for the predicted restoration time of the building.",
             "input_parameters": [
                 {
