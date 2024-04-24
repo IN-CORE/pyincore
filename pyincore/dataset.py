@@ -19,6 +19,7 @@ from pyincore import DataService
 from pathlib import Path
 import shutil
 
+
 warnings.filterwarnings("ignore", "", UserWarning)
 
 
@@ -343,8 +344,12 @@ class Dataset:
         """
         path = Path(self.local_file_path)
         absolute_path = path.parent.absolute()
+
         if os.path.isdir(absolute_path):
-            shutil.rmtree(absolute_path)
+            try:
+                shutil.rmtree(absolute_path)
+            except PermissionError as e:
+                print(f"Error deleting : {e}")
 
     def close(self):
         for key in self.readers:
