@@ -11,6 +11,7 @@ from pyincore.client import IncoreClient
 from pyincore.client import InsecureIncoreClient
 from pyincore.hazardservice import HazardService
 from pyincore.utils.expressioneval import Parser
+from pyincore.utils.cge_ml_file_util import CGEMLFileUtil
 from pyincore.dataservice import DataService
 from pyincore.utils.geoutil import GeoUtil
 from pyincore.utils.networkutil import NetworkUtil
