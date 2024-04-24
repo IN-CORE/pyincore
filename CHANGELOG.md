@@ -8,10 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-### Added
-
-- MlEnabledCgeSlc, CoreCGEML, and CGEMLFileUtil Documentation for sphinx [#542](https://github.com/IN-CORE/pyincore/issues/542)
-
 ### Changed
 
 - Name of Joplin Empirical Restoration Analysis to Joplin Empirical Building Restoration Analysis [#538](https://github.com/IN-CORE/pyincore/issues/538)
