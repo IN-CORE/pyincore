@@ -41,7 +41,7 @@ def run_with_base_class():
 
     restoration = JoplinEmpiricalBuildingRestoration(client)
     # Building final target level dataset defining custom final restoration values
-    building_fl_id = "61a68979d5b02930aa43ae39"
+    building_fl_id = "6629304a5da5fd22b250a66b"
 
     restoration.load_remote_input_dataset("buildings", bldg_dataset_id)
     # restoration.load_remote_input_dataset("building_dmg", building_dmg_result)
