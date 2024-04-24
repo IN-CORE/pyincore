@@ -176,11 +176,11 @@ analyses/joplincge
 ..  autofunction:: joplincge.outputfunctions.get_diff
     :members:
 
-analyses/joplinempiricalrestoration
+analyses/joplinempiricalbuildingrestoration
 ===================================
-..  autoclass:: joplinempiricalrestoration.joplinempiricalrestoration.JoplinEmpiricalRestoration
+..  autoclass:: joplinempiricalbuildingrestoration.joplinempiricalbuildingrestoration.JoplinEmpiricalBuildingRestoration
     :members:
-..  autoclass:: joplinempiricalrestoration.joplinempirrestor_util.JoplinEmpirRestorUtil
+..  autoclass:: joplinempiricalbuildingrestoration.joplinempirrestor_util.JoplinEmpirRestorUtil
     :members:
 
 analyses/meandamage
