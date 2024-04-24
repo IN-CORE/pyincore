@@ -7,6 +7,7 @@ from pyincore import globals as pyglobals
 
 logger = pyglobals.LOGGER
 
+
 class CGEMLFileUtil:
     "Utility class to parse the input files for the CGE-ML model"
 
