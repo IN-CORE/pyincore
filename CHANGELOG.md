@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Permission error when deleting dataset related files [#544](https://github.com/IN-CORE/pyincore/issues/544)
+- Unnecessary dependency in setup.py [#519](https://github.com/IN-CORE/pyincore/issues/519)
+
+
+## [Unreleased]
+
+### Changed
+
+- Name of Joplin Empirical Restoration Analysis to Joplin Empirical Building Restoration Analysis [#538](https://github.com/IN-CORE/pyincore/issues/538)
 
 ## [1.18.0] - 2024-04-03
 
