@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Added
+- Add support for choice disloaction and unsafe occupancy in the population dislocation analysis [#525](https://github.com/IN-CORE/pyincore/issues/525)
+
 ## [1.18.0] - 2024-04-03
 
 ### Added
