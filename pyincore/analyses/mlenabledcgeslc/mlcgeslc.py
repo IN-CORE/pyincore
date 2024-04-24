@@ -11,7 +11,7 @@ import pandas as pd
 from pyincore import globals as pyglobals
 from pyincore.client import IncoreClient
 from pyincore.analyses.core_cge_ml import CoreCGEML
-from pyincore.utils import parse_files
+from pyincore.utils.cge_ml_file_util import CGEMLFileUtil
 
 logger = pyglobals.LOGGER
 
@@ -84,7 +84,7 @@ class MlEnabledCgeSlc(CoreCGEML):
 
     def __init__(self, incore_client: IncoreClient):
         sectors, base_cap_factors, base_cap, model_coeffs, cap_shock_sectors = (
-            parse_files(self.model_filenames, self.filenames)
+            CGEMLFileUtil.parse_files(self.model_filenames, self.filenames)
         )
         self.base_cap_factors = base_cap_factors
         self.base_cap = base_cap
@@ -95,6 +95,8 @@ class MlEnabledCgeSlc(CoreCGEML):
         )  # 4 labor groups
 
     def run(self) -> bool:
+        """Executes the ML enabled CGE model for Salt Lake City """
+        
         logger.info(f"Running {self.model} model...")
         sector_shocks = pd.read_csv(
             self.get_input_dataset("sector_shocks").get_file_path("csv")
