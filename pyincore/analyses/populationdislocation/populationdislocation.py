@@ -164,8 +164,8 @@ class PopulationDislocation(BaseAnalysis):
         merged_final_inv = self.get_dislocation(seed_i, merged_block_inv, value_loss)
 
         # Choice dislocation and unsafe occupancy calculations
-        merged_final_inv["choice_dislocation"] = None
-        merged_final_inv["unsafe_occupancy"] = None
+        merged_final_inv["choice_dis"] = None
+        merged_final_inv["unsafe_occ"] = None
         if choice_dislocation:
             choice_dislocation_cutoff = self.get_parameter("choice_dislocation_cutoff") or 0.5
             choice_dislocation_ds = self.get_parameter("choice_dislocation_ds") or "DS_0"
