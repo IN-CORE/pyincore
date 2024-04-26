@@ -207,7 +207,7 @@ class PopulationDislocationUtil:
         """Get unsafe occupancy based on the dislocation state and the unsafe occupancy cutoff.
 
         Args:
-            pop_disloncation (np.array): Population dislocation Result.
+            pop_dislocation (np.array): Population dislocation Result.
             unsafe_occupancy_cutoff (float): Unsafe occupancy cutoff.
             unsafe_occupancy_ds (int): Unsafe occupancy damage state.
 
