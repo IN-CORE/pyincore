@@ -176,7 +176,6 @@ class PopulationDislocation(BaseAnalysis):
             unsafe_occupancy_ds = self.get_parameter("unsafe_occupancy_ds") or "DS_3"
             PopulationDislocationUtil.get_unsafe_occupancy(merged_final_inv, unsafe_occupancy_cutoff, unsafe_occupancy_ds)
 
-        csv_source = "dataframe"
         self.set_result_csv_data("result", merged_final_inv, result_name, "dataframe")
 
         return True

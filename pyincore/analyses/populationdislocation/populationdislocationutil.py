@@ -193,7 +193,7 @@ class PopulationDislocationUtil:
             null: None.
 
         """
-        condition1 = pop_dislocation['dislocated'] == True
+        condition1 = pop_dislocation['dislocated'] == 1
         condition2 = pop_dislocation[choice_dislocation_ds] > choice_dislocation_cutoff
         pop_dislocation['choice_dis'] = np.where(condition1 & condition2, True, False)
         # Change dislocated to 0 if choice dislocation is 1
@@ -214,11 +214,10 @@ class PopulationDislocationUtil:
             null: None.
 
         """
-        condition1 = pop_dislocation['dislocated'] == False
+        condition1 = pop_dislocation['dislocated'] == 0
         condition2 = pop_dislocation[unsafe_occupancy_ds] > unsafe_occupancy_cutoff
         pop_dislocation['unsafe_occ'] = np.where(condition1 & condition2, True, False)
         # Change dislocated to 1 if unsafe occupancy is 1
         pop_dislocation['dislocated'] = np.where(condition1 & condition2, True, False)
 
         return None
-

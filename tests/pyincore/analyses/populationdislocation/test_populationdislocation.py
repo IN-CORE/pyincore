@@ -32,7 +32,7 @@ def run_with_base_class():
     pop_dis.set_parameter("seed", seed)
 
     # Set choice_dislocation and unsafe_occupancy parameters
-    # pop_dis.set_parameter("choice_dislocation", True)
+    pop_dis.set_parameter("choice_dislocation", True)
     pop_dis.set_parameter("unsafe_occupancy", True)
 
     pop_dis.run_analysis()
