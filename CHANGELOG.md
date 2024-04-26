@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Permission error when deleting dataset related files [#544](https://github.com/IN-CORE/pyincore/issues/544)
 - Unnecessary dependency in setup.py [#519](https://github.com/IN-CORE/pyincore/issues/519)
 
+## [Unreleased]
+
+### Added
+- Add support for choice dislocation and unsafe occupancy in the population dislocation analysis [#525](https://github.com/IN-CORE/pyincore/issues/525)
+
 ## [1.18.0] - 2024-04-03
 
 ### Added
