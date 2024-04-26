@@ -180,7 +180,6 @@ class PopulationDislocationUtil:
 
         return table
 
-
     @staticmethod
     def get_choice_dislocation(pop_dislocation, choice_dislocation_cutoff, choice_dislocation_ds):
         """Get choice dislocation based on the dislocation state and the choice dislocation cutoff.
