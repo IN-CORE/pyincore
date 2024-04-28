@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [1.18.1] - 2024-05-02
+## [1.18.1] - 2024-04-30
 
 ### Changed
 - Name of Joplin Empirical Restoration Analysis to Joplin Empirical Building Restoration Analysis [#538](https://github.com/IN-CORE/pyincore/issues/538)
