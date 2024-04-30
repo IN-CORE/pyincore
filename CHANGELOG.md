@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [1.18.1] - 2024-04-30
+
+### Changed
+- Name of Joplin Empirical Restoration Analysis to Joplin Empirical Building Restoration Analysis [#538](https://github.com/IN-CORE/pyincore/issues/538)
+
+### Added
+- MlEnabledCgeSlc, CoreCGEML, and CGEMLFileUtil Documentation for sphinx [#542](https://github.com/IN-CORE/pyincore/issues/542)
+- Add support for choice dislocation and unsafe occupancy in the population dislocation analysis [#525](https://github.com/IN-CORE/pyincore/issues/525)
+
+### Fixed
+- Permission error when deleting dataset related files [#544](https://github.com/IN-CORE/pyincore/issues/544)
+- Unnecessary dependency in setup.py [#519](https://github.com/IN-CORE/pyincore/issues/519)
+
+
 ## [1.18.0] - 2024-04-03
 
 ### Added

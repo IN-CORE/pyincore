@@ -56,6 +56,11 @@ analyses/commercialbuildingrecovery
 ..  autoclass:: commercialbuildingrecovery.commercialbuildingrecovery.CommercialBuildingRecovery
     :members:
 
+analyses/core_cge_ml
+===================================
+..  autoclass:: core_cge_ml.corecgeml.CoreCGEML
+    :members:
+
 analyses/cumulativebuildingdamage
 =================================
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
@@ -176,16 +181,21 @@ analyses/joplincge
 ..  autofunction:: joplincge.outputfunctions.get_diff
     :members:
 
-analyses/joplinempiricalrestoration
+analyses/joplinempiricalbuildingrestoration
 ===================================
-..  autoclass:: joplinempiricalrestoration.joplinempiricalrestoration.JoplinEmpiricalRestoration
+..  autoclass:: joplinempiricalbuildingrestoration.joplinempiricalbuildingrestoration.JoplinEmpiricalBuildingRestoration
     :members:
-..  autoclass:: joplinempiricalrestoration.joplinempirrestor_util.JoplinEmpirRestorUtil
+..  autoclass:: joplinempiricalbuildingrestoration.joplinempirrestor_util.JoplinEmpirRestorUtil
     :members:
 
 analyses/meandamage
 ===================
 ..  autoclass:: meandamage.meandamage.MeanDamage
+    :members:
+
+analyses/mlenabledcgeslc
+===================
+..  autoclass:: mlenabledcgeslc.mlcgeslc.MlEnabledCgeSlc
     :members:
 
 analyses/montecarlofailureprobability
@@ -437,6 +447,11 @@ utilities
 utils/analysisutil
 ==================
 ..  autoclass:: utils.analysisutil.AnalysisUtil
+    :members:
+
+utils/cge_ml_file_util
+==================
+..  autoclass:: utils.cge_ml_file_util.CGEMLFileUtil
     :members:
 
 utils/cgeoutputprocess
