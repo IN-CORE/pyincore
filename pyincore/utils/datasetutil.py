@@ -17,7 +17,7 @@ import scipy
 
 class DatasetUtil:
     @staticmethod
-    def join_datasets(geodataset, tabledataset, clean_attributes=True):
+    def join_datasets(geodataset, tabledataset, clean_attributes=False):
         """Join Geopands geodataframe and non-geospatial Dataset using GUID field
 
         Args:
