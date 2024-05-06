@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unrelased]
+
+### Fixed
+- Out of index error in dfr3 service's property conversion when the rule is not found [#555](https://github.com/IN-CORE/pyincore/issues/555)
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed
