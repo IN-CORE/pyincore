@@ -187,6 +187,9 @@ def test_create_and_delete_earthquake(hazardsvc):
     model_response = hazardsvc.create_earthquake(eqmodel_json)
     assert model_response["id"] is not None
 
+    del_response = hazardsvc.delete_earthquake(model_response["id"])
+    assert del_response["id"] is not None
+
 
 def test_get_earthquake_aleatory_uncertainty(hazardsvc):
     hazard_id = "5c535f57c5c0e4ccead71a1a"
@@ -482,3 +485,23 @@ def test_get_hurricanewf_json(hazardsvc):
                                            "circular")
 
     assert len(hjson["hurricaneSimulations"]) > 0
+
+
+def test_get_allowed_demands(hazardsvc):
+    allowed_demands = hazardsvc.get_allowed_demands("earthquake")
+    assert len(allowed_demands) > 0
+
+    allowed_demands = hazardsvc.get_allowed_demands("hurricane")
+    assert len(allowed_demands) > 0
+
+    allowed_demands = hazardsvc.get_allowed_demands("flood")
+    assert len(allowed_demands) > 0
+
+    allowed_demands = hazardsvc.get_allowed_demands("tsunami")
+    assert len(allowed_demands) > 0
+
+    allowed_demands = hazardsvc.get_allowed_demands("tornado")
+    assert len(allowed_demands) > 0
+
+    hazardsvc.get_allowed_demands("hurricaneWindfield")
+    assert len(allowed_demands) > 0

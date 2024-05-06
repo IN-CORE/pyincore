@@ -39,19 +39,20 @@ class CGEOutputProcess:
         else:
             household_group_count = household_count.get_dataframe_from_csv()
 
-        before_values = household_group_count["HH0"]
-        after_values = household_group_count["HHL"]
-
         before_event = {}
         after_event = {}
         pct_change = {}
-        for i in range(len(income_categories)):
-            before_event[income_categories[i]] = before_values[i]
-            after_event[income_categories[i]] = after_values[i]
-            if before_values[i]:
-                pct_change[income_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+        for income_category in income_categories:
+            before_event[income_category] = household_group_count[household_group_count["Household Group"] ==
+                                                                  income_category]["HH0"].values[0]
+            after_event[income_category] = household_group_count[household_group_count["Household Group"] ==
+                                                                 income_category]["HHL"].values[0]
+
+            if before_event[income_category]:
+                pct_change[income_category] = 100 * ((after_event[income_category] - before_event[income_category]) /
+                                                     abs(before_event[income_category]))
             else:
-                pct_change[income_categories[i]] = None
+                pct_change[income_category] = None
 
         cge_total_household_count = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
@@ -89,19 +90,20 @@ class CGEOutputProcess:
         else:
             household_income = gross_income.get_dataframe_from_csv()
 
-        before_values = household_income["Y0"]
-        after_values = household_income["YL"]
-
         before_event = {}
         after_event = {}
         pct_change = {}
-        for i in range(len(income_categories)):
-            before_event[income_categories[i]] = before_values[i]
-            after_event[income_categories[i]] = after_values[i]
-            if before_values[i]:
-                pct_change[income_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+        for income_category in income_categories:
+            before_event[income_category] = household_income[household_income["Household Group"] == income_category][
+                "Y0"].values[0]
+            after_event[income_category] = household_income[household_income["Household Group"] == income_category][
+                "YL"].values[0]
+
+            if before_event[income_category]:
+                pct_change[income_category] = 100 * ((after_event[income_category] - before_event[income_category]) /
+                                                     abs(before_event[income_category]))
             else:
-                pct_change[income_categories[i]] = None
+                pct_change[income_category] = None
 
         cge_total_household_income = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
@@ -150,19 +152,18 @@ class CGEOutputProcess:
             pre_disaster_demand = pre_demand.get_dataframe_from_csv()
             post_disaster_demand = post_demand.get_dataframe_from_csv()
 
-        before_values = [pre_disaster_demand[demand_category].sum() for demand_category in demand_categories]
-        after_values = [post_disaster_demand[demand_category].sum() for demand_category in demand_categories]
-
         before_event = {}
         after_event = {}
         pct_change = {}
-        for i in range(len(demand_categories)):
-            before_event[demand_categories[i]] = before_values[i]
-            after_event[demand_categories[i]] = after_values[i]
-            if before_values[i]:
-                pct_change[demand_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+        for demand_category in demand_categories:
+            before_event[demand_category] = pre_disaster_demand[demand_category].sum()
+            after_event[demand_category] = post_disaster_demand[demand_category].sum()
+
+            if before_event[demand_category]:
+                pct_change[demand_category] = 100 * ((after_event[demand_category] - before_event[demand_category]) /
+                                                     abs(before_event[demand_category]))
             else:
-                pct_change[demand_categories[i]] = None
+                pct_change[demand_category] = None
 
         cge_employment = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 
@@ -203,19 +204,17 @@ class CGEOutputProcess:
         else:
             sector_supply = domestic_supply.get_dataframe_from_csv()
 
-        before_values = sector_supply["DS0"]
-        after_values = sector_supply["DSL"]
-
         before_event = {}
         after_event = {}
         pct_change = {}
-        for i in range(len(supply_categories)):
-            before_event[supply_categories[i]] = before_values[i]
-            after_event[supply_categories[i]] = after_values[i]
-            if before_values[i]:
-                pct_change[supply_categories[i]] = 100 * ((after_values[i] - before_values[i]) / abs(before_values[i]))
+        for supply_category in supply_categories:
+            before_event[supply_category] = sector_supply[sector_supply["Sectors"] == supply_category]["DS0"].values[0]
+            after_event[supply_category] = sector_supply[sector_supply["Sectors"] == supply_category]["DSL"].values[0]
+            if before_event[supply_category]:
+                pct_change[supply_category] = 100 * ((after_event[supply_category] - before_event[supply_category]) /
+                                                     abs(before_event[supply_category]))
             else:
-                pct_change[supply_categories[i]] = None
+                pct_change[supply_category] = None
 
         cge_domestic_supply = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
 

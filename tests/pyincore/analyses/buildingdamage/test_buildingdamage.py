@@ -1,15 +1,17 @@
-from pyincore import IncoreClient, FragilityService, MappingSet
+from pyincore import IncoreClient, FragilityService, MappingSet, Earthquake, HazardService, Tsunami, Hurricane, Flood, \
+    Tornado
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
+    hazardsvc = HazardService(client)
 
+    ##########################################################
     # Memphis Earthquake damage
     # New madrid earthquake using Atkinson Boore 1995
-    hazard_type = "earthquake"
-    hazard_id = "5b902cb273c3371e1236b36b"
+    eq = Earthquake.from_hazard_service("5b902cb273c3371e1236b36b", hazardsvc)
 
     # Geology dataset
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
@@ -29,10 +31,10 @@ def run_with_base_class():
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
+    bldg_dmg.set_input_hazard("hazard", eq)
+
     result_name = "memphis_eq_bldg_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
-    bldg_dmg.set_parameter("hazard_type", hazard_type)
-    bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.set_parameter("use_liquefaction", True)
     bldg_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
@@ -40,10 +42,9 @@ def run_with_base_class():
     # Run Analysis
     bldg_dmg.run_analysis()
 
+    ##########################################################
     # TSUNAMI
-
-    hazard_type = "tsunami"
-    hazard_id = "5bc9e25ef7b08533c7e610dc"
+    tsunami = Tsunami.from_hazard_service("5bc9e25ef7b08533c7e610dc", hazardsvc)
 
     # Seaside building dataset
     bldg_dataset_id = "5bcf2fcbf242fe047ce79dad"
@@ -57,18 +58,15 @@ def run_with_base_class():
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-
+    bldg_dmg.set_input_hazard("hazard", tsunami)
     result_name = "seaside_tsunami_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
-    bldg_dmg.set_parameter("hazard_type", hazard_type)
-    bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
 
+    ##########################################################
     # Hurricane
-
-    hazard_type = "hurricane"
-    hazard_id = "5f11e50cc6491311a814584c"
+    hurricane = Hurricane.from_hazard_service("5f11e50cc6491311a814584c", hazardsvc)
 
     # Galveston building dataset 602eba8bb1db9c28aef01358
     bldg_dataset_id = "602eba8bb1db9c28aef01358"  # 19k buildings with age_group
@@ -84,16 +82,16 @@ def run_with_base_class():
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
     bldg_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
 
+    bldg_dmg.set_input_hazard("hazard", hurricane)
+
     result_name = "galveston_hurr_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
-    bldg_dmg.set_parameter("hazard_type", hazard_type)
-    bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
 
+    ##########################################################
     # lumberton flood
-    hazard_type = "flood"
-    hazard_id = "5f4d02e99f43ee0dde768406"
+    flood = Flood.from_hazard_service("5f4d02e99f43ee0dde768406", hazardsvc)
 
     # lumberton building inventory v7
     # bldg_dataset_id = "603010f7b1db9c28aef53214"  # 40 building subset
@@ -109,23 +107,20 @@ def run_with_base_class():
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
     bldg_dmg.set_parameter("fragility_key", "Lumberton Flood Building Fragility ID Code")
 
+    bldg_dmg.set_input_hazard("hazard", flood)
+
     result_name = "lumberton_flood_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
-    bldg_dmg.set_parameter("hazard_type", hazard_type)
-    bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
 
-    # joplin tornado with retrofit strategy
+    ##########################################################
+    # joplin tornado without strategy
     bldg_dataset_id = "5df7d0de425e0b00092d0082"  # joplin building v6
-    retrofit_strategy_id = "6091d5a8daa06e14ee96d502"  # plan 1
-    # retrofit_strategy_id = "6091d5ffdaa06e14ee96d5ef" # plan 2
 
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    bldg_dmg.load_remote_input_dataset("retrofit_strategy", retrofit_strategy_id)
 
-    # lumberton building mapping (with equation)
     mapping_id = "6091d9fbb53ed4646fd276ca"  # 19 archetype with retrofit
     # mapping_id = "60994a1906d63d5ded1d6dcc" # 19 archetype with retrofit new format mapping
     fragility_service = FragilityService(client)
@@ -133,12 +128,11 @@ def run_with_base_class():
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
     bldg_dmg.set_parameter("fragility_key", "Fragility ID Code")
 
-    hazard_type = "tornado"
-    hazard_id = "5dfa32bbc0601200080893fb"
-    result_name = "joplin_tornado_dmg_result_w_retrofit"
+    tornado = Tornado.from_hazard_service("5dfa32bbc0601200080893fb", hazardsvc)
+    bldg_dmg.set_input_hazard("hazard", tornado)
+
+    result_name = "joplin_tornado_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
-    bldg_dmg.set_parameter("hazard_type", hazard_type)
-    bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.set_parameter("seed", 1000)
     bldg_dmg.run_analysis()

@@ -1,5 +1,14 @@
 {
   "name": "pytest - Joplin Tornado",
   "description": "Joplin tornado hazard",
-  "tornadoType": "dataset"
+  "tornadoType": "dataset",
+  "threshold": null,
+  "thresholdUnit": "mph",
+  "hazardDatasets": [
+    {
+        "demandType": "wind",
+        "demandUnits": "mph",
+        "threshold": null
+    }
+  ]
 }

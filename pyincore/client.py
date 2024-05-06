@@ -3,17 +3,17 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
+import base64
 import getpass
 import hashlib
 import json
 import os
 import shutil
 import urllib.parse
-
+from datetime import datetime, timezone
 import requests
-
 from pyincore import globals as pyglobals
+from pyincore.utils import return_http_response
 
 logger = pyglobals.LOGGER
 
@@ -102,7 +102,7 @@ class Client:
         Args:
             url (str): Service url.
             params (obj): Session parameters.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -110,7 +110,7 @@ class Client:
 
         """
         r = self.session.get(url, params=params, timeout=timeout, **kwargs)
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
         """Post data on the server.
@@ -119,7 +119,7 @@ class Client:
             url (str): Service url.
             data (obj): Data to be posted on the server.
             json (obj): Description of the data, metadata json.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -127,7 +127,7 @@ class Client:
 
         """
         r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
         """Put data on the server.
@@ -135,7 +135,7 @@ class Client:
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -143,14 +143,14 @@ class Client:
 
         """
         r = self.session.put(url, data=data, timeout=timeout, **kwargs)
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def delete(self, url: str, timeout=(30, 600), **kwargs):
         """Delete data on the server.
 
         Args:
             url (str): Service url.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -158,76 +158,66 @@ class Client:
 
         """
         r = self.session.delete(url, timeout=timeout, **kwargs)
-        return self.return_http_response(r)
-
-    @staticmethod
-    def return_http_response(http_response):
-        try:
-            http_response.raise_for_status()
-            return http_response
-        except requests.exceptions.HTTPError:
-            logger.error('A HTTPError has occurred \n' +
-                         'HTTP Status code: ' + str(http_response.status_code) + '\n' +
-                         'Error Message: ' + http_response.content.decode()
-                         )
-            raise
-        except requests.exceptions.ConnectionError:
-            logger.error("ConnectionError: Failed to establish a connection with the server. "
-                         "This might be due to a refused connection. "
-                         "Please check that you are using the right URLs.")
-            raise
-        except requests.exceptions.RequestException:
-            logger.error("RequestException: There was an exception while trying to handle your request. "
-                         "Please go to the end of this message for more specific information about the exception.")
-            raise
+        return return_http_response(r)
 
 
 class IncoreClient(Client):
-    """IN-CORE service client class. It contains token and service root url.
+    """IN-CORE service client class. It contains token and service root url."""
 
-    Args:
-        service_url (str): Service url.
-        token_file_name (str): Path to file containing the authorization token.
+    def __init__(self, service_url: str = None, token_file_name: str = None, offline: bool = False):
+        """
 
-    """
-
-    def __init__(self, service_url: str = None, token_file_name: str = None):
+        Args:
+            service_url (str): Service url.
+            token_file_name (str): Path to file containing the authorization token.
+            offline (bool): Flag to indicate offline mode or not.
+        """
         super().__init__()
-        if service_url is None or len(service_url.strip()) == 0:
-            service_url = pyglobals.INCORE_API_PROD_URL
-        self.service_url = service_url
-        self.token_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_AUTH_PATH)
+        self.offline = offline
 
-        # hashlib requires bytes array for hash operations
-        byte_url_string = str.encode(self.service_url)
-        self.hashed_service_url = hashlib.sha256(byte_url_string).hexdigest()
+        if not offline:
+            if service_url is None or len(service_url.strip()) == 0:
+                service_url = pyglobals.INCORE_API_PROD_URL
+            self.service_url = service_url
+            self.token_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_AUTH_PATH)
 
-        self.create_service_json_entry()
+            # hashlib requires bytes array for hash operations
+            byte_url_string = str.encode(self.service_url)
+            self.hashed_service_url = hashlib.sha256(byte_url_string).hexdigest()
 
-        # construct local directory and filename
-        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
-        if not os.path.exists(cache_data):
-            os.makedirs(cache_data)
+            self.create_service_json_entry()
 
-        self.hashed_svc_data_dir = os.path.join(cache_data, self.hashed_service_url)
+            # construct local directory and filename
+            cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
+            if not os.path.exists(cache_data):
+                os.makedirs(cache_data)
 
-        if not os.path.exists(self.hashed_svc_data_dir):
-            os.makedirs(self.hashed_svc_data_dir)
+            self.hashed_svc_data_dir = os.path.join(cache_data, self.hashed_service_url)
 
-        # store the token file in the respective repository's directory
-        if token_file_name is None or len(token_file_name.strip()) == 0:
-            token_file_name = "." + self.hashed_service_url + "_token"
-        self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
+            if not os.path.exists(self.hashed_svc_data_dir):
+                os.makedirs(self.hashed_svc_data_dir)
 
-        authorization = self.retrieve_token_from_file()
-        if authorization is not None:
-            self.session.headers["Authorization"] = authorization
-            print("Connection successful to IN-CORE services.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
+            # store the token file in the respective repository's directory
+            if token_file_name is None or len(token_file_name.strip()) == 0:
+                token_file_name = "." + self.hashed_service_url + "_token"
+            self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
 
+            authorization = self.retrieve_token_from_file()
+            if authorization is not None:
+                self.session.headers["Authorization"] = authorization
+                print("Connection successful to IN-CORE services.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
+
+            else:
+                if self.login():
+                    print("Connection successful to IN-CORE services.", "pyIncore version detected:",
+                          pyglobals.PACKAGE_VERSION)
         else:
-            if self.login():
-                print("Connection successful to IN-CORE services.", "pyIncore version detected:",
-                      pyglobals.PACKAGE_VERSION)
+            self.service_url = ""
+            self.token_url = ""
+            self.hashed_service_url = ""
+            self.hashed_svc_data_dir = ""
+            self.token_file = ""
+            print("You are working with the offline version of IN-CORE.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
 
     def login(self):
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
@@ -240,8 +230,8 @@ class IncoreClient(Client):
             r = requests.post(self.token_url, data={'grant_type': 'password',
                                                     'client_id': pyglobals.CLIENT_ID,
                                                     'username': username, 'password': password})
-            if r.status_code == 200:
-                token = r.json()
+            try:
+                token = return_http_response(r).json()
                 if token is None or token["access_token"] is None:
                     logger.warning("Authentication Failed.")
                     exit(0)
@@ -249,7 +239,10 @@ class IncoreClient(Client):
                 self.store_authorization_in_file(authorization)
                 self.session.headers['Authorization'] = authorization
                 return True
-            logger.warning("Authentication failed, attempting login again.")
+            except Exception as e:
+                logger.warning("Authentication failed, attempting login again.")
+                print(e)
+
 
         logger.warning("Authentication failed.")
         exit(0)
@@ -267,6 +260,22 @@ class IncoreClient(Client):
         except IOError as e:
             logger.warning(e)
 
+    def is_token_expired(self, token):
+        """Check if the token has expired
+
+        Returns:
+             True if the token has expired, False otherwise
+        """
+        # Split the token to get payload
+        _, payload_encoded, _ = token.split('.')
+        # Decode the payload
+        payload = base64.urlsafe_b64decode(payload_encoded + '==')  # Padding just in case
+        payload_json = json.loads(payload)
+        now = datetime.now(timezone.utc)
+        current_time = now.timestamp()
+        # Compare current time with exp claim
+        return current_time > payload_json['exp']
+
     def retrieve_token_from_file(self):
         """Attempts to retrieve authorization from a local file, if it exists.
 
@@ -282,9 +291,7 @@ class IncoreClient(Client):
                 with open(self.token_file, 'r') as f:
                     auth = f.read().splitlines()
                     # check if token is valid
-                    userinfo_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_USERINFO_PATH)
-                    r = requests.get(userinfo_url, headers={'Authorization': auth[0]})
-                    if r.status_code != 200:
+                    if self.is_token_expired(auth[0]):
                         return None
                 return auth[0]
             except IndexError:
@@ -298,7 +305,7 @@ class IncoreClient(Client):
         Args:
             url (str): Service url.
             params (obj): Session parameters.
-            timeout (int): Session timeout.
+            timeout (tuple[int,int]): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -311,7 +318,7 @@ class IncoreClient(Client):
             self.login()
             r = self.session.get(url, params=params, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
         """Post data on the server.
@@ -333,7 +340,7 @@ class IncoreClient(Client):
             self.login()
             r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
         """Put data on the server.
@@ -341,7 +348,7 @@ class IncoreClient(Client):
         Args:
             url (str): Service url.
             data (obj): Data to be put onn the server.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -354,14 +361,14 @@ class IncoreClient(Client):
             self.login()
             r = self.session.put(url, data=data, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def delete(self, url: str, timeout=(30, 600), **kwargs):
         """Delete data on the server.
 
         Args:
             url (str): Service url.
-            timeout (int): Session timeout.
+            timeout (tuple): Session timeout.
             **kwargs: A dictionary of external parameters.
 
         Returns:
@@ -374,7 +381,7 @@ class IncoreClient(Client):
             self.login()
             r = self.session.delete(url, timeout=timeout, **kwargs)
 
-        return self.return_http_response(r)
+        return return_http_response(r)
 
     def create_service_json_entry(self):
         update_hash_entry("add", hashed_url=self.hashed_service_url, service_url=self.service_url)

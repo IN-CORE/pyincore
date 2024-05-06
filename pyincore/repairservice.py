@@ -8,6 +8,7 @@
 import urllib
 
 from pyincore import IncoreClient
+from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
 
 
@@ -26,9 +27,10 @@ class RepairService(Dfr3Service):
 
         super(RepairService, self).__init__(client)
 
+    @forbid_offline
     def get_dfr3_sets(self, hazard_type: str = None, inventory_type: str = None,
                       author: str = None, creator: str = None, space: str = None,
-                      skip: int = None, limit: int = None):
+                      skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Get the set of repair data, curves.
 
         Args:
@@ -39,6 +41,8 @@ class RepairService(Dfr3Service):
             space (str): Name of space, default None.
             skip (int):  Skip the first n results, default None.
             limit (int): Limit number of results to return, default None.
+            timeout (tuple): Timeout for the request, default (30, 600).
+            **kwargs: Additional arguments.
 
         Returns:
             obj: HTTP response with search results.
@@ -62,5 +66,5 @@ class RepairService(Dfr3Service):
         if space is not None:
             payload['space'] = space
 
-        r = self.client.get(url, params=payload)
+        r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         return r.json()

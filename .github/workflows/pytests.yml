@@ -4,18 +4,19 @@ name: pytests
 #  - any push to any branch
 #  - when a PR is opened/reopened - this is just for additional safety and covers the case of main -> develop PRs without new pushes
 
-# TODO: Use mamba instead of conda for installing packages. Improves on ~5mins it takes to install requirements.
-#  https://github.com/mamba-org/provision-with-micromamba
-
 on:
   push:
-
   pull_request:
      types: [opened, reopened]
 
 jobs:
   unit_test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        vars: [ {python-version: '3.9', sleep: '0s'}, {python-version: '3.10', sleep: '60s'},
+                {python-version: '3.11', sleep: '120s'}, {python-version: '3.12', sleep: '180s'} ]
+    name: Python ${{ matrix.vars.python-version }} Test
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -31,18 +32,22 @@ jobs:
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
             hashFiles('environment.yml') }}
 
-      - name: Install miniconda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install micromamba
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniconda-version: "latest"
-          mamba-version: "*"
-          use-mamba: true
-          python-version: 3.8
-          activate-environment: base
+          create-args: >-
+            python=${{ matrix.vars.python-version }}
+            pytest
           environment-file: environment.yml
-          use-only-tar-bz2: true
+          generate-run-shell: true
+
+      - name: Sleep for ${{ matrix.vars.sleep }} to avoid multiple pytests run concurrently
+        uses: jakejarvis/wait-action@master
+        with:
+          time: ${{ matrix.vars.sleep }}
 
       - name: Run tests with pytest
         run: |
           echo "${{secrets.PYTEST_USER_TOKEN}}" > tests/pyincore/.incorepw
-          $CONDA/bin/python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
+          python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
+        shell: micromamba-shell {0}

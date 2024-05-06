@@ -10,6 +10,159 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - join dataset has an option for only keeping the table dataset fields [#299](https://github.com/IN-CORE/pyincore/issues/299)
 
+## [1.18.1] - 2024-04-30
+
+### Changed
+- Name of Joplin Empirical Restoration Analysis to Joplin Empirical Building Restoration Analysis [#538](https://github.com/IN-CORE/pyincore/issues/538)
+
+### Added
+- MlEnabledCgeSlc, CoreCGEML, and CGEMLFileUtil Documentation for sphinx [#542](https://github.com/IN-CORE/pyincore/issues/542)
+- Add support for choice dislocation and unsafe occupancy in the population dislocation analysis [#525](https://github.com/IN-CORE/pyincore/issues/525)
+
+### Fixed
+- Permission error when deleting dataset related files [#544](https://github.com/IN-CORE/pyincore/issues/544)
+- Unnecessary dependency in setup.py [#519](https://github.com/IN-CORE/pyincore/issues/519)
+
+
+## [1.18.0] - 2024-04-03
+
+### Added
+- Add CoreCGEML module [#468](https://github.com/IN-CORE/pyincore/issues/468)
+- Add ML enabled SLC CGE [#508](https://github.com/IN-CORE/pyincore/issues/508)
+- More mathematical functions for the DFR3 expression evaluation [#531](https://github.com/IN-CORE/pyincore/issues/531)
+
+### Changed
+- Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
+- Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
+- Update the post-processing step for generating population dislocation map layer [#526](https://github.com/IN-CORE/pyincore/issues/526)
+
+### Fixed
+- Fixed JWT token validation [#529](https://github.com/IN-CORE/pyincore/issues/529)
+
+## [1.17.0] - 2024-02-22
+
+### Added
+- New function in DataprocessUtil to generate FEMA table for Galveston Community App [#488](https://github.com/IN-CORE/pyincore/issues/488)
+
+### Fixed
+- Refactoring tornadoepndamage for hazardDatasets [#495](https://github.com/IN-CORE/pyincore/issues/495)
+
+### Changed
+- Retrofitted Building Damage [#469](https://github.com/IN-CORE/pyincore/issues/469) 
+- Optimize building damage performance [#513](https://github.com/IN-CORE/pyincore/issues/513)
+
+
+## [1.16.0] - 2024-02-07
+
+### Added
+- Create GUID field in geopackage file [#478](https://github.com/IN-CORE/pyincore/issues/478)
+
+### Changed
+- Tornado and Earthquake model [#474](https://github.com/IN-CORE/pyincore/issues/474)
+- Disable methods interact with services if in offline mode [#458](https://github.com/IN-CORE/pyincore/issues/458)
+
+### Fixed
+- Fix semantics search pytest by switching to an existing search term 
+
+
+## [1.15.1] - 2023-12-20 
+
+### Fixed
+- Fix NCI Functionality [#463](https://github.com/IN-CORE/pyincore/issues/463)
+
+
+## [1.15.0] - 2023-12-13
+
+### Added
+- Add hazard models to documentation [#448](https://github.com/IN-CORE/pyincore/issues/448)
+
+### Changed
+- Upgrade python version from 3.6 to 3.9 [#447](https://github.com/IN-CORE/pyincore/issues/447)
+- Enable offline mode for pyincore [#455](https://github.com/IN-CORE/pyincore/issues/455)
+- Update MCS analysis to output only required columns for `failure_probability` [#401](https://github.com/IN-CORE/pyincore/issues/401)
+- Update CommercialBuildingRecovery to input damage results as a required dataset [#460](https://github.com/IN-CORE/pyincore/issues/460)
+
+
+## [1.14.0] - 2023-11-08
+
+### Changed
+- Properly set the output dataset in Building Portfolio Recovery Analysis [#423](https://github.com/IN-CORE/pyincore/issues/423)
+- Dependency clean up [#431](https://github.com/IN-CORE/pyincore/issues/431)
+
+### Added
+- Add support for hazard object input from local and remote for building damage analysis [#427](https://github.com/IN-CORE/pyincore/issues/427)
+
+### Fixed
+- CGE warning that using series is deprecated and will raise a type error [#357](https://github.com/IN-CORE/pyincore/issues/357)
+- Pytest fix in workflow [#425](https://github.com/IN-CORE/pyincore/issues/425)
+- Mapping rule to match local repair curve [#438](https://github.com/IN-CORE/pyincore/issues/438)
+- Local tornado x and y axis reversed [#439](https://github.com/IN-CORE/pyincore/issues/439)
+
+
+## [1.13.0] - 2023-10-11
+
+### Changed
+- Refactoring the INDP dislocation time mode function to accept different parameters as input [#388](https://github.com/IN-CORE/pyincore/issues/388)
+
+### Added
+- Add commercial recovery analysis [#395](https://github.com/IN-CORE/pyincore/issues/395)
+- Capability to support for local hazard [#404](https://github.com/IN-CORE/pyincore/issues/404)
+- Add support for local hazard with backward compatibility to analyses [#415](https://github.com/IN-CORE/pyincore/issues/415)
+
+### Fixed
+- Aggregate hazard exposure column for non-structural building damage analysis to avoid column name cutoff and chaining issue with mean damage [#393](https://github.com/IN-CORE/pyincore/issues/393)
+
+
+## [1.12.0] - 2023-08-16
+
+### Added
+- Add Semantic Module to interact with Semantic service [#361](https://github.com/IN-CORE/pyincore/issues/361)
+- Method to get allow Hazard demands from hazard service [#363](https://github.com/IN-CORE/pyincore/issues/363)
+- Interdependent Network Design Problem (INDP) [#49](https://github.com/IN-CORE/pyincore/issues/49)
+
+### Fixed
+- Post-processing cluster fuction handle empty rows from mcs [#365](https://github.com/IN-CORE/pyincore/issues/365)
+- Expose all the incore client parameters [#295](https://github.com/IN-CORE/pyincore/issues/295)
+- Fixed testing datasets not being cleaned in the database [#367](https://github.com/IN-CORE/pyincore/issues/367)
+- Mismatching spec types in the get_spec method [#383](https://github.com/IN-CORE/pyincore/issues/383)
+- Space services methods missing timeout parameters [#375](https://github.com/IN-CORE/pyincore/issues/375)
+- Fixed conda dependency issues for Python 3.10 and 3.11 [#343](https://github.com/IN-CORE/pyincore/issues/343)
+- Fixed semantic service unit test to handle response object [#386](https://github.com/IN-CORE/pyincore/issues/386)
+- Fixed conda publish action [#381](https://github.com/IN-CORE/pyincore/issues/381)
+
+### Changed
+- Changed github workflow pytests base from miniconda to micromamba [#378](https://github.com/IN-CORE/pyincore/issues/378)
+- Moved `return_http_response` to a single file in utils named `http_util.py` [#384](https://github.com/IN-CORE/pyincore/issues/384)
+
+
+## [1.11.0] - 2023-06-14
+
+### Added
+- Added a name extension for combined wind, wave, surge building damage analysis [#308](https://github.com/IN-CORE/pyincore/issues/308)
+- Added error handeling after a request completes in services and the client [#324](https://github.com/IN-CORE/pyincore/issues/324)
+- Electric Power Facility Repair Cost Analysis [#345](https://github.com/IN-CORE/pyincore/issues/345)
+- Water Facility Repair Cost Analysis [#349](https://github.com/IN-CORE/pyincore/issues/349)
+- Water Pipeline Repair Cost Analysis [#351](https://github.com/IN-CORE/pyincore/issues/351)
+
+### Fixed
+- TransportationRecovery analysis fails to run with concatentation error [#292](https://github.com/IN-CORE/pyincore/issues/292)
+- Fix NCI Functionality float value not iterable error [#291](https://github.com/IN-CORE/pyincore/issues/291)
+- Broken analyses related to pandas 2.0 update [#310](https://github.com/IN-CORE/pyincore/issues/310)
+- Mean damage should handle buildings that don't have damage probabilities [#131](https://github.com/IN-CORE/pyincore/issues/131)
+- Updated check to see if string is float cos outputs where all NaN [#347](https://github.com/IN-CORE/pyincore/issues/347)
+
+## [1.10.0] - 2023-04-21
+
+### Added
+- Added Galveston Capital Shock and CGE models as a submodule[#239](https://github.com/IN-CORE/pyincore/issues/239)
+
+### Fixed
+- CGE output post process util function [#298](https://github.com/IN-CORE/pyincore/issues/298)
+- Population Dislocation utility function arbitrarily assumes there will be dislocated and non-dislocated [#301](https://github.com/IN-CORE/pyincore/issues/301)
+- Seaside & Joplin cge uses a fixed location for temporary files [#312](https://github.com/IN-CORE/pyincore/issues/312)
+- Functional vs non-functional calculation based of failure sample now [#300](https://github.com/IN-CORE/pyincore/issues/300)
+- Exposed timeout and kwargs parameter for incore client methods [#295](https://github.com/IN-CORE/pyincore/issues/295)
+
 ## [1.9.0] - 2023-03-15
 
 ### Added
@@ -68,6 +221,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Fix data type of Census input dataset to CSV [#166](https://github.com/IN-CORE/pyincore/issues/166)
+- MCS handles empty rows in the input dataset [#195](https://github.com/IN-CORE/pyincore/issues/195)
 
 ## [1.5.0] - 2022-06-29
 

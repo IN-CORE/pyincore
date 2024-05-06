@@ -179,3 +179,45 @@ class PopulationDislocationUtil:
                 table = table.drop(columns=[col1, col2, col1 + "-" + col2])
 
         return table
+
+    @staticmethod
+    def get_choice_dislocation(pop_dislocation, choice_dislocation_cutoff, choice_dislocation_ds):
+        """Get choice dislocation based on the dislocation state and the choice dislocation cutoff.
+
+        Args:
+            pop_dislocation (np.array): Population dislocation Result.
+            choice_dislocation_cutoff (float): Choice dislocation cutoff.
+            choice_dislocation_ds (int): Choice dislocation damage state.
+
+        Returns:
+            null: None.
+
+        """
+        condition1 = pop_dislocation['dislocated'] == 1
+        condition2 = pop_dislocation[choice_dislocation_ds] > choice_dislocation_cutoff
+        pop_dislocation['choice_dis'] = np.where(condition1 & condition2, True, False)
+        # Change dislocated to 0 if choice dislocation is 1
+        pop_dislocation['dislocated'] = np.where(condition1 & condition2, False, True)
+
+        return None
+
+    @staticmethod
+    def get_unsafe_occupancy(pop_dislocation, unsafe_occupancy_cutoff, unsafe_occupancy_ds):
+        """Get unsafe occupancy based on the dislocation state and the unsafe occupancy cutoff.
+
+        Args:
+            pop_dislocation (np.array): Population dislocation Result.
+            unsafe_occupancy_cutoff (float): Unsafe occupancy cutoff.
+            unsafe_occupancy_ds (int): Unsafe occupancy damage state.
+
+        Returns:
+            null: None.
+
+        """
+        condition1 = pop_dislocation['dislocated'] == 0
+        condition2 = pop_dislocation[unsafe_occupancy_ds] > unsafe_occupancy_cutoff
+        pop_dislocation['unsafe_occ'] = np.where(condition1 & condition2, True, False)
+        # Change dislocated to 1 if unsafe occupancy is 1
+        pop_dislocation['dislocated'] = np.where(condition1 & condition2, True, False)
+
+        return None

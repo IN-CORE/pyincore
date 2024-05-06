@@ -10,7 +10,7 @@ import logging
 import os
 import shutil
 
-PACKAGE_VERSION = "1.9.0"
+PACKAGE_VERSION = "1.18.1"
 
 INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
 INCORE_API_DEV_URL = "https://incore-dev.ncsa.illinois.edu"
@@ -40,5 +40,7 @@ TEST_DATA_DIR = os.path.join(PYINCORE_ROOT_FOLDER, "tests/data")
 MAX_LOGIN_ATTEMPTS = 3
 
 IPOPT_PATH = shutil.which("ipopt")
+GLPK_PATH = shutil.which("glpsol")
+SCIP_PATH = shutil.which("scip")
 
 DAMAGE_PRECISION = 10

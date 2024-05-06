@@ -51,6 +51,16 @@ analyses/combinedwindwavesurgebuildingloss
 ..  autoclass:: pyincore.analyses.combinedwindwavesurgebuildingloss.CombinedWindWaveSurgeBuildingLoss
     :members:
 
+analyses/commercialbuildingrecovery
+===================================
+..  autoclass:: commercialbuildingrecovery.commercialbuildingrecovery.CommercialBuildingRecovery
+    :members:
+
+analyses/core_cge_ml
+===================================
+..  autoclass:: core_cge_ml.corecgeml.CoreCGEML
+    :members:
+
 analyses/cumulativebuildingdamage
 =================================
 ..  autoclass:: cumulativebuildingdamage.cumulativebuildingdamage.CumulativeBuildingDamage
@@ -68,6 +78,11 @@ analyses/epfdamage
 ..  autoclass:: epfdamage.epfutil.EpfUtil
     :members:
 
+analyses/epfrepaircost
+==================
+..  autoclass:: epfrepaircost.epfrepaircost.EpfRepairCost
+    :members:
+
 analyses/epnfunctionality
 =========================
 ..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionality
@@ -78,6 +93,29 @@ analyses/epnfunctionality
 analyses/example
 ================
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
+    :members:
+
+analyses/galvestoncge
+==================
+..  autoclass:: galvestoncge.galvestoncge.GalvestonCGEModel
+    :members:
+..  autoclass:: galvestoncge.equationlib.VarContainer
+    :members:
+..  autoclass:: galvestoncge.equationlib.Variable
+    :members:
+..  autoclass:: galvestoncge.equationlib.ExprItem
+    :members:
+..  autoclass:: galvestoncge.equationlib.Expr
+    :members:
+..  autoclass:: galvestoncge.equationlib.ExprM
+    :members:
+..  autofunction:: galvestoncge.outputfunctions.baseValue
+    :members:
+..  autofunction:: galvestoncge.outputfunctions.newValue
+    :members:
+..  autofunction:: galvestoncge.outputfunctions.getDiff
+    :members:
+..  autofunction:: galvestoncge.galvestonoutput.gams_to_dataframes
     :members:
 
 analyses/housingrecovery
@@ -95,6 +133,31 @@ analyses/housingrecoverysequential
 analyses/housingunitallocation
 ==============================
 ..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
+    :members:
+
+analyses/indp
+==============================
+..  autoclass:: indp.indp.INDP
+    :members:
+..  autoclass:: indp.dislocationutils.DislocationUtil
+    :members:
+..  autoclass:: indp.indpcomponents.INDPComponents
+    :members:
+..  autoclass:: indp.indpresults.INDPResults
+    :members:
+..  autoclass:: indp.indputil.INDPUtil
+    :members:
+..  autoclass:: indp.infrastructurearc.InfrastructureArc
+    :members:
+..  autoclass:: indp.infrastructureinterdeparc.InfrastructureInterdepArc
+    :members:
+..  autoclass:: indp.infrastructurenetwork.InfrastructureNetwork
+    :members:
+..  autoclass:: indp.infrastructurenode.InfrastructureNode
+    :members:
+..  autoclass:: indp.infrastructurespace.InfrastructureSpace
+    :members:
+..  autoclass:: indp.infrastructureutil.InfrastructureUtil
     :members:
 
 analyses/joplincge
@@ -118,16 +181,21 @@ analyses/joplincge
 ..  autofunction:: joplincge.outputfunctions.get_diff
     :members:
 
-analyses/joplinempiricalrestoration
+analyses/joplinempiricalbuildingrestoration
 ===================================
-..  autoclass:: joplinempiricalrestoration.joplinempiricalrestoration.JoplinEmpiricalRestoration
+..  autoclass:: joplinempiricalbuildingrestoration.joplinempiricalbuildingrestoration.JoplinEmpiricalBuildingRestoration
     :members:
-..  autoclass:: joplinempiricalrestoration.joplinempirrestor_util.JoplinEmpirRestorUtil
+..  autoclass:: joplinempiricalbuildingrestoration.joplinempirrestor_util.JoplinEmpirRestorUtil
     :members:
 
 analyses/meandamage
 ===================
 ..  autoclass:: meandamage.meandamage.MeanDamage
+    :members:
+
+analyses/mlenabledcgeslc
+===================
+..  autoclass:: mlenabledcgeslc.mlcgeslc.MlEnabledCgeSlc
     :members:
 
 analyses/montecarlofailureprobability
@@ -169,6 +237,11 @@ analyses/pipelinefunctionality
 ..  autoclass:: pipelinefunctionality.pipelinefunctionality.PipelineFunctionality
     :members:
 
+analyses/pipelinerepaircost
+============================
+..  autoclass:: pipelinerepaircost.pipelinerepaircost.PipelineRepairCost
+    :members:
+
 analyses/pipelinerestoration
 ============================
 ..  autoclass:: pipelinerestoration.pipelinerestoration.PipelineRestoration
@@ -204,6 +277,29 @@ analyses/seasidecge
 ..  autoclass:: seasidecge.solverconstants.equationlib.Expr
     :members:
 ..  autoclass:: seasidecge.solverconstants.equationlib.ExprM
+    :members:
+
+analyses/saltlakecge
+==================
+..  autoclass:: saltlakecge.saltlakecge.SaltLakeCGEModel
+    :members:
+..  autoclass:: saltlakecge.equationlib.VarContainer
+    :members:
+..  autoclass:: saltlakecge.equationlib.Variable
+    :members:
+..  autoclass:: saltlakecge.equationlib.ExprItem
+    :members:
+..  autoclass:: saltlakecge.equationlib.Expr
+    :members:
+..  autoclass:: saltlakecge.equationlib.ExprM
+    :members:
+..  autofunction:: saltlakecge.outputfunctions.baseValue
+    :members:
+..  autofunction:: saltlakecge.outputfunctions.newValue
+    :members:
+..  autofunction:: saltlakecge.outputfunctions.getDiff
+    :members:
+..  autofunction:: saltlakecge.saltlakecge.gams_to_dataframes
     :members:
 
 analyses/socialvulnerability
@@ -242,6 +338,11 @@ analyses/waterfacilitydamage
 ..  autoclass:: waterfacilitydamage.waterfacilitydamage.WaterFacilityDamage
     :members:
 
+analyses/waterfacilityrepaircost
+=================================
+..  autoclass:: waterfacilityrepaircost.waterfacilityrepaircost.WaterFacilityRepairCost
+    :members:
+
 analyses/waterfacilityrestoration
 =================================
 ..  autoclass:: waterfacilityrestoration.waterfacilityrestoration.WaterFacilityRestoration
@@ -254,6 +355,51 @@ analyses/wfnfunctionality
 
 models
 ^^^^^^
+
+models/hazard/earthquake
+===================
+..  autoclass:: models.earthquake.Earthquake
+    :members:
+
+models/hazard/flood
+===================
+..  autoclass:: models.flood.Flood
+    :members:
+
+models/hazard/hazard
+===================
+..  autoclass:: models.hazard.Hazard
+    :members:
+
+models/hazard/hazarddataset
+===========================
+..  autoclass:: models.hazarddataset.HazardDataset
+    :members:
+..  autoclass:: models.hazarddataset.HurricaneDataset
+    :members:
+..  autoclass:: models.hazarddataset.EarthquakeDataset
+    :members:
+..  autoclass:: models.hazarddataset.TsunamiDataset
+    :members:
+..  autoclass:: models.hazarddataset.TornadoDataset
+    :members:
+..  autoclass:: models.hazarddataset.FloodDataset
+    :members:
+
+models/hazard/hurricane
+=======================
+..  autoclass:: models.hurricane.Hurricane
+    :members:
+
+models/hazard/tornado
+=====================
+..  autoclass:: models.tornado.Tornado
+    :members:
+
+models/hazard/tsunami
+=====================
+..  autoclass:: models.tsunami.Tsunami
+    :members:
 
 models/dfr3curve.py
 ===================
@@ -275,6 +421,11 @@ models/mappingset
 ..  autoclass:: models.mappingset.MappingSet
     :members:
 
+models/networkdataset
+=================
+..  autoclass:: models.networkdataset.NetworkDataset
+    :members:
+
 models/repaircurveset
 =====================
 ..  autoclass:: models.repaircurveset.RepairCurveSet
@@ -285,12 +436,22 @@ models/restorationcurveset
 ..  autoclass:: models.restorationcurveset.RestorationCurveSet
     :members:
 
+models/units
+==========================
+..  autoclass:: models.units.Units
+    :members:
+
 utilities
 ^^^^^^^^^
 
 utils/analysisutil
 ==================
 ..  autoclass:: utils.analysisutil.AnalysisUtil
+    :members:
+
+utils/cge_ml_file_util
+==================
+..  autoclass:: utils.cge_ml_file_util.CGEMLFileUtil
     :members:
 
 utils/cgeoutputprocess

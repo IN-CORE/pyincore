@@ -265,7 +265,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
 
         # failure probability
         fp_result = collections.OrderedDict()
-        fp_result.update(dmg)
+        fp_result['guid'] = dmg['guid']
 
         ds_sample = self.sample_damage_interval(dmg, damage_interval_keys,
                                                 num_samples, seed)
@@ -308,6 +308,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
                     prob_val += AnalysisUtil.float_to_decimal(dmg[ds_name])
             if flag:
                 print("cannot determine MC damage state!")
+                break
 
         return ds
 
@@ -332,5 +333,7 @@ class MonteCarloFailureProbability(BaseAnalysis):
                 count += 1
             else:
                 func[sample] = "1"
-
-        return func, count / len(ds_sample)
+        if len(ds_sample):
+            return func, count / len(ds_sample)
+        else:
+            return func, np.nan

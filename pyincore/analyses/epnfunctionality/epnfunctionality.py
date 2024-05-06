@@ -158,7 +158,7 @@ class EpnFunctionality(BaseAnalysis):
                     'id': 'epf_sample_failure_state',
                     'required': True,
                     'description': 'CSV file of failure state for each sample. Output from MCS analysis',
-                    'type': 'incore:sampleFailureState'
+                    'type': ['incore:sampleFailureState']
                 },
             ],
             'output_datasets': [

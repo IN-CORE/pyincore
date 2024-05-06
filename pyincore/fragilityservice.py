@@ -8,7 +8,9 @@
 import urllib
 
 from pyincore import IncoreClient
+from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
+from pyincore.utils import return_http_response
 
 
 class FragilityService(Dfr3Service):
@@ -25,11 +27,13 @@ class FragilityService(Dfr3Service):
 
         super(FragilityService, self).__init__(client)
 
+    @forbid_offline
     def get_dfr3_sets(self, demand_type: str = None,
                       hazard_type: str = None, inventory_type: str = None,
                       author: str = None, legacy_id: str = None,
                       creator: str = None, space: str = None,
-                      skip: int = None, limit: int = None):
+                      skip: int = None, limit: int = None,
+                      timeout=(30, 600), **kwargs):
         """Get the set of fragility data, curves.
 
         Args:
@@ -42,6 +46,8 @@ class FragilityService(Dfr3Service):
             space (str): Name of space, default None.
             skip (int):  Skip the first n results, default None.
             limit (int): Limit number of results to return, default None.
+            timeout (tuple): Timeout for requests, default (30, 600).
+            **kwargs: Additional arguments.
 
         Returns:
             obj: HTTP response with search results.
@@ -69,5 +75,5 @@ class FragilityService(Dfr3Service):
         if space is not None:
             payload['space'] = space
 
-        r = self.client.get(url, params=payload)
-        return r.json()
+        r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
+        return return_http_response(r).json()

@@ -47,6 +47,42 @@ class PopulationDislocation(BaseAnalysis):
                     'description': 'Seed to ensure replication if run as part of a probabilistic analysis, '
                                    'for example in connection with Housing Unit Allocation analysis.',
                     'type': int
+                },
+                {
+                    'id': 'choice_dislocation',
+                    'required': False,
+                    'description': 'Flag to calculate choice dislocation',
+                    'type': bool
+                },
+                {
+                    'id': 'choice_dislocation_cutoff',
+                    'required': False,
+                    'description': 'Choice dislocation cutoff',
+                    'type': float
+                },
+                {
+                    'id': 'choice_dislocation_ds',
+                    'required': False,
+                    'description': 'Damage state to use for choice dislocation ',
+                    'type': str
+                },
+                {
+                    'id': 'unsafe_occupancy',
+                    'required': False,
+                    'description': 'Flag to calculate unsafe occupancy',
+                    'type': bool
+                },
+                {
+                    'id': 'unsafe_occupancy_cutoff',
+                    'required': False,
+                    'description': 'Unsafe occupancy cutoff',
+                    'type': float
+                },
+                {
+                    'id': 'unsafe_occupancy_ds',
+                    'required': False,
+                    'description': 'Damage state to use for unsafe occupancy ',
+                    'type': str
                 }
             ],
             'input_datasets': [
@@ -116,13 +152,30 @@ class PopulationDislocation(BaseAnalysis):
         value_loss = self.get_input_dataset("value_loss_param").get_dataframe_from_csv(low_memory=False)
         value_loss.set_index('damagestate', inplace=True)
 
+        # Get choice_dislocation and unsafe_occupancy variables
+        choice_dislocation = self.get_parameter("choice_dislocation")
+        unsafe_occupancy = self.get_parameter("unsafe_occupancy")
+
         merged_block_inv = PopulationDislocationUtil.merge_damage_housing_block(
             building_dmg, housing_unit_alloc, bg_data
         )
 
         # Returns dataframe
         merged_final_inv = self.get_dislocation(seed_i, merged_block_inv, value_loss)
-        csv_source = "dataframe"
+
+        # Choice dislocation and unsafe occupancy calculations
+        merged_final_inv["choice_dis"] = None
+        merged_final_inv["unsafe_occ"] = None
+        if choice_dislocation:
+            choice_dislocation_cutoff = self.get_parameter("choice_dislocation_cutoff") or 0.5
+            choice_dislocation_ds = self.get_parameter("choice_dislocation_ds") or "DS_0"
+            PopulationDislocationUtil.get_choice_dislocation(merged_final_inv, choice_dislocation_cutoff, choice_dislocation_ds)
+
+        if unsafe_occupancy:
+            unsafe_occupancy_cutoff = self.get_parameter("unsafe_occupancy_cutoff") or 0.5
+            unsafe_occupancy_ds = self.get_parameter("unsafe_occupancy_ds") or "DS_3"
+            PopulationDislocationUtil.get_unsafe_occupancy(merged_final_inv, unsafe_occupancy_cutoff, unsafe_occupancy_ds)
+
         self.set_result_csv_data("result", merged_final_inv, result_name, "dataframe")
 
         return True

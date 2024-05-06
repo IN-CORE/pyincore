@@ -11,13 +11,14 @@ import json
 import os
 
 import fiona
-import numpy
 import pandas as pd
 import geopandas as gpd
 import rasterio
-import wntr
 import warnings
 from pyincore import DataService
+from pathlib import Path
+import shutil
+
 
 warnings.filterwarnings("ignore", "", UserWarning)
 
@@ -34,6 +35,8 @@ class Dataset:
         self.metadata = metadata
 
         # For convenience instead of having to dig through the metadata for these
+        self.title = metadata["title"] if "title" in metadata else None
+        self.description = metadata["description"] if "description" in metadata else None
         self.data_type = metadata["dataType"]
         self.format = metadata["format"]
         self.id = metadata["id"]
@@ -197,21 +200,6 @@ class Dataset:
         else:
             return fiona.open(filename)
 
-    def get_EPAnet_inp_reader(self):
-        """Utility method for reading different standard file formats: EPAnet reader.
-
-        Returns:
-            obj: A Winter model.
-
-        """
-        filename = self.local_file_path
-        if os.path.isdir(filename):
-            files = glob.glob(filename + "/*.inp")
-            if len(files) > 0:
-                filename = files[0]
-        wn = wntr.network.WaterNetworkModel(filename)
-        return wn
-
     def get_json_reader(self):
         """Utility method for reading different standard file formats: json reader.
 
@@ -231,27 +219,33 @@ class Dataset:
 
         return self.readers["json"]
 
-    def get_raster_value(self, location):
+    def get_raster_value(self, x, y):
         """Utility method for reading different standard file formats: raster value.
 
         Args:
-            location (obj): A point defined as location.x and location.y.
-
+            x (float): X coordinate.
+            y (float): Y coordinate.
         Returns:
             numpy.array: Hazard values.
 
         """
         if "raster" not in self.readers:
             filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.tif")
+                if len(files) > 0:
+                    filename = files[0]
             self.readers["raster"] = rasterio.open(filename)
 
         hazard = self.readers["raster"]
-        row, col = hazard.index(location.x, location.y)
+        row, col = hazard.index(x, y)
         # assume that there is only 1 band
         data = hazard.read(1)
-        if row < 0 or col < 0 or row >= hazard.height or col >= hazard.width:
-            return 0.0
-        return numpy.asscalar(data[row, col])
+        xmin, ymin, xmax, ymax = hazard.bounds
+        if x < xmin or x > xmax or y < ymin or y > ymax:
+            return None
+        # TODO check threshold
+        return float(data[row, col])
 
     def get_csv_reader(self):
         """Utility method for reading different standard file formats: csv reader.
@@ -269,6 +263,25 @@ class Dataset:
 
             csvfile = open(filename, 'r')
             return csv.DictReader(csvfile)
+
+        return self.readers["csv"]
+
+    def get_csv_reader_std(self):
+        """Utility method for reading different standard file formats: csv reader.
+
+         Returns:
+             obj: CSV reader.
+
+         """
+        if "csv" not in self.readers:
+            filename = self.local_file_path
+            if os.path.isdir(filename):
+                files = glob.glob(filename + "/*.csv")
+                if len(files) > 0:
+                    filename = files[0]
+
+            csvfile = open(filename, 'r')
+            return csv.reader(csvfile)
 
         return self.readers["csv"]
 
@@ -290,7 +303,7 @@ class Dataset:
 
         return filename
 
-    def get_dataframe_from_csv(self, low_memory=True):
+    def get_dataframe_from_csv(self, low_memory=True, delimiter=None):
         """Utility method for reading different standard file formats: Pandas DataFrame from csv.
 
         Args:
@@ -304,7 +317,7 @@ class Dataset:
         filename = self.get_file_path('csv')
         df = pd.DataFrame()
         if os.path.isfile(filename):
-            df = pd.read_csv(filename, header="infer", low_memory=low_memory)
+            df = pd.read_csv(filename, header="infer", low_memory=low_memory, delimiter=delimiter)
         return df
 
     def get_dataframe_from_shapefile(self):
@@ -319,6 +332,24 @@ class Dataset:
         gdf = gpd.read_file(self.local_file_path)
 
         return gdf
+
+    def delete_temp_file(self):
+        """Delete temporary folder.
+        """
+        if os.path.exists(self.local_file_path):
+            os.remove(self.local_file_path)
+
+    def delete_temp_folder(self):
+        """Delete temporary folder.
+        """
+        path = Path(self.local_file_path)
+        absolute_path = path.parent.absolute()
+
+        if os.path.isdir(absolute_path):
+            try:
+                shutil.rmtree(absolute_path)
+            except PermissionError as e:
+                print(f"Error deleting : {e}")
 
     def close(self):
         for key in self.readers:

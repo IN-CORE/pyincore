@@ -5,6 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 import concurrent.futures
+from itertools import repeat
 
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
@@ -31,6 +32,9 @@ class NonStructBuildingDamage(BaseAnalysis):
         """Executes building damage analysis."""
         # Building dataset
         building_set = self.get_input_dataset("buildings").get_inventory_reader()
+
+        # get input hazard
+        hazard, hazard_type, hazard_dataset_id = self.create_hazard_object_from_input_params()
 
         # set Default Fragility key
         fragility_key_as = self.get_parameter("fragility_key_as")
@@ -69,7 +73,10 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         (ds_results, damage_results) = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
                                                                               num_workers,
-                                                                              inventory_args)
+                                                                              inventory_args,
+                                                                              repeat(hazard),
+                                                                              repeat(hazard_type),
+                                                                              repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
         self.set_result_json_data("damage_result",
@@ -99,11 +106,14 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def building_damage_analysis_bulk_input(self, buildings):
+    def building_damage_analysis_bulk_input(self, buildings, hazard, hazard_type, hazard_dataset_id):
         """Run analysis for multiple buildings.
 
         Args:
             buildings (list): Multiple buildings from input inventory set.
+            hazard (obj): Hazard object.
+            hazard_type (str): Hazard type.
+            hazard_dataset_id (str): Hazard dataset id.
 
         Returns:
             dict: An ordered dictionary with building damage values.
@@ -111,11 +121,13 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         """
         # read static parameters from object self
-        hazard_type = self.get_parameter("hazard_type")
-        hazard_dataset_id = self.get_parameter("hazard_id")
         liq_geology_dataset_id = self.get_parameter("liq_geology_dataset_id")
         use_liquefaction = self.get_parameter("use_liquefaction")
         use_hazard_uncertainty = self.get_parameter("use_hazard_uncertainty")
+
+        # get allowed demand types for the hazard type
+        allowed_demand_types = [item["demand_type"].lower() for item in self.hazardsvc.get_allowed_demands(
+            hazard_type)]
 
         building_results = []
         damage_results = []
@@ -137,8 +149,8 @@ class NonStructBuildingDamage(BaseAnalysis):
                 loc = str(location.y) + "," + str(location.x)
 
                 # Acceleration-Sensitive
-                demands_as = AnalysisUtil.get_hazard_demand_types(building, fragility_set_as, hazard_type)
-                units_as = fragility_set_as.demand_units
+                demands_as, units_as, _ = AnalysisUtil.get_hazard_demand_types_units(building, fragility_set_as,
+                                                                                     hazard_type, allowed_demand_types)
                 value_as = {
                     "demands": demands_as,
                     "units": units_as,
@@ -147,8 +159,8 @@ class NonStructBuildingDamage(BaseAnalysis):
                 values_payload_as.append(value_as)
 
                 # Drift-Sensitive
-                demands_ds = AnalysisUtil.get_hazard_demand_types(building, fragility_set_ds, hazard_type)
-                units_ds = fragility_set_ds.demand_units
+                demands_ds, units_ds, _ = AnalysisUtil.get_hazard_demand_types_units(building, fragility_set_ds,
+                                                                                     hazard_type, allowed_demand_types)
                 value_ds = {
                     "demands": demands_ds,
                     "units": units_ds,
@@ -173,8 +185,8 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         # get hazard values and liquefaction
         if hazard_type == 'earthquake':
-            hazard_resp_as = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload_as)
-            hazard_resp_ds = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload_ds)
+            hazard_resp_as = hazard.read_hazard_values(values_payload_as, self.hazardsvc)
+            hazard_resp_ds = hazard.read_hazard_values(values_payload_ds, self.hazardsvc)
 
             # adjust dmg probability for liquefaction
             if use_liquefaction:
@@ -280,10 +292,10 @@ class NonStructBuildingDamage(BaseAnalysis):
             building_result['DS_DS_1'] = dmg_interval_ds['DS_1']
             building_result['DS_DS_2'] = dmg_interval_ds['DS_2']
             building_result['DS_DS_3'] = dmg_interval_ds['DS_3']
-            building_result['hazard_exposure_as'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_as,
-                                                                                                 hazard_type)
-            building_result['hazard_exposure_ds'] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_ds,
-                                                                                                 hazard_type)
+            hazard_exposure_as = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_as, hazard_type)
+            hazard_exposure_ds = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_ds, hazard_type)
+            haz_expose = NonStructBuildingUtil.determine_haz_exposure(hazard_exposure_as, hazard_exposure_ds)
+            building_result['haz_expose'] = haz_expose
 
             # put damage results in dictionary
             damage_result = dict()
@@ -341,13 +353,13 @@ class NonStructBuildingDamage(BaseAnalysis):
                 },
                 {
                     'id': 'hazard_type',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard Type (e.g. earthquake)',
                     'type': str
                 },
                 {
                     'id': 'hazard_id',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard ID',
                     'type': str
                 },
@@ -387,6 +399,14 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request',
                     'type': int
+                },
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': False,
+                    'description': 'Hazard object',
+                    'type': ["earthquake"]
                 },
             ],
             'input_datasets': [

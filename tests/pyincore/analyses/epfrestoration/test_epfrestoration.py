@@ -60,7 +60,14 @@ def run_with_base_class():
     epf_rest.run_analysis()
 
     # test utility function
-    epf_rest_util = EpfRestorationUtil(epf_rest)
+    inventory_restoration_map = epf_rest.get_output_dataset("inventory_restoration_map")
+    pf_results = epf_rest.get_output_dataset("pf_results")
+    time_results = epf_rest.get_output_dataset("time_results")
+    time_interval = epf_rest.get_parameter("time_interval")
+    pf_interval = epf_rest.get_parameter("pf_interval")
+    end_time = epf_rest.get_parameter("end_time")
+    epf_rest_util = EpfRestorationUtil(inventory_restoration_map, pf_results, time_results, time_interval,
+                                       pf_interval, end_time)
     functionality = epf_rest_util.get_percentage_func(guid="60748fbd-67c3-4f8d-beb9-26685a53d3c5",
                                                       damage_state="DS_0", time=2.0)
     time = epf_rest_util.get_restoration_time(guid="60748fbd-67c3-4f8d-beb9-26685a53d3c5", damage_state="DS_1", pf=0.81)

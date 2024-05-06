@@ -8,6 +8,7 @@ import csv
 import math
 import os
 import re
+import numpy as np
 from typing import List, Dict
 from collections import Counter
 
@@ -58,7 +59,19 @@ class AnalysisUtil:
 
     @staticmethod
     def float_to_decimal(num: float):
-        return Decimal(str(num))
+
+        # Helper function to check if a string is a float
+        def is_float(string):
+            try:
+                float(string)
+                return True
+            except ValueError:
+                return False
+
+        if is_float(num):
+            return Decimal(str(num))
+        else:
+            return np.nan
 
     @staticmethod
     def float_list_to_decimal(num_list: list):
@@ -69,34 +82,44 @@ class AnalysisUtil:
         return {key: Decimal(str(num_dict[key])) for key in num_dict}
 
     @staticmethod
+    def dmg_string_dict_to_dmg_float_dict(dmg_dict: dict):
+        float_dmg_dict = {}
+        for key in dmg_dict:
+            if key != 'guid' and key != 'haz_expose':
+                if dmg_dict[key] == '':
+                    float_dmg_dict[key] = np.nan
+                else:
+                    float_dmg_dict[key] = float(dmg_dict[key])
+            else:
+                if dmg_dict[key] != '':
+                    float_dmg_dict[key] = dmg_dict[key]
+                else:
+                    float_dmg_dict[key] = np.nan
+        return float_dmg_dict
+
+    @staticmethod
     def calculate_mean_damage(dmg_ratio_tbl, dmg_intervals,
                               damage_interval_keys, is_bridge=False,
                               bridge_spans=1):
         if len(damage_interval_keys) < 4:
             raise ValueError("we only accept 4 damage or more than 4 interval keys!")
 
+        float_dmg_intervals = AnalysisUtil.dmg_string_dict_to_dmg_float_dict(dmg_intervals)
+
         output = collections.OrderedDict()
         if len(dmg_ratio_tbl) == 5:
             output['meandamage'] = float(
-                dmg_ratio_tbl[1]["Best Mean Damage Ratio"]) * float(
-                dmg_intervals[damage_interval_keys[0]]) + float(
-                dmg_ratio_tbl[2]["Best Mean Damage Ratio"]) * float(
-                dmg_intervals[damage_interval_keys[1]]) + float(
-                dmg_ratio_tbl[3]["Best Mean Damage Ratio"]) * float(
-                dmg_intervals[damage_interval_keys[2]]) + float(
-                dmg_ratio_tbl[4]["Best Mean Damage Ratio"]) * float(
-                dmg_intervals[damage_interval_keys[3]])
+                float(dmg_ratio_tbl[1]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[0]] + \
+                float(dmg_ratio_tbl[2]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[1]] + \
+                float(dmg_ratio_tbl[3]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[2]] +\
+                float(dmg_ratio_tbl[4]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[3]])
 
         elif len(dmg_ratio_tbl) == 4:
             output['meandamage'] = float(
-                dmg_ratio_tbl[0]["Mean Damage Factor"]) * float(
-                dmg_intervals[damage_interval_keys[0]]) + float(
-                dmg_ratio_tbl[1]["Mean Damage Factor"]) * float(
-                dmg_intervals[damage_interval_keys[1]]) + float(
-                dmg_ratio_tbl[2]["Mean Damage Factor"]) * float(
-                dmg_intervals[damage_interval_keys[2]]) + float(
-                dmg_ratio_tbl[3]["Mean Damage Factor"]) * float(
-                dmg_intervals[damage_interval_keys[3]])
+                float(dmg_ratio_tbl[0]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[0]] + \
+                float(dmg_ratio_tbl[1]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[1]] + \
+                float(dmg_ratio_tbl[2]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[2]] + \
+                float(dmg_ratio_tbl[3]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[3]])
 
         elif len(dmg_ratio_tbl) == 6 and is_bridge:
             # this is for bridge
@@ -110,19 +133,15 @@ class AnalysisUtil:
                 dmg_ratio_tbl[5]['Best Mean Damage Ratio'])
 
             output['meandamage'] = \
-                weight_slight * float(dmg_intervals[damage_interval_keys[1]]) + \
-                weight_moderate * float(
-                    dmg_intervals[damage_interval_keys[2]]) + \
-                weight_extensive * float(
-                    dmg_intervals[damage_interval_keys[3]])
+                weight_slight * float_dmg_intervals[damage_interval_keys[1]] + \
+                weight_moderate * float_dmg_intervals[damage_interval_keys[2]] + \
+                weight_extensive * float_dmg_intervals[damage_interval_keys[3]]
 
             if bridge_spans >= 3:
                 output[
-                    'meandamage'] += weight_collapse1 / bridge_spans * float(
-                    dmg_intervals[damage_interval_keys[4]])
+                    'meandamage'] += weight_collapse1 / bridge_spans *float_dmg_intervals[damage_interval_keys[4]]
             else:
-                output['meandamage'] += weight_collapse0 * float(
-                    dmg_intervals[damage_interval_keys[4]])
+                output['meandamage'] += weight_collapse0 * float_dmg_intervals[damage_interval_keys[4]]
         else:
             raise ValueError('We cannot handle this damage ratio format.')
 
@@ -131,11 +150,13 @@ class AnalysisUtil:
     @staticmethod
     def calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg,
                                             mean_damage, damage_interval_keys):
+
+        float_dmg = AnalysisUtil.dmg_string_dict_to_dmg_float_dict(dmg)
         output = collections.OrderedDict()
         result = 0.0
         idx = 0
         for key in damage_interval_keys:
-            result += float(dmg[key]) * (math.pow(
+            result += float_dmg[key] * (math.pow(
                 float(dmg_ratio_tbl[idx]["Mean Damage Factor"]), 2) + math.pow(
                 float(dmg_ratio_tbl[idx]["Deviation Damage Factor"]), 2))
             idx += 1
@@ -240,14 +261,17 @@ class AnalysisUtil:
         keys = list(limit_state_probabilities.keys())
         adjusted_limit_state_probabilities = collections.OrderedDict()
 
-        for i in range(len(keys)):
+        ground_failure_probabilities_len = len(ground_failure_probabilities)
+        keys_len = len(keys)
+
+        for i in range(keys_len):
             # check and see...if we are trying to use the last ground failure
             # number for something other than the
             # last limit-state-probability, then we should use the
             # second-to-last probability of ground failure instead.
 
-            if i > len(ground_failure_probabilities) - 1:
-                prob_ground_failure = ground_failure_probabilities[len(ground_failure_probabilities) - 2]
+            if i > ground_failure_probabilities_len - 1:
+                prob_ground_failure = ground_failure_probabilities[ground_failure_probabilities_len - 2]
             else:
                 prob_ground_failure = ground_failure_probabilities[i]
 
@@ -448,7 +472,7 @@ class AnalysisUtil:
         return hazard_demand_type
 
     @staticmethod
-    def get_hazard_demand_types(building, fragility_set, hazard_type):
+    def get_hazard_demand_types_units(building, fragility_set, hazard_type, allowed_demand_types):
         """
         Get hazard demand type. This method is intended to replace get_hazard_demand_type. Fragility_set is not a
         json but a fragilityCurveSet object now.
@@ -457,6 +481,7 @@ class AnalysisUtil:
             building (obj): A JSON mapping of a geometric object from the inventory: current building.
             fragility_set (obj): FragilityCurveSet object
             hazard_type (str): A hazard type such as earthquake, tsunami etc.
+            allowed_demand_types (list): A list of allowed demand types in lowercase
 
         Returns:
             str: A hazard demand type.
@@ -467,54 +492,76 @@ class AnalysisUtil:
         BLDG_PERIOD = "period"
 
         fragility_demand_types = fragility_set.demand_types
+        fragility_demand_units = fragility_set.demand_units
         adjusted_demand_types = []
+        adjusted_demand_units = []
+        adjusted_to_original = {}
 
-        for demand_type in fragility_demand_types:
+        for index, demand_type in enumerate(fragility_demand_types):
+            original_demand_type = demand_type
+            adjusted_to_original[original_demand_type] = original_demand_type
+
+            demand_type = demand_type.lower()
             adjusted_demand_type = demand_type
+            adjusted_demand_unit = fragility_demand_units[index]
             # TODO: Due to the mismatch in demand types names on DFR3 vs hazard service, we should refactor this before
             # TODO: using expression based fragilities for tsunami & earthquake
             if hazard_type.lower() == "tsunami":
-                demand_type = demand_type.lower()
                 if demand_type == "momentumflux":
                     adjusted_demand_type = "mmax"
                 elif demand_type == "inundationdepth":
                     adjusted_demand_type = "hmax"
+                if adjusted_demand_type not in allowed_demand_types:
+                    continue
             elif hazard_type.lower() == "earthquake":
-                demand_type = demand_type.lower()
-                num_stories = building[PROPERTIES][BLDG_STORIES]
-                # Get building period from the fragility if possible
-                building_args = fragility_set.construct_expression_args_from_inventory(building)
-                building_period = fragility_set.fragility_curves[0].get_building_period(
-                    fragility_set.curve_parameters, **building_args)
+                # TODO temp fix
+                allowed = False
+                for allowed_demand_type in allowed_demand_types:
+                    if allowed_demand_type in demand_type:
+                        allowed = True
+                        break
+                if allowed:
+                    num_stories = building[PROPERTIES][BLDG_STORIES]
+                    # Get building period from the fragility if possible
+                    building_args = fragility_set.construct_expression_args_from_inventory(building)
+                    building_period = fragility_set.fragility_curves[0].get_building_period(
+                        fragility_set.curve_parameters, **building_args)
 
-                # TODO: There might be a bug here as this is not handling SD
-                if demand_type.endswith('sa'):
-                    # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
-                    if demand_type != 'sa':
-                        if len(demand_type.split()) > 2:
-                            building_period = demand_type.split()[0]
+                    # TODO: There might be a bug here as this is not handling SD
+                    if demand_type.endswith('sa'):
+                        # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
+                        if demand_type != 'sa':
+                            if len(demand_type.split()) > 2:
+                                building_period = demand_type.split()[0]
+                                adjusted_demand_type = str(building_period) + " " + "SA"
+                        else:
+                            if building_period == 0.0:
+                                if BLDG_PERIOD in building[PROPERTIES] and building[PROPERTIES][BLDG_PERIOD] > 0.0:
+
+                                    building_period = building[PROPERTIES][BLDG_PERIOD]
+                                else:
+                                    # try to calculate the period from the expression
+                                    for param in fragility_set.curve_parameters:
+                                        if param["name"].lower() == "period":
+                                            # TODO: This is a hack and expects a parameter with name "period" present.
+                                            # This can potentially cause naming conflicts in some fragilities
+
+                                            building_period = evaluateexpression.evaluate(param["expression"],
+                                                                                          {"num_stories": num_stories})
+                                            # TODO: num_stories logic is not tested. should find a fragility with
+                                            # periodEqnType = 2 or 3 to test. periodEqnType = 1 doesn't need
+                                            # num_stories.
+
                             adjusted_demand_type = str(building_period) + " " + "SA"
-                    else:
-                        if building_period == 0.0:
-                            if BLDG_PERIOD in building[PROPERTIES] and building[PROPERTIES][BLDG_PERIOD] > 0.0:
-
-                                building_period = building[PROPERTIES][BLDG_PERIOD]
-                            else:
-                                # try to calculate the period from the expression
-                                for param in fragility_set.curve_parameters:
-                                    if param["name"].lower() == "period":
-                                        # TODO: This is a hack and expects a parameter with name "period" present.
-                                        #  This can potentially cause naming conflicts in some fragilities
-
-                                        building_period = evaluateexpression.evaluate(param["expression"],
-                                                                                      {"num_stories": num_stories})
-                                        # TODO: num_stories logic is not tested. should find a fragility with
-                                        #  periodEqnType = 2 or 3 to test. periodEqnType = 1 doesn't need num_stories.
-
-                        adjusted_demand_type = str(building_period) + " " + "SA"
-
+                else:
+                    continue
+            else:
+                if demand_type not in allowed_demand_types:
+                    continue
+            adjusted_to_original[adjusted_demand_type] = original_demand_type
             adjusted_demand_types.append(adjusted_demand_type)
-        return adjusted_demand_types
+            adjusted_demand_units.append(adjusted_demand_unit)
+        return adjusted_demand_types, adjusted_demand_units, adjusted_to_original
 
     @staticmethod
     def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):

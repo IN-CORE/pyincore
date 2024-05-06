@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 # TODO: exception handling for validation and set methods
-from pyincore import DataService, AnalysisUtil
+from pyincore import DataService, AnalysisUtil, Earthquake, Tornado, Tsunami, Hurricane, Flood
 from pyincore.dataset import Dataset
 import typing
 
@@ -33,6 +33,11 @@ class BaseAnalysis:
         self.input_datasets = {}
         for input_dataset in self.spec['input_datasets']:
             self.input_datasets[input_dataset['id']] = {'spec': input_dataset, 'value': None}
+
+        self.input_hazards = {}
+        if 'input_hazards' in self.spec:
+            for input_hazards in self.spec['input_hazards']:
+                self.input_hazards[input_hazards['id']] = {'spec': input_hazards, 'value': None}
 
         self.output_datasets = {}
         for output_dataset in self.spec['output_datasets']:
@@ -124,6 +129,66 @@ class BaseAnalysis:
         else:
             print(result[1])
             return False
+
+    def get_input_hazards(self):
+        """Get the dictionary of the input hazards of an analysis."""
+        inputs = {}
+        for key in self.input_hazards.keys():
+            inputs[key] = self.input_hazards[key]['value']
+        return inputs
+
+    def get_input_hazard(self, hz_id):
+        """Get or set the analysis dataset. Setting the hazard to a new value
+        will return True or False on error."""
+        return self.input_hazards[hz_id]['value']
+
+    def set_input_hazard(self, hz_id, hazard):
+        result = self.validate_input_hazard(self.input_hazards[hz_id]['spec'], hazard)
+        if result[0]:
+            self.input_hazards[hz_id]['value'] = hazard
+            return True
+        else:
+            print(result[1])
+            return False
+
+    def create_hazard_object_from_input_params(self):
+        """Create hazard object from input parameters."""
+        hazard_object = self.get_input_hazard("hazard")
+        hazard_type = self.get_parameter("hazard_type")
+        hazard_dataset_id = self.get_parameter("hazard_id")
+
+        # either hazard object or hazard id + hazard type must be provided
+        if hazard_object is None and (hazard_type is None or hazard_dataset_id is None):
+            raise ValueError("Either hazard object or hazard id + hazard type must be provided")
+
+        # create hazard object from remote
+        elif hazard_object is None and hazard_type is not None and hazard_dataset_id is not None:
+            hazard_object = BaseAnalysis._create_hazard_object(hazard_type, hazard_dataset_id, self.hazardsvc)
+
+        # use hazard object
+        else:
+            hazard_type = hazard_object.hazard_type
+            hazard_dataset_id = hazard_object.id
+
+        return hazard_object, hazard_type, hazard_dataset_id
+
+    @staticmethod
+    def _create_hazard_object(hazard_type, hazard_dataset_id, hazardsvc):
+        """Helper function to create hazard object from hazard type and hazard dataset id."""
+        if hazard_type == "earthquake":
+            hazard_object = Earthquake.from_hazard_service(hazard_dataset_id, hazardsvc)
+        elif hazard_type == "tornado":
+            hazard_object = Tornado.from_hazard_service(hazard_dataset_id, hazardsvc)
+        elif hazard_type == "tsunami":
+            hazard_object = Tsunami.from_hazard_service(hazard_dataset_id, hazardsvc)
+        elif hazard_type == "hurricane":
+            hazard_object = Hurricane.from_hazard_service(hazard_dataset_id, hazardsvc)
+        elif hazard_type == "flood":
+            hazard_object = Flood.from_hazard_service(hazard_dataset_id, hazardsvc)
+        else:
+            raise ValueError("The provided hazard type is not supported.")
+
+        return hazard_object
 
     def get_output_datasets(self):
         """Get the output dataset of the analysis."""
@@ -221,6 +286,38 @@ class BaseAnalysis:
         return is_valid, err_msg
 
     @staticmethod
+    def validate_input_hazard(hazard_spec, hazard):
+        """Validate input hazard.
+
+        Args:
+            hazard_spec (obj): Specifications of hazard.
+            hazard (obj): Hazard description.
+
+        Returns:
+            bool, str: Hazard validity, True if valid, False otherwise. Error message.
+
+        """
+        is_valid = True
+        err_msg = ''
+
+        if not isinstance(hazard, type(None)):
+            # if hazard is not none, check hazard instance type
+            is_valid = False
+            for hazard_type in hazard_spec['type']:
+                if hazard.hazard_type == hazard_type:
+                    is_valid = True
+                    break
+            if not is_valid:
+                err_msg = 'hazard type does not match - ' + 'given type: ' + \
+                          hazard.hazard_type + ' spec types: ' + str(hazard_spec['type'])
+        else:
+            # if hazard is none, check 'requirement'
+            if hazard_spec['required']:
+                is_valid = False
+                err_msg = 'required hazard is missing - spec: ' + str(hazard_spec)
+        return is_valid, err_msg
+
+    @staticmethod
     def validate_output_dataset(dataset_spec, dataset):
         """Match output dataset by type.
 
@@ -281,6 +378,16 @@ class BaseAnalysis:
             if not result[0]:
                 print("Error reading dataset: " + result[1])
                 return result
+
+        # TODO: We will iteratively roll out input hazard; once it's done, we will remove this if block
+        if 'input_hazards' in self.spec:
+            for hazard_spec in self.spec['input_hazards']:
+                hz_id = hazard_spec["id"]
+                result = self.validate_input_hazard(hazard_spec, self.input_hazards[hz_id]["value"])
+
+                if not result[0]:
+                    print("Error reading hazard: " + result[1])
+                    return result
 
         for parameter_spec in self.spec['input_parameters']:
             par_id = parameter_spec["id"]

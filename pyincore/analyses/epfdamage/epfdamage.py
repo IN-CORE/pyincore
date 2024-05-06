@@ -39,11 +39,8 @@ class EpfDamage(BaseAnalysis):
             fragility_key = self.DEFAULT_FRAGILITY_KEY
             self.set_parameter("fragility_key", fragility_key)
 
-        # Get hazard input
-        hazard_dataset_id = self.get_parameter("hazard_id")
-
-        # Hazard type, note this is here for future use if additional hazards are supported by this analysis
-        hazard_type = self.get_parameter("hazard_type")
+        # get input hazard
+        hazard, hazard_type, hazard_dataset_id = self.create_hazard_object_from_input_params()
 
         # Hazard Uncertainty
         use_hazard_uncertainty = False
@@ -70,7 +67,9 @@ class EpfDamage(BaseAnalysis):
 
         (ds_results, damage_results) = self.epf_damage_concurrent_future(self.epf_damage_analysis_bulk_input,
                                                                          num_workers,
-                                                                         inventory_args, repeat(hazard_type),
+                                                                         inventory_args,
+                                                                         repeat(hazard),
+                                                                         repeat(hazard_type),
                                                                          repeat(hazard_dataset_id))
 
         self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
@@ -101,11 +100,12 @@ class EpfDamage(BaseAnalysis):
 
         return output_ds, output_dmg
 
-    def epf_damage_analysis_bulk_input(self, epfs, hazard_type, hazard_dataset_id):
+    def epf_damage_analysis_bulk_input(self, epfs, hazard, hazard_type, hazard_dataset_id):
         """Run analysis for multiple epfs.
 
         Args:
             epfs (list): Multiple epfs from input inventory set.
+            hazard (obj): A hazard object.
             hazard_type (str): A type of hazard exposure (earthquake, tsunami, tornado, or hurricane).
             hazard_dataset_id (str): An id of the hazard exposure.
 
@@ -179,16 +179,7 @@ class EpfDamage(BaseAnalysis):
             else:
                 unmapped_epfs.append(epf)
 
-        if hazard_type == 'earthquake':
-            hazard_vals = self.hazardsvc.post_earthquake_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'tornado':
-            hazard_vals = self.hazardsvc.post_tornado_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'hurricane':
-            hazard_vals = self.hazardsvc.post_hurricane_hazard_values(hazard_dataset_id, values_payload)
-        elif hazard_type == 'tsunami':
-            hazard_vals = self.hazardsvc.post_tsunami_hazard_values(hazard_dataset_id, values_payload)
-        else:
-            raise ValueError("Missing hazard type.")
+        hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
 
         liquefaction_resp = None
         if liquefaction_available:
@@ -327,13 +318,13 @@ class EpfDamage(BaseAnalysis):
                 },
                 {
                     'id': 'hazard_type',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard type (e.g. earthquake).',
                     'type': str
                 },
                 {
                     'id': 'hazard_id',
-                    'required': True,
+                    'required': False,
                     'description': 'Hazard ID which defines the particular hazard (e.g. New madrid earthquake '
                                    'using Atkinson Boore 1995).',
                     'type': str
@@ -374,6 +365,14 @@ class EpfDamage(BaseAnalysis):
                     'required': False,
                     'description': 'If using parallel execution, the number of cpus to request.',
                     'type': int
+                },
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': False,
+                    'description': 'Hazard object',
+                    'type': ["earthquake", "tornado", "hurricane", "flood", "tsunami"]
                 },
             ],
             'input_datasets': [

@@ -64,10 +64,17 @@ def run_with_base_class():
     wf_rest.run_analysis()
 
     # test utility function
-    wf_util = WaterFacilityRestorationUtil(wf_rest)
+    inventory_restoration_map = wf_rest.get_output_dataset("inventory_restoration_map")
+    pf_results = wf_rest.get_output_dataset("pf_results")
+    time_results = wf_rest.get_output_dataset("time_results")
+    time_interval = wf_rest.get_parameter("time_interval")
+    pf_interval = wf_rest.get_parameter("pf_interval")
+    end_time = wf_rest.get_parameter("end_time")
+    wf_util = WaterFacilityRestorationUtil(inventory_restoration_map, pf_results, time_results, time_interval,
+                                           pf_interval, end_time)
     functionality = wf_util.get_percentage_func(guid="e1bce78d-00a1-4605-95f3-3776ff907f73",
                                                 damage_state="DS_0", time=2.0)
-    time = wf_util.get_restoration_time(guid="e1bce78d-00a1-4605-95f3-3776ff907f73", damage_state="DS_1", pf=0.81)
+    time = wf_util.get_restoration_time(guid="e1bce78d-00a1-4605-95f3-3776ff907f73", damage_state="DS_1", pf=0.95)
     print(functionality, time)
 
 

@@ -14,7 +14,7 @@ def run_with_base_class():
     # incore-dev
     building_dmg = "602d96e4b1db9c28aeeebdce"  # dev Joplin
     # building_dmg = "602d975db1db9c28aeeebe35" # 15 guids test - dev Joplin
-    housing_unit_alloc = "602ea965b1db9c28aeefa5d6"  # dev Joplin
+    housing_unit_alloc = "63eb0fc2695e0f57262f7650"  # dev Joplin
     bg_data = "5df7cb0b425e0b00092c9464"  # Joplin 2ev2
     value_loss = "602d508fb1db9c28aeedb2a5"
 
@@ -30,6 +30,10 @@ def run_with_base_class():
 
     pop_dis.set_parameter("result_name", result_name)
     pop_dis.set_parameter("seed", seed)
+
+    # Set choice_dislocation and unsafe_occupancy parameters
+    pop_dis.set_parameter("choice_dislocation", True)
+    pop_dis.set_parameter("unsafe_occupancy", True)
 
     pop_dis.run_analysis()
 

@@ -1,0 +1,255 @@
+{
+  "name": "Tornado Fragilities for 19 Archetypes WITH retrofit WITH mappingEntryKeys",
+  "hazardType": "tornado",
+  "inventoryType": "building",
+  "mappings": [
+    {
+      "legacyEntry": {},
+      "entry": {
+        "retrofit_method_0": "5e4ca29e1eb25200014abc29",
+        "retrofit_method_1": "5e4ca2f51eb25200014abc9d",
+        "Non-Retrofit Fragility ID Code": "5e4ca22b9578290001e59005"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 1"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48f38b337d4a4659902659"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 2"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48f38b337d4a465990265a"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 3"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48f38b337d4a4659902657"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 4"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "retrofit_method_0": "5e4ca2e31eb25200014abc80",
+        "retrofit_method_1": "5e4ca3321eb25200014abcf4",
+        "Non-Retrofit Fragility ID Code": "5e4ca2831eb25200014abc0c"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 5"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa40337d4a476b0571b2"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 6"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa40337d4a476b0571b1"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 7"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa3f337d4a476b057192"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 8"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa40337d4a476b0571ae"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 9"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa40337d4a476b0571a7"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 10"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa40337d4a476b0571a5"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 11"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa40337d4a476b0571a3"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 12"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa3f337d4a476b0571a1"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 13"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa3f337d4a476b05719f"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 14"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48f38b337d4a465990264f"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 15"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48f38b337d4a465990264e"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 16"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa3f337d4a476b057193"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 17"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa3f337d4a476b05719a"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 18"
+        ]
+      }
+    },
+    {
+      "legacyEntry": {},
+      "entry": {
+        "Non-Retrofit Fragility ID Code": "5b48fa3f337d4a476b057199"
+      },
+      "rules": {
+        "AND": [
+          "int archetype EQUALS 19"
+        ]
+      }
+    }
+  ],
+  "creator": "cwang138",
+  "owner": "cwang138",
+  "mappingEntryKeys": [
+    {
+      "name": "retrofit_method_1",
+      "description": "Roof covering with asphalt shingles, and roof sheathing with 8d C6/12, and roof-to-wall connection type with two 16d toe nails.",
+      "defaultKey": false,
+      "config": {
+        "unit": "unitless",
+        "type": null
+      }
+    },
+    {
+      "name": "retrofit_method_2",
+      "description": "Roof covering with asphalt shingles, and roof sheathing with 8d C6/6, and roof-to-wall connection type with two H2.5 clips.",
+      "defaultKey": false,
+      "config": {
+        "unit": "unitless",
+        "type": null
+      }
+    },
+    {
+      "name": "Non-Retrofit Fragility ID Code",
+      "description": "Non-Retrofit Fragility",
+      "defaultKey": true,
+      "config": {
+        "unit": "unitless",
+        "type": null
+      }
+    }
+  ],
+  "spaces": [
+    "cwang138"
+  ],
+  "mappingType": "fragility"
+}

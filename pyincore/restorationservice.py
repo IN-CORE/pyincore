@@ -8,7 +8,9 @@
 from urllib.parse import urljoin
 
 from pyincore import IncoreClient
+from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
+from pyincore.utils import return_http_response
 
 
 class RestorationService(Dfr3Service):
@@ -21,14 +23,14 @@ class RestorationService(Dfr3Service):
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_dfr3_url = urljoin(client.service_url,
-                                                  'dfr3/api/restorations/')
+        self.base_dfr3_url = urljoin(client.service_url, 'dfr3/api/restorations/')
 
         super(RestorationService, self).__init__(client)
 
+    @forbid_offline
     def get_dfr3_sets(self, hazard_type: str = None, inventory_type: str = None,
                       author: str = None, creator: str = None, space: str = None,
-                      skip: int = None, limit: int = None):
+                      skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Get the set of restoration data, curves.
 
         Args:
@@ -62,5 +64,5 @@ class RestorationService(Dfr3Service):
         if space is not None:
             payload['space'] = space
 
-        r = self.client.get(url, params=payload)
-        return r.json()
+        r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
+        return return_http_response(r).json()
