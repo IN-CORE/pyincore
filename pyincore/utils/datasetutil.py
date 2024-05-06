@@ -42,7 +42,7 @@ class DatasetUtil:
         return join_gdf
 
     @staticmethod
-    def join_table_dataset_with_source_dataset(dataset, client, clean_attributes=True):
+    def join_table_dataset_with_source_dataset(dataset, client, clean_attributes=False):
         """Creates geopandas geodataframe by joining table dataset and its source dataset
 
             Args:
