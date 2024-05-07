@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased] 
+
+### Changed
+- Rename Housing Recovery to Housing Valuation Recovery Analysis [#560](https://github.com/IN-CORE/pyincore/issues/560)
+
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed

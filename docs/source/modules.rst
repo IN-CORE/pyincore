@@ -135,6 +135,13 @@ analyses/housingunitallocation
 ..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
     :members:
 
+analyses/housingvaluationrecovery
+========================
+..  autoclass:: housingvaluationrecovery.housingvaluationrecovery.HousingValuationRecovery
+    :members:
+..  autoclass:: housingvaluationrecovery.housingvaluationrecoveryutil.HousingValuationRecoveryUtil
+    :members:
+
 analyses/indp
 ==============================
 ..  autoclass:: indp.indp.INDP
