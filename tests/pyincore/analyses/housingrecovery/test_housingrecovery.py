@@ -3,7 +3,7 @@ from pyincore import MappingSet, FragilityService
 from pyincore.analyses.buildingdamage.buildingdamage import BuildingDamage
 from pyincore.analyses.housingunitallocation import HousingUnitAllocation
 from pyincore.analyses.populationdislocation import PopulationDislocation
-from pyincore.analyses.housingvaluationrecovery.housingvaluationrecovery import HousingValuationRecovery
+from pyincore.analyses.housingrecovery.housingrecovery import HousingRecovery
 import pyincore.globals as pyglobals
 
 
@@ -138,7 +138,7 @@ def run_with_base_class(chained):
         census_appr_id = "6241fbd153302c512d685181"  # dev
         result_name = "Galveston_building_values_chained"
 
-        housing_rec = HousingValuationRecovery(client)
+        housing_rec = HousingRecovery(client)
 
         housing_rec.set_input_dataset("population_dislocation", pd_result)
         housing_rec.load_remote_input_dataset("building_area", bldg_sqft_id)
@@ -163,7 +163,7 @@ def run_with_base_class(chained):
         census_appr_id = "62c4956d861e370172c5578b"
         result_name = "Galveston_building_values"
 
-        housing_rec = HousingValuationRecovery(client)
+        housing_rec = HousingRecovery(client)
 
         pop_disl_id = "623d1e1ca42a3e546aeba25f"  # dev
         housing_rec.load_remote_input_dataset("population_dislocation", pop_disl_id)
