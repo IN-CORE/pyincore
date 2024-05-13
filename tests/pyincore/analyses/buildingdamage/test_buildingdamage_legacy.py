@@ -97,31 +97,6 @@ def run_with_base_class():
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
 
-    # lumberton flood
-    hazard_type = "flood"
-    hazard_id = "5f4d02e99f43ee0dde768406"
-
-    # lumberton building inventory v7
-    # bldg_dataset_id = "603010f7b1db9c28aef53214"  # 40 building subset
-    bldg_dataset_id = "603010a4b1db9c28aef5319f"  # 21k full building
-
-    bldg_dmg = BuildingDamage(client)
-    bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-
-    # lumberton building mapping (with equation)
-    mapping_id = "602f3cf981bd2c09ad8f4f9d"
-    fragility_service = FragilityService(client)
-    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    bldg_dmg.set_parameter("fragility_key", "Lumberton Flood Building Fragility ID Code")
-
-    result_name = os.path.join(result_folder, "lumberton_flood_dmg_result")
-    bldg_dmg.set_parameter("result_name", result_name)
-    bldg_dmg.set_parameter("hazard_type", hazard_type)
-    bldg_dmg.set_parameter("hazard_id", hazard_id)
-    bldg_dmg.set_parameter("num_cpu", 4)
-    bldg_dmg.run_analysis()
-
     # joplin tornado with retrofit strategy
     bldg_dataset_id = "5df7d0de425e0b00092d0082"  # joplin building v6
     retrofit_strategy_id = "6091d5a8daa06e14ee96d502"  # plan 1
