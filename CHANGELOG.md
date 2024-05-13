@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Changed
+- Update Non-structural Building Damage to support flood [#562](https://github.com/IN-CORE/pyincore/issues/562)
+
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed
