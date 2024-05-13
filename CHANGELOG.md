@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Fixed
+- Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed

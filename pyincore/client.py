@@ -414,8 +414,11 @@ class IncoreClient(Client):
         if not os.path.isdir(self.hashed_svc_data_dir):
             logger.warning("Cached folder doesn't exist")
             return None
+        try:
+            shutil.rmtree(self.hashed_svc_data_dir)
+        except PermissionError as e:
+            print(f"Error clearing cache : {e}")
 
-        shutil.rmtree(self.hashed_svc_data_dir)
         # clear entry from service.json
         update_hash_entry("edit", hashed_url=self.hashed_service_url)
         return
