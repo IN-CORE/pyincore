@@ -3,7 +3,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.buildingportfolio import BuildingPortfolioRecoveryAnalysis
+from pyincore.analyses.buildingclusterrecovery import BuildingClusterRecovery
 from pyincore import IncoreClient
 import pyincore.globals as pyglobals
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         utility_partial_dataset = "5c756b1ec11bb369a33a0b4c"
         coefFL_dataset = "5c756b56c11bb369a33a0b58"
 
-        bldg_portfolio_recovery = BuildingPortfolioRecoveryAnalysis(client)
+        bldg_portfolio_recovery = BuildingClusterRecovery(client)
         bldg_portfolio_recovery.set_parameter("uncertainty", True)
         bldg_portfolio_recovery.set_parameter("sample_size", 35)  # default none. Gets size form input dataset
         bldg_portfolio_recovery.set_parameter("random_sample_size", 50)  # default 10000

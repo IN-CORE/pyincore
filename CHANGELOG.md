@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Changed
+- Rename Building Portfolio Analysis to Building Cluster Recvoery Analysis [#559](https://github.com/IN-CORE/pyincore/issues/559)
+
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed

@@ -10,11 +10,11 @@ import scipy as sp
 import scipy.stats
 import concurrent.futures
 
-from pyincore.analyses.buildingportfolio.BuildingData import BuildingData
+from pyincore.analyses.buildingclusterrecovery.buildingdata import BuildingData
 from pyincore import BaseAnalysis, Dataset
 
 
-class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
+class BuildingClusterRecovery(BaseAnalysis):
     """The Building Portfolio Recovery analysis uses damage probabilities of structural components,
     nonstructural drift-sensitive components, and nonstructural acceleration-sensitive components
     to calculate building’s initial functionality loss.
@@ -24,12 +24,12 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
 
     """
     def __init__(self, incore_client):
-        super(BuildingPortfolioRecoveryAnalysis, self).__init__(incore_client)
+        super(BuildingClusterRecovery, self).__init__(incore_client)
 
     def get_spec(self):
         return {
-            'name': 'building-portfolio-damage-analysis',
-            'description': 'Building Portfolio Damage Analysis (with uncertainty)',
+            'name': 'building-cluster-recovery-analysis',
+            'description': 'Building Cluster Recovery Analysis (with uncertainty)',
             'input_parameters': [
                 {
                     'id': 'result_name',
@@ -116,9 +116,9 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
             'output_datasets': [
                 {
                     'id': 'result',
-                    'parent_type': 'buildingPortfolio',
-                    'description': 'Building portfolio recovery result.',
-                    'type': 'incore:portfolioRecovery'
+                    'parent_type': 'buildingClusterRecovery',
+                    'description': 'Building cluster recovery result.',
+                    'type': 'incore:clusterRecovery'
                 }
             ]
         }
@@ -343,7 +343,7 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                         upper_bound95[t] = 1
 
             # END: Additional Code for uncertainty Analysis
-            with open(output_base_name + '_portfolio-recovery.csv', 'w+', newline='') as output_file:
+            with open(output_base_name + '_cluster-recovery.csv', 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', '75P_Upper_Bound',
                                       '75P_Lower_Bound', '95P_Upper_Bound', '95P_Lower_Bound',
@@ -354,14 +354,14 @@ class BuildingPortfolioRecoveryAnalysis(BaseAnalysis):
                                           lower_bound95[i], upper_bound95[i]] + list(mean_recovery[i]) +
                                          [pdf[i]])
         else:
-            with open(output_base_name + '_portfolio-recovery.csv', 'w+', newline='') as output_file:
+            with open(output_base_name + '_cluster-recovery.csv', 'w+', newline='') as output_file:
                 spam_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 spam_writer.writerow(['Week', 'Recovery_Percent_Func_Probability', 'RecPercent_RE',
                                       'RecPercent_RU', 'RecPercent_RO', 'RecPercent_BF', 'RecPercent_FF'])
                 for i in range(time_steps):
                     spam_writer.writerow([i + 1, mean_recovery_output[i]] + list(mean_recovery[i]))
 
-        self.set_output_dataset("result", Dataset.from_file(output_base_name + '_portfolio-recovery.csv',
+        self.set_output_dataset("result", Dataset.from_file(output_base_name + '_cluster-recovery.csv',
                                                             data_type=self.output_datasets["result"]["spec"]["type"]))
 
         print("INFO: Finished executing Building Portfolio Recovery Analysis")
