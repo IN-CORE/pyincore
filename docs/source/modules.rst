@@ -312,6 +312,29 @@ analyses/tornadoepndamage
 ..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
     :members:
 
+analyses/transportationrecovery
+===============================
+..  autoclass:: transportationrecovery.transportationrecovery.TransportationRecovery
+    :members:
+..  autoclass:: transportationrecovery.transportationrecoveryutil.TransportationRecoveryUtil
+    :members:
+..  autoclass:: transportationrecovery.post_disaster_long_term_solution.PostDisasterLongTermSolution
+    :members:
+..  autoclass:: transportationrecovery.nsga2.Solution
+    :members:
+..  autoclass:: transportationrecovery.nsga2.NSGAII
+    :members:
+..  autofunction:: transportationrecovery.WIPW.ipw_search
+    :members:
+..  autofunction:: transportationrecovery.WIPW.tipw_index
+    :members:
+..  autofunction:: transportationrecovery.WIPW.path_service_level_edges
+    :members:
+..  autofunction:: transportationrecovery.WIPW.path_adt_from_edges
+    :members:
+..  deprecated:: 1.19.0
+    This class will be deprecated soon. Use :class:`trafficflowrecovery.TrafficFlowRecovery` instead.
+
 analyses/trafficflowrecovery
 ===============================
 ..  autoclass:: trafficflowrecovery.trafficflowrecovery.TrafficFlowRecovery
