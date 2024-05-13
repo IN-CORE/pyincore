@@ -5,9 +5,9 @@
 import copy
 import networkx as nx
 import random
-from pyincore.analyses.transportationrecovery.nsga2 import Solution
-from pyincore.analyses.transportationrecovery import WIPW as WIPW
-from pyincore.analyses.transportationrecovery.transportationrecoveryutil import TransportationRecoveryUtil
+from pyincore.analyses.trafficflowrecovery.nsga2 import Solution
+from pyincore.analyses.trafficflowrecovery import WIPW as WIPW
+from pyincore.analyses.trafficflowrecovery.trafficflowrecoveryutil import TransportationRecoveryUtil
 
 
 class PostDisasterLongTermSolution(Solution):

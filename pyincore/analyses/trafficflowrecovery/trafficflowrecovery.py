@@ -3,10 +3,10 @@ import pandas as pd
 import copy
 import random
 
-from pyincore.analyses.transportationrecovery.transportationrecoveryutil import TransportationRecoveryUtil
-from pyincore.analyses.transportationrecovery.nsga2 import NSGAII
-from pyincore.analyses.transportationrecovery import WIPW as WIPW
-from pyincore.analyses.transportationrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
+from pyincore.analyses.trafficflowrecovery.trafficflowrecoveryutil import TransportationRecoveryUtil
+from pyincore.analyses.trafficflowrecovery.nsga2 import NSGAII
+from pyincore.analyses.trafficflowrecovery import WIPW as WIPW
+from pyincore.analyses.trafficflowrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
 from pyincore import BaseAnalysis
 
 
