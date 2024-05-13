@@ -333,7 +333,8 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'buildings',
                     'required': True,
                     'description': 'building Inventory',
-                    'type': ['ergo:buildingInventoryVer4'],
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5',
+                             'ergo:buildingInventoryVer6', 'ergo:buildingInventoryVer7'],
                 },
                 {
                     'id': 'dfr3_mapping_set',
@@ -347,13 +348,13 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'buildings',
                     'description': 'CSV file of damage states for building non-structural damage',
-                    'type': 'ergo:nsBuildingInventoryDamageVer3'
+                    'type': 'ergo:buildingDamageVer6'
                 },
                 {
                     'id': 'damage_result',
                     'parent_type': 'buildings',
                     'description': 'Json file with information about applied hazard value and fragility',
-                    'type': 'incore:nsBuildingInventoryDamageSupplement'
+                    'type': 'incore:buildingDamageSupplement'
                 }
             ]
         }
