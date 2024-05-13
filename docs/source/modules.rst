@@ -306,6 +306,13 @@ analyses/socialvulnerability
 ============================
 ..  autoclass:: socialvulnerability.socialvulnerability.SocialVulnerability
     :members:
+..  deprecated:: 1.19.0
+    This class will be deprecated soon. Use :class:`socialvulnerabilityscore.SocialVulnerabilityScore` instead.
+
+analyses/socialvulnerabilityscore
+============================
+..  autoclass:: socialvulnerabilityscore.socialvulnerabilityscore.SocialVulnerabilityScore
+    :members:
 
 analyses/tornadoepndamage
 =========================

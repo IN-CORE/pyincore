@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Changed
+- Rename Social Vulnerability Analysis to Social Vulnerability Index Analysis [#556](https://github.com/IN-CORE/pyincore/issues/556)
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed
