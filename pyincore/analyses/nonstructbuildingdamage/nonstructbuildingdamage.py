@@ -37,13 +37,9 @@ class NonStructBuildingDamage(BaseAnalysis):
         hazard, hazard_type, hazard_dataset_id = self.create_hazard_object_from_input_params()
 
         # set Default Fragility key
-        fragility_key_as = self.get_parameter("fragility_key_as")
-        if fragility_key_as is None:
-            self.set_parameter("fragility_key_as", NonStructBuildingUtil.DEFAULT_FRAGILITY_KEY_AS)
-
-        fragility_key_ds = self.get_parameter("fragility_key_ds")
-        if fragility_key_ds is None:
-            self.set_parameter("fragility_key_ds", NonStructBuildingUtil.DEFAULT_FRAGILITY_KEY_DS)
+        fragility_key = self.get_parameter("fragility_key")
+        if fragility_key is None:
+            self.set_parameter("fragility_key", NonStructBuildingUtil.DEFAULT_FRAGILITY_KEY_AS)
 
         # Set Default Hazard Uncertainty
         use_hazard_uncertainty = self.get_parameter("use_hazard_uncertainty")
@@ -97,14 +93,14 @@ class NonStructBuildingDamage(BaseAnalysis):
             dict: An ordered dictionary with building data/metadata.
 
         """
-        output_ds = []
+        output = []
         output_dmg = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
             for ret1, ret2 in executor.map(function_name, *args):
-                output_ds.extend(ret1)
+                output.extend(ret1)
                 output_dmg.extend(ret2)
 
-        return output_ds, output_dmg
+        return output, output_dmg
 
     def building_damage_analysis_bulk_input(self, buildings, hazard, hazard_type, hazard_dataset_id):
         """Run analysis for multiple buildings.
@@ -131,42 +127,28 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         building_results = []
         damage_results = []
-        fragility_sets_as = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
-                                                              self.get_parameter("fragility_key_as"))
-        fragility_sets_ds = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
-                                                              self.get_parameter("fragility_key_ds"))
-        values_payload_as = []
-        values_payload_ds = []
+        fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
+                                                           self.get_parameter("fragility_key"))
+        values_payload = []
         values_payload_liq = []
         mapped_buildings = []
         unmapped_buildings = []
         liquefaction_resp = None
         for building in buildings:
-            if building["id"] in fragility_sets_as and building["id"] in fragility_sets_ds:
-                fragility_set_as = fragility_sets_as[building["id"]]
-                fragility_set_ds = fragility_sets_ds[building["id"]]
+            if building["id"] in fragility_sets:
+                fragility_set = fragility_sets[building["id"]]
                 location = GeoUtil.get_location(building)
                 loc = str(location.y) + "," + str(location.x)
 
                 # Acceleration-Sensitive
-                demands_as, units_as, _ = AnalysisUtil.get_hazard_demand_types_units(building, fragility_set_as,
-                                                                                     hazard_type, allowed_demand_types)
-                value_as = {
-                    "demands": demands_as,
-                    "units": units_as,
+                demands, units, _ = AnalysisUtil.get_hazard_demand_types_units(building, fragility_set, hazard_type,
+                                                                               allowed_demand_types)
+                value = {
+                    "demands": demands,
+                    "units": units,
                     "loc": loc
                 }
-                values_payload_as.append(value_as)
-
-                # Drift-Sensitive
-                demands_ds, units_ds, _ = AnalysisUtil.get_hazard_demand_types_units(building, fragility_set_ds,
-                                                                                     hazard_type, allowed_demand_types)
-                value_ds = {
-                    "demands": demands_ds,
-                    "units": units_ds,
-                    "loc": loc
-                }
-                values_payload_ds.append(value_ds)
+                values_payload.append(value)
 
                 # liquefaction
                 if use_liquefaction:
@@ -185,8 +167,7 @@ class NonStructBuildingDamage(BaseAnalysis):
 
         # get hazard values and liquefaction
         if hazard_type == 'earthquake':
-            hazard_resp_as = hazard.read_hazard_values(values_payload_as, self.hazardsvc)
-            hazard_resp_ds = hazard.read_hazard_values(values_payload_ds, self.hazardsvc)
+            hazard_resp = hazard.read_hazard_values(values_payload, self.hazardsvc)
 
             # adjust dmg probability for liquefaction
             if use_liquefaction:
@@ -197,17 +178,16 @@ class NonStructBuildingDamage(BaseAnalysis):
                 else:
                     raise ValueError('Hazard does not support liquefaction! Check to make sure you defined the '
                                      'liquefaction portion of your scenario earthquake.')
+        elif hazard_type == 'flood':
+            hazard_resp = hazard.read_hazard_values(values_payload, self.hazardsvc)
         else:
             raise ValueError("The provided hazard type is not supported yet by this analysis")
 
         # calculate LS and DS
         for i, building in enumerate(mapped_buildings):
-            dmg_probability_as = {"LS_0": None, "LS_1": None, "LS_2": None}
-            dmg_interval_as = {"DS_0": None, "DS_1": None, "DS_2": None, "DS_3": None}
-            dmg_probability_ds = {"LS_0": None, "LS_1": None, "LS_2": None}
-            dmg_interval_ds = {"DS_0": None, "DS_1": None, "DS_2": None, "DS_3": None}
-            fragility_set_as = fragility_sets_as[building["id"]]
-            fragility_set_ds = fragility_sets_ds[building["id"]]
+            dmg_probability = dict()
+            dmg_interval = dict()
+            fragility_set = fragility_sets[building["id"]]
 
             # TODO this value needs to come from the hazard service
             # adjust dmg probability for hazard uncertainty
@@ -215,100 +195,49 @@ class NonStructBuildingDamage(BaseAnalysis):
                 raise ValueError('Uncertainty has not yet been implemented!')
 
             ###############
-            # AS
-            if isinstance(fragility_set_as.fragility_curves[0], DFR3Curve):
-                hazard_vals_as = AnalysisUtil.update_precision_of_lists(hazard_resp_as[i]["hazardValues"])
-                demand_types_as = hazard_resp_as[i]["demands"]
-                demand_units_as = hazard_resp_as[i]["units"]
-                hval_dict_as = dict()
-                for j, d in enumerate(fragility_set_as.demand_types):
-                    hval_dict_as[d] = hazard_vals_as[j]
-                if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp_as[i]["hazardValues"]):
-                    building_args = fragility_set_as.construct_expression_args_from_inventory(building)
-                    dmg_probability_as = fragility_set_as. \
-                        calculate_limit_state(hval_dict_as, inventory_type="building",
+            if isinstance(fragility_set.fragility_curves[0], DFR3Curve):
+                hazard_vals = AnalysisUtil.update_precision_of_lists(hazard_resp[i]["hazardValues"])
+                demand_types = hazard_resp[i]["demands"]
+                demand_units = hazard_resp[i]["units"]
+                hval_dict = dict()
+                for j, d in enumerate(fragility_set.demand_types):
+                    hval_dict[d] = hazard_vals[j]
+                if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp[i]["hazardValues"]):
+                    building_args = fragility_set.construct_expression_args_from_inventory(building)
+                    dmg_probability = fragility_set. \
+                        calculate_limit_state(hval_dict, inventory_type="building",
                                               **building_args)
                     # adjust dmg probability for liquefaction
                     if use_liquefaction:
                         if liq_geology_dataset_id is not None:
                             liquefaction_dmg = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i][
                                                                                           "groundFailureProb"])
-                            dmg_probability_as = AnalysisUtil.update_precision_of_dicts(
-                                NonStructBuildingUtil.adjust_damage_for_liquefaction(dmg_probability_as,
+                            dmg_probability = AnalysisUtil.update_precision_of_dicts(
+                                NonStructBuildingUtil.adjust_damage_for_liquefaction(dmg_probability,
                                                                                      liquefaction_dmg))
-                    dmg_interval_as = fragility_set_ds.calculate_damage_interval(dmg_probability_as,
-                                                                                 hazard_type=hazard_type,
-                                                                                 inventory_type="building")
-            else:
-                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
-                                 "seeing this please report the issue.")
-
-            ###############
-            # DS
-            if isinstance(fragility_set_ds.fragility_curves[0], DFR3Curve):
-                hazard_vals_ds = AnalysisUtil.update_precision_of_lists(hazard_resp_ds[i]["hazardValues"])
-                demand_types_ds = hazard_resp_ds[i]["demands"]
-                demand_units_ds = hazard_resp_ds[i]["units"]
-                hval_dict_ds = dict()
-                for j, d in enumerate(fragility_set_ds.demand_types):
-                    hval_dict_ds[d] = hazard_vals_ds[j]
-
-                if not AnalysisUtil.do_hazard_values_have_errors(hazard_resp_ds[i]["hazardValues"]):
-                    building_args = fragility_set_ds.construct_expression_args_from_inventory(building)
-                    dmg_probability_ds = fragility_set_ds. \
-                        calculate_limit_state(hval_dict_ds, inventory_type="building",
-                                              **building_args)
-                    # adjust dmg probability for liquefaction
-                    if use_liquefaction:
-                        if liq_geology_dataset_id is not None:
-                            liquefaction_dmg = AnalysisUtil.update_precision_of_lists(
-                                liquefaction_resp[i]["groundFailureProb"])
-                            dmg_probability_ds = AnalysisUtil.update_precision_of_dicts(
-                                NonStructBuildingUtil.adjust_damage_for_liquefaction(dmg_probability_ds,
-                                                                                     liquefaction_dmg))
-                    dmg_interval_ds = fragility_set_ds.calculate_damage_interval(dmg_probability_ds,
-                                                                                 hazard_type=hazard_type,
-                                                                                 inventory_type="building")
+                    dmg_interval = fragility_set.calculate_damage_interval(dmg_probability,
+                                                                           hazard_type=hazard_type,
+                                                                           inventory_type="building")
             else:
                 raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
                                  "seeing this please report the issue.")
 
             # put results in dictionary
-            # AS denotes acceleration-sensitive fragility assigned to the building.
-            # DS denotes drift-sensitive fragility assigned to the building.
             building_result = dict()
             building_result['guid'] = building['properties']['guid']
-            building_result['AS_LS_0'] = dmg_probability_as['LS_0']
-            building_result['AS_LS_1'] = dmg_probability_as['LS_1']
-            building_result['AS_LS_2'] = dmg_probability_as['LS_2']
-            building_result['AS_DS_0'] = dmg_interval_as['DS_0']
-            building_result['AS_DS_1'] = dmg_interval_as['DS_1']
-            building_result['AS_DS_2'] = dmg_interval_as['DS_2']
-            building_result['AS_DS_3'] = dmg_interval_as['DS_3']
-            building_result['DS_LS_0'] = dmg_probability_ds['LS_0']
-            building_result['DS_LS_1'] = dmg_probability_ds['LS_1']
-            building_result['DS_LS_2'] = dmg_probability_ds['LS_2']
-            building_result['DS_DS_0'] = dmg_interval_ds['DS_0']
-            building_result['DS_DS_1'] = dmg_interval_ds['DS_1']
-            building_result['DS_DS_2'] = dmg_interval_ds['DS_2']
-            building_result['DS_DS_3'] = dmg_interval_ds['DS_3']
-            hazard_exposure_as = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_as, hazard_type)
-            hazard_exposure_ds = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals_ds, hazard_type)
-            haz_expose = NonStructBuildingUtil.determine_haz_exposure(hazard_exposure_as, hazard_exposure_ds)
-            building_result['haz_expose'] = haz_expose
+            building_result.update(dmg_probability)
+            building_result.update(dmg_interval)
+            hazard_exposure = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
+            building_result['haz_expose'] = hazard_exposure
 
             # put damage results in dictionary
             damage_result = dict()
             damage_result['guid'] = building['properties']['guid']
-            damage_result['fragility_id_as'] = fragility_set_as.id
-            damage_result['demandtypes_as'] = demand_types_as
-            damage_result['demandunits_as'] = demand_units_as
-            damage_result['fragility_id_ds'] = fragility_set_ds.id
-            damage_result['demandtypes_ds'] = demand_types_ds
-            damage_result['demandunits_ds'] = demand_units_ds
+            damage_result['fragility_id'] = fragility_set.id
+            damage_result['demandtypes'] = demand_types
+            damage_result['demandunits'] = demand_units
             damage_result['hazardtype'] = hazard_type
-            damage_result['hazardvals_as'] = hazard_vals_as
-            damage_result['hazardvals_ds'] = hazard_vals_ds
+            damage_result['hazardvals'] = hazard_vals
 
             building_results.append(building_result)
             damage_results.append(damage_result)
@@ -319,15 +248,11 @@ class NonStructBuildingDamage(BaseAnalysis):
 
             damage_result = dict()
             damage_result['guid'] = building['properties']['guid']
-            damage_result['fragility_id_as'] = None
-            damage_result['demandtypes_as'] = None
-            damage_result['demandunits_as'] = None
-            damage_result['fragility_id_ds'] = None
-            damage_result['demandtypes_ds'] = None
-            damage_result['demandunits_ds'] = None
+            damage_result['fragility_id'] = None
+            damage_result['demandtypes'] = None
+            damage_result['demandunits'] = None
             damage_result['hazardtype'] = None
-            damage_result['hazardvals_as'] = None
-            damage_result['hazardvals_ds'] = None
+            damage_result['hazardvals'] = None
 
             building_results.append(building_result)
             damage_results.append(damage_result)
@@ -354,7 +279,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                 {
                     'id': 'hazard_type',
                     'required': False,
-                    'description': 'Hazard Type (e.g. earthquake)',
+                    'description': 'Hazard Type (e.g. earthquake, flood)',
                     'type': str
                 },
                 {
@@ -364,15 +289,9 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'type': str
                 },
                 {
-                    'id': 'fragility_key_as',
+                    'id': 'fragility_key',
                     'required': False,
-                    'description': 'Acceleration-Sensitive Fragility key to use in mapping dataset',
-                    'type': str
-                },
-                {
-                    'id': 'fragility_key_ds',
-                    'required': False,
-                    'description': 'Drift-Sensitive Fragility key to use in mapping dataset',
+                    'description': 'Non-structural Fragility key to use in mapping dataset',
                     'type': str
                 },
                 {
@@ -406,7 +325,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'hazard',
                     'required': False,
                     'description': 'Hazard object',
-                    'type': ["earthquake"]
+                    'type': ["earthquake", "flood"]
                 },
             ],
             'input_datasets': [
