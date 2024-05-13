@@ -7,7 +7,7 @@ import math
 from pyincore import GeoUtil, InventoryDataset
 
 
-class TransportationRecoveryUtil:
+class TrafficFlowRecoveryUtil:
 
     @staticmethod
     def NBI_coordinate_mapping(NBI_file):

@@ -312,25 +312,25 @@ analyses/tornadoepndamage
 ..  autoclass:: tornadoepndamage.tornadoepndamage.TornadoEpnDamage
     :members:
 
-analyses/transportationrecovery
+analyses/trafficflowrecovery
 ===============================
-..  autoclass:: transportationrecovery.transportationrecovery.TransportationRecovery
+..  autoclass:: trafficflowrecovery.trafficflowrecovery.TrafficFlowRecovery
     :members:
-..  autoclass:: transportationrecovery.transportationrecoveryutil.TransportationRecoveryUtil
+..  autoclass:: trafficflowrecovery.trafficflowrecoveryutil.TrafficFlowRecoveryUtil
     :members:
-..  autoclass:: transportationrecovery.post_disaster_long_term_solution.PostDisasterLongTermSolution
+..  autoclass:: trafficflowrecovery.post_disaster_long_term_solution.PostDisasterLongTermSolution
     :members:
-..  autoclass:: transportationrecovery.nsga2.Solution
+..  autoclass:: trafficflowrecovery.nsga2.Solution
     :members:
-..  autoclass:: transportationrecovery.nsga2.NSGAII
+..  autoclass:: trafficflowrecovery.nsga2.NSGAII
     :members:
-..  autofunction:: transportationrecovery.WIPW.ipw_search
+..  autofunction:: trafficflowrecovery.WIPW.ipw_search
     :members:
-..  autofunction:: transportationrecovery.WIPW.tipw_index
+..  autofunction:: trafficflowrecovery.WIPW.tipw_index
     :members:
-..  autofunction:: transportationrecovery.WIPW.path_service_level_edges
+..  autofunction:: trafficflowrecovery.WIPW.path_service_level_edges
     :members:
-..  autofunction:: transportationrecovery.WIPW.path_adt_from_edges
+..  autofunction:: trafficflowrecovery.WIPW.path_adt_from_edges
     :members:
 
 analyses/waterfacilitydamage

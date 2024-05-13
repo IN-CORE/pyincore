@@ -3,19 +3,19 @@ import pandas as pd
 import copy
 import random
 
-from pyincore.analyses.trafficflowrecovery.trafficflowrecoveryutil import TransportationRecoveryUtil
+from pyincore.analyses.trafficflowrecovery.trafficflowrecoveryutil import TrafficFlowRecoveryUtil
 from pyincore.analyses.trafficflowrecovery.nsga2 import NSGAII
 from pyincore.analyses.trafficflowrecovery import WIPW as WIPW
 from pyincore.analyses.trafficflowrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
 from pyincore import BaseAnalysis
 
 
-class TransportationRecovery(BaseAnalysis):
+class TrafficFlowRecovery(BaseAnalysis):
 
     def run(self):
-        """ Executes transportation recovery analysis"""
+        """ Executes traffic flow recovery analysis"""
 
-        # read the nodes in transportation
+        # read the nodes in traffic flow
         node_set = self.get_input_dataset("nodes").get_inventory_reader()
         nodes = list(node_set)
         node_df = pd.DataFrame(columns=nodes[0]['properties'].keys())
@@ -23,7 +23,7 @@ class TransportationRecovery(BaseAnalysis):
             node_properties_df = pd.DataFrame.from_dict(node['properties'], orient='index').T
             node_df = pd.concat([node_df, node_properties_df], ignore_index=True)
 
-        # read the link in transportation
+        # read the link in traffic flow
         link_set = self.get_input_dataset("links").get_inventory_reader()
         links = list(link_set)
         arc_df = pd.DataFrame(columns=links[0]['properties'].keys())
@@ -65,7 +65,7 @@ class TransportationRecovery(BaseAnalysis):
         crossover_rate = self.get_parameter("crossover_rate")
 
         # create network
-        network = TransportationRecoveryUtil.nw_reconstruct(node_df, arc_df, adt_data)
+        network = TrafficFlowRecoveryUtil.nw_reconstruct(node_df, arc_df, adt_data)
 
         if pm == 0:
             # calculate the WIPW (Weighted independent pathways) index
@@ -89,7 +89,7 @@ class TransportationRecovery(BaseAnalysis):
 
         num_objectives = 2
 
-        # implement NSGA for transportation network post-disaster recovery
+        # implement NSGA for traffic flow network post-disaster recovery
         nsga2 = NSGAII(num_objectives, mutation_rate, crossover_rate)
 
         p = []
@@ -121,7 +121,7 @@ class TransportationRecovery(BaseAnalysis):
             "optimal_solution_of_bridge_repair_schedule", bridge_recovery,
             name="optimal_solution_of_bridge_repair_schedule", source="dataframe")
 
-        network = TransportationRecoveryUtil.nw_reconstruct(node_df, arc_df, adt_data)
+        network = TrafficFlowRecoveryUtil.nw_reconstruct(node_df, arc_df, adt_data)
 
         temp_bridge_damage_value = copy.deepcopy(bridge_damage_value)
 
@@ -140,7 +140,7 @@ class TransportationRecovery(BaseAnalysis):
         for bridge in bridge_repair:
             fg[bridge] = 0
 
-        # calculate the transportation network efficiency
+        # calculate the traffic flow network efficiency
         efficiency = []
         for ii in range(len(schedule_time)):
 
@@ -171,7 +171,7 @@ class TransportationRecovery(BaseAnalysis):
             # performance metrics
             current_te = None
             if pm == 1:
-                current_te = TransportationRecoveryUtil.traveltime_freeflow(network)
+                current_te = TrafficFlowRecoveryUtil.traveltime_freeflow(network)
 
             elif pm == 0:
                 current_te = WIPW.tipw_index(network, all_ipw, path_adt)
@@ -189,21 +189,21 @@ class TransportationRecovery(BaseAnalysis):
         # output the recovery trajectory
         recovery_trajectory = pd.DataFrame(
             {"Ending Time": schedule_time, "Travel Efficiency": efficiency})
-        self.set_result_csv_data("overall_transportation_recovery_trajectory", recovery_trajectory,
-                                 name="overall_transportation_recovery_trajectory", source="dataframe")
+        self.set_result_csv_data("overall_traffic_flow_recovery_trajectory", recovery_trajectory,
+                                 name="overall_traffic_flow_recovery_trajectory", source="dataframe")
 
         return None
 
     def get_spec(self):
-        """Get specifications of the transportation recovery model.
+        """Get specifications of the traffic flow recovery model.
 
         Returns:
-            obj: A JSON object of specifications of the transportation recovery model.
+            obj: A JSON object of specifications of the traffic flow recovery model.
 
         """
         return {
-            'name': 'transportation-recovery',
-            'description': 'transportation recovery model',
+            'name': 'traffic-flow-recovery',
+            'description': 'traffic flow recovery model',
             'input_parameters': [
                 {
                     'id': 'num_cpu',
@@ -214,7 +214,7 @@ class TransportationRecovery(BaseAnalysis):
                 {
                     'id': 'pm',
                     'required': True,
-                    'description': 'transportation performance metrics 0: WIPW,  1:Free flow travel time',
+                    'description': 'traffic flow performance metrics 0: WIPW,  1:Free flow travel time',
                     'type': int
                 },
                 {
@@ -294,11 +294,11 @@ class TransportationRecovery(BaseAnalysis):
                     'type': 'incore:transportationRepairSchedule'
                 },
                 {
-                    'id': 'overall_transportation_recovery_trajectory',
+                    'id': 'overall_traffic_flow_recovery_trajectory',
                     'description': 'shows the overall recovery trajectory of the ' +
-                                   'transportation system. List the ending time and ' +
+                                   'traffic flow system. List the ending time and ' +
                                    'travel efficiency for the whole network.',
-                    'type': 'incore:transportationRecovery'
+                    'type': 'incore:trafficFlowRecovery'
                 }
             ]
         }
