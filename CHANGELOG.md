@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased] 
+
+### Changed
+- join dataset has an option for only keeping the table dataset fields [#299](https://github.com/IN-CORE/pyincore/issues/299)
 
 ## [1.18.1] - 2024-04-30
 

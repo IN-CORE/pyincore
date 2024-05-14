@@ -17,12 +17,13 @@ import scipy
 
 class DatasetUtil:
     @staticmethod
-    def join_datasets(geodataset, tabledataset):
+    def join_datasets(geodataset, tabledataset, clean_attributes=False):
         """Join Geopands geodataframe and non-geospatial Dataset using GUID field
 
         Args:
             geodataset (gpd.Dataset):  pyincore Dataset object with geospatial data
             tabledataset (gpd.Dataset): pyincore Dataset object without geospatial data
+            clean_attributes (boolean): flag for deleting the fields except guid and the fields in csv table
 
         Returns:
             gpd.GeoDataFrame: Geopandas DataFrame object
@@ -30,17 +31,24 @@ class DatasetUtil:
         """
         gdf = gpd.read_file(geodataset.local_file_path)
         df = tabledataset.get_dataframe_from_csv()
+
+        # remove the tables except guid
+        if clean_attributes:
+            gdf = gdf[['geometry','guid']]
+
+        # joining and indexing
         join_gdf = gdf.set_index("guid").join(df.set_index("guid"))
 
         return join_gdf
 
     @staticmethod
-    def join_table_dataset_with_source_dataset(dataset, client):
+    def join_table_dataset_with_source_dataset(dataset, client, clean_attributes=False):
         """Creates geopandas geodataframe by joining table dataset and its source dataset
 
             Args:
                 dataset (Dataset): pyincore dataset object
                 client (Client): pyincore service client object
+                clean_attributes (boolean): flag for deleting the fields except guid and the fields in csv table
 
             Returns:
                 gpd.Dataset: Geopandas geodataframe object.
@@ -64,7 +72,7 @@ class DatasetUtil:
         if is_source_dataset:
             # merge dataset and source dataset
             geodataset = Dataset.from_data_service(source_dataset, DataService(client))
-            joined_gdf = DatasetUtil.join_datasets(geodataset, dataset)
+            joined_gdf = DatasetUtil.join_datasets(geodataset, dataset, clean_attributes)
         else:
             return None
 
