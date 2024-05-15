@@ -14,6 +14,6 @@ class TransportationRecovery():
 
     def __getattr__(self, name):
         """
-        Delegate attribute access to the HousingValuationRecovery instance.
+        Delegate attribute access to the TrafficFlowRecovery instance.
         """
         return getattr(self._delegate, name)
