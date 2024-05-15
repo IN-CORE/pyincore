@@ -33,7 +33,6 @@ class GasFacilityDamage(BaseAnalysis):
 
     def run(self):
         """Executes Gas Facility damage analysis"""
-        print("running gas facility damage")
 
         # Facility dataset
         inventory_set = self.get_input_dataset("gas_facilities").get_inventory_reader()
