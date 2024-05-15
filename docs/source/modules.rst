@@ -118,6 +118,13 @@ analyses/galvestoncge
 ..  autofunction:: galvestoncge.galvestonoutput.gams_to_dataframes
     :members:
 
+analyses/gasfacilitydamage
+============================
+..  autoclass:: gasfacilitydamage.gasfacilitydamage.GasFacilityDamage
+    :members:
+..  autoclass:: gasfacilitydamage.gfutil.GfUtil
+    :members:
+
 analyses/housingrecovery
 ========================
 ..  autoclass:: housingrecovery.housingrecovery.HousingRecovery
