@@ -200,7 +200,12 @@ analyses/mlenabledcgeslc
 
 analyses/montecarlofailureprobability
 =====================================
-..  autoclass:: montecarlofailureprobability.montecarlofailureprobability.MonteCarloFailureProbability
+.. deprecated:: 1.19.0
+   This class will be deprecated soon. Use :class:`montecarlolimitstateprobability.MonteCarloLimitStateProbability` instead.
+
+analyses/montecarlolimitstateprobability
+=====================================
+..  autoclass:: montecarlolimitstateprobability.montecarlolimitstateprobability.MonteCarloLimitStateProbability
     :members:
 
 analyses/multiobjectiveretrofitoptimization

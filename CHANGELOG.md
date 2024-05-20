@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - join dataset has an option for only keeping the table dataset fields [#299](https://github.com/IN-CORE/pyincore/issues/299)
-
-## [Unreleased]
+- Rename Monte Carlo Failure Probability to Monte Carlo Limit State Probability [#557](https://github.com/IN-CORE/pyincore/issues/557)
 
 ### Fixed
 - Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)
