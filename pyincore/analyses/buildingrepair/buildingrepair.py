@@ -51,7 +51,7 @@ class BuildingRepair(BaseAnalysis):
 
         # Returns dataframe
         repair_results = self.recovery_rate(buildings, sample_damage_states)
-        self.set_result_csv_data("building_repair", repair_results, result_name, "dataframe")
+        self.set_result_csv_data("repair_time", repair_results, result_name, "dataframe")
 
         return True
 
@@ -69,6 +69,8 @@ class BuildingRepair(BaseAnalysis):
         if seed is not None:
             np.random.seed(seed)
 
+        num_samples = self.get_parameter("num_samples")
+
         repair_key = self.get_parameter("repair_key")
         if repair_key is None:
             repair_key = BuildingUtil.DEFAULT_REPAIR_KEY
@@ -84,7 +86,6 @@ class BuildingRepair(BaseAnalysis):
             # Obtain the damage states
             mapped_repair = repair_sets_by_guid[row['guid']]
             samples_mcs = row['sample_damage_states'].split(",")
-            num_samples = len(samples_mcs)
 
             # Use a lambda to obtain the damage state in numeric form. Note that since damage states are single digits,
             # it suffices to look at the last character and convert into an integer value. Do this computation once
@@ -92,7 +93,7 @@ class BuildingRepair(BaseAnalysis):
             samples_mcs_ds = list(map(lambda x: int(x[-1]), samples_mcs))
 
             # Now, perform the two nested loops, using the indexing function to simplify the syntax.
-            for i in range(0, num_samples):
+            for i in range(0, len(samples_mcs)):
                 state = samples_mcs_ds[i]
 
                 percent_func = np.random.random(num_samples)
@@ -101,6 +102,7 @@ class BuildingRepair(BaseAnalysis):
                 repair_time = mapped_repair.repair_curves[state].solve_curve_for_inverse(
                     hazard_values={}, curve_parameters=mapped_repair.curve_parameters, **{"repair_time": percent_func}
                 ) / 7
+                print(repair_time)
 
         return repair_time
 
@@ -132,7 +134,13 @@ class BuildingRepair(BaseAnalysis):
                     'required': False,
                     'description': 'Initial seed for the probabilistic model',
                     'type': int
-                }
+                },
+                {
+                    'id': 'num_samples',
+                    'required': True,
+                    'description': 'Number of sample scenarios',
+                    'type': int
+                },
             ],
             'input_datasets': [
                 {
