@@ -50,8 +50,8 @@ class BuildingRepair(BaseAnalysis):
         sample_damage_states = self.get_input_dataset("sample_damage_states").get_dataframe_from_csv(low_memory=False)
 
         # Returns dataframe
-        repair_results = self.recovery_rate(buildings, sample_damage_states)
-        self.set_result_csv_data("repair_time", repair_results, result_name, "dataframe")
+        recovery = self.recovery_rate(buildings, sample_damage_states)
+        self.set_result_csv_data("recovery", recovery, result_name + "_recovery", "dataframe")
 
         return True
 
@@ -69,7 +69,15 @@ class BuildingRepair(BaseAnalysis):
         if seed is not None:
             np.random.seed(seed)
 
-        num_samples = self.get_parameter("num_samples")
+        num_samples = len(sample_damage_states["sample_damage_states"].iloc[0].split(","))
+
+        # Generate a long numpy matrix for combined N1, N2 samples
+        num_buildings = sample_damage_states.shape[0]
+        samples_n1_n2 = np.zeros((num_buildings, num_samples * num_samples))
+
+        # Now, we define an internal function to take care of the index for the prior case
+        def idx(x, y):
+            return x * num_samples + y
 
         repair_key = self.get_parameter("repair_key")
         if repair_key is None:
@@ -78,14 +86,17 @@ class BuildingRepair(BaseAnalysis):
         repair_sets = self.repairsvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings, repair_key)
         repair_sets_by_guid = {}  # get repair sets by guid so they can be mapped with output of monte carlo
 
-        # This is sort of a workaround until we define Repair Curve models and abstract this out there
         for i, b in enumerate(buildings):
-            repair_sets_by_guid[b["properties"]['guid']] = repair_sets[str(i)]
+            # if building id has a matched repair curve set
+            if b['id'] in repair_sets.keys():
+                repair_sets_by_guid[b["properties"]['guid']] = repair_sets[b['id']]
+            else:
+                repair_sets_by_guid[b["properties"]['guid']] = None
 
-        for index, row in sample_damage_states.iterrows():
+        for build in range(0, num_buildings):
             # Obtain the damage states
-            mapped_repair = repair_sets_by_guid[row['guid']]
-            samples_mcs = row['sample_damage_states'].split(",")
+            mapped_repair = repair_sets_by_guid[sample_damage_states["guid"].iloc[build]]
+            samples_mcs = sample_damage_states["sample_damage_states"].iloc[build].split(",")
 
             # Use a lambda to obtain the damage state in numeric form. Note that since damage states are single digits,
             # it suffices to look at the last character and convert into an integer value. Do this computation once
@@ -93,18 +104,29 @@ class BuildingRepair(BaseAnalysis):
             samples_mcs_ds = list(map(lambda x: int(x[-1]), samples_mcs))
 
             # Now, perform the two nested loops, using the indexing function to simplify the syntax.
-            for i in range(0, len(samples_mcs)):
+            for i in range(0, num_samples):
                 state = samples_mcs_ds[i]
 
                 percent_func = np.random.random(num_samples)
                 # NOTE: Even though the kwarg name is "repair_time", it actually takes percent of functionality. DFR3
                 # system currently doesn't have a way to represent the name correctly when calculating the inverse.
-                repair_time = mapped_repair.repair_curves[state].solve_curve_for_inverse(
-                    hazard_values={}, curve_parameters=mapped_repair.curve_parameters, **{"repair_time": percent_func}
-                ) / 7
-                print(repair_time)
+                if mapped_repair is not None:
+                    repair_time = mapped_repair.repair_curves[state].solve_curve_for_inverse(
+                        hazard_values={}, curve_parameters=mapped_repair.curve_parameters,
+                        **{"repair_time": percent_func}
+                    ) / 7
+                else:
+                    repair_time = np.full(num_samples, np.nan)
 
-        return repair_time
+                for j in range(0, num_samples):
+                    samples_n1_n2[build, idx(i, j)] = round(repair_time[j], 1)
+
+        # Now, generate all the labels using list comprehension outside the loops
+        colnames = [f'sample_{i}_{j}' for i in range(0, num_samples) for j in range(0, num_samples)]
+        recovery_time = pd.DataFrame(samples_n1_n2, columns=colnames)
+        recovery_time.insert(0, 'guid', sample_damage_states["guid"])
+
+        return recovery_time
 
     def get_spec(self):
         """Get specifications of the residential building recovery analysis.
@@ -134,13 +156,7 @@ class BuildingRepair(BaseAnalysis):
                     'required': False,
                     'description': 'Initial seed for the probabilistic model',
                     'type': int
-                },
-                {
-                    'id': 'num_samples',
-                    'required': True,
-                    'description': 'Number of sample scenarios',
-                    'type': int
-                },
+                }
             ],
             'input_datasets': [
                 {
@@ -165,9 +181,9 @@ class BuildingRepair(BaseAnalysis):
             ],
             'output_datasets': [
                 {
-                    'id': 'repair_time',
-                    'description': 'CSV file of building repair times',
-                    'type': 'incore:buildingRepairTime'
+                    'id': 'recovery',
+                    'description': 'CSV file of commercial building recovery time',
+                    'type': 'incore:buildingRecoveryTime'
                 }
             ]
         }

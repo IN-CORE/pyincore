@@ -15,9 +15,6 @@ def run_with_base_class():
 
     # sample_damage_states = "6112d9ccca3e973ce144b4d9"  # 500 samples 28k buildings - MCS output format
     sample_damage_states = "60f883c059a8cc52bab4dd77"  # 10 samples 28k buildings - MCS output format
-    result_name = "joplin_repair_time"
-
-    seed = 1238
 
     building_repair = BuildingRepair(client)
     building_repair.load_remote_input_dataset("buildings", buildings)
@@ -29,8 +26,8 @@ def run_with_base_class():
 
     building_repair.load_remote_input_dataset("sample_damage_states", sample_damage_states)
 
-    building_repair.set_parameter("result_name", result_name)
-    building_repair.set_parameter("seed", seed)
+    building_repair.set_parameter("result_name", "joplin_repair_time")
+    building_repair.set_parameter("seed", 1238)
 
     building_repair.run_analysis()
 
