@@ -348,7 +348,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'result',
                     'parent_type': 'buildings',
                     'description': 'CSV file of damage states for building non-structural damage',
-                    'type': 'ergo:buildingDamageVer6'
+                    'type': 'ergo:nsBuildingInventoryDamageVer4'
                 },
                 {
                     'id': 'damage_result',
