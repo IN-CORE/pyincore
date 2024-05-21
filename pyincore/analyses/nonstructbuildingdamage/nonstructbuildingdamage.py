@@ -282,7 +282,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                 {
                     'id': 'hazard_type',
                     'required': False,
-                    'description': 'Hazard Type (e.g. earthquake, flood)',
+                    'description': 'Hazard Type (e.g. earthquake, flood, hurricane)',
                     'type': str
                 },
                 {
@@ -328,7 +328,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'hazard',
                     'required': False,
                     'description': 'Hazard object',
-                    'type': ["earthquake", "flood"]
+                    'type': ["earthquake", "flood", "hurricane"]
                 },
             ],
             'input_datasets': [
@@ -357,7 +357,7 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'id': 'damage_result',
                     'parent_type': 'buildings',
                     'description': 'Json file with information about applied hazard value and fragility',
-                    'type': 'incore:buildingDamageSupplement'
+                    'type': 'incore:nsBuildingInventoryDamageSupplement'
                 }
             ]
         }
