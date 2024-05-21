@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)
 
+## [Unreleased]
+
+### Changed
+- Update Non-structural Building Damage to support flood [#562](https://github.com/IN-CORE/pyincore/issues/562)
+
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed
