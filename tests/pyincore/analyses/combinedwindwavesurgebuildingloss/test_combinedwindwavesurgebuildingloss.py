@@ -66,7 +66,7 @@ def run_with_base_class():
     # Get damage outputs from different hazards
     surge_wave_damage = sw_bldg_dmg.get_output_dataset("ds_result")
     wind_damage = w_bldg_dmg.get_output_dataset("ds_result")
-    flood_damage = f_bldg_dmg.get_output_dataset("ds_result")
+    flood_damage = f_bldg_dmg.get_output_dataset("result")
 
     start = timer()
 
