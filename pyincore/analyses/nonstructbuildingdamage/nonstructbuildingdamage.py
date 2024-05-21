@@ -180,6 +180,9 @@ class NonStructBuildingDamage(BaseAnalysis):
                                      'liquefaction portion of your scenario earthquake.')
         elif hazard_type == 'flood':
             hazard_resp = hazard.read_hazard_values(values_payload, self.hazardsvc)
+        elif hazard_type == 'hurricane':
+            # include hurricane flood
+            hazard_resp = hazard.read_hazard_values(values_payload, self.hazardsvc)
         else:
             raise ValueError("The provided hazard type is not supported yet by this analysis")
 
@@ -208,13 +211,13 @@ class NonStructBuildingDamage(BaseAnalysis):
                         calculate_limit_state(hval_dict, inventory_type="building",
                                               **building_args)
                     # adjust dmg probability for liquefaction
-                    if use_liquefaction:
-                        if liq_geology_dataset_id is not None:
-                            liquefaction_dmg = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i][
-                                                                                          "groundFailureProb"])
-                            dmg_probability = AnalysisUtil.update_precision_of_dicts(
-                                NonStructBuildingUtil.adjust_damage_for_liquefaction(dmg_probability,
-                                                                                     liquefaction_dmg))
+                    if hazard_type == 'earthquake' and use_liquefaction and liq_geology_dataset_id is not None:
+                        liquefaction_dmg = AnalysisUtil.update_precision_of_lists(liquefaction_resp[i][
+                                                                                      "groundFailureProb"])
+                        dmg_probability = AnalysisUtil.update_precision_of_dicts(
+                            NonStructBuildingUtil.adjust_damage_for_liquefaction(dmg_probability,
+                                                                                 liquefaction_dmg))
+
                     dmg_interval = fragility_set.calculate_damage_interval(dmg_probability,
                                                                            hazard_type=hazard_type,
                                                                            inventory_type="building")
