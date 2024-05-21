@@ -439,7 +439,7 @@ class GasFacilityDamage(BaseAnalysis):
                     "id": "gas_facilities",
                     "required": True,
                     "description": "Gas facility Inventory",
-                    "type": ["ncsa:gasFacilityInventory"],
+                    "type": ["ergo:gasFacilityInventory"],
                 },
                 {
                     "id": "dfr3_mapping_set",
