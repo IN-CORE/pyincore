@@ -1,6 +1,7 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.combinedwindwavesurgebuildingdamage import CombinedWindWaveSurgeBuildingDamage
 from pyincore.analyses.buildingdamage import BuildingDamage
+from pyincore.analyses.nonstructbuildingdamage import NonStructBuildingDamage
 import pyincore.globals as pyglobals
 
 
@@ -50,7 +51,7 @@ def run_with_base_class():
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
 
     # flood building damage
-    f_bldg_dmg = BuildingDamage(client)
+    f_bldg_dmg = NonStructBuildingDamage(client)
     f_bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
     f_bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
     f_bldg_dmg.set_parameter("result_name", "Galveston-flood-dmg")
