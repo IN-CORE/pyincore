@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, FragilityService, MappingSet
+from pyincore import IncoreClient, FragilityService, MappingSet, Dataset
 from pyincore.analyses.combinedwindwavesurgebuildingdamage import CombinedWindWaveSurgeBuildingDamage
 from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore.analyses.nonstructbuildingdamage import NonStructBuildingDamage
@@ -64,7 +64,7 @@ def run_with_base_class():
     # Get damage outputs from different hazards
     surge_wave_damage = sw_bldg_dmg.get_output_dataset("ds_result")
     wind_damage = w_bldg_dmg.get_output_dataset("ds_result")
-    flood_damage = f_bldg_dmg.get_output_dataset("ds_result")
+    flood_damage = f_bldg_dmg.get_output_dataset("result")
 
     # Combined building damage to determine maximum damage state
     combined_bldg_dmg = CombinedWindWaveSurgeBuildingDamage(client)
