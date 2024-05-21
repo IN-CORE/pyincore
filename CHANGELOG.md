@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - join dataset has an option for only keeping the table dataset fields [#299](https://github.com/IN-CORE/pyincore/issues/299)
 - Update Non-structural Building Damage to support flood [#562](https://github.com/IN-CORE/pyincore/issues/562)
+- Update flood input to non-structural building damage for combined wind-wave-surge building [#566](https://github.com/IN-CORE/pyincore/issues/566)
 
 ### Fixed
 - Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)
