@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, FragilityService, MappingSet, Dataset
+from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.combinedwindwavesurgebuildingdamage import CombinedWindWaveSurgeBuildingDamage
 from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore.analyses.nonstructbuildingdamage import NonStructBuildingDamage
