@@ -63,7 +63,7 @@ def run_with_base_class():
     # test galveston hurricane road failure
 
     # road inventory for Galveston island
-    road_dataset_id = "60ba5ee94219ee25a56b6999"
+    road_dataset_id = "664e4e0aefdc9f1ed5db5649"
     # road damage by hurricane inundation mapping
     mapping_id = "60ba583b1f2b7d4a916faf03"
     # Galveston Deterministic Hurricane - Kriging inundationDuration
