@@ -396,14 +396,14 @@ class Dfr3Service:
         # Handle legacy rules
         if isinstance(rules, list):
             # If the rules are empty, return the matched properties
-            if not rules:
+            if not rules or rules == [[]] or rules == [None]:
                 return matched_properties
             for i, and_rules in enumerate(rules):
                 for j, rule in enumerate(and_rules):
                     matched_properties.update(Dfr3Service._eval_property_from_inventory(rule, properties))
         elif isinstance(rules, dict):
             # If the rules are empty, return the matched properties
-            if not rules:
+            if not rules or rules == [[]] or rules == [None]:
                 return matched_properties
 
             # Handles new style of rules
