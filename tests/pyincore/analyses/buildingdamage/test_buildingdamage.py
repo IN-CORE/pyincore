@@ -96,8 +96,7 @@ def run_with_base_class():
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
 
-    mapping_id = "6091d9fbb53ed4646fd276ca"  # 19 archetype with retrofit
-    # mapping_id = "60994a1906d63d5ded1d6dcc" # 19 archetype with retrofit new format mapping
+    mapping_id = "5e8e3a21eaa8b80001f04f1c"  # 19 archetype mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
