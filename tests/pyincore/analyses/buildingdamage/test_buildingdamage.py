@@ -100,7 +100,6 @@ def run_with_base_class():
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    bldg_dmg.set_parameter("fragility_key", "Fragility ID Code")
 
     tornado = Tornado.from_hazard_service("5dfa32bbc0601200080893fb", hazardsvc)
     bldg_dmg.set_input_hazard("hazard", tornado)
