@@ -346,6 +346,29 @@ analyses/transportationrecovery
     :members:
 ..  autofunction:: transportationrecovery.WIPW.path_adt_from_edges
     :members:
+..  deprecated:: 1.19.0
+    This class will be deprecated soon. Use :class:`trafficflowrecovery.TrafficFlowRecovery` instead.
+
+analyses/trafficflowrecovery
+===============================
+..  autoclass:: trafficflowrecovery.trafficflowrecovery.TrafficFlowRecovery
+    :members:
+..  autoclass:: trafficflowrecovery.trafficflowrecoveryutil.TrafficFlowRecoveryUtil
+    :members:
+..  autoclass:: trafficflowrecovery.post_disaster_long_term_solution.PostDisasterLongTermSolution
+    :members:
+..  autoclass:: trafficflowrecovery.nsga2.Solution
+    :members:
+..  autoclass:: trafficflowrecovery.nsga2.NSGAII
+    :members:
+..  autofunction:: trafficflowrecovery.WIPW.ipw_search
+    :members:
+..  autofunction:: trafficflowrecovery.WIPW.tipw_index
+    :members:
+..  autofunction:: trafficflowrecovery.WIPW.path_service_level_edges
+    :members:
+..  autofunction:: trafficflowrecovery.WIPW.path_adt_from_edges
+    :members:
 
 analyses/waterfacilitydamage
 ============================

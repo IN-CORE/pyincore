@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Rename Social Vulnerability Analysis to Social Vulnerability Index Analysis [#556](https://github.com/IN-CORE/pyincore/issues/556)
 
+## [Unreleased]
+
+### Changed
+- Rename transportation recovery analysis to traffic flow recovery analysis [#558](https://github.com/IN-CORE/pyincore/issues/558)
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed
