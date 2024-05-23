@@ -140,6 +140,7 @@ class FragilityCurveSet:
             ("earthquake", "road", 4): FragilityCurveSet._4ls_to_5ds,
             ("earthquake", "water_facility", 4): FragilityCurveSet._4ls_to_5ds,
             ("earthquake", "electric_facility", 4): FragilityCurveSet._4ls_to_5ds,
+            ("earthquake", "gas_facility", 4): FragilityCurveSet._4ls_to_5ds,
             ("tornado", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
             ("tornado", "electric_facility", 4): FragilityCurveSet._4ls_to_5ds,
             ("flood", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
@@ -378,6 +379,8 @@ class FragilityCurveSet:
         elif inventory_type == "road":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0, "LS_3": 0.0}
         elif inventory_type == "water_facility":
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0, "LS_3": 0.0}
+        elif inventory_type == "gas_facility":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0, "LS_3": 0.0}
         elif inventory_type == "Transmission Towers":
             output = {"LS_0": 0.0}

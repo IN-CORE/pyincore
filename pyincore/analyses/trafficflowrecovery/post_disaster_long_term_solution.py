@@ -7,9 +7,9 @@
 import copy
 import networkx as nx
 import random
-from pyincore.analyses.transportationrecovery.nsga2 import Solution
-from pyincore.analyses.transportationrecovery import WIPW as WIPW
-from pyincore.analyses.transportationrecovery.transportationrecoveryutil import TransportationRecoveryUtil
+from pyincore.analyses.trafficflowrecovery.nsga2 import Solution
+from pyincore.analyses.trafficflowrecovery import WIPW as WIPW
+from pyincore.analyses.trafficflowrecovery.trafficflowrecoveryutil import TrafficFlowRecoveryUtil
 
 
 class PostDisasterLongTermSolution(Solution):
@@ -202,7 +202,7 @@ class PostDisasterLongTermSolution(Solution):
                 # performance metrics based on travel time
                 te = None
                 if self.pm == 1:
-                    te = TransportationRecoveryUtil.traveltime_freeflow(self.network)
+                    te = TrafficFlowRecoveryUtil.traveltime_freeflow(self.network)
 
                 # based on WIPW
                 elif self.pm == 0:
