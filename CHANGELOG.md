@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Gas Facility Damage Analysis [#568](https://github.com/IN-CORE/pyincore/issues/568)
+- Copyrights to transportation recovery analysis [#579](https://github.com/IN-CORE/pyincore/issues/579)
 
 ### Changed
-- join dataset has an option for only keeping the table dataset fields [#299](https://github.com/IN-CORE/pyincore/issues/299)
+- Join dataset has an option for only keeping the table dataset fields [#299](https://github.com/IN-CORE/pyincore/issues/299)
 
 ### Fixed
 - Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)
