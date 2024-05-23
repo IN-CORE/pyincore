@@ -32,7 +32,7 @@ class NonStructBuildingDamage(BaseAnalysis):
     def run(self):
         """Executes building damage analysis."""
         # Building dataset
-        building_set = self.get_input_dataset("buildings").get_inventory_reader()
+        building_dataset = self.get_input_dataset("buildings")
 
         # building retrofit strategy
         retrofit_strategy_dataset = self.get_input_dataset("retrofit_strategy")
@@ -41,9 +41,10 @@ class NonStructBuildingDamage(BaseAnalysis):
         dfr3_mapping_set = self.get_input_dataset("dfr3_mapping_set")
 
         # Update the building inventory dataset if applicable
-        bldg_dataset, tmpdirname, _ = DatasetUtil.construct_updated_inventories(building_set,
+        bldg_dataset, tmpdirname, _ = DatasetUtil.construct_updated_inventories(building_dataset,
                                                                                 add_info_dataset=retrofit_strategy_dataset,
                                                                                 mapping=dfr3_mapping_set)
+        building_set = bldg_dataset.get_inventory_reader()
 
         # get input hazard
         hazard, hazard_type, hazard_dataset_id = self.create_hazard_object_from_input_params()
