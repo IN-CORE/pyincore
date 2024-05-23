@@ -12,6 +12,7 @@ from pyincore import BaseAnalysis, HazardService, FragilityService
 from pyincore.analyses.nonstructbuildingdamage.nonstructbuildingutil import \
     NonStructBuildingUtil
 from pyincore.models.dfr3curve import DFR3Curve
+from pyincore.utils.datasetutil import DatasetUtil
 
 
 class NonStructBuildingDamage(BaseAnalysis):
@@ -32,6 +33,17 @@ class NonStructBuildingDamage(BaseAnalysis):
         """Executes building damage analysis."""
         # Building dataset
         building_set = self.get_input_dataset("buildings").get_inventory_reader()
+
+        # building retrofit strategy
+        retrofit_strategy_dataset = self.get_input_dataset("retrofit_strategy")
+
+        # mapping
+        dfr3_mapping_set = self.get_input_dataset("dfr3_mapping_set")
+
+        # Update the building inventory dataset if applicable
+        bldg_dataset, tmpdirname, _ = DatasetUtil.construct_updated_inventories(building_set,
+                                                                                add_info_dataset=retrofit_strategy_dataset,
+                                                                                mapping=dfr3_mapping_set)
 
         # get input hazard
         hazard, hazard_type, hazard_dataset_id = self.create_hazard_object_from_input_params()
@@ -344,6 +356,12 @@ class NonStructBuildingDamage(BaseAnalysis):
                     'required': True,
                     'description': 'DFR3 Mapping Set Object',
                     'type': ['incore:dfr3MappingSet'],
+                },
+                {
+                    'id': 'retrofit_strategy',
+                    'required': False,
+                    'description': 'Building retrofit strategy that contains guid and retrofit method',
+                    'type': ['incore:retrofitStrategy']
                 }
             ],
             'output_datasets': [
