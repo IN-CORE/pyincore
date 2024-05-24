@@ -7,25 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Rename Social Vulnerability Analysis to Social Vulnerability Index Analysis [#556](https://github.com/IN-CORE/pyincore/issues/556)
+- Join dataset has an option for only keeping the table dataset fields [#299](https://github.com/IN-CORE/pyincore/issues/299)
+- Update Non-structural Building Damage to support flood [#562](https://github.com/IN-CORE/pyincore/issues/562)
+- Update flood input to non-structural building damage for combined wind-wave-surge building [#566](https://github.com/IN-CORE/pyincore/issues/566)
+- Rename transportation recovery analysis to traffic flow recovery analysis [#558](https://github.com/IN-CORE/pyincore/issues/558)
+
 ### Added
 - Gas Facility Damage Analysis [#568](https://github.com/IN-CORE/pyincore/issues/568)
 - Copyrights to transportation recovery analysis [#579](https://github.com/IN-CORE/pyincore/issues/579)
 
-### Changed
-- Join dataset has an option for only keeping the table dataset fields [#299](https://github.com/IN-CORE/pyincore/issues/299)
-
 ### Fixed
 - Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)
 
-## [Unreleased]
-
-### Changed
-- Rename Social Vulnerability Analysis to Social Vulnerability Index Analysis [#556](https://github.com/IN-CORE/pyincore/issues/556)
-
-## [Unreleased]
-
-### Changed
-- Rename transportation recovery analysis to traffic flow recovery analysis [#558](https://github.com/IN-CORE/pyincore/issues/558)
 
 ## [Unreleased] 
 
