@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Rename transportation recovery analysis to traffic flow recovery analysis [#558](https://github.com/IN-CORE/pyincore/issues/558)
 
+## [Unreleased] 
+
+### Changed
+- Rename Housing Recovery to Housing Valuation Recovery Analysis [#560](https://github.com/IN-CORE/pyincore/issues/560)
+
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed

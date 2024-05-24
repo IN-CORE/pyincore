@@ -127,10 +127,8 @@ analyses/gasfacilitydamage
 
 analyses/housingrecovery
 ========================
-..  autoclass:: housingrecovery.housingrecovery.HousingRecovery
-    :members:
-..  autoclass:: housingrecovery.housingrecoveryutil.HousingRecoveryUtil
-    :members:
+.. deprecated:: 1.19.0
+   This class will be deprecated soon. Use :class:`housingvaluationrecovery.HousingValuationRecovery` instead.
 
 analyses/housingrecoverysequential
 ==================================
@@ -140,6 +138,13 @@ analyses/housingrecoverysequential
 analyses/housingunitallocation
 ==============================
 ..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
+    :members:
+
+analyses/housingvaluationrecovery
+========================
+..  autoclass:: housingvaluationrecovery.housingvaluationrecovery.HousingValuationRecovery
+    :members:
+..  autoclass:: housingvaluationrecovery.housingvaluationrecoveryutil.HousingValuationRecoveryUtil
     :members:
 
 analyses/indp

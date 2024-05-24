@@ -4,7 +4,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-class HousingRecoveryUtil:
+class HousingValuationRecoveryUtil:
     BASEYEAR = 2008
 
     DMG_YEARS = [-1, 0, 1, 2, 3, 4, 5, 6]
