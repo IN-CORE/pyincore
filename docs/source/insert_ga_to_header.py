@@ -5,16 +5,6 @@ from bs4 import BeautifulSoup
 build_dir = "docs/build"
 
 # Google Analytics code snippet to insert into the HTML files
-# ga_code = f"""
-# <!-- Global site tag (gtag.js) - Google Analytics -->
-# <script async src="https://www.googletagmanager.com/gtag/js?id={ga_key}"></script>
-# <script>
-#   window.dataLayer = window.dataLayer || [];
-#   function gtag(){{dataLayer.push(arguments);}}
-#   gtag('js', new Date());
-#   gtag('config', '{ga_key}');
-# </script>
-# """
 ga_code = f"""
         <script>
             // Fetch and execute the analytics script
