@@ -49,8 +49,8 @@ original/
 *.csv
 !pyincore/analyses/*/*.csv
 !/tests/pyincore/analyses/*/*.csv
-# a pair of negation pattern; everything else except below will be ignored by git
-*.json
+# a pair of negation pattern; everything else except below will be ignored by git!
+!tests/*.json
 !tests/data/*/*.json
 !tests/data/*.json
 !tests/data/retrofit/*.csv
