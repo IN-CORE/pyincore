@@ -34,6 +34,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Rename Building Portfolio Analysis to Building Cluster Recovery Analysis [#559](https://github.com/IN-CORE/pyincore/issues/559)
 
 
+## [Unrelased]
+
+### Fixed
+- Out of index error in dfr3 service's property conversion when the rule is not found [#555](https://github.com/IN-CORE/pyincore/issues/555)
+
 ## [1.18.1] - 2024-04-30
 
 ### Changed
