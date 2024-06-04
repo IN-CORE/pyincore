@@ -53,6 +53,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Unnecessary dependency in setup.py [#519](https://github.com/IN-CORE/pyincore/issues/519)
 
 
+## [Unreleased]
+
+### Added
+- Google Analytics to the documentation site [#547](https://github.com/IN-CORE/pyincore/issues/547)
+
 ## [1.18.0] - 2024-04-03
 
 ### Added
