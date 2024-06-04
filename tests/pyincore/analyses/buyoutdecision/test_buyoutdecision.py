@@ -12,7 +12,7 @@ import pandas as pd
 def BuyoutDecisionTest():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
-    past_building_damage_id  = "6632d2605da5fd22b268511f"
+    past_building_damage_id = "6632d2605da5fd22b268511f"
     future_building_damage_id = "6632d45b5da5fd22b2685136"
     past_pop_dislocation_id = "6632d5205da5fd22b26878bb"
 

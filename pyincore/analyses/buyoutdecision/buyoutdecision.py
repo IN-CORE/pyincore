@@ -87,7 +87,8 @@ class BuyoutDecision(BaseAnalysis):
         # Merging with population dislocation
         buyout_inventory = pd.merge(buyout_inventory, pop_dislocation[['huid', 'dislocated']], on='huid', how='left')
 
-        # Create a new column showing the appraisal value of each building ('appr_bldg' divided by the number of times a guid is repeated)
+        # Create a new column showing the appraisal value of each building ('appr_bldg' divided by the number of times
+        # a guid is repeated)
         # For the instances that a structure has more than one housing units.
         buyout_inventory['count'] = buyout_inventory.groupby('guid')['guid'].transform('count')
         buyout_inventory['housing_unit_appraisal_value'] = buyout_inventory['appr_bldg'] / buyout_inventory['count']
@@ -102,9 +103,8 @@ class BuyoutDecision(BaseAnalysis):
         buyout_inventory = buyout_inventory[
             ['guid', 'huid', 'building_appraisal_value', 'housing_unit_appraisal_value', 'geometry',
              'number_of_housing_units', 'numprec', 'ownership', 'race', 'hispan', 'family', 'vacancy', 'incomegroup',
-             'hhinc','randincome','poverty', 'huestimate', 'dislocated', 'max_state_future_damage',
+             'hhinc', 'randincome', 'poverty', 'huestimate', 'dislocated', 'max_state_future_damage',
              'max_state_past_damage', 'x', 'y', ]]
-
 
         return buyout_inventory
 
