@@ -1,3 +1,10 @@
+# Copyright (c) 2018 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+
 class BuildingDamage(object):
 
     def __init__(self, distance_to_center, restricted_entry, restricted_use, reoccupancy, best_line_functionality,

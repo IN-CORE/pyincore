@@ -33,7 +33,6 @@ class BaseAnalysis:
         self.input_datasets = {}
         for input_dataset in self.spec['input_datasets']:
             self.input_datasets[input_dataset['id']] = {'spec': input_dataset, 'value': None}
-
         self.input_hazards = {}
         if 'input_hazards' in self.spec:
             for input_hazards in self.spec['input_hazards']:

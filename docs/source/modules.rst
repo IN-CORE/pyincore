@@ -35,6 +35,11 @@ analyses/buildingportfolio
 ..  autoclass:: pyincore.analyses.buildingportfolio.recovery.BuildingData
     :members:
 
+analyses/buyoutdecision
+=======================
+..  autoclass:: buyoutdecision.buyoutdecision.BuyoutDecision
+    :members:
+
 analyses/capitalshocks
 ======================
 
@@ -118,12 +123,17 @@ analyses/galvestoncge
 ..  autofunction:: galvestoncge.galvestonoutput.gams_to_dataframes
     :members:
 
+analyses/gasfacilitydamage
+============================
+..  autoclass:: gasfacilitydamage.gasfacilitydamage.GasFacilityDamage
+    :members:
+..  autoclass:: gasfacilitydamage.gfutil.GfUtil
+    :members:
+
 analyses/housingrecovery
 ========================
-..  autoclass:: housingrecovery.housingrecovery.HousingRecovery
-    :members:
-..  autoclass:: housingrecovery.housingrecoveryutil.HousingRecoveryUtil
-    :members:
+.. deprecated:: 1.19.0
+   This class will be deprecated soon. Use :class:`housingvaluationrecovery.HousingValuationRecovery` instead.
 
 analyses/housingrecoverysequential
 ==================================
@@ -133,6 +143,13 @@ analyses/housingrecoverysequential
 analyses/housingunitallocation
 ==============================
 ..  autoclass:: housingunitallocation.housingunitallocation.HousingUnitAllocation
+    :members:
+
+analyses/housingvaluationrecovery
+========================
+..  autoclass:: housingvaluationrecovery.housingvaluationrecovery.HousingValuationRecovery
+    :members:
+..  autoclass:: housingvaluationrecovery.housingvaluationrecoveryutil.HousingValuationRecoveryUtil
     :members:
 
 analyses/indp
@@ -311,6 +328,13 @@ analyses/socialvulnerability
 ============================
 ..  autoclass:: socialvulnerability.socialvulnerability.SocialVulnerability
     :members:
+..  deprecated:: 1.19.0
+    This class will be deprecated soon. Use :class:`socialvulnerabilityscore.SocialVulnerabilityScore` instead.
+
+analyses/socialvulnerabilityscore
+============================
+..  autoclass:: socialvulnerabilityscore.socialvulnerabilityscore.SocialVulnerabilityScore
+    :members:
 
 analyses/tornadoepndamage
 =========================
@@ -336,6 +360,29 @@ analyses/transportationrecovery
 ..  autofunction:: transportationrecovery.WIPW.path_service_level_edges
     :members:
 ..  autofunction:: transportationrecovery.WIPW.path_adt_from_edges
+    :members:
+..  deprecated:: 1.19.0
+    This class will be deprecated soon. Use :class:`trafficflowrecovery.TrafficFlowRecovery` instead.
+
+analyses/trafficflowrecovery
+===============================
+..  autoclass:: trafficflowrecovery.trafficflowrecovery.TrafficFlowRecovery
+    :members:
+..  autoclass:: trafficflowrecovery.trafficflowrecoveryutil.TrafficFlowRecoveryUtil
+    :members:
+..  autoclass:: trafficflowrecovery.post_disaster_long_term_solution.PostDisasterLongTermSolution
+    :members:
+..  autoclass:: trafficflowrecovery.nsga2.Solution
+    :members:
+..  autoclass:: trafficflowrecovery.nsga2.NSGAII
+    :members:
+..  autofunction:: trafficflowrecovery.WIPW.ipw_search
+    :members:
+..  autofunction:: trafficflowrecovery.WIPW.tipw_index
+    :members:
+..  autofunction:: trafficflowrecovery.WIPW.path_service_level_edges
+    :members:
+..  autofunction:: trafficflowrecovery.WIPW.path_adt_from_edges
     :members:
 
 analyses/waterfacilitydamage
