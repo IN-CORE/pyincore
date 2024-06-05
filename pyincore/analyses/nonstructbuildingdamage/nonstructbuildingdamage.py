@@ -10,13 +10,13 @@ from pyincore.analyses.buildingnonstructdamage.buildingnonstructdamage import \
     BuildingNonStructDamage
 
 
-@deprecated(version='1.19.0', reason="This class will be deprecated soon. Use TrafficFlowRecovery instead.")
+@deprecated(version='1.19.0', reason="This class will be deprecated soon. Use BuildingNonStructDamage instead.")
 class NonStructBuildingDamage():
     def __init__(self, incore_client):
         self._delegate = BuildingNonStructDamage(incore_client)
 
     def __getattr__(self, name):
         """
-        Delegate attribute access to the TrafficFlowRecovery instance.
+        Delegate attribute access to the BuildingNonStructDamage instance.
         """
         return getattr(self._delegate, name)
