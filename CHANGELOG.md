@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Rename transportation recovery analysis to traffic flow recovery analysis [#558](https://github.com/IN-CORE/pyincore/issues/558)
 - Rename Monte Carlo Failure Probability to Monte Carlo Limit State Probability [#557](https://github.com/IN-CORE/pyincore/issues/557)
 - Rename Housing Recovery to Housing Valuation Recovery Analysis [#560](https://github.com/IN-CORE/pyincore/issues/560)
-- - Rename Building Portfolio Analysis to Building Cluster Recovery Analysis [#559](https://github.com/IN-CORE/pyincore/issues/559)
+- Rename Building Portfolio Analysis to Building Cluster Recovery Analysis [#559](https://github.com/IN-CORE/pyincore/issues/559)
 
 ### Added
 - Gas Facility Damage Analysis [#568](https://github.com/IN-CORE/pyincore/issues/568)
