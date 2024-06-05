@@ -6,7 +6,7 @@
 
 from deprecated.sphinx import deprecated
 
-from pyincore.analyses.buildingnonstructdamage.buildingnonstructdamage import \
+from pyincore.analyses.buildingnonstructuraldamage.buildingnonstructuraldamage import \
     BuildingNonStructDamage
 
 

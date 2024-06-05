@@ -1,5 +1,5 @@
 from pyincore import IncoreClient, FragilityService, MappingSet, Flood, HazardService
-from pyincore.analyses.buildingnonstructdamage import BuildingNonStructDamage
+from pyincore.analyses.buildingnonstructuraldamage import BuildingNonStructDamage
 import pyincore.globals as pyglobals
 
 

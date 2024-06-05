@@ -9,7 +9,7 @@ from itertools import repeat
 
 from pyincore import AnalysisUtil, GeoUtil
 from pyincore import BaseAnalysis, HazardService, FragilityService
-from pyincore.analyses.buildingnonstructdamage.buildingnonstructutil import \
+from pyincore.analyses.buildingnonstructuraldamage.buildingnonstructuralutil import \
     BuildingNonStructUtil
 from pyincore.models.dfr3curve import DFR3Curve
 from pyincore.utils.datasetutil import DatasetUtil
