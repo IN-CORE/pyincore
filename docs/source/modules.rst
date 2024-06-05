@@ -35,6 +35,11 @@ analyses/buildingportfolio
 ..  autoclass:: pyincore.analyses.buildingportfolio.recovery.BuildingData
     :members:
 
+analyses/buyoutdecision
+=======================
+..  autoclass:: buyoutdecision.buyoutdecision.BuyoutDecision
+    :members:
+
 analyses/capitalshocks
 ======================
 

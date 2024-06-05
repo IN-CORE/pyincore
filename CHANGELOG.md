@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Gas Facility Damage Analysis [#568](https://github.com/IN-CORE/pyincore/issues/568)
 - Copyrights to transportation recovery analysis [#579](https://github.com/IN-CORE/pyincore/issues/579)
+- Buyout Model Analyses [#539](https://github.com/IN-CORE/pyincore/issues/539)
 
 ### Fixed
 - Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)
