@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Update Non-structural Building Damage to support flood [#562](https://github.com/IN-CORE/pyincore/issues/562)
 - Update flood input to non-structural building damage for combined wind-wave-surge building [#566](https://github.com/IN-CORE/pyincore/issues/566)
 - Rename transportation recovery analysis to traffic flow recovery analysis [#558](https://github.com/IN-CORE/pyincore/issues/558)
+- Rename Monte Carlo Failure Probability to Monte Carlo Limit State Probability [#557](https://github.com/IN-CORE/pyincore/issues/557)
+- Rename Housing Recovery to Housing Valuation Recovery Analysis [#560](https://github.com/IN-CORE/pyincore/issues/560)
+- Rename Building Portfolio Analysis to Building Cluster Recovery Analysis [#559](https://github.com/IN-CORE/pyincore/issues/559)
 - Rename nonstructural building damage [#537](https://github.com/IN-CORE/pyincore/issues/537)
 - Rename building damage to building structural damage [#561](https://github.com/IN-CORE/pyincore/issues/561)
 
@@ -20,27 +23,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Gas Facility Damage Analysis [#568](https://github.com/IN-CORE/pyincore/issues/568)
 - Copyrights to transportation recovery analysis [#579](https://github.com/IN-CORE/pyincore/issues/579)
 - Buyout Model Analyses [#539](https://github.com/IN-CORE/pyincore/issues/539)
+- Google Analytics to the documentation site [#547](https://github.com/IN-CORE/pyincore/issues/547)
 
 ### Fixed
 - Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)
-
-
-## [Unreleased] 
-
-### Changed
-- Rename Housing Recovery to Housing Valuation Recovery Analysis [#560](https://github.com/IN-CORE/pyincore/issues/560)
-
-
-## [Unreleased]
-
-### Changed
-- Rename Building Portfolio Analysis to Building Cluster Recovery Analysis [#559](https://github.com/IN-CORE/pyincore/issues/559)
-
-
-## [Unrelased]
-
-### Fixed
 - Out of index error in dfr3 service's property conversion when the rule is not found [#555](https://github.com/IN-CORE/pyincore/issues/555)
+
 
 ## [1.18.1] - 2024-04-30
 
@@ -55,11 +43,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Permission error when deleting dataset related files [#544](https://github.com/IN-CORE/pyincore/issues/544)
 - Unnecessary dependency in setup.py [#519](https://github.com/IN-CORE/pyincore/issues/519)
 
-
-## [Unreleased]
-
-### Added
-- Google Analytics to the documentation site [#547](https://github.com/IN-CORE/pyincore/issues/547)
 
 ## [1.18.0] - 2024-04-03
 
