@@ -34,6 +34,13 @@ analyses/buildingfunctionality
 ..  autoclass:: buildingfunctionality.buildingfunctionality.BuildingFunctionality
     :members:
 
+analyses/buildingnonstructdamage
+================================
+..  autoclass:: buildingnonstructdamage.buildingnonstructdamage.BuildingNonStructDamage
+    :members:
+..  autoclass:: buildingnonstructdamage.buildingnonstructutil.BuildingNonStructUtil
+    :members:
+
 analyses/buildingportfolio
 ==========================
 
@@ -250,6 +257,8 @@ analyses/nonstructbuildingdamage
     :members:
 ..  autoclass:: nonstructbuildingdamage.nonstructbuildingutil.NonStructBuildingUtil
     :members:
+..  deprecated:: 1.19.0
+    This class will be deprecated soon. Use :class:`buildingnonstructdamage.BuildingNonStructDamage` instead.
 
 analyses/pipelinedamage
 =======================

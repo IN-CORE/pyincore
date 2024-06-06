@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Rename Monte Carlo Failure Probability to Monte Carlo Limit State Probability [#557](https://github.com/IN-CORE/pyincore/issues/557)
 - Rename Housing Recovery to Housing Valuation Recovery Analysis [#560](https://github.com/IN-CORE/pyincore/issues/560)
 - Rename Building Portfolio Analysis to Building Cluster Recovery Analysis [#559](https://github.com/IN-CORE/pyincore/issues/559)
+- Rename nonstructural building damage [#537](https://github.com/IN-CORE/pyincore/issues/537)
 - Rename building damage to building structural damage [#561](https://github.com/IN-CORE/pyincore/issues/561)
 
 ### Added
