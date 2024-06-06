@@ -18,7 +18,7 @@ analyses/buildingdamage
     This class will be deprecated soon. Use :class:`buildingstructuraldamage.BuildingStructuralDamage` instead.
 
 analyses/buildingstructuraldamage
-=======================
+=================================
 ..  autoclass:: buildingstructuraldamage.buildingstructuraldamage.BuildingStructuralDamage
     :members:
 ..  autoclass:: buildingstructuraldamage.buildingutil.BuildingUtil
