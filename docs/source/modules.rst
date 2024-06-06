@@ -61,7 +61,7 @@ analyses/combinedwindwavesurgebuildingdamage
     :members:
 
 analyses/combinedwindwavesurgebuildingloss
-============================================
+==========================================
 ..  autoclass:: pyincore.analyses.combinedwindwavesurgebuildingloss.CombinedWindWaveSurgeBuildingLoss
     :members:
 
@@ -71,7 +71,7 @@ analyses/commercialbuildingrecovery
     :members:
 
 analyses/core_cge_ml
-===================================
+====================
 ..  autoclass:: core_cge_ml.corecgeml.CoreCGEML
     :members:
 
@@ -93,7 +93,7 @@ analyses/epfdamage
     :members:
 
 analyses/epfrepaircost
-==================
+======================
 ..  autoclass:: epfrepaircost.epfrepaircost.EpfRepairCost
     :members:
 
@@ -110,7 +110,7 @@ analyses/example
     :members:
 
 analyses/galvestoncge
-==================
+=====================
 ..  autoclass:: galvestoncge.galvestoncge.GalvestonCGEModel
     :members:
 ..  autoclass:: galvestoncge.equationlib.VarContainer
@@ -133,7 +133,7 @@ analyses/galvestoncge
     :members:
 
 analyses/gasfacilitydamage
-============================
+==========================
 ..  autoclass:: gasfacilitydamage.gasfacilitydamage.GasFacilityDamage
     :members:
 ..  autoclass:: gasfacilitydamage.gfutil.GfUtil
@@ -155,14 +155,14 @@ analyses/housingunitallocation
     :members:
 
 analyses/housingvaluationrecovery
-========================
+=================================
 ..  autoclass:: housingvaluationrecovery.housingvaluationrecovery.HousingValuationRecovery
     :members:
 ..  autoclass:: housingvaluationrecovery.housingvaluationrecoveryutil.HousingValuationRecoveryUtil
     :members:
 
 analyses/indp
-==============================
+=============
 ..  autoclass:: indp.indp.INDP
     :members:
 ..  autoclass:: indp.dislocationutils.DislocationUtil
@@ -208,7 +208,7 @@ analyses/joplincge
     :members:
 
 analyses/joplinempiricalbuildingrestoration
-===================================
+===========================================
 ..  autoclass:: joplinempiricalbuildingrestoration.joplinempiricalbuildingrestoration.JoplinEmpiricalBuildingRestoration
     :members:
 ..  autoclass:: joplinempiricalbuildingrestoration.joplinempirrestor_util.JoplinEmpirRestorUtil
@@ -220,7 +220,7 @@ analyses/meandamage
     :members:
 
 analyses/mlenabledcgeslc
-===================
+========================
 ..  autoclass:: mlenabledcgeslc.mlcgeslc.MlEnabledCgeSlc
     :members:
 
@@ -230,7 +230,7 @@ analyses/montecarlofailureprobability
    This class will be deprecated soon. Use :class:`montecarlolimitstateprobability.MonteCarloLimitStateProbability` instead.
 
 analyses/montecarlolimitstateprobability
-=====================================
+========================================
 ..  autoclass:: montecarlolimitstateprobability.montecarlolimitstateprobability.MonteCarloLimitStateProbability
     :members:
 
@@ -264,12 +264,12 @@ analyses/pipelinedamagerepairrate
     :members:
 
 analyses/pipelinefunctionality
-=========================
+==============================
 ..  autoclass:: pipelinefunctionality.pipelinefunctionality.PipelineFunctionality
     :members:
 
 analyses/pipelinerepaircost
-============================
+===========================
 ..  autoclass:: pipelinerepaircost.pipelinerepaircost.PipelineRepairCost
     :members:
 
@@ -311,7 +311,7 @@ analyses/seasidecge
     :members:
 
 analyses/saltlakecge
-==================
+====================
 ..  autoclass:: saltlakecge.saltlakecge.SaltLakeCGEModel
     :members:
 ..  autoclass:: saltlakecge.equationlib.VarContainer
@@ -341,7 +341,7 @@ analyses/socialvulnerability
     This class will be deprecated soon. Use :class:`socialvulnerabilityscore.SocialVulnerabilityScore` instead.
 
 analyses/socialvulnerabilityscore
-============================
+=================================
 ..  autoclass:: socialvulnerabilityscore.socialvulnerabilityscore.SocialVulnerabilityScore
     :members:
 
@@ -374,7 +374,7 @@ analyses/transportationrecovery
     This class will be deprecated soon. Use :class:`trafficflowrecovery.TrafficFlowRecovery` instead.
 
 analyses/trafficflowrecovery
-===============================
+============================
 ..  autoclass:: trafficflowrecovery.trafficflowrecovery.TrafficFlowRecovery
     :members:
 ..  autoclass:: trafficflowrecovery.trafficflowrecoveryutil.TrafficFlowRecoveryUtil
@@ -400,7 +400,7 @@ analyses/waterfacilitydamage
     :members:
 
 analyses/waterfacilityrepaircost
-=================================
+================================
 ..  autoclass:: waterfacilityrepaircost.waterfacilityrepaircost.WaterFacilityRepairCost
     :members:
 
@@ -410,7 +410,7 @@ analyses/waterfacilityrestoration
     :members:
 
 analyses/wfnfunctionality
-=================================
+=========================
 ..  autoclass:: wfnfunctionality.wfnfunctionality.WfnFunctionality
     :members:
 
@@ -418,7 +418,7 @@ models
 ^^^^^^
 
 models/hazard/earthquake
-===================
+========================
 ..  autoclass:: models.earthquake.Earthquake
     :members:
 
@@ -428,7 +428,7 @@ models/hazard/flood
     :members:
 
 models/hazard/hazard
-===================
+====================
 ..  autoclass:: models.hazard.Hazard
     :members:
 
@@ -483,7 +483,7 @@ models/mappingset
     :members:
 
 models/networkdataset
-=================
+=====================
 ..  autoclass:: models.networkdataset.NetworkDataset
     :members:
 
@@ -498,7 +498,7 @@ models/restorationcurveset
     :members:
 
 models/units
-==========================
+============
 ..  autoclass:: models.units.Units
     :members:
 
@@ -511,7 +511,7 @@ utils/analysisutil
     :members:
 
 utils/cge_ml_file_util
-==================
+======================
 ..  autoclass:: utils.cge_ml_file_util.CGEMLFileUtil
     :members:
 
