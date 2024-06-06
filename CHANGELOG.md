@@ -14,10 +14,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Update flood input to non-structural building damage for combined wind-wave-surge building [#566](https://github.com/IN-CORE/pyincore/issues/566)
 - Rename transportation recovery analysis to traffic flow recovery analysis [#558](https://github.com/IN-CORE/pyincore/issues/558)
 - Rename nonstructural building damage [#537](https://github.com/IN-CORE/pyincore/issues/537)
+- Rename building damage to building structural damage [#561](https://github.com/IN-CORE/pyincore/issues/561)
 
 ### Added
 - Gas Facility Damage Analysis [#568](https://github.com/IN-CORE/pyincore/issues/568)
 - Copyrights to transportation recovery analysis [#579](https://github.com/IN-CORE/pyincore/issues/579)
+- Buyout Model Analyses [#539](https://github.com/IN-CORE/pyincore/issues/539)
 
 ### Fixed
 - Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)

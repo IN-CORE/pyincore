@@ -14,6 +14,15 @@ analyses/buildingdamage
     :members:
 ..  autoclass:: buildingdamage.buildingutil.BuildingUtil
     :members:
+..  deprecated:: 1.19.0
+    This class will be deprecated soon. Use :class:`buildingstructuraldamage.BuildingStructuralDamage` instead.
+
+analyses/buildingstructuraldamage
+=================================
+..  autoclass:: buildingstructuraldamage.buildingstructuraldamage.BuildingStructuralDamage
+    :members:
+..  autoclass:: buildingstructuraldamage.buildingutil.BuildingUtil
+    :members:
 
 analyses/buildingeconloss
 =========================
@@ -40,6 +49,11 @@ analyses/buildingportfolio
 ..  autoclass:: pyincore.analyses.buildingportfolio.recovery.BuildingDamage
     :members:
 ..  autoclass:: pyincore.analyses.buildingportfolio.recovery.BuildingData
+    :members:
+
+analyses/buyoutdecision
+=======================
+..  autoclass:: buyoutdecision.buyoutdecision.BuyoutDecision
     :members:
 
 analyses/capitalshocks
