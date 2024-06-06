@@ -13,9 +13,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Update Non-structural Building Damage to support flood [#562](https://github.com/IN-CORE/pyincore/issues/562)
 - Update flood input to non-structural building damage for combined wind-wave-surge building [#566](https://github.com/IN-CORE/pyincore/issues/566)
 - Rename transportation recovery analysis to traffic flow recovery analysis [#558](https://github.com/IN-CORE/pyincore/issues/558)
+<<<<<<< 557-rename-monte-carlo-failure-probability-to-monte-carlo-limit-state-probability
 - Rename Monte Carlo Failure Probability to Monte Carlo Limit State Probability [#557](https://github.com/IN-CORE/pyincore/issues/557)
 - Rename Housing Recovery to Housing Valuation Recovery Analysis [#560](https://github.com/IN-CORE/pyincore/issues/560)
 - Rename Building Portfolio Analysis to Building Cluster Recovery Analysis [#559](https://github.com/IN-CORE/pyincore/issues/559)
+=======
+- Rename building damage to building structural damage [#561](https://github.com/IN-CORE/pyincore/issues/561)
+>>>>>>> develop
 
 ### Added
 - Gas Facility Damage Analysis [#568](https://github.com/IN-CORE/pyincore/issues/568)
