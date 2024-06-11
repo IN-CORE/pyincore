@@ -164,7 +164,7 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
                     'id': 'flood_damage',
                     'required': True,
                     'description': 'Flood damage result that has damage intervals in it',
-                    'type': ['ergo:buildingDamageVer6']
+                    'type': ['ergo:nsBuildingInventoryDamageVer4']
                 },
 
             ],

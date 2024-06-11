@@ -1,6 +1,6 @@
 import os
 
-from pyincore import IncoreClient, MappingSet, Tornado, Dataset, HazardService, Flood
+from pyincore import IncoreClient, MappingSet, Tornado, Dataset, HazardService
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
 import time
@@ -52,37 +52,6 @@ def run_with_base_class():
 
     end_time_1 = time.time()
     print(f"Joplin Tornado Retrofit execution time: {end_time_1 - start_time:.5f} seconds")
-
-    ##############################
-    # lumberton flood
-    flood = Flood.from_hazard_service("5f4d02e99f43ee0dde768406", dev_hazardsvc)
-
-    flood_fragility_mapping_set = MappingSet.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR,
-                                                                         "retrofit/flood_retrofit_mapping.json"))
-    # lumberton building inventory v7
-    bldg_dataset_id = "603010a4b1db9c28aef5319f"  # 21k full building
-
-    flood_bldg_dmg = BuildingDamage(dev_client)
-    flood_bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-
-    # lumberton building mapping (with equation)
-    flood_bldg_dmg.set_input_dataset("dfr3_mapping_set", flood_fragility_mapping_set)
-    flood_bldg_dmg.set_parameter("fragility_key", "Lumberton Flood Building Fragility ID Code")
-
-    flood_bldg_dmg.set_input_hazard("hazard", flood)
-
-    retrofit_strategy_plan = Dataset.from_file(os.path.join(pyglobals.TEST_DATA_DIR,
-                                                            "retrofit/flood_retrofit_plan.csv"),
-                                               data_type="incore:retrofitStrategy")
-    flood_bldg_dmg.set_input_dataset("retrofit_strategy", retrofit_strategy_plan)
-
-    result_name = "lumberton_flood_dmg_result_w_retrofit"
-    flood_bldg_dmg.set_parameter("result_name", os.path.join(result_folder, result_name))
-    flood_bldg_dmg.set_parameter("num_cpu", 8)
-    flood_bldg_dmg.run_analysis()
-
-    end_time_2 = time.time()
-    print(f"Lumberton Flood Retrofit execution time: {end_time_2 - end_time_1:.5f} seconds")
 
 
 if __name__ == '__main__':

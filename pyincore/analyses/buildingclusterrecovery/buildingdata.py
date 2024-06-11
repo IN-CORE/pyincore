@@ -1,3 +1,10 @@
+# Copyright (c) 2018 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+
 class BuildingData:
     def __init__(self, tract_id, lon, lat, structural, code_level, epsa_node_id, pwsa_node_id, tep_id, build_id_x,
                  epsa_id, pwsa_id, finance, ep_pw_id, occupation_code):

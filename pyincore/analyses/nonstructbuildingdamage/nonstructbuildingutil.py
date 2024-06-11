@@ -60,25 +60,3 @@ class NonStructBuildingUtil:
             + prob_ground_failure - limit_state_probabilities[keys[j]] * prob_ground_failure
 
         return adjusted_limit_state_probabilities
-
-    @staticmethod
-    def determine_haz_exposure(hazard_exposure_as, hazard_exposure_ds):
-        """
-        Determine the hazard exposure of the building based on the
-        Args:
-            hazard_exposure_as:
-            hazard_exposure_ds:
-
-        Returns:
-
-        """
-        if hazard_exposure_as == "yes" and hazard_exposure_ds == "yes":
-            haz_expose = "yes"
-        elif hazard_exposure_as == "error" or hazard_exposure_ds == "error":
-            haz_expose = "error"
-        elif hazard_exposure_as == "no" and hazard_exposure_ds == "no":
-            haz_expose = "no"
-        else:
-            haz_expose = "partial"
-
-        return haz_expose
