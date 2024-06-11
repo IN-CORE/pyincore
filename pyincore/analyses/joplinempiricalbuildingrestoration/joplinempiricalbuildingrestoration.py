@@ -170,7 +170,10 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                              "ergo:buildingDamageVer6",
                              "ergo:buildingInventory",
                              "ergo:nsBuildingInventoryDamage",
-                             "ergo:nsBuildingInventoryDamageVer2"]
+                             "ergo:nsBuildingInventoryDamageVer2",
+                             'ergo:nsBuildingInventoryDamageVer3',
+                             'ergo:nsBuildingInventoryDamageVer4',
+                             ]
                 },
                 {
                     "id": "building_functionality_level",

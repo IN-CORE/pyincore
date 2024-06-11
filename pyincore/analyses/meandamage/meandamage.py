@@ -61,12 +61,14 @@ class MeanDamage(BaseAnalysis):
                              'ergo:nsBuildingInventoryDamage',
                              'ergo:nsBuildingInventoryDamageVer2',
                              'ergo:nsBuildingInventoryDamageVer3',
+                             'ergo:nsBuildingInventoryDamageVer4',
                              'ergo:bridgeDamage',
                              'ergo:bridgeDamageVer2',
                              'ergo:bridgeDamageVer3',
                              'ergo:roadDamage',
                              'ergo:roadDamageVer2',
-                             'ergo:roadDamageVer3']
+                             'ergo:roadDamageVer3',
+                             ]
                 },
                 {
                     'id': 'dmg_ratios',

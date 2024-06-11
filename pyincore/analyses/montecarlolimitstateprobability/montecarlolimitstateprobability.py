@@ -85,6 +85,7 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
                              'ergo:nsBuildingInventoryDamage',
                              'ergo:nsBuildingInventoryDamageVer2',
                              'ergo:nsBuildingInventoryDamageVer3',
+                             'ergo:nsBuildingInventoryDamageVer4',
                              'ergo:bridgeDamage',
                              'ergo:bridgeDamageVer2',
                              'ergo:bridgeDamageVer3',
