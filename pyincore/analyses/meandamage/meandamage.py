@@ -67,7 +67,7 @@ class MeanDamage(BaseAnalysis):
                              'ergo:bridgeDamageVer3',
                              'ergo:roadDamage',
                              'ergo:roadDamageVer2',
-                             'ergo:roadDamageVer3',
+                             'ergo:roadDamageVer3'
                              ]
                 },
                 {
