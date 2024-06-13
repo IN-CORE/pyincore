@@ -10,6 +10,9 @@ hs_err_pid*
 # vim swap files
 *.swp
 
+# backup files
+*~
+
 # IDEA:
 .idea/
 **.iml
