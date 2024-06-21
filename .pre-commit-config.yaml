@@ -7,3 +7,7 @@ repos:
     rev: 6.1.0
     hooks:
       - id: flake8
+        exclude_patterns:
+        - pyincore/analyses/joplincge/
+        - pyincore/analyses/saltlakecge/
+        - pyincore/analyses/seasidecge/
