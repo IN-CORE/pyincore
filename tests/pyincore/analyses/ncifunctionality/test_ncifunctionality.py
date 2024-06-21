@@ -1,4 +1,10 @@
-from pyincore import IncoreClient, Dataset, FragilityService, MappingSet, RestorationService
+from pyincore import (
+    IncoreClient,
+    Dataset,
+    FragilityService,
+    MappingSet,
+    RestorationService,
+)
 from pyincore.analyses.epfdamage.epfdamage import EpfDamage
 from pyincore.analyses.epfrestoration import EpfRestoration
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
@@ -52,7 +58,7 @@ def run_with_base_class():
 
     epn_sub_dmg.run_analysis()
 
-    substation_dmg_result = epn_sub_dmg.get_output_dataset('result')
+    substation_dmg_result = epn_sub_dmg.get_output_dataset("result")
 
     # EPF substation functionality analysis
     print("Electric power facility MonteCarlo failure analysis...")
@@ -62,12 +68,14 @@ def run_with_base_class():
     mc_sub.set_input_dataset("damage", substation_dmg_result)
     mc_sub.set_parameter("num_cpu", 16)
     mc_sub.set_parameter("num_samples", num_samples)
-    mc_sub.set_parameter("damage_interval_keys", ["DS_0", "DS_1", "DS_2", "DS_3", "DS_4"])
+    mc_sub.set_parameter(
+        "damage_interval_keys", ["DS_0", "DS_1", "DS_2", "DS_3", "DS_4"]
+    )
     mc_sub.set_parameter("failure_state_keys", ["DS_3", "DS_4"])
     mc_sub.set_parameter("result_name", result_name)  # name of csv file with results
     mc_sub.run_analysis()
 
-    epf_subst_failure_results = mc_sub.get_output_dataset('failure_probability')
+    epf_subst_failure_results = mc_sub.get_output_dataset("failure_probability")
 
     # EPF restoration analysis
     print("Electric power facility restoration analysis...")
@@ -75,7 +83,7 @@ def run_with_base_class():
     restorationsvc = RestorationService(client)
     mapping_set = MappingSet(restorationsvc.get_mapping(epf_restoration_mapping_id))
     epf_rest.load_remote_input_dataset("epfs", epf_dataset)
-    epf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
+    epf_rest.set_input_dataset("dfr3_mapping_set", mapping_set)
     epf_rest.set_input_dataset("damage", substation_dmg_result)
     result_name = "4_MMSA_epf_restoration_result"
     epf_rest.set_parameter("result_name", result_name)
@@ -110,9 +118,13 @@ def run_with_base_class():
     # WDS restoration
     print("Water facility restoration analysis...")
     wf_rest = WaterFacilityRestoration(client)
-    mapping_set = MappingSet(restorationsvc.get_mapping(wds_restoration_mapping_id))  # new format of mapping
-    wf_rest.load_remote_input_dataset("water_facilities", "5a284f2ac7d30d13bc081e52")  # water facility
-    wf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
+    mapping_set = MappingSet(
+        restorationsvc.get_mapping(wds_restoration_mapping_id)
+    )  # new format of mapping
+    wf_rest.load_remote_input_dataset(
+        "water_facilities", "5a284f2ac7d30d13bc081e52"
+    )  # water facility
+    wf_rest.set_input_dataset("dfr3_mapping_set", mapping_set)
     wf_rest.set_input_dataset("damage", wds_dmg_results)
     wf_rest.set_parameter("result_name", "wf_restoration")
     wf_rest.set_parameter("restoration_key", "Restoration ID Code")
@@ -142,5 +154,5 @@ def run_with_base_class():
     nic_func.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

@@ -14,9 +14,12 @@ def spacesvc(monkeypatch):
     return pytest.spacesvc
 
 
-@pytest.mark.parametrize("space,expected", [
-    ({'mettadatta': {'name': 'bad'}}, 400),
-])
+@pytest.mark.parametrize(
+    "space,expected",
+    [
+        ({"mettadatta": {"name": "bad"}}, 400),
+    ],
+)
 def test_create_space_failed(spacesvc, space, expected):
     # assert that trying to create a space with invalid data throws an error
     with pytest.raises(Exception):
@@ -28,22 +31,19 @@ def test_create_update_and_delete_space(spacesvc):
     # assert that trying to create a space with invalid data throws an error
     space_json = {
         "privileges": {
-            "groupPrivileges": {
-                "incore_admin": "ADMIN",
-                "incore_ncsa": "ADMIN"
-            }
+            "groupPrivileges": {"incore_admin": "ADMIN", "incore_ncsa": "ADMIN"}
         },
-        "metadata": {
-            "name": "test-space"
-        },
-        "members": []
+        "metadata": {"name": "test-space"},
+        "members": [],
     }
     create_json = spacesvc.create_space(json.dumps(space_json))
     assert create_json["id"] is not None
     assert create_json["metadata"]["name"] == "test-space"
 
     # update the space
-    update_json = spacesvc.update_space(create_json["id"], json.dumps({'metadata': {'name': 'test-space-updated'}}))
+    update_json = spacesvc.update_space(
+        create_json["id"], json.dumps({"metadata": {"name": "test-space-updated"}})
+    )
     assert update_json["id"] is not None
     assert update_json["metadata"]["name"] == "test-space-updated"
 
@@ -57,10 +57,13 @@ def test_add_and_remove_member(spacesvc):
     assert member_id in space["members"]
 
 
-@pytest.mark.parametrize("space_id,space,expected", [
-    ("5c89287d5648c42a917569d8", {'metadata': {'name': 'test-space'}}, 400),
-    ("5c75bd1a9e503f2ea0500000", {'metadata': {'name': 'not found'}}, 404),
-])
+@pytest.mark.parametrize(
+    "space_id,space,expected",
+    [
+        ("5c89287d5648c42a917569d8", {"metadata": {"name": "test-space"}}, 400),
+        ("5c75bd1a9e503f2ea0500000", {"metadata": {"name": "not found"}}, 404),
+    ],
+)
 def test_update_space(spacesvc, space_id, space, expected):
     """
     If the new name already exists, it will throw a bad request exception
@@ -71,7 +74,7 @@ def test_update_space(spacesvc, space_id, space, expected):
 
 def test_get_spaces(spacesvc):
     metadata = spacesvc.get_spaces()
-    assert 'members' in metadata[0].keys()
+    assert "members" in metadata[0].keys()
 
 
 def test_get_space(spacesvc):

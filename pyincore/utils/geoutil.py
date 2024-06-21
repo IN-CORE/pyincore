@@ -28,18 +28,18 @@ class GeoUtil:
     def get_location(feature):
         """Location of the object.
 
-         Args:
-             feature (obj):  A JSON mapping of a geometric object from the inventory.
+        Args:
+            feature (obj):  A JSON mapping of a geometric object from the inventory.
 
-         Note:
-             From the Shapely documentation: The centroid of an object might be one of its points,
-             but this is not guaranteed.
+        Note:
+            From the Shapely documentation: The centroid of an object might be one of its points,
+            but this is not guaranteed.
 
-         Returns:
-             point: A representation of the object’s geometric centroid.
+        Returns:
+            point: A representation of the object’s geometric centroid.
 
-         """
-        geom = shape(feature['geometry'])
+        """
+        geom = shape(feature["geometry"])
         return geom.centroid
 
     @staticmethod
@@ -55,8 +55,10 @@ class GeoUtil:
              obj: A nearest feature.
              obj: Nearest distances.
 
-         """
-        points = np.asarray([feature['geometry']['coordinates'] for feature in features])
+        """
+        points = np.asarray(
+            [feature["geometry"]["coordinates"] for feature in features]
+        )
         tree = KDTree(points)
         query_point = np.asarray([[query_point.x, query_point.y]])
 
@@ -85,28 +87,28 @@ class GeoUtil:
         new_schema = source.schema.copy()
         col_names = results[list(results.keys())[0]].keys()
         for col in col_names:
-            new_schema['properties'][col] = types[col]
+            new_schema["properties"][col] = types[col]
         empty_data = {}
         for col in col_names:
             empty_data[col] = None
 
         with fiona.open(
-                filename, 'w',
-                crs=source.crs,
-                driver=source.driver,
-                schema=new_schema,
+            filename,
+            "w",
+            crs=source.crs,
+            driver=source.driver,
+            schema=new_schema,
         ) as sink:
             for f in source:
                 try:
                     new_feature = f.copy()
-                    if new_feature['id'] in results.keys():
-                        new_feature['properties'].update(
-                            results[new_feature['id']])
+                    if new_feature["id"] in results.keys():
+                        new_feature["properties"].update(results[new_feature["id"]])
                     else:
-                        new_feature['properties'].update(empty_data)
+                        new_feature["properties"].update(empty_data)
                     sink.write(new_feature)
                 except Exception as e:
-                    logging.exception("Error processing feature %s:", f['id'])
+                    logging.exception("Error processing feature %s:", f["id"])
 
     @staticmethod
     def decimal_to_degree(decimal: float):
@@ -125,9 +127,12 @@ class GeoUtil:
         degree = int(decimal)
         minutes = int((decimal - degree) * 60)
         seconds = (decimal - degree - minutes / 60) * 3600
-        overall_degree = format(degree, '02d') + format(minutes, '02d') \
-                         + format(int(seconds), '02d') + format(
-            int(seconds % 1 * 100), '02d')
+        overall_degree = (
+            format(degree, "02d")
+            + format(minutes, "02d")
+            + format(int(seconds), "02d")
+            + format(int(seconds % 1 * 100), "02d")
+        )
 
         return int(overall_degree)
 
@@ -144,11 +149,15 @@ class GeoUtil:
             int: A decimal value.
 
         """
-        if degree == 0.0 or degree == None or degree == '':
-            decimal = 'NA'
+        if degree == 0.0 or degree == None or degree == "":
+            decimal = "NA"
         else:
             degree = str(int(degree))
-            decimal = int(degree[:-6]) + int(degree[-6:-4]) / 60 + (int(degree[-4:-2]) + int(degree[-2:]) / 100) / 3600
+            decimal = (
+                int(degree[:-6])
+                + int(degree[-6:-4]) / 60
+                + (int(degree[-4:-2]) + int(degree[-2:]) / 100) / 3600
+            )
 
         return decimal
 
@@ -168,11 +177,16 @@ class GeoUtil:
         if isinstance(line_segment, MultiLineString):
             for line in line_segment.geoms:
                 dist = dist + float(
-                    GeoUtil.calc_geog_distance_between_points(Point(line.coords[0]), Point(line.coords[1]), unit))
+                    GeoUtil.calc_geog_distance_between_points(
+                        Point(line.coords[0]), Point(line.coords[1]), unit
+                    )
+                )
         elif isinstance(line_segment, LineString):
             dist = float(
-                GeoUtil.calc_geog_distance_between_points(Point(line_segment.coords[0]), Point(line_segment.coords[1]),
-                                                          unit))
+                GeoUtil.calc_geog_distance_between_points(
+                    Point(line_segment.coords[0]), Point(line_segment.coords[1]), unit
+                )
+            )
 
         return dist
 
@@ -190,7 +204,7 @@ class GeoUtil:
 
         """
         dist = 0
-        geod = pyproj.Geod(ellps='WGS84')
+        geod = pyproj.Geod(ellps="WGS84")
         angle1, angle2, distance = geod.inv(point1.x, point1.y, point2.x, point2.y)
         # print(point1.x, point1.y, point2.x, point2.y)
         km = "{0:8.4f}".format(distance / 1000)
@@ -220,7 +234,7 @@ class GeoUtil:
         print("creating node index.....")
         feature_list = []
         for feature in inshp:
-            line = shape(feature['geometry'])
+            line = shape(feature["geometry"])
             feature_list.append(line)
         idx = index.Index()
         for i in range(len(feature_list)):
@@ -250,9 +264,9 @@ class GeoUtil:
         is_shapefile = False
         is_geopackage = False
 
-        if infile.lower().endswith('.shp'):
+        if infile.lower().endswith(".shp"):
             is_shapefile = True
-        elif infile.lower().endswith('.gpkg'):
+        elif infile.lower().endswith(".gpkg"):
             is_geopackage = True
         else:
             logging.error("Error: Input file format is not supported.")
@@ -264,18 +278,22 @@ class GeoUtil:
 
         if is_shapefile:
             gdf = gpd.read_file(infile)
-            gdf['guid'] = gdf.apply(lambda x: str(uuid.uuid4()), axis=1)
-            gdf.to_file(f"{outfile}", driver='ESRI Shapefile')
+            gdf["guid"] = gdf.apply(lambda x: str(uuid.uuid4()), axis=1)
+            gdf.to_file(f"{outfile}", driver="ESRI Shapefile")
             is_success = True
         elif is_geopackage:
             if GeoUtil.is_vector_gpkg(infile):
                 gdf = gpd.read_file(infile)
-                gdf['guid'] = gdf.apply(lambda x: str(uuid.uuid4()), axis=1)
-                gdf.to_file(outfile, layer=outfile_name, driver='GPKG')
+                gdf["guid"] = gdf.apply(lambda x: str(uuid.uuid4()), axis=1)
+                gdf.to_file(outfile, layer=outfile_name, driver="GPKG")
                 is_success = True
             else:
-                logging.error("Error: The GeoPackage contains raster data, which is not supported.")
-                print("Error: The GeoPackage contains raster data, which is not supported.")
+                logging.error(
+                    "Error: The GeoPackage contains raster data, which is not supported."
+                )
+                print(
+                    "Error: The GeoPackage contains raster data, which is not supported."
+                )
                 return False
 
         return is_success
@@ -284,6 +302,6 @@ class GeoUtil:
     def is_vector_gpkg(filepath):
         try:
             with fiona.open(filepath) as src:
-                return src.schema['geometry'] is not None
+                return src.schema["geometry"] is not None
         except fiona.errors.DriverError:
             return False

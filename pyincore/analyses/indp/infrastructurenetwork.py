@@ -57,14 +57,14 @@ class InfrastructureNetwork(object):
         for q in player_strategy[0]:
             node = q
             strat = player_strategy[0][q]
-            self.G.node[q]['data']['inf_data'].repaired = round(strat['repair'])
-            self.G.node[q]['data']['inf_data'].functionality = round(strat['w'])
+            self.G.node[q]["data"]["inf_data"].repaired = round(strat["repair"])
+            self.G.node[q]["data"]["inf_data"].functionality = round(strat["w"])
         for q in player_strategy[1]:
             src = q[0]
             dst = q[1]
             strat = player_strategy[1][q]
-            self.G[src][dst]['data']['inf_data'].repaired = round(strat['repair'])
-            self.G[src][dst]['data']['inf_data'].functionality = round(strat['y'])
+            self.G[src][dst]["data"]["inf_data"].repaired = round(strat["repair"])
+            self.G[src][dst]["data"]["inf_data"].functionality = round(strat["y"])
 
     def get_clusters(self, layer):
         """
@@ -81,11 +81,20 @@ class InfrastructureNetwork(object):
             List of layer components
 
         """
-        g_prime_nodes = [n[0] for n in self.G.nodes(data=True) if
-                         n[1]['data']['inf_data'].net_id == layer and n[1]['data']['inf_data'].functionality == 1.0]
+        g_prime_nodes = [
+            n[0]
+            for n in self.G.nodes(data=True)
+            if n[1]["data"]["inf_data"].net_id == layer
+            and n[1]["data"]["inf_data"].functionality == 1.0
+        ]
         g_prime = nx.DiGraph(self.G.subgraph(g_prime_nodes).copy())
         g_prime.remove_edges_from(
-            [(u, v) for u, v, a in g_prime.edges(data=True) if a['data']['inf_data'].functionality == 0.0])
+            [
+                (u, v)
+                for u, v, a in g_prime.edges(data=True)
+                if a["data"]["inf_data"].functionality == 0.0
+            ]
+        )
         # print nx.connected_components(g_prime.to_undirected())
         return list(nx.connected_components(g_prime.to_undirected()))
 
@@ -103,11 +112,20 @@ class InfrastructureNetwork(object):
             : int
             Size of the largest component in the layer
         """
-        g_prime_nodes = [n[0] for n in self.G.nodes(data=True) if
-                         n[1]['data']['inf_data'].net_id == layer and n[1]['data']['inf_data'].functionality == 1.0]
+        g_prime_nodes = [
+            n[0]
+            for n in self.G.nodes(data=True)
+            if n[1]["data"]["inf_data"].net_id == layer
+            and n[1]["data"]["inf_data"].functionality == 1.0
+        ]
         g_prime = nx.Graph(self.G.subgraph(g_prime_nodes))
         g_prime.remove_edges_from(
-            [(u, v) for u, v, a in g_prime.edges(data=True) if a['data']['inf_data'].functionality == 0.0])
+            [
+                (u, v)
+                for u, v, a in g_prime.edges(data=True)
+                if a["data"]["inf_data"].functionality == 0.0
+            ]
+        )
         cc = nx.connected_components(g_prime.to_undirected())
         if cc:
             # if len(list(cc)) == 1:
@@ -139,13 +157,23 @@ class InfrastructureNetwork(object):
             layers = [1, 3]
         with open("../results/indp_gamefile.game") as f:
             num_players = len(layers)
-            num_targets = len([n for n in self.G.nodes(data=True) if n[1]['data']['inf_data'].net_id in layers])
+            num_targets = len(
+                [
+                    n
+                    for n in self.G.nodes(data=True)
+                    if n[1]["data"]["inf_data"].net_id in layers
+                ]
+            )
             f.write(str(num_players) + "," + str(num_targets) + ",2\n")
             for layer in range(len(layers)):
-                layer_nodes = [n for n in self.G.nodes(data=True) if n[1]['data']['inf_data'].net_id == layers[layer]]
+                layer_nodes = [
+                    n
+                    for n in self.G.nodes(data=True)
+                    if n[1]["data"]["inf_data"].net_id == layers[layer]
+                ]
                 for node in layer_nodes:
                     def_values = [0.0] * len(layers)
-                    def_values[layer] = abs(node[1]['data']['inf_data'].demand)
+                    def_values[layer] = abs(node[1]["data"]["inf_data"].demand)
                     atk_values = sum(def_values)
                     f.write(str(layer) + "\n")
                     # f.write("0.0,1.0")
@@ -167,6 +195,15 @@ class InfrastructureNetwork(object):
         None.
 
         """
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             for u, v, a in self.G.edges(data=True):
-                f.write(str(u[0]) + "." + str(u[1]) + "," + str(v[0]) + "." + str(v[1]) + "\n")
+                f.write(
+                    str(u[0])
+                    + "."
+                    + str(u[1])
+                    + ","
+                    + str(v[0])
+                    + "."
+                    + str(v[1])
+                    + "\n"
+                )

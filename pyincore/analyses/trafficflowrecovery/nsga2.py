@@ -69,6 +69,7 @@ def crowded_comparison(s1, s2):
 
 class NSGAII:
     """Implementation of NSGA-II algorithm."""
+
     current_evaluated_objective = 0
 
     def __init__(self, num_objectives, mutation_rate=0.1, crossover_rate=1.0):
@@ -103,7 +104,6 @@ class NSGAII:
 
         first_front = []
         for i in range(num_generations):
-
             r = []
             r.extend(p)
 
@@ -284,8 +284,8 @@ class NSGAII:
         for obj_index in range(self.num_objectives):
             self.sort_objective(front, obj_index)
 
-            front[0].distance = float('inf')
-            front[len(front) - 1].distance = float('inf')
+            front[0].distance = float("inf")
+            front[len(front) - 1].distance = float("inf")
 
             for i in range(1, len(front) - 1):
-                front[i].distance += (front[i + 1].distance - front[i - 1].distance)
+                front[i].distance += front[i + 1].distance - front[i - 1].distance

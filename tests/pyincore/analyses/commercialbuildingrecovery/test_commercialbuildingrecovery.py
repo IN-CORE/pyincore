@@ -1,5 +1,7 @@
 from pyincore import IncoreClient, RepairService, MappingSet
-from pyincore.analyses.commercialbuildingrecovery.commercialbuildingrecovery import CommercialBuildingRecovery
+from pyincore.analyses.commercialbuildingrecovery.commercialbuildingrecovery import (
+    CommercialBuildingRecovery,
+)
 import pyincore.globals as pyglobals
 
 
@@ -18,21 +20,21 @@ def run_with_base_class():
     # Create repair service
     repair_service = RepairService(client)
     mapping_set = MappingSet(repair_service.get_mapping(mapping_id))
-    com_recovery.set_input_dataset('dfr3_mapping_set', mapping_set)
+    com_recovery.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     # input datsets ids
-    sample_damage_states = "64ee146456b25759cfc599ac"  # 10 samples 28k buildings - MCS output format
-    mcs_failure = '64ee144256b25759cfc599a5'
+    sample_damage_states = (
+        "64ee146456b25759cfc599ac"  # 10 samples 28k buildings - MCS output format
+    )
+    mcs_failure = "64ee144256b25759cfc599a5"
     delay_factors = "64ee10e756b25759cfc53243"
-    bld_dmg = '65723c3f9bc3c806024c69b0'
+    bld_dmg = "65723c3f9bc3c806024c69b0"
 
     # Load input datasets
     com_recovery.load_remote_input_dataset("sample_damage_states", sample_damage_states)
     com_recovery.load_remote_input_dataset("mcs_failure", mcs_failure)
     com_recovery.load_remote_input_dataset("delay_factors", delay_factors)
     com_recovery.load_remote_input_dataset("building_dmg", bld_dmg)
-
-
 
     # Input parameters
     num_samples = 10
@@ -48,5 +50,5 @@ def run_with_base_class():
     com_recovery.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

@@ -9,10 +9,10 @@ import pycodestyle
 from pyincore.globals import PYINCORE_ROOT_FOLDER
 
 paths = [
-    os.path.join(PYINCORE_ROOT_FOLDER, 'pyincore/'),
-    os.path.join(PYINCORE_ROOT_FOLDER, 'tests/'),
-    os.path.join(PYINCORE_ROOT_FOLDER, 'recipes/'),
-    os.path.join(PYINCORE_ROOT_FOLDER, 'scripts/')
+    os.path.join(PYINCORE_ROOT_FOLDER, "pyincore/"),
+    os.path.join(PYINCORE_ROOT_FOLDER, "tests/"),
+    os.path.join(PYINCORE_ROOT_FOLDER, "recipes/"),
+    os.path.join(PYINCORE_ROOT_FOLDER, "scripts/"),
 ]
 
 

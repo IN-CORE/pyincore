@@ -36,7 +36,9 @@ class Dataset:
 
         # For convenience instead of having to dig through the metadata for these
         self.title = metadata["title"] if "title" in metadata else None
-        self.description = metadata["description"] if "description" in metadata else None
+        self.description = (
+            metadata["description"] if "description" in metadata else None
+        )
         self.data_type = metadata["dataType"]
         self.format = metadata["format"]
         self.id = metadata["id"]
@@ -86,7 +88,9 @@ class Dataset:
             instance.local_file_path = file_path
 
         else:
-            raise ValueError("You have to either use data services, or given pass local file path.")
+            raise ValueError(
+                "You have to either use data services, or given pass local file path."
+            )
 
         return instance
 
@@ -102,10 +106,12 @@ class Dataset:
             obj: Dataset from file.
 
         """
-        metadata = {"dataType": data_type,
-                    "format": '',
-                    "fileDescriptors": [],
-                    "id": file_path}
+        metadata = {
+            "dataType": data_type,
+            "format": "",
+            "fileDescriptors": [],
+            "id": file_path,
+        }
         instance = cls(metadata)
         instance.local_file_path = file_path
         return instance
@@ -141,9 +147,11 @@ class Dataset:
 
         """
         if len(result_data) > 0:
-            with open(name, 'w') as csv_file:
+            with open(name, "w") as csv_file:
                 # Write the parent ID at the top of the result data, if it is given
-                writer = csv.DictWriter(csv_file, dialect="unix", fieldnames=result_data[0].keys())
+                writer = csv.DictWriter(
+                    csv_file, dialect="unix", fieldnames=result_data[0].keys()
+                )
                 writer.writeheader()
                 writer.writerows(result_data)
         return Dataset.from_file(name, data_type)
@@ -162,7 +170,7 @@ class Dataset:
 
         """
         if len(result_data) > 0:
-            with open(name, 'w') as json_file:
+            with open(name, "w") as json_file:
                 json_dumps_str = json.dumps(result_data, indent=4)
                 json_file.write(json_dumps_str)
         return Dataset.from_file(name, data_type)
@@ -214,7 +222,7 @@ class Dataset:
                 if len(files) > 0:
                     filename = files[0]
 
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 return json.load(f)
 
         return self.readers["json"]
@@ -250,10 +258,10 @@ class Dataset:
     def get_csv_reader(self):
         """Utility method for reading different standard file formats: csv reader.
 
-         Returns:
-             obj: CSV reader.
+        Returns:
+            obj: CSV reader.
 
-         """
+        """
         if "csv" not in self.readers:
             filename = self.local_file_path
             if os.path.isdir(filename):
@@ -261,7 +269,7 @@ class Dataset:
                 if len(files) > 0:
                     filename = files[0]
 
-            csvfile = open(filename, 'r')
+            csvfile = open(filename, "r")
             return csv.DictReader(csvfile)
 
         return self.readers["csv"]
@@ -269,10 +277,10 @@ class Dataset:
     def get_csv_reader_std(self):
         """Utility method for reading different standard file formats: csv reader.
 
-         Returns:
-             obj: CSV reader.
+        Returns:
+            obj: CSV reader.
 
-         """
+        """
         if "csv" not in self.readers:
             filename = self.local_file_path
             if os.path.isdir(filename):
@@ -280,12 +288,12 @@ class Dataset:
                 if len(files) > 0:
                     filename = files[0]
 
-            csvfile = open(filename, 'r')
+            csvfile = open(filename, "r")
             return csv.reader(csvfile)
 
         return self.readers["csv"]
 
-    def get_file_path(self, type='csv'):
+    def get_file_path(self, type="csv"):
         """Utility method for reading different standard file formats: file path.
 
         Args:
@@ -314,10 +322,12 @@ class Dataset:
             obj: Panda's DataFrame.
 
         """
-        filename = self.get_file_path('csv')
+        filename = self.get_file_path("csv")
         df = pd.DataFrame()
         if os.path.isfile(filename):
-            df = pd.read_csv(filename, header="infer", low_memory=low_memory, delimiter=delimiter)
+            df = pd.read_csv(
+                filename, header="infer", low_memory=low_memory, delimiter=delimiter
+            )
         return df
 
     def get_dataframe_from_shapefile(self):
@@ -334,14 +344,12 @@ class Dataset:
         return gdf
 
     def delete_temp_file(self):
-        """Delete temporary folder.
-        """
+        """Delete temporary folder."""
         if os.path.exists(self.local_file_path):
             os.remove(self.local_file_path)
 
     def delete_temp_folder(self):
-        """Delete temporary folder.
-        """
+        """Delete temporary folder."""
         path = Path(self.local_file_path)
         absolute_path = path.parent.absolute()
 
@@ -369,7 +377,7 @@ class DamageRatioDataset:
 
     def __init__(self, filename):
         self.damage_ratio = None
-        csvfile = open(filename, 'r')
+        csvfile = open(filename, "r")
         reader = csv.DictReader(csvfile)
         self.damage_ratio = []
         for row in reader:
