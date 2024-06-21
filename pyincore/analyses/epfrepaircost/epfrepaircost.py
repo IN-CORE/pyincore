@@ -25,12 +25,8 @@ class EpfRepairCost(BaseAnalysis):
         """Executes electric power facility repair cost analysis."""
 
         epf_df = self.get_input_dataset("epfs").get_dataframe_from_shapefile()
-        sample_damage_states_df = self.get_input_dataset(
-            "sample_damage_states"
-        ).get_dataframe_from_csv()
-        replacement_cost = self.get_input_dataset(
-            "replacement_cost"
-        ).get_dataframe_from_csv()
+        sample_damage_states_df = self.get_input_dataset("sample_damage_states").get_dataframe_from_csv()
+        replacement_cost = self.get_input_dataset("replacement_cost").get_dataframe_from_csv()
 
         # join damage state, replacement cost, with original inventory
         epf_df = epf_df.merge(sample_damage_states_df, on="guid")
@@ -38,32 +34,22 @@ class EpfRepairCost(BaseAnalysis):
         epf_set = epf_df.to_dict(orient="records")
 
         user_defined_cpu = 1
-        if (
-            not self.get_parameter("num_cpu") is None
-            and self.get_parameter("num_cpu") > 0
-        ):
+        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(
-            self, len(epf_set), user_defined_cpu
-        )
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(epf_set), user_defined_cpu)
 
         avg_bulk_input_size = int(len(epf_set) / num_workers)
         inventory_args = []
         count = 0
         inventory_list = list(epf_set)
         while count < len(inventory_list):
-            inventory_args.append(inventory_list[count : count + avg_bulk_input_size])
+            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        repair_costs = self.epf_repair_cost_concurrent_future(
-            self.epf_repair_cost_bulk_input, num_workers, inventory_args
-        )
-        self.set_result_csv_data(
-            "result",
-            repair_costs,
-            name=self.get_parameter("result_name") + "_repair_cost",
-        )
+        repair_costs = self.epf_repair_cost_concurrent_future(self.epf_repair_cost_bulk_input, num_workers,
+                                                              inventory_args)
+        self.set_result_csv_data("result", repair_costs, name=self.get_parameter("result_name") + "_repair_cost")
 
         return True
 
@@ -81,9 +67,7 @@ class EpfRepairCost(BaseAnalysis):
         """
 
         output = []
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=num_workers
-        ) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
             for ret1 in executor.map(function_name, *args):
                 output.extend(ret1)
 
@@ -101,9 +85,7 @@ class EpfRepairCost(BaseAnalysis):
         """
         # read in the damage ratio tables
         epf_dmg_ratios_csv = self.get_input_dataset("epf_dmg_ratios").get_csv_reader()
-        dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(
-            epf_dmg_ratios_csv, ignore_first_row=False
-        )
+        dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(epf_dmg_ratios_csv, ignore_first_row=False)
 
         repair_costs = []
 
@@ -117,15 +99,12 @@ class EpfRepairCost(BaseAnalysis):
             for n, ds in enumerate(sample_damage_states):
                 for dmg_ratio_row in dmg_ratio_tbl:
                     # use "in" instead of "==" since some inventory has pending number (e.g. EDC2)
-                    if (
-                        dmg_ratio_row["Inventory Type"] in epf_type
-                        and dmg_ratio_row["Damage State"] == ds
-                    ):
+                    if dmg_ratio_row["Inventory Type"] in epf_type and dmg_ratio_row["Damage State"] == ds:
                         dr = float(dmg_ratio_row["Best Mean Damage Ratio"])
                         repair_cost[n] = str(epf["replacement_cost"] * dr)
 
-            rc["budget"] = ",".join(repair_cost)
-            rc["repaircost"] = ",".join(repair_cost)
+            rc["budget"] = ','.join(repair_cost)
+            rc["repaircost"] = ','.join(repair_cost)
 
             repair_costs.append(rc)
 
@@ -146,13 +125,13 @@ class EpfRepairCost(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "A name of the resulting dataset",
-                    "type": str,
+                    "type": str
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "If using parallel execution, the number of cpus to request.",
-                    "type": int,
+                    "type": int
                 },
             ],
             "input_datasets": [
@@ -160,7 +139,10 @@ class EpfRepairCost(BaseAnalysis):
                     "id": "epfs",
                     "required": True,
                     "description": "Electric Power Facility Inventory",
-                    "type": ["incore:epf", "ergo:epf", "incore:epfVer2"],
+                    "type": ["incore:epf",
+                             "ergo:epf",
+                             "incore:epfVer2"
+                             ],
                 },
                 {
                     "id": "replacement_cost",
@@ -172,13 +154,13 @@ class EpfRepairCost(BaseAnalysis):
                     "id": "sample_damage_states",
                     "required": True,
                     "description": "sample damage states from Monte Carlo Simulation",
-                    "type": ["incore:sampleDamageState"],
+                    "type": ["incore:sampleDamageState"]
                 },
                 {
                     "id": "epf_dmg_ratios",
                     "required": True,
                     "description": "Damage Ratios table",
-                    "type": ["incore:epfDamageRatios"],
+                    "type": ["incore:epfDamageRatios"]
                 },
             ],
             "output_datasets": [
@@ -186,7 +168,7 @@ class EpfRepairCost(BaseAnalysis):
                     "id": "result",
                     "parent_type": "epfs",
                     "description": "A csv file with repair cost for each electric power facility",
-                    "type": "incore:repairCost",
+                    "type": "incore:repairCost"
                 }
-            ],
+            ]
         }

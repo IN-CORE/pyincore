@@ -8,23 +8,22 @@ from pyincore.analyses.galvestoncge.equationlib import *
 import pandas as pd
 import numpy as np
 
-
 # Return initial values function
 def baseValue(vars, soln, eqName):
-    if vars.getInfo(eqName)["size"] == 1:
+    if vars.getInfo(eqName)['size'] == 1:
         basevalues = vars.initialVals[vars.getIndex(eqName)]
 
     else:
-        rows = vars.getInfo(eqName)["rows"]
+        rows = vars.getInfo(eqName)['rows']
         rws = []
-        if vars.getInfo(eqName)["size"] == vars.getInfo(eqName)["nrows"]:
+        if vars.getInfo(eqName)['size'] == vars.getInfo(eqName)['nrows']:
             for rr in rows:
                 number = vars.initialVals[vars.getIndex(eqName, row=rr)]
                 rws.append(number)
             basevalues = pd.DataFrame(rws, index=rows)
 
         else:
-            cols = vars.getInfo(eqName)["cols"]
+            cols = vars.getInfo(eqName)['cols']
             for rr in rows:
                 clms = []
                 for cc in cols:
@@ -39,14 +38,14 @@ def baseValue(vars, soln, eqName):
 # Get the new values function
 def newValue(vars, soln, eqName, ittr):
     #    for scalar
-    if vars.getInfo(eqName)["size"] == 1:
+    if vars.getInfo(eqName)['size'] == 1:
         newvalue = soln[ittr][vars.getIndex(eqName)]
 
     else:
-        rows = vars.getInfo(eqName)["rows"]
+        rows = vars.getInfo(eqName)['rows']
         rws = []
         #       vectors
-        if vars.getInfo(eqName)["size"] == vars.getInfo(eqName)["nrows"]:
+        if vars.getInfo(eqName)['size'] == vars.getInfo(eqName)['nrows']:
             for rr in rows:
                 number = soln[ittr][vars.getIndex(eqName, row=rr)]
                 rws.append(number)
@@ -54,7 +53,7 @@ def newValue(vars, soln, eqName, ittr):
         #       data frames
         else:
             for rr in rows:
-                cols = vars.getInfo(eqName)["cols"]
+                cols = vars.getInfo(eqName)['cols']
                 clms = []
                 for cc in cols:
                     number = soln[ittr][vars.getIndex(eqName, row=rr, col=cc)]
@@ -69,3 +68,5 @@ def newValue(vars, soln, eqName, ittr):
 def getDiff(vars, soln, eqName, ittr):
     difference = newValue(vars, soln, eqName, ittr) - baseValue(vars, soln, eqName)
     return difference
+
+

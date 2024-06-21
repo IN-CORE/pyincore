@@ -2,9 +2,7 @@ from pyincore import IncoreClient, MappingSet, FragilityService
 import pyincore.globals as pyglobals
 from pyincore import Dataset
 from pyincore.analyses.buildingdamage import BuildingDamage
-from pyincore.analyses.cumulativebuildingdamage.cumulativebuildingdamage import (
-    CumulativeBuildingDamage,
-)
+from pyincore.analyses.cumulativebuildingdamage.cumulativebuildingdamage import CumulativeBuildingDamage
 
 
 def run_with_base_class():
@@ -28,7 +26,7 @@ def run_with_base_class():
     result_name = "eq_bldg_dmg_result"
     bldg_dmg_eq.set_parameter("result_name", result_name)
     eq_mapping_set = MappingSet(fragility_service.get_mapping(eq_mapping_id))
-    bldg_dmg_eq.set_input_dataset("dfr3_mapping_set", eq_mapping_set)
+    bldg_dmg_eq.set_input_dataset('dfr3_mapping_set', eq_mapping_set)
     bldg_dmg_eq.set_parameter("hazard_type", eq_hazard_type)
     bldg_dmg_eq.set_parameter("hazard_id", eq_hazard_id)
     bldg_dmg_eq.set_parameter("num_cpu", 4)
@@ -48,7 +46,7 @@ def run_with_base_class():
     tsunami_result_name = "tsunami_bldg_dmg_result"
     bldg_dmg_tsunami.set_parameter("result_name", tsunami_result_name)
     tsu_mapping_set = MappingSet(fragility_service.get_mapping(tsunami_mapping_id))
-    bldg_dmg_tsunami.set_input_dataset("dfr3_mapping_set", tsu_mapping_set)
+    bldg_dmg_tsunami.set_input_dataset('dfr3_mapping_set', tsu_mapping_set)
     bldg_dmg_tsunami.set_parameter("hazard_type", tsunami_hazard_type)
     bldg_dmg_tsunami.set_parameter("hazard_id", tsunami_hazard_id)
     bldg_dmg_tsunami.set_parameter("num_cpu", 4)
@@ -70,5 +68,5 @@ def run_with_base_class():
     cumulative_bldg_dmg.run_analysis()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_with_base_class()

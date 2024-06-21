@@ -8,13 +8,8 @@
 import concurrent.futures
 from itertools import repeat
 
-from pyincore import (
-    BaseAnalysis,
-    HazardService,
-    FragilityService,
-    AnalysisUtil,
-    GeoUtil,
-)
+from pyincore import BaseAnalysis, HazardService, \
+    FragilityService, AnalysisUtil, GeoUtil
 from pyincore.analyses.buildingstructuraldamage.buildingutil import BuildingUtil
 from pyincore.models.dfr3curve import DFR3Curve
 from pyincore.utils.datasetutil import DatasetUtil
@@ -48,11 +43,9 @@ class BuildingStructuralDamage(BaseAnalysis):
         dfr3_mapping_set = self.get_input_dataset("dfr3_mapping_set")
 
         # Update the building inventory dataset if applicable
-        bldg_dataset, tmpdirname, _ = DatasetUtil.construct_updated_inventories(
-            bldg_dataset,
-            add_info_dataset=retrofit_strategy_dataset,
-            mapping=dfr3_mapping_set,
-        )
+        bldg_dataset, tmpdirname, _ = DatasetUtil.construct_updated_inventories(bldg_dataset,
+                                                                    add_info_dataset=retrofit_strategy_dataset,
+                                                                    mapping=dfr3_mapping_set)
 
         bldg_set = bldg_dataset.get_inventory_reader()
 
@@ -67,70 +60,47 @@ class BuildingStructuralDamage(BaseAnalysis):
             hazard_dataset_ids = [hazard_object.id]
             hazards = [hazard_object]
         # To use remote hazard
-        elif (
-            self.get_parameter("hazard_id") is not None
-            and self.get_parameter("hazard_type") is not None
-        ):
+        elif self.get_parameter("hazard_id") is not None and self.get_parameter("hazard_type") is not None:
             hazard_dataset_ids = self.get_parameter("hazard_id").split("+")
             hazard_types = self.get_parameter("hazard_type").split("+")
             for hazard_type, hazard_dataset_id in zip(hazard_types, hazard_dataset_ids):
-                hazards.append(
-                    BaseAnalysis._create_hazard_object(
-                        hazard_type, hazard_dataset_id, self.hazardsvc
-                    )
-                )
+                hazards.append(BaseAnalysis._create_hazard_object(hazard_type, hazard_dataset_id, self.hazardsvc))
         else:
-            raise ValueError(
-                "Either hazard object or hazard id + hazard type must be provided"
-            )
+            raise ValueError("Either hazard object or hazard id + hazard type must be provided")
 
         # Get Fragility key
         fragility_key = self.get_parameter("fragility_key")
         if fragility_key is None:
-            fragility_key = (
-                BuildingUtil.DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY
-                if "tsunami" in hazard_types
-                else BuildingUtil.DEFAULT_FRAGILITY_KEY
-            )
+            fragility_key = BuildingUtil.DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY if 'tsunami' in hazard_types else \
+                    BuildingUtil.DEFAULT_FRAGILITY_KEY
             self.set_parameter("fragility_key", fragility_key)
 
         user_defined_cpu = 1
 
-        if (
-            not self.get_parameter("num_cpu") is None
-            and self.get_parameter("num_cpu") > 0
-        ):
+        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(
-            self, len(bldg_set), user_defined_cpu
-        )
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(bldg_set), user_defined_cpu)
 
         avg_bulk_input_size = int(len(bldg_set) / num_workers)
         inventory_args = []
         count = 0
         inventory_list = list(bldg_set)
         while count < len(inventory_list):
-            inventory_args.append(inventory_list[count : count + avg_bulk_input_size])
+            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        (ds_results, damage_results) = self.building_damage_concurrent_future(
-            self.building_damage_analysis_bulk_input,
-            num_workers,
-            inventory_args,
-            repeat(hazards),
-            repeat(hazard_types),
-            repeat(hazard_dataset_ids),
-        )
+        (ds_results, damage_results) = self.building_damage_concurrent_future(self.building_damage_analysis_bulk_input,
+                                                                              num_workers,
+                                                                              inventory_args,
+                                                                              repeat(hazards),
+                                                                              repeat(hazard_types),
+                                                                              repeat(hazard_dataset_ids))
 
-        self.set_result_csv_data(
-            "ds_result", ds_results, name=self.get_parameter("result_name")
-        )
-        self.set_result_json_data(
-            "damage_result",
-            damage_results,
-            name=self.get_parameter("result_name") + "_additional_info",
-        )
+        self.set_result_csv_data("ds_result", ds_results, name=self.get_parameter("result_name"))
+        self.set_result_json_data("damage_result",
+                                  damage_results,
+                                  name=self.get_parameter("result_name") + "_additional_info")
 
         # clean up temp folder if applicable
         if tmpdirname is not None:
@@ -152,18 +122,14 @@ class BuildingStructuralDamage(BaseAnalysis):
         """
         output_ds = []
         output_dmg = []
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=parallelism
-        ) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=parallelism) as executor:
             for ret1, ret2 in executor.map(function_name, *args):
                 output_ds.extend(ret1)
                 output_dmg.extend(ret2)
 
         return output_ds, output_dmg
 
-    def building_damage_analysis_bulk_input(
-        self, buildings, hazards, hazard_types, hazard_dataset_ids
-    ):
+    def building_damage_analysis_bulk_input(self, buildings, hazards, hazard_types, hazard_dataset_ids):
         """Run analysis for multiple buildings.
 
         Args:
@@ -178,9 +144,8 @@ class BuildingStructuralDamage(BaseAnalysis):
         """
 
         fragility_key = self.get_parameter("fragility_key")
-        fragility_sets = self.fragilitysvc.match_inventory(
-            self.get_input_dataset("dfr3_mapping_set"), buildings, fragility_key
-        )
+        fragility_sets = self.fragilitysvc.match_inventory(self.get_input_dataset("dfr3_mapping_set"), buildings,
+                                                           fragility_key)
         use_liquefaction = False
         liquefaction_resp = None
         # Get geology dataset id containing liquefaction susceptibility
@@ -189,20 +154,13 @@ class BuildingStructuralDamage(BaseAnalysis):
         multihazard_vals = {}
         adjust_demand_types_mapping = {}
 
-        for hazard, hazard_type, hazard_dataset_id in zip(
-            hazards, hazard_types, hazard_dataset_ids
-        ):
+        for hazard, hazard_type, hazard_dataset_id in zip(hazards, hazard_types, hazard_dataset_ids):
             # get allowed demand types for the hazard type
-            allowed_demand_types = [
-                item["demand_type"].lower()
-                for item in self.hazardsvc.get_allowed_demands(hazard_type)
-            ]
+            allowed_demand_types = [item["demand_type"].lower() for item in self.hazardsvc.get_allowed_demands(
+                hazard_type)]
 
             # Liquefaction
-            if (
-                hazard_type == "earthquake"
-                and self.get_parameter("use_liquefaction") is not None
-            ):
+            if hazard_type == "earthquake" and self.get_parameter("use_liquefaction") is not None:
                 use_liquefaction = self.get_parameter("use_liquefaction")
 
             values_payload = []
@@ -216,19 +174,25 @@ class BuildingStructuralDamage(BaseAnalysis):
                 bldg_id = b["id"]
                 location = GeoUtil.get_location(b)
                 loc = str(location.y) + "," + str(location.x)
-                (
-                    demands,
-                    units,
-                    adjusted_to_original,
-                ) = AnalysisUtil.get_hazard_demand_types_units(
-                    b, fragility_sets[bldg_id], hazard_type, allowed_demand_types
-                )
+                demands, units, adjusted_to_original = \
+                    AnalysisUtil.get_hazard_demand_types_units(b,
+                                                               fragility_sets[bldg_id],
+                                                               hazard_type,
+                                                               allowed_demand_types)
                 adjust_demand_types_mapping.update(adjusted_to_original)
-                value = {"demands": demands, "units": units, "loc": loc}
+                value = {
+                    "demands": demands,
+                    "units": units,
+                    "loc": loc
+                }
                 values_payload.append(value)
 
                 if use_liquefaction and geology_dataset_id is not None:
-                    value_liq = {"demands": [""], "units": [""], "loc": loc}
+                    value_liq = {
+                        "demands": [""],
+                        "units": [""],
+                        "loc": loc
+                    }
                     values_payload_liq.append(value_liq)
 
             hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
@@ -237,27 +201,18 @@ class BuildingStructuralDamage(BaseAnalysis):
             # worst code I have ever written
             # e.g. 1.04 Sec Sa --> 1.04 SA --> 1.0 SA
             for payload, response in zip(values_payload, hazard_vals):
-                adjust_demand_types_mapping.update(
-                    {
-                        response_demand: adjust_demand_types_mapping[payload_demand]
-                        for payload_demand, response_demand in zip(
-                            payload["demands"], response["demands"]
-                        )
-                    }
-                )
+                adjust_demand_types_mapping.update({
+                    response_demand: adjust_demand_types_mapping[payload_demand]
+                    for payload_demand, response_demand in zip(payload["demands"], response["demands"])
+                })
 
             # record hazard value for each hazard type for later calcu
             multihazard_vals[hazard_type] = hazard_vals
 
             # Check if liquefaction is applicable
-            if (
-                hazard_type == "earthquake"
-                and use_liquefaction
-                and geology_dataset_id is not None
-            ):
-                liquefaction_resp = self.hazardsvc.post_liquefaction_values(
-                    hazard_dataset_id, geology_dataset_id, values_payload_liq
-                )
+            if hazard_type == "earthquake" and use_liquefaction and geology_dataset_id is not None:
+                liquefaction_resp = self.hazardsvc.post_liquefaction_values(hazard_dataset_id, geology_dataset_id,
+                                                                            values_payload_liq)
 
         # not needed anymore as they are already split into mapped and unmapped
         del buildings
@@ -283,9 +238,8 @@ class BuildingStructuralDamage(BaseAnalysis):
                 b_demands = dict()
                 b_units = dict()
                 for hazard_type in hazard_types:
-                    b_haz_vals = AnalysisUtil.update_precision_of_lists(
-                        multihazard_vals[hazard_type][i]["hazardValues"]
-                    )
+                    b_haz_vals = AnalysisUtil.update_precision_of_lists(multihazard_vals[hazard_type][i][
+                                                                            "hazardValues"])
                     b_demands[hazard_type] = multihazard_vals[hazard_type][i]["demands"]
                     b_units[hazard_type] = multihazard_vals[hazard_type][i]["units"]
                     b_multihaz_vals[hazard_type] = b_haz_vals
@@ -293,9 +247,7 @@ class BuildingStructuralDamage(BaseAnalysis):
                     # instead  of using what the hazard service returns. There could be a difference "SA" in DFR3 vs
                     # "1.07 SA" from hazard
                     j = 0
-                    for adjusted_demand_type in multihazard_vals[hazard_type][i][
-                        "demands"
-                    ]:
+                    for adjusted_demand_type in multihazard_vals[hazard_type][i]["demands"]:
                         d = adjust_demand_types_mapping[adjusted_demand_type]
                         hval_dict[d] = b_haz_vals[j]
                         j += 1
@@ -303,57 +255,31 @@ class BuildingStructuralDamage(BaseAnalysis):
                 # catch any of the hazard values error
                 hazard_values_errors = False
                 for hazard_type in hazard_types:
-                    hazard_values_errors = (
-                        hazard_values_errors
-                        or AnalysisUtil.do_hazard_values_have_errors(
-                            b_multihaz_vals[hazard_type]
-                        )
-                    )
+                    hazard_values_errors = hazard_values_errors or AnalysisUtil.do_hazard_values_have_errors(
+                        b_multihaz_vals[hazard_type])
 
                 if not hazard_values_errors:
-                    building_args = (
-                        selected_fragility_set.construct_expression_args_from_inventory(
-                            b
-                        )
-                    )
+                    building_args = selected_fragility_set.construct_expression_args_from_inventory(b)
 
-                    building_period = selected_fragility_set.fragility_curves[
-                        0
-                    ].get_building_period(
-                        selected_fragility_set.curve_parameters, **building_args
-                    )
+                    building_period = selected_fragility_set.fragility_curves[0].get_building_period(
+                        selected_fragility_set.curve_parameters, **building_args)
 
                     dmg_probability = selected_fragility_set.calculate_limit_state(
-                        hval_dict, **building_args, period=building_period
-                    )
+                        hval_dict, **building_args, period=building_period)
 
-                    if (
-                        use_liquefaction
-                        and geology_dataset_id is not None
-                        and liquefaction_resp is not None
-                    ):
-                        ground_failure_prob = liquefaction_resp[i][
-                            BuildingUtil.GROUND_FAILURE_PROB
-                        ]
+                    if use_liquefaction and geology_dataset_id is not None and liquefaction_resp is not None:
+                        ground_failure_prob = liquefaction_resp[i][BuildingUtil.GROUND_FAILURE_PROB]
                         dmg_probability = AnalysisUtil.update_precision_of_dicts(
-                            AnalysisUtil.adjust_damage_for_liquefaction(
-                                dmg_probability, ground_failure_prob
-                            )
-                        )
+                            AnalysisUtil.adjust_damage_for_liquefaction(dmg_probability, ground_failure_prob))
 
                     dmg_interval = selected_fragility_set.calculate_damage_interval(
-                        dmg_probability,
-                        hazard_type="+".join(hazard_types),
-                        inventory_type="building",
-                    )
+                        dmg_probability, hazard_type="+".join(hazard_types), inventory_type="building")
             else:
-                raise ValueError(
-                    "One of the fragilities is in deprecated format. This should not happen. If you are "
-                    "seeing this please report the issue."
-                )
+                raise ValueError("One of the fragilities is in deprecated format. This should not happen. If you are "
+                                 "seeing this please report the issue.")
 
-            ds_result["guid"] = b["properties"]["guid"]
-            damage_result["guid"] = b["properties"]["guid"]
+            ds_result['guid'] = b['properties']['guid']
+            damage_result['guid'] = b['properties']['guid']
 
             ds_result.update(dmg_probability)
             ds_result.update(dmg_interval)
@@ -361,15 +287,14 @@ class BuildingStructuralDamage(BaseAnalysis):
             # determine expose from multiple hazard
             haz_expose = False
             for hazard_type in hazard_types:
-                haz_expose = haz_expose or AnalysisUtil.get_exposure_from_hazard_values(
-                    b_multihaz_vals[hazard_type], hazard_type
-                )
-            ds_result["haz_expose"] = haz_expose
+                haz_expose = haz_expose or AnalysisUtil.get_exposure_from_hazard_values(b_multihaz_vals[
+                                                                                             hazard_type], hazard_type)
+            ds_result['haz_expose'] = haz_expose
 
-            damage_result["fragility_id"] = selected_fragility_set.id
-            damage_result["demandtype"] = b_demands
-            damage_result["demandunits"] = b_units
-            damage_result["hazardval"] = b_multihaz_vals
+            damage_result['fragility_id'] = selected_fragility_set.id
+            damage_result['demandtype'] = b_demands
+            damage_result['demandunits'] = b_units
+            damage_result['hazardval'] = b_multihaz_vals
 
             if use_liquefaction and geology_dataset_id is not None:
                 damage_result[BuildingUtil.GROUND_FAILURE_PROB] = ground_failure_prob
@@ -381,12 +306,12 @@ class BuildingStructuralDamage(BaseAnalysis):
         for b in unmapped_buildings:
             ds_result = dict()
             damage_result = dict()
-            ds_result["guid"] = b["properties"]["guid"]
-            damage_result["guid"] = b["properties"]["guid"]
-            damage_result["fragility_id"] = None
-            damage_result["demandtype"] = None
-            damage_result["demandunits"] = None
-            damage_result["hazardval"] = None
+            ds_result['guid'] = b['properties']['guid']
+            damage_result['guid'] = b['properties']['guid']
+            damage_result['fragility_id'] = None
+            damage_result['demandtype'] = None
+            damage_result['demandunits'] = None
+            damage_result['hazardval'] = None
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)
@@ -401,109 +326,105 @@ class BuildingStructuralDamage(BaseAnalysis):
 
         """
         return {
-            "name": "building-damage",
-            "description": "building damage analysis",
-            "input_parameters": [
+            'name': 'building-damage',
+            'description': 'building damage analysis',
+            'input_parameters': [
                 {
-                    "id": "result_name",
-                    "required": True,
-                    "description": "result dataset name",
-                    "type": str,
+                    'id': 'result_name',
+                    'required': True,
+                    'description': 'result dataset name',
+                    'type': str
                 },
                 {
-                    "id": "hazard_type",
-                    "required": False,
-                    "description": "Hazard Type (e.g. earthquake)",
-                    "type": str,
+                    'id': 'hazard_type',
+                    'required': False,
+                    'description': 'Hazard Type (e.g. earthquake)',
+                    'type': str
                 },
                 {
-                    "id": "hazard_id",
-                    "required": False,
-                    "description": "Hazard ID",
-                    "type": str,
+                    'id': 'hazard_id',
+                    'required': False,
+                    'description': 'Hazard ID',
+                    'type': str
                 },
                 {
-                    "id": "fragility_key",
-                    "required": False,
-                    "description": "Fragility key to use in mapping dataset",
-                    "type": str,
+                    'id': 'fragility_key',
+                    'required': False,
+                    'description': 'Fragility key to use in mapping dataset',
+                    'type': str
                 },
                 {
-                    "id": "use_liquefaction",
-                    "required": False,
-                    "description": "Use liquefaction",
-                    "type": bool,
+                    'id': 'use_liquefaction',
+                    'required': False,
+                    'description': 'Use liquefaction',
+                    'type': bool
                 },
                 {
-                    "id": "use_hazard_uncertainty",
-                    "required": False,
-                    "description": "Use hazard uncertainty",
-                    "type": bool,
+                    'id': 'use_hazard_uncertainty',
+                    'required': False,
+                    'description': 'Use hazard uncertainty',
+                    'type': bool
                 },
                 {
-                    "id": "num_cpu",
-                    "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
-                    "type": int,
+                    'id': 'num_cpu',
+                    'required': False,
+                    'description': 'If using parallel execution, the number of cpus to request',
+                    'type': int
                 },
                 {
-                    "id": "seed",
-                    "required": False,
-                    "description": "Initial seed for the tornado hazard value",
-                    "type": int,
+                    'id': 'seed',
+                    'required': False,
+                    'description': 'Initial seed for the tornado hazard value',
+                    'type': int
                 },
                 {
-                    "id": "liquefaction_geology_dataset_id",
-                    "required": False,
-                    "description": "Geology dataset id",
-                    "type": str,
+                    'id': 'liquefaction_geology_dataset_id',
+                    'required': False,
+                    'description': 'Geology dataset id',
+                    'type': str,
+                }
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': False,
+                    'description': 'Hazard object',
+                    'type': ["earthquake", "tornado", "hurricane", "flood", "tsunami"]
                 },
             ],
-            "input_hazards": [
+            'input_datasets': [
                 {
-                    "id": "hazard",
-                    "required": False,
-                    "description": "Hazard object",
-                    "type": ["earthquake", "tornado", "hurricane", "flood", "tsunami"],
+                    'id': 'buildings',
+                    'required': True,
+                    'description': 'Building Inventory',
+                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5',
+                             'ergo:buildingInventoryVer6', 'ergo:buildingInventoryVer7'],
                 },
+                {
+                    'id': 'dfr3_mapping_set',
+                    'required': True,
+                    'description': 'DFR3 Mapping Set Object',
+                    'type': ['incore:dfr3MappingSet'],
+                },
+                {
+                    'id': 'retrofit_strategy',
+                    'required': False,
+                    'description': 'Building retrofit strategy that contains guid and retrofit method',
+                    'type': ['incore:retrofitStrategy']
+                }
             ],
-            "input_datasets": [
+            'output_datasets': [
                 {
-                    "id": "buildings",
-                    "required": True,
-                    "description": "Building Inventory",
-                    "type": [
-                        "ergo:buildingInventoryVer4",
-                        "ergo:buildingInventoryVer5",
-                        "ergo:buildingInventoryVer6",
-                        "ergo:buildingInventoryVer7",
-                    ],
+                    'id': 'ds_result',
+                    'parent_type': 'buildings',
+                    'description': 'CSV file of damage states for building structural damage',
+                    'type': 'ergo:buildingDamageVer6'
                 },
                 {
-                    "id": "dfr3_mapping_set",
-                    "required": True,
-                    "description": "DFR3 Mapping Set Object",
-                    "type": ["incore:dfr3MappingSet"],
-                },
-                {
-                    "id": "retrofit_strategy",
-                    "required": False,
-                    "description": "Building retrofit strategy that contains guid and retrofit method",
-                    "type": ["incore:retrofitStrategy"],
-                },
-            ],
-            "output_datasets": [
-                {
-                    "id": "ds_result",
-                    "parent_type": "buildings",
-                    "description": "CSV file of damage states for building structural damage",
-                    "type": "ergo:buildingDamageVer6",
-                },
-                {
-                    "id": "damage_result",
-                    "parent_type": "buildings",
-                    "description": "Json file with information about applied hazard value and fragility",
-                    "type": "incore:buildingDamageSupplement",
-                },
-            ],
+                    'id': 'damage_result',
+                    'parent_type': 'buildings',
+                    'description': 'Json file with information about applied hazard value and fragility',
+                    'type': 'incore:buildingDamageSupplement'
+                }
+            ]
         }

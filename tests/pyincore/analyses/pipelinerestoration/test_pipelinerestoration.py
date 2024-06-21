@@ -14,19 +14,13 @@ def run_with_base_class():
     pipeline_restoration = PipelineRestoration(client)
 
     # shelby county pipelines
-    pipeline_restoration.load_remote_input_dataset(
-        "pipeline", "5a284f28c7d30d13bc081d14"
-    )
-    pipeline_restoration.load_remote_input_dataset(
-        "pipeline_damage", "61f36023c53b3620b6b614c6"
-    )
+    pipeline_restoration.load_remote_input_dataset("pipeline", "5a284f28c7d30d13bc081d14")
+    pipeline_restoration.load_remote_input_dataset("pipeline_damage", "61f36023c53b3620b6b614c6")
 
     # Load fragility mapping
     restoration_service = RestorationService(client)
-    mapping_set = MappingSet(
-        restoration_service.get_mapping("61f35f09903e515036cee106")
-    )
-    pipeline_restoration.set_input_dataset("dfr3_mapping_set", mapping_set)
+    mapping_set = MappingSet(restoration_service.get_mapping("61f35f09903e515036cee106"))
+    pipeline_restoration.set_input_dataset('dfr3_mapping_set', mapping_set)
 
     pipeline_restoration.set_parameter("result_name", "pipeline_restoration_times")
 

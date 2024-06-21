@@ -6,7 +6,7 @@
 
 
 class Mapping:
-    """mapping class that contains the rules and keys of dfr3 curves.
+    """ mapping class that contains the rules and keys of dfr3 curves.
 
     Args:
         entry (dict): mapping entry.

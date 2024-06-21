@@ -17,7 +17,6 @@ from pyincore.globals import LOGGER
 
 logger = LOGGER
 
-
 @pytest.fixture
 def semanticsvc():
     return pytest.semanticsvc
@@ -31,20 +30,22 @@ def test_get_all_semantic_types(semanticsvc):
     # get all semantic types without hyperlink
     hyperlink = False
     semantic_types = semanticsvc.get_all_semantic_types(
-        hyperlink=hyperlink, order=order, skip=skip, limit=limit
+        hyperlink=hyperlink, 
+        order=order, 
+        skip=skip, 
+        limit=limit
     )
-    assert (
-        len(semantic_types) == limit and len(semantic_types[0].split("/")) <= 1
-    ), "Should not have hyperlink"
+    assert len(semantic_types) == limit and len(semantic_types[0].split("/")) <= 1, "Should not have hyperlink"
 
     # get all semantic types with hyperlink
     hyperlink = True
     semantic_types = semanticsvc.get_all_semantic_types(
-        hyperlink=hyperlink, order=order, skip=skip, limit=limit
+        hyperlink=hyperlink, 
+        order=order, 
+        skip=skip, 
+        limit=limit
     )
-    assert (
-        len(semantic_types) == limit and len(semantic_types[0].split("/")) > 1
-    ), "Should have hyperlink"
+    assert len(semantic_types) == limit and len(semantic_types[0].split("/")) > 1, "Should have hyperlink"
 
 
 def test_get_semantic_type_by_name(semanticsvc):
@@ -54,16 +55,12 @@ def test_get_semantic_type_by_name(semanticsvc):
     # find semantic type by name which exists
     semantic_types = semanticsvc.get_semantic_type_by_name(semantic_type_exists)
     # Checks semantic dictionary is not empty
-    assert type(semantic_types) == dict and bool(
-        dict
-    ), f"Should find one semantic type as {semantic_type_exists} exists"
+    assert type(semantic_types) == dict and bool(dict), f"Should find one semantic type as {semantic_type_exists} exists"
     # find semantic type by name which does not exist
     # this should raise error
     with pytest.raises(Exception) as excinfo:
         semantic_types = semanticsvc.get_semantic_type_by_name(semantic_type_not_exists)
-        assert (
-            excinfo == HTTPError
-        ), f"Should raise HTTPError as {semantic_type_not_exists} does not exist"
+        assert excinfo == HTTPError, f"Should raise HTTPError as {semantic_type_not_exists} does not exist"
 
 
 def test_search_semantic_types(semanticsvc):
@@ -71,11 +68,8 @@ def test_search_semantic_types(semanticsvc):
     search_term_not_exists = "asdwerueidj"
     # search for term that should find an entry
     semantic_types = semanticsvc.search_semantic_type(search_term_exists)
-    assert (
-        len(semantic_types) > 0
-    ), f"Should find at least one semantic type as {search_term_exists} exists"
+    assert len(semantic_types) > 0, f"Should find at least one semantic type as {search_term_exists} exists"
     # search for term that should not find an entry
     semantic_types = semanticsvc.search_semantic_type(search_term_not_exists)
-    assert (
-        len(semantic_types) == 0
-    ), f"Should not find any semantic type as {search_term_not_exists} does not exist"
+    assert len(semantic_types) == 0, f"Should not find any semantic type as {search_term_not_exists} does not exist"
+

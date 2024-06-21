@@ -1,16 +1,6 @@
-from pyincore import (
-    IncoreClient,
-    FragilityService,
-    MappingSet,
-    Earthquake,
-    HazardService,
-    Tsunami,
-    Hurricane,
-    Tornado,
-)
-from pyincore.analyses.buildingstructuraldamage.buildingstructuraldamage import (
-    BuildingStructuralDamage,
-)
+from pyincore import IncoreClient, FragilityService, MappingSet, Earthquake, HazardService, Tsunami, Hurricane, \
+    Tornado
+from pyincore.analyses.buildingstructuraldamage.buildingstructuraldamage import BuildingStructuralDamage
 import pyincore.globals as pyglobals
 
 
@@ -39,7 +29,7 @@ def run_with_base_class():
     mapping_id = "5b47b350337d4a3629076f2c"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
+    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
     bldg_dmg.set_input_hazard("hazard", eq)
 
@@ -67,7 +57,7 @@ def run_with_base_class():
     mapping_id = "5b48fb1f337d4a478e7bd54d"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
+    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
     bldg_dmg.set_input_hazard("hazard", tsunami)
     result_name = "seaside_tsunami_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
@@ -89,10 +79,8 @@ def run_with_base_class():
     mapping_id = "602c381a1d85547cdc9f0675"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
-    bldg_dmg.set_parameter(
-        "fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code"
-    )
+    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bldg_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
 
     bldg_dmg.set_input_hazard("hazard", hurricane)
 
@@ -111,7 +99,7 @@ def run_with_base_class():
     mapping_id = "5e8e3a21eaa8b80001f04f1c"  # 19 archetype mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
+    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
 
     tornado = Tornado.from_hazard_service("5dfa32bbc0601200080893fb", hazardsvc)
     bldg_dmg.set_input_hazard("hazard", tornado)
@@ -123,5 +111,5 @@ def run_with_base_class():
     bldg_dmg.run_analysis()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_with_base_class()

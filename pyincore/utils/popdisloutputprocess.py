@@ -23,25 +23,17 @@ class PopDislOutputProcess:
         vacant_disl (bool): A flag to include vacant (Vacant for tenure) dislocation
 
     """
+    HUPD_CATEGORIES = ["household_characteristics",
+                       "household_dislocated",
+                       "total_households",
+                       "percent_household_dislocated",
+                       "population_dislocated",
+                       "total_population",
+                       "percent_population_dislocated"
+                       ]
 
-    HUPD_CATEGORIES = [
-        "household_characteristics",
-        "household_dislocated",
-        "total_households",
-        "percent_household_dislocated",
-        "population_dislocated",
-        "total_population",
-        "percent_population_dislocated",
-    ]
-
-    def __init__(
-        self,
-        pop_disl_result,
-        pop_disl_result_path=None,
-        filter_name=None,
-        filter_guid=True,
-        vacant_disl=True,
-    ):
+    def __init__(self, pop_disl_result, pop_disl_result_path=None,
+                 filter_name=None, filter_guid=True, vacant_disl=True):
         if pop_disl_result_path:
             pd_result = pd.read_csv(pop_disl_result_path, low_memory=False)
         else:
@@ -51,36 +43,26 @@ class PopDislOutputProcess:
         # keep only inventory with guid; filter for Joplin since only Joplin inventory has guids
         if filter_guid:
             if filter_name:
-                pd_result_flag = pd_result[
-                    (pd_result["guid"].notnull())
-                    & (pd_result["numprec"].notnull())
-                    & (pd_result["plcname10"] == filter_name)
-                ]
+                pd_result_flag = pd_result[(pd_result["guid"].notnull()) &
+                                           (pd_result["numprec"].notnull()) &
+                                           (pd_result["plcname10"] == filter_name)]
                 # only keep guid and place
-                pd_result_shp = pd_result[
-                    (pd_result["guid"].notnull())
-                    & (pd_result["numprec"].notnull())
-                    & (pd_result["plcname10"] == filter_name)
-                ]
+                pd_result_shp = pd_result[(pd_result["guid"].notnull()) &
+                                          (pd_result["numprec"].notnull()) &
+                                          (pd_result["plcname10"] == filter_name)]
             else:
-                pd_result_flag = pd_result[
-                    (pd_result["guid"].notnull()) & (pd_result["numprec"].notnull())
-                ]
+                pd_result_flag = pd_result[(pd_result["guid"].notnull()) &
+                                           (pd_result["numprec"].notnull())]
                 # only keep guid
-                pd_result_shp = pd_result[
-                    (pd_result["guid"].notnull()) & (pd_result["numprec"].notnull())
-                ]
+                pd_result_shp = pd_result[(pd_result["guid"].notnull()) &
+                                          (pd_result["numprec"].notnull())]
         else:
             if filter_name:
-                pd_result_flag = pd_result[
-                    (pd_result["numprec"].notnull())
-                    & (pd_result["plcname10"] == filter_name)
-                ]
+                pd_result_flag = pd_result[(pd_result["numprec"].notnull()) &
+                                           (pd_result["plcname10"] == filter_name)]
                 # only keep guid and place
-                pd_result_shp = pd_result[
-                    (pd_result["numprec"].notnull())
-                    & (pd_result["plcname10"] == filter_name)
-                ]
+                pd_result_shp = pd_result[(pd_result["numprec"].notnull()) &
+                                          (pd_result["plcname10"] == filter_name)]
             else:
                 pd_result_flag = pd_result[(pd_result["numprec"].notnull())]
                 # only keep guid
@@ -91,19 +73,19 @@ class PopDislOutputProcess:
         self.pop_disl_result_shp = pd_result_shp
 
     def get_heatmap_shp(self, filename="pop-disl-numprec.shp"):
-        """Convert and filter population dislocation output to shapefile that contains only guid and numprec columns
+        """ Convert and filter population dislocation output to shapefile that contains only guid and numprec columns
 
-        Args:
-            filename (str): Path and name to save shapefile output file in. E.g "heatmap.shp"
+            Args:
+                filename (str): Path and name to save shapefile output file in. E.g "heatmap.shp"
 
-        Returns:
-            str: full path and filename of the shapefile
+            Returns:
+                str: full path and filename of the shapefile
 
         """
         df = self.pop_disl_result_shp
 
         # save as shapefile
-        gdf = gpd.GeoDataFrame(df, crs="epsg:4326")
+        gdf = gpd.GeoDataFrame(df, crs='epsg:4326')
         gdf = gdf[["guid", "numprec", "geometry", "dislocated"]]
 
         # keep original dislocated results
@@ -120,7 +102,7 @@ class PopDislOutputProcess:
         return filename
 
     def pd_by_race(self, filename_json=None):
-        """Calculate race results from the output files of the Joplin Population Dislocation analysis
+        """ Calculate race results from the output files of the Joplin Population Dislocation analysis
         and convert the results to json format.
         [
             {"household_characteristics": "Not Hispanic/White",
@@ -145,24 +127,20 @@ class PopDislOutputProcess:
         # The numbering follows the Community description notebook
         # 0 - Vacant HU No Race Ethnicity Data, 1 - Not Hispanic/White, 2 - Not Hispanic/Black
         # 3 - Not Hispanic/Other race, 4 - Hispanic, 5 - No Race or Ethnicity Data
-        race_categories = [
-            "Vacant HU No Race or Ethnicity Data",
-            "Not Hispanic/White",
-            "Not Hispanic/Black",
-            "Not Hispanic/Other Race",
-            "Hispanic",
-            "No Race or Ethnicity Data",
-            "Total",
-        ]
+        race_categories = ["Vacant HU No Race or Ethnicity Data",
+                           "Not Hispanic/White",
+                           "Not Hispanic/Black",
+                           "Not Hispanic/Other Race",
+                           "Hispanic",
+                           "No Race or Ethnicity Data",
+                           "Total"]
 
         huapd = self.pop_disl_result
         # Allocated by race and ethnicity
         huapd["hua_re"] = "0"
         huapd.loc[(huapd["race"] == 1) & (huapd["hispan"] == 0), "hua_re"] = "1"
         huapd.loc[(huapd["race"] == 2) & (huapd["hispan"] == 0), "hua_re"] = "2"
-        huapd.loc[
-            (huapd["race"].isin([3, 4, 5, 6, 7])) & (huapd["hispan"] == 0), "hua_re"
-        ] = "3"
+        huapd.loc[(huapd["race"].isin([3, 4, 5, 6, 7])) & (huapd["hispan"] == 0), "hua_re"] = "3"
         huapd.loc[(huapd["hispan"] == 1), "hua_re"] = "4"
         huapd.loc[(huapd["gqtype"] >= 1), "hua_re"] = "5"
         hua_vals = huapd["hua_re"].value_counts()
@@ -183,20 +161,9 @@ class PopDislOutputProcess:
         # Dislocated by race and ethnicity
         huapd["hud_re"] = ""
         huapd.loc[huapd["dislocated"], "hud_re"] = "0"
-        huapd.loc[
-            (huapd["race"] == 1) & (huapd["hispan"] == 0) & huapd["dislocated"],
-            "hud_re",
-        ] = "1"
-        huapd.loc[
-            (huapd["race"] == 2) & (huapd["hispan"] == 0) & huapd["dislocated"],
-            "hud_re",
-        ] = "2"
-        huapd.loc[
-            (huapd["race"].isin([3, 4, 5, 6, 7]))
-            & (huapd["hispan"] == 0)
-            & huapd["dislocated"],
-            "hud_re",
-        ] = "3"
+        huapd.loc[(huapd["race"] == 1) & (huapd["hispan"] == 0) & huapd["dislocated"], "hud_re"] = "1"
+        huapd.loc[(huapd["race"] == 2) & (huapd["hispan"] == 0) & huapd["dislocated"], "hud_re"] = "2"
+        huapd.loc[(huapd["race"].isin([3, 4, 5, 6, 7])) & (huapd["hispan"] == 0) & huapd["dislocated"], "hud_re"] = "3"
         huapd.loc[(huapd["hispan"] == 1) & huapd["dislocated"], "hud_re"] = "4"
         huapd.loc[(huapd["gqtype"] >= 1) & huapd["dislocated"], "hud_re"] = "5"
         hud_vals = huapd["hud_re"].value_counts()
@@ -240,7 +207,7 @@ class PopDislOutputProcess:
         return json.dumps(pd_by_race_json)
 
     def pd_by_income(self, filename_json=None):
-        """Calculate income results from the output files of the Joplin Population Dislocation analysis
+        """ Calculate income results from the output files of the Joplin Population Dislocation analysis
         and convert the results to json format.
         [
             {"household_characteristics": "HH1 (less than $15,000)",
@@ -262,15 +229,13 @@ class PopDislOutputProcess:
             obj: PD total count by income. A JSON of the hua and population dislocation income results by category.
 
         """
-        income_categories = [
-            "HH1 (less than $15,000)",
-            "HH2 ($15,000 to $35,000)",
-            "HH3 ($35,000 to $70,000)",
-            "HH4 ($70,000 to $120,000)",
-            "HH5 (More than $120,000)",
-            "Unknown",
-            "Total",
-        ]
+        income_categories = ["HH1 (less than $15,000)",
+                             "HH2 ($15,000 to $35,000)",
+                             "HH3 ($35,000 to $70,000)",
+                             "HH4 ($70,000 to $120,000)",
+                             "HH5 (More than $120,000)",
+                             "Unknown",
+                             "Total"]
 
         huapd = self.pop_disl_result
         # Allocated by income
@@ -291,25 +256,17 @@ class PopDislOutputProcess:
         # Dislocated by income
         hua_disl = []
         for i in range(1, 6):
-            disl = huapd.loc[
-                (huapd["hhinc"] == i) & huapd["dislocated"], ["dislocated"]
-            ].sum()
+            disl = huapd.loc[(huapd["hhinc"] == i) & huapd["dislocated"], ["dislocated"]].sum()
             hua_disl.append(int(disl))
-        disl_unknown = huapd.loc[
-            pd.isna(huapd["hhinc"]) & huapd["dislocated"], ["dislocated"]
-        ].sum()
+        disl_unknown = huapd.loc[pd.isna(huapd["hhinc"]) & huapd["dislocated"], ["dislocated"]].sum()
         hua_disl.append(int(disl_unknown))
         hua_disl.append(int(sum(hua_disl)))
 
         pd_disl = []
         for i in range(1, 6):
-            disl = huapd.loc[
-                (huapd["hhinc"] == i) & huapd["dislocated"], ["numprec"]
-            ].sum()
+            disl = huapd.loc[(huapd["hhinc"] == i) & huapd["dislocated"], ["numprec"]].sum()
             pd_disl.append(int(disl))
-        disl_unknown = huapd.loc[
-            pd.isna(huapd["hhinc"]) & huapd["dislocated"], ["numprec"]
-        ].sum()
+        disl_unknown = huapd.loc[pd.isna(huapd["hhinc"]) & huapd["dislocated"], ["numprec"]].sum()
         pd_disl.append(int(disl_unknown))
         pd_disl.append(int(sum(pd_disl)))
 
@@ -339,7 +296,7 @@ class PopDislOutputProcess:
         return json.dumps(pd_by_income_json)
 
     def pd_by_tenure(self, filename_json=None):
-        """Calculate tenure results from the output files of the Joplin Population Dislocation analysis
+        """ Calculate tenure results from the output files of the Joplin Population Dislocation analysis
         and convert the results to json format.
         [
             {"household_characteristics": "Owner occupied",
@@ -366,16 +323,14 @@ class PopDislOutputProcess:
         # 0 - Vacant HU No Tenure Data, 1 - Owner occupied, 2 - Renter occupied,
         # 3 - Nursing facilities, 4 - Other group quarters, 5 - Vacant for rent
         # 6 - Vacant for sale, 7 - Vacant other
-        tenure_categories = [
-            "Owner occupied",
-            "Renter occupied",
-            "Nursing facilities",
-            "Other group quarters",
-            "Vacant for rent",
-            "Vacant for sale",
-            "Vacant other",
-            "Total",
-        ]
+        tenure_categories = ["Owner occupied",
+                             "Renter occupied",
+                             "Nursing facilities",
+                             "Other group quarters",
+                             "Vacant for rent",
+                             "Vacant for sale",
+                             "Vacant other",
+                             "Total"]
 
         huapd = self.pop_disl_result
         # Allocated by tenure
@@ -398,9 +353,7 @@ class PopDislOutputProcess:
 
         pop_tot = []
         for i in range(len(tenure_categories)):
-            pop_tot.append(
-                int(huapd["numprec"].where(huapd["hua_tnr"] == str(i)).sum())
-            )
+            pop_tot.append(int(huapd["numprec"].where(huapd["hua_tnr"] == str(i)).sum()))
         pop_tot.append(int(sum(pop_tot[1:])))
 
         # Dislocated by tenure
@@ -409,14 +362,10 @@ class PopDislOutputProcess:
         huapd.loc[(huapd["ownershp"] == 1.0) & huapd["dislocated"], "hud_tnr"] = "1"
         huapd.loc[(huapd["ownershp"] == 2.0) & huapd["dislocated"], "hud_tnr"] = "2"
         huapd.loc[(huapd["gqtype"] == 3) & huapd["dislocated"], "hud_tnr"] = "3"
-        huapd.loc[
-            huapd["gqtype"].isin([1, 2, 4, 5, 6, 7, 8]) & huapd["dislocated"], "hud_tnr"
-        ] = "4"
+        huapd.loc[huapd["gqtype"].isin([1, 2, 4, 5, 6, 7, 8]) & huapd["dislocated"], "hud_tnr"] = "4"
         huapd.loc[huapd["vacancy"].isin([1, 2]) & huapd["dislocated"], "hud_tnr"] = "5"
         huapd.loc[huapd["vacancy"].isin([3, 4]) & huapd["dislocated"], "hud_tnr"] = "6"
-        huapd.loc[
-            huapd["vacancy"].isin([5, 6, 7]) & huapd["dislocated"], "hud_tnr"
-        ] = "7"
+        huapd.loc[huapd["vacancy"].isin([5, 6, 7]) & huapd["dislocated"], "hud_tnr"] = "7"
         hud_vals = huapd["hud_tnr"].value_counts()
         hua_disl = []
         for i in range(len(tenure_categories)):
@@ -433,9 +382,7 @@ class PopDislOutputProcess:
 
         pd_disl = []
         for i in range(len(tenure_categories)):
-            pd_disl.append(
-                int(huapd["numprec"].where(huapd["hud_tnr"] == str(i)).sum())
-            )
+            pd_disl.append(int(huapd["numprec"].where(huapd["hud_tnr"] == str(i)).sum()))
         pd_disl.append(int(sum(pd_disl[1:])))
 
         pd_by_tenure_json = []
@@ -445,17 +392,13 @@ class PopDislOutputProcess:
             huapd_tenure[self.HUPD_CATEGORIES[1]] = hua_disl[i + 1]
             huapd_tenure[self.HUPD_CATEGORIES[2]] = hua_tot[i + 1]
             if hua_tot[i + 1]:
-                huapd_tenure[self.HUPD_CATEGORIES[3]] = 100 * (
-                    hua_disl[i + 1] / hua_tot[i + 1]
-                )
+                huapd_tenure[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i + 1] / hua_tot[i + 1])
             else:
                 huapd_tenure[self.HUPD_CATEGORIES[3]] = None
             huapd_tenure[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
             huapd_tenure[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
             if pop_tot[i + 1]:
-                huapd_tenure[self.HUPD_CATEGORIES[6]] = 100 * (
-                    pd_disl[i + 1] / pop_tot[i + 1]
-                )
+                huapd_tenure[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i + 1] / pop_tot[i + 1])
             else:
                 huapd_tenure[self.HUPD_CATEGORIES[6]] = None
             pd_by_tenure_json.append(huapd_tenure)
@@ -468,7 +411,7 @@ class PopDislOutputProcess:
         return json.dumps(pd_by_tenure_json)
 
     def pd_by_housing(self, filename_json=None):
-        """Calculate housing results from the output files of the Joplin Population Dislocation analysis
+        """ Calculate housing results from the output files of the Joplin Population Dislocation analysis
         using huestimate column (huestimate = 1 is single family, huestimate > 1 means multi family house)
         and convert the results to json format.
         [
@@ -491,7 +434,9 @@ class PopDislOutputProcess:
         """
         # Household categories
         # 0 - Vacant HU No Tenure Data, 1 - Single Family, 2 - Multi Family
-        household_categories = ["Single Family", "Multi Family", "Total"]
+        household_categories = ["Single Family",
+                                "Multi Family",
+                                "Total"]
 
         huapd = self.pop_disl_result
         # Allocated by housing
@@ -509,9 +454,7 @@ class PopDislOutputProcess:
 
         pop_tot = []
         for i in range(len(household_categories)):
-            pop_tot.append(
-                int(huapd["numprec"].where(huapd["hua_house"] == str(i)).sum())
-            )
+            pop_tot.append(int(huapd["numprec"].where(huapd["hua_house"] == str(i)).sum()))
         pop_tot.append(int(sum(pop_tot[1:])))
 
         # Dislocated by household
@@ -530,9 +473,7 @@ class PopDislOutputProcess:
 
         pd_disl = []
         for i in range(len(household_categories)):
-            pd_disl.append(
-                int(huapd["numprec"].where(huapd["hud_house"] == str(i)).sum())
-            )
+            pd_disl.append(int(huapd["numprec"].where(huapd["hud_house"] == str(i)).sum()))
         pd_disl.append(int(sum(pd_disl[1:])))
 
         pd_by_housing_json = []
@@ -542,17 +483,13 @@ class PopDislOutputProcess:
             huapd_household[self.HUPD_CATEGORIES[1]] = hua_disl[i + 1]
             huapd_household[self.HUPD_CATEGORIES[2]] = hua_tot[i + 1]
             if hua_tot[i + 1]:
-                huapd_household[self.HUPD_CATEGORIES[3]] = 100 * (
-                    hua_disl[i + 1] / hua_tot[i + 1]
-                )
+                huapd_household[self.HUPD_CATEGORIES[3]] = 100 * (hua_disl[i + 1] / hua_tot[i + 1])
             else:
                 huapd_household[self.HUPD_CATEGORIES[3]] = None
             huapd_household[self.HUPD_CATEGORIES[4]] = pd_disl[i + 1]
             huapd_household[self.HUPD_CATEGORIES[5]] = pop_tot[i + 1]
             if pop_tot[i + 1]:
-                huapd_household[self.HUPD_CATEGORIES[6]] = 100 * (
-                    pd_disl[i + 1] / pop_tot[i + 1]
-                )
+                huapd_household[self.HUPD_CATEGORIES[6]] = 100 * (pd_disl[i + 1] / pop_tot[i + 1])
             else:
                 huapd_household[self.HUPD_CATEGORIES[6]] = None
             pd_by_housing_json.append(huapd_household)
@@ -564,7 +501,7 @@ class PopDislOutputProcess:
         return json.dumps(pd_by_housing_json)
 
     def pd_total(self, filename_json=None):
-        """Calculate total results from the output files of the Joplin Population Dislocation analysis
+        """ Calculate total results from the output files of the Joplin Population Dislocation analysis
         and convert the results to json format.
         {   "household_dislocated": {
                 "dislocated": {
@@ -598,10 +535,8 @@ class PopDislOutputProcess:
 
         hua_disl = [hud_vals_false, hud_vals_true]
 
-        pd_disl = [
-            int(hud["numprec"].where(hud["dislocated"] == 0).sum()),
-            int(hud["numprec"].where(hud["dislocated"] == 1).sum()),
-        ]
+        pd_disl = [int(hud["numprec"].where(hud["dislocated"] == 0).sum()),
+                   int(hud["numprec"].where(hud["dislocated"] == 1).sum())]
 
         hua_tot = sum(hua_disl)
         pop_tot = sum(pd_disl)
@@ -612,18 +547,11 @@ class PopDislOutputProcess:
         hua_disl_tot["not_dislocated"] = no_hua_tot
         hua_disl_tot["total"] = no_hua_tot
         if hua_tot:
-            hua_disl_tot["dislocated"] = {
-                "households": hua_disl[1],
-                "percent_of_households": 100 * (hua_disl[1] / hua_tot),
-            }
-            hua_disl_tot["not_dislocated"] = {
-                "households": hua_tot - hua_disl[1],
-                "percent_of_households": 100 * ((hua_tot - hua_disl[1]) / hua_tot),
-            }
-            hua_disl_tot["total"] = {
-                "households": hua_tot,
-                "percent_of_households": 100,
-            }
+            hua_disl_tot["dislocated"] = {"households": hua_disl[1],
+                                          "percent_of_households": 100 * (hua_disl[1]/hua_tot)}
+            hua_disl_tot["not_dislocated"] = {"households": hua_tot - hua_disl[1],
+                                              "percent_of_households": 100 * ((hua_tot - hua_disl[1])/hua_tot)}
+            hua_disl_tot["total"] = {"households": hua_tot, "percent_of_households": 100}
 
         no_pop_tot = {"population": None, "percent_of_population": None}
         pop_disl_tot = {}
@@ -631,23 +559,14 @@ class PopDislOutputProcess:
         pop_disl_tot["not_dislocated"] = no_pop_tot
         pop_disl_tot["total"] = no_pop_tot
         if pop_tot:
-            pop_disl_tot["dislocated"] = {
-                "population": pd_disl[1],
-                "percent_of_population": 100 * (pd_disl[1] / pop_tot),
-            }
-            pop_disl_tot["not_dislocated"] = {
-                "population": pop_tot - pd_disl[1],
-                "percent_of_population": 100 * ((pop_tot - pd_disl[1]) / pop_tot),
-            }
-            pop_disl_tot["total"] = {
-                "population": pop_tot,
-                "percent_of_population": 100,
-            }
+            pop_disl_tot["dislocated"] = {"population": pd_disl[1],
+                                          "percent_of_population": 100 * (pd_disl[1]/pop_tot)}
+            pop_disl_tot["not_dislocated"] = {"population": pop_tot - pd_disl[1],
+                                              "percent_of_population": 100 * ((pop_tot - pd_disl[1])/pop_tot)}
+            pop_disl_tot["total"] = {"population": pop_tot, "percent_of_population": 100}
 
-        pd_total_json = {
-            "household_dislocation_in_total": hua_disl_tot,
-            "population_dislocation_in_total": pop_disl_tot,
-        }
+        pd_total_json = {"household_dislocation_in_total": hua_disl_tot,
+                         "population_dislocation_in_total": pop_disl_tot}
         # print(pd_total_json)
 
         if filename_json:

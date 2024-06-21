@@ -116,6 +116,7 @@ class CoreCGEML(BaseAnalysis):
                 prefd_l = []
                 postfd_l = []
                 for grp in self.labor_groups:
+
                     if temp_prefd[sector].get(grp, None) is None:
                         prefd_l.append(-1)
                     else:
@@ -142,11 +143,11 @@ class CoreCGEML(BaseAnalysis):
         base_cap_factors: List[np.ndarray],
     ) -> None:
         """run_core_cge_ml will use the model coefficients to predict the change in capital stock for each sector.
-        The predicted change will then be added to base_cap_factors to get the final capital stock for each sector
+        The predicted change will then be added to base_cap_factors to get the final capital stock for each sector 
         after a disaster.
-        The model requires capital stock loss in dollar amount, hence the base_cap will be used to
+        The model requires capital stock loss in dollar amount, hence the base_cap will be used to 
         calculate the loss in dollar amount.
-        The capital_shocks is the percentage of capital stock that remains and hence to get the loss we
+        The capital_shocks is the percentage of capital stock that remains and hence to get the loss we 
         use 1 - capital_shocks.
 
         Some variables for parameters:
@@ -167,7 +168,7 @@ class CoreCGEML(BaseAnalysis):
         capital_shocks : (1 X K) np.ndarray
             This is the capital shock for each sector in percentage. This is a (1, K) array with K elements.
         model_coeffs : Dict[str, np.ndarray]
-            This is a dictionary of 2D arrays with shape [n, (k_i, l_i)].
+            This is a dictionary of 2D arrays with shape [n, (k_i, l_i)]. 
             Each entry in the dictionary corresponds to a factor and each factor has k_i number of models.
             It is assumed that the intercept term is included in the model coefficients and is at the 0th column.
         base_cap_factors : List[np.ndarray]

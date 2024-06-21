@@ -20,20 +20,14 @@ def run_with_base_class():
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
 
     non_structural_building_dmg_flood = NonStructBuildingDamage(client)
-    non_structural_building_dmg_flood.load_remote_input_dataset(
-        "buildings", bldg_dataset_id
-    )
-    non_structural_building_dmg_flood.set_input_dataset("dfr3_mapping_set", mapping_set)
-    non_structural_building_dmg_flood.set_parameter(
-        "result_name", "non_structural_building_dmg_result_flood"
-    )
+    non_structural_building_dmg_flood.load_remote_input_dataset("buildings", bldg_dataset_id)
+    non_structural_building_dmg_flood.set_input_dataset('dfr3_mapping_set', mapping_set)
+    non_structural_building_dmg_flood.set_parameter("result_name", "non_structural_building_dmg_result_flood")
     non_structural_building_dmg_flood.set_input_hazard("hazard", flood)
     non_structural_building_dmg_flood.set_parameter("num_cpu", 4)
-    non_structural_building_dmg_flood.set_parameter(
-        "fragility_key", "Lumberton Flood Building Fragility ID Code"
-    )
+    non_structural_building_dmg_flood.set_parameter("fragility_key", "Lumberton Flood Building Fragility ID Code")
     non_structural_building_dmg_flood.run_analysis()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_with_base_class()

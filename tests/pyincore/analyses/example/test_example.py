@@ -5,7 +5,7 @@ from pyincore.analyses.example.exampleanalysis import ExampleAnalysis
 import traceback
 import pyincore.globals as pyglobals
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cred = None
 
     # If you installed pyIncore, a folder called .incore should be created in your home directory along
@@ -44,10 +44,8 @@ if __name__ == "__main__":
         if example_bldgdmg.run_analysis():
             print("Analysis finished, check for a file called " + result_name + ".csv")
         else:
-            print(
-                "There was an error running the example, you may need to check there there is a credential in "
-                + incore_pw
-            )
+            print("There was an error running the example, you may need to check there there is a credential in " +
+                  incore_pw)
     except EnvironmentError:
         print("exception")
         traceback.print_exc()

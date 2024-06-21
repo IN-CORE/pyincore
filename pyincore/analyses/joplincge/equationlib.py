@@ -37,24 +37,24 @@ class VarContainer:
         if rows is not None and cols is not None:
             size = len(rows) * len(cols)
             self.namelist[name] = {
-                "nrows": len(rows),
-                "ncols": len(cols),
-                "rows": rows,
-                "cols": cols,
-                "start": self.nvars,
-                "size": size,
+                'nrows': len(rows),
+                'ncols': len(cols),
+                'rows': rows,
+                'cols': cols,
+                'start': self.nvars,
+                'size': size
             }
         elif rows is not None and cols is None:
             size = len(rows)
             self.namelist[name] = {
-                "nrows": len(rows),
-                "rows": rows,
-                "start": self.nvars,
-                "size": size,
+                'nrows': len(rows),
+                'rows': rows,
+                'start': self.nvars,
+                'size': size
             }
         else:
             size = 1
-            self.namelist[name] = {"start": self.nvars, "size": 1}
+            self.namelist[name] = {'start': self.nvars, 'size': 1}
 
         self.initialVals.extend([None] * size)
         self.LO.extend([None] * size)
@@ -74,12 +74,10 @@ class VarContainer:
         """
         if type(values) == int or type(values) == float:
             info = self.namelist[name]
-            if "nrows" in info and "ncols" in info:
-                values = pd.DataFrame(index=info["rows"], columns=info["cols"]).fillna(
-                    values
-                )
-            elif "nrows" in info and "ncols" not in info:
-                values = pd.Series(index=info["rows"], dtype="float64").fillna(values)
+            if 'nrows' in info and 'ncols' in info:
+                values = pd.DataFrame(index=info['rows'], columns=info['cols']).fillna(values)
+            elif 'nrows' in info and 'ncols' not in info:
+                values = pd.Series(index=info['rows'], dtype='float64').fillna(values)
 
         if type(values) == pd.DataFrame:
             rows = values.index.tolist()
@@ -142,11 +140,11 @@ class VarContainer:
 
         """
         info = self.namelist[name]
-        result = info["start"]
+        result = info['start']
         if row is not None and col is not None:
-            result += info["rows"].index(row) * info["ncols"] + info["cols"].index(col)
+            result += info['rows'].index(row) * info['ncols'] + info['cols'].index(col)
         elif row is not None:
-            result += info["rows"].index(row)
+            result += info['rows'].index(row)
         return result
 
     def get_label(self, index):
@@ -161,24 +159,15 @@ class VarContainer:
         """
         result = []
         for i in self.namelist.keys():
-            if (
-                index >= self.namelist[i]["start"]
-                and index < self.namelist[i]["start"] + self.namelist[i]["size"]
-            ):
+            if index >= self.namelist[i]['start'] and index < self.namelist[i]['start'] + self.namelist[i]['size']:
                 result.append(i)
-                if self.namelist[i]["size"] > 1:
-                    diff = index - self.namelist[i]["start"]
-                    if "ncols" in self.namelist[i]:
-                        result.append(
-                            self.namelist[i]["rows"][
-                                int(diff / self.namelist[i]["ncols"])
-                            ]
-                        )
-                        result.append(
-                            self.namelist[i]["cols"][diff % self.namelist[i]["ncols"]]
-                        )
+                if self.namelist[i]['size'] > 1:
+                    diff = index - self.namelist[i]['start']
+                    if 'ncols' in self.namelist[i]:
+                        result.append(self.namelist[i]['rows'][int(diff / self.namelist[i]['ncols'])])
+                        result.append(self.namelist[i]['cols'][diff % self.namelist[i]['ncols']])
                     else:
-                        result.append(self.namelist[i]["rows"][diff])
+                        result.append(self.namelist[i]['rows'][diff])
                 return result
 
     def get(self, name, x=None):
@@ -198,16 +187,16 @@ class VarContainer:
 
         ret = None
         info = self.namelist[name]
-        if "nrows" in info and "ncols" in info:
-            ret = pd.DataFrame(index=info["rows"], columns=info["cols"]).fillna(0.0)
-            for i in info["rows"]:
-                for j in info["cols"]:
+        if 'nrows' in info and 'ncols' in info:
+            ret = pd.DataFrame(index=info['rows'], columns=info['cols']).fillna(0.0)
+            for i in info['rows']:
+                for j in info['cols']:
                     ret.at[i, j] = x[self.get_index(name, row=i, col=j)]
-        elif "nrows" in info and "ncols" not in info:
-            ret = pd.Series(index=info["rows"], dtype="float64").fillna(0.0)
-            for i in info["rows"]:
+        elif 'nrows' in info and 'ncols' not in info:
+            ret = pd.Series(index=info['rows'], dtype='float64').fillna(0.0)
+            for i in info['rows']:
                 ret.at[i] = x[self.get_index(name, row=i)]
-        elif "nrows" not in info and "ncols" not in info:
+        elif 'nrows' not in info and 'ncols' not in info:
             ret = x[self.get_index(name)]
 
         return ret
@@ -239,22 +228,12 @@ class VarContainer:
             filename (str): The output filename.
 
         """
-        with open(filename, "a") as f:
+        with open(filename, 'a') as f:
             for i in range(self.nvars):
                 lower = -1e10 if self.LO[i] is None else self.LO[i]
                 upper = 1e10 if self.UP[i] is None else self.UP[i]
-                f.write(
-                    "model.x"
-                    + str(i)
-                    + " = Var(bounds=("
-                    + str(lower)
-                    + ","
-                    + str(upper)
-                    + "),initialize="
-                    + str(self.initialVals[i])
-                    + ")"
-                    + "\n"
-                )
+                f.write('model.x' + str(i) + ' = Var(bounds=(' + str(lower) + ',' + str(upper) + '),initialize=' + str(
+                    self.initialVals[i]) + ')' + '\n')
 
 
 class Variable:
@@ -279,7 +258,7 @@ class Variable:
     def __str__(self):
         """Returns the variable in the format of "model.x#" if gets printed, with # being the index
         in the array in the container."""
-        return "model.x" + str(self.index) + ""
+        return 'model.x' + str(self.index) + ''
 
 
 class ExprItem:
@@ -298,9 +277,9 @@ class ExprItem:
         else:
             print("invalid parameter to create a item")
 
-    """
+    '''
       You could multiply it with a number, a variable, a ExprItem or Expression
-    """
+    '''
 
     def __mul__(self, rhs):
         copy = ExprItem(self)
@@ -313,7 +292,7 @@ class ExprItem:
             copy.varList.extend(deepcopy(rhs.varList))
         elif type(rhs) == Expr:
             if rhs.isComposite:
-                if rhs.operator == "/":
+                if rhs.operator == '/':
                     return rhs * copy
                 else:
                     copy.varList.append(Expr(rhs))
@@ -324,7 +303,7 @@ class ExprItem:
         return copy
 
     def __str__(self):
-        result = "" + str(self.const)
+        result = '' + str(self.const)
         for i in range(len(self.varList)):
             result += "*" + self.varList[i].__str__()
         return result
@@ -343,23 +322,16 @@ class ExprItem:
 
 
 class Expr:
+
     def __init__(self, item):
         self.itemList = []
         self.isComposite = False
-        if (
-            type(item) == ExprItem
-            or type(item) == Variable
-            or type(item) == int
-            or type(item) == float
-        ):
+        if type(item) == ExprItem or type(item) == Variable or type(item) == int or type(item) == float:
             self.itemList.append(ExprItem(item))
         elif type(item) == Expr:
             self.itemList = [
-                ExprItem(item.itemList[i])
-                if type(item.itemList[i]) == ExprItem
-                else Expr(item.itemList[i])
-                for i in range(len(item.itemList))
-            ]
+                ExprItem(item.itemList[i]) if type(item.itemList[i]) == ExprItem else Expr(item.itemList[i]) for i in
+                range(len(item.itemList))]
             try:
                 self.isComposite = deepcopy(item.isComposite)
             except Exception as e:
@@ -394,12 +366,7 @@ class Expr:
             else:
                 rhscopy = Expr(rhs)
                 copy.itemList = copy.itemList + rhscopy.itemList
-        elif (
-            type(rhs) == ExprItem
-            or type(rhs) == int
-            or type(rhs) == float
-            or type(rhs) == Variable
-        ):
+        elif type(rhs) == ExprItem or type(rhs) == int or type(rhs) == float or type(rhs) == Variable:
             copy.itemList.append(ExprItem(rhs))
         return copy
 
@@ -411,9 +378,9 @@ class Expr:
         copy = Expr(self)
         if type(rhs) == int or type(rhs) == float or type(rhs) == ExprItem:
             if copy.isComposite:
-                if copy.operator == "/":
+                if copy.operator == '/':
                     copy.first = copy.first * rhs
-                elif copy.operator == "**":
+                elif copy.operator == '**':
                     return ExprItem(rhs) * copy
             else:
                 result = []
@@ -423,7 +390,7 @@ class Expr:
 
         elif type(rhs) == Expr:
             if copy.isComposite and not rhs.isComposite:
-                if copy.operator == "/":
+                if copy.operator == '/':
                     copy.first = copy.first * rhs
                 else:
                     copy.itemList = [i * copy for i in rhs.itemList]
@@ -433,12 +400,14 @@ class Expr:
                 # print('rhs',rhs)
 
                 if len(copy.itemList) * len(rhs.itemList) > 10:
+
                     tmpItem = ExprItem(1)
                     tmpItem.varList.append(Expr(copy))
                     tmpItem.varList.append(Expr(rhs))
                     copy.itemList = [tmpItem]
 
                 else:
+
                     # The expanding way is super slow for long equations
 
                     result = []
@@ -456,15 +425,15 @@ class Expr:
                 return rhs * copy
             else:
                 # both are composite
-                if copy.operator == "/" and rhs.operator == "/":
+                if copy.operator == '/' and rhs.operator == '/':
                     copy.first = copy.first * rhs.first
                     copy.second = copy.second * rhs.second
-                elif copy.operator == "**" and rhs.operator == "**":
+                elif copy.operator == '**' and rhs.operator == '**':
                     copy.first = copy.first * rhs.first
                     copy.second = copy.second + rhs.second
-                elif copy.operator == "/" and rhs.operator == "**":
+                elif copy.operator == '/' and rhs.operator == '**':
                     copy.first = copy.first * rhs
-                elif copy.operator == "**" and rhs.operator == "/":
+                elif copy.operator == '**' and rhs.operator == '/':
                     copyrhs = Expr(rhs)
                     copyrhs.first = copyrhs.first * copy
         return copy
@@ -473,7 +442,7 @@ class Expr:
         copy = Expr(self)
         tmp = Expr(copy)
         copy.isComposite = True
-        copy.operator = "/"
+        copy.operator = '/'
         copy.first = tmp
         copy.second = Expr(rhs)
         return copy
@@ -482,20 +451,18 @@ class Expr:
         copy = Expr(self)
         tmp = Expr(copy)
         copy.isComposite = True
-        copy.operator = "**"
+        copy.operator = '**'
         copy.first = tmp
         copy.second = Expr(rhs)
         return copy
 
     def __str__(self):
         if self.isComposite:
-            result = (
-                "(" + self.first.__str__() + self.operator + self.second.__str__() + ")"
-            )
+            result = "(" + self.first.__str__() + self.operator + self.second.__str__() + ")"
         else:
             if len(self.itemList) == 0:
-                return "0"
-            result = ""
+                return '0'
+            result = ''
             for i in self.itemList[0:-1]:
                 result += "(" + i.__str__() + ")" + "+"
             result += "(" + self.itemList[-1].__str__() + ")"
@@ -551,20 +518,17 @@ class ExprM:
                 else:
                     print("Can't find this variable in the all variable list")
 
-                self.info["height"] = 1
-                self.info["width"] = 1
-                self.info["rows"] = deepcopy(rows)
-                self.info["cols"] = deepcopy(cols)
+                self.info['height'] = 1
+                self.info['width'] = 1
+                self.info['rows'] = deepcopy(rows)
+                self.info['cols'] = deepcopy(cols)
                 if cols is not None:
-                    self.info["width"] = len(cols)
+                    self.info['width'] = len(cols)
                 if rows is not None:
-                    self.info["height"] = len(rows)
+                    self.info['height'] = len(rows)
 
                 if cols is not None:  # if it is a DataFrame
-                    self.m = [
-                        [Expr(Variable(self.vars, name, i, j)) for j in cols]
-                        for i in rows
-                    ]
+                    self.m = [[Expr(Variable(self.vars, name, i, j)) for j in cols] for i in rows]
                 elif rows is not None:  # if it is a Series
                     self.m = [[Expr(Variable(self.vars, name, i))] for i in rows]
                 else:  # if it is a variable
@@ -573,110 +537,80 @@ class ExprM:
             # otherwise these are just constants
             else:
                 self.info = {}
-                self.info["height"] = 1
-                self.info["width"] = 1
-                self.info["rows"] = None
-                self.info["cols"] = None
+                self.info['height'] = 1
+                self.info['width'] = 1
+                self.info['rows'] = None
+                self.info['cols'] = None
                 if type(m) == pd.DataFrame:
-                    self.info["rows"] = m.index.tolist()
-                    self.info["height"] = len(self.info["rows"])
-                    self.info["cols"] = m.columns.tolist()
-                    self.info["width"] = len(self.info["cols"])
-                    self.m = [
-                        [Expr(float(m.loc[i, j])) for j in self.info["cols"]]
-                        for i in self.info["rows"]
-                    ]
+                    self.info['rows'] = m.index.tolist()
+                    self.info['height'] = len(self.info['rows'])
+                    self.info['cols'] = m.columns.tolist()
+                    self.info['width'] = len(self.info['cols'])
+                    self.m = [[Expr(float(m.loc[i, j])) for j in self.info['cols']] for i in self.info['rows']]
                 elif type(m) == pd.Series:
-                    self.info["rows"] = m.index.tolist()
-                    self.info["height"] = len(self.info["rows"])
-                    self.m = [[Expr(float(m.loc[i]))] for i in self.info["rows"]]
+                    self.info['rows'] = m.index.tolist()
+                    self.info['height'] = len(self.info['rows'])
+                    self.m = [[Expr(float(m.loc[i]))] for i in self.info['rows']]
                 else:
                     self.m = [[Expr(float(m))]]
         else:
             # make deep copy
             self.info = deepcopy(em.info)
-            self.m = [
-                [Expr(em.m[i][j]) for j in range(em.info["width"])]
-                for i in range(em.info["height"])
-            ]
+            self.m = [[Expr(em.m[i][j]) for j in range(em.info['width'])] for i in range(em.info['height'])]
 
     def operation(self, rhs, oper):
         copy = ExprM(self.vars, em=self)
 
         if type(rhs) == int or type(rhs) == float:
-            for i in range(self.info["height"]):
-                for j in range(self.info["width"]):
+            for i in range(self.info['height']):
+                for j in range(self.info['width']):
                     copy.m[i][j] = oper(copy.m[i][j], Expr(rhs))
 
         elif type(rhs) == pd.DataFrame or type(rhs) == pd.Series:
             return self.operation(ExprM(self.vars, m=rhs), oper)
 
         elif type(rhs) == ExprM:
-            if (
-                copy.info["rows"] == rhs.info["rows"]
-                and copy.info["cols"] == rhs.info["cols"]
-            ):
+            if copy.info['rows'] == rhs.info['rows'] and copy.info['cols'] == rhs.info['cols']:
                 # same size, apply operation element-wise
-                for i in range(self.info["height"]):
-                    for j in range(self.info["width"]):
+                for i in range(self.info['height']):
+                    for j in range(self.info['width']):
                         copy.m[i][j] = oper(copy.m[i][j], rhs.m[i][j])
-            elif copy.info["rows"] == rhs.info["rows"] and copy.info["width"] == 1:
+            elif copy.info['rows'] == rhs.info['rows'] and copy.info['width'] == 1:
                 # for each column in rhs
-                result = [
-                    [Expr(0) for j in range(rhs.info["width"])]
-                    for i in range(self.info["height"])
-                ]
-                for i in range(self.info["height"]):
-                    for j in range(rhs.info["width"]):
+                result = [[Expr(0) for j in range(rhs.info['width'])] for i in range(self.info['height'])]
+                for i in range(self.info['height']):
+                    for j in range(rhs.info['width']):
                         result[i][j] = oper(copy.m[i][0], rhs.m[i][j])
                 copy.m = result
-                copy.info["width"] = rhs.info["width"]
-                copy.info["cols"] = deepcopy(rhs.info["cols"])
-            elif copy.info["rows"] == rhs.info["rows"] and rhs.info["width"] == 1:
+                copy.info['width'] = rhs.info['width']
+                copy.info['cols'] = deepcopy(rhs.info['cols'])
+            elif copy.info['rows'] == rhs.info['rows'] and rhs.info['width'] == 1:
                 # for each column in lhs
-                for i in range(self.info["height"]):
-                    for j in range(self.info["width"]):
+                for i in range(self.info['height']):
+                    for j in range(self.info['width']):
                         copy.m[i][j] = oper(copy.m[i][j], rhs.m[i][0])
-            elif copy.info["height"] == 1 and copy.info["cols"] == rhs.info["cols"]:
+            elif copy.info['height'] == 1 and copy.info['cols'] == rhs.info['cols']:
                 # for each row in rhs
-                result = [
-                    [Expr(0) for j in range(rhs.info["width"])]
-                    for i in range(rhs.info["height"])
-                ]
-                for i in range(rhs.info["height"]):
-                    for j in range(rhs.info["width"]):
+                result = [[Expr(0) for j in range(rhs.info['width'])] for i in range(rhs.info['height'])]
+                for i in range(rhs.info['height']):
+                    for j in range(rhs.info['width']):
                         result[i][j] = oper(copy.m[0][j], rhs.m[i][j])
                 copy.m = result
-                copy.info["height"] = rhs.info["height"]
-                copy.info["rows"] = deepcopy(rhs.info["rows"])
-            elif rhs.info["height"] == 1 and copy.info["cols"] == rhs.info["cols"]:
+                copy.info['height'] = rhs.info['height']
+                copy.info['rows'] = deepcopy(rhs.info['rows'])
+            elif rhs.info['height'] == 1 and copy.info['cols'] == rhs.info['cols']:
                 # for each row in lhs
-                for i in range(self.info["height"]):
-                    for j in range(self.info["width"]):
+                for i in range(self.info['height']):
+                    for j in range(self.info['width']):
                         copy.m[i][j] = oper(copy.m[i][j], rhs.m[0][j])
-            elif (
-                self.info["width"] == rhs.info["height"]
-                and self.info["cols"] == rhs.info["rows"]
-            ) or (
-                self.info["height"] == rhs.info["width"]
-                and self.info["rows"] == rhs.info["cols"]
-            ):
+            elif (self.info['width'] == rhs.info['height'] and self.info['cols'] == rhs.info['rows']) or \
+                    (self.info['height'] == rhs.info['width'] and self.info['rows'] == rhs.info['cols']):
                 # flip the matrix
                 return oper(self, ~rhs)
 
             else:
-                print(
-                    copy.info["rows"],
-                    copy.info["cols"],
-                    rhs.info["rows"],
-                    rhs.info["cols"],
-                )
-                print(
-                    copy.info["height"],
-                    copy.info["width"],
-                    rhs.info["height"],
-                    rhs.info["width"],
-                )
+                print(copy.info['rows'], copy.info['cols'], rhs.info['rows'], rhs.info['cols'])
+                print(copy.info['height'], copy.info['width'], rhs.info['height'], rhs.info['width'])
                 print("Invalid size for ", str(oper))
         return copy
 
@@ -703,43 +637,35 @@ class ExprM:
 
     def __xor__(self, rhs):
         """
-        create 2d list out of 2 single lists
+          create 2d list out of 2 single lists
         """
         # has to be 2 single lists
-        if self.info["width"] != 1 or rhs.info["width"] != 1:
+        if self.info['width'] != 1 or rhs.info['width'] != 1:
             print("Invalid size for creating a 2-D matrix")
         else:
             copy = ExprM(self.vars, em=self)
-            copy.m = [
-                [copy.m[i][0] * rhs.m[j][0] for j in range(rhs.info["height"])]
-                for i in range(copy.info["height"])
-            ]
-            copy.info["cols"] = deepcopy(rhs.info["rows"])
-            copy.info["width"] = deepcopy(rhs.info["height"])
+            copy.m = [[copy.m[i][0] * rhs.m[j][0] for j in range(rhs.info['height'])] for i in
+                      range(copy.info['height'])]
+            copy.info['cols'] = deepcopy(rhs.info['rows'])
+            copy.info['width'] = deepcopy(rhs.info['height'])
             return copy
 
     def __invert__(self):
         """Return the transpose of a Expression matrix"""
 
         copy = ExprM(self.vars, em=self)
-        result = [
-            [copy.m[i][j] for i in range(copy.info["height"])]
-            for j in range(copy.info["width"])
-        ]
-        copy.info["height"], copy.info["width"] = (
-            copy.info["width"],
-            copy.info["height"],
-        )
-        copy.info["rows"], copy.info["cols"] = copy.info["cols"], copy.info["rows"]
+        result = [[copy.m[i][j] for i in range(copy.info['height'])] for j in range(copy.info['width'])]
+        copy.info['height'], copy.info['width'] = copy.info['width'], copy.info['height']
+        copy.info['rows'], copy.info['cols'] = copy.info['cols'], copy.info['rows']
         copy.m = result
         return copy
 
     def __str__(self):
-        result = ""
+        result = ''
         for i in self.m:
             for j in i:
-                result += j.__str__() + "\n"
-            result += "///////////////////\n"
+                result += j.__str__() + '\n'
+            result += '///////////////////\n'
         return result
 
     def loc(self, rows=None, cols=None):
@@ -747,24 +673,19 @@ class ExprM:
 
         copy = ExprM(self.vars, em=self)
         if cols is not None:
-            result = [
-                [
-                    Expr(copy.m[self.info["rows"].index(i)][self.info["cols"].index(j)])
-                    for j in cols
-                ]
-                for i in rows
-            ]
+            result = [[Expr(copy.m[self.info['rows'].index(i)][self.info['cols'].index(j)]) for j in cols] for i in
+                      rows]
             copy.m = result
-            copy.info["rows"] = deepcopy(rows)
-            copy.info["height"] = len(copy.info["rows"])
-            copy.info["cols"] = deepcopy(cols)
-            copy.info["width"] = len(copy.info["cols"])
+            copy.info['rows'] = deepcopy(rows)
+            copy.info['height'] = len(copy.info['rows'])
+            copy.info['cols'] = deepcopy(cols)
+            copy.info['width'] = len(copy.info['cols'])
             return copy
         elif rows is not None:
-            result = [[Expr(copy.m[self.info["rows"].index(i)][0])] for i in rows]
+            result = [[Expr(copy.m[self.info['rows'].index(i)][0])] for i in rows]
             copy.m = result
-            copy.info["rows"] = deepcopy(rows)
-            copy.info["height"] = len(copy.info["rows"])
+            copy.info['rows'] = deepcopy(rows)
+            copy.info['height'] = len(copy.info['rows'])
             return copy
         else:
             return copy
@@ -773,111 +694,92 @@ class ExprM:
         copy = ExprM(self.vars, em=self)
         if label is None:
             result = Expr(0)
-            for i in range(self.info["height"]):
-                for j in range(self.info["width"]):
+            for i in range(self.info['height']):
+                for j in range(self.info['width']):
                     result = result + copy.m[i][j]
             copy.m = [[result]]
-            copy.info["width"] = 1
-            copy.info["height"] = 1
-            copy.info["rows"] = None
-            copy.info["cols"] = None
+            copy.info['width'] = 1
+            copy.info['height'] = 1
+            copy.info['rows'] = None
+            copy.info['cols'] = None
 
-        elif label == self.info["rows"] or label == 0:
-            result = [[Expr(0) for j in range(self.info["width"])]]
-            for i in range(self.info["height"]):
-                for j in range(self.info["width"]):
+        elif label == self.info['rows'] or label == 0:
+            result = [[Expr(0) for j in range(self.info['width'])]]
+            for i in range(self.info['height']):
+                for j in range(self.info['width']):
                     if not self.hasCondition or self.hasCondition and self.mark[i][j]:
                         result[0][j] = result[0][j] + copy.m[i][j]
             copy.m = result
-            copy.info["height"] = 1
-            copy.info["rows"] = None
+            copy.info['height'] = 1
+            copy.info['rows'] = None
 
-        elif label == self.info["cols"] or label == 1:
-            result = [[Expr(0)] for i in range(self.info["height"])]
-            for i in range(self.info["height"]):
-                for j in range(self.info["width"]):
+        elif label == self.info['cols'] or label == 1:
+            result = [[Expr(0)] for i in range(self.info['height'])]
+            for i in range(self.info['height']):
+                for j in range(self.info['width']):
                     if not self.hasCondition or self.hasCondition and self.mark[i][j]:
                         result[i][0] = result[i][0] + copy.m[i][j]
             copy.m = result
-            copy.info["width"] = 1
-            copy.info["cols"] = None
+            copy.info['width'] = 1
+            copy.info['cols'] = None
         return copy
 
     def prod(self, label):
         copy = ExprM(self.vars, em=self)
-        if label == self.info["rows"] or label == 0:
-            result = [[Expr(1) for j in range(self.info["width"])]]
-            for i in range(self.info["height"]):
-                for j in range(self.info["width"]):
+        if label == self.info['rows'] or label == 0:
+            result = [[Expr(1) for j in range(self.info['width'])]]
+            for i in range(self.info['height']):
+                for j in range(self.info['width']):
                     if not self.hasCondition or self.hasCondition and self.mark[i][j]:
                         result[0][j] = result[0][j] * copy.m[i][j]
             copy.m = result
-            copy.info["height"] = 1
-            copy.info["rows"] = None
-        elif label == self.info["cols"] or label == 1:
-            result = [[Expr(1)] for i in range(self.info["height"])]
-            for i in range(self.info["height"]):
-                for j in range(self.info["width"]):
+            copy.info['height'] = 1
+            copy.info['rows'] = None
+        elif label == self.info['cols'] or label == 1:
+            result = [[Expr(1)] for i in range(self.info['height'])]
+            for i in range(self.info['height']):
+                for j in range(self.info['width']):
                     if not self.hasCondition or self.hasCondition and self.mark[i][j]:
                         result[i][0] = result[i][0] * copy.m[i][j]
             copy.m = result
-            copy.info["width"] = 1
-            copy.info["cols"] = None
+            copy.info['width'] = 1
+            copy.info['cols'] = None
         return copy
 
     def set_condition(self, matrix, operator=None, value=None):
         self.hasCondition = True
-        mappings = {
-            "LT": op.lt,
-            "LE": op.le,
-            "EQ": op.eq,
-            "INEQ": op.ne,
-        }  # not complete list
+        mappings = {'LT': op.lt, 'LE': op.le, 'EQ': op.eq, 'INEQ': op.ne}  # not complete list
         if type(matrix) == pd.DataFrame:
-            self.mark = [
-                [False for j in range(self.info["width"])]
-                for i in range(self.info["height"])
-            ]
-            for i in range(self.info["height"]):
-                for j in range(self.info["width"]):
+            self.mark = [[False for j in range(self.info['width'])] for i in range(self.info['height'])]
+            for i in range(self.info['height']):
+                for j in range(self.info['width']):
                     if operator is None:
-                        self.mark[i][j] = op.ne(
-                            matrix.loc[self.info["rows"][i]][self.info["cols"][j]], 0
-                        )
+                        self.mark[i][j] = op.ne(matrix.loc[self.info['rows'][i]][self.info['cols'][j]], 0)
                     else:
-                        self.mark[i][j] = mappings[operator](
-                            matrix.loc[self.info["rows"][i]][self.info["cols"][j]],
-                            value,
-                        )
+                        self.mark[i][j] = mappings[operator](matrix.loc[self.info['rows'][i]][self.info['cols'][j]],
+                                                             value)
 
         if type(matrix) == pd.Series:
-            self.mark = [[False] for i in range(self.info["height"])]
-            for i in range(self.info["height"]):
+            self.mark = [[False] for i in range(self.info['height'])]
+            for i in range(self.info['height']):
                 if operator is None:
-                    self.mark[i][0] = op.ne(matrix.loc[self.info["rows"][i]], 0)
+                    self.mark[i][0] = op.ne(matrix.loc[self.info['rows'][i]], 0)
                 else:
-                    self.mark[i][0] = mappings[operator](
-                        matrix.loc[self.info["rows"][i]], value
-                    )
+                    self.mark[i][0] = mappings[operator](matrix.loc[self.info['rows'][i]], value)
 
     def write(self, count, filename):
-        f = open(filename, "a")
-        for i in range(self.info["height"]):
-            for j in range(self.info["width"]):
+        f = open(filename, 'a')
+        for i in range(self.info['height']):
+            for j in range(self.info['width']):
                 if not self.hasCondition or self.hasCondition and self.mark[i][j]:
                     f.write(
-                        "model.equality"
-                        + str(count[0])
-                        + " = Constraint(expr="
-                        + self.m[i][j].__str__()
-                        + " == 0)\n"
-                    )
+                        'model.equality' + str(count[0]) + ' = Constraint(expr=' + self.m[i][j].__str__() + ' == 0)\n')
                     count[0] += 1
         f.close()
 
     def test(self, x):
-        for i in range(self.info["height"]):
-            for j in range(self.info["width"]):
+        for i in range(self.info['height']):
+            for j in range(self.info['width']):
                 if not self.hasCondition or self.hasCondition and self.mark[i][j]:
                     fun = lambda x: eval(self.m[i][j].__str__())
                     print(i, j, fun(x))

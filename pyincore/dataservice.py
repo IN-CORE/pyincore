@@ -31,12 +31,10 @@ class DataService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_url = urljoin(client.service_url, "data/api/datasets/")
-        self.files_url = urljoin(client.service_url, "data/api/files/")
-        self.base_earthquake_url = urljoin(
-            client.service_url, "hazard/api/earthquakes/"
-        )
-        self.base_tornado_url = urljoin(client.service_url, "hazard/api/tornadoes/")
+        self.base_url = urljoin(client.service_url, 'data/api/datasets/')
+        self.files_url = urljoin(client.service_url, 'data/api/files/')
+        self.base_earthquake_url = urljoin(client.service_url, 'hazard/api/earthquakes/')
+        self.base_tornado_url = urljoin(client.service_url, 'hazard/api/tornadoes/')
 
     @forbid_offline
     def get_dataset_metadata(self, dataset_id: str, timeout=(30, 600), **kwargs):
@@ -68,14 +66,12 @@ class DataService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urljoin(self.base_url, dataset_id + "/files")
+        url = urljoin(self.base_url, dataset_id + '/files')
         r = self.client.get(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
     @forbid_offline
-    def get_dataset_file_metadata(
-        self, dataset_id: str, file_id: str, timeout=(30, 600), **kwargs
-    ):
+    def get_dataset_file_metadata(self, dataset_id: str, file_id: str, timeout=(30, 600), **kwargs):
         """Retrieve metadata of all files associated with the dataset. Files API endpoint is called.
 
         Args:
@@ -88,7 +84,8 @@ class DataService:
             obj: HTTP response containing the metadata.
 
         """
-        url = urljoin(self.base_url, dataset_id + "/files/" + file_id)
+        url = urljoin(self.base_url,
+                                   dataset_id + "/files/" + file_id)
         r = self.client.get(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
@@ -117,22 +114,16 @@ class DataService:
             # for consistency check to ensure the repository hash is recorded in service.json
             self.client.create_service_json_entry()
 
-            local_filename = self.download_dataset_blob(
-                cache_data_dir, dataset_id, timeout=timeout, **kwargs
-            )
+            local_filename = self.download_dataset_blob(cache_data_dir, dataset_id, timeout=timeout, **kwargs )
 
         # if cache_data_dir exist, check if id folder and zip file exist inside
         else:
             for fname in os.listdir(cache_data_dir):
-                if fname.endswith(".zip"):
+                if fname.endswith('.zip'):
                     local_filename = os.path.join(cache_data_dir, fname)
-                    print(
-                        "Dataset already exists locally. Reading from local cached zip."
-                    )
+                    print('Dataset already exists locally. Reading from local cached zip.')
             if not local_filename:
-                local_filename = self.download_dataset_blob(
-                    cache_data_dir, dataset_id, timeout=timeout, **kwargs
-                )
+                local_filename = self.download_dataset_blob(cache_data_dir, dataset_id, timeout=timeout, **kwargs)
 
         folder = self.unzip_dataset(local_filename)
         if folder is not None:
@@ -141,34 +132,27 @@ class DataService:
             return local_filename
 
     @forbid_offline
-    def download_dataset_blob(
-        self,
-        cache_data_dir: str,
-        dataset_id: str,
-        join=None,
-        timeout=(30, 600),
-        **kwargs
-    ):
+    def download_dataset_blob(self, cache_data_dir: str, dataset_id: str, join=None, timeout=(30, 600), **kwargs):
         # construct url for file download
-        url = urljoin(self.base_url, dataset_id + "/blob")
+        url = urljoin(self.base_url, dataset_id + '/blob')
         kwargs["stream"] = True
         if join is None:
             r = self.client.get(url, timeout=timeout, **kwargs)
         else:
             payload = {}
             if join is True:
-                payload["join"] = "true"
+                payload['join'] = 'true'
             elif join is False:
-                payload["join"] = "false"
+                payload['join'] = 'false'
             r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         # extract filename
-        disposition = r.headers["content-disposition"]
+        disposition = r.headers['content-disposition']
         fname = re.findall("filename=(.+)", disposition)
 
-        local_filename = os.path.join(cache_data_dir, fname[0].strip('"'))
+        local_filename = os.path.join(cache_data_dir, fname[0].strip('\"'))
 
         # download
-        with open(local_filename, "wb") as f:
+        with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
@@ -176,17 +160,8 @@ class DataService:
         return local_filename
 
     @forbid_offline
-    def get_datasets(
-        self,
-        datatype: str = None,
-        title: str = None,
-        creator: str = None,
-        skip: int = None,
-        limit: int = None,
-        space: str = None,
-        timeout=(30, 600),
-        **kwargs
-    ):
+    def get_datasets(self, datatype: str = None, title: str = None, creator: str = None, skip: int = None,
+                     limit: int = None, space: str = None, timeout=(30, 600), **kwargs):
         """Function to get datasets. Blob API endpoint is called.
 
         Args:
@@ -207,17 +182,17 @@ class DataService:
         url = self.base_url
         payload = {}
         if datatype is not None:
-            payload["type"] = datatype
+            payload['type'] = datatype
         if title is not None:
-            payload["title"] = title
+            payload['title'] = title
         if creator is not None:
-            payload["creator"] = creator
+            payload['creator'] = creator
         if skip is not None:
-            payload["skip"] = skip
+            payload['skip'] = skip
         if limit is not None:
-            payload["limit"] = limit
+            payload['limit'] = limit
         if space is not None:
-            payload["space"] = space
+            payload['space'] = space
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         # need to handle there is no datasets
@@ -235,21 +210,15 @@ class DataService:
             obj: HTTP POST Response. Json of the dataset posted to the server.
 
         """
-        payload = {"dataset": json.dumps(properties)}
+        payload = {'dataset': json.dumps(properties)}
         url = self.base_url
         kwargs["files"] = payload
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
     @forbid_offline
-    def update_dataset(
-        self,
-        dataset_id,
-        property_name: str,
-        property_value: str,
-        timeout=(30, 600),
-        **kwargs
-    ):
+    def update_dataset(self, dataset_id, property_name: str,
+                       property_value: str, timeout=(30, 600), **kwargs):
         """Update dataset. Put API endpoint is called.
 
         Args:
@@ -264,19 +233,14 @@ class DataService:
 
         """
         url = urljoin(self.base_url, dataset_id)
-        payload = {
-            "update": json.dumps(
-                {"property name": property_name, "property value": property_value}
-            )
-        }
+        payload = {'update': json.dumps({"property name": property_name,
+                                         "property value": property_value})}
         kwargs["files"] = payload
         r = self.client.put(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
     @forbid_offline
-    def add_files_to_dataset(
-        self, dataset_id: str, filepaths: list, timeout=(30, 600), **kwargs
-    ):
+    def add_files_to_dataset(self, dataset_id: str, filepaths: list, timeout=(30, 600), **kwargs):
         """Add files to the dataset. Post API endpoint is called.
 
         Args:
@@ -292,10 +256,10 @@ class DataService:
         url = urljoin(self.base_url, dataset_id + "/files")
         listfiles = []
         for filepath in filepaths:
-            file = open(filepath, "rb")
-            tuple = ("file", file)
+            file = open(filepath, 'rb')
+            tuple = ('file', file)
             listfiles.append(tuple)
-        kwargs["files"] = listfiles
+        kwargs['files'] = listfiles
         r = self.client.post(url, timeout=timeout, **kwargs)
 
         # close files
@@ -305,16 +269,8 @@ class DataService:
         return return_http_response(r).json()
 
     @forbid_offline
-    def add_files_to_network_dataset(
-        self,
-        dataset_id: str,
-        filepaths: list,
-        nodename: str,
-        linkname: str,
-        graphname: str,
-        timeout=(30, 600),
-        **kwargs
-    ):
+    def add_files_to_network_dataset(self, dataset_id: str, filepaths: list,
+                                     nodename: str, linkname: str, graphname: str, timeout=(30, 600), **kwargs):
         """Add files to the network dataset. Post API endpoint is called.
 
         Args:
@@ -337,14 +293,14 @@ class DataService:
         graphname = os.path.splitext(graphname)[0]
         for filepath in filepaths:
             filename = os.path.splitext(ntpath.basename(filepath))[0]
-            file = open(filepath, "rb")
-            bodyname = ""
+            file = open(filepath, 'rb')
+            bodyname = ''
             if filename == linkname:
-                bodyname = "link-file"
+                bodyname = 'link-file'
             if filename == nodename:
-                bodyname = "node-file"
+                bodyname = 'node-file'
             if filename == graphname:
-                bodyname = "graph-file"
+                bodyname = 'graph-file'
             tuple = (bodyname, file)
             listfiles.append(tuple)
         kwargs["files"] = listfiles
@@ -420,23 +376,23 @@ class DataService:
 
         """
         # construct url for file download
-        url = urljoin(self.files_url, file_id + "/blob")
+        url = urljoin(self.files_url, file_id + '/blob')
         kwargs["stream"] = True
         r = self.client.get(url, timeout=timeout, **kwargs)
 
         r = return_http_response(r)
 
         # extract filename
-        disposition = r.headers["content-disposition"]
+        disposition = r.headers['content-disposition']
         fname = re.findall("filename=(.+)", disposition)
 
         # construct local directory and filename
-        if not os.path.exists("data"):
-            os.makedirs("data")
-        local_filename = os.path.join("data", fname[0].strip('"'))
+        if not os.path.exists('data'):
+            os.makedirs('data')
+        local_filename = os.path.join('data', fname[0].strip('\"'))
 
         # download
-        with open(local_filename, "wb") as f:
+        with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
@@ -455,16 +411,16 @@ class DataService:
         """
         foldername, file_extension = os.path.splitext(local_filename)
         # if it is not a zip file, no unzip
-        if not file_extension.lower() == ".zip":
-            print("It is not a zip file; no unzip")
+        if not file_extension.lower() == '.zip':
+            print('It is not a zip file; no unzip')
             return None
         # check the folder existance, no unzip
         if os.path.isdir(foldername):
-            print("Unzipped folder found in the local cache. Reading from it...")
+            print('Unzipped folder found in the local cache. Reading from it...')
             return foldername
         os.makedirs(foldername)
 
-        zip_ref = zipfile.ZipFile(local_filename, "r")
+        zip_ref = zipfile.ZipFile(local_filename, 'r')
         zip_ref.extractall(foldername)
         zip_ref.close()
         return foldername
@@ -484,7 +440,7 @@ class DataService:
 
         """
         request_str = self.base_url + fileid
-        request_str_zip = request_str + "/blob"
+        request_str_zip = request_str + '/blob'
 
         # obtain file name
         r = self.client.get(request_str, timeout=timeout, **kwargs)
@@ -521,14 +477,7 @@ class DataService:
         return return_http_response(r).json()["tornadoDatasetId"]
 
     @forbid_offline
-    def search_datasets(
-        self,
-        text: str,
-        skip: int = None,
-        limit: int = None,
-        timeout=(30, 600),
-        **kwargs
-    ):
+    def search_datasets(self, text: str, skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Function to search datasets.
 
         Args:
@@ -545,9 +494,9 @@ class DataService:
         url = urljoin(self.base_url, "search")
         payload = {"text": text}
         if skip is not None:
-            payload["skip"] = skip
+            payload['skip'] = skip
         if limit is not None:
-            payload["limit"] = limit
+            payload['limit'] = limit
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
 

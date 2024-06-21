@@ -5,8 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.buildingclusterrecovery.buildingclusterrecovery import (
-    BuildingClusterRecovery,
-)
+from pyincore.analyses.buildingclusterrecovery.buildingclusterrecovery import BuildingClusterRecovery
 from pyincore.analyses.buildingclusterrecovery.buildingdamage import BuildingDamage
 from pyincore.analyses.buildingclusterrecovery.buildingdata import BuildingData

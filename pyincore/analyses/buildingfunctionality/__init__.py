@@ -1,3 +1,1 @@
-from pyincore.analyses.buildingfunctionality.buildingfunctionality import (
-    BuildingFunctionality,
-)
+from pyincore.analyses.buildingfunctionality.buildingfunctionality import BuildingFunctionality

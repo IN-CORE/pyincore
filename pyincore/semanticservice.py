@@ -31,6 +31,7 @@ class SemanticService:
         self.client = client
         self.base_url = urljoin(client.service_url, "semantics/api/types")
 
+
     @forbid_offline
     def get_all_semantic_types(
         self,
@@ -71,7 +72,9 @@ class SemanticService:
             "limit": limit,
             "detail": detail,
         }
-        response = self.client.get(url, params=payload, timeout=timeout, **kwargs)
+        response = self.client.get(
+            url, params=payload, timeout=timeout, **kwargs
+        )
         data = return_http_response(response).json()
 
         if save_json:
@@ -133,5 +136,7 @@ class SemanticService:
 
         url = f"{self.base_url}/search"
         payload = {"text": query}
-        response = self.client.get(url, params=payload, timeout=timeout, **kwargs)
+        response = self.client.get(
+            url, params=payload, timeout=timeout, **kwargs
+        )
         return return_http_response(response).json()

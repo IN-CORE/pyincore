@@ -15,12 +15,10 @@ def run_base_analysis():
     capital_shocks.set_parameter("result_name", "sector_shocks")
 
     capital_shocks.load_remote_input_dataset("buildings", building_inventory)
-    capital_shocks.load_remote_input_dataset(
-        "buildings_to_sectors", building_to_sectors
-    )
+    capital_shocks.load_remote_input_dataset("buildings_to_sectors", building_to_sectors)
     capital_shocks.load_remote_input_dataset("failure_probability", failure_probability)
     capital_shocks.run_analysis()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_base_analysis()

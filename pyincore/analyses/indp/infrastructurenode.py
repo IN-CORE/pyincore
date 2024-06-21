@@ -88,11 +88,7 @@ class InfrastructureNode(object):
 
         """
         for l in extra_commodity:
-            self.extra_com[l] = {
-                "demand": 0,
-                "oversupply_penalty": 0,
-                "undersupply_penalty": 0,
-            }
+            self.extra_com[l] = {'demand': 0, 'oversupply_penalty': 0, 'undersupply_penalty': 0}
 
     def set_resource_usage(self, resource_names):
         """

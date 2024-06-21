@@ -1,7 +1,5 @@
 from pyincore import IncoreClient
-from pyincore.analyses.multiobjectiveretrofitoptimization import (
-    MultiObjectiveRetrofitOptimization,
-)
+from pyincore.analyses.multiobjectiveretrofitoptimization import MultiObjectiveRetrofitOptimization
 import pyincore.globals as pyglobals
 
 
@@ -17,15 +15,11 @@ def run_base_analysis():
     retrofit_optimization.set_parameter("max_budget", "default")
     retrofit_optimization.set_parameter("scale_data", False)
 
-    retrofit_optimization.load_remote_input_dataset(
-        "building_related_data", building_related_data
-    )
-    retrofit_optimization.load_remote_input_dataset(
-        "strategy_costs_data", strategy_costs_data
-    )
+    retrofit_optimization.load_remote_input_dataset("building_related_data", building_related_data)
+    retrofit_optimization.load_remote_input_dataset("strategy_costs_data", strategy_costs_data)
 
     retrofit_optimization.run_analysis()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_base_analysis()

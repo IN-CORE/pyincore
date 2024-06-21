@@ -6,6 +6,4 @@
 
 
 from pyincore.analyses.buildingstructuraldamage.buildingutil import BuildingUtil
-from pyincore.analyses.buildingstructuraldamage.buildingstructuraldamage import (
-    BuildingStructuralDamage,
-)
+from pyincore.analyses.buildingstructuraldamage.buildingstructuraldamage import BuildingStructuralDamage

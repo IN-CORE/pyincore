@@ -70,7 +70,7 @@ class InfrastructureArc(object):
 
         """
         for ec in extra_commodity:
-            self.extra_com[ec] = {"flow_cost": 0}
+            self.extra_com[ec] = {'flow_cost': 0}
 
     def set_resource_usage(self, resource_names):
         """

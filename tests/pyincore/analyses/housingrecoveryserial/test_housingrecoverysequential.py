@@ -26,21 +26,17 @@ def run_with_base_class():
     housing_recovery = HousingRecoverySequential(client)
 
     # Parameter setup
-    housing_recovery.set_parameter("num_cpu", 4)
-    housing_recovery.set_parameter("seed", seed)
-    housing_recovery.set_parameter("t_delta", t_delta)
-    housing_recovery.set_parameter("t_final", t_final)
-    housing_recovery.set_parameter("result_name", "results_hhrs_galveston.csv")
+    housing_recovery.set_parameter('num_cpu', 4)
+    housing_recovery.set_parameter('seed', seed)
+    housing_recovery.set_parameter('t_delta', t_delta)
+    housing_recovery.set_parameter('t_final', t_final)
+    housing_recovery.set_parameter('result_name', 'results_hhrs_galveston.csv')
 
     # Dataset inputs
-    housing_recovery.load_remote_input_dataset(
-        "population_dislocation_block", population_dislocation
-    )
-    housing_recovery.load_remote_input_dataset("tpm", transition_probability_matrix)
-    housing_recovery.load_remote_input_dataset(
-        "initial_stage_probabilities", initial_probability_vector
-    )
-    housing_recovery.load_remote_input_dataset("sv_result", sv_result)
+    housing_recovery.load_remote_input_dataset("population_dislocation_block", population_dislocation)
+    housing_recovery.load_remote_input_dataset('tpm', transition_probability_matrix)
+    housing_recovery.load_remote_input_dataset('initial_stage_probabilities', initial_probability_vector)
+    housing_recovery.load_remote_input_dataset('sv_result', sv_result)
 
     housing_recovery.run()
 
@@ -50,12 +46,12 @@ def run_with_base_class():
 
     end = timer()
 
-    print(f"Elapsed time: {end - start:.3f} seconds")
+    print(f'Elapsed time: {end - start:.3f} seconds')
 
     timesteps = ["1", "7", "13", "25", "49"]  # t0, t6, t12, t24, t48
 
     print(HHRSOutputProcess.get_hhrs_stage_count(timesteps, hhrs_df))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_with_base_class()

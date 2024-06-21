@@ -97,8 +97,8 @@ class INDPComponents:
             for n in c:
                 members.append(str(n[0]) + "." + str(n[1]))
                 excess_supply = 0.0
-                excess_supply += m.getVarByName("delta+_" + str(n) + "," + str(t)).x
-                excess_supply += -m.getVarByName("delta-_" + str(n) + "," + str(t)).x
+                excess_supply += m.getVarByName('delta+_' + str(n) + "," + str(t)).x
+                excess_supply += -m.getVarByName('delta-_' + str(n) + "," + str(t)).x
                 total_excess_supply += excess_supply
             indp_components.add_component(members, total_excess_supply)
         return indp_components
