@@ -28,5 +28,5 @@ def run_base_analysis():
     saltlake_cge.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_base_analysis()

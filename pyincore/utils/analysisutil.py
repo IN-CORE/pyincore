@@ -21,12 +21,8 @@ from pyincore.utils import evaluateexpression
 
 class AnalysisUtil:
     """Utility methods for analysis"""
-    DOCSTR_FORMAT = "$DESC$ \n\n" \
-                    "Args: \n\t" \
-                    "$ARGS$ " \
-                    "\n" \
-                    "Returns: \n\t" \
-                    "$RETS$ "
+
+    DOCSTR_FORMAT = "$DESC$ \n\n" "Args: \n\t" "$ARGS$ " "\n" "Returns: \n\t" "$RETS$ "
 
     getcontext().prec = DAMAGE_PRECISION
 
@@ -41,7 +37,9 @@ class AnalysisUtil:
 
     @staticmethod
     def update_precision_of_dicts(states: dict) -> dict:
-        updated_states = {key: AnalysisUtil.update_precision(states[key]) for key in states}
+        updated_states = {
+            key: AnalysisUtil.update_precision(states[key]) for key in states
+        }
         return updated_states
 
     @staticmethod
@@ -49,7 +47,9 @@ class AnalysisUtil:
         updated_hazard_vals = []
         for val in hazard_vals:
             if val is not None:
-                if math.ceil(val) == -9999:  # if it's an error code(-9999.x) do not update precision
+                if (
+                    math.ceil(val) == -9999
+                ):  # if it's an error code(-9999.x) do not update precision
                     updated_hazard_vals.append(val)
                 else:
                     updated_hazard_vals.append(AnalysisUtil.update_precision(val))
@@ -59,7 +59,6 @@ class AnalysisUtil:
 
     @staticmethod
     def float_to_decimal(num: float):
-
         # Helper function to check if a string is a float
         def is_float(string):
             try:
@@ -85,83 +84,103 @@ class AnalysisUtil:
     def dmg_string_dict_to_dmg_float_dict(dmg_dict: dict):
         float_dmg_dict = {}
         for key in dmg_dict:
-            if key != 'guid' and key != 'haz_expose':
-                if dmg_dict[key] == '':
+            if key != "guid" and key != "haz_expose":
+                if dmg_dict[key] == "":
                     float_dmg_dict[key] = np.nan
                 else:
                     float_dmg_dict[key] = float(dmg_dict[key])
             else:
-                if dmg_dict[key] != '':
+                if dmg_dict[key] != "":
                     float_dmg_dict[key] = dmg_dict[key]
                 else:
                     float_dmg_dict[key] = np.nan
         return float_dmg_dict
 
     @staticmethod
-    def calculate_mean_damage(dmg_ratio_tbl, dmg_intervals,
-                              damage_interval_keys, is_bridge=False,
-                              bridge_spans=1):
+    def calculate_mean_damage(
+        dmg_ratio_tbl,
+        dmg_intervals,
+        damage_interval_keys,
+        is_bridge=False,
+        bridge_spans=1,
+    ):
         if len(damage_interval_keys) < 4:
             raise ValueError("we only accept 4 damage or more than 4 interval keys!")
 
-        float_dmg_intervals = AnalysisUtil.dmg_string_dict_to_dmg_float_dict(dmg_intervals)
+        float_dmg_intervals = AnalysisUtil.dmg_string_dict_to_dmg_float_dict(
+            dmg_intervals
+        )
 
         output = collections.OrderedDict()
         if len(dmg_ratio_tbl) == 5:
-            output['meandamage'] = float(
-                float(dmg_ratio_tbl[1]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[0]] + \
-                float(dmg_ratio_tbl[2]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[1]] + \
-                float(dmg_ratio_tbl[3]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[2]] +\
-                float(dmg_ratio_tbl[4]["Best Mean Damage Ratio"]) * float_dmg_intervals[damage_interval_keys[3]])
+            output["meandamage"] = float(
+                float(dmg_ratio_tbl[1]["Best Mean Damage Ratio"])
+                * float_dmg_intervals[damage_interval_keys[0]]
+                + float(dmg_ratio_tbl[2]["Best Mean Damage Ratio"])
+                * float_dmg_intervals[damage_interval_keys[1]]
+                + float(dmg_ratio_tbl[3]["Best Mean Damage Ratio"])
+                * float_dmg_intervals[damage_interval_keys[2]]
+                + float(dmg_ratio_tbl[4]["Best Mean Damage Ratio"])
+                * float_dmg_intervals[damage_interval_keys[3]]
+            )
 
         elif len(dmg_ratio_tbl) == 4:
-            output['meandamage'] = float(
-                float(dmg_ratio_tbl[0]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[0]] + \
-                float(dmg_ratio_tbl[1]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[1]] + \
-                float(dmg_ratio_tbl[2]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[2]] + \
-                float(dmg_ratio_tbl[3]["Mean Damage Factor"]) * float_dmg_intervals[damage_interval_keys[3]])
+            output["meandamage"] = float(
+                float(dmg_ratio_tbl[0]["Mean Damage Factor"])
+                * float_dmg_intervals[damage_interval_keys[0]]
+                + float(dmg_ratio_tbl[1]["Mean Damage Factor"])
+                * float_dmg_intervals[damage_interval_keys[1]]
+                + float(dmg_ratio_tbl[2]["Mean Damage Factor"])
+                * float_dmg_intervals[damage_interval_keys[2]]
+                + float(dmg_ratio_tbl[3]["Mean Damage Factor"])
+                * float_dmg_intervals[damage_interval_keys[3]]
+            )
 
         elif len(dmg_ratio_tbl) == 6 and is_bridge:
             # this is for bridge
-            weight_slight = float(dmg_ratio_tbl[1]['Best Mean Damage Ratio'])
-            weight_moderate = float(dmg_ratio_tbl[2]['Best Mean Damage Ratio'])
-            weight_extensive = float(
-                dmg_ratio_tbl[3]['Best Mean Damage Ratio'])
-            weight_collapse0 = float(
-                dmg_ratio_tbl[4]['Best Mean Damage Ratio'])
-            weight_collapse1 = float(
-                dmg_ratio_tbl[5]['Best Mean Damage Ratio'])
+            weight_slight = float(dmg_ratio_tbl[1]["Best Mean Damage Ratio"])
+            weight_moderate = float(dmg_ratio_tbl[2]["Best Mean Damage Ratio"])
+            weight_extensive = float(dmg_ratio_tbl[3]["Best Mean Damage Ratio"])
+            weight_collapse0 = float(dmg_ratio_tbl[4]["Best Mean Damage Ratio"])
+            weight_collapse1 = float(dmg_ratio_tbl[5]["Best Mean Damage Ratio"])
 
-            output['meandamage'] = \
-                weight_slight * float_dmg_intervals[damage_interval_keys[1]] + \
-                weight_moderate * float_dmg_intervals[damage_interval_keys[2]] + \
-                weight_extensive * float_dmg_intervals[damage_interval_keys[3]]
+            output["meandamage"] = (
+                weight_slight * float_dmg_intervals[damage_interval_keys[1]]
+                + weight_moderate * float_dmg_intervals[damage_interval_keys[2]]
+                + weight_extensive * float_dmg_intervals[damage_interval_keys[3]]
+            )
 
             if bridge_spans >= 3:
-                output[
-                    'meandamage'] += weight_collapse1 / bridge_spans *float_dmg_intervals[damage_interval_keys[4]]
+                output["meandamage"] += (
+                    weight_collapse1
+                    / bridge_spans
+                    * float_dmg_intervals[damage_interval_keys[4]]
+                )
             else:
-                output['meandamage'] += weight_collapse0 * float_dmg_intervals[damage_interval_keys[4]]
+                output["meandamage"] += (
+                    weight_collapse0 * float_dmg_intervals[damage_interval_keys[4]]
+                )
         else:
-            raise ValueError('We cannot handle this damage ratio format.')
+            raise ValueError("We cannot handle this damage ratio format.")
 
         return output
 
     @staticmethod
-    def calculate_mean_damage_std_deviation(dmg_ratio_tbl, dmg,
-                                            mean_damage, damage_interval_keys):
-
+    def calculate_mean_damage_std_deviation(
+        dmg_ratio_tbl, dmg, mean_damage, damage_interval_keys
+    ):
         float_dmg = AnalysisUtil.dmg_string_dict_to_dmg_float_dict(dmg)
         output = collections.OrderedDict()
         result = 0.0
         idx = 0
         for key in damage_interval_keys:
-            result += float_dmg[key] * (math.pow(
-                float(dmg_ratio_tbl[idx]["Mean Damage Factor"]), 2) + math.pow(
-                float(dmg_ratio_tbl[idx]["Deviation Damage Factor"]), 2))
+            result += float_dmg[key] * (
+                math.pow(float(dmg_ratio_tbl[idx]["Mean Damage Factor"]), 2)
+                + math.pow(float(dmg_ratio_tbl[idx]["Deviation Damage Factor"]), 2)
+            )
             idx += 1
 
-        output['mdamagedev'] = math.sqrt(result - math.pow(mean_damage, 2))
+        output["mdamagedev"] = math.sqrt(result - math.pow(mean_damage, 2))
         return output
 
     @staticmethod
@@ -176,16 +195,26 @@ class AnalysisUtil:
             float: A value of the damage state.
 
         """
-        no_dmg_bound = [float(dmg_ratios[1]["Lower Bound"]),
-                        float(dmg_ratios[1]["Upper Bound"])]
-        slight_bound = [float(dmg_ratios[2]["Lower Bound"]),
-                        float(dmg_ratios[2]["Upper Bound"])]
-        moderate_bound = [float(dmg_ratios[3]["Lower Bound"]),
-                          float(dmg_ratios[3]["Upper Bound"])]
-        extensive_bound = [float(dmg_ratios[4]["Lower Bound"]),
-                           float(dmg_ratios[4]["Upper Bound"])]
-        collapse_bound = [float(dmg_ratios[5]["Lower Bound"]),
-                          float(dmg_ratios[5]["Upper Bound"])]
+        no_dmg_bound = [
+            float(dmg_ratios[1]["Lower Bound"]),
+            float(dmg_ratios[1]["Upper Bound"]),
+        ]
+        slight_bound = [
+            float(dmg_ratios[2]["Lower Bound"]),
+            float(dmg_ratios[2]["Upper Bound"]),
+        ]
+        moderate_bound = [
+            float(dmg_ratios[3]["Lower Bound"]),
+            float(dmg_ratios[3]["Upper Bound"]),
+        ]
+        extensive_bound = [
+            float(dmg_ratios[4]["Lower Bound"]),
+            float(dmg_ratios[4]["Upper Bound"]),
+        ]
+        collapse_bound = [
+            float(dmg_ratios[5]["Lower Bound"]),
+            float(dmg_ratios[5]["Upper Bound"]),
+        ]
         if no_dmg_bound[0] <= mean_damage <= no_dmg_bound[1]:
             idx = 1
         elif slight_bound[0] <= mean_damage <= slight_bound[1]:
@@ -201,8 +230,9 @@ class AnalysisUtil:
         return dmg_ratios[idx]["Damage State"]
 
     @staticmethod
-    def determine_parallelism_locally(self, number_of_loops,
-                                      user_defined_parallelism=0):
+    def determine_parallelism_locally(
+        self, number_of_loops, user_defined_parallelism=0
+    ):
         """Determine the parallelism on the current compute node.
 
         Args:
@@ -218,17 +248,20 @@ class AnalysisUtil:
         number_of_cpu = os.cpu_count()
         if number_of_loops > 0:
             if user_defined_parallelism > 0:
-                return min(number_of_cpu, number_of_loops,
-                           user_defined_parallelism)
+                return min(number_of_cpu, number_of_loops, user_defined_parallelism)
             else:
                 return min(number_of_cpu, number_of_loops)
         else:
             return number_of_cpu
 
     @staticmethod
-    def create_result_dataset(datasvc: DataService, parentid: str,
-                              result_files: List[str], title: str,
-                              output_metadata: Dict[str, str]):
+    def create_result_dataset(
+        datasvc: DataService,
+        parentid: str,
+        result_files: List[str],
+        title: str,
+        output_metadata: Dict[str, str],
+    ):
         # Result metadata
         properties = output_metadata
         properties["title"] = title
@@ -244,7 +277,9 @@ class AnalysisUtil:
         return result_dataset_id
 
     @staticmethod
-    def adjust_damage_for_liquefaction(limit_state_probabilities, ground_failure_probabilities):
+    def adjust_damage_for_liquefaction(
+        limit_state_probabilities, ground_failure_probabilities
+    ):
         """Adjusts building damage probability based on liquefaction ground failure probability
         with the liq_dmg, we know that it is 3 values, the first two are the same.
         The 3rd might be different.
@@ -271,20 +306,26 @@ class AnalysisUtil:
             # second-to-last probability of ground failure instead.
 
             if i > ground_failure_probabilities_len - 1:
-                prob_ground_failure = ground_failure_probabilities[ground_failure_probabilities_len - 2]
+                prob_ground_failure = ground_failure_probabilities[
+                    ground_failure_probabilities_len - 2
+                ]
             else:
                 prob_ground_failure = ground_failure_probabilities[i]
 
-            adjusted_limit_state_probabilities[keys[i]] = \
-                limit_state_probabilities[keys[i]] + prob_ground_failure \
+            adjusted_limit_state_probabilities[keys[i]] = (
+                limit_state_probabilities[keys[i]]
+                + prob_ground_failure
                 - limit_state_probabilities[keys[i]] * prob_ground_failure
+            )
 
         # the final one is the last of limitStates should match with the last of ground failures
         j = len(limit_state_probabilities) - 1
         prob_ground_failure = ground_failure_probabilities[-1]
-        adjusted_limit_state_probabilities[keys[j]] = \
-            limit_state_probabilities[keys[j]] \
-            + prob_ground_failure - limit_state_probabilities[keys[j]] * prob_ground_failure
+        adjusted_limit_state_probabilities[keys[j]] = (
+            limit_state_probabilities[keys[j]]
+            + prob_ground_failure
+            - limit_state_probabilities[keys[j]] * prob_ground_failure
+        )
 
         return adjusted_limit_state_probabilities
 
@@ -294,13 +335,16 @@ class AnalysisUtil:
             adj_limit_states = collections.OrderedDict()
 
             for key, value in limit_states.items():
-                adj_limit_states[key] = limit_states[key] + pgd_limit_states[key] - \
-                                        (limit_states[key] * pgd_limit_states[key])
+                adj_limit_states[key] = (
+                    limit_states[key]
+                    + pgd_limit_states[key]
+                    - (limit_states[key] * pgd_limit_states[key])
+                )
 
             return AnalysisUtil.update_precision_of_dicts(adj_limit_states)
 
         except KeyError as e:
-            print('Mismatched keys encountered in the limit states')
+            print("Mismatched keys encountered in the limit states")
             print(str(e))
 
     @staticmethod
@@ -331,38 +375,59 @@ class AnalysisUtil:
             str: Google format docstrings to copy for the run() method of any analysis
 
         """
-        desc = specs['description']
+        desc = specs["description"]
         args = ""
         rets = ""
 
-        for dataset in specs['input_datasets']:
+        for dataset in specs["input_datasets"]:
             is_opt = ""
-            if not dataset['required']:
+            if not dataset["required"]:
                 is_opt = ", " + "optional"
 
-            args = \
-                args + dataset['id'] + "(str" + is_opt + ") : " \
-                + dataset['description'] + ". " \
-                + AnalysisUtil.get_custom_types_str(dataset['type']) + "\n\t"
+            args = (
+                args
+                + dataset["id"]
+                + "(str"
+                + is_opt
+                + ") : "
+                + dataset["description"]
+                + ". "
+                + AnalysisUtil.get_custom_types_str(dataset["type"])
+                + "\n\t"
+            )
 
-        for param in specs['input_parameters']:
+        for param in specs["input_parameters"]:
             is_opt = ""
-            if not param['required']:
+            if not param["required"]:
                 is_opt = ", " + "optional"
 
-            args = \
-                args + param['id'] + "(" + AnalysisUtil.get_type_str(param['type']) + is_opt + ") : " \
-                + param['description'] + "\n\t"
+            args = (
+                args
+                + param["id"]
+                + "("
+                + AnalysisUtil.get_type_str(param["type"])
+                + is_opt
+                + ") : "
+                + param["description"]
+                + "\n\t"
+            )
 
-        for dataset in specs['output_datasets']:
-            rets = rets + dataset['id'] + ": " \
-                   + dataset[
-                       'description'] + ". " + AnalysisUtil.get_custom_types_str(
-                dataset['type']) + "\n\t"
+        for dataset in specs["output_datasets"]:
+            rets = (
+                rets
+                + dataset["id"]
+                + ": "
+                + dataset["description"]
+                + ". "
+                + AnalysisUtil.get_custom_types_str(dataset["type"])
+                + "\n\t"
+            )
 
-        docstr = AnalysisUtil.DOCSTR_FORMAT.replace("$DESC$", desc).replace(
-            "$ARGS$",
-            args).replace("$RETS$", rets)
+        docstr = (
+            AnalysisUtil.DOCSTR_FORMAT.replace("$DESC$", desc)
+            .replace("$ARGS$", args)
+            .replace("$RETS$", rets)
+        )
 
         print(docstr)
 
@@ -379,7 +444,7 @@ class AnalysisUtil:
         """
 
         t = str(class_type)
-        match = re.search('\'([^"]*)\'', t)
+        match = re.search("'([^\"]*)'", t)
         if match is not None:
             return match.group(1)
         return None
@@ -395,11 +460,11 @@ class AnalysisUtil:
             str: Formatted string with applicable datatypes used to generate docstrigns from specs
 
         """
-        custom_types_str = 'Applicable dataset type(s): '
-        if (isinstance(types, str)):
+        custom_types_str = "Applicable dataset type(s): "
+        if isinstance(types, str):
             return custom_types_str + types
-        if (isinstance(types, list)):
-            if (len(types) > 1):
+        if isinstance(types, list):
+            if len(types) > 1:
                 idx = 0
                 for type in types:
                     if idx < len(types) - 1:
@@ -415,7 +480,7 @@ class AnalysisUtil:
     def chunks(lst, n):
         """Yield successive n-sized chunks from lst."""
         for i in range(0, len(lst), n):
-            yield lst[i:i + n]
+            yield lst[i : i + n]
 
     @staticmethod
     def get_hazard_demand_type(building, fragility_set, hazard_type):
@@ -443,11 +508,14 @@ class AnalysisUtil:
             num_stories = building[PROPERTIES][BLDG_STORIES]
             # Get building period from the fragility if possible
 
-            building_args = fragility_set.construct_expression_args_from_inventory(building)
+            building_args = fragility_set.construct_expression_args_from_inventory(
+                building
+            )
             building_period = fragility_set.fragility_curves[0].get_building_period(
-                fragility_set.curve_parameters, **building_args)
+                fragility_set.curve_parameters, **building_args
+            )
 
-            if fragility_hazard_type.endswith('sa') and fragility_hazard_type != 'sa':
+            if fragility_hazard_type.endswith("sa") and fragility_hazard_type != "sa":
                 # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
                 if len(fragility_hazard_type.split()) > 2:
                     building_period = fragility_hazard_type.split()[0]
@@ -456,7 +524,7 @@ class AnalysisUtil:
             hazard_demand_type = fragility_hazard_type
 
             # This handles the case where some fragilities only specify Sa, others a specific period of Sa
-            if not hazard_demand_type.endswith('pga'):
+            if not hazard_demand_type.endswith("pga"):
                 # If the fragility does not contain the period calculation, check if the dataset has it
                 if building_period == 0.0 and BLDG_PERIOD in building[PROPERTIES]:
                     if building[PROPERTIES][BLDG_PERIOD] > 0.0:
@@ -472,7 +540,9 @@ class AnalysisUtil:
         return hazard_demand_type
 
     @staticmethod
-    def get_hazard_demand_types_units(building, fragility_set, hazard_type, allowed_demand_types):
+    def get_hazard_demand_types_units(
+        building, fragility_set, hazard_type, allowed_demand_types
+    ):
         """
         Get hazard demand type. This method is intended to replace get_hazard_demand_type. Fragility_set is not a
         json but a fragilityCurveSet object now.
@@ -523,21 +593,28 @@ class AnalysisUtil:
                 if allowed:
                     num_stories = building[PROPERTIES][BLDG_STORIES]
                     # Get building period from the fragility if possible
-                    building_args = fragility_set.construct_expression_args_from_inventory(building)
-                    building_period = fragility_set.fragility_curves[0].get_building_period(
-                        fragility_set.curve_parameters, **building_args)
+                    building_args = (
+                        fragility_set.construct_expression_args_from_inventory(building)
+                    )
+                    building_period = fragility_set.fragility_curves[
+                        0
+                    ].get_building_period(
+                        fragility_set.curve_parameters, **building_args
+                    )
 
                     # TODO: There might be a bug here as this is not handling SD
-                    if demand_type.endswith('sa'):
+                    if demand_type.endswith("sa"):
                         # This fixes a bug where demand type is in a format similar to 1.0 Sec Sa
-                        if demand_type != 'sa':
+                        if demand_type != "sa":
                             if len(demand_type.split()) > 2:
                                 building_period = demand_type.split()[0]
                                 adjusted_demand_type = str(building_period) + " " + "SA"
                         else:
                             if building_period == 0.0:
-                                if BLDG_PERIOD in building[PROPERTIES] and building[PROPERTIES][BLDG_PERIOD] > 0.0:
-
+                                if (
+                                    BLDG_PERIOD in building[PROPERTIES]
+                                    and building[PROPERTIES][BLDG_PERIOD] > 0.0
+                                ):
                                     building_period = building[PROPERTIES][BLDG_PERIOD]
                                 else:
                                     # try to calculate the period from the expression
@@ -546,8 +623,12 @@ class AnalysisUtil:
                                             # TODO: This is a hack and expects a parameter with name "period" present.
                                             # This can potentially cause naming conflicts in some fragilities
 
-                                            building_period = evaluateexpression.evaluate(param["expression"],
-                                                                                          {"num_stories": num_stories})
+                                            building_period = (
+                                                evaluateexpression.evaluate(
+                                                    param["expression"],
+                                                    {"num_stories": num_stories},
+                                                )
+                                            )
                                             # TODO: num_stories logic is not tested. should find a fragility with
                                             # periodEqnType = 2 or 3 to test. periodEqnType = 1 doesn't need
                                             # num_stories.
@@ -564,7 +645,9 @@ class AnalysisUtil:
         return adjusted_demand_types, adjusted_demand_units, adjusted_to_original
 
     @staticmethod
-    def group_by_demand_type(inventories, fragility_sets, hazard_type="earthquake", is_building=False):
+    def group_by_demand_type(
+        inventories, fragility_sets, hazard_type="earthquake", is_building=False
+    ):
         """
         This method should replace group_by_demand_type in the future. Fragility_sets is not list of dictionary (
         json) anymore but a list of FragilityCurveSet objects
@@ -581,14 +664,15 @@ class AnalysisUtil:
         """
         grouped_inventory = dict()
         for fragility_id, frag in fragility_sets.items():
-
             # TODO this method will be deprecated so this is temporary fix
             demand_type = frag.demand_types[0]
             demand_unit = frag.demand_units[0]
 
             if is_building:
                 inventory = inventories[fragility_id]
-                demand_type = AnalysisUtil.get_hazard_demand_type(inventory, frag, hazard_type)
+                demand_type = AnalysisUtil.get_hazard_demand_type(
+                    inventory, frag, hazard_type
+                )
 
             tpl = (demand_type, demand_unit)
             grouped_inventory.setdefault(tpl, []).append(fragility_id)
@@ -634,7 +718,7 @@ class AnalysisUtil:
 
     @staticmethod
     def do_hazard_values_have_errors(hazard_vals):
-        """ Checks if any of the hazard values have errors
+        """Checks if any of the hazard values have errors
 
         Args:
             hazard_vals(list): List of hazard values returned by the service for a particular point
@@ -658,12 +742,19 @@ class AnalysisUtil:
 
         class_restoration = {}
         for time in discretized_days:
-            restoration_times = restoration_curve_set.calculate_restoration_rates(time=time)
+            restoration_times = restoration_curve_set.calculate_restoration_rates(
+                time=time
+            )
             # Key (e.g. day1, day3)
-            time_key = "day"+str(time)
+            time_key = "day" + str(time)
 
-            restoration = [1, restoration_times['PF_0'], restoration_times['PF_1'], restoration_times['PF_2'],
-                           restoration_times['PF_3']]
+            restoration = [
+                1,
+                restoration_times["PF_0"],
+                restoration_times["PF_1"],
+                restoration_times["PF_2"],
+                restoration_times["PF_3"],
+            ]
 
             class_restoration[time_key] = restoration
 

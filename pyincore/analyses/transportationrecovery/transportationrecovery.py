@@ -9,8 +9,11 @@ from deprecated.sphinx import deprecated
 from pyincore.analyses.trafficflowrecovery import TrafficFlowRecovery
 
 
-@deprecated(version='1.19.0', reason="This class will be deprecated soon. Use TrafficFlowRecovery instead.")
-class TransportationRecovery():
+@deprecated(
+    version="1.19.0",
+    reason="This class will be deprecated soon. Use TrafficFlowRecovery instead.",
+)
+class TransportationRecovery:
     def __init__(self, incore_client):
         self._delegate = TrafficFlowRecovery(incore_client)
 

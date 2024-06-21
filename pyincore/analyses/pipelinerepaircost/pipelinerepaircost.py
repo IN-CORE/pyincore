@@ -25,8 +25,12 @@ class PipelineRepairCost(BaseAnalysis):
         """Executes pipline facility repair cost analysis."""
 
         pipeline_df = self.get_input_dataset("pipeline").get_dataframe_from_shapefile()
-        pipeline_dmg_df = self.get_input_dataset("pipeline_dmg").get_dataframe_from_csv()
-        replacement_cost = self.get_input_dataset("replacement_cost").get_dataframe_from_csv()
+        pipeline_dmg_df = self.get_input_dataset(
+            "pipeline_dmg"
+        ).get_dataframe_from_csv()
+        replacement_cost = self.get_input_dataset(
+            "replacement_cost"
+        ).get_dataframe_from_csv()
 
         # join damage, replacement cost, with original inventory
         pipeline_df = pipeline_df.merge(pipeline_dmg_df, on="guid")
@@ -34,22 +38,32 @@ class PipelineRepairCost(BaseAnalysis):
         pipeline_set = pipeline_df.to_dict(orient="records")
 
         user_defined_cpu = 1
-        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
+        if (
+            not self.get_parameter("num_cpu") is None
+            and self.get_parameter("num_cpu") > 0
+        ):
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(pipeline_set), user_defined_cpu)
+        num_workers = AnalysisUtil.determine_parallelism_locally(
+            self, len(pipeline_set), user_defined_cpu
+        )
 
         avg_bulk_input_size = int(len(pipeline_set) / num_workers)
         inventory_args = []
         count = 0
         inventory_list = list(pipeline_set)
         while count < len(inventory_list):
-            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
+            inventory_args.append(inventory_list[count : count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        repair_costs = self.pipeline_repair_cost_concurrent_future(self.pipeline_repair_cost_bulk_input, num_workers,
-                                                                   inventory_args)
-        self.set_result_csv_data("result", repair_costs, name=self.get_parameter("result_name") + "_repair_cost")
+        repair_costs = self.pipeline_repair_cost_concurrent_future(
+            self.pipeline_repair_cost_bulk_input, num_workers, inventory_args
+        )
+        self.set_result_csv_data(
+            "result",
+            repair_costs,
+            name=self.get_parameter("result_name") + "_repair_cost",
+        )
 
         return True
 
@@ -67,7 +81,9 @@ class PipelineRepairCost(BaseAnalysis):
         """
 
         output = []
-        with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=num_workers
+        ) as executor:
             for ret1 in executor.map(function_name, *args):
                 output.extend(ret1)
 
@@ -84,8 +100,12 @@ class PipelineRepairCost(BaseAnalysis):
 
         """
         # read in the damage ratio tables
-        pipeline_dmg_ratios_csv = self.get_input_dataset("pipeline_dmg_ratios").get_csv_reader()
-        dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(pipeline_dmg_ratios_csv, ignore_first_row=False)
+        pipeline_dmg_ratios_csv = self.get_input_dataset(
+            "pipeline_dmg_ratios"
+        ).get_csv_reader()
+        dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(
+            pipeline_dmg_ratios_csv, ignore_first_row=False
+        )
 
         segment_length = self.get_parameter("segment_length")
         if segment_length is None:
@@ -110,19 +130,27 @@ class PipelineRepairCost(BaseAnalysis):
             dr_leak = 0
             if pipeline["diameter"] > diameter:
                 for dmg_ratio_row in dmg_ratio_tbl:
-                    if dmg_ratio_row["Inventory Type"] == ">" + str(diameter) + " in" and \
-                            dmg_ratio_row["Damage State"] == "break":
+                    if (
+                        dmg_ratio_row["Inventory Type"] == ">" + str(diameter) + " in"
+                        and dmg_ratio_row["Damage State"] == "break"
+                    ):
                         dr_break = float(dmg_ratio_row["Best Mean Damage Ratio"])
-                    if dmg_ratio_row["Inventory Type"] == ">" + str(diameter) + " in" and \
-                            dmg_ratio_row["Damage State"] == "leak":
+                    if (
+                        dmg_ratio_row["Inventory Type"] == ">" + str(diameter) + " in"
+                        and dmg_ratio_row["Damage State"] == "leak"
+                    ):
                         dr_leak = float(dmg_ratio_row["Best Mean Damage Ratio"])
             else:
                 for dmg_ratio_row in dmg_ratio_tbl:
-                    if dmg_ratio_row["Inventory Type"] == "<" + str(diameter) + " in" and \
-                            dmg_ratio_row["Damage State"] == "break":
+                    if (
+                        dmg_ratio_row["Inventory Type"] == "<" + str(diameter) + " in"
+                        and dmg_ratio_row["Damage State"] == "break"
+                    ):
                         dr_break = float(dmg_ratio_row["Best Mean Damage Ratio"])
-                    if dmg_ratio_row["Inventory Type"] == "<" + str(diameter) + " in" and \
-                            dmg_ratio_row["Damage State"] == "leak":
+                    if (
+                        dmg_ratio_row["Inventory Type"] == "<" + str(diameter) + " in"
+                        and dmg_ratio_row["Damage State"] == "leak"
+                    ):
                         dr_leak = float(dmg_ratio_row["Best Mean Damage Ratio"])
 
             num_segment = pipe_length_ft / segment_length
@@ -131,13 +159,17 @@ class PipelineRepairCost(BaseAnalysis):
             if num_breaks > num_segment:
                 repair_cost += pipeline["replacement_cost"] * dr_break
             else:
-                repair_cost += pipeline["replacement_cost"] / num_segment * num_breaks * dr_break
+                repair_cost += (
+                    pipeline["replacement_cost"] / num_segment * num_breaks * dr_break
+                )
 
             num_leaks = pipeline["leakrate"] * pipe_length
             if num_leaks > num_segment:
                 repair_cost += pipeline["replacement_cost"] * dr_leak
             else:
-                repair_cost += pipeline["replacement_cost"] / num_segment * num_leaks * dr_leak
+                repair_cost += (
+                    pipeline["replacement_cost"] / num_segment * num_leaks * dr_leak
+                )
             repair_cost = min(repair_cost, pipeline["replacement_cost"])
 
             rc["budget"] = repair_cost
@@ -162,26 +194,26 @@ class PipelineRepairCost(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "A name of the resulting dataset",
-                    "type": str
+                    "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "If using parallel execution, the number of cpus to request.",
-                    "type": int
+                    "type": int,
                 },
                 {
                     "id": "diameter",
                     "required": False,
                     "description": "Pipeline diameter cutoff assumption for different damage ratios. Default is 20 "
-                                   "inches",
-                    "type": int
+                    "inches",
+                    "type": int,
                 },
                 {
                     "id": "segment_length",
                     "required": False,
                     "description": "Segment length assumption. Default is 20 feet",
-                    "type": int
+                    "type": int,
                 },
             ],
             "input_datasets": [
@@ -201,13 +233,13 @@ class PipelineRepairCost(BaseAnalysis):
                     "id": "pipeline_dmg",
                     "required": True,
                     "description": "pipeline damage from PipelineDamageRepairRate Analysis",
-                    "type": ["ergo:pipelineDamageVer3"]
+                    "type": ["ergo:pipelineDamageVer3"],
                 },
                 {
                     "id": "pipeline_dmg_ratios",
                     "required": True,
                     "description": "Damage Ratios table",
-                    "type": ["incore:pipelineDamageRatios"]
+                    "type": ["incore:pipelineDamageRatios"],
                 },
             ],
             "output_datasets": [
@@ -215,7 +247,7 @@ class PipelineRepairCost(BaseAnalysis):
                     "id": "result",
                     "parent_type": "pipelines",
                     "description": "A csv file with repair cost for each pipeline",
-                    "type": "incore:pipelineRepairCost"
+                    "type": "incore:pipelineRepairCost",
                 }
-            ]
+            ],
         }

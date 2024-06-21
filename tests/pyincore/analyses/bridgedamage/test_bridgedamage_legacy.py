@@ -34,7 +34,7 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bridge_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     # Set analysis parameters
     # bridge_dmg.set_parameter("result_name", "bridge_result")
@@ -68,7 +68,7 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bridge_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     # Set analysis parameters
     bridge_dmg.set_parameter("result_name", "bridge_result_south_carolina")
@@ -99,11 +99,15 @@ def run_with_base_class():
 
     # Load fragility mapping
     fragility_service = FragilityService(client)
-    refactored_mapping_set = MappingSet(fragility_service.get_mapping(refactored_mapping_id))
-    bridge_dmg.set_input_dataset('dfr3_mapping_set', refactored_mapping_set)
+    refactored_mapping_set = MappingSet(
+        fragility_service.get_mapping(refactored_mapping_id)
+    )
+    bridge_dmg.set_input_dataset("dfr3_mapping_set", refactored_mapping_set)
 
     # Set analysis parameters
-    bridge_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
+    bridge_dmg.set_parameter(
+        "fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code"
+    )
     bridge_dmg.set_parameter("result_name", "galveston_bridge_dmg_result")
     bridge_dmg.set_parameter("hazard_type", hazard_type)
     bridge_dmg.set_parameter("hazard_id", hazard_id)
@@ -113,5 +117,5 @@ def run_with_base_class():
     bridge_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

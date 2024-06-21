@@ -31,7 +31,7 @@ class NetworkUtil:
         """
         # read graph
         with open(graph_filename) as f:
-            reader = csv.reader(f, delimiter=',')
+            reader = csv.reader(f, delimiter=",")
             graph_list = list(reader)
         # remove the first element, which is a header, from a list
         graph_list.pop(0)
@@ -46,20 +46,20 @@ class NetworkUtil:
 
         # create a schema for output line file
         schema = {
-            'geometry': 'LineString',
-            'properties': {
-                'linkid': 'str:10',
-                'guid': 'str:30',
-                'from_node': 'str:10',
-                'to_node': 'str:10'
-            }
+            "geometry": "LineString",
+            "properties": {
+                "linkid": "str:10",
+                "guid": "str:30",
+                "from_node": "str:10",
+                "to_node": "str:10",
+            },
         }
 
         for in_feature in innode:
             # build shape feature
             tmp_feature = copy.deepcopy(in_feature)
-            tmp_feature['properties']['guid'] = str(uuid.uuid4())
-            node_id = str(tmp_feature['properties'][id_field])
+            tmp_feature["properties"]["guid"] = str(uuid.uuid4())
+            node_id = str(tmp_feature["properties"][id_field])
             node_list.append(tmp_feature)
             node_id_list.append(node_id)
 
@@ -85,28 +85,42 @@ class NetworkUtil:
                 if str(node_id_list[i]) == to_id:
                     to_location_in_node_list = i
 
-            from_geo = node_list[from_location_in_node_list]['geometry']
-            to_geo = node_list[to_location_in_node_list]['geometry']
-            line_geom = LineString([Point(shape(from_geo).coords), Point(shape(to_geo).coords)])
+            from_geo = node_list[from_location_in_node_list]["geometry"]
+            to_geo = node_list[to_location_in_node_list]["geometry"]
+            line_geom = LineString(
+                [Point(shape(from_geo).coords), Point(shape(to_geo).coords)]
+            )
             line_geom_list.append(line_geom)
 
         # create line feature
-        with fiona.open(out_filename, 'w', crs=from_epsg(4326), driver='ESRI Shapefile', schema=schema) as layer:
+        with fiona.open(
+            out_filename,
+            "w",
+            crs=from_epsg(4326),
+            driver="ESRI Shapefile",
+            schema=schema,
+        ) as layer:
             for i in range(len(line_geom_list)):
                 # filling schema
-                schema['geometry'] = mapping(line_geom_list[i])
-                schema['properties']['linkid'] = line_id_list[i]
-                schema['properties']['guid'] = str(uuid.uuid4())
-                schema['properties']['from_node'] = line_from_list[i]
-                schema['properties']['to_node'] = line_to_list[i]
+                schema["geometry"] = mapping(line_geom_list[i])
+                schema["properties"]["linkid"] = line_id_list[i]
+                schema["properties"]["guid"] = str(uuid.uuid4())
+                schema["properties"]["from_node"] = line_from_list[i]
+                schema["properties"]["to_node"] = line_to_list[i]
 
                 layer.write(schema)
 
         return True
 
     @staticmethod
-    def build_node_by_link(link_filename, link_id_field, fromnode_field, tonode_field, out_node_filename,
-                           out_graph_filename):
+    def build_node_by_link(
+        link_filename,
+        link_id_field,
+        fromnode_field,
+        tonode_field,
+        out_node_filename,
+        out_graph_filename,
+    ):
         """Create node dataset based on line shapefile and graph file graph should be in csv format
 
         Args:
@@ -129,17 +143,19 @@ class NetworkUtil:
         graph_list = []
 
         for line in linefile:
-            line_geom = shape(line['geometry'])
+            line_geom = shape(line["geometry"])
             seg_coord_list = list(line_geom.coords)
 
             # to check if this is a multiline string
             if len(seg_coord_list) > 2:
-                print("The line shapefile is a multiline string. The process will be aborted")
+                print(
+                    "The line shapefile is a multiline string. The process will be aborted"
+                )
                 return False
 
-            line_id = str(line['properties'][link_id_field])
-            fromnode_id = str(line['properties'][fromnode_field])
-            tonode_id = str(line['properties'][tonode_field])
+            line_id = str(line["properties"][link_id_field])
+            fromnode_id = str(line["properties"][fromnode_field])
+            tonode_id = str(line["properties"][tonode_field])
             fromnode_coord = seg_coord_list[0]
             tonode_coord = seg_coord_list[1]
             graph_line_list = []
@@ -170,24 +186,27 @@ class NetworkUtil:
 
         # create a schema for output line file
         schema = {
-            'geometry': 'Point',
-            'properties': {
-                'nodeid': 'str:10',
-                'guid': 'str:30'
-            }
+            "geometry": "Point",
+            "properties": {"nodeid": "str:10", "guid": "str:30"},
         }
 
         # create output node feature
-        with fiona.open(out_node_filename, 'w', crs=from_epsg(4326), driver='ESRI Shapefile', schema=schema) as layer:
+        with fiona.open(
+            out_node_filename,
+            "w",
+            crs=from_epsg(4326),
+            driver="ESRI Shapefile",
+            schema=schema,
+        ) as layer:
             for i in range(len(node_id_list)):
                 # filling schema
-                schema['geometry'] = mapping(node_list[i])
-                schema['properties']['nodeid'] = node_id_list[i]
-                schema['properties']['guid'] = str(uuid.uuid4())
+                schema["geometry"] = mapping(node_list[i])
+                schema["properties"]["nodeid"] = node_id_list[i]
+                schema["properties"]["guid"] = str(uuid.uuid4())
 
                 layer.write(schema)
 
-        with open(out_graph_filename, "w", newline='') as f:
+        with open(out_graph_filename, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows([[link_id_field, fromnode_field, tonode_field]])
             writer.writerows(graph_list)
@@ -195,7 +214,9 @@ class NetworkUtil:
         return True
 
     @staticmethod
-    def create_network_graph_from_link(link_file, fromnode_fldname, tonode_fldname, is_directed=False):
+    def create_network_graph_from_link(
+        link_file, fromnode_fldname, tonode_fldname, is_directed=False
+    ):
         """Create network graph from field.
 
         Args:
@@ -221,14 +242,14 @@ class NetworkUtil:
         for line_feature in indataset:
             from_node_val = None
             if fromnode_fldname in line_feature["properties"]:
-                from_node_val = line_feature['properties'][fromnode_fldname]
+                from_node_val = line_feature["properties"][fromnode_fldname]
             elif fromnode_fldname.lower() in line_feature["properties"]:
-                from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+                from_node_val = line_feature["properties"][fromnode_fldname.lower()]
             to_node_val = None
             if tonode_fldname in line_feature["properties"]:
-                to_node_val = line_feature['properties'][tonode_fldname]
+                to_node_val = line_feature["properties"][tonode_fldname]
             elif tonode_fldname.lower() in line_feature["properties"]:
-                to_node_val = line_feature['properties'][tonode_fldname.lower()]
+                to_node_val = line_feature["properties"][tonode_fldname.lower()]
             fromnode_list.append(from_node_val - 1)
             tonode_list.append(to_node_val - 1)
             node_list.append(from_node_val - 1)
@@ -256,16 +277,16 @@ class NetworkUtil:
         for line_feature in indataset:
             from_node_val = None
             if fromnode_fldname in line_feature["properties"]:
-                from_node_val = line_feature['properties'][fromnode_fldname]
+                from_node_val = line_feature["properties"][fromnode_fldname]
             elif fromnode_fldname.lower() in line_feature["properties"]:
-                from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+                from_node_val = line_feature["properties"][fromnode_fldname.lower()]
             to_node_val = None
             if tonode_fldname in line_feature["properties"]:
-                to_node_val = line_feature['properties'][tonode_fldname]
+                to_node_val = line_feature["properties"][tonode_fldname]
             elif tonode_fldname.lower() in line_feature["properties"]:
-                to_node_val = line_feature['properties'][tonode_fldname.lower()]
-            line_geom = (line_feature['geometry'])
-            coords_list = line_geom.get('coordinates')
+                to_node_val = line_feature["properties"][tonode_fldname.lower()]
+            line_geom = line_feature["geometry"]
+            coords_list = line_geom.get("coordinates")
             from_coord = coords_list[0]
             to_coord = coords_list[1]
             coords[int(from_node_val) - 1] = from_coord
@@ -285,9 +306,11 @@ class NetworkUtil:
         # nx.draw(graph, coords, with_lables=True, font_weithg='bold')
 
         # other ways to draw
-        nx.draw_networkx_nodes(graph, coords, cmap=plt.get_cmap('jet'), node_size=100, node_color='g')
+        nx.draw_networkx_nodes(
+            graph, coords, cmap=plt.get_cmap("jet"), node_size=100, node_color="g"
+        )
         nx.draw_networkx_labels(graph, coords)
-        nx.draw_networkx_edges(graph, coords, edge_color='r', arrows=True)
+        nx.draw_networkx_edges(graph, coords, edge_color="r", arrows=True)
         plt.show()
 
     @staticmethod
@@ -322,7 +345,9 @@ class NetworkUtil:
         return graph, node_coords
 
     @staticmethod
-    def validate_network_node_ids(network_dataset, fromnode_fldname, tonode_fldname, nodeid_fldname):
+    def validate_network_node_ids(
+        network_dataset, fromnode_fldname, tonode_fldname, nodeid_fldname
+    ):
         """Check if the node id in from or to node exist in the real node id.
 
         Args:
@@ -344,14 +369,14 @@ class NetworkUtil:
         for line_feature in link_dataset:
             from_node_val = None
             if fromnode_fldname in line_feature["properties"]:
-                from_node_val = line_feature['properties'][fromnode_fldname]
+                from_node_val = line_feature["properties"][fromnode_fldname]
             elif fromnode_fldname.lower() in line_feature["properties"]:
-                from_node_val = line_feature['properties'][fromnode_fldname.lower()]
+                from_node_val = line_feature["properties"][fromnode_fldname.lower()]
             to_node_val = None
             if tonode_fldname in line_feature["properties"]:
-                to_node_val = line_feature['properties'][tonode_fldname]
+                to_node_val = line_feature["properties"][tonode_fldname]
             elif tonode_fldname.lower() in line_feature["properties"]:
-                to_node_val = line_feature['properties'][tonode_fldname.lower()]
+                to_node_val = line_feature["properties"][tonode_fldname.lower()]
             link_node_list.append(from_node_val)
             link_node_list.append(to_node_val)
 
@@ -360,9 +385,9 @@ class NetworkUtil:
         for node_feature in node_dataset:
             node_val = None
             if nodeid_fldname in node_feature["properties"]:
-                node_val = node_feature['properties'][nodeid_fldname]
+                node_val = node_feature["properties"][nodeid_fldname]
             elif nodeid_fldname.lower() in node_feature["properties"]:
-                node_val = node_feature['properties'][nodeid_fldname.lower()]
+                node_val = node_feature["properties"][nodeid_fldname.lower()]
             node_list.append(node_val)
 
         link_node_list.sort()
@@ -404,14 +429,14 @@ class NetworkUtil:
         prefix_b = labels[1]
 
         # Ensure data types are correct
-        edges_ab[prefix_a] = edges_ab[prefix_a].astype('int64')
-        edges_ab[prefix_b] = edges_ab[prefix_a].astype('int64')
+        edges_ab[prefix_a] = edges_ab[prefix_a].astype("int64")
+        edges_ab[prefix_b] = edges_ab[prefix_a].astype("int64")
 
         direction = None
 
         if directed:
             direction = labels[2]
-            edges_ab[direction] = edges_ab[direction].astype('int64')
+            edges_ab[direction] = edges_ab[direction].astype("int64")
 
         # Merge the networks
         merged_graph = nx.union(graph_a, graph_b, rename=(prefix_a, prefix_b))
@@ -420,14 +445,24 @@ class NetworkUtil:
         for idx, row in edges_ab.iterrows():
             if directed:
                 if row[direction] == __left_to_right:
-                    merged_graph.add_edge(f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}")
+                    merged_graph.add_edge(
+                        f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}"
+                    )
                 elif row[direction] == __no_direction:
-                    merged_graph.add_edge(f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}")
-                    merged_graph.add_edge(f"{prefix_b}{row[prefix_b]}", f"{prefix_a}{row[prefix_a]}")
+                    merged_graph.add_edge(
+                        f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}"
+                    )
+                    merged_graph.add_edge(
+                        f"{prefix_b}{row[prefix_b]}", f"{prefix_a}{row[prefix_a]}"
+                    )
                 else:
-                    merged_graph.add_edge(f"{prefix_b}{row[prefix_b]}", f"{prefix_a}{row[prefix_a]}")
+                    merged_graph.add_edge(
+                        f"{prefix_b}{row[prefix_b]}", f"{prefix_a}{row[prefix_a]}"
+                    )
             else:
-                merged_graph.add_edge(f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}")
+                merged_graph.add_edge(
+                    f"{prefix_a}{row[prefix_a]}", f"{prefix_b}{row[prefix_b]}"
+                )
 
         return merged_graph
 
@@ -445,7 +480,9 @@ class NetworkUtil:
         """
 
         # Filter the list of nodes based on prefix
-        prefix_nodes = filter(lambda node_id: node_id.startswith(prefix), list(labeled_graph.nodes))
+        prefix_nodes = filter(
+            lambda node_id: node_id.startswith(prefix), list(labeled_graph.nodes)
+        )
 
         # Extract the corresponding subgraph
         subgraph = labeled_graph.subgraph(prefix_nodes)
@@ -456,7 +493,7 @@ class NetworkUtil:
         return nx.relabel_nodes(subgraph, de_mapping, copy=True)
 
     @staticmethod
-    def create_network_graph_from_dataframes(df_nodes, df_links, sort='unsorted'):
+    def create_network_graph_from_dataframes(df_nodes, df_links, sort="unsorted"):
         """Given a dataframe of nodes and a dataframe of links, assemble a network object.
 
         Args:
@@ -469,27 +506,27 @@ class NetworkUtil:
         """
         graph = nx.DiGraph()  # Empty graph
 
-        pos_x = df_nodes['geometry'].apply(lambda p: p.x).head()
-        pos_y = df_nodes['geometry'].apply(lambda p: p.y).head()
-        node_id = df_nodes['nodenwid']
+        pos_x = df_nodes["geometry"].apply(lambda p: p.x).head()
+        pos_y = df_nodes["geometry"].apply(lambda p: p.y).head()
+        node_id = df_nodes["nodenwid"]
 
         pos = {}
-        pos_x = df_nodes['geometry'].apply(lambda p: p.x)
-        
-        pos_y = df_nodes['geometry'].apply(lambda p: p.y)
+        pos_x = df_nodes["geometry"].apply(lambda p: p.x)
+
+        pos_y = df_nodes["geometry"].apply(lambda p: p.y)
         for i, val in enumerate(df_nodes["nodenwid"]):
             pos[val] = (pos_x[i], pos_y[i])
 
         edges = [(x, y) for x, y in zip(df_links["fromnode"], df_links["tonode"])]
         edge = []
 
-        if sort == 'sorted':
+        if sort == "sorted":
             for i, val in enumerate(df_links["linknwid"]):
                 if df_links["direction"][i] == 1:
                     edge.append((df_links["fromnode"][i], df_links["tonode"][i]))
                 else:
                     edge.append((df_links["tonode"][i], df_links["fromnode"][i]))
-        elif sort == 'unsorted':
+        elif sort == "unsorted":
             for i, val in enumerate(df_links["linknwid"]):
                 edge.append((df_links["fromnode"][i], df_links["tonode"][i]))
 
@@ -497,7 +534,7 @@ class NetworkUtil:
         graph.add_edges_from(edge)
 
         for x, y, id in zip(pos_x, pos_y, node_id):
-            graph.nodes[id]['pos'] = (x, y)
+            graph.nodes[id]["pos"] = (x, y)
 
         for ii, node_id in enumerate(graph.nodes()):
             graph.nodes[node_id]["classification"] = df_nodes["utilfcltyc"][ii]
