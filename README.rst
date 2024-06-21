@@ -47,7 +47,8 @@ Please use pip for installing pyincore at your discretion.
 **Prerequisite**
 
 * GDAL C library must be installed to install pyincore. (for Ubuntu, **gdal-bin** and **libgdal-dev**)
-* ipopt executable must be installed to run some analyses such as seaside CGE, joplin CGE, etc. 
+* ipopt executable must be installed to run some analyses such as seaside CGE, joplin CGE, etc.
+* For developers, pre-commit must be installed. If not, run `brew install pre-commit` or `pip install pre-commit`
 
 To install **pyincore** package, run
 
