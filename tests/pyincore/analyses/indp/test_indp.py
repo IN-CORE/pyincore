@@ -21,7 +21,7 @@ from pyincore.dataservice import DataService
 def run_with_base_class():
     dev_client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     prod_client = IncoreClient()
-    dev_datasvc = DataService(dev_client)
+    prod_datasvc = DataService(prod_client)
 
     hazard_type = "earthquake"
     hazard_id = "5dfa3e36b9219c934b64c231"  # 1000 yr eq
@@ -30,18 +30,16 @@ def run_with_base_class():
     sim_number = 2
     sample_range = range(0, sim_number)
     result_name = "seaside_indp"
-
-    bldg_inv_id = "613ba5ef5d3b1d6461e8c415"  # prod
-    bldg_inv_id_dev = "64c7d058a62b20774f4107b5"  # dev
     seed = 1111
 
-    power_network_dataset = Dataset.from_data_service("64ac73694e01de3af8fd8f2b", data_service=dev_datasvc)
+    power_network_dataset = Dataset.from_data_service("64adbc47c36a346b1f3969f0", data_service=prod_datasvc)
     power_network = NetworkDataset.from_dataset(power_network_dataset)
-    water_network_dataset = Dataset.from_data_service("64ad6abb4e01de3af8fe5201", data_service=dev_datasvc)
+    water_network_dataset = Dataset.from_data_service("64adbed3e1b74b4e158210ed", data_service=prod_datasvc)
     water_network = NetworkDataset.from_dataset(water_network_dataset)
     water_facilities = water_network.nodes
     epfs = power_network.nodes
     pipeline = water_network.links
+    bldg_dataset = Dataset.from_data_service("613ba5ef5d3b1d6461e8c415", data_service=prod_datasvc)
 
     ###################################################
     # water facility damage
@@ -226,7 +224,7 @@ def run_with_base_class():
     ###################################################
     bldg_dmg = BuildingDamage(dev_client)
     fragility_service = FragilityService(dev_client)
-    bldg_dmg.load_remote_input_dataset("buildings", bldg_inv_id_dev)
+    bldg_dmg.set_input_dataset("buildings", bldg_dataset)
     mapping_id = "5e99c86d6129af000136defa"  # 4 DS dev
     # mapping_id = "5d2789dbb9219c3c553c7977"  # 4 DS prod
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
@@ -246,7 +244,7 @@ def run_with_base_class():
     address_point_inv_id = "5d542fefb9219c0689b981fb"
     hua.load_remote_input_dataset("housing_unit_inventory", housing_unit_inv_id)
     hua.load_remote_input_dataset("address_point_inventory", address_point_inv_id)
-    hua.load_remote_input_dataset("buildings", bldg_inv_id)
+    hua.set_input_dataset("buildings", bldg_dataset)
     hua.set_parameter("result_name", result_name + "_hua")
     hua.set_parameter("seed", seed)
     hua.set_parameter("iterations", 1)
@@ -311,10 +309,18 @@ def run_with_base_class():
     indp_analysis.set_input_dataset("pipeline_repair_cost", pipeline_repair_cost_result)
     indp_analysis.set_input_dataset("power_network", power_network_dataset)
     indp_analysis.set_input_dataset("water_network", water_network_dataset)  # with distribution noes
-    indp_analysis.load_remote_input_dataset("powerline_supply_demand_info", "64ad8b434e01de3af8fea0ba")
-    indp_analysis.load_remote_input_dataset("epf_supply_demand_info", "64ad9ea54e01de3af8fea0f2")
-    indp_analysis.load_remote_input_dataset("wf_supply_demand_info", "64ad9e704e01de3af8fea0ec")
-    indp_analysis.load_remote_input_dataset("pipeline_supply_demand_info", "64ad9e274e01de3af8fea0e5")
+    powerline_supply_demand_info = Dataset.from_data_service("64adbfdeae71103fb41906e6", data_service=prod_datasvc)
+    indp_analysis.set_input_dataset("powerline_supply_demand_info", powerline_supply_demand_info)
+
+    epf_supply_demand_info = Dataset.from_data_service("64adc019e1b74b4e1582110d", data_service=prod_datasvc)
+    indp_analysis.set_input_dataset("epf_supply_demand_info", epf_supply_demand_info)
+
+    wf_supply_demand_info = Dataset.from_data_service("64adc051ae71103fb41906e7", data_service=prod_datasvc)
+    indp_analysis.set_input_dataset("wf_supply_demand_info", wf_supply_demand_info)
+
+    pipeline_supply_demand_info = Dataset.from_data_service("64adc08ee1b74b4e1582110e", data_service=prod_datasvc)
+    indp_analysis.set_input_dataset("pipeline_supply_demand_info", pipeline_supply_demand_info)
+
     indp_analysis.load_remote_input_dataset("interdep", "61c10104837ac508f9a178ef")
     indp_analysis.set_input_dataset("wf_failure_state", wterfclty_sample_failure_state)
     indp_analysis.set_input_dataset("wf_damage_state", wterfclty_sample_damage_states)
