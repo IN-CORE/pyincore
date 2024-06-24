@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Fixed Sphinx autodoc skipping class methods with custom decorators. [#518](https://github.com/IN-CORE/pyincore/issues/518)
+
 ## [1.19.0] - 2024-06-12
 
 ### Changed
