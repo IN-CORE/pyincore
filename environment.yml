@@ -11,7 +11,7 @@ dependencies:
   - numpy>=1.26.0,<2.0a0
   - pandas>=2.1.2
   - pycodestyle>=2.6.0
-  - pyomo>=6.6.2
+  - pyomo>=6.0.0,<=6.6.2
   - pyproj>=3.6.1
   - pytest>=3.9.0
   - python-jose>=3.0
