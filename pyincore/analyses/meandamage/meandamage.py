@@ -28,70 +28,68 @@ class MeanDamage(BaseAnalysis):
 
         """
         return {
-            "name": "mean-damage",
-            "description": "calculate the mean and expected damage using damage ratio table",
-            "input_parameters": [
+            'name': 'mean-damage',
+            'description': 'calculate the mean and expected damage using damage ratio table',
+            'input_parameters': [
                 {
-                    "id": "result_name",
-                    "required": True,
-                    "description": "result dataset name",
-                    "type": str,
+                    'id': 'result_name',
+                    'required': True,
+                    'description': 'result dataset name',
+                    'type': str
                 },
                 {
-                    "id": "damage_interval_keys",
-                    "required": True,
-                    "description": "Column name of the damage interval must be four and ranged in order",
-                    "type": List[str],
+                    'id': 'damage_interval_keys',
+                    'required': True,
+                    'description': 'Column name of the damage interval must be four and ranged in order',
+                    'type': List[str]
                 },
                 {
-                    "id": "num_cpu",
-                    "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
-                    "type": int,
-                },
-            ],
-            "input_datasets": [
-                {
-                    "id": "damage",
-                    "required": True,
-                    "description": "damage result that has damage intervals in it",
-                    "type": [
-                        "ergo:buildingDamageVer4",
-                        "ergo:buildingDamageVer5",
-                        "ergo:buildingDamageVer6",
-                        "ergo:nsBuildingInventoryDamage",
-                        "ergo:nsBuildingInventoryDamageVer2",
-                        "ergo:nsBuildingInventoryDamageVer3",
-                        "ergo:nsBuildingInventoryDamageVer4",
-                        "ergo:bridgeDamage",
-                        "ergo:bridgeDamageVer2",
-                        "ergo:bridgeDamageVer3",
-                        "ergo:roadDamage",
-                        "ergo:roadDamageVer2",
-                        "ergo:roadDamageVer3",
-                    ],
-                },
-                {
-                    "id": "dmg_ratios",
-                    "required": True,
-                    "description": "Damage Ratios table",
-                    "type": [
-                        "ergo:buildingDamageRatios",
-                        "ergo:bridgeDamageRatios",
-                        "ergo:buildingContentDamageRatios",
-                        "ergo:buildingASDamageRatios",
-                        "ergo:buildingDSDamageRatios",
-                        "ergo:roadDamageRatios",
-                    ],
-                },
-            ],
-            "output_datasets": [
-                {
-                    "id": "result",
-                    "description": "CSV file of mean damage",
-                    "type": "ergo:meanDamage",
+                    'id': 'num_cpu',
+                    'required': False,
+                    'description': 'If using parallel execution, the number of cpus to request',
+                    'type': int
                 }
             ],
+            'input_datasets': [
+                {
+                    'id': 'damage',
+                    'required': True,
+                    'description': 'damage result that has damage intervals in it',
+                    'type': ['ergo:buildingDamageVer4',
+                             'ergo:buildingDamageVer5',
+                             'ergo:buildingDamageVer6',
+                             'ergo:nsBuildingInventoryDamage',
+                             'ergo:nsBuildingInventoryDamageVer2',
+                             'ergo:nsBuildingInventoryDamageVer3',
+                             'ergo:nsBuildingInventoryDamageVer4',
+                             'ergo:bridgeDamage',
+                             'ergo:bridgeDamageVer2',
+                             'ergo:bridgeDamageVer3',
+                             'ergo:roadDamage',
+                             'ergo:roadDamageVer2',
+                             'ergo:roadDamageVer3'
+                             ]
+                },
+                {
+                    'id': 'dmg_ratios',
+                    'required': True,
+                    'description': 'Damage Ratios table',
+                    'type': ['ergo:buildingDamageRatios',
+                             'ergo:bridgeDamageRatios',
+                             'ergo:buildingContentDamageRatios',
+                             'ergo:buildingASDamageRatios',
+                             'ergo:buildingDSDamageRatios',
+                             'ergo:roadDamageRatios']
+                },
+
+            ],
+            'output_datasets': [
+                {
+                    'id': 'result',
+                    'description': 'CSV file of mean damage',
+                    'type': 'ergo:meanDamage'
+                }
+            ]
         }
 
     def run(self):
@@ -106,33 +104,27 @@ class MeanDamage(BaseAnalysis):
 
         # setting number of cpus to use
         user_defined_cpu = 1
-        if (
-            not self.get_parameter("num_cpu") is None
-            and self.get_parameter("num_cpu") > 0
-        ):
+        if not self.get_parameter("num_cpu") is None and self.get_parameter(
+                "num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(
-            self, len(damage_result), user_defined_cpu
-        )
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(
+            damage_result), user_defined_cpu)
 
         avg_bulk_input_size = int(len(damage_result) / num_workers)
         inventory_args = []
         count = 0
         inventory_list = damage_result
         while count < len(inventory_list):
-            inventory_args.append(inventory_list[count : count + avg_bulk_input_size])
+            inventory_args.append(
+                inventory_list[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
         results = self.mean_damage_concurrent_future(
-            self.mean_damage_bulk_input,
-            num_workers,
-            inventory_args,
-            repeat(dmg_ratio_tbl),
-        )
-        self.set_result_csv_data(
-            "result", results, name=self.get_parameter("result_name")
-        )
+            self.mean_damage_bulk_input, num_workers,
+            inventory_args, repeat(dmg_ratio_tbl))
+        self.set_result_csv_data("result", results,
+                                 name=self.get_parameter("result_name"))
         return True
 
     def mean_damage_concurrent_future(self, function_name, parallelism, *args):
@@ -149,8 +141,7 @@ class MeanDamage(BaseAnalysis):
         """
         output = []
         with concurrent.futures.ProcessPoolExecutor(
-            max_workers=parallelism
-        ) as executor:
+                max_workers=parallelism) as executor:
             for ret in executor.map(function_name, *args):
                 output.extend(ret)
 
@@ -179,8 +170,8 @@ class MeanDamage(BaseAnalysis):
         result = []
         for dmg in damage:
             result.append(
-                self.mean_damage(dmg, dmg_ratio_tbl, damage_interval_keys, is_bridge)
-            )
+                self.mean_damage(dmg, dmg_ratio_tbl, damage_interval_keys,
+                                 is_bridge))
 
         return result
 
@@ -203,42 +194,39 @@ class MeanDamage(BaseAnalysis):
 
         if is_bridge:
             # need to calculate bridge span
-            if (
-                "spans" in dmg.keys()
-                and dmg["spans"] is not None
-                and dmg["spans"].isdigit()
-            ):
+            if "spans" in dmg.keys() and dmg['spans'] is not None \
+                    and dmg["spans"].isdigit():
                 bridge_spans = int(dmg["spans"])
             else:
                 bridge_spans = 1
 
             if bridge_spans > 10:
                 bridge_spans = 10
-                print(
-                    "A bridge was found with greater than 10 spans: "
-                    + dmg["guid"]
-                    + ". Default to 10 bridge spans."
-                )
+                print("A bridge was found with greater than 10 spans: "
+                      + dmg['guid'] + ". Default to 10 bridge spans.")
 
-            mean_damage = AnalysisUtil.calculate_mean_damage(
-                dmg_ratio_tbl, dmg, damage_interval_keys, is_bridge, bridge_spans
-            )
+            mean_damage = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl,
+                                                             dmg,
+                                                             damage_interval_keys,
+                                                             is_bridge,
+                                                             bridge_spans)
         else:
-            mean_damage = AnalysisUtil.calculate_mean_damage(
-                dmg_ratio_tbl, dmg, damage_interval_keys, is_bridge
-            )
+            mean_damage = AnalysisUtil.calculate_mean_damage(dmg_ratio_tbl,
+                                                             dmg,
+                                                             damage_interval_keys,
+                                                             is_bridge)
         results.update(mean_damage)
 
         # bridge doesn't calculates deviation
         if not is_bridge:
             mean_damage_dev = AnalysisUtil.calculate_mean_damage_std_deviation(
-                dmg_ratio_tbl, dmg, mean_damage["meandamage"], damage_interval_keys
-            )
+                dmg_ratio_tbl, dmg, mean_damage['meandamage'],
+                damage_interval_keys)
             results.update(mean_damage_dev)
         else:
             expected_damage = AnalysisUtil.get_expected_damage(
-                mean_damage["meandamage"], dmg_ratio_tbl
-            )
-            results["expectval"] = expected_damage
+                mean_damage['meandamage'],
+                dmg_ratio_tbl)
+            results['expectval'] = expected_damage
 
         return results

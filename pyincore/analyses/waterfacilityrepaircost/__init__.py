@@ -1,3 +1,1 @@
-from pyincore.analyses.waterfacilityrepaircost.waterfacilityrepaircost import (
-    WaterFacilityRepairCost,
-)
+from pyincore.analyses.waterfacilityrepaircost.waterfacilityrepaircost import WaterFacilityRepairCost

@@ -56,21 +56,12 @@ class BuildingEconLoss(BaseAnalysis):
                 occ_type = bldg_item["properties"]["occ_type"]
                 prop_select.append([guid, year_built, occ_type, appr_bldg])
 
-            bldg_set_df = pd.DataFrame(
-                prop_select, columns=["guid", "year_built", "occ_type", "appr_bldg"]
-            )
+            bldg_set_df = pd.DataFrame(prop_select, columns=["guid", "year_built", "occ_type", "appr_bldg"])
             bldg_dmg_set = self.get_input_dataset("building_mean_dmg").get_csv_reader()
             bldg_dmg_df = pd.DataFrame(list(bldg_dmg_set))
 
-            dmg_set_df = pd.merge(
-                bldg_set_df,
-                bldg_dmg_df,
-                how="outer",
-                left_on="guid",
-                right_on="guid",
-                sort=True,
-                copy=True,
-            )
+            dmg_set_df = pd.merge(bldg_set_df, bldg_dmg_df, how="outer", left_on="guid", right_on="guid",
+                                  sort=True, copy=True)
             infl_mult = self.get_inflation_mult()
 
             dmg_set_df = self.add_multipliers(dmg_set_df, occ_mult_df)
@@ -80,18 +71,10 @@ class BuildingEconLoss(BaseAnalysis):
             lossdev = 0.0
 
             if "appr_bldg" in dmg_set_df:
-                loss = (
-                    dmg_set_df["appr_bldg"].astype(float)
-                    * dmg_set_df["meandamage"].astype(float)
-                    * dmg_set_df["Multiplier"].astype(float)
-                    * infl_mult
-                )
-                lossdev = (
-                    dmg_set_df["appr_bldg"].astype(float)
-                    * dmg_set_df["mdamagedev"].astype(float)
-                    * dmg_set_df["Multiplier"].astype(float)
-                    * infl_mult
-                )
+                loss = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["meandamage"].astype(float) * dmg_set_df[
+                    "Multiplier"].astype(float) * infl_mult
+                lossdev = dmg_set_df["appr_bldg"].astype(float) * dmg_set_df["mdamagedev"].astype(float) * dmg_set_df[
+                    "Multiplier"].astype(float) * infl_mult
 
             bldg_results["loss"] = loss.round(2)
             bldg_results["loss_dev"] = lossdev.round(2)
@@ -127,20 +110,11 @@ class BuildingEconLoss(BaseAnalysis):
         """
         if occ_mult_df is not None:
             # Occupancy multipliers are in percentages, convert to multiplication factors
-            occ_mult_df["Multiplier"] = (
-                occ_mult_df["Multiplier"].astype(float) / 100.0
-            ) + 1.0
+            occ_mult_df["Multiplier"] = (occ_mult_df["Multiplier"].astype(float) / 100.0) + 1.0
 
             occ_mult_df = occ_mult_df.rename(columns={"Occupancy": "occ_type"})
-            dmg_set_df = pd.merge(
-                dmg_set_df,
-                occ_mult_df,
-                how="left",
-                left_on="occ_type",
-                right_on="occ_type",
-                sort=True,
-                copy=True,
-            )
+            dmg_set_df = pd.merge(dmg_set_df, occ_mult_df, how="left", left_on="occ_type",
+                                  right_on="occ_type", sort=True, copy=True)
         else:
             dmg_set_df["Multiplier"] = 1.0
 
@@ -154,59 +128,55 @@ class BuildingEconLoss(BaseAnalysis):
 
         """
         return {
-            "name": "building-economy-damage",
-            "description": "building economy damage analysis",
-            "input_parameters": [
+            'name': 'building-economy-damage',
+            'description': 'building economy damage analysis',
+            'input_parameters': [
                 {
-                    "id": "result_name",
-                    "required": True,
-                    "description": "result dataset name",
-                    "type": str,
+                    'id': 'result_name',
+                    'required': True,
+                    'description': 'result dataset name',
+                    'type': str
                 },
                 {
-                    "id": "inflation_factor",
-                    "required": False,
-                    "description": "Inflation factor to adjust the appraisal values of buildings. Default 0.0",
-                    "type": float,
-                },
-            ],
-            "input_datasets": [
-                {
-                    "id": "buildings",
-                    "required": True,
-                    "description": "Building Inventory",
-                    "type": [
-                        "ergo:buildingInventory",
-                        "ergo:buildingInventoryVer4",
-                        "ergo:buildingInventoryVer5",
-                        "ergo:buildingInventoryVer6",
-                        "ergo:buildingInventoryVer7",
-                    ],
-                },
-                {
-                    "id": "building_mean_dmg",
-                    "required": True,
-                    "description": "A CSV file with building mean damage results for either Structural, "
-                    "Drift-Sensitive Nonstructural, Acceleration-Sensitive Nonstructural "
-                    "or Contents Damage component.",
-                    "type": ["ergo:meanDamage"],
-                },
-                {
-                    "id": "occupancy_multiplier",
-                    "required": False,
-                    "description": "Building occupancy damage multipliers. These percentage multipliers account "
-                    "for the value associated with different types of components (structural, "
-                    "acceleration-sensitive nonstructural, "
-                    "drift-sensitive nonstructural, contents).",
-                    "type": ["incore:buildingOccupancyMultiplier"],
+                    'id': 'inflation_factor',
+                    'required': False,
+                    'description': 'Inflation factor to adjust the appraisal values of buildings. Default 0.0',
+                    'type': float
                 },
             ],
-            "output_datasets": [
+            'input_datasets': [
                 {
-                    "id": "result",
-                    "parent_type": "buildings",
-                    "description": "CSV file of building economy damages",
-                    "type": "incore:buildingEconomicLoss",
+                    'id': 'buildings',
+                    'required': True,
+                    'description': 'Building Inventory',
+                    'type': ['ergo:buildingInventory', 'ergo:buildingInventoryVer4',
+                             'ergo:buildingInventoryVer5', 'ergo:buildingInventoryVer6',
+                             'ergo:buildingInventoryVer7']
+                },
+                {
+                    'id': 'building_mean_dmg',
+                    'required': True,
+                    'description': 'A CSV file with building mean damage results for either Structural, '
+                                   'Drift-Sensitive Nonstructural, Acceleration-Sensitive Nonstructural '
+                                   'or Contents Damage component.',
+                    'type': ['ergo:meanDamage']
+                },
+                {
+                    'id': 'occupancy_multiplier',
+                    'required': False,
+                    'description': 'Building occupancy damage multipliers. These percentage multipliers account '
+                                   'for the value associated with different types of components (structural, '
+                                   'acceleration-sensitive nonstructural, '
+                                   'drift-sensitive nonstructural, contents).',
+                    'type': ['incore:buildingOccupancyMultiplier']
                 }
             ],
+            'output_datasets': [
+                {
+                    'id': 'result',
+                    'parent_type': 'buildings',
+                    'description': 'CSV file of building economy damages',
+                    'type': 'incore:buildingEconomicLoss'
+                }
+            ]
         }

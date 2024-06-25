@@ -5,9 +5,5 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.joplinempiricalbuildingrestoration.joplinempiricalbuildingrestoration import (
-    JoplinEmpiricalBuildingRestoration,
-)
-from pyincore.analyses.joplinempiricalbuildingrestoration.joplinempirrestor_util import (
-    JoplinEmpirRestorUtil,
-)
+from pyincore.analyses.joplinempiricalbuildingrestoration.joplinempiricalbuildingrestoration import JoplinEmpiricalBuildingRestoration
+from pyincore.analyses.joplinempiricalbuildingrestoration.joplinempirrestor_util import JoplinEmpirRestorUtil

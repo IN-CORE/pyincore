@@ -15,9 +15,7 @@ def test_pipeline_functionality():
     pipline_func = PipelineFunctionality(client)
 
     # Load input datasets
-    pipline_func.load_remote_input_dataset(
-        "pipeline_repair_rate_damage", "62cdec9c861e370172c8da77"
-    )
+    pipline_func.load_remote_input_dataset("pipeline_repair_rate_damage", "62cdec9c861e370172c8da77")
     # Load fragility mapping
 
     # Set analysis parameters

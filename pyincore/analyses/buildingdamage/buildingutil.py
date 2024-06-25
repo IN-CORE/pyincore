@@ -7,7 +7,6 @@
 
 class BuildingUtil:
     """Utility methods for the building damage analysis."""
-
     DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
     DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY = "Non-Retrofit Inundation Fragility ID Code"
     DEFAULT_TSUNAMI_MMAX_FRAGILITY_KEY = "Non-Retrofit MomentumFlux Fragility ID Code"

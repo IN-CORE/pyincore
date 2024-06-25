@@ -5,6 +5,4 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.pipelinerestoration.pipelinerestoration import (
-    PipelineRestoration,
-)
+from pyincore.analyses.pipelinerestoration.pipelinerestoration import PipelineRestoration

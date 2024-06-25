@@ -13,13 +13,7 @@ import numpy
 from pyincore.utils.analysisutil import AnalysisUtil
 from shapely.geometry import shape, LineString, MultiLineString
 
-from pyincore import (
-    BaseAnalysis,
-    HazardService,
-    FragilityService,
-    DataService,
-    FragilityCurveSet,
-)
+from pyincore import BaseAnalysis, HazardService, FragilityService, DataService, FragilityCurveSet
 from pyincore import GeoUtil, NetworkUtil, NetworkDataset
 from pyincore.models.dfr3curve import DFR3Curve
 
@@ -37,8 +31,8 @@ class TornadoEpnDamage(BaseAnalysis):
         self.hazardsvc = HazardService(incore_client)
         self.fragilitysvc = FragilityService(incore_client)
         self.datasetsvc = DataService(incore_client)
-        self.fragility_tower_id = "5b201b41b1cf3e336de8fa67"
-        self.fragility_pole_id = "5b201d91b1cf3e336de8fa68"
+        self.fragility_tower_id = '5b201b41b1cf3e336de8fa67'
+        self.fragility_pole_id = '5b201d91b1cf3e336de8fa68'
 
         # this is for deciding to use indpnode field. Not using this could be safer for general dataset
         self.use_indpnode = False
@@ -50,16 +44,14 @@ class TornadoEpnDamage(BaseAnalysis):
         self.mcost = 1435  # mean repair cost for single distribution pole
         self.vcost = (0.1 * self.mcost) ** 2
         self.sigmad = math.sqrt(
-            math.log(self.vcost / (self.mcost**2) + 1)
-        )  # convert to gaussian Std Deviation to be used in logncdf
-        self.mud = math.log((self.mcost**2) / math.sqrt(self.vcost + self.mcost**2))
+            math.log(self.vcost / (self.mcost ** 2) + 1))  # convert to gaussian Std Deviation to be used in logncdf
+        self.mud = math.log((self.mcost ** 2) / math.sqrt(self.vcost + self.mcost ** 2))
 
         self.mcost = 400000  # mean repair cost for single transmission pole
         self.vcost = (0.1 * self.mcost) ** 2
         self.sigmat = math.sqrt(
-            math.log(self.vcost / (self.mcost**2) + 1)
-        )  # convert to gaussian Std Deviation to be used in logncdf
-        self.mut = math.log((self.mcost**2) / math.sqrt(self.vcost + self.mcost**2))
+            math.log(self.vcost / (self.mcost ** 2) + 1))  # convert to gaussian Std Deviation to be used in logncdf
+        self.mut = math.log((self.mcost ** 2) / math.sqrt(self.vcost + self.mcost ** 2))
 
         self.tmut = 72  # mean repairtime for transmission tower in hrs
         self.tsigmat = 36  # std dev
@@ -70,8 +62,8 @@ class TornadoEpnDamage(BaseAnalysis):
         self.totalcost2repairpath = []
         self.totalpoles2repair = []
 
-        self.tornado_sim_field_name = "SIMULATION"
-        self.tornado_ef_field_name = "EF_RATING"
+        self.tornado_sim_field_name = 'SIMULATION'
+        self.tornado_ef_field_name = 'EF_RATING'
 
         # tornado number of simulation and ef_rate
         self.nmcs = 0
@@ -82,7 +74,7 @@ class TornadoEpnDamage(BaseAnalysis):
         # node variables
         self.nodenwid_fld_name = "NODENWID"
         self.indpnode_fld_name = "INDPNODE"
-        self.guid_fldname = "GUID"
+        self.guid_fldname = 'GUID'
 
         # link variables
         self.tonode_fld_name = "TONODE"
@@ -96,35 +88,22 @@ class TornadoEpnDamage(BaseAnalysis):
         super(TornadoEpnDamage, self).__init__(incore_client)
 
     def run(self):
-        network_dataset = NetworkDataset.from_dataset(
-            self.get_input_dataset("epn_network")
-        )
+        network_dataset = NetworkDataset.from_dataset(self.get_input_dataset("epn_network"))
         tornado = self.get_input_hazard("hazard")
-        tornado_id = self.get_parameter("tornado_id")
+        tornado_id = self.get_parameter('tornado_id')
         if tornado is None and tornado_id is None:
-            raise ValueError(
-                "Either tornado hazard object or tornado id must be provided"
-            )
+            raise ValueError("Either tornado hazard object or tornado id must be provided")
         elif tornado_id is None:
             tornado_id = tornado.id
 
         tornado_metadata = self.hazardsvc.get_tornado_hazard_metadata(tornado_id)
-        self.load_remote_input_dataset(
-            "tornado", tornado_metadata["hazardDatasets"][0].get("datasetId")
-        )
+        self.load_remote_input_dataset("tornado", tornado_metadata["hazardDatasets"][0].get("datasetId"))
         tornado_dataset = self.get_input_dataset("tornado").get_inventory_reader()
-        ds_results, damage_results = self.get_damage(
-            network_dataset, tornado_dataset, tornado_id
-        )
+        ds_results, damage_results = self.get_damage(network_dataset, tornado_dataset, tornado_id)
 
-        self.set_result_csv_data(
-            "result", ds_results, name=self.get_parameter("result_name")
-        )
+        self.set_result_csv_data("result", ds_results, name=self.get_parameter("result_name"))
         self.set_result_json_data(
-            "metadata",
-            damage_results,
-            name=self.get_parameter("result_name") + "_additional_info",
-        )
+            "metadata", damage_results, name=self.get_parameter("result_name") + "_additional_info")
 
         return True
 
@@ -143,22 +122,14 @@ class TornadoEpnDamage(BaseAnalysis):
         self.set_node_variables(node_dataset)
 
         # get fragility curves set - tower for transmission, pole for distribution
-        fragility_set_tower = FragilityCurveSet(
-            self.fragilitysvc.get_dfr3_set(self.fragility_tower_id)
-        )
+        fragility_set_tower = FragilityCurveSet(self.fragilitysvc.get_dfr3_set(self.fragility_tower_id))
         assert fragility_set_tower.id == self.fragility_tower_id
-        fragility_set_pole = FragilityCurveSet(
-            self.fragilitysvc.get_dfr3_set(self.fragility_pole_id)
-        )
+        fragility_set_pole = FragilityCurveSet(self.fragilitysvc.get_dfr3_set(self.fragility_pole_id))
         assert fragility_set_pole.id == self.fragility_pole_id
 
         # network test
         node_id_validation = NetworkUtil.validate_network_node_ids(
-            network_dataset,
-            self.fromnode_fld_name,
-            self.tonode_fld_name,
-            self.nodenwid_fld_name,
-        )
+            network_dataset, self.fromnode_fld_name, self.tonode_fld_name, self.nodenwid_fld_name)
         if node_id_validation is False:
             sys.exit("ID in from or to node field doesn't exist in the node dataset")
 
@@ -167,11 +138,7 @@ class TornadoEpnDamage(BaseAnalysis):
         link_filepath = link_dataset.path
 
         graph, node_coords = NetworkUtil.create_network_graph_from_link(
-            link_filepath,
-            self.fromnode_fld_name,
-            self.tonode_fld_name,
-            is_directed_graph,
-        )
+            link_filepath, self.fromnode_fld_name, self.tonode_fld_name, is_directed_graph)
 
         # reverse the graph to acculate the damage to next to node
         graph = nx.DiGraph.reverse(graph, copy=True)
@@ -202,41 +169,27 @@ class TornadoEpnDamage(BaseAnalysis):
         nodenwid_list = []
         for node_feature in node_dataset:
             # get guid colum
-            guid_fld_val = ""
-            if self.guid_fldname.lower() in node_feature["properties"]:
-                guid_fld_val = node_feature["properties"][self.guid_fldname.lower()]
-            elif self.guid_fldname in node_feature["properties"]:
-                guid_fld_val = node_feature["properties"][self.guid_fldname]
+            guid_fld_val = ''
+            if self.guid_fldname.lower() in node_feature['properties']:
+                guid_fld_val = node_feature['properties'][self.guid_fldname.lower()]
+            elif self.guid_fldname in node_feature['properties']:
+                guid_fld_val = node_feature['properties'][self.guid_fldname]
             guid_list.append(guid_fld_val)
 
             # get nodenwid colum
-            nodenwid_fld_val = ""
-            if self.nodenwid_fld_name.lower() in node_feature["properties"]:
-                nodenwid_fld_val = int(
-                    node_feature["properties"][self.nodenwid_fld_name.lower()]
-                )
-            elif self.nodenwid_fld_name in node_feature["properties"]:
-                nodenwid_fld_val = int(
-                    node_feature["properties"][self.nodenwid_fld_name]
-                )
+            nodenwid_fld_val = ''
+            if self.nodenwid_fld_name.lower() in node_feature['properties']:
+                nodenwid_fld_val = int(node_feature['properties'][self.nodenwid_fld_name.lower()])
+            elif self.nodenwid_fld_name in node_feature['properties']:
+                nodenwid_fld_val = int(node_feature['properties'][self.nodenwid_fld_name])
             nodenwid_list.append(nodenwid_fld_val)
 
         for z in range(self.nmcs):
-            nodedam = [
-                0
-            ] * self.nnode  # placeholder for recording number of damaged pole for each node
-            noderepair = [
-                0
-            ] * self.nnode  # placeholder for recording repair cost for each node
-            poles2repair = [
-                0
-            ] * self.nnode  # placeholder for recording total number of poles to repair
-            cost2repairpath = [
-                0
-            ] * self.nnode  # placeholder for recording total repair cost for the network
-            time2repairpath = [
-                0
-            ] * self.nnode  # placeholder for recording total repair time for the network
+            nodedam = [0] * self.nnode  # placeholder for recording number of damaged pole for each node
+            noderepair = [0] * self.nnode  # placeholder for recording repair cost for each node
+            poles2repair = [0] * self.nnode  # placeholder for recording total number of poles to repair
+            cost2repairpath = [0] * self.nnode  # placeholder for recording total repair cost for the network
+            time2repairpath = [0] * self.nnode  # placeholder for recording total repair time for the network
             nodetimerep = [0] * self.nnode
             hazardval = [[0]] * self.nnode  # placeholder for recording hazard values
             demandtypes = [[""]] * self.nnode  # placeholder for recording demand types
@@ -253,68 +206,44 @@ class TornadoEpnDamage(BaseAnalysis):
                 demand_types = [""]
                 demand_units = [""]
 
-                if self.tonode_fld_name.lower() in line_feature["properties"]:
-                    to_node_val = line_feature["properties"][
-                        self.tonode_fld_name.lower()
-                    ]
-                elif self.tonode_fld_name in line_feature["properties"]:
-                    to_node_val = line_feature["properties"][self.tonode_fld_name]
+                if self.tonode_fld_name.lower() in line_feature['properties']:
+                    to_node_val = line_feature['properties'][self.tonode_fld_name.lower()]
+                elif self.tonode_fld_name in line_feature['properties']:
+                    to_node_val = line_feature['properties'][self.tonode_fld_name]
 
-                if self.linetype_fld_name in line_feature["properties"]:
-                    linetype_val = line_feature["properties"][self.linetype_fld_name]
-                elif self.linetype_fld_name.lower() in line_feature["properties"]:
-                    linetype_val = line_feature["properties"][
-                        self.linetype_fld_name.lower()
-                    ]
+                if self.linetype_fld_name in line_feature['properties']:
+                    linetype_val = line_feature['properties'][self.linetype_fld_name]
+                elif self.linetype_fld_name.lower() in line_feature['properties']:
+                    linetype_val = line_feature['properties'][self.linetype_fld_name.lower()]
 
-                line = shape(line_feature["geometry"])
+                line = shape(line_feature['geometry'])
 
                 # iterate tornado
                 for tornado_feature in tornado_dataset:
-                    resistivity_probability = (
-                        0  # resistivity value at the point of windSpeed
-                    )
+                    resistivity_probability = 0  # resistivity value at the point of windSpeed
                     random_resistivity = 0  # random resistivity value between 0 and one
 
                     sim_fld_val = ""
                     ef_fld_val = ""
 
                     # get EF rating and simulation number column
-                    if (
-                        self.tornado_sim_field_name.lower()
-                        in tornado_feature["properties"]
-                    ):
-                        sim_fld_val = int(
-                            tornado_feature["properties"][
-                                self.tornado_sim_field_name.lower()
-                            ]
-                        )
-                    elif self.tornado_sim_field_name in tornado_feature["properties"]:
-                        sim_fld_val = int(
-                            tornado_feature["properties"][self.tornado_sim_field_name]
-                        )
+                    if self.tornado_sim_field_name.lower() in tornado_feature['properties']:
+                        sim_fld_val = int(tornado_feature['properties'][self.tornado_sim_field_name.lower()])
+                    elif self.tornado_sim_field_name in tornado_feature['properties']:
+                        sim_fld_val = int(tornado_feature['properties'][self.tornado_sim_field_name])
 
-                    if (
-                        self.tornado_ef_field_name.lower()
-                        in tornado_feature["properties"]
-                    ):
-                        ef_fld_val = tornado_feature["properties"][
-                            self.tornado_ef_field_name.lower()
-                        ]
-                    elif self.tornado_ef_field_name in tornado_feature["properties"]:
-                        ef_fld_val = tornado_feature["properties"][
-                            self.tornado_ef_field_name
-                        ]
+                    if self.tornado_ef_field_name.lower() in tornado_feature['properties']:
+                        ef_fld_val = tornado_feature['properties'][self.tornado_ef_field_name.lower()]
+                    elif self.tornado_ef_field_name in tornado_feature['properties']:
+                        ef_fld_val = tornado_feature['properties'][self.tornado_ef_field_name]
 
                     if sim_fld_val == "" or ef_fld_val == "":
-                        print(
-                            "unable to convert tornado simulation field value to integer"
-                        )
+                        print("unable to convert tornado simulation field value to integer")
                         sys.exit(0)
 
                     # get Tornado EF polygon
                     # assumes that the polygon is not a multipolygon
-                    poly = shape(tornado_feature["geometry"])
+                    poly = shape(tornado_feature['geometry'])
                     poly_list.append(poly)
 
                     # loop for ef ranges
@@ -328,10 +257,7 @@ class TornadoEpnDamage(BaseAnalysis):
                         # also figure out the length of the line that ovelapped with EF box
                         inter_length_meter = None
                         # compute the intersection between tornado polygon and line
-                        if (
-                            sim_fld_val == z
-                            and ef_fld_val.lower() == ef_content.lower()
-                        ):
+                        if sim_fld_val == z and ef_fld_val.lower() == ef_content.lower():
                             if poly is not None and line is not None:
                                 if poly.intersects(line):
                                     intersection = poly.intersection(line)
@@ -341,11 +267,7 @@ class TornadoEpnDamage(BaseAnalysis):
                                         # print(intersection.__class__.__name__)
                                         # calculate the length of intersected line
                                         # since this is a geographic, it has to be projected to meters to be calcuated
-                                        inter_length_meter = (
-                                            GeoUtil.calc_geog_distance_from_linestring(
-                                                intersection
-                                            )
-                                        )
+                                        inter_length_meter = GeoUtil.calc_geog_distance_from_linestring(intersection)
                                         if isinstance(intersection, MultiLineString):
                                             intersection_list.append(intersection)
                                             for inter_line in intersection.geoms:
@@ -371,32 +293,16 @@ class TornadoEpnDamage(BaseAnalysis):
                                     else:
                                         fragility_set_used = fragility_set_pole
 
-                                    values_payload = [
-                                        {
-                                            "demands": [
-                                                x.lower()
-                                                for x in fragility_set_used.demand_types
-                                            ],
-                                            "units": [
-                                                x.lower()
-                                                for x in fragility_set_used.demand_units
-                                            ],
-                                            "loc": str(any_point.coords[0][1])
-                                            + ","
-                                            + str(any_point.coords[0][0]),
-                                        }
-                                    ]
+                                    values_payload = [{
+                                        "demands": [x.lower() for x in fragility_set_used.demand_types],
+                                        "units": [x.lower() for x in fragility_set_used.demand_units],
+                                        "loc": str(any_point.coords[0][1]) + "," + str(any_point.coords[0][0])
+                                    }]
 
                                     h_vals = self.hazardsvc.post_tornado_hazard_values(
-                                        tornado_id,
-                                        values_payload,
-                                        self.get_parameter("seed"),
-                                    )
-                                    tor_hazard_values = (
-                                        AnalysisUtil.update_precision_of_lists(
-                                            h_vals[0]["hazardValues"]
-                                        )
-                                    )
+                                        tornado_id, values_payload, self.get_parameter('seed'))
+                                    tor_hazard_values = AnalysisUtil.update_precision_of_lists(
+                                        h_vals[0]["hazardValues"])
                                     demand_types = h_vals[0]["demands"]
                                     demand_units = h_vals[0]["units"]
                                     hval_dict = dict()
@@ -404,31 +310,22 @@ class TornadoEpnDamage(BaseAnalysis):
                                     for d in h_vals[0]["demands"]:
                                         hval_dict[d] = tor_hazard_values[j]
                                         j += 1
-                                    if isinstance(
-                                        fragility_set_used.fragility_curves[0],
-                                        DFR3Curve,
-                                    ):
+                                    if isinstance(fragility_set_used.fragility_curves[0],
+                                                  DFR3Curve):
                                         inventory_args = fragility_set_used.construct_expression_args_from_inventory(
-                                            tornado_feature
-                                        )
-                                        resistivity_probability = fragility_set_used.calculate_limit_state(
-                                            hval_dict,
-                                            inventory_type=fragility_set_used.inventory_type,
-                                            **inventory_args
-                                        )
+                                            tornado_feature)
+                                        resistivity_probability = \
+                                            fragility_set_used.calculate_limit_state(
+                                                hval_dict,
+                                                inventory_type=fragility_set_used.inventory_type, **inventory_args)
                                     else:
                                         raise ValueError(
                                             "One of the fragilities is in deprecated format. This should not happen. "
-                                            "If you are seeing this please report the issue."
-                                        )
+                                            "If you are seeing this please report the issue.")
 
                                     # randomly generated capacity of each poles ; 1 m/s is 2.23694 mph
-                                    poleresist = (
-                                        resistivity_probability.get("LS_0") * 2.23694
-                                    )
-                                    npoles = int(
-                                        round(inter_length_meter / self.pole_distance)
-                                    )
+                                    poleresist = resistivity_probability.get('LS_0') * 2.23694
+                                    npoles = int(round(inter_length_meter / self.pole_distance))
                                     repairtime_list = []
 
                                     mu = None
@@ -444,10 +341,7 @@ class TornadoEpnDamage(BaseAnalysis):
                                             # since the time and cost differs when it is pole or tower,
                                             # this could be changed by see if it is tower or pole
                                             # if numpy.cross(k, z) <= 3 or numpy.cross(k, z) == 24:
-                                            if (
-                                                linetype_val.lower()
-                                                == self.line_transmission
-                                            ):
+                                            if linetype_val.lower() == self.line_transmission:
                                                 mu = self.mut
                                                 sigma = self.sigmat
                                                 tmu = self.tmut
@@ -458,9 +352,7 @@ class TornadoEpnDamage(BaseAnalysis):
                                                 tmu = self.tmud
                                                 tsigma = self.tsigmad
 
-                                            repairtime_list.append(
-                                                numpy.random.normal(tmu, tsigma)
-                                            )
+                                            repairtime_list.append(numpy.random.normal(tmu, tsigma))
 
                                     for k in range(ndamage):
                                         repaircost += numpy.random.lognormal(mu, sigma)
@@ -480,11 +372,7 @@ class TornadoEpnDamage(BaseAnalysis):
             for i in range(len(first_node_list)):
                 for j in range(len(connection_list[i])):
                     # print(connection_list[i][j], first_node_list[i])
-                    pathij = list(
-                        nx.all_simple_paths(
-                            graph, connection_list[i][j], first_node_list[i]
-                        )
-                    )
+                    pathij = list(nx.all_simple_paths(graph, connection_list[i][j], first_node_list[i]))
                     poler = 0
                     coster = 0
                     timer = []
@@ -525,24 +413,22 @@ class TornadoEpnDamage(BaseAnalysis):
             ds_result = dict()
             damage_result = dict()
 
-            ds_result["guid"] = guid_list[i]
+            ds_result['guid'] = guid_list[i]
             ds_result["meanpoles"] = meanpoles[i]
             ds_result["stdpoles"] = stdpoles[i]
             ds_result["meancost"] = meancost[i]
             ds_result["stdcost"] = stdcost[i]
             ds_result["meantime"] = meantime[i]
             ds_result["stdtime"] = stdtime[i]
-            ds_result["haz_expose"] = AnalysisUtil.get_exposure_from_hazard_values(
-                hazardval[i], "tornado"
-            )
+            ds_result['haz_expose'] = AnalysisUtil.get_exposure_from_hazard_values(hazardval[i], "tornado")
 
-            damage_result["guid"] = guid_list[i]
+            damage_result['guid'] = guid_list[i]
             damage_result["fragility_tower_id"] = self.fragility_tower_id
             damage_result["fragility_pole_id"] = self.fragility_pole_id
             damage_result["hazardtype"] = "Tornado"
-            damage_result["hazardvals"] = hazardval[i]
-            damage_result["demandtypes"] = demandtypes[i]
-            damage_result["demandunits"] = demandunits[i]
+            damage_result['hazardvals'] = hazardval[i]
+            damage_result['demandtypes'] = demandtypes[i]
+            damage_result['demandunits'] = demandunits[i]
 
             ds_results.append(ds_result)
             damage_results.append(damage_result)
@@ -568,20 +454,16 @@ class TornadoEpnDamage(BaseAnalysis):
         ef_rate_list = []
 
         for ef_poly in tornado_dataset:
-            ef_string = ""
-            if self.tornado_sim_field_name.lower() in ef_poly["properties"]:
-                sim_num_list.append(
-                    int(ef_poly["properties"][self.tornado_sim_field_name.lower()])
-                )
-            elif self.tornado_sim_field_name in ef_poly["properties"]:
-                sim_num_list.append(
-                    int(ef_poly["properties"][self.tornado_sim_field_name])
-                )
+            ef_string = ''
+            if self.tornado_sim_field_name.lower() in ef_poly['properties']:
+                sim_num_list.append(int(ef_poly['properties'][self.tornado_sim_field_name.lower()]))
+            elif self.tornado_sim_field_name in ef_poly['properties']:
+                sim_num_list.append(int(ef_poly['properties'][self.tornado_sim_field_name]))
 
-            if self.tornado_ef_field_name.lower() in ef_poly["properties"]:
-                ef_string = ef_poly["properties"][self.tornado_ef_field_name.lower()]
-            elif self.tornado_ef_field_name in ef_poly["properties"]:
-                ef_string = ef_poly["properties"][self.tornado_ef_field_name]
+            if self.tornado_ef_field_name.lower() in ef_poly['properties']:
+                ef_string = ef_poly['properties'][self.tornado_ef_field_name.lower()]
+            elif self.tornado_ef_field_name in ef_poly['properties']:
+                ef_string = ef_poly['properties'][self.tornado_ef_field_name]
             # parse the number in EF and the format should be "EF0", "EF1", or something like it
             ef_rate_list.append(int(ef_string.lower().split("ef", 1)[1]))
 
@@ -598,18 +480,16 @@ class TornadoEpnDamage(BaseAnalysis):
         for node_point in node_dataset:
             node_id = None
             indpnode_val = None
-            if self.nodenwid_fld_name.lower() in node_point["properties"]:
-                node_id = int(node_point["properties"][self.nodenwid_fld_name.lower()])
-            elif self.nodenwid_fld_name in node_point["properties"]:
-                node_id = int(node_point["properties"][self.nodenwid_fld_name])
+            if self.nodenwid_fld_name.lower() in node_point['properties']:
+                node_id = int(node_point['properties'][self.nodenwid_fld_name.lower()])
+            elif self.nodenwid_fld_name in node_point['properties']:
+                node_id = int(node_point['properties'][self.nodenwid_fld_name])
 
             if self.use_indpnode is True:
-                if self.indpnode_fld_name.lower() in node_point["properties"]:
-                    indpnode_val = int(
-                        node_point["properties"][self.indpnode_fld_name.lower()]
-                    )
-                elif self.indpnode_fld_name in node_point["properties"]:
-                    indpnode_val = int(node_point["properties"][self.indpnode_fld_name])
+                if self.indpnode_fld_name.lower() in node_point['properties']:
+                    indpnode_val = int(node_point['properties'][self.indpnode_fld_name.lower()])
+                elif self.indpnode_fld_name in node_point['properties']:
+                    indpnode_val = int(node_point['properties'][self.indpnode_fld_name])
 
             if node_id is None and indpnode_val is None:
                 print("problem getting the value")
@@ -631,62 +511,62 @@ class TornadoEpnDamage(BaseAnalysis):
 
     def get_spec(self):
         return {
-            "name": "tornado-epn-damage",
-            "description": "tornado epn damage analysis",
-            "input_parameters": [
+            'name': 'tornado-epn-damage',
+            'description': 'tornado epn damage analysis',
+            'input_parameters': [
                 {
-                    "id": "result_name",
-                    "required": True,
-                    "description": "result dataset name",
-                    "type": str,
+                    'id': 'result_name',
+                    'required': True,
+                    'description': 'result dataset name',
+                    'type': str
                 },
                 {
-                    "id": "tornado_id",
-                    "required": False,
-                    "description": "Tornado hazard id",
-                    "type": str,
+                    'id': 'tornado_id',
+                    'required': False,
+                    'description': 'Tornado hazard id',
+                    'type': str
                 },
                 {
-                    "id": "seed",
-                    "required": False,
-                    "description": "Initial seed for the tornado hazard value",
-                    "type": int,
+                    'id': 'seed',
+                    'required': False,
+                    'description': 'Initial seed for the tornado hazard value',
+                    'type': int
+                }
+            ],
+            'input_hazards': [
+                {
+                    'id': 'hazard',
+                    'required': False,
+                    'description': 'Hazard object',
+                    'type': ["tornado"]
                 },
             ],
-            "input_hazards": [
+            'input_datasets': [
                 {
-                    "id": "hazard",
-                    "required": False,
-                    "description": "Hazard object",
-                    "type": ["tornado"],
+                    'id': 'epn_network',
+                    'required': True,
+                    'description': 'EPN Network Dataset',
+                    'type': ['incore:epnNetwork'],
                 },
+                {
+                    'id': 'tornado',
+                    'required': False,
+                    'description': 'Tornado Dataset',
+                    'type': ['incore:tornadoWindfield'],
+                }
             ],
-            "input_datasets": [
+            'output_datasets': [
                 {
-                    "id": "epn_network",
-                    "required": True,
-                    "description": "EPN Network Dataset",
-                    "type": ["incore:epnNetwork"],
+                    'id': 'result',
+                    'parent_type': 'epn_network',
+                    'description': 'CSV file of damages for electric power network by tornado',
+                    'type': 'incore:tornadoEPNDamageVer3'
                 },
                 {
-                    "id": "tornado",
-                    "required": False,
-                    "description": "Tornado Dataset",
-                    "type": ["incore:tornadoWindfield"],
-                },
-            ],
-            "output_datasets": [
-                {
-                    "id": "result",
-                    "parent_type": "epn_network",
-                    "description": "CSV file of damages for electric power network by tornado",
-                    "type": "incore:tornadoEPNDamageVer3",
-                },
-                {
-                    "id": "metadata",
-                    "parent_type": "epn_network",
-                    "description": "Json file with information about applied hazard value and fragility",
-                    "type": "incore:tornadoEPNDamageSupplement",
-                },
-            ],
+                    'id': 'metadata',
+                    'parent_type': 'epn_network',
+                    'description': 'Json file with information about applied hazard value and fragility',
+                    'type': 'incore:tornadoEPNDamageSupplement'
+                }
+            ]
         }

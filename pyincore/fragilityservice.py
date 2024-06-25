@@ -23,27 +23,17 @@ class FragilityService(Dfr3Service):
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_dfr3_url = urllib.parse.urljoin(
-            client.service_url, "dfr3/api/fragilities/"
-        )
+        self.base_dfr3_url = urllib.parse.urljoin(client.service_url, 'dfr3/api/fragilities/')
 
         super(FragilityService, self).__init__(client)
 
     @forbid_offline
-    def get_dfr3_sets(
-        self,
-        demand_type: str = None,
-        hazard_type: str = None,
-        inventory_type: str = None,
-        author: str = None,
-        legacy_id: str = None,
-        creator: str = None,
-        space: str = None,
-        skip: int = None,
-        limit: int = None,
-        timeout=(30, 600),
-        **kwargs
-    ):
+    def get_dfr3_sets(self, demand_type: str = None,
+                      hazard_type: str = None, inventory_type: str = None,
+                      author: str = None, legacy_id: str = None,
+                      creator: str = None, space: str = None,
+                      skip: int = None, limit: int = None,
+                      timeout=(30, 600), **kwargs):
         """Get the set of fragility data, curves.
 
         Args:
@@ -67,23 +57,23 @@ class FragilityService(Dfr3Service):
         payload = {}
 
         if demand_type is not None:
-            payload["demand"] = demand_type
+            payload['demand'] = demand_type
         if hazard_type is not None:
-            payload["hazard"] = hazard_type
+            payload['hazard'] = hazard_type
         if inventory_type is not None:
-            payload["inventory"] = inventory_type
+            payload['inventory'] = inventory_type
         if author is not None:
-            payload["author"] = author
+            payload['author'] = author
         if legacy_id is not None:
-            payload["legacy_id"] = legacy_id
+            payload['legacy_id'] = legacy_id
         if creator is not None:
-            payload["creator"] = creator
+            payload['creator'] = creator
         if skip is not None:
-            payload["skip"] = skip
+            payload['skip'] = skip
         if limit is not None:
-            payload["limit"] = limit
+            payload['limit'] = limit
         if space is not None:
-            payload["space"] = space
+            payload['space'] = space
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         return return_http_response(r).json()

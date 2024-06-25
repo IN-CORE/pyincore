@@ -6,7 +6,6 @@ import time
 # This script runs GalvestonCGEModel analysis with input files from
 # IN-CORE development services
 
-
 def run_base_analysis():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     galveston_cge = GalvestonCGEModel(client)
@@ -23,5 +22,5 @@ def run_base_analysis():
     galveston_cge.run_analysis()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_base_analysis()

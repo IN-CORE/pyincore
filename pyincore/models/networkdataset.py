@@ -14,7 +14,7 @@ import networkx as nx
 
 
 class NetworkDataset:
-    """This class wraps around the Dataset class.
+    """ This class wraps around the Dataset class.
 
     Args:
         dataset (obj): The dataset object we want to extract the network data from.
@@ -22,17 +22,12 @@ class NetworkDataset:
     """
 
     def __init__(self, dataset: Dataset):
-        if (
-            dataset.format == "shp-network"
-            and dataset.metadata["networkDataset"] is not None
-        ):
+        if dataset.format == 'shp-network' and dataset.metadata['networkDataset'] is not None:
             self.metadata = dataset.metadata
             self.data_type = dataset.metadata["dataType"]
             self.nodes = NetworkDataset._network_component_from_dataset(dataset, "node")
             self.links = NetworkDataset._network_component_from_dataset(dataset, "link")
-            self.graph = NetworkDataset._network_component_from_dataset(
-                dataset, "graph"
-            )
+            self.graph = NetworkDataset._network_component_from_dataset(dataset, "graph")
         else:
             # TODO why do we need those
             self._metadata = None
@@ -74,9 +69,7 @@ class NetworkDataset:
         return cls(dataset)
 
     @classmethod
-    def from_json_str(
-        cls, json_str, data_service: DataService = None, folder_path=None
-    ):
+    def from_json_str(cls, json_str, data_service: DataService = None, folder_path=None):
         """Get Dataset from json string.
 
         Args:
@@ -97,23 +90,14 @@ class NetworkDataset:
         elif folder_path is not None:
             dataset.local_file_path = folder_path
         else:
-            raise ValueError(
-                "You have to either use data services, or given pass local file path."
-            )
+            raise ValueError("You have to either use data services, or given pass local file path.")
 
         return cls(dataset)
 
     @classmethod
-    def from_files(
-        cls,
-        node_file_path,
-        link_file_path,
-        graph_file_path,
-        network_data_type,
-        link_data_type,
-        node_data_type,
-        graph_data_type,
-    ):
+    def from_files(cls, node_file_path, link_file_path, graph_file_path, network_data_type, link_data_type,
+                   node_data_type,
+                   graph_data_type):
         """Create Dataset from the file.
 
         Args:
@@ -133,11 +117,20 @@ class NetworkDataset:
             "dataType": network_data_type,
             "fileDescriptors": [],
             "networkDataset": {
-                "link": {"dataType": link_data_type, "fileName": link_file_path},
-                "node": {"dataType": node_data_type, "fileName": node_file_path},
-                "graph": {"dataType": graph_data_type, "fileName": graph_file_path},
+                "link": {
+                    "dataType": link_data_type,
+                    "fileName": link_file_path
+                },
+                "node": {
+                    "dataType": node_data_type,
+                    "fileName": node_file_path
+                },
+                "graph": {
+                    "dataType": graph_data_type,
+                    "fileName": graph_file_path
+                }
             },
-            "format": "shp-network",
+            "format": "shp-network"
         }
         dataset = Dataset(metadata)
         dataset.local_file_path = ""
@@ -154,24 +147,17 @@ class NetworkDataset:
         Returns: network component in dataset object
 
         """
-        network_component_filename = dataset.metadata["networkDataset"][network_type][
-            "fileName"
-        ]
+        network_component_filename = dataset.metadata['networkDataset'][network_type]["fileName"]
         network_component_metadata = {
-            "dataType": dataset.metadata["networkDataset"][network_type]["dataType"],
+            "dataType": dataset.metadata['networkDataset'][network_type]["dataType"],
             "format": f"shp-{network_type}",
             "id": f"{dataset.id}-{network_type}",
-            "fileDescriptors": [
-                fd
-                for fd in dataset.file_descriptors
-                if fd["filename"].find(network_component_filename.split(".")[0]) != -1
-            ],
+            "fileDescriptors": [fd for fd in dataset.file_descriptors if fd["filename"].find(
+                network_component_filename.split(".")[0]) != -1]
         }
         network_component = Dataset(network_component_metadata)
         try:
-            file_path = os.path.join(
-                dataset.local_file_path, network_component_filename
-            )
+            file_path = os.path.join(dataset.local_file_path, network_component_filename)
         except FileNotFoundError:
             raise FileNotFoundError("Invalid local file path.")
         network_component.local_file_path = file_path
@@ -187,13 +173,7 @@ class NetworkDataset:
     def get_graph(self):
         return self.graph.get_csv_reader()
 
-    def get_graph_networkx(
-        self,
-        from_node_fld="fromnode",
-        to_node_fld="tonode",
-        directed=False,
-        numeric=True,
-    ):
+    def get_graph_networkx(self, from_node_fld="fromnode", to_node_fld="tonode", directed=False, numeric=True):
         if directed:
             G = nx.DiGraph()
         else:

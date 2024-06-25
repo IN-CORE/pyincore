@@ -28,7 +28,7 @@ def ipw_search(v, e):
     # calculate length of each link which is 1 for all edges
     length = {}
 
-    for i, j in edgeslist:
+    for (i, j) in edgeslist:
         length[i, j] = 1
         length[j, i] = 1
 
@@ -55,7 +55,8 @@ def ipw_search(v, e):
     # the length of kth independent path between node pair
     path_length = {}
 
-    for w, q in nodespair:
+    for (w, q) in nodespair:
+
         # creat a temp list to search path
         temp_edgelist = copy.deepcopy(edgeslist)
 
@@ -72,12 +73,14 @@ def ipw_search(v, e):
             g_local.add_nodes_from(nodelist)
 
             for headnode, tailnode in temp_edgelist:
-                g_local.add_edge(headnode, tailnode, length=length[headnode, tailnode])
+                g_local.add_edge(headnode, tailnode, length=length[headnode,
+                                                                   tailnode])
 
             try:
-                temp = copy.deepcopy(
-                    nx.shortest_path(g_local, source=w, target=q, weight="length")
-                )
+                temp = copy.deepcopy(nx.shortest_path(g_local,
+                                                      source=w,
+                                                      target=q,
+                                                      weight='length'))
             except nx.NetworkXNoPath as e:
                 # print(w,q)
                 # print("NetworkXNoPath")
@@ -86,6 +89,7 @@ def ipw_search(v, e):
             # if there is a path connecting the source and target,
             # start to calculate IPW
             if temp:
+
                 # find the shortest path
                 ipath[w, q][k] = copy.deepcopy(temp)
                 path_length[w, q][k] = 0
@@ -94,20 +98,22 @@ def ipw_search(v, e):
                 if len(ipath[w, q][k]) == 2:
                     # for the path just has two nodes
                     # (origin and destination)
-                    ipathtuple.append((ipath[w, q][k][0], ipath[w, q][k][1]))
-                    path_length[w, q][k] = length[ipath[w, q][k][0], ipath[w, q][k][1]]
+                    ipathtuple.append((ipath[w, q][k][0],
+                                       ipath[w, q][k][1]))
+                    path_length[w, q][k] = length[ipath[w, q][k][0],
+                                                  ipath[w, q][k][1]]
 
                 else:
                     # for the path has more than two nodes
                     for p in range(0, len(ipath[w, q][k]) - 1):
-                        ipathtuple.append((ipath[w, q][k][p], ipath[w, q][k][p + 1]))
+                        ipathtuple.append((ipath[w, q][k][p],
+                                           ipath[w, q][k][p + 1]))
 
-                        path_length[w, q][k] += length[
-                            ipath[w, q][k][p], ipath[w, q][k][p + 1]
-                        ]
+                        path_length[w, q][k] += length[ipath[w, q][k][p],
+                                                       ipath[w, q][k][p + 1]]
 
                 # delete edges that used in previous shortest paths
-                for s, t in ipathtuple:
+                for (s, t) in ipathtuple:
                     if (s, t) in temp_edgelist:
                         temp_edgelist.remove((s, t))
                         # temp_edgelist.remove((t, s))
@@ -136,9 +142,8 @@ def tipw_index(g, l, path_adt):
     for key in path_adt.keys():
         normal_path_adt[key] = {}
         for i, j in path_adt[key].items():
-            normal_path_adt[key][i] = (
-                len(path_adt[key].values()) * j / sum(path_adt[key].values())
-            )
+            normal_path_adt[key][i] = len(path_adt[key].values()) * j \
+                                      / sum(path_adt[key].values())
 
     # compute the TIPW of node
     node_tipw = {}
@@ -148,20 +153,21 @@ def tipw_index(g, l, path_adt):
             if pairnode != node:
                 if (node, pairnode) in l.keys():
                     for key, value in l[node, pairnode].items():
-                        node_tipw[node] += normal_path_adt[node, pairnode][
-                            key
-                        ] * path_service_level_edges(g, value)
+                        node_tipw[node] \
+                            += normal_path_adt[node, pairnode][key] \
+                               * path_service_level_edges(g, value)
                 elif (pairnode, node) in l.keys():
                     for key, value in l[pairnode, node].items():
-                        node_tipw[node] += normal_path_adt[pairnode, node][
-                            key
-                        ] * path_service_level_edges(g, value)
+                        node_tipw[node] \
+                            += normal_path_adt[pairnode, node][key] \
+                               * path_service_level_edges(g, value)
 
     # caculate the TIPW index
     tipw_index_val = 0
     for node in gnodes:
         # network IPW
-        tipw_index_val += (1 / float(len(gnodes)) * node_tipw[node]) / (len(gnodes) - 1)
+        tipw_index_val \
+            += (1 / float(len(gnodes)) * node_tipw[node]) / (len(gnodes) - 1)
 
     return tipw_index_val
 
@@ -176,7 +182,8 @@ def path_service_level_edges(g, path):
 
     service_level = 1
     for i in range(len(path) - 1):
-        service_level *= 1 - g.edges[path[i], path[i + 1]]["Damage_Status"] / 4.0
+        service_level \
+            *= (1 - g.edges[path[i], path[i + 1]]['Damage_Status'] / 4.0)
     return service_level
 
 
@@ -188,8 +195,8 @@ def path_adt_from_edges(g, path):
     :return: reliability
     """
 
-    adt = max(nx.get_edge_attributes(g, "adt").values())
+    adt = max(nx.get_edge_attributes(g, 'adt').values())
     for i in range(len(path) - 1):
-        adt = min(adt, g.edges[path[i], path[i + 1]]["adt"])
+        adt = min(adt, g.edges[path[i], path[i + 1]]['adt'])
 
     return adt

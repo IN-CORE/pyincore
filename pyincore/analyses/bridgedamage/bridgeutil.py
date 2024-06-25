@@ -7,21 +7,20 @@
 
 class BridgeUtil:
     """Utility methods for the bridge damage analysis."""
-
     BRIDGE_FRAGILITY_KEYS = {
-        "elastomeric bearing retrofit fragility id code": ["Elastomeric Bearing", "eb"],
+        "elastomeric bearing retrofit fragility id code": [
+            "Elastomeric Bearing", "eb"],
         "steel jacket retrofit fragility id code": ["Steel Jacket", "sj"],
-        "restrainer cables retrofit fragility id code": ["Restrainer Cables", "rc"],
+        "restrainer cables retrofit fragility id code": ["Restrainer Cables",
+                                                         "rc"],
         "seat extender retrofit fragility id code": ["Seat Extender", "se"],
         "shear key retrofit fragility id code": ["Shear Key", "sk"],
         "non-retrofit fragility id code": ["as built", "none"],
-        "non-retrofit inundationdepth fragility id code": ["as built", "none"],
+        "non-retrofit inundationdepth fragility id code": ["as built", "none"]
     }
 
     DEFAULT_FRAGILITY_KEY = "Non-Retrofit Fragility ID Code"
-    DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY = (
-        "Non-Retrofit inundationDepth Fragility ID Code"
-    )
+    DEFAULT_TSUNAMI_HMAX_FRAGILITY_KEY = "Non-Retrofit inundationDepth Fragility ID Code"
     GROUND_FAILURE_PROB = "groundFailureProb"
 
     @staticmethod
@@ -57,11 +56,9 @@ class BridgeUtil:
             str: A retrofit type.
 
         """
-        return (
-            BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][0]
-            if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS
-            else "none"
-        )
+        return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][
+            0] \
+            if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"
 
     @staticmethod
     def get_retrofit_code(target_fragility_key):
@@ -74,8 +71,6 @@ class BridgeUtil:
             str: A retrofit code.
 
         """
-        return (
-            BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][1]
-            if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS
-            else "none"
-        )
+        return BridgeUtil.BRIDGE_FRAGILITY_KEYS[target_fragility_key.lower()][
+            1] \
+            if target_fragility_key.lower() in BridgeUtil.BRIDGE_FRAGILITY_KEYS else "none"

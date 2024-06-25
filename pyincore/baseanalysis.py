@@ -5,15 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 # TODO: exception handling for validation and set methods
-from pyincore import (
-    DataService,
-    AnalysisUtil,
-    Earthquake,
-    Tornado,
-    Tsunami,
-    Hurricane,
-    Flood,
-)
+from pyincore import DataService, AnalysisUtil, Earthquake, Tornado, Tsunami, Hurricane, Flood
 from pyincore.dataset import Dataset
 import typing
 
@@ -35,29 +27,20 @@ class BaseAnalysis:
 
         # initialize parameters, input_datasets, output_datasets, etc
         self.parameters = {}
-        for param in self.spec["input_parameters"]:
-            self.parameters[param["id"]] = {"spec": param, "value": None}
+        for param in self.spec['input_parameters']:
+            self.parameters[param['id']] = {'spec': param, 'value': None}
 
         self.input_datasets = {}
-        for input_dataset in self.spec["input_datasets"]:
-            self.input_datasets[input_dataset["id"]] = {
-                "spec": input_dataset,
-                "value": None,
-            }
+        for input_dataset in self.spec['input_datasets']:
+            self.input_datasets[input_dataset['id']] = {'spec': input_dataset, 'value': None}
         self.input_hazards = {}
-        if "input_hazards" in self.spec:
-            for input_hazards in self.spec["input_hazards"]:
-                self.input_hazards[input_hazards["id"]] = {
-                    "spec": input_hazards,
-                    "value": None,
-                }
+        if 'input_hazards' in self.spec:
+            for input_hazards in self.spec['input_hazards']:
+                self.input_hazards[input_hazards['id']] = {'spec': input_hazards, 'value': None}
 
         self.output_datasets = {}
-        for output_dataset in self.spec["output_datasets"]:
-            self.output_datasets[output_dataset["id"]] = {
-                "spec": output_dataset,
-                "value": None,
-            }
+        for output_dataset in self.spec['output_datasets']:
+            self.output_datasets[output_dataset['id']] = {'spec': output_dataset, 'value': None}
 
     def get_spec(self):
         """Get basic specifications.
@@ -72,11 +55,14 @@ class BaseAnalysis:
 
         """
         return {
-            "name": "base-analysis",
-            "description": "this should be replaced by analysis spec",
-            "input_parameters": [],
-            "input_datasets": [],
-            "output_datasets": [],
+            'name': 'base-analysis',
+            'description': 'this should be replaced by analysis spec',
+            'input_parameters': [
+            ],
+            'input_datasets': [
+            ],
+            'output_datasets': [
+            ]
         }
 
     def load_remote_input_dataset(self, analysis_param_id, remote_id):
@@ -94,29 +80,29 @@ class BaseAnalysis:
 
     def get_name(self):
         """Get the analysis name."""
-        return self.spec["name"]
+        return self.spec['name']
 
     def get_description(self):
         """Get the description of an analysis."""
-        return self.spec["description"]
+        return self.spec['description']
 
     def get_parameters(self):
         """Get the dictionary of analysis' parameters."""
         param = {}
         for key in self.parameters.keys():
-            param[key] = self.parameters[key]["value"]
+            param[key] = self.parameters[key]['value']
         return param
 
     def get_parameter(self, par_id):
         """Get or set the analysis parameter value. Setting a parameter to a new value
         will return True or False on error."""
-        return self.parameters[par_id]["value"]
+        return self.parameters[par_id]['value']
 
     def set_parameter(self, par_id, parameter):
-        result = self.validate_parameter(self.parameters[par_id]["spec"], parameter)
+        result = self.validate_parameter(self.parameters[par_id]['spec'], parameter)
 
         if result[0]:
-            self.parameters[par_id]["value"] = parameter
+            self.parameters[par_id]['value'] = parameter
             return True
         else:
             print("Error setting parameter: " + result[1])
@@ -126,20 +112,18 @@ class BaseAnalysis:
         """Get the dictionary of the input datasets of an analysis."""
         inputs = {}
         for key in self.input_datasets.keys():
-            inputs[key] = self.input_datasets[key]["value"]
+            inputs[key] = self.input_datasets[key]['value']
         return inputs
 
     def get_input_dataset(self, ds_id):
         """Get or set the analysis dataset. Setting the dataset to a new value
         will return True or False on error."""
-        return self.input_datasets[ds_id]["value"]
+        return self.input_datasets[ds_id]['value']
 
     def set_input_dataset(self, ds_id, dataset):
-        result = self.validate_input_dataset(
-            self.input_datasets[ds_id]["spec"], dataset
-        )
+        result = self.validate_input_dataset(self.input_datasets[ds_id]['spec'], dataset)
         if result[0]:
-            self.input_datasets[ds_id]["value"] = dataset
+            self.input_datasets[ds_id]['value'] = dataset
             return True
         else:
             print(result[1])
@@ -149,18 +133,18 @@ class BaseAnalysis:
         """Get the dictionary of the input hazards of an analysis."""
         inputs = {}
         for key in self.input_hazards.keys():
-            inputs[key] = self.input_hazards[key]["value"]
+            inputs[key] = self.input_hazards[key]['value']
         return inputs
 
     def get_input_hazard(self, hz_id):
         """Get or set the analysis dataset. Setting the hazard to a new value
         will return True or False on error."""
-        return self.input_hazards[hz_id]["value"]
+        return self.input_hazards[hz_id]['value']
 
     def set_input_hazard(self, hz_id, hazard):
-        result = self.validate_input_hazard(self.input_hazards[hz_id]["spec"], hazard)
+        result = self.validate_input_hazard(self.input_hazards[hz_id]['spec'], hazard)
         if result[0]:
-            self.input_hazards[hz_id]["value"] = hazard
+            self.input_hazards[hz_id]['value'] = hazard
             return True
         else:
             print(result[1])
@@ -174,19 +158,11 @@ class BaseAnalysis:
 
         # either hazard object or hazard id + hazard type must be provided
         if hazard_object is None and (hazard_type is None or hazard_dataset_id is None):
-            raise ValueError(
-                "Either hazard object or hazard id + hazard type must be provided"
-            )
+            raise ValueError("Either hazard object or hazard id + hazard type must be provided")
 
         # create hazard object from remote
-        elif (
-            hazard_object is None
-            and hazard_type is not None
-            and hazard_dataset_id is not None
-        ):
-            hazard_object = BaseAnalysis._create_hazard_object(
-                hazard_type, hazard_dataset_id, self.hazardsvc
-            )
+        elif hazard_object is None and hazard_type is not None and hazard_dataset_id is not None:
+            hazard_object = BaseAnalysis._create_hazard_object(hazard_type, hazard_dataset_id, self.hazardsvc)
 
         # use hazard object
         else:
@@ -217,19 +193,17 @@ class BaseAnalysis:
         """Get the output dataset of the analysis."""
         outputs = {}
         for key in self.output_datasets.keys():
-            outputs[key] = self.output_datasets[key]["value"]
+            outputs[key] = self.output_datasets[key]['value']
         return outputs
 
     def get_output_dataset(self, ds_id):
         """Get or set the output dataset. Setting the output dataset to a new value
         will return True or False on error."""
-        return self.output_datasets[ds_id]["value"]
+        return self.output_datasets[ds_id]['value']
 
     def set_output_dataset(self, ds_id, dataset):
-        if self.validate_output_dataset(self.output_datasets[ds_id]["spec"], dataset)[
-            0
-        ]:
-            self.output_datasets[ds_id]["value"] = dataset
+        if self.validate_output_dataset(self.output_datasets[ds_id]['spec'], dataset)[0]:
+            self.output_datasets[ds_id]['value'] = dataset
             return True
         else:
             # TODO handle error message
@@ -238,27 +212,19 @@ class BaseAnalysis:
     @staticmethod
     def validate_parameter_nested(parameter, parameter_spec):
         is_valid = True
-        err_msg = ""
+        err_msg = ''
 
-        if type(parameter_spec["type"]) is typing._GenericAlias:
-            if not (type(parameter) is parameter_spec["type"].__origin__):
+        if type(parameter_spec['type']) is typing._GenericAlias:
+            if not (type(parameter) is parameter_spec['type'].__origin__):
                 is_valid = False
-                err_msg = "container parameter type does not match - spec: " + str(
-                    parameter_spec
-                )
-            elif not (
-                all(
-                    isinstance(s, parameter_spec["type"].__args__[0]) for s in parameter
-                )
-            ):
+                err_msg = 'container parameter type does not match - spec: ' + str(parameter_spec)
+            elif not (all(isinstance(s, parameter_spec['type'].__args__[0]) for s in parameter)):
                 is_valid = False
-                err_msg = "element parameter type does not match - spec: " + str(
-                    parameter_spec
-                )
+                err_msg = 'element parameter type does not match - spec: ' + str(parameter_spec)
         else:
-            if not type(parameter) is parameter_spec["type"]:
+            if not type(parameter) is parameter_spec['type']:
                 is_valid = False
-                err_msg = "parameter type does not match - spec: " + str(parameter_spec)
+                err_msg = 'parameter type does not match - spec: ' + str(parameter_spec)
 
         return is_valid, err_msg
 
@@ -274,21 +240,17 @@ class BaseAnalysis:
 
         """
         is_valid = True
-        err_msg = ""
+        err_msg = ''
 
-        if parameter_spec["required"]:
+        if parameter_spec['required']:
             if parameter is None:
                 is_valid = False
-                err_msg = "required parameter is missing - spec: " + str(parameter_spec)
+                err_msg = 'required parameter is missing - spec: ' + str(parameter_spec)
             else:
-                is_valid, err_msg = self.validate_parameter_nested(
-                    parameter, parameter_spec
-                )
+                is_valid, err_msg = self.validate_parameter_nested(parameter, parameter_spec)
         else:
             if parameter is not None:
-                is_valid, err_msg = self.validate_parameter_nested(
-                    parameter, parameter_spec
-                )
+                is_valid, err_msg = self.validate_parameter_nested(parameter, parameter_spec)
 
         return is_valid, err_msg
 
@@ -305,26 +267,21 @@ class BaseAnalysis:
 
         """
         is_valid = True
-        err_msg = ""
+        err_msg = ''
 
         if not isinstance(dataset, type(None)):
             # if dataset is not none, check data type
-            if not (dataset.data_type in dataset_spec["type"]):
+            if not (dataset.data_type in dataset_spec['type']):
                 # if dataset type is not equal to spec, then return false
                 is_valid = False
-                err_msg = (
-                    "dataset type does not match - "
-                    + "given type: "
-                    + dataset.data_type
-                    + " spec types: "
-                    + str(dataset_spec["type"])
-                )
+                err_msg = 'dataset type does not match - ' + 'given type: ' + \
+                          dataset.data_type + ' spec types: ' + str(dataset_spec['type'])
         else:
             # if dataset is none, check 'requirement'
-            if dataset_spec["required"]:
+            if dataset_spec['required']:
                 # if dataset is 'required', return false
                 is_valid = False
-                err_msg = "required dataset is missing - spec: " + str(dataset_spec)
+                err_msg = 'required dataset is missing - spec: ' + str(dataset_spec)
         return is_valid, err_msg
 
     @staticmethod
@@ -340,28 +297,23 @@ class BaseAnalysis:
 
         """
         is_valid = True
-        err_msg = ""
+        err_msg = ''
 
         if not isinstance(hazard, type(None)):
             # if hazard is not none, check hazard instance type
             is_valid = False
-            for hazard_type in hazard_spec["type"]:
+            for hazard_type in hazard_spec['type']:
                 if hazard.hazard_type == hazard_type:
                     is_valid = True
                     break
             if not is_valid:
-                err_msg = (
-                    "hazard type does not match - "
-                    + "given type: "
-                    + hazard.hazard_type
-                    + " spec types: "
-                    + str(hazard_spec["type"])
-                )
+                err_msg = 'hazard type does not match - ' + 'given type: ' + \
+                          hazard.hazard_type + ' spec types: ' + str(hazard_spec['type'])
         else:
             # if hazard is none, check 'requirement'
-            if hazard_spec["required"]:
+            if hazard_spec['required']:
                 is_valid = False
-                err_msg = "required hazard is missing - spec: " + str(hazard_spec)
+                err_msg = 'required hazard is missing - spec: ' + str(hazard_spec)
         return is_valid, err_msg
 
     @staticmethod
@@ -377,17 +329,15 @@ class BaseAnalysis:
 
         """
         is_valid = True
-        err_msg = ""
-        if not (dataset.data_type is dataset_spec["type"]):
+        err_msg = ''
+        if not (dataset.data_type is dataset_spec['type']):
             is_valid = False
-            err_msg = "dataset type does not match"
+            err_msg = 'dataset type does not match'
         return is_valid, err_msg
 
     """ convenience function(s) for setting result data as a csv """
 
-    def set_result_csv_data(
-        self, result_id, result_data, name, source="file", index=False
-    ):
+    def set_result_csv_data(self, result_id, result_data, name, source='file', index=False):
         if name is None:
             name = self.spec["name"] + "-result"
 
@@ -397,14 +347,14 @@ class BaseAnalysis:
         dataset_type = self.output_datasets[result_id]["spec"]["type"]
         dataset = None
 
-        if source == "file":
+        if source == 'file':
             dataset = Dataset.from_csv_data(result_data, name, dataset_type)
-        elif source == "dataframe":
+        elif source == 'dataframe':
             dataset = Dataset.from_dataframe(result_data, name, dataset_type, index)
 
         self.set_output_dataset(result_id, dataset)
 
-    def set_result_json_data(self, result_id, result_data, name, source="file"):
+    def set_result_json_data(self, result_id, result_data, name, source='file'):
         if name is None:
             name = self.spec["name"] + "-result"
 
@@ -413,36 +363,32 @@ class BaseAnalysis:
 
         dataset_type = self.output_datasets[result_id]["spec"]["type"]
         dataset = None
-        if source == "file":
+        if source == 'file':
             dataset = Dataset.from_json_data(result_data, name, dataset_type)
 
         self.set_output_dataset(result_id, dataset)
 
     def run_analysis(self):
-        """Validates and runs the analysis."""
-        for dataset_spec in self.spec["input_datasets"]:
+        """ Validates and runs the analysis."""
+        for dataset_spec in self.spec['input_datasets']:
             ds_id = dataset_spec["id"]
-            result = self.validate_input_dataset(
-                dataset_spec, self.input_datasets[ds_id]["value"]
-            )
+            result = self.validate_input_dataset(dataset_spec, self.input_datasets[ds_id]["value"])
 
             if not result[0]:
                 print("Error reading dataset: " + result[1])
                 return result
 
         # TODO: We will iteratively roll out input hazard; once it's done, we will remove this if block
-        if "input_hazards" in self.spec:
-            for hazard_spec in self.spec["input_hazards"]:
+        if 'input_hazards' in self.spec:
+            for hazard_spec in self.spec['input_hazards']:
                 hz_id = hazard_spec["id"]
-                result = self.validate_input_hazard(
-                    hazard_spec, self.input_hazards[hz_id]["value"]
-                )
+                result = self.validate_input_hazard(hazard_spec, self.input_hazards[hz_id]["value"])
 
                 if not result[0]:
                     print("Error reading hazard: " + result[1])
                     return result
 
-        for parameter_spec in self.spec["input_parameters"]:
+        for parameter_spec in self.spec['input_parameters']:
             par_id = parameter_spec["id"]
             result = self.validate_parameter(parameter_spec, self.get_parameter(par_id))
 

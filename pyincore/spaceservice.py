@@ -39,7 +39,7 @@ class SpaceService:
 
         """
         url = self.base_space_url
-        space_data = {("space", space_json)}
+        space_data = {('space', space_json)}
         kwargs["files"] = space_data
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
@@ -60,7 +60,7 @@ class SpaceService:
         url = self.base_space_url
         payload = {}
         if dataset_id is not None:
-            payload["dataset"] = dataset_id
+            payload['dataset'] = dataset_id
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
 
@@ -95,9 +95,7 @@ class SpaceService:
             obj: HTTP response with the returned space information.
 
         """
-        r = self.client.get(
-            self.base_space_url, params={"name": space_name}, timeout=timeout, **kwargs
-        )
+        r = self.client.get(self.base_space_url, params={"name": space_name}, timeout=timeout, **kwargs)
         return return_http_response(r).json()
 
     @forbid_offline
@@ -115,7 +113,7 @@ class SpaceService:
 
         """
         url = urljoin(self.base_space_url, space_id)
-        space_data = {("space", space_json)}
+        space_data = {('space', space_json)}
         kwargs["files"] = space_data
         r = self.client.put(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
@@ -157,9 +155,7 @@ class SpaceService:
         return response
 
     @forbid_offline
-    def remove_dataset_from_space(
-        self, space_id: str, dataset_id: str, timeout=(30, 600), **kwargs
-    ):
+    def remove_dataset_from_space(self, space_id: str, dataset_id: str, timeout=(30, 600), **kwargs):
         """Remove dataset from the space using dataset id and space id
 
         Args:
@@ -178,9 +174,7 @@ class SpaceService:
         return return_http_response(r).json()
 
     @forbid_offline
-    def add_dataset_to_space(
-        self, space_id: str, dataset_id: str, timeout=(30, 600), **kwargs
-    ):
+    def add_dataset_to_space(self, space_id: str, dataset_id: str, timeout=(30, 600), **kwargs):
         """Add member to a Space.
 
         Args:
@@ -199,9 +193,7 @@ class SpaceService:
         return return_http_response(r).json()
 
     @forbid_offline
-    def grant_privileges_to_space(
-        self, space_id: str, privileges_json, timeout=(30, 600), **kwargs
-    ):
+    def grant_privileges_to_space(self, space_id: str, privileges_json, timeout=(30, 600), **kwargs):
         """Updates a Space.
 
         Args:
@@ -215,7 +207,7 @@ class SpaceService:
 
         """
         url = urljoin(self.base_space_url, space_id + "/grant")
-        space_privileges = {("grant", privileges_json)}
+        space_privileges = {('grant', privileges_json)}
         kwargs["files"] = space_privileges
         r = self.client.post(url, timeout=timeout, **kwargs)
 

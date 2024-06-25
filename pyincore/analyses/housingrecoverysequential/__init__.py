@@ -1,3 +1,1 @@
-from pyincore.analyses.housingrecoverysequential.housingrecoverysequential import (
-    HousingRecoverySequential,
-)
+from pyincore.analyses.housingrecoverysequential.housingrecoverysequential import HousingRecoverySequential

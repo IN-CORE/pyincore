@@ -11,8 +11,9 @@ import pyincore.globals as pyglobals
 
 
 def run_with_base_class():
-    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
+    
     # Memphis EPF Damage with Earthquake
     hazard_type_eq = "earthquake"
     hazard_id_eq = "5b902cb273c3371e1236b36b"
@@ -30,31 +31,25 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    epf_dmg_eq_memphis.set_input_dataset("dfr3_mapping_set", mapping_set)
+    epf_dmg_eq_memphis.set_input_dataset('dfr3_mapping_set', mapping_set)
 
     epf_dmg_eq_memphis.set_parameter("result_name", "memphis_eq_epf_dmg_result")
     epf_dmg_eq_memphis.set_parameter("hazard_type", hazard_type_eq)
     epf_dmg_eq_memphis.set_parameter("hazard_id", hazard_id_eq)
     epf_dmg_eq_memphis.set_parameter("use_liquefaction", use_liquefaction)
     epf_dmg_eq_memphis.set_parameter("use_hazard_uncertainty", use_hazard_uncertainty)
-    epf_dmg_eq_memphis.set_parameter(
-        "liquefaction_geology_dataset_id", liquefaction_geology_dataset_id
-    )
+    epf_dmg_eq_memphis.set_parameter("liquefaction_geology_dataset_id", liquefaction_geology_dataset_id)
     epf_dmg_eq_memphis.set_parameter("num_cpu", 1)
 
     # Run Analysis
     epf_dmg_eq_memphis.run_analysis()
-
+    
     epf_rest = EpfRestoration(client)
     restorationsvc = RestorationService(client)
-    mapping_set = MappingSet(
-        restorationsvc.get_mapping("61f302e6e3a03e465500b3eb")
-    )  # new format of mapping
+    mapping_set = MappingSet(restorationsvc.get_mapping("61f302e6e3a03e465500b3eb"))  # new format of mapping
     epf_rest.load_remote_input_dataset("epfs", "6189c103d5b02930aa3efc35")
     epf_rest.set_input_dataset("dfr3_mapping_set", mapping_set)
-    epf_rest.set_input_dataset(
-        "damage", epf_dmg_eq_memphis.get_output_dataset("result")
-    )
+    epf_rest.set_input_dataset('damage', epf_dmg_eq_memphis.get_output_dataset("result"))
     epf_rest.set_parameter("result_name", "memphis-epf")
     epf_rest.set_parameter("discretized_days", [1, 3, 7, 30, 90])
     epf_rest.set_parameter("restoration_key", "Restoration ID Code")
@@ -71,22 +66,13 @@ def run_with_base_class():
     time_interval = epf_rest.get_parameter("time_interval")
     pf_interval = epf_rest.get_parameter("pf_interval")
     end_time = epf_rest.get_parameter("end_time")
-    epf_rest_util = EpfRestorationUtil(
-        inventory_restoration_map,
-        pf_results,
-        time_results,
-        time_interval,
-        pf_interval,
-        end_time,
-    )
-    functionality = epf_rest_util.get_percentage_func(
-        guid="60748fbd-67c3-4f8d-beb9-26685a53d3c5", damage_state="DS_0", time=2.0
-    )
-    time = epf_rest_util.get_restoration_time(
-        guid="60748fbd-67c3-4f8d-beb9-26685a53d3c5", damage_state="DS_1", pf=0.81
-    )
+    epf_rest_util = EpfRestorationUtil(inventory_restoration_map, pf_results, time_results, time_interval,
+                                       pf_interval, end_time)
+    functionality = epf_rest_util.get_percentage_func(guid="60748fbd-67c3-4f8d-beb9-26685a53d3c5",
+                                                      damage_state="DS_0", time=2.0)
+    time = epf_rest_util.get_restoration_time(guid="60748fbd-67c3-4f8d-beb9-26685a53d3c5", damage_state="DS_1", pf=0.81)
     print(functionality, time)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_with_base_class()

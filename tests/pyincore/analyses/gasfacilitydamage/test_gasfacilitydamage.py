@@ -1,10 +1,4 @@
-from pyincore import (
-    IncoreClient,
-    FragilityService,
-    MappingSet,
-    HazardService,
-    Earthquake,
-)
+from pyincore import IncoreClient, FragilityService, MappingSet, HazardService, Earthquake
 from pyincore.analyses.gasfacilitydamage import GasFacilityDamage
 import pyincore.globals as pyglobals
 

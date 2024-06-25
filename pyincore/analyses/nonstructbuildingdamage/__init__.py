@@ -5,9 +5,5 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.nonstructbuildingdamage.nonstructbuildingdamage import (
-    NonStructBuildingDamage,
-)
-from pyincore.analyses.nonstructbuildingdamage.nonstructbuildingutil import (
-    NonStructBuildingUtil,
-)
+from pyincore.analyses.nonstructbuildingdamage.nonstructbuildingdamage import NonStructBuildingDamage
+from pyincore.analyses.nonstructbuildingdamage.nonstructbuildingutil import NonStructBuildingUtil

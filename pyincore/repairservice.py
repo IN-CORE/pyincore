@@ -22,25 +22,15 @@ class RepairService(Dfr3Service):
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_dfr3_url = urllib.parse.urljoin(
-            client.service_url, "dfr3/api/repairs/"
-        )
+        self.base_dfr3_url = urllib.parse.urljoin(client.service_url,
+                                                  'dfr3/api/repairs/')
 
         super(RepairService, self).__init__(client)
 
     @forbid_offline
-    def get_dfr3_sets(
-        self,
-        hazard_type: str = None,
-        inventory_type: str = None,
-        author: str = None,
-        creator: str = None,
-        space: str = None,
-        skip: int = None,
-        limit: int = None,
-        timeout=(30, 600),
-        **kwargs
-    ):
+    def get_dfr3_sets(self, hazard_type: str = None, inventory_type: str = None,
+                      author: str = None, creator: str = None, space: str = None,
+                      skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
         """Get the set of repair data, curves.
 
         Args:
@@ -62,19 +52,19 @@ class RepairService(Dfr3Service):
         payload = {}
 
         if hazard_type is not None:
-            payload["hazard"] = hazard_type
+            payload['hazard'] = hazard_type
         if inventory_type is not None:
-            payload["inventory"] = inventory_type
+            payload['inventory'] = inventory_type
         if author is not None:
-            payload["author"] = author
+            payload['author'] = author
         if creator is not None:
-            payload["creator"] = creator
+            payload['creator'] = creator
         if skip is not None:
-            payload["skip"] = skip
+            payload['skip'] = skip
         if limit is not None:
-            payload["limit"] = limit
+            payload['limit'] = limit
         if space is not None:
-            payload["space"] = space
+            payload['space'] = space
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         return r.json()

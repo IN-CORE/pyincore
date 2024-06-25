@@ -24,45 +24,40 @@ class CumulativeBuildingDamage(BaseAnalysis):
         """Executes Cumulative Building Damage Analysis"""
         eq_damage_set = self.get_input_dataset("eq_bldg_dmg").get_csv_reader()
         eq_damage_df = pd.DataFrame(list(eq_damage_set))
-        tsunami_damage_set = self.get_input_dataset("tsunami_bldg_dmg").get_csv_reader()
+        tsunami_damage_set = self.get_input_dataset(
+            "tsunami_bldg_dmg").get_csv_reader()
         tsunami_damage_df = pd.DataFrame(list(tsunami_damage_set))
 
         user_defined_cpu = 1
 
-        if (
-            not self.get_parameter("num_cpu") is None
-            and self.get_parameter("num_cpu") > 0
-        ):
+        if not self.get_parameter("num_cpu") is None and self.get_parameter(
+                "num_cpu") > 0:
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(
-            self, len(eq_damage_df), user_defined_cpu
-        )
+        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(
+            eq_damage_df), user_defined_cpu)
 
         avg_bulk_input_size = int(len(eq_damage_df) / num_workers)
         eq_damage_args = []
         count = 0
 
         while count < len(eq_damage_df):
-            eq_damage_args.append(eq_damage_df[count : count + avg_bulk_input_size])
+            eq_damage_args.append(
+                eq_damage_df[count:count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
         results = self.cumulative_building_damage_concurrent_future(
             self.cumulative_building_damage_bulk_input,
-            num_workers,
-            eq_damage_args,
-            repeat(tsunami_damage_df),
-        )
+            num_workers, eq_damage_args,
+            repeat(tsunami_damage_df))
 
-        self.set_result_csv_data(
-            "combined-result", results, name=self.get_parameter("result_name")
-        )
+        self.set_result_csv_data("combined-result", results,
+                                 name=self.get_parameter("result_name"))
 
         return True
 
-    def cumulative_building_damage_concurrent_future(
-        self, function_name, num_workers, *args
-    ):
+    def cumulative_building_damage_concurrent_future(self, function_name,
+                                                     num_workers, *args):
         """Utilizes concurrent.future module.
 
         Args:
@@ -76,92 +71,77 @@ class CumulativeBuildingDamage(BaseAnalysis):
         """
         output = []
         with concurrent.futures.ProcessPoolExecutor(
-            max_workers=num_workers
-        ) as executor:
+                max_workers=num_workers) as executor:
             for ret in executor.map(function_name, *args):
                 output.extend(ret)
 
         return output
 
-    def cumulative_building_damage_bulk_input(
-        self, eq_building_damage_set, tsunami_building_damage_set
-    ):
+    def cumulative_building_damage_bulk_input(self, eq_building_damage_set,
+                                              tsunami_building_damage_set):
         """Run analysis for building damage results.
 
-        Args:
-            eq_building_damage_set (obj): A set of earthquake building damage results.
-            tsunami_building_damage_set (obj): A set of all tsunami building damage results.
+         Args:
+             eq_building_damage_set (obj): A set of earthquake building damage results.
+             tsunami_building_damage_set (obj): A set of all tsunami building damage results.
 
-        Returns:
-            list: A list of ordered dictionaries with multiple damage values and other data/metadata.
+         Returns:
+             list: A list of ordered dictionaries with multiple damage values and other data/metadata.
         """
         result = []
         for idx, eq_building_damage in eq_building_damage_set.iterrows():
-            result.append(
-                self.cumulative_building_damage(
-                    eq_building_damage, tsunami_building_damage_set
-                )
-            )
+            result.append(self.cumulative_building_damage(eq_building_damage,
+                                                          tsunami_building_damage_set))
 
         return result
 
-    def cumulative_building_damage(self, eq_building_damage, tsunami_building_damage):
+    def cumulative_building_damage(self, eq_building_damage,
+                                   tsunami_building_damage):
         """Run analysis for building damage results.
 
-        Args:
-            eq_building_damage (obj): A JSON description of an earthquake building damage.
-            tsunami_building_damage (obj): Set of all tsunami building damage results.
+         Args:
+             eq_building_damage (obj): A JSON description of an earthquake building damage.
+             tsunami_building_damage (obj): Set of all tsunami building damage results.
 
-        Returns:
-            OrderedDict: A dictionary with building damage values and other data/metadata.
+         Returns:
+             OrderedDict: A dictionary with building damage values and other data/metadata.
 
         """
-        guid = eq_building_damage["guid"]
+        guid = eq_building_damage['guid']
 
         tsunami_building = tsunami_building_damage.loc[
-            tsunami_building_damage["guid"] == guid
-        ]
+            tsunami_building_damage['guid'] == guid]
 
         for idy, tsunami_building in tsunami_building.iterrows():
             eq_limit_states = collections.OrderedDict()
 
             try:
-                eq_limit_states["LS_0"] = float(eq_building_damage["LS_0"])
-                eq_limit_states["LS_1"] = float(eq_building_damage["LS_1"])
-                eq_limit_states["LS_2"] = float(eq_building_damage["LS_2"])
+                eq_limit_states['LS_0'] = float(eq_building_damage["LS_0"])
+                eq_limit_states['LS_1'] = float(eq_building_damage["LS_1"])
+                eq_limit_states['LS_2'] = float(eq_building_damage["LS_2"])
 
                 tsunami_limit_states = collections.OrderedDict()
-                tsunami_limit_states["LS_0"] = float(tsunami_building["LS_0"])
-                tsunami_limit_states["LS_1"] = float(tsunami_building["LS_1"])
-                tsunami_limit_states["LS_2"] = float(tsunami_building["LS_2"])
+                tsunami_limit_states['LS_0'] = float(tsunami_building["LS_0"])
+                tsunami_limit_states['LS_1'] = float(tsunami_building["LS_1"])
+                tsunami_limit_states['LS_2'] = float(tsunami_building["LS_2"])
 
                 limit_states = collections.OrderedDict()
 
-                limit_states["LS_0"] = (
-                    eq_limit_states["LS_0"]
-                    + tsunami_limit_states["LS_0"]
+                limit_states["LS_0"] = \
+                    eq_limit_states["LS_0"] + tsunami_limit_states["LS_0"] \
                     - eq_limit_states["LS_0"] * tsunami_limit_states["LS_0"]
-                )
 
-                limit_states["LS_1"] = (
-                    eq_limit_states["LS_1"]
-                    + tsunami_limit_states["LS_1"]
-                    - eq_limit_states["LS_1"] * tsunami_limit_states["LS_1"]
-                    + (
-                        (eq_limit_states["LS_0"] - eq_limit_states["LS_1"])
-                        * (tsunami_limit_states["LS_0"] - tsunami_limit_states["LS_1"])
-                    )
-                )
+                limit_states["LS_1"] = \
+                    eq_limit_states["LS_1"] + tsunami_limit_states["LS_1"] \
+                    - eq_limit_states["LS_1"] * tsunami_limit_states["LS_1"] \
+                    + ((eq_limit_states["LS_0"]
+                        - eq_limit_states["LS_1"]) * (tsunami_limit_states["LS_0"] - tsunami_limit_states["LS_1"]))
 
-                limit_states["LS_2"] = (
-                    eq_limit_states["LS_2"]
-                    + tsunami_limit_states["LS_2"]
-                    - eq_limit_states["LS_2"] * tsunami_limit_states["LS_2"]
-                    + (
-                        (eq_limit_states["LS_1"] - eq_limit_states["LS_2"])
-                        * (tsunami_limit_states["LS_1"] - tsunami_limit_states["LS_2"])
-                    )
-                )
+                limit_states["LS_2"] = \
+                    eq_limit_states["LS_2"] + tsunami_limit_states["LS_2"] \
+                    - eq_limit_states["LS_2"] * tsunami_limit_states["LS_2"] \
+                    + ((eq_limit_states["LS_1"]
+                        - eq_limit_states["LS_2"]) * (tsunami_limit_states["LS_1"] - tsunami_limit_states["LS_2"]))
 
                 damage_state = FragilityCurveSet._3ls_to_4ds(limit_states)
 
@@ -200,42 +180,43 @@ class CumulativeBuildingDamage(BaseAnalysis):
 
         """
         return {
-            "name": "cumulative-building-damage",
-            "description": "cumulative building damage (earthquake + tsunami)",
-            "input_parameters": [
+            'name': 'cumulative-building-damage',
+            'description': 'cumulative building damage (earthquake + tsunami)',
+            'input_parameters': [
                 {
-                    "id": "result_name",
-                    "required": True,
-                    "description": "result dataset name",
-                    "type": str,
+                    'id': 'result_name',
+                    'required': True,
+                    'description': 'result dataset name',
+                    'type': str
                 },
                 {
-                    "id": "num_cpu",
-                    "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
-                    "type": int,
-                },
-            ],
-            "input_datasets": [
-                {
-                    "id": "eq_bldg_dmg",
-                    "required": True,
-                    "description": "Earthquake Building Damage Results",
-                    "type": ["ergo:buildingDamageVer5", "ergo:buildingDamageVer6"],
-                },
-                {
-                    "id": "tsunami_bldg_dmg",
-                    "required": True,
-                    "description": "Tsunami Building Damage Results",
-                    "type": ["ergo:buildingDamageVer5", "ergo:buildingDamageVer6"],
-                },
-            ],
-            "output_datasets": [
-                {
-                    "id": "combined-result",
-                    "parent_type": "buildings",
-                    "description": "CSV file of building cumulative damage",
-                    "type": "ergo:buildingDamageVer5",
+                    'id': 'num_cpu',
+                    'required': False,
+                    'description': 'If using parallel execution, the number of cpus to request',
+                    'type': int
                 }
             ],
+            'input_datasets': [
+                {
+                    'id': 'eq_bldg_dmg',
+                    'required': True,
+                    'description': 'Earthquake Building Damage Results',
+                    'type': ['ergo:buildingDamageVer5', 'ergo:buildingDamageVer6']
+                },
+                {
+                    'id': 'tsunami_bldg_dmg',
+                    'required': True,
+                    'description': 'Tsunami Building Damage Results',
+                    'type': ['ergo:buildingDamageVer5', 'ergo:buildingDamageVer6'],
+                }
+            ],
+            'output_datasets': [
+                {
+                    'id': 'combined-result',
+                    'parent_type': 'buildings',
+                    'description': 'CSV file of building cumulative damage',
+                    'type': 'ergo:buildingDamageVer5'
+                }
+
+            ]
         }

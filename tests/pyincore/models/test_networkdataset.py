@@ -38,14 +38,9 @@ def test_from_data_service(datasvc):
 
 def test_from_json_str():
     print(PYINCORE_ROOT_FOLDER)
-    with open(
-        os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/network_dataset.json"),
-        "r",
-    ) as f:
+    with open(os.path.join(PYINCORE_ROOT_FOLDER, "tests/data/network/network_dataset.json"), "r") as f:
         json_dict = json.load(f)
-    network = NetworkDataset.from_json_str(
-        json.dumps(json_dict), folder_path="../data/network/"
-    )
+    network = NetworkDataset.from_json_str(json.dumps(json_dict), folder_path="../data/network/")
     assert network.nodes is not None
     assert network.graph is not None
     assert network.links is not None
@@ -66,15 +61,8 @@ def test_from_files():
     link_data_type = "incore:epnLinkVer1"
     node_data_type = "incore:epnNodeVer1"
     graph_data_type = "incore:epnGraph"
-    network = NetworkDataset.from_files(
-        node_file_path,
-        link_file_path,
-        graph_file_path,
-        network_data_type,
-        link_data_type,
-        node_data_type,
-        graph_data_type,
-    )
+    network = NetworkDataset.from_files(node_file_path, link_file_path, graph_file_path, network_data_type,
+                                        link_data_type, node_data_type, graph_data_type)
     assert network.nodes is not None
     assert network.graph is not None
     assert network.links is not None
@@ -91,14 +79,14 @@ def test_get_node_inventory(datasvc):
     dataset_id = "62719fc857f1d94b047447e6"
     network = NetworkDataset.from_data_service(dataset_id, datasvc)
     nodes = list(network.get_nodes())
-    assert nodes[0]["properties"]["guid"] == "9c39623d-920e-49e6-b272-83b2ec954b84"
+    assert nodes[0]['properties']["guid"] == "9c39623d-920e-49e6-b272-83b2ec954b84"
 
 
 def test_get_link_inventory(datasvc):
     dataset_id = "62719fc857f1d94b047447e6"
     network = NetworkDataset.from_data_service(dataset_id, datasvc)
     links = list(network.get_links())
-    assert links[0]["properties"]["guid"] == "a4f63126-bb4b-45e7-9029-47984155f859"
+    assert links[0]['properties']["guid"] == "a4f63126-bb4b-45e7-9029-47984155f859"
 
 
 def test_get_graph_table(datasvc):
@@ -121,15 +109,10 @@ def test_set_input_dataset(datasvc, client):
     dataset_id = "62719fc857f1d94b047447e6"
     network = NetworkDataset.from_data_service(dataset_id, datasvc)
     base_analysis = BaseAnalysis(client)
-    base_analysis.input_datasets = {
-        "network": {
-            "spec": {
-                "id": "network",
-                "required": True,
-                "description": "network",
-                "type": ["incore:epnNetwork"],
-            },
-            "value": None,
-        }
-    }
+    base_analysis.input_datasets = {"network": {"spec": {
+                    'id': 'network',
+                    'required': True,
+                    'description': 'network',
+                    'type': ['incore:epnNetwork'],
+                }, "value": None}}
     assert base_analysis.set_input_dataset("network", network) is True
