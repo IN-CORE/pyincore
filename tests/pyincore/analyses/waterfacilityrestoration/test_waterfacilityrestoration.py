@@ -31,7 +31,7 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    wf_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    wf_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     result_name = "wf-dmg-results.csv"
     wf_dmg.set_parameter("result_name", result_name)
@@ -50,10 +50,14 @@ def run_with_base_class():
 
     # Load restoration mapping
     restorationsvc = RestorationService(client)
-    mapping_set = MappingSet(restorationsvc.get_mapping("61f075ee903e515036cee0a5"))  # new format of mapping
-    wf_rest.load_remote_input_dataset("water_facilities", "5a284f2ac7d30d13bc081e52")  # water facility
+    mapping_set = MappingSet(
+        restorationsvc.get_mapping("61f075ee903e515036cee0a5")
+    )  # new format of mapping
+    wf_rest.load_remote_input_dataset(
+        "water_facilities", "5a284f2ac7d30d13bc081e52"
+    )  # water facility
     wf_rest.set_input_dataset("damage", wf_dmg.get_output_dataset("result"))
-    wf_rest.set_input_dataset('dfr3_mapping_set', mapping_set)
+    wf_rest.set_input_dataset("dfr3_mapping_set", mapping_set)
     wf_rest.set_parameter("discretized_days", [1, 3, 7, 30, 90])
     wf_rest.set_parameter("result_name", "shelby-water-facility")
     wf_rest.set_parameter("restoration_key", "Restoration ID Code")
@@ -70,13 +74,22 @@ def run_with_base_class():
     time_interval = wf_rest.get_parameter("time_interval")
     pf_interval = wf_rest.get_parameter("pf_interval")
     end_time = wf_rest.get_parameter("end_time")
-    wf_util = WaterFacilityRestorationUtil(inventory_restoration_map, pf_results, time_results, time_interval,
-                                           pf_interval, end_time)
-    functionality = wf_util.get_percentage_func(guid="e1bce78d-00a1-4605-95f3-3776ff907f73",
-                                                damage_state="DS_0", time=2.0)
-    time = wf_util.get_restoration_time(guid="e1bce78d-00a1-4605-95f3-3776ff907f73", damage_state="DS_1", pf=0.95)
+    wf_util = WaterFacilityRestorationUtil(
+        inventory_restoration_map,
+        pf_results,
+        time_results,
+        time_interval,
+        pf_interval,
+        end_time,
+    )
+    functionality = wf_util.get_percentage_func(
+        guid="e1bce78d-00a1-4605-95f3-3776ff907f73", damage_state="DS_0", time=2.0
+    )
+    time = wf_util.get_restoration_time(
+        guid="e1bce78d-00a1-4605-95f3-3776ff907f73", damage_state="DS_1", pf=0.95
+    )
     print(functionality, time)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

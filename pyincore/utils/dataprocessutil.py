@@ -14,7 +14,6 @@ from functools import reduce
 
 
 class DataProcessUtil:
-
     @staticmethod
     def get_mapped_result_from_analysis(
         client,
@@ -442,7 +441,7 @@ class DataProcessUtil:
 
         guids = dmg_result[["guid"]]
         max_val = dmg_result[dmg_states].max(axis=1)
-        max_key = dmg_result[dmg_states].dropna(how='all').idxmax(axis=1)
+        max_key = dmg_result[dmg_states].dropna(how="all").idxmax(axis=1)
         dmg_concat = pd.concat([guids, max_val, max_key], axis=1)
         dmg_concat.rename(columns={0: "max_prob", 1: "max_state"}, inplace=True)
 
@@ -479,12 +478,12 @@ class DataProcessUtil:
             Then rename them to their respective categories.
         """
 
-        max_dmg_result.loc[max_dmg_result["max_state"] == "DS_0", "max_state"] = (
-            "Affected"
-        )
-        max_dmg_result.loc[max_dmg_result["max_state"] == "DS_1", "max_state"] = (
-            "Affected"
-        )
+        max_dmg_result.loc[
+            max_dmg_result["max_state"] == "DS_0", "max_state"
+        ] = "Affected"
+        max_dmg_result.loc[
+            max_dmg_result["max_state"] == "DS_1", "max_state"
+        ] = "Affected"
         max_dmg_result.loc[max_dmg_result["max_state"] == "DS_2", "max_state"] = "Minor"
         max_dmg_result.loc[
             (
@@ -493,9 +492,9 @@ class DataProcessUtil:
             ),
             "max_state",
         ] = "Major"
-        max_dmg_result.loc[max_dmg_result["sw_max_ds"] == "DS_3", "max_state"] = (
-            "Destroyed"
-        )
+        max_dmg_result.loc[
+            max_dmg_result["sw_max_ds"] == "DS_3", "max_state"
+        ] = "Destroyed"
 
         result_by_cluster, result_by_category = DataProcessUtil.create_mapped_dmg(
             inventory, max_dmg_result, arch_mapping, groupby_col_name, arch_col
