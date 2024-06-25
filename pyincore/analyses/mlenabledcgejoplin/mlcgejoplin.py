@@ -16,7 +16,7 @@ from pyincore.utils.cge_ml_file_util import CGEMLFileUtil
 logger = pyglobals.LOGGER
 
 
-class MLEnabledCgeJoplin(CoreCGEML):
+class MlEnabledCgeJoplin(CoreCGEML):
 
     model = "Machine Learning Enabled Computable General Equilibrium - Joplin"
 
