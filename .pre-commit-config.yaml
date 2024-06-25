@@ -7,4 +7,4 @@ repos:
     rev: 6.1.0
     hooks:
       - id: flake8
-exclude: 'pyincore/analyses/(joplincge|saltlakecge|seasidecge)/.*'
+exclude: 'pyincore/analyses/(joplincge|saltlakecge|seasidecge|galvestoncge)/.*’
