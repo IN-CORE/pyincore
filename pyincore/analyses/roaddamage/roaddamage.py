@@ -216,7 +216,7 @@ class RoadDamage(BaseAnalysis):
             liq_hazard_vals = None
             liquefaction_prob = None
             selected_fragility_set = fragility_sets[road["id"]]
-            hazard_std_dev = 0.0
+            # hazard_std_dev = 0.0
             if use_hazard_uncertainty:
                 raise ValueError("Uncertainty Not Implemented Yet.")
 

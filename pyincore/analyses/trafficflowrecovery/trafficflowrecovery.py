@@ -105,7 +105,6 @@ class TrafficFlowRecovery(BaseAnalysis):
                             ]
         else:
             all_ipw = None
-            all_ipw_length = None
             path_adt = None
 
         num_objectives = 2

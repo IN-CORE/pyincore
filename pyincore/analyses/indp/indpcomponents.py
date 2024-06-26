@@ -56,8 +56,6 @@ class INDPComponents:
         """
         comp_strings = []
         for c in self.components:
-            comp = c[0]
-            supp = c[1]
             comp_string = "/".join(c[0])
             comp_string += ":" + str(c[1])
             comp_strings.append(comp_string)

@@ -506,11 +506,11 @@ class INDPUtil:
     @staticmethod
     def flow_arc_functionality_rule(model, i, k, j, kb, t):
         if not model.functionality:
-            interdep_nodes_list = (
+            _ = (
                 model.interdep_nodes.keys()
             )  # Interdependent nodes with a damaged dependee node
         else:
-            interdep_nodes_list = model.interdep_nodes[
+            _ = model.interdep_nodes[
                 t
             ].keys()  # Interdependent nodes with a damaged dependee node
         a = model.n_hat[i, k][j, kb]["data"]["inf_data"]

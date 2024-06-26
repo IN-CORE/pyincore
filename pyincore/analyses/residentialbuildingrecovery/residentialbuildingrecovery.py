@@ -52,7 +52,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
 
         """
         # TODO: Start using seed
-        seed = self.get_parameter("seed")
+        # seed = self.get_parameter("seed")
 
         num_samples = self.get_parameter("num_samples")
         result_name = self.get_parameter("result_name")

@@ -55,7 +55,6 @@ class InfrastructureNetwork(object):
 
         """
         for q in player_strategy[0]:
-            node = q
             strat = player_strategy[0][q]
             self.G.node[q]["data"]["inf_data"].repaired = round(strat["repair"])
             self.G.node[q]["data"]["inf_data"].functionality = round(strat["w"])

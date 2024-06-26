@@ -497,7 +497,6 @@ class AnalysisUtil:
             str: A hazard demand type.
 
         """
-        BLDG_STORIES = "no_stories"
         PROPERTIES = "properties"
         BLDG_PERIOD = "period"
 
@@ -505,7 +504,6 @@ class AnalysisUtil:
         hazard_demand_type = fragility_hazard_type
 
         if hazard_type.lower() == "earthquake":
-            num_stories = building[PROPERTIES][BLDG_STORIES]
             # Get building period from the fragility if possible
 
             building_args = fragility_set.construct_expression_args_from_inventory(
