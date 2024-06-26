@@ -2,7 +2,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import IncoreClient, FragilityService, MappingSet
+from pyincore import IncoreClient
 from pyincore.analyses.populationdislocation import PopulationDislocation
 import pyincore.globals as pyglobals
 

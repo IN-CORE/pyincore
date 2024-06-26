@@ -11,7 +11,6 @@ from pyincore.models.units import Units
 from shapely.geometry import Point
 import random
 import time
-import math
 
 
 class Tornado(Hazard):

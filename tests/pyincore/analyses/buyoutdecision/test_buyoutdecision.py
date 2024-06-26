@@ -4,9 +4,8 @@
 
 
 from pyincore.analyses.buyoutdecision import BuyoutDecision
-from pyincore import IncoreClient, Dataset
+from pyincore import IncoreClient
 import pyincore.globals as pyglobals
-import pandas as pd
 
 
 def BuyoutDecisionTest():

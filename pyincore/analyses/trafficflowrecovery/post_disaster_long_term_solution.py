@@ -82,9 +82,9 @@ class PostDisasterLongTermSolution(Solution):
         end = {}
         schedule_time = []
 
-        l = copy.deepcopy(self.attributes)
+        attributes_copy = copy.deepcopy(self.attributes)
 
-        for i in range(len(l)):
+        for i in range(len(attributes_copy)):
             if i <= simax - 1:
                 # repair start from time 0
                 start[candidate_schedule[i]] = 0.0

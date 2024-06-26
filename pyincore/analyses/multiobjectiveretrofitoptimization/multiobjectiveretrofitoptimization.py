@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 import time
 from typing import List
-from pandas import DataFrame
 from pyomo.environ import ConcreteModel, Set, Var, Param, Objective, Constraint
 from pyomo.environ import quicksum, minimize, maximize, NonNegativeReals
 from pyomo.environ import sum_product

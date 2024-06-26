@@ -1,7 +1,7 @@
 import math
-import scipy
-import numpy
-import decimal
+import scipy  # noqa: F401
+import numpy  # noqa: F401
+import decimal  # noqa: F401
 
 INVALID_NAMES = [
     "exec",

@@ -11,8 +11,8 @@ import tempfile
 from pyincore import Dataset, DataService, MappingSet
 
 # for evaluation of retrofit expression
-import math
-import scipy
+import math  # noqa: F401
+import scipy  # noqa: F401
 
 
 class DatasetUtil:

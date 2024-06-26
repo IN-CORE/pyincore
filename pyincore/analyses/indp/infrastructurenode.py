@@ -87,8 +87,8 @@ class InfrastructureNode(object):
         None.
 
         """
-        for l in extra_commodity:
-            self.extra_com[l] = {
+        for m in extra_commodity:
+            self.extra_com[m] = {
                 "demand": 0,
                 "oversupply_penalty": 0,
                 "undersupply_penalty": 0,

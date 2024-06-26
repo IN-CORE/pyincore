@@ -416,8 +416,8 @@ class NciFunctionality(BaseAnalysis):
         for idx in discretized_days:
             u = 1 - df_functionality_nodes[f"functionality{idx}"]
             u = u.to_numpy()
-            I = np.identity(len(u))
-            q = np.dot(np.linalg.inv(I - M.T), u).tolist()
+            i = np.identity(len(u))
+            q = np.dot(np.linalg.inv(i - M.T), u).tolist()
             df_functionality_nodes[f"func_cascading{idx}"] = [
                 0 if i >= 1 else 1 - i for i in q
             ]
