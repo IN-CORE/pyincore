@@ -160,9 +160,9 @@ def test_calculate_limit_state_probability(
 )
 def test_calculate_repair_rates(repair_set, args, expected):
     result = repair_set.calculate_repair_rates(**args)
-    if type(result["PF_0"]) == numpy.ndarray:
+    if type(result["PF_0"]) is numpy.ndarray:
         assert numpy.allclose(result["PF_0"], expected, rtol=1e-03, atol=1e-03)
-    elif type(result["PF_0"]) == numpy.float64:
+    elif type(result["PF_0"]) is numpy.float64:
         assert result["PF_0"] == expected
     else:
         assert False
@@ -182,9 +182,9 @@ def test_calculate_repair_rates(repair_set, args, expected):
 def test_calculate_inverse_repair_rates(repair_set, args, expected):
     result = repair_set.calculate_inverse_repair_rates(**args)
     print(result)
-    if type(result["PF_0"]) == numpy.ndarray:
+    if type(result["PF_0"]) is numpy.ndarray:
         assert numpy.allclose(result["PF_0"], expected, rtol=1e-03, atol=1e-03)
-    elif type(result["PF_0"]) == numpy.float64:
+    elif type(result["PF_0"]) is numpy.float64:
         assert result["PF_0"] == expected
     else:
         assert False
@@ -203,9 +203,9 @@ def test_calculate_inverse_repair_rates(repair_set, args, expected):
 )
 def test_calculate_restoration_rates(restoration_set, args, expected):
     result = restoration_set.calculate_restoration_rates(**args)
-    if type(result["PF_0"]) == numpy.ndarray:
+    if type(result["PF_0"]) is numpy.ndarray:
         assert numpy.allclose(result["PF_0"], expected, rtol=1e-03, atol=1e-03)
-    elif type(result["PF_0"]) == numpy.float64:
+    elif type(result["PF_0"]) is numpy.float64:
         assert result["PF_0"] == expected
     else:
         assert False
@@ -224,7 +224,7 @@ def test_calculate_restoration_rates(restoration_set, args, expected):
 def test_calculate_pipeline_restoration_rates(restoration_set, args, expected):
     result = restoration_set.calculate_restoration_rates(**args)
     print(result)
-    if type(result["RT"]) == numpy.ndarray:
+    if type(result["RT"]) is numpy.ndarray:
         assert numpy.allclose(result["RT"], expected, rtol=1e-03, atol=1e-03)
     else:
         assert result["RT"] == expected
