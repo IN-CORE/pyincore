@@ -335,8 +335,8 @@ class NetworkUtil:
             graph = nx.Graph()
 
         graph.add_nodes_from(node_coords.keys())
-        l = [set(x) for x in geom.edges()]
-        edg = [tuple(k for k, v in node_coords.items() if v in sl) for sl in l]
+        m = [set(x) for x in geom.edges()]
+        edg = [tuple(k for k, v in node_coords.items() if v in sl) for sl in m]
 
         graph.add_edges_from(edg)
 

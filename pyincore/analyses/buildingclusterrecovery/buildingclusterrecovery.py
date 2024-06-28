@@ -808,17 +808,17 @@ class BuildingClusterRecovery(BaseAnalysis):
 
                 # Functionality State k
                 for k in range(5):
-                    # Functionality State l
-                    for l in range(5):
-                        expect1 += joint_probability[k][l] * (
+                    # Functionality State m
+                    for m in range(5):
+                        expect1 += joint_probability[k][m] * (
                             temporary_correlation1[t][i][k]
-                            * temporary_correlation1[t][j][l]
+                            * temporary_correlation1[t][j][m]
                             + temporary_correlation1[t][i][k]
-                            * temporary_correlation1[t][j][l]
+                            * temporary_correlation1[t][j][m]
                             + temporary_correlation2[t][i][k]
-                            * temporary_correlation1[t][j][l]
+                            * temporary_correlation1[t][j][m]
                             + temporary_correlation2[t][i][k]
-                            * temporary_correlation2[t][j][l]
+                            * temporary_correlation2[t][j][m]
                         )
                 expect2 = mean_over_time[t][i] * mean_over_time[t][j]
 

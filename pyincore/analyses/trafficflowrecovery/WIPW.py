@@ -120,11 +120,11 @@ def ipw_search(v, e):
     return ipath, path_length
 
 
-def tipw_index(g, l, path_adt):
+def tipw_index(g, p, path_adt):
     """
     caculate the TIPW index of the network
     :param g: graph
-    :param l: Indpendent pathway
+    :param p: Independent pathway
     :param path_adt: Adt of the path
     :return: TIPW index of the network
     """
@@ -146,13 +146,13 @@ def tipw_index(g, l, path_adt):
         node_tipw[node] = 0
         for pairnode in gnodes:
             if pairnode != node:
-                if (node, pairnode) in l.keys():
-                    for key, value in l[node, pairnode].items():
+                if (node, pairnode) in p.keys():
+                    for key, value in p[node, pairnode].items():
                         node_tipw[node] += normal_path_adt[node, pairnode][
                             key
                         ] * path_service_level_edges(g, value)
-                elif (pairnode, node) in l.keys():
-                    for key, value in l[pairnode, node].items():
+                elif (pairnode, node) in p.keys():
+                    for key, value in p[pairnode, node].items():
                         node_tipw[node] += normal_path_adt[pairnode, node][
                             key
                         ] * path_service_level_edges(g, value)

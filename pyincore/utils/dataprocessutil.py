@@ -9,7 +9,7 @@ import json
 import pandas as pd
 import numpy as np
 
-from pyincore import Dataset, DataService, IncoreClient
+from pyincore import Dataset, DataService
 from functools import reduce
 
 

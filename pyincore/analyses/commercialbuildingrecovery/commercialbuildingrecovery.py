@@ -6,7 +6,6 @@
 
 import numpy as np
 import pandas as pd
-from scipy.stats import lognorm
 import time
 
 from pyincore import BaseAnalysis, RepairService
@@ -341,8 +340,8 @@ class CommercialBuildingRecovery(BaseAnalysis):
             # Use a lambda to obtain the damage state in numeric form. Note that since damage states are single digits,
             # it suffices to look at the last character and convert into an integer value. Do this computation once
             # per building only.
-            extract_ds = lambda x: int(x[-1])
-            samples_mcs_ds = list(map(extract_ds, samples_mcs))
+            extract_ds = lambda x: int(x[-1])  # noqa: E731
+            samples_mcs_ds = list(map(extract_ds, samples_mcs))  # noqa: E731
 
             # Now, perform the two nested loops, using the indexing function to simplify the syntax.
             for i in range(0, num_samples):

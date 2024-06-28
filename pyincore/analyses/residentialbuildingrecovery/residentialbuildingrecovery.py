@@ -516,7 +516,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             # Use a lambda to obtain the damage state in numeric form. Note that since damage states are single digits,
             # it suffices to look at the last character and convert into an integer value. Do this computation once
             # per household only.
-            extract_ds = lambda x: int(x[-1])
+            extract_ds = lambda x: int(x[-1])  # noqa: E731
             samples_mcs_ds = list(map(extract_ds, samples_mcs))
 
             # Now, perform the two nested loops, using the indexing function to simplify the syntax.
