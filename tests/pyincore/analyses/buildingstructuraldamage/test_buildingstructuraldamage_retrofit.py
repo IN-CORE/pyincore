@@ -10,9 +10,7 @@ import time
 
 def run_with_base_class():
     client = IncoreClient()
-    dev_client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     hazardsvc = HazardService(client)
-    dev_hazardsvc = HazardService(dev_client)
 
     # Set analysis parameters
     result_folder = "retrofit"

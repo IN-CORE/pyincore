@@ -1220,7 +1220,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                         * pyo.value(model.Sc_ijkk_prime[i, j, k, k_prime])
                         for (i, j, k, k_prime) in model.ZSKK_prime
                     )
-                    percent_budget_used = (
+                    _ = (
                         budget_used / pyo.value(model.B)
                     ) * 100  # Record percentage of available budget used.
                     # Add objective (economic loss), dislocation, and functionality values to results dataframe:
@@ -1362,7 +1362,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                         * pyo.value(model.Sc_ijkk_prime[i, j, k, k_prime])
                         for (i, j, k, k_prime) in model.ZSKK_prime
                     )
-                    percent_budget_used = (
+                    _ = (
                         budget_used / pyo.value(model.B)
                     ) * 100  # Record percentage of available budget used.
                     # Add objective (dislocation), economic loss, and functionality values to results dataframe:
@@ -1504,7 +1504,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                         * pyo.value(model.Sc_ijkk_prime[i, j, k, k_prime])
                         for (i, j, k, k_prime) in model.ZSKK_prime
                     )
-                    percent_budget_used = (
+                    _ = (
                         budget_used / pyo.value(model.B)
                     ) * 100  # Record percentage of available budget used.
                     # Add objective (functionality), economic loss, and dislocation values to results dataframe:

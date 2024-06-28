@@ -16,10 +16,7 @@ def run_with_base_class():
     # Default Bridge Fragility Mapping on incore-service
     mapping_id = "5b47bcce337d4a37755e0cb2"
 
-    # Use hazard uncertainty for computing damage
-    use_hazard_uncertainty = False
     # Use liquefaction (LIQ) column of bridges to modify fragility curve
-    # use_liquefaction = False
     use_liquefaction = True
 
     # Geology dataset

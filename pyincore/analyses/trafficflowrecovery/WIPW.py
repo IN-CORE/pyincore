@@ -78,7 +78,7 @@ def ipw_search(v, e):
                 temp = copy.deepcopy(
                     nx.shortest_path(g_local, source=w, target=q, weight="length")
                 )
-            except nx.NetworkXNoPath as e:
+            except nx.NetworkXNoPath:
                 # print(w,q)
                 # print("NetworkXNoPath")
                 temp = []

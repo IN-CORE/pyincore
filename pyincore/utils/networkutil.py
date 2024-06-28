@@ -235,7 +235,6 @@ class NetworkUtil:
         fromnode_list = []
         tonode_list = []
         node_list = []
-        size = 0
 
         indataset = fiona.open(link_file)
 
@@ -273,7 +272,6 @@ class NetworkUtil:
         coords = dict((i, None) for i in range(len(node_list) - 1))
 
         # create coordinates
-        node_coords_list = [None] * (len(node_list))
         for line_feature in indataset:
             from_node_val = None
             if fromnode_fldname in line_feature["properties"]:
@@ -419,7 +417,6 @@ class NetworkUtil:
 
         # Define directionality when needed
         __left_to_right = 1
-        __right_to_left = -1
         __no_direction = 0
 
         # Extract labels
@@ -517,7 +514,7 @@ class NetworkUtil:
         for i, val in enumerate(df_nodes["nodenwid"]):
             pos[val] = (pos_x[i], pos_y[i])
 
-        edges = [(x, y) for x, y in zip(df_links["fromnode"], df_links["tonode"])]
+        _ = [(x, y) for x, y in zip(df_links["fromnode"], df_links["tonode"])]
         edge = []
 
         if sort == "sorted":

@@ -244,7 +244,6 @@ class PostDisasterLongTermSolution(Solution):
                     * schedule_time[ii]
                     * (schedule_time[ii] - schedule_time[ii - inte])
                 )
-                aa = te
                 denominator += te * (schedule_time[ii] - schedule_time[ii - inte])
 
         # calculate the skewness of the recovery trajectory

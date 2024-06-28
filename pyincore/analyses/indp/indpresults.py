@@ -490,8 +490,8 @@ class INDPResults:
         """
         action_file = out_dir + "/actions_" + str(sample_num) + "_" + suffix + ".csv"
         costs_file = out_dir + "/costs_" + str(sample_num) + "_" + suffix + ".csv"
-        perc_file = out_dir + "/percolation_" + str(sample_num) + "_" + suffix + ".csv"
-        comp_file = out_dir + "/components_" + str(sample_num) + "_" + suffix + ".csv"
+        # perc_file = out_dir + "/percolation_" + str(sample_num) + "_" + suffix + ".csv"
+        # comp_file = out_dir + "/components_" + str(sample_num) + "_" + suffix + ".csv"
         run_time_file = out_dir + "/run_time_" + str(sample_num) + "_" + suffix + ".csv"
         indp_result = INDPResults()
         if os.path.isfile(

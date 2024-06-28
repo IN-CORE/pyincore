@@ -37,7 +37,7 @@ def run_with_base_class():
     pipeline_dmg.set_parameter("num_cpu", 4)
 
     # Run pipeline damage analysis
-    result = pipeline_dmg.run_analysis()
+    _ = pipeline_dmg.run_analysis()
 
 
 if __name__ == "__main__":
