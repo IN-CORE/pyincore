@@ -129,14 +129,6 @@ class BridgeDamage(BaseAnalysis):
             )
             self.set_parameter("fragility_key", fragility_key)
 
-        # Hazard Uncertainty
-        use_hazard_uncertainty = False
-        if (
-            hazard_type == "earthquake"
-            and self.get_parameter("use_hazard_uncertainty") is not None
-        ):
-            use_hazard_uncertainty = self.get_parameter("use_hazard_uncertainty")
-
         # Liquefaction
         use_liquefaction = False
         if (

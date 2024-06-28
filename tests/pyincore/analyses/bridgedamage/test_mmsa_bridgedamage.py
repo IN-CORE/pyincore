@@ -51,11 +51,6 @@ def run_with_base_class():
         "ABP": "60f89fda52e10319df808a72",
     }
 
-    # Use hazard uncertainty for computing damage
-    use_hazard_uncertainty = False
-    # Use liquefaction (LIQ) column of bridges to modify fragility curve
-    use_liquefaction = False
-
     # Create bridge damage
     bridge_dmg = BridgeDamage(client)
 

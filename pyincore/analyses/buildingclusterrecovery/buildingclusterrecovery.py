@@ -152,7 +152,6 @@ class BuildingClusterRecovery(BaseAnalysis):
             building_damage_results = building_damage_results.head(sample_size)
             coeFL = coeFL.iloc[0:sample_size, 0:sample_size]
 
-        user_defined_cpu = self.get_parameter("num_cpu")
         permutation = np.random.permutation(len(building_data))
         permutation_subset = permutation[0:sample_size]
         sample_buildings = [

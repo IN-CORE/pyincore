@@ -113,7 +113,7 @@ class PopulationDislocationUtil:
                     )
                 )
             )
-        except Exception as e:
+        except Exception:
             print()
             # raise e
 

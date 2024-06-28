@@ -242,7 +242,6 @@ class PopulationDislocation(BaseAnalysis):
         if "d_sf_y" in inventory.columns:
             inventory = inventory.drop(columns=["d_sf_y"])
         dsf = inventory["d_sf"].values
-        hue = inventory["huestimate"].values.astype(int)
         pbd = inventory["pblackbg"].values
         phd = inventory["phispbg"].values
 

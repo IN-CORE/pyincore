@@ -43,7 +43,7 @@ class BridgeUtil:
         if target_fragility_key.lower() == BridgeUtil.DEFAULT_FRAGILITY_KEY.lower():
             return retrofit_cost
         else:
-            retrofit_code = BridgeUtil.get_retrofit_code(target_fragility_key)
+            _ = BridgeUtil.get_retrofit_code(target_fragility_key)
         return retrofit_cost
 
     @staticmethod

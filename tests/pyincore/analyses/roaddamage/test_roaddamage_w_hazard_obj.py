@@ -35,7 +35,6 @@ def run_with_base_class():
     tsu_mapping_id = "5ee7b2c9c54361000148de37"
 
     tsu_fragility_key = "Non-Retrofit inundationDepth Fragility ID Code"
-    tsu_liquefaction = False
 
     uncertainty = False
 

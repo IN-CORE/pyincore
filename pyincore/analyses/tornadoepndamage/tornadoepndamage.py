@@ -336,7 +336,6 @@ class TornadoEpnDamage(BaseAnalysis):
                                 if poly.intersects(line):
                                     intersection = poly.intersection(line)
                                     any_point = None
-                                    intersection_length = intersection.length
                                     if intersection.length > 0:
                                         # print(intersection.__class__.__name__)
                                         # calculate the length of intersected line
@@ -434,7 +433,6 @@ class TornadoEpnDamage(BaseAnalysis):
                                     mu = None
                                     sigma = None
                                     for k in range(npoles):
-                                        repair_time = 0
                                         random_resistivity = random.uniform(0, 1)
 
                                         if random_resistivity <= poleresist:
@@ -552,16 +550,6 @@ class TornadoEpnDamage(BaseAnalysis):
     """
     align coordinate values in a list as a single pair in order
     """
-
-    def align_list_cooridnate(self, coord_list):
-        coord_iterator = iter(coord_list)
-        first = prev = next(coord_iterator)
-        for coord in coord_iterator:
-            yield prev, coord
-            prev = coord
-
-            # if it is polygon the following line is needed to close the polygon geometry
-            # yield coord, first
 
     def set_tornado_variables(self, tornado_dataset):
         sim_num_list = []

@@ -152,7 +152,7 @@ class DatasetUtil:
                     )
                     else None
                 )
-                type = (
+                _ = (
                     row["config_mappingEntryKey"]["type"]
                     if (
                         "config_mappingEntryKey" in row.index
@@ -164,12 +164,6 @@ class DatasetUtil:
 
                 if target_column and expression:
                     if target_column in row.index:
-                        retrofit_value = (
-                            float(row["retrofit_value"])
-                            if type == "number"
-                            else row["retrofit_value"]
-                        )
-
                         # Dangerous! Be careful with the expression
                         row[target_column] = eval(f"row[target_column]{expression}")
                     else:

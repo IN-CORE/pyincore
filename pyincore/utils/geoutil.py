@@ -107,7 +107,7 @@ class GeoUtil:
                     else:
                         new_feature["properties"].update(empty_data)
                     sink.write(new_feature)
-                except Exception as e:
+                except Exception:
                     logging.exception("Error processing feature %s:", f["id"])
 
     @staticmethod
@@ -203,7 +203,6 @@ class GeoUtil:
             str: Distance between points.
 
         """
-        dist = 0
         geod = pyproj.Geod(ellps="WGS84")
         angle1, angle2, distance = geod.inv(point1.x, point1.y, point2.x, point2.y)
         # print(point1.x, point1.y, point2.x, point2.y)
