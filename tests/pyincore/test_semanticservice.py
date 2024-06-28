@@ -54,7 +54,7 @@ def test_get_semantic_type_by_name(semanticsvc):
     # find semantic type by name which exists
     semantic_types = semanticsvc.get_semantic_type_by_name(semantic_type_exists)
     # Checks semantic dictionary is not empty
-    assert type(semantic_types) == dict and bool(
+    assert type(semantic_types) is dict and bool(
         dict
     ), f"Should find one semantic type as {semantic_type_exists} exists"
     # find semantic type by name which does not exist

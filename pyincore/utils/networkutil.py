@@ -394,7 +394,7 @@ class NetworkUtil:
         node_list = list(set(node_list))
 
         for node in link_node_list:
-            if node in node_list == False:
+            if node in node_list is False:
                 validate = False
 
         return validate

@@ -149,7 +149,7 @@ class GeoUtil:
             int: A decimal value.
 
         """
-        if degree == 0.0 or degree == None or degree == "":
+        if degree == 0.0 or degree is None or degree == "":
             decimal = "NA"
         else:
             degree = str(int(degree))
