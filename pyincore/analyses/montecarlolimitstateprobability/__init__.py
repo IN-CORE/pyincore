@@ -5,5 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.montecarlolimitstateprobability.montecarlolimitstateprobability import \
-    MonteCarloLimitStateProbability
+from pyincore.analyses.montecarlolimitstateprobability.montecarlolimitstateprobability import (
+    MonteCarloLimitStateProbability,
+)

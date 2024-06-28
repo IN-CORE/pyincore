@@ -25,7 +25,9 @@ class ExampleAnalysis(BaseAnalysis):
             results.append(self.building_damage_analysis(building))
 
         # Create the result dataset
-        self.set_result_csv_data("result", results, name=self.get_parameter("result_name"))
+        self.set_result_csv_data(
+            "result", results, name=self.get_parameter("result_name")
+        )
 
         return True
 
@@ -45,10 +47,10 @@ class ExampleAnalysis(BaseAnalysis):
             bldg_results = collections.OrderedDict()
 
             mean_damage = collections.OrderedDict()
-            mean_damage['meandamage'] = random.uniform(0.0, 1.0)
+            mean_damage["meandamage"] = random.uniform(0.0, 1.0)
 
             # Add building global id so damage can be linked to building attributes
-            bldg_results['guid'] = building['properties']['guid']
+            bldg_results["guid"] = building["properties"]["guid"]
             # Damage result
             bldg_results.update(mean_damage)
 
@@ -68,31 +70,33 @@ class ExampleAnalysis(BaseAnalysis):
 
         """
         return {
-            'name': 'mock-building-damage',
-            'description': 'mock-building damage analysis',
-            'input_parameters': [
+            "name": "mock-building-damage",
+            "description": "mock-building damage analysis",
+            "input_parameters": [
                 {
-                    'id': 'result_name',
-                    'required': True,
-                    'description': 'result dataset name',
-                    'type': str
+                    "id": "result_name",
+                    "required": True,
+                    "description": "result dataset name",
+                    "type": str,
                 },
             ],
-            'input_datasets': [
+            "input_datasets": [
                 {
-                    'id': 'buildings',
-                    'required': True,
-                    'description': 'Building Inventory',
-                    'type': ['ergo:buildingInventoryVer4', 'ergo:buildingInventoryVer5'],
+                    "id": "buildings",
+                    "required": True,
+                    "description": "Building Inventory",
+                    "type": [
+                        "ergo:buildingInventoryVer4",
+                        "ergo:buildingInventoryVer5",
+                    ],
                 },
-
             ],
-            'output_datasets': [
+            "output_datasets": [
                 {
-                    'id': 'result',
-                    'parent_type': 'buildings',
-                    'description': 'CSV file of building structural damage',
-                    'type': 'ergo:buildingDamageVer4'
+                    "id": "result",
+                    "parent_type": "buildings",
+                    "description": "CSV file of building structural damage",
+                    "type": "ergo:buildingDamageVer4",
                 }
-            ]
+            ],
         }

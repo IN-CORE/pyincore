@@ -22,7 +22,9 @@ def run_with_base_class():
     bldg_econ_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
     bldg_econ_dmg.load_remote_input_dataset("building_mean_dmg", bldg_dmg_id)
 
-    bldg_econ_dmg.load_remote_input_dataset("occupancy_multiplier", bldg_occupancy_mult_id)
+    bldg_econ_dmg.load_remote_input_dataset(
+        "occupancy_multiplier", bldg_occupancy_mult_id
+    )
 
     result_name = "seaside_bldg_econ_loss"
     bldg_econ_dmg.set_parameter("result_name", result_name)
@@ -34,5 +36,5 @@ def run_with_base_class():
     bldg_econ_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

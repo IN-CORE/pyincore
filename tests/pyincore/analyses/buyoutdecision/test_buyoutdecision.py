@@ -4,9 +4,8 @@
 
 
 from pyincore.analyses.buyoutdecision import BuyoutDecision
-from pyincore import IncoreClient, Dataset
+from pyincore import IncoreClient
 import pyincore.globals as pyglobals
-import pandas as pd
 
 
 def BuyoutDecisionTest():
@@ -30,9 +29,15 @@ def BuyoutDecisionTest():
 
     buyout_decision.load_remote_input_dataset("buildings", buildings_id)
     buyout_decision.load_remote_input_dataset("housing_unit_allocation", hua_id)
-    buyout_decision.load_remote_input_dataset("past_building_damage", past_building_damage_id)
-    buyout_decision.load_remote_input_dataset("future_building_damage", future_building_damage_id)
-    buyout_decision.load_remote_input_dataset("population_dislocation", past_pop_dislocation_id)
+    buyout_decision.load_remote_input_dataset(
+        "past_building_damage", past_building_damage_id
+    )
+    buyout_decision.load_remote_input_dataset(
+        "future_building_damage", future_building_damage_id
+    )
+    buyout_decision.load_remote_input_dataset(
+        "population_dislocation", past_pop_dislocation_id
+    )
 
     buyout_decision.run_analysis()
 

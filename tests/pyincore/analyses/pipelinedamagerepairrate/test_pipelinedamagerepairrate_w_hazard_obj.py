@@ -3,7 +3,13 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore import IncoreClient, FragilityService, MappingSet, HazardService, Earthquake
+from pyincore import (
+    IncoreClient,
+    FragilityService,
+    MappingSet,
+    HazardService,
+    Earthquake,
+)
 from pyincore.analyses.pipelinedamagerepairrate import PipelineDamageRepairRate
 import pyincore.globals as pyglobals
 
@@ -18,7 +24,9 @@ def test_pipeline_dmg_w_repair_rate():
 
     # New madrid earthquake using Atkinson Boore 1995
     hazard_service = HazardService(client)
-    earthquake = Earthquake.from_hazard_service("5b902cb273c3371e1236b36b", hazard_service)
+    earthquake = Earthquake.from_hazard_service(
+        "5b902cb273c3371e1236b36b", hazard_service
+    )
 
     # Geology dataset
     liq_geology_dataset_id = "5a284f53c7d30d13bc08249c"
@@ -30,19 +38,22 @@ def test_pipeline_dmg_w_repair_rate():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    test_pipeline_dmg_w_rr.set_input_dataset('dfr3_mapping_set', mapping_set)
+    test_pipeline_dmg_w_rr.set_input_dataset("dfr3_mapping_set", mapping_set)
     # set hazard
-    test_pipeline_dmg_w_rr.set_input_hazard('hazard', earthquake)
+    test_pipeline_dmg_w_rr.set_input_hazard("hazard", earthquake)
     # Specify the result name
     result_name = "pipeline_result_w_hazard_obj"
     # Set analysis parameters
     test_pipeline_dmg_w_rr.set_parameter("result_name", result_name)
     test_pipeline_dmg_w_rr.set_parameter("liquefaction_fragility_key", "pgd")
     # test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", False)
-    test_pipeline_dmg_w_rr.set_parameter("use_liquefaction", True)  # toggle on and off to see liquefaction
+    test_pipeline_dmg_w_rr.set_parameter(
+        "use_liquefaction", True
+    )  # toggle on and off to see liquefaction
     test_pipeline_dmg_w_rr.set_parameter("num_cpu", 4)
-    test_pipeline_dmg_w_rr.set_parameter("liquefaction_geology_dataset_id",
-                                         liq_geology_dataset_id)
+    test_pipeline_dmg_w_rr.set_parameter(
+        "liquefaction_geology_dataset_id", liq_geology_dataset_id
+    )
     # Run pipeline damage analysis
     result = test_pipeline_dmg_w_rr.run_analysis()
 

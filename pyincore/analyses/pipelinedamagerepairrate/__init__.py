@@ -5,5 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.pipelinedamagerepairrate.pipelinedamagerepairrate import PipelineDamageRepairRate
+from pyincore.analyses.pipelinedamagerepairrate.pipelinedamagerepairrate import (
+    PipelineDamageRepairRate,
+)
 from pyincore.analyses.pipelinedamagerepairrate.pipelineutil import PipelineUtil

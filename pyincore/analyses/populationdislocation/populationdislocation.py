@@ -6,7 +6,9 @@ import numpy as np
 import pandas as pd
 import warnings
 from pyincore import BaseAnalysis
-from pyincore.analyses.populationdislocation.populationdislocationutil import PopulationDislocationUtil
+from pyincore.analyses.populationdislocation.populationdislocationutil import (
+    PopulationDislocationUtil,
+)
 
 
 class PopulationDislocation(BaseAnalysis):
@@ -32,98 +34,100 @@ class PopulationDislocation(BaseAnalysis):
 
     def get_spec(self):
         return {
-            'name': 'population-dislocation',
-            'description': 'Population Dislocation Analysis',
-            'input_parameters': [
+            "name": "population-dislocation",
+            "description": "Population Dislocation Analysis",
+            "input_parameters": [
                 {
-                    'id': 'result_name',
-                    'required': True,
-                    'description': 'Result CSV dataset name',
-                    'type': str
+                    "id": "result_name",
+                    "required": True,
+                    "description": "Result CSV dataset name",
+                    "type": str,
                 },
                 {
-                    'id': 'seed',
-                    'required': True,
-                    'description': 'Seed to ensure replication if run as part of a probabilistic analysis, '
-                                   'for example in connection with Housing Unit Allocation analysis.',
-                    'type': int
+                    "id": "seed",
+                    "required": True,
+                    "description": "Seed to ensure replication if run as part of a probabilistic analysis, "
+                    "for example in connection with Housing Unit Allocation analysis.",
+                    "type": int,
                 },
                 {
-                    'id': 'choice_dislocation',
-                    'required': False,
-                    'description': 'Flag to calculate choice dislocation',
-                    'type': bool
+                    "id": "choice_dislocation",
+                    "required": False,
+                    "description": "Flag to calculate choice dislocation",
+                    "type": bool,
                 },
                 {
-                    'id': 'choice_dislocation_cutoff',
-                    'required': False,
-                    'description': 'Choice dislocation cutoff',
-                    'type': float
+                    "id": "choice_dislocation_cutoff",
+                    "required": False,
+                    "description": "Choice dislocation cutoff",
+                    "type": float,
                 },
                 {
-                    'id': 'choice_dislocation_ds',
-                    'required': False,
-                    'description': 'Damage state to use for choice dislocation ',
-                    'type': str
+                    "id": "choice_dislocation_ds",
+                    "required": False,
+                    "description": "Damage state to use for choice dislocation ",
+                    "type": str,
                 },
                 {
-                    'id': 'unsafe_occupancy',
-                    'required': False,
-                    'description': 'Flag to calculate unsafe occupancy',
-                    'type': bool
+                    "id": "unsafe_occupancy",
+                    "required": False,
+                    "description": "Flag to calculate unsafe occupancy",
+                    "type": bool,
                 },
                 {
-                    'id': 'unsafe_occupancy_cutoff',
-                    'required': False,
-                    'description': 'Unsafe occupancy cutoff',
-                    'type': float
+                    "id": "unsafe_occupancy_cutoff",
+                    "required": False,
+                    "description": "Unsafe occupancy cutoff",
+                    "type": float,
                 },
                 {
-                    'id': 'unsafe_occupancy_ds',
-                    'required': False,
-                    'description': 'Damage state to use for unsafe occupancy ',
-                    'type': str
+                    "id": "unsafe_occupancy_ds",
+                    "required": False,
+                    "description": "Damage state to use for unsafe occupancy ",
+                    "type": str,
+                },
+            ],
+            "input_datasets": [
+                {
+                    "id": "building_dmg",
+                    "required": True,
+                    "description": "Building damage results CSV file",
+                    "type": [
+                        "ergo:buildingInventoryVer4",
+                        "ergo:buildingDamageVer5",
+                        "ergo:buildingDamageVer6",
+                        "ergo:buildingInventory",
+                    ],
+                },
+                {
+                    "id": "housing_unit_allocation",
+                    "required": True,
+                    "description": "A csv file with the merged dataset of the inputs, aka Probabilistic"
+                    "House Unit Allocation",
+                    "type": ["incore:housingUnitAllocation"],
+                },
+                {
+                    "id": "block_group_data",
+                    "required": True,
+                    "description": "Block group racial distribution census CSV data",
+                    "type": ["incore:blockGroupData"],
+                },
+                {
+                    "id": "value_loss_param",
+                    "required": True,
+                    "description": "A table with value loss beta distribution parameters based on Bai et al. 2009",
+                    "type": ["incore:valuLossParam"],
+                },
+            ],
+            "output_datasets": [
+                {
+                    "id": "result",
+                    "parent_type": "population_block",
+                    "description": "A csv file with population dislocation result "
+                    "aggregated to the block group level",
+                    "type": "incore:popDislocation",
                 }
             ],
-            'input_datasets': [
-                {
-                    'id': 'building_dmg',
-                    'required': True,
-                    'description': 'Building damage results CSV file',
-                    'type': ['ergo:buildingInventoryVer4',
-                             'ergo:buildingDamageVer5',
-                             'ergo:buildingDamageVer6',
-                             'ergo:buildingInventory']
-                },
-                {
-                    'id': 'housing_unit_allocation',
-                    'required': True,
-                    'description': 'A csv file with the merged dataset of the inputs, aka Probabilistic'
-                                   'House Unit Allocation',
-                    'type': ['incore:housingUnitAllocation']
-                },
-                {
-                    'id': 'block_group_data',
-                    'required': True,
-                    'description': 'Block group racial distribution census CSV data',
-                    'type': ['incore:blockGroupData']
-                },
-                {
-                    'id': 'value_loss_param',
-                    'required': True,
-                    'description': 'A table with value loss beta distribution parameters based on Bai et al. 2009',
-                    'type': ['incore:valuLossParam']
-                }
-            ],
-            'output_datasets': [
-                {
-                    'id': 'result',
-                    'parent_type': 'population_block',
-                    'description': 'A csv file with population dislocation result '
-                                   'aggregated to the block group level',
-                    'type': 'incore:popDislocation'
-                }
-            ]
         }
 
     def run(self):
@@ -139,18 +143,25 @@ class PopulationDislocation(BaseAnalysis):
         result_name = self.get_parameter("result_name")
 
         # Building damage dataset
-        building_dmg = self.get_input_dataset("building_dmg").get_dataframe_from_csv(low_memory=False)
+        building_dmg = self.get_input_dataset("building_dmg").get_dataframe_from_csv(
+            low_memory=False
+        )
 
         # Housing unit allocation dataset
-        housing_unit_alloc = self.get_input_dataset("housing_unit_allocation"). \
-            get_dataframe_from_csv(low_memory=False)
+        housing_unit_alloc = self.get_input_dataset(
+            "housing_unit_allocation"
+        ).get_dataframe_from_csv(low_memory=False)
 
         # Block group dataset
-        bg_data = self.get_input_dataset("block_group_data").get_dataframe_from_csv(low_memory=False)
+        bg_data = self.get_input_dataset("block_group_data").get_dataframe_from_csv(
+            low_memory=False
+        )
 
         # Get value loss parameters
-        value_loss = self.get_input_dataset("value_loss_param").get_dataframe_from_csv(low_memory=False)
-        value_loss.set_index('damagestate', inplace=True)
+        value_loss = self.get_input_dataset("value_loss_param").get_dataframe_from_csv(
+            low_memory=False
+        )
+        value_loss.set_index("damagestate", inplace=True)
 
         # Get choice_dislocation and unsafe_occupancy variables
         choice_dislocation = self.get_parameter("choice_dislocation")
@@ -167,20 +178,32 @@ class PopulationDislocation(BaseAnalysis):
         merged_final_inv["choice_dis"] = None
         merged_final_inv["unsafe_occ"] = None
         if choice_dislocation:
-            choice_dislocation_cutoff = self.get_parameter("choice_dislocation_cutoff") or 0.5
-            choice_dislocation_ds = self.get_parameter("choice_dislocation_ds") or "DS_0"
-            PopulationDislocationUtil.get_choice_dislocation(merged_final_inv, choice_dislocation_cutoff, choice_dislocation_ds)
+            choice_dislocation_cutoff = (
+                self.get_parameter("choice_dislocation_cutoff") or 0.5
+            )
+            choice_dislocation_ds = (
+                self.get_parameter("choice_dislocation_ds") or "DS_0"
+            )
+            PopulationDislocationUtil.get_choice_dislocation(
+                merged_final_inv, choice_dislocation_cutoff, choice_dislocation_ds
+            )
 
         if unsafe_occupancy:
-            unsafe_occupancy_cutoff = self.get_parameter("unsafe_occupancy_cutoff") or 0.5
+            unsafe_occupancy_cutoff = (
+                self.get_parameter("unsafe_occupancy_cutoff") or 0.5
+            )
             unsafe_occupancy_ds = self.get_parameter("unsafe_occupancy_ds") or "DS_3"
-            PopulationDislocationUtil.get_unsafe_occupancy(merged_final_inv, unsafe_occupancy_cutoff, unsafe_occupancy_ds)
+            PopulationDislocationUtil.get_unsafe_occupancy(
+                merged_final_inv, unsafe_occupancy_cutoff, unsafe_occupancy_ds
+            )
 
         self.set_result_csv_data("result", merged_final_inv, result_name, "dataframe")
 
         return True
 
-    def get_dislocation(self, seed_i: int, inventory: pd.DataFrame, value_loss: pd.DataFrame):
+    def get_dislocation(
+        self, seed_i: int, inventory: pd.DataFrame, value_loss: pd.DataFrame
+    ):
         """Calculates dislocation probability.
 
         Probability of dislocation, a binary variable based on the logistic probability of dislocation.
@@ -205,9 +228,9 @@ class PopulationDislocation(BaseAnalysis):
         if "huestimate" in inventory.columns:
             inventory["d_sf"] = (inventory["huestimate"] == 1).astype(int)
         elif "huestimate_x" in inventory.columns:
-            inventory = PopulationDislocationUtil.compare_columns(inventory,
-                                                                  "huestimate_x",
-                                                                  "huestimate_y", True)
+            inventory = PopulationDislocationUtil.compare_columns(
+                inventory, "huestimate_x", "huestimate_y", True
+            )
             if "huestimate_x-huestimate_y" in inventory.columns:
                 exit("Column huestimate is ambiguous, check the input datasets!")
             else:
@@ -219,7 +242,6 @@ class PopulationDislocation(BaseAnalysis):
         if "d_sf_y" in inventory.columns:
             inventory = inventory.drop(columns=["d_sf_y"])
         dsf = inventory["d_sf"].values
-        hue = inventory["huestimate"].values.astype(int)
         pbd = inventory["pblackbg"].values
         phd = inventory["phispbg"].values
 
@@ -229,20 +251,36 @@ class PopulationDislocation(BaseAnalysis):
         prob3 = inventory["DS_3"].values
 
         # include random value loss by damage state
-        rploss0 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_0", dsf.size)
-        rploss1 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_1", dsf.size)
-        rploss2 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_2", dsf.size)
-        rploss3 = PopulationDislocationUtil.get_random_loss(seed_i, value_loss, "DS_3", dsf.size)
+        rploss0 = PopulationDislocationUtil.get_random_loss(
+            seed_i, value_loss, "DS_0", dsf.size
+        )
+        rploss1 = PopulationDislocationUtil.get_random_loss(
+            seed_i, value_loss, "DS_1", dsf.size
+        )
+        rploss2 = PopulationDislocationUtil.get_random_loss(
+            seed_i, value_loss, "DS_2", dsf.size
+        )
+        rploss3 = PopulationDislocationUtil.get_random_loss(
+            seed_i, value_loss, "DS_3", dsf.size
+        )
 
         inventory["rploss_0"] = rploss0
         inventory["rploss_1"] = rploss1
         inventory["rploss_2"] = rploss2
         inventory["rploss_3"] = rploss3
 
-        prob0_disl = PopulationDislocationUtil.get_disl_probability(rploss0, dsf, pbd, phd)
-        prob1_disl = PopulationDislocationUtil.get_disl_probability(rploss1, dsf, pbd, phd)
-        prob2_disl = PopulationDislocationUtil.get_disl_probability(rploss2, dsf, pbd, phd)
-        prob3_disl = PopulationDislocationUtil.get_disl_probability(rploss3, dsf, pbd, phd)
+        prob0_disl = PopulationDislocationUtil.get_disl_probability(
+            rploss0, dsf, pbd, phd
+        )
+        prob1_disl = PopulationDislocationUtil.get_disl_probability(
+            rploss1, dsf, pbd, phd
+        )
+        prob2_disl = PopulationDislocationUtil.get_disl_probability(
+            rploss2, dsf, pbd, phd
+        )
+        prob3_disl = PopulationDislocationUtil.get_disl_probability(
+            rploss3, dsf, pbd, phd
+        )
 
         #  dislocation probability is 0 if the damage is set to 100% probability (insignificant, DS_0 = 1).
         #  DS_0 bulding does not distinguish between in and out hazard boundaries. All DS_0 = 1 are set to
@@ -251,7 +289,12 @@ class PopulationDislocation(BaseAnalysis):
 
         # total_prob_disl is the sum of the probability of dislocation at four damage states
         # times the probability of being in that damage state.
-        total_prob_disl = prob0_disl * prob0 + prob1_disl * prob1 + prob2_disl * prob2 + prob3_disl * prob3
+        total_prob_disl = (
+            prob0_disl * prob0
+            + prob1_disl * prob1
+            + prob2_disl * prob2
+            + prob3_disl * prob3
+        )
 
         inventory["prdis"] = total_prob_disl
 

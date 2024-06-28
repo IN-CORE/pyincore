@@ -74,7 +74,9 @@ def run_with_base_class():
     pipeline_dmg_w_rr.set_parameter("hazard_type", hazard_type)
     pipeline_dmg_w_rr.set_parameter("hazard_id", hazard_id)
     pipeline_dmg_w_rr.set_parameter("liquefaction_fragility_key", liq_fragility_key)
-    pipeline_dmg_w_rr.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
+    pipeline_dmg_w_rr.set_parameter(
+        "liquefaction_geology_dataset_id", liq_geology_dataset_id
+    )
     pipeline_dmg_w_rr.set_parameter("use_liquefaction", use_liq)
     pipeline_dmg_w_rr.set_parameter("num_cpu", 4)
 
@@ -124,5 +126,5 @@ def run_with_base_class():
     wfn_func.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

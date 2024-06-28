@@ -24,9 +24,15 @@ class WaterFacilityRepairCost(BaseAnalysis):
     def run(self):
         """Executes water facility repair cost analysis."""
 
-        wf_df = self.get_input_dataset("water_facilities").get_dataframe_from_shapefile()
-        sample_damage_states_df = self.get_input_dataset("sample_damage_states").get_dataframe_from_csv()
-        replacement_cost = self.get_input_dataset("replacement_cost").get_dataframe_from_csv()
+        wf_df = self.get_input_dataset(
+            "water_facilities"
+        ).get_dataframe_from_shapefile()
+        sample_damage_states_df = self.get_input_dataset(
+            "sample_damage_states"
+        ).get_dataframe_from_csv()
+        replacement_cost = self.get_input_dataset(
+            "replacement_cost"
+        ).get_dataframe_from_csv()
 
         # join damage state, replacement cost, with original inventory
         wf_df = wf_df.merge(sample_damage_states_df, on="guid")
@@ -34,22 +40,32 @@ class WaterFacilityRepairCost(BaseAnalysis):
         wf_set = wf_df.to_dict(orient="records")
 
         user_defined_cpu = 1
-        if not self.get_parameter("num_cpu") is None and self.get_parameter("num_cpu") > 0:
+        if (
+            not self.get_parameter("num_cpu") is None
+            and self.get_parameter("num_cpu") > 0
+        ):
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(self, len(wf_set), user_defined_cpu)
+        num_workers = AnalysisUtil.determine_parallelism_locally(
+            self, len(wf_set), user_defined_cpu
+        )
 
         avg_bulk_input_size = int(len(wf_set) / num_workers)
         inventory_args = []
         count = 0
         inventory_list = list(wf_set)
         while count < len(inventory_list):
-            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
+            inventory_args.append(inventory_list[count : count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
-        repair_costs = self.wf_repair_cost_concurrent_future(self.wf_repair_cost_bulk_input, num_workers,
-                                                             inventory_args)
-        self.set_result_csv_data("result", repair_costs, name=self.get_parameter("result_name") + "_repair_cost")
+        repair_costs = self.wf_repair_cost_concurrent_future(
+            self.wf_repair_cost_bulk_input, num_workers, inventory_args
+        )
+        self.set_result_csv_data(
+            "result",
+            repair_costs,
+            name=self.get_parameter("result_name") + "_repair_cost",
+        )
 
         return True
 
@@ -67,7 +83,9 @@ class WaterFacilityRepairCost(BaseAnalysis):
         """
 
         output = []
-        with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=num_workers
+        ) as executor:
             for ret1 in executor.map(function_name, *args):
                 output.extend(ret1)
 
@@ -85,7 +103,9 @@ class WaterFacilityRepairCost(BaseAnalysis):
         """
         # read in the damage ratio tables
         wf_dmg_ratios_csv = self.get_input_dataset("wf_dmg_ratios").get_csv_reader()
-        dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(wf_dmg_ratios_csv, ignore_first_row=False)
+        dmg_ratio_tbl = AnalysisUtil.get_csv_table_rows(
+            wf_dmg_ratios_csv, ignore_first_row=False
+        )
 
         repair_costs = []
 
@@ -99,7 +119,10 @@ class WaterFacilityRepairCost(BaseAnalysis):
             for n, ds in enumerate(sample_damage_states):
                 for dmg_ratio_row in dmg_ratio_tbl:
                     # use "in" instead of "==" since some inventory has pending number (e.g. EDC2)
-                    if dmg_ratio_row["Inventory Type"] in wf_type and dmg_ratio_row["Damage State"] == ds:
+                    if (
+                        dmg_ratio_row["Inventory Type"] in wf_type
+                        and dmg_ratio_row["Damage State"] == ds
+                    ):
                         dr = float(dmg_ratio_row["Best Mean Damage Ratio"])
                         repair_cost[n] = str(wf["replacement_cost"] * dr)
 
@@ -125,13 +148,13 @@ class WaterFacilityRepairCost(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "A name of the resulting dataset",
-                    "type": str
+                    "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "If using parallel execution, the number of cpus to request.",
-                    "type": int
+                    "type": int,
                 },
             ],
             "input_datasets": [
@@ -151,13 +174,13 @@ class WaterFacilityRepairCost(BaseAnalysis):
                     "id": "sample_damage_states",
                     "required": True,
                     "description": "sample damage states from Monte Carlo Simulation",
-                    "type": ["incore:sampleDamageState"]
+                    "type": ["incore:sampleDamageState"],
                 },
                 {
                     "id": "wf_dmg_ratios",
                     "required": True,
                     "description": "Damage Ratios table",
-                    "type": ["incore:waterFacilityDamageRatios"]
+                    "type": ["incore:waterFacilityDamageRatios"],
                 },
             ],
             "output_datasets": [
@@ -165,7 +188,7 @@ class WaterFacilityRepairCost(BaseAnalysis):
                     "id": "result",
                     "parent_type": "water_facilities",
                     "description": "A csv file with repair cost for each water facility",
-                    "type": "incore:repairCost"
+                    "type": "incore:repairCost",
                 }
-            ]
+            ],
         }

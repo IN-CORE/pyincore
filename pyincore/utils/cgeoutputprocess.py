@@ -12,8 +12,12 @@ class CGEOutputProcess:
     """This class converts csv results outputs of Joplin CGE analysis to json format."""
 
     @staticmethod
-    def get_cge_household_count(household_count, household_count_path=None, filename_json=None,
-                                income_categories=("HH1", "HH2", "HH3", "HH4", "HH5")):
+    def get_cge_household_count(
+        household_count,
+        household_count_path=None,
+        filename_json=None,
+        income_categories=("HH1", "HH2", "HH3", "HH4", "HH5"),
+    ):
         """Calculate income results from the output files of the Joplin CGE analysis and convert the results
         to json format.
         {
@@ -43,18 +47,26 @@ class CGEOutputProcess:
         after_event = {}
         pct_change = {}
         for income_category in income_categories:
-            before_event[income_category] = household_group_count[household_group_count["Household Group"] ==
-                                                                  income_category]["HH0"].values[0]
-            after_event[income_category] = household_group_count[household_group_count["Household Group"] ==
-                                                                 income_category]["HHL"].values[0]
+            before_event[income_category] = household_group_count[
+                household_group_count["Household Group"] == income_category
+            ]["HH0"].values[0]
+            after_event[income_category] = household_group_count[
+                household_group_count["Household Group"] == income_category
+            ]["HHL"].values[0]
 
             if before_event[income_category]:
-                pct_change[income_category] = 100 * ((after_event[income_category] - before_event[income_category]) /
-                                                     abs(before_event[income_category]))
+                pct_change[income_category] = 100 * (
+                    (after_event[income_category] - before_event[income_category])
+                    / abs(before_event[income_category])
+                )
             else:
                 pct_change[income_category] = None
 
-        cge_total_household_count = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
+        cge_total_household_count = {
+            "beforeEvent": before_event,
+            "afterEvent": after_event,
+            "%_change": pct_change,
+        }
 
         if filename_json:
             with open(filename_json, "w") as outfile:
@@ -63,8 +75,12 @@ class CGEOutputProcess:
         return json.dumps(cge_total_household_count)
 
     @staticmethod
-    def get_cge_gross_income(gross_income, gross_income_path=None, filename_json=None,
-                             income_categories=("HH1", "HH2", "HH3", "HH4", "HH5")):
+    def get_cge_gross_income(
+        gross_income,
+        gross_income_path=None,
+        filename_json=None,
+        income_categories=("HH1", "HH2", "HH3", "HH4", "HH5"),
+    ):
         """Calculate household gross income results from the output files of the Joplin CGE analysis
         and convert the results to json format.
         {
@@ -94,18 +110,26 @@ class CGEOutputProcess:
         after_event = {}
         pct_change = {}
         for income_category in income_categories:
-            before_event[income_category] = household_income[household_income["Household Group"] == income_category][
-                "Y0"].values[0]
-            after_event[income_category] = household_income[household_income["Household Group"] == income_category][
-                "YL"].values[0]
+            before_event[income_category] = household_income[
+                household_income["Household Group"] == income_category
+            ]["Y0"].values[0]
+            after_event[income_category] = household_income[
+                household_income["Household Group"] == income_category
+            ]["YL"].values[0]
 
             if before_event[income_category]:
-                pct_change[income_category] = 100 * ((after_event[income_category] - before_event[income_category]) /
-                                                     abs(before_event[income_category]))
+                pct_change[income_category] = 100 * (
+                    (after_event[income_category] - before_event[income_category])
+                    / abs(before_event[income_category])
+                )
             else:
                 pct_change[income_category] = None
 
-        cge_total_household_income = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
+        cge_total_household_income = {
+            "beforeEvent": before_event,
+            "afterEvent": after_event,
+            "%_change": pct_change,
+        }
 
         if filename_json:
             with open(filename_json, "w") as outfile:
@@ -114,8 +138,14 @@ class CGEOutputProcess:
         return json.dumps(cge_total_household_income)
 
     @staticmethod
-    def get_cge_employment(pre_demand, post_demand, pre_demand_path=None, post_demand_path=None,
-                           filename_json=None, demand_categories=("GOODS", "TRADE", "OTHER")):
+    def get_cge_employment(
+        pre_demand,
+        post_demand,
+        pre_demand_path=None,
+        post_demand_path=None,
+        filename_json=None,
+        demand_categories=("GOODS", "TRADE", "OTHER"),
+    ):
         """Calculate employment results from the output files of the Joplin CGE analysis and convert the results
         to json format. The value is a sum of L1, L2 and L3 Labor groups numbers.
         {
@@ -160,12 +190,18 @@ class CGEOutputProcess:
             after_event[demand_category] = post_disaster_demand[demand_category].sum()
 
             if before_event[demand_category]:
-                pct_change[demand_category] = 100 * ((after_event[demand_category] - before_event[demand_category]) /
-                                                     abs(before_event[demand_category]))
+                pct_change[demand_category] = 100 * (
+                    (after_event[demand_category] - before_event[demand_category])
+                    / abs(before_event[demand_category])
+                )
             else:
                 pct_change[demand_category] = None
 
-        cge_employment = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
+        cge_employment = {
+            "beforeEvent": before_event,
+            "afterEvent": after_event,
+            "%_change": pct_change,
+        }
 
         if filename_json:
             with open(filename_json, "w") as outfile:
@@ -174,8 +210,12 @@ class CGEOutputProcess:
         return json.dumps(cge_employment)
 
     @staticmethod
-    def get_cge_domestic_supply(domestic_supply, domestic_supply_path=None, filename_json=None,
-                                supply_categories=("Goods", "Trade", "Other", "HS1", "HS2", "HS3")):
+    def get_cge_domestic_supply(
+        domestic_supply,
+        domestic_supply_path=None,
+        filename_json=None,
+        supply_categories=("Goods", "Trade", "Other", "HS1", "HS2", "HS3"),
+    ):
         """Calculate domestic supply results from the output files of the Joplin CGE analysis and convert the results
         to json format.
         {
@@ -208,15 +248,25 @@ class CGEOutputProcess:
         after_event = {}
         pct_change = {}
         for supply_category in supply_categories:
-            before_event[supply_category] = sector_supply[sector_supply["Sectors"] == supply_category]["DS0"].values[0]
-            after_event[supply_category] = sector_supply[sector_supply["Sectors"] == supply_category]["DSL"].values[0]
+            before_event[supply_category] = sector_supply[
+                sector_supply["Sectors"] == supply_category
+            ]["DS0"].values[0]
+            after_event[supply_category] = sector_supply[
+                sector_supply["Sectors"] == supply_category
+            ]["DSL"].values[0]
             if before_event[supply_category]:
-                pct_change[supply_category] = 100 * ((after_event[supply_category] - before_event[supply_category]) /
-                                                     abs(before_event[supply_category]))
+                pct_change[supply_category] = 100 * (
+                    (after_event[supply_category] - before_event[supply_category])
+                    / abs(before_event[supply_category])
+                )
             else:
                 pct_change[supply_category] = None
 
-        cge_domestic_supply = {"beforeEvent": before_event, "afterEvent": after_event, "%_change": pct_change}
+        cge_domestic_supply = {
+            "beforeEvent": before_event,
+            "afterEvent": after_event,
+            "%_change": pct_change,
+        }
 
         if filename_json:
             with open(filename_json, "w") as outfile:

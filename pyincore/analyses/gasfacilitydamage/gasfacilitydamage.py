@@ -38,9 +38,11 @@ class GasFacilityDamage(BaseAnalysis):
         inventory_set = self.get_input_dataset("gas_facilities").get_inventory_reader()
 
         # get input hazard
-        hazard, hazard_type, hazard_dataset_id = (
-            self.create_hazard_object_from_input_params()
-        )
+        (
+            hazard,
+            hazard_type,
+            hazard_dataset_id,
+        ) = self.create_hazard_object_from_input_params()
 
         user_defined_cpu = 1
 
@@ -310,9 +312,9 @@ class GasFacilityDamage(BaseAnalysis):
                 **limit_states,
                 **dmg_intervals,
             }
-            facility_result["haz_expose"] = (
-                AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
-            )
+            facility_result[
+                "haz_expose"
+            ] = AnalysisUtil.get_exposure_from_hazard_values(hazard_vals, hazard_type)
             damage_result = dict()
             damage_result["guid"] = facility["properties"]["guid"]
             damage_result["fragility_id"] = fragility_set.id

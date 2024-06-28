@@ -24,27 +24,31 @@ class FragilityCurveSet:
 
     def __init__(self, metadata):
         self.id = metadata["id"] if "id" in metadata else ""
-        self.description = metadata['description'] if "description" in metadata else ""
-        self.authors = ", ".join(metadata['authors']) if "authors" in metadata else ""
-        self.paper_reference = str(metadata["paperReference"]) if "paperReference" in metadata else ""
+        self.description = metadata["description"] if "description" in metadata else ""
+        self.authors = ", ".join(metadata["authors"]) if "authors" in metadata else ""
+        self.paper_reference = (
+            str(metadata["paperReference"]) if "paperReference" in metadata else ""
+        )
         self.creator = metadata["creator"] if "creator" in metadata else ""
         self.demand_types = metadata["demandTypes"]
         self.demand_units = metadata["demandUnits"]
         self.result_type = metadata["resultType"]
         self.result_unit = metadata["resultUnit"] if "resultUnit" in metadata else ""
-        self.hazard_type = metadata['hazardType']
-        self.inventory_type = metadata['inventoryType']
+        self.hazard_type = metadata["hazardType"]
+        self.inventory_type = metadata["inventoryType"]
         self.curve_parameters = {}
         self.fragility_curves = []
 
-        if 'curveParameters' in metadata.keys():
+        if "curveParameters" in metadata.keys():
             self.curve_parameters = metadata["curveParameters"]
 
-        if 'fragilityCurves' in metadata.keys():
+        if "fragilityCurves" in metadata.keys():
             for fragility_curve in metadata["fragilityCurves"]:
                 self.fragility_curves.append(DFR3Curve(fragility_curve))
         else:
-            raise ValueError("Cannot create dfr3 curve object. Missing key field: fragilityCurves.")
+            raise ValueError(
+                "Cannot create dfr3 curve object. Missing key field: fragilityCurves."
+            )
 
     @classmethod
     def from_json_str(cls, json_str):
@@ -75,9 +79,9 @@ class FragilityCurveSet:
 
         return instance
 
-    def calculate_limit_state(self, hazard_values: dict = {},
-                              inventory_type: str = "building",
-                              **kwargs):
+    def calculate_limit_state(
+        self, hazard_values: dict = {}, inventory_type: str = "building", **kwargs
+    ):
         """WIP computation of limit state probabilities accounting for custom expressions.
 
         Args:
@@ -95,17 +99,23 @@ class FragilityCurveSet:
 
         if len(self.fragility_curves) <= 4:
             for fragility_curve in self.fragility_curves:
-                probability = fragility_curve.solve_curve_expression(hazard_values,
-                                                                     self.curve_parameters,
-                                                                     **kwargs)
-                output[limit_state[index]] = AnalysisUtil.update_precision(probability)  # round to default digits
+                probability = fragility_curve.solve_curve_expression(
+                    hazard_values, self.curve_parameters, **kwargs
+                )
+                output[limit_state[index]] = AnalysisUtil.update_precision(
+                    probability
+                )  # round to default digits
                 index += 1
         else:
-            raise ValueError("We can only handle fragility curves with less than 4 limit states.")
+            raise ValueError(
+                "We can only handle fragility curves with less than 4 limit states."
+            )
 
         return output
 
-    def calculate_damage_interval(self, damage, hazard_type="earthquake", inventory_type: str = "building"):
+    def calculate_damage_interval(
+        self, damage, hazard_type="earthquake", inventory_type: str = "building"
+    ):
         """
 
         Args:
@@ -152,11 +162,22 @@ class FragilityCurveSet:
             ("hurricane", "bridge", 4): FragilityCurveSet._4ls_to_5ds,
         }
 
-        if not (hazard_type, inventory_type, len(self.fragility_curves)) in ls_ds_dspatcher.keys():
-            raise ValueError(inventory_type + " " + hazard_type + " damage analysis do not support " +
-                             str(len(self.fragility_curves)) + " limit state")
+        if (
+            not (hazard_type, inventory_type, len(self.fragility_curves))
+            in ls_ds_dspatcher.keys()
+        ):
+            raise ValueError(
+                inventory_type
+                + " "
+                + hazard_type
+                + " damage analysis do not support "
+                + str(len(self.fragility_curves))
+                + " limit state"
+            )
 
-        return ls_ds_dspatcher[(hazard_type, inventory_type, len(self.fragility_curves))](damage)
+        return ls_ds_dspatcher[
+            (hazard_type, inventory_type, len(self.fragility_curves))
+        ](damage)
 
     def construct_expression_args_from_inventory(self, inventory_unit: dict):
         """
@@ -170,13 +191,16 @@ class FragilityCurveSet:
         """
         kwargs_dict = {}
         for parameters in self.curve_parameters:
-
-            if parameters['name'] == "age_group" and ('age_group' not in inventory_unit['properties'] or
-                                                      inventory_unit['properties']['age_group'] == ""):
-                if 'year_built' in inventory_unit['properties'].keys() and inventory_unit['properties']['year_built'] \
-                        is not None:
+            if parameters["name"] == "age_group" and (
+                "age_group" not in inventory_unit["properties"]
+                or inventory_unit["properties"]["age_group"] == ""
+            ):
+                if (
+                    "year_built" in inventory_unit["properties"].keys()
+                    and inventory_unit["properties"]["year_built"] is not None
+                ):
                     try:
-                        yr_built = int(inventory_unit['properties']['year_built'])
+                        yr_built = int(inventory_unit["properties"]["year_built"])
                     except ValueError:
                         print("Non integer value found in year_built")
                         raise
@@ -190,12 +214,16 @@ class FragilityCurveSet:
                     elif 1995 <= yr_built < 2008:
                         age_group = 4
 
-                    kwargs_dict['age_group'] = age_group
+                    kwargs_dict["age_group"] = age_group
 
-            if parameters['name'] in inventory_unit['properties'] and \
-                    inventory_unit['properties'][parameters['name']] is not None and \
-                    inventory_unit['properties'][parameters['name']] != "":
-                kwargs_dict[parameters['name']] = inventory_unit['properties'][parameters['name']]
+            if (
+                parameters["name"] in inventory_unit["properties"]
+                and inventory_unit["properties"][parameters["name"]] is not None
+                and inventory_unit["properties"][parameters["name"]] != ""
+            ):
+                kwargs_dict[parameters["name"]] = inventory_unit["properties"][
+                    parameters["name"]
+                ]
         return kwargs_dict
 
     @staticmethod
@@ -210,23 +238,27 @@ class FragilityCurveSet:
 
         """
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
-        damage_states = AnalysisUtil.float_dict_to_decimal({"DS_0": 0.0, "DS_1": 0.0, "DS_2": 0.0, "DS_3": 0.0})
+        damage_states = AnalysisUtil.float_dict_to_decimal(
+            {"DS_0": 0.0, "DS_1": 0.0, "DS_2": 0.0, "DS_3": 0.0}
+        )
 
         small_overlap = FragilityCurveSet.is_there_small_overlap(limit_states)
 
         if small_overlap:
-            ds_overlap = FragilityCurveSet.adjust_for_small_overlap(small_overlap, limit_states, damage_states)
+            ds_overlap = FragilityCurveSet.adjust_for_small_overlap(
+                small_overlap, limit_states, damage_states
+            )
 
-            damage_states['DS_0'] = ds_overlap[0]
-            damage_states['DS_1'] = ds_overlap[1]
-            damage_states['DS_2'] = ds_overlap[2]
-            damage_states['DS_3'] = ds_overlap[3]
+            damage_states["DS_0"] = ds_overlap[0]
+            damage_states["DS_1"] = ds_overlap[1]
+            damage_states["DS_2"] = ds_overlap[2]
+            damage_states["DS_3"] = ds_overlap[3]
 
         else:
-            damage_states['DS_0'] = 1 - limit_states["LS_0"]
-            damage_states['DS_1'] = limit_states["LS_0"] - limit_states["LS_1"]
-            damage_states['DS_2'] = limit_states["LS_1"] - limit_states["LS_2"]
-            damage_states['DS_3'] = limit_states["LS_2"]
+            damage_states["DS_0"] = 1 - limit_states["LS_0"]
+            damage_states["DS_1"] = limit_states["LS_0"] - limit_states["LS_1"]
+            damage_states["DS_2"] = limit_states["LS_1"] - limit_states["LS_2"]
+            damage_states["DS_3"] = limit_states["LS_2"]
 
         return damage_states
 
@@ -242,26 +274,29 @@ class FragilityCurveSet:
 
         """
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
-        damage_states = AnalysisUtil.float_dict_to_decimal({"DS_0": 0.0, "DS_1": 0.0, "DS_2": 0.0, "DS_3": 0.0,
-                                                            "DS_4": 0.0})
+        damage_states = AnalysisUtil.float_dict_to_decimal(
+            {"DS_0": 0.0, "DS_1": 0.0, "DS_2": 0.0, "DS_3": 0.0, "DS_4": 0.0}
+        )
 
         small_overlap = FragilityCurveSet.is_there_small_overlap(limit_states)
 
         if small_overlap:
-            ds_overlap = FragilityCurveSet.adjust_for_small_overlap(small_overlap, limit_states, damage_states)
+            ds_overlap = FragilityCurveSet.adjust_for_small_overlap(
+                small_overlap, limit_states, damage_states
+            )
 
-            damage_states['DS_0'] = ds_overlap[0]
-            damage_states['DS_1'] = ds_overlap[1]
-            damage_states['DS_2'] = ds_overlap[2]
-            damage_states['DS_3'] = ds_overlap[3]
-            damage_states['DS_4'] = ds_overlap[4]
+            damage_states["DS_0"] = ds_overlap[0]
+            damage_states["DS_1"] = ds_overlap[1]
+            damage_states["DS_2"] = ds_overlap[2]
+            damage_states["DS_3"] = ds_overlap[3]
+            damage_states["DS_4"] = ds_overlap[4]
 
         else:
-            damage_states['DS_0'] = 1 - limit_states["LS_0"]
-            damage_states['DS_1'] = limit_states["LS_0"] - limit_states["LS_1"]
-            damage_states['DS_2'] = limit_states["LS_1"] - limit_states["LS_2"]
-            damage_states['DS_3'] = limit_states["LS_2"] - limit_states["LS_3"]
-            damage_states['DS_4'] = limit_states["LS_3"]
+            damage_states["DS_0"] = 1 - limit_states["LS_0"]
+            damage_states["DS_1"] = limit_states["LS_0"] - limit_states["LS_1"]
+            damage_states["DS_2"] = limit_states["LS_1"] - limit_states["LS_2"]
+            damage_states["DS_3"] = limit_states["LS_2"] - limit_states["LS_3"]
+            damage_states["DS_4"] = limit_states["LS_3"]
 
         return damage_states
 
@@ -278,10 +313,10 @@ class FragilityCurveSet:
         """
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
         damage_states = dict()
-        damage_states['DS_0'] = 1 - limit_states["LS_0"]
-        damage_states['DS_1'] = 0
-        damage_states['DS_2'] = 0
-        damage_states['DS_3'] = limit_states["LS_0"]
+        damage_states["DS_0"] = 1 - limit_states["LS_0"]
+        damage_states["DS_1"] = 0
+        damage_states["DS_2"] = 0
+        damage_states["DS_3"] = limit_states["LS_0"]
 
         return damage_states
 
@@ -298,11 +333,11 @@ class FragilityCurveSet:
         """
         limit_states = AnalysisUtil.float_dict_to_decimal(limit_states)
         damage_states = dict()
-        damage_states['DS_0'] = 1 - limit_states["LS_0"]
-        damage_states['DS_1'] = 0
-        damage_states['DS_2'] = 0
-        damage_states['DS_3'] = 0
-        damage_states['DS_4'] = limit_states["LS_0"]
+        damage_states["DS_0"] = 1 - limit_states["LS_0"]
+        damage_states["DS_1"] = 0
+        damage_states["DS_2"] = 0
+        damage_states["DS_3"] = 0
+        damage_states["DS_4"] = limit_states["LS_0"]
 
         return damage_states
 

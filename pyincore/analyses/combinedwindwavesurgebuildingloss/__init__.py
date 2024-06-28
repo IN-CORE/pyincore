@@ -5,6 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.combinedwindwavesurgebuildingloss.combinedwindwavesurgebuildingloss import \
-    CombinedWindWaveSurgeBuildingLoss
-
+from pyincore.analyses.combinedwindwavesurgebuildingloss.combinedwindwavesurgebuildingloss import (
+    CombinedWindWaveSurgeBuildingLoss,
+)

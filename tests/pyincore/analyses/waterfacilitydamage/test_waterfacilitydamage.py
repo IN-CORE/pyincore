@@ -28,7 +28,7 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    wf_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    wf_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     result_name = "wf-dmg-results.csv"
     wf_dmg.set_parameter("result_name", result_name)
@@ -44,5 +44,5 @@ def run_with_base_class():
     wf_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

@@ -18,14 +18,16 @@ class DFR3Curve:
     """A class to represent a DFR3 curve."""
 
     def __init__(self, curve_parameters):
-        self.rules = curve_parameters['rules']
-        self.return_type = curve_parameters['returnType']
+        self.rules = curve_parameters["rules"]
+        self.return_type = curve_parameters["returnType"]
 
         for rule in self.rules:
             rule["expression"] = rule["expression"].replace("^", "**")
-        self.description = curve_parameters['description']
+        self.description = curve_parameters["description"]
 
-    def solve_curve_expression(self, hazard_values: dict, curve_parameters: dict, **kwargs):
+    def solve_curve_expression(
+        self, hazard_values: dict, curve_parameters: dict, **kwargs
+    ):
         """Evaluates expression of the curve.
 
         Args:
@@ -46,7 +48,9 @@ class DFR3Curve:
         for parameter in curve_parameters:
             # if default exists, use default
             if "expression" in parameter and parameter["expression"] is not None:
-                parameters[parameter["name"]] = evaluateexpression.evaluate(parameter["expression"], parameters)
+                parameters[parameter["name"]] = evaluateexpression.evaluate(
+                    parameter["expression"], parameters
+                )
             else:
                 parameters[parameter["name"]] = None
 
@@ -78,7 +82,9 @@ class DFR3Curve:
         eval_result = None
         for rule in self.rules:
             if "condition" not in rule or rule["condition"] is None:
-                eval_result = evaluateexpression.evaluate(rule["expression"], parameters)
+                eval_result = evaluateexpression.evaluate(
+                    rule["expression"], parameters
+                )
             else:
                 conditions_met = []
                 for condition in rule["condition"]:
@@ -89,10 +95,14 @@ class DFR3Curve:
                         conditions_met.append(False)
                         break
                 if all(conditions_met):
-                    eval_result = evaluateexpression.evaluate(rule["expression"], parameters)
+                    eval_result = evaluateexpression.evaluate(
+                        rule["expression"], parameters
+                    )
                     break
 
-        if isinstance(eval_result, numpy.ndarray) or isinstance(eval_result, list):  # for repair curves etc.
+        if isinstance(eval_result, numpy.ndarray) or isinstance(
+            eval_result, list
+        ):  # for repair curves etc.
             return eval_result
         else:  # for fragility curves the return is a float
             if eval_result is None:
@@ -100,14 +110,25 @@ class DFR3Curve:
             if math.isnan(eval_result):
                 error_msg = "Unable to calculate limit state."
                 if self.rules:
-                    error_msg += " Evaluation failed for expression: \n" + json.dumps(self.rules) + "\n"
-                    error_msg += "Provided Inputs: \n" + json.dumps(hazard_values) + "\n" + json.dumps(kwargs)
+                    error_msg += (
+                        " Evaluation failed for expression: \n"
+                        + json.dumps(self.rules)
+                        + "\n"
+                    )
+                    error_msg += (
+                        "Provided Inputs: \n"
+                        + json.dumps(hazard_values)
+                        + "\n"
+                        + json.dumps(kwargs)
+                    )
 
                 raise ValueError(error_msg)
 
             return eval_result
 
-    def solve_curve_for_inverse(self, hazard_values: dict, curve_parameters: dict, **kwargs):
+    def solve_curve_for_inverse(
+        self, hazard_values: dict, curve_parameters: dict, **kwargs
+    ):
         """Evaluates expression of the curve by calculating its inverse. Example, ppf for cdf. Only supports cdf() for
          now. More inverse methods may be added in the future.
 
@@ -123,14 +144,20 @@ class DFR3Curve:
         inverse_rules = []
         actual_rules = self.rules
         for rule in self.rules:
-            if ".cdf(" in rule['expression']:
-                new_exp = rule['expression'].replace(".cdf(", ".ppf(")
-                inverse_rules.append({'condition': rule['condition'], 'expression': new_exp})
+            if ".cdf(" in rule["expression"]:
+                new_exp = rule["expression"].replace(".cdf(", ".ppf(")
+                inverse_rules.append(
+                    {"condition": rule["condition"], "expression": new_exp}
+                )
             else:
-                raise KeyError("Inverse does not exist for the provided expression. exiting..")
+                raise KeyError(
+                    "Inverse does not exist for the provided expression. exiting.."
+                )
 
         self.rules = inverse_rules
-        inverse = self.solve_curve_expression(hazard_values=hazard_values, curve_parameters=curve_parameters, **kwargs)
+        inverse = self.solve_curve_expression(
+            hazard_values=hazard_values, curve_parameters=curve_parameters, **kwargs
+        )
         self.rules = actual_rules  # swap the original rules back so further calculations are not affected
         return inverse
 
@@ -151,16 +178,30 @@ class DFR3Curve:
         num_stories = 1.0
         for parameter in curve_parameters:
             # if default exists, use default
-            if parameter["name"] == "num_stories" and "expression" in parameter and parameter["expression"] is not None:
+            if (
+                parameter["name"] == "num_stories"
+                and "expression" in parameter
+                and parameter["expression"] is not None
+            ):
                 num_stories = evaluateexpression.evaluate(parameter["expression"])
 
             # if exist in building inventory
             for kwargs_key, kwargs_value in kwargs.items():
-                if kwargs_key.lower() == "num_stories" and kwargs_value is not None and kwargs_value > 0:
+                if (
+                    kwargs_key.lower() == "num_stories"
+                    and kwargs_value is not None
+                    and kwargs_value > 0
+                ):
                     num_stories = kwargs_value
 
             # calculate period
-            if parameter["name"] == "period" and "expression" in parameter and parameter["expression"] is not None:
-                period = evaluateexpression.evaluate(parameter["expression"], {"num_stories": num_stories})
+            if (
+                parameter["name"] == "period"
+                and "expression" in parameter
+                and parameter["expression"] is not None
+            ):
+                period = evaluateexpression.evaluate(
+                    parameter["expression"], {"num_stories": num_stories}
+                )
 
         return period

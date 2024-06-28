@@ -9,7 +9,6 @@ from pyincore.models.hazard.hazarddataset import TsunamiDataset
 
 
 class Tsunami(Hazard):
-
     def __init__(self, metadata):
         super().__init__(metadata)
         self.hazardDatasets = []
@@ -35,7 +34,7 @@ class Tsunami(Hazard):
         return instance
 
     def read_hazard_values(self, payload: list, hazard_service=None, **kwargs):
-        """ Retrieve bulk tsunami hazard values either from the Hazard service or read it from local Dataset
+        """Retrieve bulk tsunami hazard values either from the Hazard service or read it from local Dataset
 
         Args:
             payload (list):
@@ -49,4 +48,3 @@ class Tsunami(Hazard):
             return hazard_service.post_tsunami_hazard_values(self.id, payload, **kwargs)
         else:
             return self.read_local_raster_hazard_values(payload)
-

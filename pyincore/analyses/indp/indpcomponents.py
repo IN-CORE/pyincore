@@ -56,8 +56,6 @@ class INDPComponents:
         """
         comp_strings = []
         for c in self.components:
-            comp = c[0]
-            supp = c[1]
             comp_string = "/".join(c[0])
             comp_string += ":" + str(c[1])
             comp_strings.append(comp_string)
@@ -97,8 +95,8 @@ class INDPComponents:
             for n in c:
                 members.append(str(n[0]) + "." + str(n[1]))
                 excess_supply = 0.0
-                excess_supply += m.getVarByName('delta+_' + str(n) + "," + str(t)).x
-                excess_supply += -m.getVarByName('delta-_' + str(n) + "," + str(t)).x
+                excess_supply += m.getVarByName("delta+_" + str(n) + "," + str(t)).x
+                excess_supply += -m.getVarByName("delta-_" + str(n) + "," + str(t)).x
                 total_excess_supply += excess_supply
             indp_components.add_component(members, total_excess_supply)
         return indp_components

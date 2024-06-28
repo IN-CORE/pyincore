@@ -5,4 +5,6 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore.analyses.commercialbuildingrecovery.commercialbuildingrecovery import CommercialBuildingRecovery
+from pyincore.analyses.commercialbuildingrecovery.commercialbuildingrecovery import (
+    CommercialBuildingRecovery,
+)

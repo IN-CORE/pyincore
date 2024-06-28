@@ -1,7 +1,9 @@
 import os
 
 from pyincore import IncoreClient, FragilityService, MappingSet
-from pyincore.analyses.buildingstructuraldamage.buildingstructuraldamage import BuildingStructuralDamage
+from pyincore.analyses.buildingstructuraldamage.buildingstructuraldamage import (
+    BuildingStructuralDamage,
+)
 import pyincore.globals as pyglobals
 
 
@@ -16,7 +18,7 @@ def run_with_base_class():
     mapping_id = "648a3f88c687ae511a1814e2"  # earthquake+tsunami mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     bldg_dmg.set_parameter("fragility_key", "Non-Retrofit Fragility ID Code")
 
     hazard_type = "earthquake+tsunami"
@@ -34,5 +36,5 @@ def run_with_base_class():
     bldg_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

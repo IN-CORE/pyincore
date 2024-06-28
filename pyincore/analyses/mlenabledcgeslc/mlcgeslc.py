@@ -17,7 +17,6 @@ logger = pyglobals.LOGGER
 
 
 class MlEnabledCgeSlc(CoreCGEML):
-
     model = "Machine Learning Enabled Computable General Equilibrium - Salt Lake City "
 
     # Coefficients files
@@ -83,9 +82,13 @@ class MlEnabledCgeSlc(CoreCGEML):
     ]
 
     def __init__(self, incore_client: IncoreClient):
-        sectors, base_cap_factors, base_cap, model_coeffs, cap_shock_sectors = (
-            CGEMLFileUtil.parse_files(self.model_filenames, self.filenames)
-        )
+        (
+            sectors,
+            base_cap_factors,
+            base_cap,
+            model_coeffs,
+            cap_shock_sectors,
+        ) = CGEMLFileUtil.parse_files(self.model_filenames, self.filenames)
         self.base_cap_factors = base_cap_factors
         self.base_cap = base_cap
         self.model_coeffs = model_coeffs
@@ -95,8 +98,8 @@ class MlEnabledCgeSlc(CoreCGEML):
         )  # 4 labor groups
 
     def run(self) -> bool:
-        """Executes the ML enabled CGE model for Salt Lake City """
-        
+        """Executes the ML enabled CGE model for Salt Lake City"""
+
         logger.info(f"Running {self.model} model...")
         sector_shocks = pd.read_csv(
             self.get_input_dataset("sector_shocks").get_file_path("csv")
@@ -107,8 +110,8 @@ class MlEnabledCgeSlc(CoreCGEML):
         for sector in self.cap_shock_sectors:
             if sector.upper() not in [v.upper() for v in sector_shocks["sector"]]:
                 raise ValueError(
-                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors.\n" + 
-                    "Please make sure you have used the correct capital shocks"
+                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors.\n"
+                    + "Please make sure you have used the correct capital shocks"
                 )
             shocks.append(
                 sector_shocks.loc[sector_shocks["sector"] == sector.upper()]["shock"]

@@ -19,19 +19,23 @@ def upload_shapefile_to_services(client):
         "contributors": [],
         "dataType": "incore:popdislocationShp",
         "storedUrl": "",
-        "format": "shapefile"
+        "format": "shapefile",
     }
     response = datasvc.create_dataset(dataset_prop)
-    dataset_id = response['id']
-    files = ['joplin-pop-disl-numprec.shp',
-             'joplin-pop-disl-numprec.dbf',
-             'joplin-pop-disl-numprec.shx',
-             'joplin-pop-disl-numprec.prj']
+    dataset_id = response["id"]
+    files = [
+        "joplin-pop-disl-numprec.shp",
+        "joplin-pop-disl-numprec.dbf",
+        "joplin-pop-disl-numprec.shx",
+        "joplin-pop-disl-numprec.prj",
+    ]
     datasvc.add_files_to_dataset(dataset_id, files)
 
     # add to space
     spacesvc = SpaceService(client)
-    spacesvc.add_dataset_to_space("5f99ba8b0ace240b22a82e00", dataset_id=dataset_id)  # commresilience
+    spacesvc.add_dataset_to_space(
+        "5f99ba8b0ace240b22a82e00", dataset_id=dataset_id
+    )  # commresilience
     print(dataset_id + " successfully uploaded and move to commresilience space!")
 
 
@@ -63,7 +67,7 @@ def run_convert_pd_json_chained(client):
     return pd_result
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # test chaining with population dislocation
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
@@ -89,7 +93,9 @@ if __name__ == '__main__':
     testpath = ""
     # testpath = "/Users/<user>/<path_to_pyincore>/pyincore/tests/pyincore/utils"
     if testpath:
-        pd_process = PopDislOutputProcess(None, os.path.join(testpath, "joplin-pop-disl-results.csv"))
+        pd_process = PopDislOutputProcess(
+            None, os.path.join(testpath, "joplin-pop-disl-results.csv")
+        )
         # pd_process = PopDislOutputProcess(None,
         #                                   os.path.join(testpath, "joplin-pop-disl-results.csv"),
         #                                   filter_name="Joplin",

@@ -21,25 +21,29 @@ class RepairCurveSet:
 
     def __init__(self, metadata):
         self.id = metadata["id"] if "id" in metadata else ""
-        self.description = metadata['description'] if "description" in metadata else ""
-        self.authors = ", ".join(metadata['authors']) if "authors" in metadata else ""
-        self.paper_reference = str(metadata["paperReference"]) if "paperReference" in metadata else ""
+        self.description = metadata["description"] if "description" in metadata else ""
+        self.authors = ", ".join(metadata["authors"]) if "authors" in metadata else ""
+        self.paper_reference = (
+            str(metadata["paperReference"]) if "paperReference" in metadata else ""
+        )
         self.creator = metadata["creator"] if "creator" in metadata else ""
         self.time_units = metadata["timeUnits"]
         self.result_type = metadata["resultType"]
         self.result_unit = metadata["resultUnit"] if "resultUnit" in metadata else ""
-        self.hazard_type = metadata['hazardType']
-        self.inventory_type = metadata['inventoryType']
+        self.hazard_type = metadata["hazardType"]
+        self.inventory_type = metadata["inventoryType"]
         self.repair_curves = []
 
-        if 'curveParameters' in metadata.keys():
+        if "curveParameters" in metadata.keys():
             self.curve_parameters = metadata["curveParameters"]
 
-        if 'repairCurves' in metadata.keys():
+        if "repairCurves" in metadata.keys():
             for repair_curve in metadata["repairCurves"]:
                 self.repair_curves.append(DFR3Curve(repair_curve))
         else:
-            raise ValueError("Cannot create dfr3 curve object. Missing key field: repairCurves.")
+            raise ValueError(
+                "Cannot create dfr3 curve object. Missing key field: repairCurves."
+            )
 
     @classmethod
     def from_json_str(cls, json_str):
@@ -84,11 +88,14 @@ class RepairCurveSet:
         output = {}
         if len(self.repair_curves) <= 5:
             for repair_curve in self.repair_curves:
-                eval_value = repair_curve.solve_curve_expression(hazard_values={},
-                                                                 curve_parameters=self.curve_parameters, **kwargs)
-                output[repair_curve.return_type['description']] = eval_value
+                eval_value = repair_curve.solve_curve_expression(
+                    hazard_values={}, curve_parameters=self.curve_parameters, **kwargs
+                )
+                output[repair_curve.return_type["description"]] = eval_value
         else:
-            raise ValueError("We can only handle repair curves with less than 5 damage states.")
+            raise ValueError(
+                "We can only handle repair curves with less than 5 damage states."
+            )
 
         return output
 
@@ -107,10 +114,13 @@ class RepairCurveSet:
 
         if len(self.repair_curves) <= 5:
             for repair_curve in self.repair_curves:
-                eval_value = repair_curve.solve_curve_for_inverse(hazard_values={},
-                                                                 curve_parameters=self.curve_parameters, **kwargs)
-                output[repair_curve.return_type['description']] = eval_value
+                eval_value = repair_curve.solve_curve_for_inverse(
+                    hazard_values={}, curve_parameters=self.curve_parameters, **kwargs
+                )
+                output[repair_curve.return_type["description"]] = eval_value
         else:
-            raise ValueError("We can only handle repair curves with less than 5 damage states.")
+            raise ValueError(
+                "We can only handle repair curves with less than 5 damage states."
+            )
 
         return output

@@ -6,12 +6,16 @@
 
 from deprecated.sphinx import deprecated
 
-from pyincore.analyses.buildingnonstructuraldamage.buildingnonstructuraldamage import \
-    BuildingNonStructDamage
+from pyincore.analyses.buildingnonstructuraldamage.buildingnonstructuraldamage import (
+    BuildingNonStructDamage,
+)
 
 
-@deprecated(version='1.19.0', reason="This class will be deprecated soon. Use BuildingNonStructDamage instead.")
-class NonStructBuildingDamage():
+@deprecated(
+    version="1.19.0",
+    reason="This class will be deprecated soon. Use BuildingNonStructDamage instead.",
+)
+class NonStructBuildingDamage:
     def __init__(self, incore_client):
         self._delegate = BuildingNonStructDamage(incore_client)
 

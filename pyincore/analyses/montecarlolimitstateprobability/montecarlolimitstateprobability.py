@@ -30,97 +30,98 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
 
         """
         return {
-            'name': 'monte-carlo-limit-state-probability',
-            'description': 'calculate the probability of limit state in monte-carlo simulation',
-            'input_parameters': [
+            "name": "monte-carlo-limit-state-probability",
+            "description": "calculate the probability of limit state in monte-carlo simulation",
+            "input_parameters": [
                 {
-                    'id': 'result_name',
-                    'required': True,
-                    'description': 'basename of the result datasets. This analysis will create two outputs: failure '
-                                   'proability and failure state with the basename in the filename. '
-                                   'For example: "result_name = joplin_mcs_building" will result in '
-                                   '"joplin_mcs_building_failure_state.csv" and '
-                                   '"joplin_mcs_building_failure_probability.csv"',
-                    'type': str
+                    "id": "result_name",
+                    "required": True,
+                    "description": "basename of the result datasets. This analysis will create two outputs: failure "
+                    "proability and failure state with the basename in the filename. "
+                    'For example: "result_name = joplin_mcs_building" will result in '
+                    '"joplin_mcs_building_failure_state.csv" and '
+                    '"joplin_mcs_building_failure_probability.csv"',
+                    "type": str,
                 },
                 {
-                    'id': 'num_cpu',
-                    'required': False,
-                    'description': 'If using parallel execution, the number of cpus to request',
-                    'type': int
+                    "id": "num_cpu",
+                    "required": False,
+                    "description": "If using parallel execution, the number of cpus to request",
+                    "type": int,
                 },
                 {
-                    'id': 'num_samples',
-                    'required': True,
-                    'description': 'Number of MC samples',
-                    'type': int
+                    "id": "num_samples",
+                    "required": True,
+                    "description": "Number of MC samples",
+                    "type": int,
                 },
                 {
-                    'id': 'damage_interval_keys',
-                    'required': True,
-                    'description': 'Column name of the damage interval',
-                    'type': List[str]
+                    "id": "damage_interval_keys",
+                    "required": True,
+                    "description": "Column name of the damage interval",
+                    "type": List[str],
                 },
                 {
-                    'id': 'failure_state_keys',
-                    'required': True,
-                    'description': 'Column name of the damage interval that considered as damaged',
-                    'type': List[str]
+                    "id": "failure_state_keys",
+                    "required": True,
+                    "description": "Column name of the damage interval that considered as damaged",
+                    "type": List[str],
                 },
                 {
-                    'id': 'seed',
-                    'required': False,
-                    'description': 'Initial seed for the probabilistic model',
-                    'type': int
+                    "id": "seed",
+                    "required": False,
+                    "description": "Initial seed for the probabilistic model",
+                    "type": int,
                 },
             ],
-            'input_datasets': [
+            "input_datasets": [
                 {
-                    'id': 'damage',
-                    'required': True,
-                    'description': 'damage result that has damage intervals in it',
-                    'type': ['ergo:buildingDamageVer4',
-                             'ergo:buildingDamageVer5',
-                             'ergo:buildingDamageVer6',
-                             'ergo:nsBuildingInventoryDamage',
-                             'ergo:nsBuildingInventoryDamageVer2',
-                             'ergo:nsBuildingInventoryDamageVer3',
-                             'ergo:nsBuildingInventoryDamageVer4',
-                             'ergo:bridgeDamage',
-                             'ergo:bridgeDamageVer2',
-                             'ergo:bridgeDamageVer3',
-                             'ergo:waterFacilityDamageVer4',
-                             'ergo:waterFacilityDamageVer5',
-                             'ergo:waterFacilityDamageVer6',
-                             'ergo:roadDamage',
-                             'ergo:roadDamageVer2',
-                             'ergo:roadDamageVer3',
-                             'incore:epfDamage',
-                             'incore:epfDamageVer2',
-                             'incore:epfDamageVer3',
-                             'incore:pipelineDamage',
-                             'incore:pipelineDamageVer2',
-                             'incore:pipelineDamageVer3']
+                    "id": "damage",
+                    "required": True,
+                    "description": "damage result that has damage intervals in it",
+                    "type": [
+                        "ergo:buildingDamageVer4",
+                        "ergo:buildingDamageVer5",
+                        "ergo:buildingDamageVer6",
+                        "ergo:nsBuildingInventoryDamage",
+                        "ergo:nsBuildingInventoryDamageVer2",
+                        "ergo:nsBuildingInventoryDamageVer3",
+                        "ergo:nsBuildingInventoryDamageVer4",
+                        "ergo:bridgeDamage",
+                        "ergo:bridgeDamageVer2",
+                        "ergo:bridgeDamageVer3",
+                        "ergo:waterFacilityDamageVer4",
+                        "ergo:waterFacilityDamageVer5",
+                        "ergo:waterFacilityDamageVer6",
+                        "ergo:roadDamage",
+                        "ergo:roadDamageVer2",
+                        "ergo:roadDamageVer3",
+                        "incore:epfDamage",
+                        "incore:epfDamageVer2",
+                        "incore:epfDamageVer3",
+                        "incore:pipelineDamage",
+                        "incore:pipelineDamageVer2",
+                        "incore:pipelineDamageVer3",
+                    ],
                 },
-
             ],
-            'output_datasets': [
+            "output_datasets": [
                 {
-                    'id': 'failure_probability',
-                    'description': 'CSV file of failure probability',
-                    'type': 'incore:failureProbability'
+                    "id": "failure_probability",
+                    "description": "CSV file of failure probability",
+                    "type": "incore:failureProbability",
                 },
                 {
-                    'id': 'sample_failure_state',
-                    'description': 'CSV file of failure state for each sample',
-                    'type': 'incore:sampleFailureState'
+                    "id": "sample_failure_state",
+                    "description": "CSV file of failure state for each sample",
+                    "type": "incore:sampleFailureState",
                 },
                 {
-                    'id': 'sample_damage_states',
-                    'description': 'CSV file of simulated damage states for each sample',
-                    'type': 'incore:sampleDamageState'
-                }
-            ]
+                    "id": "sample_damage_states",
+                    "description": "CSV file of simulated damage states for each sample",
+                    "type": "incore:sampleDamageState",
+                },
+            ],
         }
 
     def run(self):
@@ -132,14 +133,15 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
 
         # setting number of cpus to use
         user_defined_cpu = 1
-        if not self.get_parameter("num_cpu") is None and self.get_parameter(
-                "num_cpu") > 0:
+        if (
+            not self.get_parameter("num_cpu") is None
+            and self.get_parameter("num_cpu") > 0
+        ):
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(self,
-                                                                 len(
-                                                                     damage_result),
-                                                                 user_defined_cpu)
+        num_workers = AnalysisUtil.determine_parallelism_locally(
+            self, len(damage_result), user_defined_cpu
+        )
 
         avg_bulk_input_size = int(len(damage_result) / num_workers)
         inventory_args = []
@@ -151,29 +153,55 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
         if seed is not None:
             while count < len(inventory_list):
                 inventory_args.append(
-                    inventory_list[count:count + avg_bulk_input_size])
-                seed_list.append([seed + i for i in range(count - 1, count + avg_bulk_input_size - 1)])
+                    inventory_list[count : count + avg_bulk_input_size]
+                )
+                seed_list.append(
+                    [
+                        seed + i
+                        for i in range(count - 1, count + avg_bulk_input_size - 1)
+                    ]
+                )
                 count += avg_bulk_input_size
         else:
             while count < len(inventory_list):
                 inventory_args.append(
-                    inventory_list[count:count + avg_bulk_input_size])
-                seed_list.append([None for i in range(count - 1, count + avg_bulk_input_size - 1)])
+                    inventory_list[count : count + avg_bulk_input_size]
+                )
+                seed_list.append(
+                    [None for i in range(count - 1, count + avg_bulk_input_size - 1)]
+                )
                 count += avg_bulk_input_size
 
-        fs_results, fp_results, samples_results = self.monte_carlo_failure_probability_concurrent_future(
-            self.monte_carlo_failure_probability_bulk_input, num_workers,
-            inventory_args, seed_list)
-        self.set_result_csv_data("sample_failure_state",
-                                 fs_results, name=self.get_parameter("result_name") + "_failure_state")
-        self.set_result_csv_data("failure_probability",
-                                 fp_results, name=self.get_parameter("result_name") + "_failure_probability")
-        self.set_result_csv_data("sample_damage_states",
-                                 samples_results, name=self.get_parameter("result_name") + "_sample_damage_states")
+        (
+            fs_results,
+            fp_results,
+            samples_results,
+        ) = self.monte_carlo_failure_probability_concurrent_future(
+            self.monte_carlo_failure_probability_bulk_input,
+            num_workers,
+            inventory_args,
+            seed_list,
+        )
+        self.set_result_csv_data(
+            "sample_failure_state",
+            fs_results,
+            name=self.get_parameter("result_name") + "_failure_state",
+        )
+        self.set_result_csv_data(
+            "failure_probability",
+            fp_results,
+            name=self.get_parameter("result_name") + "_failure_probability",
+        )
+        self.set_result_csv_data(
+            "sample_damage_states",
+            samples_results,
+            name=self.get_parameter("result_name") + "_sample_damage_states",
+        )
         return True
 
-    def monte_carlo_failure_probability_concurrent_future(self, function_name,
-                                                          parallelism, *args):
+    def monte_carlo_failure_probability_concurrent_future(
+        self, function_name, parallelism, *args
+    ):
         """Utilizes concurrent.future module.
 
         Args:
@@ -190,7 +218,8 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
         fp_output = []
         samples_output = []
         with concurrent.futures.ProcessPoolExecutor(
-                max_workers=parallelism) as executor:
+            max_workers=parallelism
+        ) as executor:
             for fs_ret, fp_ret, samples_ret in executor.map(function_name, *args):
                 fs_output.extend(fs_ret)
                 fp_output.extend(fp_ret)
@@ -220,8 +249,9 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
 
         i = 0
         for dmg in damage:
-            fs, fp, samples_result = self.monte_carlo_failure_probability(dmg, damage_interval_keys, failure_state_keys,
-                                                                          num_samples, seed_list[i])
+            fs, fp, samples_result = self.monte_carlo_failure_probability(
+                dmg, damage_interval_keys, failure_state_keys, num_samples, seed_list[i]
+            )
             fs_result.append(fs)
             fp_result.append(fp)
             samples_output.append(samples_result)
@@ -229,8 +259,9 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
 
         return fs_result, fp_result, samples_output
 
-    def monte_carlo_failure_probability(self, dmg, damage_interval_keys,
-                                        failure_state_keys, num_samples, seed):
+    def monte_carlo_failure_probability(
+        self, dmg, damage_interval_keys, failure_state_keys, num_samples, seed
+    ):
         """Calculates building damage results for a single building.
 
         Args:
@@ -253,28 +284,29 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
         samples_result = collections.OrderedDict()
 
         # copying guid/id column to the sample damage failure table
-        if 'guid' in dmg.keys():
-            fs_result['guid'] = dmg['guid']
-            samples_result['guid'] = dmg['guid']
+        if "guid" in dmg.keys():
+            fs_result["guid"] = dmg["guid"]
+            samples_result["guid"] = dmg["guid"]
 
-        elif 'id' in dmg.keys():
-            fs_result['id'] = dmg['id']
-            samples_result['id'] = dmg['id']
+        elif "id" in dmg.keys():
+            fs_result["id"] = dmg["id"]
+            samples_result["id"] = dmg["id"]
         else:
-            fs_result['id'] = 'NA'
-            samples_result['id'] = 'NA'
+            fs_result["id"] = "NA"
+            samples_result["id"] = "NA"
 
         # failure probability
         fp_result = collections.OrderedDict()
-        fp_result['guid'] = dmg['guid']
+        fp_result["guid"] = dmg["guid"]
 
-        ds_sample = self.sample_damage_interval(dmg, damage_interval_keys,
-                                                num_samples, seed)
+        ds_sample = self.sample_damage_interval(
+            dmg, damage_interval_keys, num_samples, seed
+        )
         func, fp = self.calc_probability_failure_value(ds_sample, failure_state_keys)
 
-        fs_result['failure'] = ",".join(func.values())
-        fp_result['failure_probability'] = fp
-        samples_result['sample_damage_states'] = ','.join(ds_sample.values())
+        fs_result["failure"] = ",".join(func.values())
+        fp_result["failure_probability"] = fp
+        samples_result["sample_damage_states"] = ",".join(ds_sample.values())
 
         return fs_result, fp_result, samples_result
 
@@ -300,9 +332,8 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
             prob_val = 0
             flag = True
             for ds_name in damage_interval_keys:
-
                 if rnd_num < prob_val + AnalysisUtil.float_to_decimal(dmg[ds_name]):
-                    ds['sample_{}'.format(i)] = ds_name
+                    ds["sample_{}".format(i)] = ds_name
                     flag = False
                     break
                 else:

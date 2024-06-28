@@ -1,4 +1,11 @@
-from pyincore import IncoreClient, FragilityService, MappingSet, HazardService, Earthquake, Hurricane
+from pyincore import (
+    IncoreClient,
+    FragilityService,
+    MappingSet,
+    HazardService,
+    Earthquake,
+    Hurricane,
+)
 from pyincore.analyses.bridgedamage import BridgeDamage
 import pyincore.globals as pyglobals
 
@@ -16,10 +23,7 @@ def run_with_base_class():
     # Default Bridge Fragility Mapping on incore-service
     mapping_id = "5b47bcce337d4a37755e0cb2"
 
-    # Use hazard uncertainty for computing damage
-    use_hazard_uncertainty = False
     # Use liquefaction (LIQ) column of bridges to modify fragility curve
-    # use_liquefaction = False
     use_liquefaction = True
 
     # Geology dataset
@@ -34,9 +38,9 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bridge_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
-    bridge_dmg.set_input_hazard('hazard', eq)
+    bridge_dmg.set_input_hazard("hazard", eq)
 
     # Set analysis parameters
     # bridge_dmg.set_parameter("result_name", "bridge_result")
@@ -67,9 +71,9 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bridge_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bridge_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
-    bridge_dmg.set_input_hazard('hazard', eq)
+    bridge_dmg.set_input_hazard("hazard", eq)
     # Set analysis parameters
     bridge_dmg.set_parameter("result_name", "bridge_result_south_carolina")
     bridge_dmg.set_parameter("use_liquefaction", False)
@@ -80,7 +84,9 @@ def run_with_base_class():
 
     ###################################################################
     # test Galveston Bridge Damage
-    hurricane = Hurricane.from_hazard_service("5f11e50cc6491311a814584c", hazard_service)
+    hurricane = Hurricane.from_hazard_service(
+        "5f11e50cc6491311a814584c", hazard_service
+    )
 
     # Galveston bridge
     bridge_dataset_id = "6062058ac57ada48e48c31e3"
@@ -96,13 +102,17 @@ def run_with_base_class():
 
     # Load fragility mapping
     fragility_service = FragilityService(client)
-    refactored_mapping_set = MappingSet(fragility_service.get_mapping(refactored_mapping_id))
-    bridge_dmg.set_input_dataset('dfr3_mapping_set', refactored_mapping_set)
+    refactored_mapping_set = MappingSet(
+        fragility_service.get_mapping(refactored_mapping_id)
+    )
+    bridge_dmg.set_input_dataset("dfr3_mapping_set", refactored_mapping_set)
 
     bridge_dmg.set_input_hazard("hazard", hurricane)
 
     # Set analysis parameters
-    bridge_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
+    bridge_dmg.set_parameter(
+        "fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code"
+    )
     bridge_dmg.set_parameter("result_name", "galveston_bridge_dmg_result")
     bridge_dmg.set_parameter("num_cpu", 4)
 
@@ -110,5 +120,5 @@ def run_with_base_class():
     bridge_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()
