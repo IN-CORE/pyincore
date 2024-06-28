@@ -58,7 +58,7 @@ def test_get_dataset_blob(datasvc):
     dataset_id = "5a284f0ac7d30d13bc0819c4"
     fname = datasvc.get_dataset_blob(dataset_id, join=True)
 
-    if type(fname) != str:
+    if type(fname) is not str:
         errors.append("doesn't return the correct filename!")
     # check if file or folder exists locally, which means successfully downloaded
     if not os.path.exists(fname):
@@ -158,7 +158,7 @@ def test_get_file_blob(datasvc):
     dataset_id = "5a284f24c7d30d13bc081adb"
     fname = datasvc.get_file_blob(dataset_id)
 
-    if type(fname) != str:
+    if type(fname) is not str:
         errors.append("doesn't return the correct filename!")
     # check if file or folder exists locally, which means successfully downloaded
     if not os.path.exists(fname):

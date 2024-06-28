@@ -216,8 +216,7 @@ class NciFunctionality(BaseAnalysis):
 
         # To be implemented in a future release
         # wds_cascading_functionality = wds_network_nodes[['guid', 'geometry']].merge(df_wds_func_nodes, on='guid',
-        # how='left').rename(columns={
-        #'guid': 'sguid'})
+        # how='left').rename(columns={'guid': 'sguid'})
 
         return epn_cascading_functionality
 

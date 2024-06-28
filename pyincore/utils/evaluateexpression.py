@@ -36,9 +36,7 @@ def evaluate(expression: str, parameters: dict = {}):
         if "__" in name or name in INVALID_NAMES:
             raise NameError(f"The use of '{name}' is not allowed.")
     for parameter in parameters:
-        if type(parameter) == "str" and (
-            "__" in parameter or parameter in INVALID_NAMES
-        ):
+        if type(parameter) is str and ("__" in parameter or parameter in INVALID_NAMES):
             raise NameError(f"Using '{parameter}' is not allowed.")
 
     # TODO figure out a better way of doing this. Can we import the packages here directly?
