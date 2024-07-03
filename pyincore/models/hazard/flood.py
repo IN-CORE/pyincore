@@ -3,13 +3,12 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-from pyincore import HazardService, Dataset
+from pyincore import HazardService
 from pyincore.models.hazard.hazard import Hazard
 from pyincore.models.hazard.hazarddataset import FloodDataset
 
 
 class Flood(Hazard):
-
     def __init__(self, metadata):
         super().__init__(metadata)
         self.hazardDatasets = []
@@ -35,7 +34,7 @@ class Flood(Hazard):
         return instance
 
     def read_hazard_values(self, payload: list, hazard_service=None, **kwargs):
-        """ Retrieve bulk flood hazard values either from the Hazard service or read it from local Dataset
+        """Retrieve bulk flood hazard values either from the Hazard service or read it from local Dataset
 
         Args:
             payload (list):
