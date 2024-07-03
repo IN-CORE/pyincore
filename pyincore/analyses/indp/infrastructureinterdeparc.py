@@ -24,7 +24,9 @@ class InfrastructureInterdepArc(InfrastructureArc):
     """
 
     def __init__(self, source, dest, source_layer, dest_layer, gamma):
-        super(InfrastructureInterdepArc, self).__init__(source, dest, source_layer, True)
+        super(InfrastructureInterdepArc, self).__init__(
+            source, dest, source_layer, True
+        )
         self.source_layer = source_layer
         self.dest_layer = dest_layer
         self.gamma = gamma

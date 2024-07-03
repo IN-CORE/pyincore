@@ -7,7 +7,14 @@ from jose import jwt
 
 from pyincore import (
     globals as pyglobals,
-    IncoreClient, DataService, FragilityService, RepairService, RestorationService, HazardService, SpaceService, SemanticService
+    IncoreClient,
+    DataService,
+    FragilityService,
+    RepairService,
+    RestorationService,
+    HazardService,
+    SpaceService,
+    SemanticService,
 )
 
 
@@ -18,7 +25,9 @@ def pytest_sessionstart(session):
     before performing collection and entering the run test loop.
     """
     try:
-        with open(os.path.join(os.path.dirname(__file__), "pyincore/.incorepw"), 'r') as f:
+        with open(
+            os.path.join(os.path.dirname(__file__), "pyincore/.incorepw"), "r"
+        ) as f:
             cred = f.read().splitlines()
     except EnvironmentError:
         assert False
@@ -27,7 +36,9 @@ def pytest_sessionstart(session):
     monkeypatch = MonkeyPatch()
     monkeypatch.setattr("builtins.input", lambda x: credentials["username"])
     monkeypatch.setattr("getpass.getpass", lambda y: credentials["password"])
-    client = IncoreClient(service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken")
+    client = IncoreClient(
+        service_url=pyglobals.INCORE_API_DEV_URL, token_file_name=".incrtesttoken"
+    )
     pytest.client = client
     pytest.datasvc = DataService(client)
     pytest.fragilitysvc = FragilityService(client)
@@ -36,4 +47,6 @@ def pytest_sessionstart(session):
     pytest.hazardsvc = HazardService(client)
     pytest.spacesvc = SpaceService(client)
     pytest.semanticsvc = SemanticService(client)
-    print(f"Successfully initialized Incore client and services. Using {pyglobals.INCORE_API_DEV_URL}")
+    print(
+        f"Successfully initialized Incore client and services. Using {pyglobals.INCORE_API_DEV_URL}"
+    )

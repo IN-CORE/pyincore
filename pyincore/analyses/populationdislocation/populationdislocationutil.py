@@ -7,10 +7,12 @@ import numpy as np
 
 
 class PopulationDislocationUtil:
-
     @staticmethod
-    def merge_damage_housing_block(building_dmg: pd.DataFrame, hua_inventory: pd.DataFrame,
-                                   block_data: pd.DataFrame):
+    def merge_damage_housing_block(
+        building_dmg: pd.DataFrame,
+        hua_inventory: pd.DataFrame,
+        block_data: pd.DataFrame,
+    ):
         """Load CSV files to pandas Dataframes, merge them and drop unused columns.
 
         Args:
@@ -29,7 +31,9 @@ class PopulationDislocationUtil:
 
         # first merge hazard with house unit allocation inventory on "guid"
         # note guid can be duplicated in housing unit allocation inventory
-        df = pd.merge(building_dmg, hua_inventory, how="right", on="guid", validate="1:m")
+        df = pd.merge(
+            building_dmg, hua_inventory, how="right", on="guid", validate="1:m"
+        )
 
         # drop columns in building damage that are not used
         col_drops = ["LS_0", "LS_1", "LS_2", "hazardtype", "meandamage", "mdamagedev"]
@@ -44,7 +48,9 @@ class PopulationDislocationUtil:
         elif "blockid" in df.columns:
             df["bgid"] = df["blockid"].astype("Int64")
         elif "blockid_x" in df.columns:
-            df = PopulationDislocationUtil.compare_columns(df, "blockid_x", "blockid_y", True)
+            df = PopulationDislocationUtil.compare_columns(
+                df, "blockid_x", "blockid_y", True
+            )
             if "blockid_x-blockid_y" in df.columns:
                 exit("Column bgid is ambiguous, check the input datasets!")
             else:
@@ -57,8 +63,12 @@ class PopulationDislocationUtil:
         return final_df
 
     @staticmethod
-    def get_disl_probability(value_loss: np.array, d_sf: np.array,
-                             percent_black_bg: np.array, percent_hisp_bg: np.array):
+    def get_disl_probability(
+        value_loss: np.array,
+        d_sf: np.array,
+        percent_black_bg: np.array,
+        percent_hisp_bg: np.array,
+    ):
         """
         Calculate dislocation, the probability of dislocation for the household and population.
         Probability of dislocation Damage factor,
@@ -80,20 +90,30 @@ class PopulationDislocationUtil:
 
         """
         # coefficients for the Logistic regression model
-        coefficient = {"beta0": -0.42523,
-                       "beta1": 0.02480,
-                       "beta2": -0.50166,  # single family coefficient
-                       "beta3": -0.01826,  # black block group coefficient
-                       "beta4": -0.01198}  # hispanic block group coefficient
+        coefficient = {
+            "beta0": -0.42523,
+            "beta1": 0.02480,
+            "beta2": -0.50166,  # single family coefficient
+            "beta3": -0.01826,  # black block group coefficient
+            "beta4": -0.01198,
+        }  # hispanic block group coefficient
 
         disl_prob = np.zeros_like(d_sf)
         try:
-            disl_prob = 1.0 / (1 + np.exp(-1.0 * (coefficient["beta0"] * 1 +
-                                                  coefficient["beta1"] * (value_loss * 100) +
-                                                  coefficient["beta2"] * d_sf +
-                                                  coefficient["beta3"] * percent_black_bg +
-                                                  coefficient["beta4"] * percent_hisp_bg)))
-        except Exception as e:
+            disl_prob = 1.0 / (
+                1
+                + np.exp(
+                    -1.0
+                    * (
+                        coefficient["beta0"] * 1
+                        + coefficient["beta1"] * (value_loss * 100)
+                        + coefficient["beta2"] * d_sf
+                        + coefficient["beta3"] * percent_black_bg
+                        + coefficient["beta4"] * percent_hisp_bg
+                    )
+                )
+            )
+        except Exception:
             print()
             # raise e
 
@@ -118,10 +138,10 @@ class PopulationDislocationUtil:
 
         """
         # select upper bound and lower bound from input table
-        alpha = df.loc[damage_state, 'alpha']
-        beta = df.loc[damage_state, 'beta']
-        ub = df.loc[damage_state, 'ub']
-        lb = df.loc[damage_state, 'lb']
+        alpha = df.loc[damage_state, "alpha"]
+        beta = df.loc[damage_state, "beta"]
+        ub = df.loc[damage_state, "ub"]
+        lb = df.loc[damage_state, "lb"]
 
         # Generate array of random values that follow beta distribution for damage state
         random_generator = np.random.RandomState(seed_i)
@@ -131,7 +151,7 @@ class PopulationDislocationUtil:
 
     @staticmethod
     def compare_merges(table1_cols, table2_cols, table_merged):
-        """ Compare two lists of columns and run compare columns on columns in both lists.
+        """Compare two lists of columns and run compare columns on columns in both lists.
         It assumes that suffixes are _x and _y
 
         Args:
@@ -146,10 +166,13 @@ class PopulationDislocationUtil:
         match_column = set(table1_cols).intersection(table2_cols)
         for col in match_column:
             # Compare two columns and marked similarity or rename and drop
-            if col + "_x" in table_merged.columns and col + "_y" in table_merged.columns:
-                table_merged = PopulationDislocationUtil.compare_columns(table_merged,
-                                                                         col + "_x",
-                                                                         col + "_y", True)
+            if (
+                col + "_x" in table_merged.columns
+                and col + "_y" in table_merged.columns
+            ):
+                table_merged = PopulationDislocationUtil.compare_columns(
+                    table_merged, col + "_x", col + "_y", True
+                )
         return table_merged
 
     @staticmethod
@@ -181,7 +204,9 @@ class PopulationDislocationUtil:
         return table
 
     @staticmethod
-    def get_choice_dislocation(pop_dislocation, choice_dislocation_cutoff, choice_dislocation_ds):
+    def get_choice_dislocation(
+        pop_dislocation, choice_dislocation_cutoff, choice_dislocation_ds
+    ):
         """Get choice dislocation based on the dislocation state and the choice dislocation cutoff.
 
         Args:
@@ -193,16 +218,18 @@ class PopulationDislocationUtil:
             null: None.
 
         """
-        condition1 = pop_dislocation['dislocated'] == 1
+        condition1 = pop_dislocation["dislocated"] == 1
         condition2 = pop_dislocation[choice_dislocation_ds] > choice_dislocation_cutoff
-        pop_dislocation['choice_dis'] = np.where(condition1 & condition2, True, False)
+        pop_dislocation["choice_dis"] = np.where(condition1 & condition2, True, False)
         # Change dislocated to 0 if choice dislocation is 1
-        pop_dislocation['dislocated'] = np.where(condition1 & condition2, False, True)
+        pop_dislocation["dislocated"] = np.where(condition1 & condition2, False, True)
 
         return None
 
     @staticmethod
-    def get_unsafe_occupancy(pop_dislocation, unsafe_occupancy_cutoff, unsafe_occupancy_ds):
+    def get_unsafe_occupancy(
+        pop_dislocation, unsafe_occupancy_cutoff, unsafe_occupancy_ds
+    ):
         """Get unsafe occupancy based on the dislocation state and the unsafe occupancy cutoff.
 
         Args:
@@ -214,10 +241,10 @@ class PopulationDislocationUtil:
             null: None.
 
         """
-        condition1 = pop_dislocation['dislocated'] == 0
+        condition1 = pop_dislocation["dislocated"] == 0
         condition2 = pop_dislocation[unsafe_occupancy_ds] > unsafe_occupancy_cutoff
-        pop_dislocation['unsafe_occ'] = np.where(condition1 & condition2, True, False)
+        pop_dislocation["unsafe_occ"] = np.where(condition1 & condition2, True, False)
         # Change dislocated to 1 if unsafe occupancy is 1
-        pop_dislocation['dislocated'] = np.where(condition1 & condition2, True, False)
+        pop_dislocation["dislocated"] = np.where(condition1 & condition2, True, False)
 
         return None

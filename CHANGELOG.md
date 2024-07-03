@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Remove unused insecure IN-CORE client [#581](https://github.com/IN-CORE/pyincore/issues/581)
 
+### Added
+- Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
+
 
 ## [1.19.0] - 2024-06-12
 

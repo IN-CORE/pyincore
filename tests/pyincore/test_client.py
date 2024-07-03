@@ -6,9 +6,8 @@
 import os.path
 
 import pytest
-import requests
 
-from pyincore import Client, IncoreClient, DataService
+from pyincore import IncoreClient
 
 
 def test_client_success(monkeypatch):

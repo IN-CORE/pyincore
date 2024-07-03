@@ -13,7 +13,7 @@ def run_with_base_class():
     # hazard_type = "earthquake"
     liq_geology_dataset_id = None
 
-    if hazard_type == 'earthquake':
+    if hazard_type == "earthquake":
         # Seaside Earthquake
         hazard_id = "5ba8f379ec2309043520906f"
 
@@ -22,7 +22,7 @@ def run_with_base_class():
 
         fragility_key = "pgd"
         liquefaction = False
-    elif hazard_type == 'tsunami':
+    elif hazard_type == "tsunami":
         # Seaside Tsunami
         hazard_id = "5bc9eaf7f7b08533c7e610e1"
 
@@ -32,7 +32,9 @@ def run_with_base_class():
         fragility_key = "Non-Retrofit inundationDepth Fragility ID Code"
         liquefaction = False
     else:
-        raise ValueError("Earthquake and tsunami are the only testable hazards with road damage currently")
+        raise ValueError(
+            "Earthquake and tsunami are the only testable hazards with road damage currently"
+        )
 
     uncertainty = False
 
@@ -43,7 +45,7 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    road_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    road_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     road_dmg.set_parameter("result_name", "seaside_road_dmg_" + hazard_type)
     road_dmg.set_parameter("hazard_type", hazard_type)
@@ -53,7 +55,9 @@ def run_with_base_class():
     road_dmg.set_parameter("num_cpu", 1)
     road_dmg.set_parameter("use_liquefaction", liquefaction)
     if liquefaction and liq_geology_dataset_id is not None:
-        road_dmg.set_parameter("liquefaction_geology_dataset_id", liq_geology_dataset_id)
+        road_dmg.set_parameter(
+            "liquefaction_geology_dataset_id", liq_geology_dataset_id
+        )
     road_dmg.set_parameter("use_hazard_uncertainty", uncertainty)
 
     # Run Analysis
@@ -77,13 +81,15 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    hurr_road_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    hurr_road_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     # Specify the result name
     result_name = "galveston_hurricane_road_result"
     # Set analysis parameters
     hurr_road_dmg.set_parameter("result_name", result_name)
     hurr_road_dmg.set_parameter("hazard_type", hazard_type)
-    hurr_road_dmg.set_parameter("fragility_key", "Non-Retrofit inundationDepth Fragility ID Code")
+    hurr_road_dmg.set_parameter(
+        "fragility_key", "Non-Retrofit inundationDepth Fragility ID Code"
+    )
     hurr_road_dmg.set_parameter("hazard_id", hazard_id)
     hurr_road_dmg.set_parameter("num_cpu", 4)
 
@@ -91,5 +97,5 @@ def run_with_base_class():
     hurr_road_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()
