@@ -31,61 +31,61 @@ class PipelineRestoration(BaseAnalysis):
 
         """
         return {
-            'name': 'pipeline-restoration',
-            'description': 'calculate the restoration times for damaged pipelines',
-            'input_parameters': [
+            "name": "pipeline-restoration",
+            "description": "calculate the restoration times for damaged pipelines",
+            "input_parameters": [
                 {
-                    'id': 'result_name',
-                    'required': True,
-                    'description': 'name of the result csv dataset',
-                    'type': str
+                    "id": "result_name",
+                    "required": True,
+                    "description": "name of the result csv dataset",
+                    "type": str,
                 },
                 {
-                    'id': 'num_cpu',
-                    'required': False,
-                    'description': 'If using parallel execution, the number of cpus to request',
-                    'type': int
+                    "id": "num_cpu",
+                    "required": False,
+                    "description": "If using parallel execution, the number of cpus to request",
+                    "type": int,
                 },
                 {
-                    'id': 'num_available_workers',
-                    'required': True,
-                    'description': 'Number of available workers to work on the repairs',
-                    'type': int
+                    "id": "num_available_workers",
+                    "required": True,
+                    "description": "Number of available workers to work on the repairs",
+                    "type": int,
                 },
                 {
-                    'id': 'restoration_key',
-                    'required': False,
-                    'description': 'restoration key to use in mapping dataset',
-                    'type': str
+                    "id": "restoration_key",
+                    "required": False,
+                    "description": "restoration key to use in mapping dataset",
+                    "type": str,
                 },
             ],
-            'input_datasets': [
+            "input_datasets": [
                 {
-                    'id': 'pipeline',
-                    'required': True,
-                    'description': 'Pipeline Inventory',
-                    'type': ['ergo:buriedPipelineTopology', 'ergo:pipeline'],
+                    "id": "pipeline",
+                    "required": True,
+                    "description": "Pipeline Inventory",
+                    "type": ["ergo:buriedPipelineTopology", "ergo:pipeline"],
                 },
                 {
-                    'id': 'pipeline_damage',
-                    'required': True,
-                    'description': 'pipeline damage results with repairs',
-                    'type': ['ergo:pipelineDamageVer2', 'ergo:pipelineDamageVer3']
+                    "id": "pipeline_damage",
+                    "required": True,
+                    "description": "pipeline damage results with repairs",
+                    "type": ["ergo:pipelineDamageVer2", "ergo:pipelineDamageVer3"],
                 },
                 {
-                    'id': 'dfr3_mapping_set',
-                    'required': True,
-                    'description': 'DFR3 Mapping Set Object',
-                    'type': ['incore:dfr3MappingSet'],
+                    "id": "dfr3_mapping_set",
+                    "required": True,
+                    "description": "DFR3 Mapping Set Object",
+                    "type": ["incore:dfr3MappingSet"],
+                },
+            ],
+            "output_datasets": [
+                {
+                    "id": "pipeline_restoration",
+                    "description": "CSV file of pipeline restoration times",
+                    "type": "incore:pipelineRestorationVer1",
                 }
             ],
-            'output_datasets': [
-                {
-                    'id': 'pipeline_restoration',
-                    'description': 'CSV file of pipeline restoration times',
-                    'type': 'incore:pipelineRestorationVer1'
-                }
-            ]
         }
 
     def run(self):
@@ -96,18 +96,19 @@ class PipelineRestoration(BaseAnalysis):
         pipeline_dmg = self.get_input_dataset("pipeline_damage").get_csv_reader()
         pipelines_dmg_df = pd.DataFrame(list(pipeline_dmg))
 
-        damage_result = pipelines_dmg_df.merge(pipelines_df, on='guid')
-        damage_result = damage_result.to_dict(orient='records')
+        damage_result = pipelines_dmg_df.merge(pipelines_df, on="guid")
+        damage_result = damage_result.to_dict(orient="records")
 
         user_defined_cpu = 1
-        if not self.get_parameter("num_cpu") is None and self.get_parameter(
-                "num_cpu") > 0:
+        if (
+            not self.get_parameter("num_cpu") is None
+            and self.get_parameter("num_cpu") > 0
+        ):
             user_defined_cpu = self.get_parameter("num_cpu")
 
-        num_workers = AnalysisUtil.determine_parallelism_locally(self,
-                                                                 len(
-                                                                     damage_result),
-                                                                 user_defined_cpu)
+        num_workers = AnalysisUtil.determine_parallelism_locally(
+            self, len(damage_result), user_defined_cpu
+        )
 
         avg_bulk_input_size = int(len(damage_result) / num_workers)
         inventory_args = []
@@ -115,18 +116,20 @@ class PipelineRestoration(BaseAnalysis):
         inventory_list = damage_result
 
         while count < len(inventory_list):
-            inventory_args.append(inventory_list[count:count + avg_bulk_input_size])
+            inventory_args.append(inventory_list[count : count + avg_bulk_input_size])
             count += avg_bulk_input_size
 
         restoration_results = self.pipeline_restoration_concurrent_future(
-            self.pipeline_restoration_bulk_input, num_workers,
-            inventory_args)
-        self.set_result_csv_data("pipeline_restoration",
-                                 restoration_results, name=self.get_parameter("result_name"))
+            self.pipeline_restoration_bulk_input, num_workers, inventory_args
+        )
+        self.set_result_csv_data(
+            "pipeline_restoration",
+            restoration_results,
+            name=self.get_parameter("result_name"),
+        )
         return True
 
-    def pipeline_restoration_concurrent_future(self, function_name,
-                                               parallelism, *args):
+    def pipeline_restoration_concurrent_future(self, function_name, parallelism, *args):
         """Utilizes concurrent.future module.
 
         Args:
@@ -140,7 +143,8 @@ class PipelineRestoration(BaseAnalysis):
         """
         res_output = []
         with concurrent.futures.ProcessPoolExecutor(
-                max_workers=parallelism) as executor:
+            max_workers=parallelism
+        ) as executor:
             for res_ret in executor.map(function_name, *args):
                 res_output.extend(res_ret)
 
@@ -163,11 +167,14 @@ class PipelineRestoration(BaseAnalysis):
         if restoration_key is None:
             restoration_key = "Restoration ID Code"
 
-        restoration_sets = self.restorationsvc.match_list_of_dicts(self.get_input_dataset("dfr3_mapping_set"),
-                                                                   damage, restoration_key)
+        restoration_sets = self.restorationsvc.match_list_of_dicts(
+            self.get_input_dataset("dfr3_mapping_set"), damage, restoration_key
+        )
 
         for dmg in damage:
-            res = self.restoration_time(dmg, num_available_workers, restoration_sets[dmg['guid']])
+            res = self.restoration_time(
+                dmg, num_available_workers, restoration_sets[dmg["guid"]]
+            )
             restoration_results.append(res)
 
         return restoration_results
@@ -186,15 +193,18 @@ class PipelineRestoration(BaseAnalysis):
         """
         res_result = collections.OrderedDict()
 
-        if 'guid' in dmg.keys():
-            res_result['guid'] = dmg['guid']
+        if "guid" in dmg.keys():
+            res_result["guid"] = dmg["guid"]
         else:
-            res_result['guid'] = 'NA'
+            res_result["guid"] = "NA"
 
-        res_result['repair_time'] = restoration_set.calculate_restoration_rates(**{
-            "break_rate": float(dmg['breakrate']),
-            "leak_rate": float(dmg['leakrate']),
-            "pipe_length": dmg['length'],
-            "num_workers": num_available_workers})['RT']
+        res_result["repair_time"] = restoration_set.calculate_restoration_rates(
+            **{
+                "break_rate": float(dmg["breakrate"]),
+                "leak_rate": float(dmg["leakrate"]),
+                "pipe_length": dmg["length"],
+                "num_workers": num_available_workers,
+            }
+        )["RT"]
 
         return res_result

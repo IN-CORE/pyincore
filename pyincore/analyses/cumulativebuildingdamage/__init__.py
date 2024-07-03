@@ -1,1 +1,3 @@
-from pyincore.analyses.cumulativebuildingdamage.cumulativebuildingdamage import CumulativeBuildingDamage
+from pyincore.analyses.cumulativebuildingdamage.cumulativebuildingdamage import (
+    CumulativeBuildingDamage,
+)
