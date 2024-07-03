@@ -103,12 +103,16 @@ class CGEMLFileUtil:
         """
 
         base_cap_factors: List[np.ndarray] = []
-        base_cap: np.ndarray = CGEMLFileUtil.parse_csv(filenames[-1], ds_sectors).reshape(
+        base_cap: np.ndarray = CGEMLFileUtil.parse_csv(
+            filenames[-1], ds_sectors
+        ).reshape(
             1, -1
         )  # 1 x K array K = number of sectors in the model
         # logger.info(f"base_cap shape: {base_cap.shape}")
 
-        for filename, sector_order in zip(filenames[:-1], base_cap_sector_order.values()):
+        for filename, sector_order in zip(
+            filenames[:-1], base_cap_sector_order.values()
+        ):
             base_cap_factors.append(
                 CGEMLFileUtil.parse_csv(filename, sector_order).reshape(-1, 1)
             )  # k_i x 1 array k_i = number of sectors k for a factor i
@@ -146,7 +150,9 @@ class CGEMLFileUtil:
         """
         logger.info("Parsing input files...")
 
-        model_coeffs, sectors, base_cap_sector_ordering = CGEMLFileUtil.parse_coeff(model_filenames)
+        model_coeffs, sectors, base_cap_sector_ordering = CGEMLFileUtil.parse_coeff(
+            model_filenames
+        )
 
         base_cap_factors, base_cap = CGEMLFileUtil.parse_base_vals(
             filenames, sectors["ds"], base_cap_sector_ordering

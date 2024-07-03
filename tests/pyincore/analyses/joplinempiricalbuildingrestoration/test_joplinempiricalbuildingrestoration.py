@@ -2,7 +2,9 @@
 
 from pyincore import IncoreClient, FragilityService, MappingSet
 from pyincore.analyses.buildingdamage import BuildingDamage
-from pyincore.analyses.joplinempiricalbuildingrestoration import JoplinEmpiricalBuildingRestoration
+from pyincore.analyses.joplinempiricalbuildingrestoration import (
+    JoplinEmpiricalBuildingRestoration,
+)
 import pyincore.globals as pyglobals
 
 
@@ -46,7 +48,9 @@ def run_with_base_class():
     restoration.load_remote_input_dataset("buildings", bldg_dataset_id)
     # restoration.load_remote_input_dataset("building_dmg", building_dmg_result)
     restoration.set_input_dataset("building_dmg", building_dmg_result)
-    restoration.load_remote_input_dataset("building_functionality_level", building_fl_id)
+    restoration.load_remote_input_dataset(
+        "building_functionality_level", building_fl_id
+    )
 
     result_name = "Joplin_empirical_restoration_result"
     restoration.set_parameter("result_name", result_name)
@@ -57,5 +61,5 @@ def run_with_base_class():
     restoration.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

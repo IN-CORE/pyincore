@@ -6,7 +6,6 @@
 
 
 class Units:
-
     deg_to_rad = 0.0174533
     rad_to_deg = 57.2958
 
@@ -63,14 +62,18 @@ class Units:
     def convert_hazard(hazard_value, original_demand_units, requested_demand_units):
         converted_hazard_value = hazard_value
         if original_demand_units.lower() != requested_demand_units.lower():
-            conversion = f"{original_demand_units.lower().replace('/', '')}_to_" \
-                         f"{requested_demand_units.lower().replace('/', '')}"
+            conversion = (
+                f"{original_demand_units.lower().replace('/', '')}_to_"
+                f"{requested_demand_units.lower().replace('/', '')}"
+            )
             try:
                 conversion_value = getattr(Units, conversion)
                 converted_hazard_value = conversion_value * hazard_value
             except AttributeError:
-                raise ValueError(f"We don't support the conversion from {original_demand_units} "
-                                 f"to {requested_demand_units}")
+                raise ValueError(
+                    f"We don't support the conversion from {original_demand_units} "
+                    f"to {requested_demand_units}"
+                )
         else:
             return converted_hazard_value
 

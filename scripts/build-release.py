@@ -4,39 +4,41 @@ import os
 
 
 script_path = os.path.dirname(os.path.realpath(__file__))
-dest_path = os.path.abspath(os.path.join(script_path, '..', '..'))
+dest_path = os.path.abspath(os.path.join(script_path, "..", ".."))
 
-with open(os.path.join(script_path, 'release-packages.yml')) as f:
+with open(os.path.join(script_path, "release-packages.yml")) as f:
     config = yaml.safe_load(f)
 
-internalExcludes = ['__pycache__', 'build', 'cache_data', 'dist', 'pyincore.egg-info']
+internalExcludes = ["__pycache__", "build", "cache_data", "dist", "pyincore.egg-info"]
 
 excludeList = None
-if config['exclude'] is not None:
-    excludeList = config['exclude'] + internalExcludes
+if config["exclude"] is not None:
+    excludeList = config["exclude"] + internalExcludes
 else:
     excludeList = internalExcludes
 
-version = config['version']
+version = config["version"]
 
-zipName = 'pyincore_' + version + '.zip'
+zipName = "pyincore_" + version + ".zip"
 zf = zipfile.ZipFile(os.path.join(dest_path, zipName), "w")
 
-for dirname, subdirs, files in os.walk(os.path.relpath(os.path.join(script_path, '..'))):
+for dirname, subdirs, files in os.walk(
+    os.path.relpath(os.path.join(script_path, ".."))
+):
     for exclude in excludeList:
         if exclude in subdirs:
             subdirs.remove(exclude)
 
     for subdir in subdirs:
-        if subdir[0] == '.':  # hidden sub directories
+        if subdir[0] == ".":  # hidden sub directories
             subdirs.remove(subdir)
 
     dirbasename = os.path.basename(os.path.abspath(dirname))
-    if dirbasename[0] != '.':  # hidden directories
+    if dirbasename[0] != ".":  # hidden directories
         zf.write(dirname)
 
     for filename in files:
-        if filename[0] != '.':  # hidden files
+        if filename[0] != ".":  # hidden files
             zf.write(os.path.join(dirname, filename))
 zf.close()
 
