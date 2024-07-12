@@ -26,9 +26,8 @@ from pyincore.dataservice import DataService
 
 
 def run_with_base_class():
-    dev_client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
-    prod_client = IncoreClient()
-    prod_datasvc = DataService(prod_client)
+    client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
+    datasvc = DataService(client)
 
     hazard_type = "earthquake"
     hazard_id = "5dfa3e36b9219c934b64c231"  # 1000 yr eq
@@ -40,27 +39,27 @@ def run_with_base_class():
     seed = 1111
 
     power_network_dataset = Dataset.from_data_service(
-        "64adbc47c36a346b1f3969f0", data_service=prod_datasvc
+        "669048e0b65495213330a10e", data_service=datasvc
     )
     power_network = NetworkDataset.from_dataset(power_network_dataset)
     water_network_dataset = Dataset.from_data_service(
-        "64adbed3e1b74b4e158210ed", data_service=prod_datasvc
+        "66904a7bb65495213330c8f2", data_service=datasvc
     )
     water_network = NetworkDataset.from_dataset(water_network_dataset)
     water_facilities = water_network.nodes
     epfs = power_network.nodes
     pipeline = water_network.links
     bldg_dataset = Dataset.from_data_service(
-        "613ba5ef5d3b1d6461e8c415", data_service=prod_datasvc
+        "66904cbeb65495213330c920", data_service=datasvc
     )
 
     ###################################################
     # water facility damage
     ###################################################
-    wterfclty_dmg = WaterFacilityDamage(prod_client)
-    fragility_service = FragilityService(prod_client)
+    wterfclty_dmg = WaterFacilityDamage(client)
+    fragility_service = FragilityService(client)
     wterfclty_dmg.set_input_dataset("water_facilities", water_facilities)
-    mapping_id = "5d39e010b9219cc18bd0b0b6"  # 5 DS
+    mapping_id = "66904d9bed7e39392d75f761"  # 5 DS
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     wterfclty_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     wterfclty_dmg.set_parameter("hazard_type", hazard_type)
@@ -74,7 +73,7 @@ def run_with_base_class():
     ###################################################
     # water facility mcs
     ###################################################
-    wterfclty_mc = MonteCarloFailureProbability(prod_client)
+    wterfclty_mc = MonteCarloFailureProbability(client)
     wterfclty_mc.set_input_dataset("damage", wterfclty_dmg_result)
     wterfclty_mc.set_parameter("num_cpu", num_cpu)
     wterfclty_mc.set_parameter("num_samples", sim_number)
@@ -96,8 +95,8 @@ def run_with_base_class():
     ###################################################
     # water facility repair time
     ###################################################
-    wterfclty_rest = WaterFacilityRestoration(prod_client)
-    restorationsvc = RestorationService(prod_client)
+    wterfclty_rest = WaterFacilityRestoration(client)
+    restorationsvc = RestorationService(client)
     mapping_set = MappingSet(restorationsvc.get_mapping("61f075ee903e515036cee0a5"))
     wterfclty_rest.set_input_dataset("water_facilities", water_facilities)
     wterfclty_rest.set_input_dataset("dfr3_mapping_set", mapping_set)
@@ -114,16 +113,16 @@ def run_with_base_class():
     ###################################################
     # water facility repair cost
     ###################################################
-    wf_repair_cost = WaterFacilityRepairCost(prod_client)
+    wf_repair_cost = WaterFacilityRepairCost(client)
     wf_repair_cost.set_input_dataset("water_facilities", water_facilities)
     wf_repair_cost.load_remote_input_dataset(
-        "replacement_cost", "64833bcdd3f39a26a0c8b147"
+        "replacement_cost", "669140f5b6549521333118a9"
     )
     wf_repair_cost.set_input_dataset(
         "sample_damage_states", wterfclty_sample_damage_states
     )
     wf_repair_cost.load_remote_input_dataset(
-        "wf_dmg_ratios", "647e423d7ae18139d9758607"
+        "wf_dmg_ratios", "66914b3cb654952133316832"
     )
     wf_repair_cost.set_parameter("result_name", result_name + "_wf_repair_cost")
     wf_repair_cost.set_parameter("num_cpu", 4)
@@ -133,10 +132,10 @@ def run_with_base_class():
     ###################################################
     # epf damage
     ###################################################
-    epf_dmg = EpfDamage(prod_client)
-    fragility_service = FragilityService(prod_client)
+    epf_dmg = EpfDamage(client)
+    fragility_service = FragilityService(client)
     epf_dmg.set_input_dataset("epfs", epfs)
-    mapping_id = "64ac5f3ad2122d1f95f36356"  # 5 DS
+    mapping_id = "66914c5bed7e39392d75f762"  # 5 DS
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
     epf_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     epf_dmg.set_parameter("hazard_type", hazard_type)
@@ -150,8 +149,8 @@ def run_with_base_class():
     ###################################################
     # epf repair time
     ###################################################
-    epf_rest = EpfRestoration(prod_client)
-    restorationsvc = RestorationService(prod_client)
+    epf_rest = EpfRestoration(client)
+    restorationsvc = RestorationService(client)
     mapping_set = MappingSet(restorationsvc.get_mapping("61f302e6e3a03e465500b3eb"))
     epf_rest.set_input_dataset("epfs", epfs)
     epf_rest.set_input_dataset("dfr3_mapping_set", mapping_set)
@@ -168,7 +167,7 @@ def run_with_base_class():
     ###################################################
     # epf mcs
     ###################################################
-    epf_mc = MonteCarloFailureProbability(prod_client)
+    epf_mc = MonteCarloFailureProbability(client)
     epf_mc.set_input_dataset("damage", epf_dmg_result)
     epf_mc.set_parameter("num_cpu", num_cpu)
     epf_mc.set_parameter("num_samples", sim_number)
@@ -186,14 +185,14 @@ def run_with_base_class():
     ###################################################
     # epf repair cost
     ###################################################
-    epf_repair_cost = EpfRepairCost(prod_client)
+    epf_repair_cost = EpfRepairCost(client)
     epf_repair_cost.set_input_dataset("epfs", epfs)
     epf_repair_cost.load_remote_input_dataset(
-        "replacement_cost", "647dff5b4dd25160127ca192"
+        "replacement_cost", "66914cd5b65495213331900d"
     )
     epf_repair_cost.set_input_dataset("sample_damage_states", epf_sample_damage_states)
     epf_repair_cost.load_remote_input_dataset(
-        "epf_dmg_ratios", "6483354b41181d20004efbd7"
+        "epf_dmg_ratios", "66914d2ab654952133319012"
     )
     epf_repair_cost.set_parameter("result_name", result_name + "_epf_repair_cost")
     epf_repair_cost.set_parameter("num_cpu", 4)
@@ -203,8 +202,8 @@ def run_with_base_class():
     ###################################################
     # pipeline repair rate damage
     ###################################################
-    pipeline_dmg = PipelineDamageRepairRate(prod_client)
-    fragility_service = FragilityService(prod_client)
+    pipeline_dmg = PipelineDamageRepairRate(client)
+    fragility_service = FragilityService(client)
     pipeline_dmg.set_input_dataset("pipeline", pipeline)
     mapping_id = "5b47c227337d4a38464efea8"
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
@@ -220,7 +219,7 @@ def run_with_base_class():
     ###################################################
     # pipeline functionality
     ###################################################
-    pipeline_func = PipelineFunctionality(prod_client)
+    pipeline_func = PipelineFunctionality(client)
     pipeline_func.set_input_dataset("pipeline_repair_rate_damage", pipeline_dmg_result)
     pipeline_func.set_parameter("result_name", result_name + "_pipeline")
     pipeline_func.set_parameter("num_samples", sim_number)
@@ -232,8 +231,8 @@ def run_with_base_class():
     ###################################################
     # pipeline repair time
     ###################################################
-    pipeline_rest = PipelineRestoration(prod_client)
-    restorationsvc = RestorationService(prod_client)
+    pipeline_rest = PipelineRestoration(client)
+    restorationsvc = RestorationService(client)
     mapping_set = MappingSet(restorationsvc.get_mapping("61f35f09903e515036cee106"))
     pipeline_rest.set_input_dataset("pipeline", pipeline)
     pipeline_rest.set_input_dataset("pipeline_damage", pipeline_dmg_result)
@@ -246,14 +245,14 @@ def run_with_base_class():
     ###################################################
     # pipeline repair cost
     ###################################################
-    pipeline_repair_cost = PipelineRepairCost(prod_client)
+    pipeline_repair_cost = PipelineRepairCost(client)
     pipeline_repair_cost.set_input_dataset("pipeline", pipeline)
     pipeline_repair_cost.load_remote_input_dataset(
-        "replacement_cost", "6480a2787ae18139d975e919"
+        "replacement_cost", "66914deeb65495213331b7db"
     )
     pipeline_repair_cost.set_input_dataset("pipeline_dmg", pipeline_dmg_result)
     pipeline_repair_cost.load_remote_input_dataset(
-        "pipeline_dmg_ratios", "6480a2d44dd25160127d2fcc"
+        "pipeline_dmg_ratios", "66914e4ab65495213331b7e0"
     )
     pipeline_repair_cost.set_parameter(
         "result_name", result_name + "_pipeline_repair_cost"
@@ -265,8 +264,8 @@ def run_with_base_class():
     ###################################################
     # building damage
     ###################################################
-    bldg_dmg = BuildingDamage(dev_client)
-    fragility_service = FragilityService(dev_client)
+    bldg_dmg = BuildingDamage(client)
+    fragility_service = FragilityService(client)
     bldg_dmg.set_input_dataset("buildings", bldg_dataset)
     mapping_id = "5e99c86d6129af000136defa"  # 4 DS dev
     # mapping_id = "5d2789dbb9219c3c553c7977"  # 4 DS prod
@@ -282,9 +281,9 @@ def run_with_base_class():
     ###################################################
     # housing unit allocation
     ###################################################
-    hua = HousingUnitAllocation(prod_client)
-    housing_unit_inv_id = "5d543087b9219c0689b98234"
-    address_point_inv_id = "5d542fefb9219c0689b981fb"
+    hua = HousingUnitAllocation(client)
+    housing_unit_inv_id = "5df7cd3a425e0b00092cffa4"
+    address_point_inv_id = "5df7cd88425e0b00092cffc9"
     hua.load_remote_input_dataset("housing_unit_inventory", housing_unit_inv_id)
     hua.load_remote_input_dataset("address_point_inventory", address_point_inv_id)
     hua.set_input_dataset("buildings", bldg_dataset)
@@ -297,11 +296,11 @@ def run_with_base_class():
     ###################################################
     # population dislocation
     ###################################################
-    pop_dis = PopulationDislocation(prod_client)
+    pop_dis = PopulationDislocation(client)
     pop_dis.set_input_dataset("building_dmg", building_dmg_result)
     pop_dis.set_input_dataset("housing_unit_allocation", hua_result)
-    pop_dis.load_remote_input_dataset("block_group_data", "5d542bd8b9219c0689b90408")
-    pop_dis.load_remote_input_dataset("value_loss_param", "60354810e379f22e16560dbd")
+    pop_dis.load_remote_input_dataset("block_group_data", "6035432c1e456929c8609402")
+    pop_dis.load_remote_input_dataset("value_loss_param", "602d508fb1db9c28aeedb2a5")
     pop_dis.set_parameter("result_name", result_name + "_popdislocation")
     pop_dis.set_parameter("seed", seed)
     pop_dis.run_analysis()
@@ -310,7 +309,7 @@ def run_with_base_class():
     ###################################################
     # INDP
     ###################################################
-    indp_analysis = INDP(dev_client)
+    indp_analysis = INDP(client)
     indp_analysis.set_parameter("network_type", "from_csv")
     indp_analysis.set_parameter("MAGS", [1000])
     indp_analysis.set_parameter("sample_range", sample_range)
@@ -361,24 +360,24 @@ def run_with_base_class():
         "water_network", water_network_dataset
     )  # with distribution noes
     powerline_supply_demand_info = Dataset.from_data_service(
-        "64adbfdeae71103fb41906e6", data_service=prod_datasvc
+        "66914f5cb65495213331b7f0", data_service=datasvc
     )
     indp_analysis.set_input_dataset(
         "powerline_supply_demand_info", powerline_supply_demand_info
     )
 
     epf_supply_demand_info = Dataset.from_data_service(
-        "64adc019e1b74b4e1582110d", data_service=prod_datasvc
+        "66914faeb65495213331b7f5", data_service=datasvc
     )
     indp_analysis.set_input_dataset("epf_supply_demand_info", epf_supply_demand_info)
 
     wf_supply_demand_info = Dataset.from_data_service(
-        "64adc051ae71103fb41906e7", data_service=prod_datasvc
+        "66915039b65495213331b7fc", data_service=datasvc
     )
     indp_analysis.set_input_dataset("wf_supply_demand_info", wf_supply_demand_info)
 
     pipeline_supply_demand_info = Dataset.from_data_service(
-        "64adc08ee1b74b4e1582110e", data_service=prod_datasvc
+        "669150fdb65495213331b807", data_service=datasvc
     )
     indp_analysis.set_input_dataset(
         "pipeline_supply_demand_info", pipeline_supply_demand_info
