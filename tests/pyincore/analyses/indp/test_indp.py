@@ -30,8 +30,7 @@ def run_with_base_class():
     datasvc = DataService(client)
 
     hazard_type = "earthquake"
-    hazard_id = "5dfa3e36b9219c934b64c231"  # 1000 yr eq
-    hazard_id_dev = "5ba8f127ec2309043520906c"  # 1000 yr eq dev
+    hazard_id = "5ba8f127ec2309043520906c"  # 1000 yr eq
     num_cpu = 8
     sim_number = 2
     sample_range = range(0, sim_number)
@@ -273,7 +272,7 @@ def run_with_base_class():
     bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     bldg_dmg.set_parameter("hazard_type", hazard_type)
     bldg_dmg.set_parameter("num_cpu", 4)
-    bldg_dmg.set_parameter("hazard_id", hazard_id_dev)
+    bldg_dmg.set_parameter("hazard_id", hazard_id)
     bldg_dmg.set_parameter("result_name", result_name + "_bldg_dmg")
     bldg_dmg.run_analysis()
     building_dmg_result = bldg_dmg.get_output_dataset("ds_result")
