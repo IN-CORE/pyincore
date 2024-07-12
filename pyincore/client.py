@@ -451,26 +451,3 @@ class IncoreClient(Client):
         # clear entry from service.json
         update_hash_entry("edit", hashed_url=self.hashed_service_url)
         return
-
-
-class InsecureIncoreClient(Client):
-    """IN-CORE service client class that bypasses Ambassador auth. It contains token and service root url.
-
-    Args:
-        service_url (str): Service url.
-        username (str): Username string.
-
-    """
-
-    def __init__(self, service_url: str = None, username: str = None):
-        super().__init__()
-        if service_url is None or len(service_url.strip()) == 0:
-            service_url = pyglobals.INCORE_API_PROD_URL
-        self.service_url = service_url
-        if username is None or len(username.strip()) == 0:
-            self.session.headers[
-                "x-auth-userinfo"
-            ] = pyglobals.INCORE_LDAP_TEST_USER_INFO
-        else:
-            user_info = '{"preferred_username": "' + username + '"}'
-            self.session.headers["x-auth-userinfo"] = user_info

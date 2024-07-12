@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Fixed Sphinx autodoc skipping class methods with custom decorators. [#518](https://github.com/IN-CORE/pyincore/issues/518)
 
+### Changed
+- Remove unused insecure IN-CORE client [#581](https://github.com/IN-CORE/pyincore/issues/581)
+
 ### Added
 - Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
 
