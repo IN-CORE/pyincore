@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
 ## [Unreleased]
+
+### Changed
+- Remove unused insecure IN-CORE client [#581](https://github.com/IN-CORE/pyincore/issues/581)
 
 ### Added
 - Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
