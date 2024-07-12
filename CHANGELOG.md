@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Pyomo version fixed to fix indp solver failure [#585](https://github.com/IN-CORE/pyincore/issues/585)
 
+### Changed
+- Remove unused insecure IN-CORE client [#581](https://github.com/IN-CORE/pyincore/issues/581)
+
 ### Added
 - Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
 
