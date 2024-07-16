@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Remove unused insecure IN-CORE client [#581](https://github.com/IN-CORE/pyincore/issues/581)
+- Update port inventory type and corresponding limit state and damage state calculation [#603](https://github.com/IN-CORE/pyincore/issues/603)
 
 ### Added
 - Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
