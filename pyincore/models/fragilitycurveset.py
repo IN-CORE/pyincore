@@ -137,7 +137,6 @@ class FragilityCurveSet:
             ("hurricane", "crane", 1): FragilityCurveSet._1ls_to_4ds,
             ("hurricane", "equipment", 1): FragilityCurveSet._1ls_to_4ds,
             ("hurricane", "tank", 1): FragilityCurveSet._1ls_to_4ds,
-            ("hurricane", "yard", 1): FragilityCurveSet._1ls_to_4ds,
             ("hurricane", "electric_facility", 1): FragilityCurveSet._1ls_to_4ds,
             # 1 LS to 5 DS
             ("hurricane", "road", 1): FragilityCurveSet._1ls_to_5ds,
@@ -416,8 +415,6 @@ class FragilityCurveSet:
         elif inventory_type == "tank":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
         elif inventory_type == "warehouse":
-            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
-        elif inventory_type == "yard":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
         elif inventory_type == "crane":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
