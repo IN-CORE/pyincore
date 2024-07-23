@@ -93,6 +93,13 @@ class HousingRecoverySequential(BaseAnalysis):
         t_final = self.get_parameter("t_final")
 
         # Load population block data from IN-CORE
+        households_csv = self.get_input_dataset(
+            "population_dislocation_block"
+        ).get_csv_reader()
+
+        # Read the header from households_csv
+        header = next(households_csv)
+
         pop_dis_selectors = [
             "guid",
             "huid",
@@ -102,9 +109,11 @@ class HousingRecoverySequential(BaseAnalysis):
             "ownershp",
             "dislocated",
         ]
-        households_csv = self.get_input_dataset(
-            "population_dislocation_block"
-        ).get_csv_reader()
+
+        # Check if 'hhinc' is in the header
+        if 'hhinc' in header:
+            pop_dis_selectors.append('hhinc')
+
         households_df = (pd.DataFrame(households_csv))[pop_dis_selectors]
 
         # Perform  conversions across the dataset from object type into the appropriate type
@@ -113,6 +122,10 @@ class HousingRecoverySequential(BaseAnalysis):
         households_df["hispan"] = pd.to_numeric(households_df["hispan"])
         households_df["ownershp"] = pd.to_numeric(households_df["ownershp"])
         households_df["dislocated"] = households_df["dislocated"] == "True"
+
+        # Check if 'hhinc' is in the header
+        if 'hhinc' in header:
+            households_df["hhinc"] = pd.to_numeric(households_df["hhinc"])
 
         # Load the transition probability matrix from IN-CORE
         tpm_csv = self.get_input_dataset("tpm").get_csv_reader()
@@ -214,16 +227,21 @@ class HousingRecoverySequential(BaseAnalysis):
         """
         seed = self.get_parameter("seed")
         rng = np.random.RandomState(seed)
-        sv_result = self.get_input_dataset("sv_result").get_dataframe_from_csv(
-            low_memory=False
-        )
-        # turn fips code to string for ease of matching
-        sv_result["FIPS"] = sv_result["FIPS"].astype(str)
 
-        # Compute the social vulnerability zone using known factors
-        households_df = self.compute_social_vulnerability_zones(
-            sv_result, households_df
-        )
+        sv_result = self.get_input_dataset("sv_result")
+        if sv_result is not None:
+            sv_result = sv_result.get_dataframe_from_csv(low_memory=False)
+
+            # turn fips code to string for ease of matching
+            sv_result["FIPS"] = sv_result["FIPS"].astype(str)
+
+            # Compute the social vulnerability zone using known factors
+            households_df = self.compute_social_vulnerability_zones(
+                sv_result, households_df
+            )
+        else:
+            # If sv result is Null, calculate the zones by using household income (hhinc)
+            households_df = self.compute_zones_by_household_income(households_df)
 
         # Set the number of Markov chain stages
         stages = int(t_final / t_delta)
@@ -352,6 +370,7 @@ class HousingRecoverySequential(BaseAnalysis):
         result["guid"] = households_df["guid"]
         result["huid"] = households_df["huid"]
         result["Zone"] = households_df["Zone"]
+        result["Zone Indicator"] = households_df["Zone Indicator"]
         result["SV"] = sv_scores
         column_names = [str(i) for i in range(1, stages + 1)]
 
@@ -390,6 +409,9 @@ class HousingRecoverySequential(BaseAnalysis):
         )
         # e.g.Medium Vulnerable (zone3) extract the number 3 to construct Z3
         households_df["Zone"] = households_df["zone"].apply(lambda row: "Z" + row[-2])
+
+        # add an indicator showing the zones are from Social Vulnerability analysis
+        households_df["Zone Indicator"] = "SV"
 
         return households_df[households_df["Zone"] != "missing"]
 
@@ -442,6 +464,33 @@ class HousingRecoverySequential(BaseAnalysis):
                 )
 
         return sv_scores
+
+    @staticmethod
+    def compute_zones_by_household_income(households_df):
+        """
+        Compute the zones based on household income. Updates the household dataset
+        by adding a new `Zone` column and removing values with missing Zone.
+
+        Args:
+            households_df (pd.DataFrame): Vector position of a household.
+
+        Returns:
+            households_df (pd.DataFrame): Vector position of a household with additional zones.
+
+        """
+        zone_map = {0: 'Z5', 1: 'Z4', 2: 'Z3', 3: 'Z2', 4: 'Z1', np.nan: 'missing'}
+
+        households_df['Zone'] = 'missing'
+        households_df.loc[households_df['hhinc'] == 5, 'Zone'] = zone_map[4]
+        households_df.loc[households_df['hhinc'] == 4, 'Zone'] = zone_map[3]
+        households_df.loc[households_df['hhinc'] == 3, 'Zone'] = zone_map[2]
+        households_df.loc[households_df['hhinc'] == 2, 'Zone'] = zone_map[1]
+        households_df.loc[households_df['hhinc'] == 1, 'Zone'] = zone_map[0]
+
+        # add an indicator showing the zones are from Social Vulnerability analysis
+        households_df["Zone Indicator"] = "hhinc"
+
+        return households_df[households_df['Zone'] != 'missing']
 
     @staticmethod
     def compute_regressions(markov_stages, household, lower, upper):
@@ -535,7 +584,7 @@ class HousingRecoverySequential(BaseAnalysis):
                 },
                 {
                     "id": "sv_result",
-                    "required": True,
+                    "required": False,
                     "description": "A csv file with zones containing demographic factors"
                     "qualified by a social vulnerability score",
                     "type": ["incore:socialVulnerabilityScore"],
