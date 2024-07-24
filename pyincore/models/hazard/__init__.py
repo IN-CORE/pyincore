@@ -6,6 +6,7 @@
 
 
 from pyincore.models.hazard.earthquake import Earthquake
+from pyincore.models.hazard.localearthquake import LocalEarthquake
 from pyincore.models.hazard.hazard import Hazard
 from pyincore.models.hazard.hazarddataset import HazardDataset
 from pyincore.models.hazard.flood import Flood
