@@ -37,7 +37,7 @@ def run_with_base_class():
     housing_recovery.set_parameter("seed", seed)
     housing_recovery.set_parameter("t_delta", t_delta)
     housing_recovery.set_parameter("t_final", t_final)
-    housing_recovery.set_parameter("result_name", "results_hhrs_galveston.csv")
+    housing_recovery.set_parameter("result_name", "results_hhrs_joplin.csv")
 
     # Dataset inputs
     housing_recovery.set_input_dataset(
