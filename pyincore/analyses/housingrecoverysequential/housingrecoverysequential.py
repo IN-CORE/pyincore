@@ -35,54 +35,6 @@ class HousingRecoverySequential(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
     """
 
-    # Social vulnerability value generators per zone
-    __sv_generator = {
-        "Z1": {
-            "threshold_0": 0.95,
-            "below_lower": 0.00,
-            "below_upper": 0.20,
-            "above_lower": 0.20,
-            "above_upper": 1.00,
-        },
-        "Z2": {
-            "threshold_0": 0.85,
-            "below_lower": 0.20,
-            "below_upper": 0.40,
-            "threshold_1": 0.90,
-            "middle_lower": 0.00,
-            "middle_upper": 0.20,
-            "above_lower": 0.40,
-            "above_upper": 1.00,
-        },
-        "Z3": {
-            "threshold_0": 0.80,
-            "below_lower": 0.40,
-            "below_upper": 0.60,
-            "threshold_1": 0.90,
-            "middle_lower": 0.00,
-            "middle_upper": 0.40,
-            "above_lower": 0.60,
-            "above_upper": 1.00,
-        },
-        "Z4": {
-            "threshold_0": 0.85,
-            "below_lower": 0.60,
-            "below_upper": 0.80,
-            "threshold_1": 0.95,
-            "middle_lower": 0.00,
-            "middle_upper": 0.40,
-            "above_lower": 0.80,
-            "above_upper": 1.00,
-        },
-        "Z5": {
-            "threshold_0": 0.95,
-            "below_lower": 0.80,
-            "below_upper": 1.00,
-            "above_lower": 0.00,
-            "above_upper": 0.80,
-        },
-    }
-
     def __init__(self, incore_client):
         super(HousingRecoverySequential, self).__init__(incore_client)
 
@@ -429,36 +381,38 @@ class HousingRecoverySequential(BaseAnalysis):
         sv_scores = np.zeros(num_households)
         zones = households_df["Zone"].to_numpy()
 
+        sv_generator = self.get_input_dataset("sv_generator").get_json_reader()
+
         for household in range(0, num_households):
             spin = rng.rand()
             zone = zones[household]
 
-            if spin < self.__sv_generator[zone]["threshold_0"]:
+            if spin < sv_generator[zone]["threshold_0"]:
                 sv_scores[household] = round(
                     rng.uniform(
-                        self.__sv_generator[zone]["below_lower"],
-                        self.__sv_generator[zone]["below_upper"],
+                        sv_generator[zone]["below_lower"],
+                        sv_generator[zone]["below_upper"],
                     ),
                     3,
                 )
 
             # for zone 2, 3, 4 there is additional middle range
             elif (
-                "threshold_1" in self.__sv_generator[zone].keys()
-                and spin < self.__sv_generator[zone]["threshold_1"]
+                "threshold_1" in sv_generator[zone].keys()
+                and spin < sv_generator[zone]["threshold_1"]
             ):
                 sv_scores[household] = round(
                     rng.uniform(
-                        self.__sv_generator[zone]["middle_lower"],
-                        self.__sv_generator[zone]["middle_upper"],
+                        sv_generator[zone]["middle_lower"],
+                        sv_generator[zone]["middle_upper"],
                     ),
                     3,
                 )
             else:
                 sv_scores[household] = round(
                     rng.uniform(
-                        self.__sv_generator[zone]["above_lower"],
-                        self.__sv_generator[zone]["above_upper"],
+                        sv_generator[zone]["above_lower"],
+                        sv_generator[zone]["above_upper"],
                     ),
                     3,
                 )
@@ -588,6 +542,12 @@ class HousingRecoverySequential(BaseAnalysis):
                     "description": "A csv file with zones containing demographic factors"
                     "qualified by a social vulnerability score",
                     "type": ["incore:socialVulnerabilityScore"],
+                },
+                {
+                    "id": "sv_generator",
+                    "required": True,
+                    "description": "A json file file with social vulnerability value generators per zone",
+                    "type": ["incore:socialVulnerabilityValueGenerator"],
                 },
             ],
             "output_datasets": [

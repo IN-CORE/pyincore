@@ -21,6 +21,14 @@ def run_with_base_class():
         ),
         data_type="incore:popDislocation",
     )
+
+    sv_generator_json = Dataset.from_file(
+        os.path.join(
+            pyglobals.TEST_DATA_DIR, "sv_generator_values_sv.json"
+        ),
+        data_type="incore:socialVulnerabilityValueGenerator",
+    )
+
     transition_probability_matrix = "60ef513802897f12fcd9765c"
     initial_probability_vector = "60ef532e02897f12fcd9ac63"
     # sv_result = "62c5be23861e370172c5e412"  # dev tract level
@@ -42,6 +50,9 @@ def run_with_base_class():
     # Dataset inputs
     housing_recovery.set_input_dataset(
         "population_dislocation_block", population_dislocation
+    )
+    housing_recovery.set_input_dataset(
+        "sv_generator", sv_generator_json
     )
     housing_recovery.load_remote_input_dataset("tpm", transition_probability_matrix)
     housing_recovery.load_remote_input_dataset(

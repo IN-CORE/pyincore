@@ -1,8 +1,9 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
+import os
 
-from pyincore import IncoreClient, HHRSOutputProcess
+from pyincore import IncoreClient, HHRSOutputProcess, Dataset
 from pyincore.analyses.housingrecoverysequential import HousingRecoverySequential
 from timeit import default_timer as timer
 import pyincore.globals as pyglobals
@@ -18,6 +19,12 @@ def run_with_base_class():
     initial_probability_vector = "60ef532e02897f12fcd9ac63"
     # sv_result = "62c5be23861e370172c5e412"  # dev tract level
     sv_result = "62c70445861e370172c6eaab"  # dev block group level
+    sv_generator_json = Dataset.from_file(
+        os.path.join(
+            pyglobals.TEST_DATA_DIR, "sv_generator_values_sv.json"
+        ),
+        data_type="incore:socialVulnerabilityValueGenerator",
+    )
 
     seed = 1234
     t_delta = 1.0
@@ -41,6 +48,9 @@ def run_with_base_class():
         "initial_stage_probabilities", initial_probability_vector
     )
     housing_recovery.load_remote_input_dataset("sv_result", sv_result)
+    housing_recovery.set_input_dataset(
+        "sv_generator", sv_generator_json
+    )
 
     housing_recovery.run()
 
