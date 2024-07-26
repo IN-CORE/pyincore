@@ -14,7 +14,6 @@ def run_with_base_class():
 
     start = timer()
 
-    #population_dislocation = "60f098f502897f12fcda19ec"  # dev Galveston testbed
     population_dislocation = Dataset.from_file(
         os.path.join(
             pyglobals.TEST_DATA_DIR, "pop-dislocation-results.csv"
@@ -22,17 +21,17 @@ def run_with_base_class():
         data_type="incore:popDislocation",
     )
 
-    zone_def_sv_json = Dataset.from_file(
+    zone_def_hhinc_json = Dataset.from_file(
         os.path.join(
             pyglobals.TEST_DATA_DIR, "zone_def_sv.json"
         ),
-        data_type="incore:socialVulnerabilityValueGenerator",
+        data_type="incore:zoneDefinitionsHouseholdIncome",
     )
 
-    transition_probability_matrix = "60ef513802897f12fcd9765c"
-    initial_probability_vector = "60ef532e02897f12fcd9ac63"
-    # sv_result = "62c5be23861e370172c5e412"  # dev tract level
-    sv_result = "62c70445861e370172c6eaab"  # dev block group level
+    # Transition probability matrix per social vulnerability level, from Sutley and Hamideh (2020).
+    transition_probability_matrix = "60f5e2ae544e944c3cec0794"
+    # Initial mass probability function for household at time 0
+    initial_probability_vector = "60f5e918544e944c3cec668b"
 
     seed = 1234
     t_delta = 1.0
@@ -52,7 +51,7 @@ def run_with_base_class():
         "population_dislocation_block", population_dislocation
     )
     housing_recovery.set_input_dataset(
-        "zone_def_sv", zone_def_sv_json
+        "zone_def_hhinc", zone_def_hhinc_json
     )
     housing_recovery.load_remote_input_dataset("tpm", transition_probability_matrix)
     housing_recovery.load_remote_input_dataset(
