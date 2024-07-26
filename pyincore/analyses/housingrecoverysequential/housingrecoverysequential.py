@@ -35,6 +35,94 @@ class HousingRecoverySequential(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
     """
 
+    # threshold and definition per zone from social vulnerability analysis
+    __zone_def_sv = {
+        "Z1": {
+            "threshold_0": 0.95,
+            "below_lower": 0.00,
+            "below_upper": 0.20,
+            "above_lower": 0.20,
+            "above_upper": 1.00,
+        },
+        "Z2": {
+            "threshold_0": 0.85,
+            "below_lower": 0.20,
+            "below_upper": 0.40,
+            "threshold_1": 0.90,
+            "middle_lower": 0.00,
+            "middle_upper": 0.20,
+            "above_lower": 0.40,
+            "above_upper": 1.00,
+        },
+        "Z3": {
+            "threshold_0": 0.80,
+            "below_lower": 0.40,
+            "below_upper": 0.60,
+            "threshold_1": 0.90,
+            "middle_lower": 0.00,
+            "middle_upper": 0.40,
+            "above_lower": 0.60,
+            "above_upper": 1.00,
+        },
+        "Z4": {
+            "threshold_0": 0.85,
+            "below_lower": 0.60,
+            "below_upper": 0.80,
+            "threshold_1": 0.95,
+            "middle_lower": 0.00,
+            "middle_upper": 0.40,
+            "above_lower": 0.80,
+            "above_upper": 1.00,
+        },
+        "Z5": {
+            "threshold_0": 0.95,
+            "below_lower": 0.80,
+            "below_upper": 1.00,
+            "above_lower": 0.00,
+            "above_upper": 0.80,
+        },
+    }
+
+    # threshold and definition per zone from household income
+    __zone_def_hhinc = {
+        "Z1": {
+            "threshold": 0.95,
+            "below_lower": 0.01,
+            "below_upper": 0.15,
+            "above_lower": 0.10,
+            "above_upper": 0.90
+        },
+        "Z2": {
+            "threshold": 0.85,
+            "below_lower": 0.10,
+            "below_upper": 0.50,
+            "above_lower": 0.10,
+            "above_upper": 0.90
+        },
+        "Z3": {
+            "threshold": 0.80,
+            "below_lower": 0.30,
+            "below_upper": 0.70,
+            "above_lower": 0.10,
+            "above_upper": 0.90
+        },
+        "Z4": {
+            "threshold": 0.85,
+            "below_lower": 0.50,
+            "below_upper": 0.90,
+            "above_lower": 0.10,
+            "above_upper": 0.90
+        },
+        "Z5": {
+            "threshold": 0.95,
+            "below_lower": 0.85,
+            "below_upper": 0.99,
+            "above_lower": 0.10,
+            "above_upper": 0.90
+        }
+    }
+
+
     def __init__(self, incore_client):
         super(HousingRecoverySequential, self).__init__(incore_client)
 
@@ -181,7 +269,10 @@ class HousingRecoverySequential(BaseAnalysis):
         rng = np.random.RandomState(seed)
 
         sv_result = self.get_input_dataset("sv_result")
+        are_zones_from_sv = False
+
         if sv_result is not None:
+            are_zones_from_sv = True
             sv_result = sv_result.get_dataframe_from_csv(low_memory=False)
 
             # turn fips code to string for ease of matching
@@ -207,7 +298,7 @@ class HousingRecoverySequential(BaseAnalysis):
         # Obtain a social vulnerability score stochastically per household
         # We use them later to construct the final output dataset
         sv_scores = self.compute_social_vulnerability_values(
-            households_df, num_households, rng
+            households_df, num_households, rng, are_zones_from_sv
         )
 
         # We store Markov states as a list of numpy arrays for convenience and add each one by one
@@ -367,13 +458,14 @@ class HousingRecoverySequential(BaseAnalysis):
 
         return households_df[households_df["Zone"] != "missing"]
 
-    def compute_social_vulnerability_values(self, households_df, num_households, rng):
+    def compute_social_vulnerability_values(self, households_df, num_households, rng, are_zones_from_sv):
         """
         Compute the social vulnerability score of a household depending on its zone
         Args:
             households_df (pd.DataFrame): Information about household zones.
             num_households (int): Number of households.
             rng (np.RandomState): Random state to draw pseudo-random numbers from.
+            are_zones_from_sv: Boolean indicating whether zones are from social vulnerability analysis.
         Returns:
             pd.Series: social vulnerability scores.
         """
@@ -381,41 +473,64 @@ class HousingRecoverySequential(BaseAnalysis):
         sv_scores = np.zeros(num_households)
         zones = households_df["Zone"].to_numpy()
 
-        sv_generator = self.get_input_dataset("sv_generator").get_json_reader()
+        ## zones from social vulnerability analusis
+        if are_zones_from_sv:
+            zone_def = self.get_input_dataset("zone_def_sv")
+            if zone_def is None:
+                zone_def = self.__zone_def_sv
+            else:
+                zone_def = zone_def.get_json_reader()
+
+        ## zones caulculated by household income (hhinc)
+        else:
+            zone_def = self.get_input_dataset("zone_def_hhinc")
+            if zone_def is None:
+                zone_def = self.__zone_def_hhinc
+            else:
+                zone_def = zone_def.get_json_reader()
 
         for household in range(0, num_households):
             spin = rng.rand()
             zone = zones[household]
 
-            if spin < sv_generator[zone]["threshold_0"]:
-                sv_scores[household] = round(
-                    rng.uniform(
-                        sv_generator[zone]["below_lower"],
-                        sv_generator[zone]["below_upper"],
-                    ),
-                    3,
-                )
+            if are_zones_from_sv:
+                if spin < zone_def[zone]["threshold_0"]:
+                    sv_scores[household] = round(
+                        rng.uniform(
+                            zone_def[zone]["below_lower"],
+                            zone_def[zone]["below_upper"],
+                        ),
+                        3,
+                    )
 
-            # for zone 2, 3, 4 there is additional middle range
-            elif (
-                "threshold_1" in sv_generator[zone].keys()
-                and spin < sv_generator[zone]["threshold_1"]
-            ):
-                sv_scores[household] = round(
-                    rng.uniform(
-                        sv_generator[zone]["middle_lower"],
-                        sv_generator[zone]["middle_upper"],
-                    ),
-                    3,
-                )
+                # for zone 2, 3, 4 there is additional middle range
+                elif (
+                    "threshold_1" in zone_def[zone].keys()
+                    and spin < zone_def[zone]["threshold_1"]
+                ):
+                    sv_scores[household] = round(
+                        rng.uniform(
+                            zone_def[zone]["middle_lower"],
+                            zone_def[zone]["middle_upper"],
+                        ),
+                        3,
+                    )
+                else:
+                    sv_scores[household] = round(
+                        rng.uniform(
+                            zone_def[zone]["above_lower"],
+                            zone_def[zone]["above_upper"],
+                        ),
+                        3,
+                    )
+
             else:
-                sv_scores[household] = round(
-                    rng.uniform(
-                        sv_generator[zone]["above_lower"],
-                        sv_generator[zone]["above_upper"],
-                    ),
-                    3,
-                )
+                if spin < zone_def[zone]['threshold']:
+                    sv_scores[household] = round(rng.uniform(zone_def[zone]['below_lower'],
+                                                             zone_def[zone]['below_upper']), 3)
+                else:
+                    sv_scores[household] = round(rng.uniform(zone_def[zone]['above_lower'],
+                                                             zone_def[zone]['above_upper']), 3)
 
         return sv_scores
 
@@ -544,10 +659,17 @@ class HousingRecoverySequential(BaseAnalysis):
                     "type": ["incore:socialVulnerabilityScore"],
                 },
                 {
-                    "id": "sv_generator",
-                    "required": True,
-                    "description": "A json file file with social vulnerability value generators per zone",
-                    "type": ["incore:socialVulnerabilityValueGenerator"],
+                    "id": "zone_def_sv",
+                    "required": False,
+                    "description": "A json file with thresholds and definitions per zone "
+                    "from social vulnerability analysis",
+                    "type": ["incore:zoneDefinitionsSocialVulnerability"],
+                },
+                {
+                    "id": "zone_def_hhinc",
+                    "required": False,
+                    "description": "A json file with thresholds and definitions per zone from household income",
+                    "type": ["incore:zoneDefinitionsHouseholdIncome"],
                 },
             ],
             "output_datasets": [
