@@ -20,9 +20,7 @@ def run_with_base_class():
     # sv_result = "62c5be23861e370172c5e412"  # dev tract level
     sv_result = "62c70445861e370172c6eaab"  # dev block group level
     zone_def_sv_json = Dataset.from_file(
-        os.path.join(
-            pyglobals.TEST_DATA_DIR, "zone_def_sv.json"
-        ),
+        os.path.join(pyglobals.TEST_DATA_DIR, "zone_def_sv.json"),
         data_type="incore:socialVulnerabilityValueGenerator",
     )
 
@@ -48,9 +46,7 @@ def run_with_base_class():
         "initial_stage_probabilities", initial_probability_vector
     )
     housing_recovery.load_remote_input_dataset("sv_result", sv_result)
-    housing_recovery.set_input_dataset(
-        "zone_def_sv", zone_def_sv_json
-    )
+    housing_recovery.set_input_dataset("zone_def_sv", zone_def_sv_json)
 
     housing_recovery.run()
 

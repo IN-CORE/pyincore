@@ -16,16 +16,12 @@ def run_with_base_class():
 
     # dev Joplin testbed
     population_dislocation = Dataset.from_file(
-        os.path.join(
-            pyglobals.TEST_DATA_DIR, "pop-dislocation-results.csv"
-        ),
+        os.path.join(pyglobals.TEST_DATA_DIR, "pop-dislocation-results.csv"),
         data_type="incore:popDislocation",
     )
 
     zone_def_hhinc_json = Dataset.from_file(
-        os.path.join(
-            pyglobals.TEST_DATA_DIR, "zone_def_hhinc.json"
-        ),
+        os.path.join(pyglobals.TEST_DATA_DIR, "zone_def_hhinc.json"),
         data_type="incore:zoneDefinitionsHouseholdIncome",
     )
 
@@ -51,9 +47,7 @@ def run_with_base_class():
     housing_recovery.set_input_dataset(
         "population_dislocation_block", population_dislocation
     )
-    housing_recovery.set_input_dataset(
-        "zone_def_hhinc", zone_def_hhinc_json
-    )
+    housing_recovery.set_input_dataset("zone_def_hhinc", zone_def_hhinc_json)
     housing_recovery.load_remote_input_dataset("tpm", transition_probability_matrix)
     housing_recovery.load_remote_input_dataset(
         "initial_stage_probabilities", initial_probability_vector

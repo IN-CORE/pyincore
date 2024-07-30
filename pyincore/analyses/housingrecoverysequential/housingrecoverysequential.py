@@ -10,6 +10,7 @@ import pandas as pd
 import concurrent.futures
 from itertools import repeat
 
+
 class HousingRecoverySequential(BaseAnalysis):
     """
     This analysis computes the series of household recovery states given a population
@@ -89,36 +90,36 @@ class HousingRecoverySequential(BaseAnalysis):
             "below_lower": 0.01,
             "below_upper": 0.15,
             "above_lower": 0.10,
-            "above_upper": 0.90
+            "above_upper": 0.90,
         },
         "Z2": {
             "threshold": 0.85,
             "below_lower": 0.10,
             "below_upper": 0.50,
             "above_lower": 0.10,
-            "above_upper": 0.90
+            "above_upper": 0.90,
         },
         "Z3": {
             "threshold": 0.80,
             "below_lower": 0.30,
             "below_upper": 0.70,
             "above_lower": 0.10,
-            "above_upper": 0.90
+            "above_upper": 0.90,
         },
         "Z4": {
             "threshold": 0.85,
             "below_lower": 0.50,
             "below_upper": 0.90,
             "above_lower": 0.10,
-            "above_upper": 0.90
+            "above_upper": 0.90,
         },
         "Z5": {
             "threshold": 0.95,
             "below_lower": 0.85,
             "below_upper": 0.99,
             "above_lower": 0.10,
-            "above_upper": 0.90
-        }
+            "above_upper": 0.90,
+        },
     }
 
     def __init__(self, incore_client):
@@ -149,8 +150,8 @@ class HousingRecoverySequential(BaseAnalysis):
         ]
 
         # Check if 'hhinc' is in the header
-        if 'hhinc' in header:
-            pop_dis_selectors.append('hhinc')
+        if "hhinc" in header:
+            pop_dis_selectors.append("hhinc")
 
         households_df = (pd.DataFrame(households_csv))[pop_dis_selectors]
 
@@ -162,7 +163,7 @@ class HousingRecoverySequential(BaseAnalysis):
         households_df["dislocated"] = households_df["dislocated"] == "True"
 
         # Check if 'hhinc' is in the header
-        if 'hhinc' in header:
+        if "hhinc" in header:
             households_df["hhinc"] = pd.to_numeric(households_df["hhinc"])
 
         # Load the transition probability matrix from IN-CORE
@@ -456,7 +457,9 @@ class HousingRecoverySequential(BaseAnalysis):
 
         return households_df[households_df["Zone"] != "missing"]
 
-    def compute_social_vulnerability_values(self, households_df, num_households, rng, are_zones_from_sv):
+    def compute_social_vulnerability_values(
+        self, households_df, num_households, rng, are_zones_from_sv
+    ):
         """
         Compute the social vulnerability score of a household depending on its zone
         Args:
@@ -471,7 +474,7 @@ class HousingRecoverySequential(BaseAnalysis):
         sv_scores = np.zeros(num_households)
         zones = households_df["Zone"].to_numpy()
 
-        ## zones from social vulnerability analusis
+        # zones from social vulnerability analusis
         if are_zones_from_sv:
             zone_def = self.get_input_dataset("zone_def_sv")
             if zone_def is None:
@@ -479,7 +482,7 @@ class HousingRecoverySequential(BaseAnalysis):
             else:
                 zone_def = zone_def.get_json_reader()
 
-        ## zones caulculated by household income (hhinc)
+        # zones caulculated by household income (hhinc)
         else:
             zone_def = self.get_input_dataset("zone_def_hhinc")
             if zone_def is None:
@@ -523,12 +526,20 @@ class HousingRecoverySequential(BaseAnalysis):
                     )
 
             else:
-                if spin < zone_def[zone]['threshold']:
-                    sv_scores[household] = round(rng.uniform(zone_def[zone]['below_lower'],
-                                                             zone_def[zone]['below_upper']), 3)
+                if spin < zone_def[zone]["threshold"]:
+                    sv_scores[household] = round(
+                        rng.uniform(
+                            zone_def[zone]["below_lower"], zone_def[zone]["below_upper"]
+                        ),
+                        3,
+                    )
                 else:
-                    sv_scores[household] = round(rng.uniform(zone_def[zone]['above_lower'],
-                                                             zone_def[zone]['above_upper']), 3)
+                    sv_scores[household] = round(
+                        rng.uniform(
+                            zone_def[zone]["above_lower"], zone_def[zone]["above_upper"]
+                        ),
+                        3,
+                    )
 
         return sv_scores
 
@@ -545,19 +556,19 @@ class HousingRecoverySequential(BaseAnalysis):
             households_df (pd.DataFrame): Vector position of a household with additional zones.
 
         """
-        zone_map = {0: 'Z5', 1: 'Z4', 2: 'Z3', 3: 'Z2', 4: 'Z1', np.nan: 'missing'}
+        zone_map = {0: "Z5", 1: "Z4", 2: "Z3", 3: "Z2", 4: "Z1", np.nan: "missing"}
 
-        households_df['Zone'] = 'missing'
-        households_df.loc[households_df['hhinc'] == 5, 'Zone'] = zone_map[4]
-        households_df.loc[households_df['hhinc'] == 4, 'Zone'] = zone_map[3]
-        households_df.loc[households_df['hhinc'] == 3, 'Zone'] = zone_map[2]
-        households_df.loc[households_df['hhinc'] == 2, 'Zone'] = zone_map[1]
-        households_df.loc[households_df['hhinc'] == 1, 'Zone'] = zone_map[0]
+        households_df["Zone"] = "missing"
+        households_df.loc[households_df["hhinc"] == 5, "Zone"] = zone_map[4]
+        households_df.loc[households_df["hhinc"] == 4, "Zone"] = zone_map[3]
+        households_df.loc[households_df["hhinc"] == 3, "Zone"] = zone_map[2]
+        households_df.loc[households_df["hhinc"] == 2, "Zone"] = zone_map[1]
+        households_df.loc[households_df["hhinc"] == 1, "Zone"] = zone_map[0]
 
         # add an indicator showing the zones are from Social Vulnerability analysis
         households_df["Zone Indicator"] = "hhinc"
 
-        return households_df[households_df['Zone'] != 'missing']
+        return households_df[households_df["Zone"] != "missing"]
 
     @staticmethod
     def compute_regressions(markov_stages, household, lower, upper):
