@@ -10,14 +10,13 @@ import pandas as pd
 import concurrent.futures
 from itertools import repeat
 
-
 class HousingRecoverySequential(BaseAnalysis):
     """
     This analysis computes the series of household recovery states given a population
     dislocation dataset, a transition probability matrix (TPM) and an initial state vector.
 
     The computation operates by segregating household units into five zones as a way of
-    assigning social vulnerability. Using this vulnerability in conjunction with the TPM
+    assigning social vulnerability or household income. Using this vulnerability in conjunction with the TPM
     and the initial state vector, a Markov chain computation simulates most probable
     states to generate a stage history of housing recovery changes for each household.
 
@@ -35,7 +34,7 @@ class HousingRecoverySequential(BaseAnalysis):
         incore_client (IncoreClient): Service authentication.
     """
 
-    # threshold and definition per zone from social vulnerability analysis
+    # threshold and definition per zone based on social vulnerability analysis
     __zone_def_sv = {
         "Z1": {
             "threshold_0": 0.95,
@@ -83,7 +82,7 @@ class HousingRecoverySequential(BaseAnalysis):
         },
     }
 
-    # threshold and definition per zone from household income
+    # threshold and definition per zone based on household income
     __zone_def_hhinc = {
         "Z1": {
             "threshold": 0.95,
@@ -121,7 +120,6 @@ class HousingRecoverySequential(BaseAnalysis):
             "above_upper": 0.90
         }
     }
-
 
     def __init__(self, incore_client):
         super(HousingRecoverySequential, self).__init__(incore_client)
@@ -662,13 +660,13 @@ class HousingRecoverySequential(BaseAnalysis):
                     "id": "zone_def_sv",
                     "required": False,
                     "description": "A json file with thresholds and definitions per zone "
-                    "from social vulnerability analysis",
+                    "based on social vulnerability analysis",
                     "type": ["incore:zoneDefinitionsSocialVulnerability"],
                 },
                 {
                     "id": "zone_def_hhinc",
                     "required": False,
-                    "description": "A json file with thresholds and definitions per zone from household income",
+                    "description": "A json file with thresholds and definitions per zone based on household income",
                     "type": ["incore:zoneDefinitionsHouseholdIncome"],
                 },
             ],

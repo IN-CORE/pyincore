@@ -14,6 +14,7 @@ def run_with_base_class():
 
     start = timer()
 
+    # dev Joplin testbed
     population_dislocation = Dataset.from_file(
         os.path.join(
             pyglobals.TEST_DATA_DIR, "pop-dislocation-results.csv"
@@ -23,15 +24,15 @@ def run_with_base_class():
 
     zone_def_hhinc_json = Dataset.from_file(
         os.path.join(
-            pyglobals.TEST_DATA_DIR, "zone_def_sv.json"
+            pyglobals.TEST_DATA_DIR, "zone_def_hhinc.json"
         ),
         data_type="incore:zoneDefinitionsHouseholdIncome",
     )
 
-    # Transition probability matrix per social vulnerability level, from Sutley and Hamideh (2020).
-    transition_probability_matrix = "60f5e2ae544e944c3cec0794"
-    # Initial mass probability function for household at time 0
-    initial_probability_vector = "60f5e918544e944c3cec668b"
+    # Household-level housing serial recovery model TPM
+    transition_probability_matrix = "66a8fac64e40247326448873"
+    # Galveston HHRS model initial stage probability
+    initial_probability_vector = "6420c184b18d026e7c7dc321"
 
     seed = 1234
     t_delta = 1.0
@@ -61,7 +62,7 @@ def run_with_base_class():
     housing_recovery.run()
 
     # test the utilility
-    housing_recovery.set_parameter("result_name", "results_hhrs_galveston_wo_sv.csv")
+    housing_recovery.set_parameter("result_name", "results_hhrs_joplin.csv")
     hhr_result = housing_recovery.get_output_dataset("ds_result")
     hhrs_df = hhr_result.get_dataframe_from_csv(low_memory=False)
 
