@@ -21,7 +21,7 @@ def run_with_base_class():
     sv_result = "62c70445861e370172c6eaab"  # dev block group level
     zone_def_sv_json = Dataset.from_file(
         os.path.join(pyglobals.TEST_DATA_DIR, "zone_def_sv.json"),
-        data_type="incore:socialVulnerabilityValueGenerator",
+        data_type="incore:zoneDefinitionsSocialVulnerability",
     )
 
     seed = 1234
