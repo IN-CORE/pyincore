@@ -192,9 +192,6 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             + " secs"
         )
 
-        # result = recovery
-        # result = time_stepping_recovery
-
         end_time = time.process_time()
         print(
             "Analysis completed in "

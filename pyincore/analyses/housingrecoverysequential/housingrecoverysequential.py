@@ -152,6 +152,8 @@ class HousingRecoverySequential(BaseAnalysis):
         # Check if 'hhinc' is in the header
         if "hhinc" in header:
             pop_dis_selectors.append("hhinc")
+        else:
+            raise ValueError("'hhinc' not found in header")
 
         households_df = (pd.DataFrame(households_csv))[pop_dis_selectors]
 
@@ -165,6 +167,8 @@ class HousingRecoverySequential(BaseAnalysis):
         # Check if 'hhinc' is in the header
         if "hhinc" in header:
             households_df["hhinc"] = pd.to_numeric(households_df["hhinc"])
+        else:
+            raise ValueError("'hhinc' not found in header")
 
         # Load the transition probability matrix from IN-CORE
         tpm_csv = self.get_input_dataset("tpm").get_csv_reader()
