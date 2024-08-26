@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## Changed
+- Support Interdependent recovery of residential buildings and households [#606](https://github.com/IN-CORE/pyincore/pull/606)
+
 ### Added
 - Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
 
