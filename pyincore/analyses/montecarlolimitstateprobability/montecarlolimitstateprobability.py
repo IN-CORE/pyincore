@@ -15,7 +15,7 @@ from pyincore import BaseAnalysis, AnalysisUtil
 class MonteCarloLimitStateProbability(BaseAnalysis):
     """
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

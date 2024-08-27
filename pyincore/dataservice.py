@@ -11,9 +11,10 @@ import os
 import re
 import zipfile
 import ntpath
+from typing import Union
 
 import pyincore.globals as pyglobals
-from pyincore import IncoreClient
+from pyincore import IncoreClient, IncoreInternalClient
 from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
 from urllib.parse import urljoin
@@ -25,11 +26,11 @@ class DataService:
     """Data service client.
 
     Args:
-        client (IncoreClient): Service authentication.
+        client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 
-    def __init__(self, client: IncoreClient):
+    def __init__(self, client: Union[IncoreClient, IncoreInternalClient]):
         self.client = client
         self.base_url = urljoin(client.service_url, "data/api/datasets/")
         self.files_url = urljoin(client.service_url, "data/api/files/")

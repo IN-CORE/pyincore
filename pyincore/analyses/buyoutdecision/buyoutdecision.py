@@ -13,7 +13,7 @@ class BuyoutDecision(BaseAnalysis):
     """A framework to select households for buyout based on past and future flood damaged.
 
     Args:
-    incore_client(IncoreClient): Service authentication.
+    incore_client(Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

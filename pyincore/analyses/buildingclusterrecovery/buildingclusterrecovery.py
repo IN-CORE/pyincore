@@ -22,7 +22,7 @@ class BuildingClusterRecovery(BaseAnalysis):
     to calculate building’s initial functionality loss.
 
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

@@ -19,7 +19,7 @@ class BuildingFunctionality(BaseAnalysis):
     functional, buildings are considered to be able to receive electric power.
 
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

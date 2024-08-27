@@ -14,7 +14,7 @@ class EpfRepairCost(BaseAnalysis):
     """Computes electric power facility repair cost.
 
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

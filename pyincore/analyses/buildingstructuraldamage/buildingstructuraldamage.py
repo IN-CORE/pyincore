@@ -25,7 +25,7 @@ class BuildingStructuralDamage(BaseAnalysis):
     different hazard type such as earthquake, tsunami, and tornado.
 
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

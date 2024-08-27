@@ -16,7 +16,7 @@ class EpfDamage(BaseAnalysis):
     """Computes electric power facility structural damage for an earthquake, tsunami, tornado, and hurricane hazards.
 
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

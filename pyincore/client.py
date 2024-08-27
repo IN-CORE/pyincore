@@ -463,6 +463,7 @@ class IncoreInternalClient(Client):
         service_url: str = None,
         username: str = None,
         usergroups: list = None,
+        offline: bool = False,
     ):
         """
 
@@ -470,9 +471,10 @@ class IncoreInternalClient(Client):
             service_url (str): Service url.
             username (str): Username.
             usergroups (list): User groups.
-            offline (bool): Flag to indicate offline mode or not.
+            offline (bool): Flag to indicate offline mode or not. Default to False.
         """
         super().__init__()
+        self.offline = offline
 
         if service_url is None or len(service_url.strip()) == 0:
             service_url = pyglobals.INCORE_INTERNAL_API_URL
@@ -494,10 +496,11 @@ class IncoreInternalClient(Client):
             os.makedirs(self.hashed_svc_data_dir)
 
         # Constructing the headers
-        self.session.headers[
-            "x-auth-userinfo"
-        ] = f'{{"preferred_username":"{username}"}}'
-        self.session.headers["x-auth-usergroup"] = f'{{"groups":{usergroups}}}'
+        self.session.headers["x-auth-userinfo"] = json.dumps(
+            {"preferred_username": username}
+        )
+        self.session.headers["x-auth-usergroup"] = json.dumps({"groups": usergroups})
+
         print(
             "Internal connection successful to IN-CORE services.",
             "pyIncore version detected:",

@@ -14,7 +14,7 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
     and uses the maximum damage probabilities from the 3 damages to determine overall damage
 
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
     """
 
     def __init__(self, incore_client):

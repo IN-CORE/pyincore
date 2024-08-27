@@ -34,7 +34,7 @@ class CommercialBuildingRecovery(BaseAnalysis):
         in Community Resilience Modeling. Natural Hazards Review, 24(4), p.04023031.
 
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

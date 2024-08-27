@@ -3,9 +3,9 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
+from typing import Union
 from urllib.parse import urljoin
-from pyincore import IncoreClient
+from pyincore import IncoreClient, IncoreInternalClient
 import pyincore.globals as pyglobals
 from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
@@ -17,11 +17,11 @@ class SpaceService:
     """Space service client.
 
     Args:
-        client (IncoreClient): Service authentication.
+        client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 
-    def __init__(self, client: IncoreClient):
+    def __init__(self, client: Union[IncoreClient, IncoreInternalClient]):
         self.client = client
         self.base_space_url = urljoin(client.service_url, "space/api/spaces/")
 

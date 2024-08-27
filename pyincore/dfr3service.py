@@ -7,12 +7,12 @@
 
 import re
 from urllib.parse import urljoin
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import pyincore.globals as pyglobals
 from pyincore.decorators import forbid_offline
 
-from pyincore import IncoreClient
+from pyincore import IncoreClient, IncoreInternalClient
 from pyincore.models.fragilitycurveset import FragilityCurveSet
 from pyincore.models.repaircurveset import RepairCurveSet
 from pyincore.models.restorationcurveset import RestorationCurveSet
@@ -60,11 +60,11 @@ class Dfr3Service:
     """DFR3 service client.
 
     Args:
-        client (IncoreClient): Service authentication.
+        client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 
-    def __init__(self, client: IncoreClient):
+    def __init__(self, client: Union[IncoreClient, IncoreInternalClient]):
         self.client = client
         self.base_mapping_url = urljoin(client.service_url, "dfr3/api/mappings/")
 

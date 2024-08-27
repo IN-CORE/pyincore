@@ -36,7 +36,7 @@ class HousingValuationRecovery(BaseAnalysis):
         seasonal/vacation housing markets in coastal communities. Natural Hazards Review.
 
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

@@ -20,7 +20,7 @@ class BuildingNonStructDamage(BaseAnalysis):
     """Computes non-structural structural building damage for an earthquake hazard.
 
     Args:
-        incore_client (IncoreClient): Service authentication.
+        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 

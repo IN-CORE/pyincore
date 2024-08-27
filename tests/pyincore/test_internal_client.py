@@ -8,10 +8,9 @@ import os.path
 
 from pyincore import IncoreInternalClient
 
-
 user = {
-    "username": "incrtest",
-    "usergroups": ["incore_admin", "incore_user", "ncsa_admin"],
+    "username": "cwang138",
+    "usergroups": ["incore_ncsa"],
 }
 
 
@@ -20,8 +19,8 @@ def test_client_success():
     testing successful login
     """
     client = IncoreInternalClient(**user)
-    assert "incrtest" in str(client.session.headers["x-auth-userinfo"])
-    assert "incore_admin" in str(client.session.headers["x-auth-usergroup"])
+    assert "cwang138" in str(client.session.headers["x-auth-userinfo"])
+    assert "incore_ncsa" in str(client.session.headers["x-auth-usergroup"])
 
 
 def test_delete_repo_cache():
@@ -29,3 +28,12 @@ def test_delete_repo_cache():
     hashed_repo_dir_path = client.hashed_svc_data_dir
     client.clear_cache()
     assert os.path.exists(hashed_repo_dir_path) is False
+
+
+# def test_get_dataset_metadata():
+#     client = IncoreInternalClient(**user)
+#     print(client.session.headers)
+#     datasvc_internal = DataService(client)
+#     dataset_id = "5a284f09c7d30d13bc0819a6"
+#     metadata = datasvc_internal.get_dataset_metadata(dataset_id)
+#     assert metadata["id"] == dataset_id

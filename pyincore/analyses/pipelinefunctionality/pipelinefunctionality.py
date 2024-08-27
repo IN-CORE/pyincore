@@ -35,7 +35,7 @@ class PipelineFunctionality(BaseAnalysis):
         approach for generalized network-system analysis. Reliability Engineering & System Safety, 217, 108042.
 
     Args:
-    incore_client (IncoreClient): Service authentication.
+    incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
 
     """
 
