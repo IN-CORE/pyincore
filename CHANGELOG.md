@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
+- Internal client connecting to the IN-CORE services [#609](https://github.com/IN-CORE/pyincore/issues/609)
 
 
 ## [1.19.0] - 2024-06-12
