@@ -15,6 +15,8 @@ PACKAGE_VERSION = "1.19.0"
 INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
 INCORE_API_DEV_URL = "https://incore-dev.ncsa.illinois.edu"
 
+INCORE_INTERNAL_API_URL = "http://localhost:8080"
+
 KEYCLOAK_AUTH_PATH = "/auth/realms/In-core/protocol/openid-connect/token"
 KEYCLOAK_USERINFO_PATH = "/auth/realms/In-core/protocol/openid-connect/userinfo"
 CLIENT_ID = "react-auth"

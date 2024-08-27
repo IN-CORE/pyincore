@@ -8,6 +8,7 @@
 # The order of import matters. You need to import module by order of dependency
 from pyincore.client import Client
 from pyincore.client import IncoreClient
+from pyincore.client import IncoreInternalClient
 from pyincore.hazardservice import HazardService
 from pyincore.utils.expressioneval import Parser
 from pyincore.utils.cge_ml_file_util import CGEMLFileUtil
