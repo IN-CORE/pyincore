@@ -14,7 +14,7 @@ import ntpath
 from typing import Union
 
 import pyincore.globals as pyglobals
-from pyincore import IncoreClient, IncoreInternalClient
+from pyincore import IncoreClient, IncoreInternalClient, Client
 from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
 from urllib.parse import urljoin
@@ -116,7 +116,9 @@ class DataService:
         if not os.path.exists(cache_data_dir):
             os.makedirs(cache_data_dir)
             # for consistency check to ensure the repository hash is recorded in service.json
-            self.client.create_service_json_entry()
+            Client.create_service_json_entry(
+                self.client.hashed_service_url, self.client.service_url
+            )
 
             local_filename = self.download_dataset_blob(
                 cache_data_dir, dataset_id, timeout=timeout, **kwargs
