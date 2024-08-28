@@ -152,8 +152,6 @@ class HousingRecoverySequential(BaseAnalysis):
         # Check if 'hhinc' is in the header
         if "hhinc" in header:
             pop_dis_selectors.append("hhinc")
-        else:
-            raise ValueError("'hhinc' not found in header")
 
         households_df = (pd.DataFrame(households_csv))[pop_dis_selectors]
 
@@ -167,8 +165,6 @@ class HousingRecoverySequential(BaseAnalysis):
         # Check if 'hhinc' is in the header
         if "hhinc" in header:
             households_df["hhinc"] = pd.to_numeric(households_df["hhinc"])
-        else:
-            raise ValueError("'hhinc' not found in header")
 
         # Load the transition probability matrix from IN-CORE
         tpm_csv = self.get_input_dataset("tpm").get_csv_reader()
@@ -416,7 +412,7 @@ class HousingRecoverySequential(BaseAnalysis):
         result["guid"] = households_df["guid"]
         result["huid"] = households_df["huid"]
         result["Zone"] = households_df["Zone"]
-        result["Zone Indicator"] = households_df["Zone Indicator"]
+        result["zone_indic"] = households_df["zone_indic"]
         result["SV"] = sv_scores
         column_names = [str(i) for i in range(1, stages + 1)]
 
@@ -457,7 +453,7 @@ class HousingRecoverySequential(BaseAnalysis):
         households_df["Zone"] = households_df["zone"].apply(lambda row: "Z" + row[-2])
 
         # add an indicator showing the zones are from Social Vulnerability analysis
-        households_df["Zone Indicator"] = "SV"
+        households_df["zone_indic"] = "SV"
 
         return households_df[households_df["Zone"] != "missing"]
 
@@ -570,7 +566,7 @@ class HousingRecoverySequential(BaseAnalysis):
         households_df.loc[households_df["hhinc"] == 1, "Zone"] = zone_map[0]
 
         # add an indicator showing the zones are from Social Vulnerability analysis
-        households_df["Zone Indicator"] = "hhinc"
+        households_df["zone_indic"] = "hhinc"
 
         return households_df[households_df["Zone"] != "missing"]
 
