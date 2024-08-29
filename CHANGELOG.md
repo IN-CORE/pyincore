@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Pyomo version fixed to fix indp solver failure [#585](https://github.com/IN-CORE/pyincore/issues/585)
+
 ### Changed
 - Support Interdependent recovery of residential buildings and households [#606](https://github.com/IN-CORE/pyincore/pull/606)
 - Remove unused insecure IN-CORE client [#581](https://github.com/IN-CORE/pyincore/issues/581)
