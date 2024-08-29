@@ -54,7 +54,7 @@ setup(
         "networkx>=3.2.1",
         "numpy>=1.26.0,<2.0a0",
         "pandas>=2.1.2",
-        "pyomo>=6.6.2",
+        "pyomo>=6.0.0,<=6.6.2",
         "pyproj>=3.6.1",
         "rasterio>=1.3.9",
         "rtree>=1.1.0",

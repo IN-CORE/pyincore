@@ -79,7 +79,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         ).get_dataframe_from_csv(low_memory=False)
 
         # Returns dataframe
-        recovery_results = self.residential_recovery(
+        total_delay, recovery, time_stepping_recovery = self.residential_recovery(
             buildings,
             sample_damage_states,
             socio_demographic_data,
@@ -87,8 +87,18 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             redi_delay_factors,
             num_samples,
         )
+
         self.set_result_csv_data(
-            "residential_building_recovery", recovery_results, result_name, "dataframe"
+            "total_delay", total_delay, result_name + "_delay", "dataframe"
+        )
+        self.set_result_csv_data(
+            "recovery", recovery, result_name + "_recovery", "dataframe"
+        )
+        self.set_result_csv_data(
+            "time_stepping_recovery",
+            time_stepping_recovery,
+            result_name + "_time_stepping_recovery",
+            "dataframe",
         )
 
         return True
@@ -182,8 +192,6 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             + " secs"
         )
 
-        result = time_stepping_recovery
-
         end_time = time.process_time()
         print(
             "Analysis completed in "
@@ -191,7 +199,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             + " secs"
         )
 
-        return result
+        return total_delay, recovery, time_stepping_recovery
 
     @staticmethod
     def household_income_prediction(income_groups, num_samples):
@@ -651,7 +659,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
                 },
                 {
                     "id": "sample_damage_states",
-                    "required": True,
+                    "required": False,
                     "description": "Sample damage states",
                     "type": ["incore:sampleDamageState"],
                 },
@@ -677,9 +685,19 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             ],
             "output_datasets": [
                 {
-                    "id": "residential_building_recovery",
+                    "id": "total_delay",
+                    "description": "CSV file of residential building delay time",
+                    "type": "incore:buildingRecoveryDelay",
+                },
+                {
+                    "id": "recovery",
+                    "description": "CSV file of residential  building recovery time",
+                    "type": "incore:buildingRecoveryTime",
+                },
+                {
+                    "id": "time_stepping_recovery",
                     "description": "CSV file of residential building recovery percent",
                     "type": "incore:buildingRecovery",
-                }
+                },
             ],
         }
