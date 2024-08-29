@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Fixed Sphinx autodoc skipping class methods with custom decorators. [#518](https://github.com/IN-CORE/pyincore/issues/518)
 - Pyomo version fixed to fix indp solver failure [#585](https://github.com/IN-CORE/pyincore/issues/585)
 
 ### Changed
