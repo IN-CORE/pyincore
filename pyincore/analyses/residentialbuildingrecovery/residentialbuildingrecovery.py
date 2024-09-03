@@ -35,7 +35,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         and Effects of Pre-and Post-event Policies." International Journal of Disaster Risk Reduction (2021): 102259.
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
 

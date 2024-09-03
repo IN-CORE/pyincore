@@ -6,9 +6,8 @@
 
 
 import urllib
-from typing import Union
 
-from pyincore import IncoreClient, IncoreInternalClient
+from pyincore import IncoreClient
 from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
 
@@ -17,11 +16,11 @@ class RepairService(Dfr3Service):
     """Fragility service client.
 
     Args:
-        client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        client (IncoreClient): Service authentication.
 
     """
 
-    def __init__(self, client: Union[IncoreClient, IncoreInternalClient]):
+    def __init__(self, client: IncoreClient):
         self.client = client
         self.base_dfr3_url = urllib.parse.urljoin(
             client.service_url, "dfr3/api/repairs/"

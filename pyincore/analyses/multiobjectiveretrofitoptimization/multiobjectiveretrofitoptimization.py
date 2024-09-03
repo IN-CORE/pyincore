@@ -36,7 +36,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
     Args:
 
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
 

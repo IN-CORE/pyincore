@@ -23,7 +23,7 @@ class CombinedWindWaveSurgeBuildingLoss(BaseAnalysis):
         147. 04021185. 10.1061/(ASCE)ST.1943-541X.0003144.
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
     """
 
     def __init__(self, incore_client):

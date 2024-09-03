@@ -160,23 +160,6 @@ class Client:
         r = self.session.delete(url, timeout=timeout, **kwargs)
         return return_http_response(r)
 
-    @staticmethod
-    def create_service_json_entry(hashed_service_url, service_url):
-        update_hash_entry("add", hashed_url=hashed_service_url, service_url=service_url)
-
-    @staticmethod
-    def clear_root_cache():
-        # incase cache_data folder doesn't exist
-        if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
-            logger.warning("User data cache does not exist")
-            return None
-
-        for root, dirs, files in os.walk(pyglobals.PYINCORE_USER_DATA_CACHE):
-            for d in dirs:
-                shutil.rmtree(os.path.join(root, d))
-        update_hash_entry("clear")
-        return None
-
 
 class IncoreClient(Client):
     """IN-CORE service client class. It contains token and service root url."""
@@ -185,6 +168,9 @@ class IncoreClient(Client):
         self,
         service_url: str = None,
         token_file_name: str = None,
+        username: str = None,
+        usergroups: list = None,
+        internal: bool = False,
         offline: bool = False,
     ):
         """
@@ -196,6 +182,7 @@ class IncoreClient(Client):
         """
         super().__init__()
         self.offline = offline
+        self.internal = internal
 
         if not offline:
             if service_url is None or len(service_url.strip()) == 0:
@@ -209,9 +196,7 @@ class IncoreClient(Client):
             byte_url_string = str.encode(self.service_url)
             self.hashed_service_url = hashlib.sha256(byte_url_string).hexdigest()
 
-            IncoreClient.create_service_json_entry(
-                self.hashed_service_url, self.service_url
-            )
+            self.create_service_json_entry()
 
             # construct local directory and filename
             cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
@@ -223,29 +208,38 @@ class IncoreClient(Client):
             if not os.path.exists(self.hashed_svc_data_dir):
                 os.makedirs(self.hashed_svc_data_dir)
 
-            # store the token file in the respective repository's directory
-            if token_file_name is None or len(token_file_name.strip()) == 0:
-                token_file_name = "." + self.hashed_service_url + "_token"
-            self.token_file = os.path.join(
-                pyglobals.PYINCORE_USER_CACHE, token_file_name
-            )
-
-            authorization = self.retrieve_token_from_file()
-            if authorization is not None:
-                self.session.headers["Authorization"] = authorization
-                print(
-                    "Connection successful to IN-CORE services.",
-                    "pyIncore version detected:",
-                    pyglobals.PACKAGE_VERSION,
+            if internal:
+                # Constructing the headers
+                self.session.headers["x-auth-userinfo"] = json.dumps(
+                    {"preferred_username": username}
+                )
+                self.session.headers["x-auth-usergroup"] = json.dumps(
+                    {"groups": usergroups}
+                )
+            else:
+                # store the token file in the respective repository's directory
+                if token_file_name is None or len(token_file_name.strip()) == 0:
+                    token_file_name = "." + self.hashed_service_url + "_token"
+                self.token_file = os.path.join(
+                    pyglobals.PYINCORE_USER_CACHE, token_file_name
                 )
 
-            else:
-                if self.login():
+                authorization = self.retrieve_token_from_file()
+                if authorization is not None:
+                    self.session.headers["Authorization"] = authorization
                     print(
                         "Connection successful to IN-CORE services.",
                         "pyIncore version detected:",
                         pyglobals.PACKAGE_VERSION,
                     )
+                else:
+                    if self.login():
+                        print(
+                            "Connection successful to IN-CORE services.",
+                            "pyIncore version detected:",
+                            pyglobals.PACKAGE_VERSION,
+                        )
+
         else:
             self.service_url = ""
             self.token_url = ""
@@ -259,6 +253,13 @@ class IncoreClient(Client):
             )
 
     def login(self):
+        if self.offline is True:
+            logger.warning("Offline mode does not have login method.")
+            return False
+        if self.internal is True:
+            logger.warning("Internal mode does not have login method.")
+            return False
+
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
             try:
                 username = input("Enter username: ")
@@ -298,6 +299,16 @@ class IncoreClient(Client):
             authorization (str): An authorization in the format "bearer access_token".
 
         """
+        if self.offline is True:
+            logger.warning(
+                "Offline mode does not have store_authorization_in_file method."
+            )
+            return
+        if self.internal is True:
+            logger.warning(
+                "Internal mode does not have store_authorization_in_file method."
+            )
+            return
         try:
             with open(self.token_file, "w") as f:
                 f.write(authorization)
@@ -310,6 +321,13 @@ class IncoreClient(Client):
         Returns:
              True if the token has expired, False otherwise
         """
+        if self.offline is True:
+            logger.warning("Offline mode does not have is_token_expired method.")
+            return
+        if self.internal is True:
+            logger.warning("Internal mode does not have is_token_expired method.")
+            return
+
         # Split the token to get payload
         _, payload_encoded, _ = token.split(".")
         # Decode the payload
@@ -330,6 +348,17 @@ class IncoreClient(Client):
             dict: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
 
         """
+        if self.offline is True:
+            logger.warning(
+                "Offline mode does not have retrieve_token_from_file method."
+            )
+            return
+        if self.internal is True:
+            logger.warning(
+                "Internal mode does not have retrieve_token_from_file method."
+            )
+            return
+
         if not os.path.isfile(self.token_file):
             return None
         else:
@@ -429,147 +458,23 @@ class IncoreClient(Client):
 
         return return_http_response(r)
 
-    def clear_cache(self):
-        """
-        This function helps clear the data cache for a specific repository or the entire cache
+    def create_service_json_entry(self):
+        update_hash_entry(
+            "add", hashed_url=self.hashed_service_url, service_url=self.service_url
+        )
 
-        Returns: None
-
-        """
+    @staticmethod
+    def clear_root_cache():
         # incase cache_data folder doesn't exist
         if not os.path.isdir(pyglobals.PYINCORE_USER_DATA_CACHE):
             logger.warning("User data cache does not exist")
             return None
 
-        if not os.path.isdir(self.hashed_svc_data_dir):
-            logger.warning("Cached folder doesn't exist")
-            return None
-        try:
-            shutil.rmtree(self.hashed_svc_data_dir)
-        except PermissionError as e:
-            print(f"Error clearing cache : {e}")
-
-        # clear entry from service.json
-        update_hash_entry("edit", hashed_url=self.hashed_service_url)
-        return
-
-
-class IncoreInternalClient(Client):
-    """IN-CORE service client class meant for interal communiation with restful services behind the auth middleware
-    It contains x-user-info and x-user-groups as headers"""
-
-    def __init__(
-        self,
-        service_url: str = None,
-        username: str = None,
-        usergroups: list = None,
-        offline: bool = False,
-    ):
-        """
-
-        Args:
-            service_url (str): Service url.
-            username (str): Username.
-            usergroups (list): User groups.
-            offline (bool): Flag to indicate offline mode or not. Default to False.
-        """
-        super().__init__()
-        self.offline = offline
-
-        if service_url is None or len(service_url.strip()) == 0:
-            service_url = pyglobals.INCORE_INTERNAL_API_URL
-        self.service_url = service_url
-
-        # hashlib requires bytes array for hash operations
-        byte_url_string = str.encode(self.service_url)
-        self.hashed_service_url = hashlib.sha256(byte_url_string).hexdigest()
-        IncoreInternalClient.create_service_json_entry(
-            self.hashed_service_url, self.service_url
-        )
-
-        # construct local directory and filename
-        cache_data = pyglobals.PYINCORE_USER_DATA_CACHE
-        if not os.path.exists(cache_data):
-            os.makedirs(cache_data)
-        self.hashed_svc_data_dir = os.path.join(cache_data, self.hashed_service_url)
-        if not os.path.exists(self.hashed_svc_data_dir):
-            os.makedirs(self.hashed_svc_data_dir)
-
-        # Constructing the headers
-        self.session.headers["x-auth-userinfo"] = json.dumps(
-            {"preferred_username": username}
-        )
-        self.session.headers["x-auth-usergroup"] = json.dumps({"groups": usergroups})
-
-        print(
-            "Internal connection successful to IN-CORE services.",
-            "pyIncore version detected:",
-            pyglobals.PACKAGE_VERSION,
-        )
-
-    def get(self, url: str, params=None, timeout=(30, 600), **kwargs):
-        """Get server connection response.
-
-        Args:
-            url (str): Service url.
-            params (obj): Session parameters.
-            timeout (tuple[int,int]): Session timeout.
-            **kwargs: A dictionary of external parameters.
-
-        Returns:
-            obj: HTTP response.
-
-        """
-        r = self.session.get(url, params=params, timeout=timeout, **kwargs)
-        return return_http_response(r)
-
-    def post(self, url: str, data=None, json=None, timeout=(30, 600), **kwargs):
-        """Post data on the server.
-
-        Args:
-            url (str): Service url.
-            data (obj): Data to be posted on the server.
-            json (obj): Description of the data, metadata json.
-            timeout (tuple[int,int]): Session timeout.
-            **kwargs: A dictionary of external parameters.
-
-        Returns:
-            obj: HTTP response.
-
-        """
-        r = self.session.post(url, data=data, json=json, timeout=timeout, **kwargs)
-        return return_http_response(r)
-
-    def put(self, url: str, data=None, timeout=(30, 600), **kwargs):
-        """Put data on the server.
-
-        Args:
-            url (str): Service url.
-            data (obj): Data to be put onn the server.
-            timeout (tuple): Session timeout.
-            **kwargs: A dictionary of external parameters.
-
-        Returns:
-            obj: HTTP response.
-
-        """
-        r = self.session.put(url, data=data, timeout=timeout, **kwargs)
-        return return_http_response(r)
-
-    def delete(self, url: str, timeout=(30, 600), **kwargs):
-        """Delete data on the server.
-
-        Args:
-            url (str): Service url.
-            timeout (tuple): Session timeout.
-            **kwargs: A dictionary of external parameters.
-
-        Returns:
-            obj: HTTP response.
-
-        """
-        r = self.session.delete(url, timeout=timeout, **kwargs)
-        return return_http_response(r)
+        for root, dirs, files in os.walk(pyglobals.PYINCORE_USER_DATA_CACHE):
+            for d in dirs:
+                shutil.rmtree(os.path.join(root, d))
+        update_hash_entry("clear")
+        return None
 
     def clear_cache(self):
         """

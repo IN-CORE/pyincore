@@ -27,7 +27,7 @@ class SeasideCGEModel(BaseAnalysis):
      tax revenues in order to finance the provision of public services; and (4) the rest of the world.
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
 

@@ -18,7 +18,7 @@ class BridgeDamage(BaseAnalysis):
     """Computes bridge structural damage for earthquake, tsunami, tornado, and hurricane hazards.
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
 

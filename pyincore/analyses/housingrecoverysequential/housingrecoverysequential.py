@@ -32,7 +32,7 @@ class HousingRecoverySequential(BaseAnalysis):
         and duration based on social vulnerability. Risk Analysis, 40(12), pp.2675-2695.
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
     """
 
     # Social vulnerability value generators per zone

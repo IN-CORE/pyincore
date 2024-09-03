@@ -18,7 +18,7 @@ class BuildingEconLoss(BaseAnalysis):
     year and year of interest (current, date of hazard etc.)
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
 

@@ -6,14 +6,14 @@
 
 
 import json
-from typing import List, Union
+from typing import List
 from urllib.parse import urljoin
 import numpy
 
 import pyincore.globals as pyglobals
 from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
-from pyincore import IncoreClient, IncoreInternalClient
+from pyincore import IncoreClient
 
 logger = pyglobals.LOGGER
 
@@ -22,11 +22,11 @@ class HazardService:
     """Hazard service client
 
     Args:
-        client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        client (IncoreClient): Service authentication.
 
     """
 
-    def __init__(self, client: Union[IncoreClient, IncoreInternalClient]):
+    def __init__(self, client: IncoreClient):
         self.client = client
 
         self.base_earthquake_url = urljoin(

@@ -36,7 +36,7 @@ class INDP(BaseAnalysis):
         | Implementation: Chen Wang and NCSA IN-CORE Dev Team
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
     """
 
     def __init__(self, incore_client):

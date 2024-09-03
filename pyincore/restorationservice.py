@@ -3,10 +3,9 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-from typing import Union
 from urllib.parse import urljoin
 
-from pyincore import IncoreClient, IncoreInternalClient
+from pyincore import IncoreClient
 from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
 from pyincore.utils import return_http_response
@@ -16,11 +15,11 @@ class RestorationService(Dfr3Service):
     """Fragility service client.
 
     Args:
-        client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        client (IncoreClient): Service authentication.
 
     """
 
-    def __init__(self, client: Union[IncoreClient, IncoreInternalClient]):
+    def __init__(self, client: IncoreClient):
         self.client = client
         self.base_dfr3_url = urljoin(client.service_url, "dfr3/api/restorations/")
 

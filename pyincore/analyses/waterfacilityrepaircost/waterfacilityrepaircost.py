@@ -14,7 +14,7 @@ class WaterFacilityRepairCost(BaseAnalysis):
     """Computes water facility repair cost.
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
 

@@ -22,7 +22,7 @@ class GasFacilityDamage(BaseAnalysis):
     """Computes gas facility structural damage for earthquake.
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
 

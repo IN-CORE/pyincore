@@ -11,10 +11,9 @@ import os
 import re
 import zipfile
 import ntpath
-from typing import Union
 
 import pyincore.globals as pyglobals
-from pyincore import IncoreClient, IncoreInternalClient, Client
+from pyincore import IncoreClient
 from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
 from urllib.parse import urljoin
@@ -26,11 +25,11 @@ class DataService:
     """Data service client.
 
     Args:
-        client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        client (IncoreClient): Service authentication.
 
     """
 
-    def __init__(self, client: Union[IncoreClient, IncoreInternalClient]):
+    def __init__(self, client: IncoreClient):
         self.client = client
         self.base_url = urljoin(client.service_url, "data/api/datasets/")
         self.files_url = urljoin(client.service_url, "data/api/files/")
@@ -116,9 +115,7 @@ class DataService:
         if not os.path.exists(cache_data_dir):
             os.makedirs(cache_data_dir)
             # for consistency check to ensure the repository hash is recorded in service.json
-            Client.create_service_json_entry(
-                self.client.hashed_service_url, self.client.service_url
-            )
+            self.client.create_service_json_entry()
 
             local_filename = self.download_dataset_blob(
                 cache_data_dir, dataset_id, timeout=timeout, **kwargs

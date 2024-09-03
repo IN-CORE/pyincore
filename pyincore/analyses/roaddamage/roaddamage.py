@@ -21,7 +21,7 @@ class RoadDamage(BaseAnalysis):
     """Road Damage Analysis calculates the probability of road damage based on an earthquake or tsunami hazard.
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
 

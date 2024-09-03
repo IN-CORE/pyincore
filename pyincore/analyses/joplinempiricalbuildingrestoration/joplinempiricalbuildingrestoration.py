@@ -20,7 +20,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
     Level 4 (FL4, the lowest functionality) to Functionality Level 0 (FL0, full functionality).
 
     Args:
-        incore_client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        incore_client (IncoreClient): Service authentication.
 
     """
 

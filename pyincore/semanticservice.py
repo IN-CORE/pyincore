@@ -6,10 +6,10 @@
 
 
 import json
-from typing import Tuple, Union
+from typing import Tuple
 
 import pyincore.globals as pyglobals
-from pyincore import IncoreClient, IncoreInternalClient
+from pyincore import IncoreClient
 from pyincore.decorators import forbid_offline
 from pyincore.utils import return_http_response
 from urllib.parse import urljoin
@@ -23,11 +23,11 @@ class SemanticService:
     Use this class to interact with the semantics service.
 
     Args:
-        client (Union[IncoreClient, IncoreInternalClient]): Service authentication.
+        client (IncoreClient): Service authentication.
 
     """
 
-    def __init__(self, client: Union[IncoreClient, IncoreInternalClient]):
+    def __init__(self, client: IncoreClient):
         self.client = client
         self.base_url = urljoin(client.service_url, "semantics/api/types")
 
