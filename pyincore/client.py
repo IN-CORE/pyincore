@@ -187,6 +187,9 @@ class IncoreClient(Client):
         if not offline:
             if service_url is None or len(service_url.strip()) == 0:
                 service_url = pyglobals.INCORE_API_PROD_URL
+                if internal:
+                    service_url = pyglobals.INCORE_INTERNAL_API_URL
+
             self.service_url = service_url
             self.token_url = urllib.parse.urljoin(
                 self.service_url, pyglobals.KEYCLOAK_AUTH_PATH
