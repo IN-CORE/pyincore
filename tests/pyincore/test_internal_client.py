@@ -8,7 +8,10 @@ import os.path
 
 from pyincore import IncoreClient
 
+# from pyincore import DataService
+
 user = {
+    "service_url": "http://localhost:8080",
     "internal": True,
     "username": "incrtest",
     "usergroups": ["incore_ncsa"],
