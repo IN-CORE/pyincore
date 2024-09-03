@@ -41,7 +41,6 @@ class EquityMetric(BaseAnalysis):
             "equity_metric",
             equity_metric,
             name=self.get_parameter("result_name") + "_equity_metric",
-            source="dataframe",
         )
 
         return True
