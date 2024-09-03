@@ -6,6 +6,7 @@
 
 import numpy as np
 from pyincore import BaseAnalysis
+from pyincore.analyses.equitymetric.equitymetricutil import EquityMetricUtil
 
 
 class EquityMetric(BaseAnalysis):
@@ -27,6 +28,9 @@ class EquityMetric(BaseAnalysis):
         hua_df = self.get_input_dataset(
             "housing_unit_allocation"
         ).get_dataframe_from_csv()
+        if division_decision_column == "SVI" and "SVI" not in hua_df.columns:
+            hua_df = EquityMetricUtil.prepare_svi_as_division_decision(hua_df)
+
         merged_df = hua_df.merge(
             scarce_resource_df, how="inner", left_on="guid", right_on="guid"
         )
@@ -42,11 +46,11 @@ class EquityMetric(BaseAnalysis):
 
         return True
 
-    def equity_metric(self, merged_gdf, division_decision_column):
+    def equity_metric(self, merged_df, division_decision_column):
         """
         Compute equity metric
         Args:
-            merged_gdf: Merging housing unit allocation and scarce resource to create geopands dataframes
+            merged_df: Merging housing unit allocation and scarce resource to create dataframes
             division_decision_column: column name of the division decision variable e.g. SVI
 
         Returns:
@@ -54,10 +58,10 @@ class EquityMetric(BaseAnalysis):
 
         """
         # Calculation of households in each group
-        total_1 = merged_gdf[merged_gdf[division_decision_column] > 0].shape[
+        total_1 = merged_df[merged_df[division_decision_column] > 0].shape[
             0
         ]  # socially vulnerable populations
-        total_2 = merged_gdf[merged_gdf[division_decision_column] < 1].shape[
+        total_2 = merged_df[merged_df[division_decision_column] < 1].shape[
             0
         ]  # non socially vulnerable populations
         total_households = (
@@ -65,24 +69,24 @@ class EquityMetric(BaseAnalysis):
         )  # for non-vacant households (i.e., non-vacant are not included)
 
         # Metric Computation
-        scarce_resource = merged_gdf["scarce_resource"]
+        scarce_resource = merged_df["scarce_resource"]
         yi = scarce_resource / np.sum(scarce_resource)
-        Yg_1 = np.sum(yi[merged_gdf[division_decision_column] > 0])
-        Yg_2 = np.sum(yi[merged_gdf[division_decision_column] < 1])
+        Yg_1 = np.sum(yi[merged_df[division_decision_column] > 0])
+        Yg_2 = np.sum(yi[merged_df[division_decision_column] < 1])
         TheilT = np.sum(yi * np.log(yi * total_households))
-        bzi = np.sum(yi[merged_gdf[division_decision_column] > 0]) * np.log(
-            np.average(yi[merged_gdf[division_decision_column] > 0]) / np.average(yi)
-        ) + np.sum(yi[merged_gdf[division_decision_column] < 1]) * np.log(
-            np.average(yi[merged_gdf[division_decision_column] < 1]) / np.average(yi)
+        bzi = np.sum(yi[merged_df[division_decision_column] > 0]) * np.log(
+            np.average(yi[merged_df[division_decision_column] > 0]) / np.average(yi)
+        ) + np.sum(yi[merged_df[division_decision_column] < 1]) * np.log(
+            np.average(yi[merged_df[division_decision_column] < 1]) / np.average(yi)
         )
         wzi = Yg_1 * np.sum(
-            yi[merged_gdf[division_decision_column] > 0]
+            yi[merged_df[division_decision_column] > 0]
             / Yg_1
-            * np.log((yi[merged_gdf[division_decision_column] > 0] / Yg_1 * total_1))
+            * np.log((yi[merged_df[division_decision_column] > 0] / Yg_1 * total_1))
         ) + Yg_2 * np.sum(
-            yi[merged_gdf[division_decision_column] < 1]
+            yi[merged_df[division_decision_column] < 1]
             / Yg_2
-            * np.log((yi[merged_gdf[division_decision_column] < 1] / Yg_2 * total_2))
+            * np.log((yi[merged_df[division_decision_column] < 1] / Yg_2 * total_2))
         )
 
         return [{"Theils T": TheilT, "BZI": bzi, "WZI": wzi}]
@@ -124,7 +128,7 @@ class EquityMetric(BaseAnalysis):
                     "id": "scarce_resource",
                     "required": True,
                     "description": "Scarce resource dataset e.g. probability of service, return time, etc",
-                    "type": ["incore:housingRecoveryHistory"],
+                    "type": ["incore:scarceResource"],
                 },
             ],
             "output_datasets": [
