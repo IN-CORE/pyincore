@@ -341,10 +341,10 @@ class HazardService:
 
         """
         url = self.base_earthquake_url
-        eq_data = {("earthquake", eq_json)}
+        eq_data = [("earthquake", eq_json)]
 
         for file_path in file_paths:
-            eq_data.add(("file", open(file_path, "rb")))
+            eq_data.append(("file", open(file_path, "rb")))
         kwargs = {"files": eq_data}
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
@@ -558,10 +558,10 @@ class HazardService:
 
         """
         url = self.base_tornado_url
-        tornado_data = {("tornado", tornado_json)}
+        tornado_data = [("tornado", tornado_json)]
 
         for file_path in file_paths:
-            tornado_data.add(("file", open(file_path, "rb")))
+            tornado_data.append(("file", open(file_path, "rb")))
         kwargs = {"files": tornado_data}
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
@@ -708,10 +708,10 @@ class HazardService:
         """
 
         url = self.base_tsunami_url
-        tsunami_data = {("tsunami", tsunami_json)}
+        tsunami_data = [("tsunami", tsunami_json)]
 
         for file_path in file_paths:
-            tsunami_data.add(("file", open(file_path, "rb")))
+            tsunami_data.append(("file", open(file_path, "rb")))
         kwargs = {"files": tsunami_data}
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
@@ -783,10 +783,10 @@ class HazardService:
 
         """
         url = self.base_hurricane_url
-        hurricane_data = {("hurricane", hurricane_json)}
+        hurricane_data = [("hurricane", hurricane_json)]
 
         for file_path in file_paths:
-            hurricane_data.add(("file", open(file_path, "rb")))
+            hurricane_data.append(("file", open(file_path, "rb")))
         kwargs = {"files": hurricane_data}
         r = self.client.post(url, timeout=timeout, **kwargs)
 
@@ -926,10 +926,10 @@ class HazardService:
 
         """
         url = self.base_flood_url
-        flood_data = {("flood", flood_json)}
+        flood_data = [("flood", flood_json)]
 
         for file_path in file_paths:
-            flood_data.add(("file", open(file_path, "rb")))
+            flood_data.append(("file", open(file_path, "rb")))
         kwargs = {"files": flood_data}
         r = self.client.post(url, timeout=timeout, **kwargs)
 
