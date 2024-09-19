@@ -38,7 +38,7 @@ class SpaceService:
 
         """
         url = self.base_space_url
-        space_data = {("space", space_json)}
+        space_data = [("space", space_json)]
         kwargs["files"] = space_data
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
@@ -214,7 +214,7 @@ class SpaceService:
 
         """
         url = urljoin(self.base_space_url, space_id + "/grant")
-        space_privileges = {("grant", privileges_json)}
+        space_privileges = [("grant", privileges_json)]
         kwargs["files"] = space_privileges
         r = self.client.post(url, timeout=timeout, **kwargs)
 

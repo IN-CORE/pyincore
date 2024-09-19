@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Fixed Sphinx autodoc skipping class methods with custom decorators. [#518](https://github.com/IN-CORE/pyincore/issues/518)
 - Pyomo version fixed to fix indp solver failure [#585](https://github.com/IN-CORE/pyincore/issues/585)
+- Uploaded raster files doesn't respect the order [#614](https://github.com/IN-CORE/pyincore/issues/614)
 
 ### Changed
 - Support Interdependent recovery of residential buildings and households [#606](https://github.com/IN-CORE/pyincore/pull/606)
