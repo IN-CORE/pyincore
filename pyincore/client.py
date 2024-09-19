@@ -168,6 +168,9 @@ class IncoreClient(Client):
         self,
         service_url: str = None,
         token_file_name: str = None,
+        username: str = None,
+        usergroups: list = None,
+        internal: bool = False,
         offline: bool = False,
     ):
         """
@@ -179,10 +182,14 @@ class IncoreClient(Client):
         """
         super().__init__()
         self.offline = offline
+        self.internal = internal
 
         if not offline:
             if service_url is None or len(service_url.strip()) == 0:
                 service_url = pyglobals.INCORE_API_PROD_URL
+                if internal:
+                    service_url = pyglobals.INCORE_INTERNAL_API_URL
+
             self.service_url = service_url
             self.token_url = urllib.parse.urljoin(
                 self.service_url, pyglobals.KEYCLOAK_AUTH_PATH
@@ -204,29 +211,38 @@ class IncoreClient(Client):
             if not os.path.exists(self.hashed_svc_data_dir):
                 os.makedirs(self.hashed_svc_data_dir)
 
-            # store the token file in the respective repository's directory
-            if token_file_name is None or len(token_file_name.strip()) == 0:
-                token_file_name = "." + self.hashed_service_url + "_token"
-            self.token_file = os.path.join(
-                pyglobals.PYINCORE_USER_CACHE, token_file_name
-            )
-
-            authorization = self.retrieve_token_from_file()
-            if authorization is not None:
-                self.session.headers["Authorization"] = authorization
-                print(
-                    "Connection successful to IN-CORE services.",
-                    "pyIncore version detected:",
-                    pyglobals.PACKAGE_VERSION,
+            if internal:
+                # Constructing the headers
+                self.session.headers["x-auth-userinfo"] = json.dumps(
+                    {"preferred_username": username}
+                )
+                self.session.headers["x-auth-usergroup"] = json.dumps(
+                    {"groups": usergroups}
+                )
+            else:
+                # store the token file in the respective repository's directory
+                if token_file_name is None or len(token_file_name.strip()) == 0:
+                    token_file_name = "." + self.hashed_service_url + "_token"
+                self.token_file = os.path.join(
+                    pyglobals.PYINCORE_USER_CACHE, token_file_name
                 )
 
-            else:
-                if self.login():
+                authorization = self.retrieve_token_from_file()
+                if authorization is not None:
+                    self.session.headers["Authorization"] = authorization
                     print(
                         "Connection successful to IN-CORE services.",
                         "pyIncore version detected:",
                         pyglobals.PACKAGE_VERSION,
                     )
+                else:
+                    if self.login():
+                        print(
+                            "Connection successful to IN-CORE services.",
+                            "pyIncore version detected:",
+                            pyglobals.PACKAGE_VERSION,
+                        )
+
         else:
             self.service_url = ""
             self.token_url = ""
@@ -240,6 +256,13 @@ class IncoreClient(Client):
             )
 
     def login(self):
+        if self.offline is True:
+            logger.warning("Offline mode does not have login method.")
+            return False
+        if self.internal is True:
+            logger.warning("Internal mode does not have login method.")
+            return False
+
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
             try:
                 username = input("Enter username: ")
@@ -279,6 +302,16 @@ class IncoreClient(Client):
             authorization (str): An authorization in the format "bearer access_token".
 
         """
+        if self.offline is True:
+            logger.warning(
+                "Offline mode does not have store_authorization_in_file method."
+            )
+            return
+        if self.internal is True:
+            logger.warning(
+                "Internal mode does not have store_authorization_in_file method."
+            )
+            return
         try:
             with open(self.token_file, "w") as f:
                 f.write(authorization)
@@ -291,6 +324,13 @@ class IncoreClient(Client):
         Returns:
              True if the token has expired, False otherwise
         """
+        if self.offline is True:
+            logger.warning("Offline mode does not have is_token_expired method.")
+            return
+        if self.internal is True:
+            logger.warning("Internal mode does not have is_token_expired method.")
+            return
+
         # Split the token to get payload
         _, payload_encoded, _ = token.split(".")
         # Decode the payload
@@ -311,6 +351,17 @@ class IncoreClient(Client):
             dict: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
 
         """
+        if self.offline is True:
+            logger.warning(
+                "Offline mode does not have retrieve_token_from_file method."
+            )
+            return
+        if self.internal is True:
+            logger.warning(
+                "Internal mode does not have retrieve_token_from_file method."
+            )
+            return
+
         if not os.path.isfile(self.token_file):
             return None
         else:

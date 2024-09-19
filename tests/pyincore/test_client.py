@@ -10,7 +10,7 @@ import pytest
 from pyincore import IncoreClient
 
 
-def test_client_success(monkeypatch):
+def test_client_success():
     """
     testing successful login
     """
