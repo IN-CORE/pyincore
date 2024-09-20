@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Support Interdependent recovery of residential buildings and households [#606](https://github.com/IN-CORE/pyincore/pull/606)
 - Remove unused insecure IN-CORE client [#581](https://github.com/IN-CORE/pyincore/issues/581)
+- Update port inventory type and corresponding limit state and damage state calculation [#603](https://github.com/IN-CORE/pyincore/issues/603)
 
 ### Added
 - Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
