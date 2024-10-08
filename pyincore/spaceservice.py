@@ -3,7 +3,6 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
 from urllib.parse import urljoin
 from pyincore import IncoreClient
 import pyincore.globals as pyglobals
@@ -39,7 +38,7 @@ class SpaceService:
 
         """
         url = self.base_space_url
-        space_data = {("space", space_json)}
+        space_data = [("space", space_json)]
         kwargs["files"] = space_data
         r = self.client.post(url, timeout=timeout, **kwargs)
         return return_http_response(r).json()
@@ -215,7 +214,7 @@ class SpaceService:
 
         """
         url = urljoin(self.base_space_url, space_id + "/grant")
-        space_privileges = {("grant", privileges_json)}
+        space_privileges = [("grant", privileges_json)]
         kwargs["files"] = space_privileges
         r = self.client.post(url, timeout=timeout, **kwargs)
 
