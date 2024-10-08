@@ -10,7 +10,7 @@ from pyincore.analyses.equitymetric.equitymetricutil import EquityMetricUtil
 
 
 class EquityMetric(BaseAnalysis):
-    """Computes electric power infrastructure functionality.
+    """Computes equity metric.
     Args:
         incore_client: Service client with authentication info
     """
