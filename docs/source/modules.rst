@@ -111,6 +111,13 @@ analyses/epnfunctionality
 ..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionalityUtil
     :members:
 
+analyses/equitymetric
+=========================
+..  autoclass:: equitymetric.equitymetric.EquityMetric
+    :members:
+..  autoclass:: equitymetric.equitymetric.EquityMetricUtil
+    :members:
+
 analyses/example
 ================
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
