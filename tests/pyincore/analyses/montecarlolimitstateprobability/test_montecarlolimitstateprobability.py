@@ -1,6 +1,7 @@
 from pyincore.client import IncoreClient
-from pyincore.analyses.montecarlolimitstateprobability import \
-    MonteCarloLimitStateProbability
+from pyincore.analyses.montecarlolimitstateprobability import (
+    MonteCarloLimitStateProbability,
+)
 import pyincore.globals as pyglobals
 
 
@@ -16,8 +17,7 @@ def run_with_base_class():
     mc.set_parameter("result_name", "building_damage")
     mc.set_parameter("num_cpu", 8)
     mc.set_parameter("num_samples", 10)
-    mc.set_parameter("damage_interval_keys",
-                     ["DS_0", "DS_1", "DS_2", "DS_3"])
+    mc.set_parameter("damage_interval_keys", ["DS_0", "DS_1", "DS_2", "DS_3"])
     mc.set_parameter("failure_state_keys", ["DS_1", "DS_2", "DS_3"])
 
     # optional parameter
@@ -26,5 +26,5 @@ def run_with_base_class():
     mc.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

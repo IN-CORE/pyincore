@@ -1,7 +1,7 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-import pytest
+
 
 from pyincore.analyses.galvestoncge.galvestoncge import GalvestonCGEModel
 from pyincore.analyses.saltlakecge.saltlakecge import SaltLakeCGEModel
@@ -26,28 +26,65 @@ def run_convert_SLC_cge_json_path(testpath):
         for r in region:
             categories.append(h + "_" + r)
 
-    cge_json.get_cge_household_count(None,
-                                     os.path.join(testpath, "household-count.csv"),
-                                     "slc_cge_total_household_count.json", income_categories=categories)
-    cge_json.get_cge_gross_income(None,
-                                  os.path.join(testpath, "gross-income.csv"),
-                                  "slc_cge_total_household_income.json", income_categories=categories)
+    cge_json.get_cge_household_count(
+        None,
+        os.path.join(testpath, "household-count.csv"),
+        "slc_cge_total_household_count.json",
+        income_categories=categories,
+    )
+    cge_json.get_cge_gross_income(
+        None,
+        os.path.join(testpath, "gross-income.csv"),
+        "slc_cge_total_household_income.json",
+        income_categories=categories,
+    )
 
     categories = []
-    for d in ["AG_MI", "UTIL", "CONS", "MANU", "COMMER", "EDU", "HEALTH", "ART_ACC", "RELIG"]:
+    for d in [
+        "AG_MI",
+        "UTIL",
+        "CONS",
+        "MANU",
+        "COMMER",
+        "EDU",
+        "HEALTH",
+        "ART_ACC",
+        "RELIG",
+    ]:
         for r in region:
             categories.append(d + "_" + r)
-    cge_json.get_cge_employment(None, None, os.path.join(testpath, "pre-disaster-factor-demand.csv"),
-                                os.path.join(testpath, "post-disaster-factor-demand.csv"),
-                                "slc_cge_employment.json", demand_categories=categories)
+    cge_json.get_cge_employment(
+        None,
+        None,
+        os.path.join(testpath, "pre-disaster-factor-demand.csv"),
+        os.path.join(testpath, "post-disaster-factor-demand.csv"),
+        "slc_cge_employment.json",
+        demand_categories=categories,
+    )
 
     categories = []
-    for d in ["AG_MI", "UTIL", "CONS", "MANU", "COMMER", "EDU", "HEALTH", "ART_ACC", "RELIG", "HS1", "HS2", "HS3"]:
+    for d in [
+        "AG_MI",
+        "UTIL",
+        "CONS",
+        "MANU",
+        "COMMER",
+        "EDU",
+        "HEALTH",
+        "ART_ACC",
+        "RELIG",
+        "HS1",
+        "HS2",
+        "HS3",
+    ]:
         for r in region:
             categories.append(d + "_" + r)
-    cge_json.get_cge_domestic_supply(None,
-                                     os.path.join(testpath, "domestic-supply.csv"), "slc_cge_domestic_supply.json",
-                                     supply_categories=categories)
+    cge_json.get_cge_domestic_supply(
+        None,
+        os.path.join(testpath, "domestic-supply.csv"),
+        "slc_cge_domestic_supply.json",
+        supply_categories=categories,
+    )
     return True
 
 
@@ -56,22 +93,36 @@ def run_convert_Joplin_cge_json_path(testpath):
 
     cge_json = CGEOutputProcess()
     categories = ["HH1", "HH2", "HH3", "HH4", "HH5"]
-    cge_json.get_cge_household_count(None,
-                                     os.path.join(testpath, "household-count.csv"),
-                                     "joplin_cge_total_household_count.json", income_categories=categories)
-    cge_json.get_cge_gross_income(None,
-                                  os.path.join(testpath, "gross-income.csv"),
-                                  "joplin_cge_total_household_income.json", income_categories=categories)
+    cge_json.get_cge_household_count(
+        None,
+        os.path.join(testpath, "household-count.csv"),
+        "joplin_cge_total_household_count.json",
+        income_categories=categories,
+    )
+    cge_json.get_cge_gross_income(
+        None,
+        os.path.join(testpath, "gross-income.csv"),
+        "joplin_cge_total_household_income.json",
+        income_categories=categories,
+    )
 
     categories = ["GOODS", "TRADE", "OTHER"]
-    cge_json.get_cge_employment(None, None, os.path.join(testpath, "pre-disaster-factor-demand.csv"),
-                                os.path.join(testpath, "post-disaster-factor-demand.csv"),
-                                "joplin_cge_employment.json", demand_categories=categories)
+    cge_json.get_cge_employment(
+        None,
+        None,
+        os.path.join(testpath, "pre-disaster-factor-demand.csv"),
+        os.path.join(testpath, "post-disaster-factor-demand.csv"),
+        "joplin_cge_employment.json",
+        demand_categories=categories,
+    )
 
     categories = ["Goods", "Trades", "Others", "HS1", "HS2", "HS3"]
-    cge_json.get_cge_domestic_supply(None,
-                                     os.path.join(testpath, "domestic-supply.csv"), "joplin_cge_domestic_supply.json",
-                                     supply_categories=categories)
+    cge_json.get_cge_domestic_supply(
+        None,
+        os.path.join(testpath, "domestic-supply.csv"),
+        "joplin_cge_domestic_supply.json",
+        supply_categories=categories,
+    )
     return True
 
 
@@ -81,40 +132,89 @@ def run_convert_Galveston_cge_json_path(testpath):
     cge_json = CGEOutputProcess()
     region = ["I", "M"]
 
-    categories = ["IHH1", "IHH2", "IHH3", "IHH4", "IHH5", "MHH1", "MHH2", "MHH3", "MHH4", "MHH5"]
-    cge_json.get_cge_household_count(None,
-                                     os.path.join(testpath, "household-count.csv"),
-                                     "galveston_cge_total_household_count.json", income_categories=categories)
-    cge_json.get_cge_gross_income(None,
-                                  os.path.join(testpath, "gross-income.csv"),
-                                  "galveston_cge_total_household_income.json", income_categories=categories)
+    categories = [
+        "IHH1",
+        "IHH2",
+        "IHH3",
+        "IHH4",
+        "IHH5",
+        "MHH1",
+        "MHH2",
+        "MHH3",
+        "MHH4",
+        "MHH5",
+    ]
+    cge_json.get_cge_household_count(
+        None,
+        os.path.join(testpath, "household-count.csv"),
+        "galveston_cge_total_household_count.json",
+        income_categories=categories,
+    )
+    cge_json.get_cge_gross_income(
+        None,
+        os.path.join(testpath, "gross-income.csv"),
+        "galveston_cge_total_household_income.json",
+        income_categories=categories,
+    )
 
     categories = []
-    for d in ["AGMIN", "UTIL", "CONS", "MANU", "WHOLE", "RETAIL", "TRANS", "PROFSER", "REALE", "EDU", "HEALTH", "ART",
-              "ACCO"]:
+    for d in [
+        "AGMIN",
+        "UTIL",
+        "CONS",
+        "MANU",
+        "WHOLE",
+        "RETAIL",
+        "TRANS",
+        "PROFSER",
+        "REALE",
+        "EDU",
+        "HEALTH",
+        "ART",
+        "ACCO",
+    ]:
         for r in region:
             categories.append(r + d)
-    cge_json.get_cge_employment(None, None, os.path.join(testpath, "pre-disaster-factor-demand.csv"),
-                                os.path.join(testpath, "post-disaster-factor-demand.csv"),
-                                "galveston_cge_employment.json", demand_categories=categories)
+    cge_json.get_cge_employment(
+        None,
+        None,
+        os.path.join(testpath, "pre-disaster-factor-demand.csv"),
+        os.path.join(testpath, "post-disaster-factor-demand.csv"),
+        "galveston_cge_employment.json",
+        demand_categories=categories,
+    )
 
     categories = []
-    for d in ["AGMIN", "UTIL", "CONS", "MANU", "WHOLE", "RETAIL", "TRANS", "PROFSER", "REALE", "EDU", "HEALTH", "ART",
-              "ACCO"]:
+    for d in [
+        "AGMIN",
+        "UTIL",
+        "CONS",
+        "MANU",
+        "WHOLE",
+        "RETAIL",
+        "TRANS",
+        "PROFSER",
+        "REALE",
+        "EDU",
+        "HEALTH",
+        "ART",
+        "ACCO",
+    ]:
         for r in region:
             categories.append(r + d)  # e.g.iAGMIN
     for d in ["HS1", "HS2", "HS3"]:
         for r in region:
             categories.append(d + r)  # e.g.HS1I
-    cge_json.get_cge_domestic_supply(None,
-                                     os.path.join(testpath, "domestic-supply.csv"),
-                                     "galveston_cge_domestic_supply.json",
-                                     supply_categories=categories)
+    cge_json.get_cge_domestic_supply(
+        None,
+        os.path.join(testpath, "domestic-supply.csv"),
+        "galveston_cge_domestic_supply.json",
+        supply_categories=categories,
+    )
     return True
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     # # run slc cge
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     saltlake_cge = SaltLakeCGEModel(client)

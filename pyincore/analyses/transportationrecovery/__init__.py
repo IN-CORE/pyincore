@@ -6,7 +6,13 @@
 
 from pyincore.analyses.transportationrecovery.nsga2 import Solution
 from pyincore.analyses.transportationrecovery.nsga2 import NSGAII
-from pyincore.analyses.transportationrecovery.post_disaster_long_term_solution import PostDisasterLongTermSolution
+from pyincore.analyses.transportationrecovery.post_disaster_long_term_solution import (
+    PostDisasterLongTermSolution,
+)
 from pyincore.analyses.transportationrecovery import WIPW
-from pyincore.analyses.transportationrecovery.transportationrecovery import TransportationRecovery
-from pyincore.analyses.transportationrecovery.transportationrecoveryutil import TransportationRecoveryUtil
+from pyincore.analyses.transportationrecovery.transportationrecovery import (
+    TransportationRecovery,
+)
+from pyincore.analyses.transportationrecovery.transportationrecoveryutil import (
+    TransportationRecoveryUtil,
+)

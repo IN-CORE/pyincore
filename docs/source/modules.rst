@@ -580,8 +580,6 @@ client
     :members:
 ..  autoclass:: client.IncoreClient
     :members:
-..  autoclass:: client.InsecureIncoreClient
-    :members:
 
 dataservice
 ===========
