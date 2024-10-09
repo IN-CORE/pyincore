@@ -17,7 +17,6 @@ logger = pyglobals.LOGGER
 
 
 class MlEnabledCgeJoplin(CoreCGEML):
-
     model = "Machine Learning Enabled Computable General Equilibrium - Joplin"
 
     # Coefficients files
@@ -83,20 +82,24 @@ class MlEnabledCgeJoplin(CoreCGEML):
     ]
 
     def __init__(self, incore_client: IncoreClient):
-        sectors, base_cap_factors, base_cap, model_coeffs, cap_shock_sectors = (
-            CGEMLFileUtil.parse_files(self.model_filenames, self.filenames)
-        )
+        (
+            sectors,
+            base_cap_factors,
+            base_cap,
+            model_coeffs,
+            cap_shock_sectors,
+        ) = CGEMLFileUtil.parse_files(self.model_filenames, self.filenames)
         self.base_cap_factors = base_cap_factors
         self.base_cap = base_cap
         self.model_coeffs = model_coeffs
         self.cap_shock_sectors = cap_shock_sectors
-        super(MLEnabledCgeJoplin, self).__init__(
+        super(MlEnabledCgeJoplin, self).__init__(
             incore_client, sectors, labor_groups=[f"L{gp}" for gp in range(1, 5)]
         )  # 4 labor groups
-    
+
     def run(self) -> bool:
-        """Executes the ML enabled CGE model for Joplin """
-        
+        """Executes the ML enabled CGE model for Joplin"""
+
         logger.info(f"Running {self.model} model...")
         sector_shocks = pd.read_csv(
             self.get_input_dataset("sector_shocks").get_file_path("csv")
@@ -107,8 +110,8 @@ class MlEnabledCgeJoplin(CoreCGEML):
         for sector in self.cap_shock_sectors:
             if sector.upper() not in [v.upper() for v in sector_shocks["sector"]]:
                 raise ValueError(
-                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors.\n" + 
-                    "Please make sure you have used the correct capital shocks"
+                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors.\n"
+                    + "Please make sure you have used the correct capital shocks"
                 )
             shocks.append(
                 sector_shocks.loc[sector_shocks["sector"] == sector.upper()]["shock"]
@@ -125,12 +128,12 @@ class MlEnabledCgeJoplin(CoreCGEML):
         logger.info(f"Running {self.model} model completed.")
 
         return True
-    
+
     def get_spec(self):
         return {
-            'name': 'Joplin-small-calibrated',
-            'description': 'CGE model for Joplin.',
-            'input_parameters': [
+            "name": "Joplin-small-calibrated",
+            "description": "CGE model for Joplin.",
+            "input_parameters": [
                 {
                     "id": "result_name",
                     "required": False,
@@ -138,7 +141,7 @@ class MlEnabledCgeJoplin(CoreCGEML):
                     "type": str,
                 }
             ],
-            'input_datasets': [
+            "input_datasets": [
                 {
                     "id": "sector_shocks",
                     "required": True,
@@ -146,36 +149,36 @@ class MlEnabledCgeJoplin(CoreCGEML):
                     "type": ["incore:capitalShocks"],
                 }
             ],
-            'output_datasets': [
+            "output_datasets": [
                 {
-                    'id': 'domestic-supply',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting domestic supply',
-                    'type': 'incore:Employment'
+                    "id": "domestic-supply",
+                    "parent_type": "",
+                    "description": "CSV file of resulting domestic supply",
+                    "type": "incore:Employment",
                 },
                 {
-                    'id': 'gross-income',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting gross income',
-                    'type': 'incore:Employment'
+                    "id": "gross-income",
+                    "parent_type": "",
+                    "description": "CSV file of resulting gross income",
+                    "type": "incore:Employment",
                 },
                 {
-                    'id': 'pre-disaster-factor-demand',
-                    'parent_type': '',
-                    'description': 'CSV file of factor demand before disaster',
-                    'type': 'incore:FactorDemand'
+                    "id": "pre-disaster-factor-demand",
+                    "parent_type": "",
+                    "description": "CSV file of factor demand before disaster",
+                    "type": "incore:FactorDemand",
                 },
                 {
-                    'id': 'post-disaster-factor-demand',
-                    'parent_type': '',
-                    'description': 'CSV file of resulting factor-demand',
-                    'type': 'incore:FactorDemand'
+                    "id": "post-disaster-factor-demand",
+                    "parent_type": "",
+                    "description": "CSV file of resulting factor-demand",
+                    "type": "incore:FactorDemand",
                 },
                 {
-                    'id': 'household-count',
-                    'parent_type': '',
-                    'description': 'CSV file of household count',
-                    'type': 'incore:HouseholdCount'
-                }
-            ]
+                    "id": "household-count",
+                    "parent_type": "",
+                    "description": "CSV file of household count",
+                    "type": "incore:HouseholdCount",
+                },
+            ],
         }
