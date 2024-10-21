@@ -231,6 +231,11 @@ analyses/mlenabledcgeslc
 ..  autoclass:: mlenabledcgeslc.mlcgeslc.MlEnabledCgeSlc
     :members:
 
+analyses/mlenabledcgejoplin
+========================
+..  autoclass:: mlenabledcgejoplin.mlcgejoplin.MlEnabledCgeJoplin
+    :members:
+
 analyses/montecarlofailureprobability
 =====================================
 .. deprecated:: 1.19.0
