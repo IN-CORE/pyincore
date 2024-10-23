@@ -133,6 +133,10 @@ class FragilityCurveSet:
         ls_ds_dspatcher = {
             # 1 LS to 4 DS
             ("hurricane", "building", 1): FragilityCurveSet._1ls_to_4ds,
+            ("hurricane", "berth", 1): FragilityCurveSet._1ls_to_4ds,
+            ("hurricane", "crane", 1): FragilityCurveSet._1ls_to_4ds,
+            ("hurricane", "equipment", 1): FragilityCurveSet._1ls_to_4ds,
+            ("hurricane", "tank", 1): FragilityCurveSet._1ls_to_4ds,
             ("hurricane", "electric_facility", 1): FragilityCurveSet._1ls_to_4ds,
             # 1 LS to 5 DS
             ("hurricane", "road", 1): FragilityCurveSet._1ls_to_5ds,
@@ -142,6 +146,7 @@ class FragilityCurveSet:
             ("earthquake+tsunami", "building", 3): FragilityCurveSet._3ls_to_4ds,
             ("tornado", "building", 3): FragilityCurveSet._3ls_to_4ds,
             ("hurricane", "building", 3): FragilityCurveSet._3ls_to_4ds,
+            ("hurricane", "warehouse", 3): FragilityCurveSet._3ls_to_4ds,
             ("flood", "building", 3): FragilityCurveSet._3ls_to_4ds,
             ("tsunami", "building", 3): FragilityCurveSet._3ls_to_4ds,
             # 4 LS to 5 DS
@@ -404,6 +409,16 @@ class FragilityCurveSet:
 
         """
         if inventory_type == "building":
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
+        elif inventory_type == "berth":
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
+        elif inventory_type == "tank":
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
+        elif inventory_type == "warehouse":
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
+        elif inventory_type == "crane":
+            output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
+        elif inventory_type == "equipment":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0}
         elif inventory_type == "pipeline":
             output = {"LS_0": 0.0, "LS_1": 0.0, "LS_2": 0.0, "LS_3": 0.0}
