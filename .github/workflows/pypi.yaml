@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: get release info
         id: release_info
@@ -50,7 +50,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           # This path is specific to Ubuntu
           path: ~/.cache/pip
@@ -66,7 +66,7 @@ jobs:
 
       - name: Publish distribution to PyPI
         if: github.event_name == 'release'
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ env.TOKEN }}
           repository_url: ${{ env.REPO_URL }}
