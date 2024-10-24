@@ -19,10 +19,10 @@ jobs:
     name: Python ${{ matrix.vars.python-version }} Test
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Cache conda
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           # Increase this value to reset cache if environment.yml has not changed
           CACHE_NUMBER: 0
