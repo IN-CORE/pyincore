@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Support Interdependent recovery of residential buildings and households [#606](https://github.com/IN-CORE/pyincore/pull/606)
 - Remove unused insecure IN-CORE client [#581](https://github.com/IN-CORE/pyincore/issues/581)
+- Update GH actions to use the latest version [#623](https://github.com/IN-CORE/pyincore/issues/623)
 
 ### Added
 - Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
