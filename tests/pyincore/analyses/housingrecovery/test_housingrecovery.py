@@ -34,7 +34,9 @@ def run_with_base_class(chained):
 
         result_name = "Galveston_bldg_dmg_result"
 
-        bldg_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
+        bldg_dmg.set_parameter(
+            "fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code"
+        )
         bldg_dmg.set_parameter("result_name", result_name)
         bldg_dmg.set_parameter("hazard_type", hazard_type)
         bldg_dmg.set_parameter("hazard_id", hazard_id)
@@ -177,7 +179,7 @@ def run_with_base_class(chained):
         housing_rec.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     chained = False
 
     run_with_base_class(chained)

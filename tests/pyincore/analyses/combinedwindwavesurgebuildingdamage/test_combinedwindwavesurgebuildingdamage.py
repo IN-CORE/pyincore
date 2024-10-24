@@ -1,5 +1,7 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
-from pyincore.analyses.combinedwindwavesurgebuildingdamage import CombinedWindWaveSurgeBuildingDamage
+from pyincore.analyses.combinedwindwavesurgebuildingdamage import (
+    CombinedWindWaveSurgeBuildingDamage,
+)
 from pyincore.analyses.buildingdamage import BuildingDamage
 from pyincore.analyses.nonstructbuildingdamage import NonStructBuildingDamage
 import pyincore.globals as pyglobals
@@ -25,7 +27,7 @@ def run_with_base_class():
     # surge-wave building damage
     sw_bldg_dmg = BuildingDamage(client)
     sw_bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    sw_bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    sw_bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     sw_bldg_dmg.set_parameter("result_name", "Galveston-sw-dmg")
     sw_bldg_dmg.set_parameter("hazard_type", hazard_type)
     sw_bldg_dmg.set_parameter("hazard_id", hazard_id)
@@ -39,7 +41,7 @@ def run_with_base_class():
     # wind building damage
     w_bldg_dmg = BuildingDamage(client)
     w_bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    w_bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    w_bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     w_bldg_dmg.set_parameter("result_name", "Galveston-wind-dmg")
     w_bldg_dmg.set_parameter("hazard_type", hazard_type)
     w_bldg_dmg.set_parameter("hazard_id", hazard_id)
@@ -53,7 +55,7 @@ def run_with_base_class():
     # flood building damage
     f_bldg_dmg = NonStructBuildingDamage(client)
     f_bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    f_bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    f_bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     f_bldg_dmg.set_parameter("result_name", "Galveston-flood-dmg")
     f_bldg_dmg.set_parameter("fragility_key", "Non-Retrofit Fragility ID Code")
     f_bldg_dmg.set_parameter("hazard_type", hazard_type)
@@ -75,5 +77,5 @@ def run_with_base_class():
     combined_bldg_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

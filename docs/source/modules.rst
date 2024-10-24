@@ -111,6 +111,13 @@ analyses/epnfunctionality
 ..  autoclass:: epnfunctionality.epnfunctionality.EpnFunctionalityUtil
     :members:
 
+analyses/equitymetric
+=========================
+..  autoclass:: equitymetric.equitymetric.EquityMetric
+    :members:
+..  autoclass:: equitymetric.equitymetric.EquityMetricUtil
+    :members:
+
 analyses/example
 ================
 ..  autoclass:: example.exampleanalysis.ExampleAnalysis
@@ -229,6 +236,11 @@ analyses/meandamage
 analyses/mlenabledcgeslc
 ========================
 ..  autoclass:: mlenabledcgeslc.mlcgeslc.MlEnabledCgeSlc
+    :members:
+
+analyses/mlenabledcgejoplin
+========================
+..  autoclass:: mlenabledcgejoplin.mlcgejoplin.MlEnabledCgeJoplin
     :members:
 
 analyses/montecarlofailureprobability
@@ -574,8 +586,6 @@ client
 ..  autoclass:: client.Client
     :members:
 ..  autoclass:: client.IncoreClient
-    :members:
-..  autoclass:: client.InsecureIncoreClient
     :members:
 
 dataservice

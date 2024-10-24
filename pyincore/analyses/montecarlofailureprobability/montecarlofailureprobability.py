@@ -4,11 +4,16 @@
 
 from deprecated.sphinx import deprecated
 
-from pyincore.analyses.montecarlolimitstateprobability import MonteCarloLimitStateProbability
+from pyincore.analyses.montecarlolimitstateprobability import (
+    MonteCarloLimitStateProbability,
+)
 
 
-@deprecated(version='1.19.0', reason="This class will be deprecated soon. Use MonteCarloLimitStateProbability instead.")
-class MonteCarloFailureProbability():
+@deprecated(
+    version="1.19.0",
+    reason="This class will be deprecated soon. Use MonteCarloLimitStateProbability instead.",
+)
+class MonteCarloFailureProbability:
     def __init__(self, incore_client):
         self._delegate = MonteCarloLimitStateProbability(incore_client)
 

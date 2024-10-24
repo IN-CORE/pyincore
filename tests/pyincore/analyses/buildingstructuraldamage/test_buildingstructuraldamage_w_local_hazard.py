@@ -1,7 +1,9 @@
 import os
 
 from pyincore import IncoreClient, FragilityService, MappingSet, Hurricane, Tornado
-from pyincore.analyses.buildingstructuraldamage.buildingstructuraldamage import BuildingStructuralDamage
+from pyincore.analyses.buildingstructuraldamage.buildingstructuraldamage import (
+    BuildingStructuralDamage,
+)
 import pyincore.globals as pyglobals
 
 
@@ -10,19 +12,27 @@ def run_with_base_class():
 
     # try local hurricane
     # test with local hurricane
-    hurricane = Hurricane.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "hurricane-dataset.json"))
-    hurricane.hazardDatasets[0].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif"),
-                                          data_type="ncsa:probabilisticHurricaneRaster")
+    hurricane = Hurricane.from_json_file(
+        os.path.join(pyglobals.TEST_DATA_DIR, "hurricane-dataset.json")
+    )
+    hurricane.hazardDatasets[0].from_file(
+        os.path.join(pyglobals.TEST_DATA_DIR, "Wave_Raster.tif"),
+        data_type="ncsa:probabilisticHurricaneRaster",
+    )
     # Optional: set threshold to determine exposure or not
     hurricane.hazardDatasets[0].set_threshold(threshold_value=0.3, threshold_unit="m")
 
-    hurricane.hazardDatasets[1].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"),
-                                          data_type="ncsa:probabilisticHurricaneRaster")
+    hurricane.hazardDatasets[1].from_file(
+        os.path.join(pyglobals.TEST_DATA_DIR, "Surge_Raster.tif"),
+        data_type="ncsa:probabilisticHurricaneRaster",
+    )
     # Optional: set threshold to determine exposure or not
     hurricane.hazardDatasets[0].set_threshold(threshold_value=0.3, threshold_unit="m")
 
-    hurricane.hazardDatasets[2].from_file(os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"),
-                                          data_type="ncsa:probabilisticHurricaneRaster")
+    hurricane.hazardDatasets[2].from_file(
+        os.path.join(pyglobals.TEST_DATA_DIR, "Inundation_Raster.tif"),
+        data_type="ncsa:probabilisticHurricaneRaster",
+    )
     # Optional: set threshold to determine exposure or not
     hurricane.hazardDatasets[2].set_threshold(threshold_value=1, threshold_unit="hr")
 
@@ -36,8 +46,10 @@ def run_with_base_class():
     mapping_id = "602c381a1d85547cdc9f0675"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    bldg_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
+    bldg_dmg.set_parameter(
+        "fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code"
+    )
 
     bldg_dmg.set_input_hazard("hazard", hurricane)
 
@@ -51,11 +63,15 @@ def run_with_base_class():
 
     ###########################
     # local tornado
-    tornado = Tornado.from_json_file(os.path.join(pyglobals.TEST_DATA_DIR, "tornado_dataset.json"))
+    tornado = Tornado.from_json_file(
+        os.path.join(pyglobals.TEST_DATA_DIR, "tornado_dataset.json")
+    )
 
     # attach dataset from local file
-    tornado.hazardDatasets[0].from_file((os.path.join(pyglobals.TEST_DATA_DIR, "joplin_tornado/joplin_path_wgs84.shp")),
-                                        data_type="incore:tornadoWindfield")
+    tornado.hazardDatasets[0].from_file(
+        (os.path.join(pyglobals.TEST_DATA_DIR, "joplin_tornado/joplin_path_wgs84.shp")),
+        data_type="incore:tornadoWindfield",
+    )
 
     bldg_dataset_id = "5df7d0de425e0b00092d0082"
 
@@ -65,7 +81,7 @@ def run_with_base_class():
     mapping_id = "5e8e3a21eaa8b80001f04f1c"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     bldg_dmg.set_input_hazard("hazard", tornado)
 
@@ -78,5 +94,5 @@ def run_with_base_class():
     bldg_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

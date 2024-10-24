@@ -6,12 +6,11 @@
 import os.path
 
 import pytest
-import requests
 
-from pyincore import Client, IncoreClient, InsecureIncoreClient, DataService
+from pyincore import IncoreClient
 
 
-def test_client_success(monkeypatch):
+def test_client_success():
     """
     testing successful login
     """

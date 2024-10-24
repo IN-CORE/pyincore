@@ -1,4 +1,4 @@
-from pyincore import IncoreClient, FragilityService, MappingSet
+from pyincore import IncoreClient
 from pyincore.analyses.epnfunctionality import EpnFunctionality
 import pyincore.globals as pyglobals
 
@@ -11,7 +11,9 @@ def run_with_base_class():
     # run epn functionality
     epn_func = EpnFunctionality(client)
     epn_func.load_remote_input_dataset("epn_network", epn_dataset_id)
-    epn_func.load_remote_input_dataset("epf_sample_failure_state", "62d03711861e370172cb0a37")
+    epn_func.load_remote_input_dataset(
+        "epf_sample_failure_state", "62d03711861e370172cb0a37"
+    )
 
     epn_func.set_parameter("result_name", "mmsa_epn_functionality")
     epn_func.set_parameter("gate_station_node_list", [1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -20,5 +22,5 @@ def run_with_base_class():
     epn_func.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

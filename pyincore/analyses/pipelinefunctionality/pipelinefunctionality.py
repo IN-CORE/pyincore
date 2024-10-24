@@ -43,18 +43,27 @@ class PipelineFunctionality(BaseAnalysis):
         super(PipelineFunctionality, self).__init__(incore_client)
 
     def run(self):
-        pipeline_dmg_df = self.get_input_dataset("pipeline_repair_rate_damage").get_dataframe_from_csv()
+        pipeline_dmg_df = self.get_input_dataset(
+            "pipeline_repair_rate_damage"
+        ).get_dataframe_from_csv()
 
         num_samples = self.get_parameter("num_samples")
 
-        (fs_results, fp_results) = self.pipeline_functionality(pipeline_dmg_df, num_samples)
-        self.set_result_csv_data("sample_failure_state",
-                                 fs_results, name=self.get_parameter("result_name") + "_failure_state",
-                                 source="dataframe")
-        self.set_result_csv_data("failure_probability",
-                                 fp_results,
-                                 name=self.get_parameter("result_name") + "_failure_probability",
-                                 source="dataframe")
+        (fs_results, fp_results) = self.pipeline_functionality(
+            pipeline_dmg_df, num_samples
+        )
+        self.set_result_csv_data(
+            "sample_failure_state",
+            fs_results,
+            name=self.get_parameter("result_name") + "_failure_state",
+            source="dataframe",
+        )
+        self.set_result_csv_data(
+            "failure_probability",
+            fp_results,
+            name=self.get_parameter("result_name") + "_failure_probability",
+            source="dataframe",
+        )
 
         return True
 
@@ -70,31 +79,40 @@ class PipelineFunctionality(BaseAnalysis):
 
         """
 
-        pipeline_dmg_df['pgv_pf'] = 1 - poisson.pmf(0, pipeline_dmg_df.loc[:, 'numpgvrpr'].values)
+        pipeline_dmg_df["pgv_pf"] = 1 - poisson.pmf(
+            0, pipeline_dmg_df.loc[:, "numpgvrpr"].values
+        )
 
         # todo there is more efficient pandas manipulation
-        sampcols = ['s' + samp for samp in np.arange(num_samples).astype(str)]
+        sampcols = ["s" + samp for samp in np.arange(num_samples).astype(str)]
 
         fs_results = pd.DataFrame(
-            bernoulli.rvs(1 - pipeline_dmg_df.loc[:, 'pgv_pf'].values, size=(num_samples, pipeline_dmg_df.shape[0])).T,
-            index=pipeline_dmg_df.guid.values, columns=sampcols)
+            bernoulli.rvs(
+                1 - pipeline_dmg_df.loc[:, "pgv_pf"].values,
+                size=(num_samples, pipeline_dmg_df.shape[0]),
+            ).T,
+            index=pipeline_dmg_df.guid.values,
+            columns=sampcols,
+        )
         fp_results = fs_results.copy(deep=True)
 
         # calculate sample failure
         # concatenate all columns into one failure column
-        fs_results['failure'] = fs_results.astype(str).apply(','.join, axis=1)
-        fs_results = fs_results.filter(['failure'])
+        fs_results["failure"] = fs_results.astype(str).apply(",".join, axis=1)
+        fs_results = fs_results.filter(["failure"])
         # set guid column
         fs_results.reset_index(inplace=True)
-        fs_results = fs_results.rename(columns={'index': 'guid'})
+        fs_results = fs_results.rename(columns={"index": "guid"})
 
         # calculate failure probability
         # count of 0s divided by sample size
-        fp_results["failure_probability"] = (num_samples - fp_results.sum(axis=1).astype(int)) / num_samples
-        fp_results = fp_results.filter(['failure_probability'])
+        fp_results["failure_probability"] = (
+            num_samples - fp_results.sum(axis=1).astype(int)
+        ) / num_samples
+        fp_results = fp_results.filter(["failure_probability"])
         # set guid column
         fp_results.reset_index(inplace=True)
-        fp_results = fp_results.rename(columns={'index': 'guid'})
+        fp_results = fp_results.rename(columns={"index": "guid"})
 
         return fs_results, fp_results
 
@@ -106,40 +124,40 @@ class PipelineFunctionality(BaseAnalysis):
 
         """
         return {
-            'name': 'pipeline-functionality',
-            'description': 'buried pipeline functionality analysis',
-            'input_parameters': [
+            "name": "pipeline-functionality",
+            "description": "buried pipeline functionality analysis",
+            "input_parameters": [
                 {
-                    'id': 'result_name',
-                    'required': True,
-                    'description': 'result dataset name',
-                    'type': str
+                    "id": "result_name",
+                    "required": True,
+                    "description": "result dataset name",
+                    "type": str,
                 },
                 {
-                    'id': 'num_samples',
-                    'required': True,
-                    'description': 'Number of MC samples',
-                    'type': int
-                },
-            ],
-            'input_datasets': [
-                {
-                    'id': 'pipeline_repair_rate_damage',
-                    'required': True,
-                    'description': 'Output of pipeline damage repair rate analysis',
-                    'type': ['ergo:pipelineDamageVer3'],
+                    "id": "num_samples",
+                    "required": True,
+                    "description": "Number of MC samples",
+                    "type": int,
                 },
             ],
-            'output_datasets': [
+            "input_datasets": [
                 {
-                    'id': 'failure_probability',
-                    'description': 'CSV file of failure probability',
-                    'type': 'incore:failureProbability'
+                    "id": "pipeline_repair_rate_damage",
+                    "required": True,
+                    "description": "Output of pipeline damage repair rate analysis",
+                    "type": ["ergo:pipelineDamageVer3"],
+                },
+            ],
+            "output_datasets": [
+                {
+                    "id": "failure_probability",
+                    "description": "CSV file of failure probability",
+                    "type": "incore:failureProbability",
                 },
                 {
-                    'id': 'sample_failure_state',
-                    'description': 'CSV file of failure state for each sample',
-                    'type': 'incore:sampleFailureState'
+                    "id": "sample_failure_state",
+                    "description": "CSV file of failure state for each sample",
+                    "type": "incore:sampleFailureState",
                 },
-            ]
+            ],
         }

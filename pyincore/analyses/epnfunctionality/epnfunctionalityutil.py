@@ -9,12 +9,13 @@ import networkx as nx
 
 
 class EpnFunctionalityUtil:
-
     @staticmethod
-    def get_bad_edges(G, nodestate, linkstate=None, scol='s0'):
-        badnodes = nodestate.loc[nodestate.loc[:, scol] == 0, 'nodenwid'].values
+    def get_bad_edges(G, nodestate, linkstate=None, scol="s0"):
+        badnodes = nodestate.loc[nodestate.loc[:, scol] == 0, "nodenwid"].values
         if linkstate is not None:
-            badlinks = linkstate.loc[linkstate.loc[:, scol] == 0, ['fromnode', 'tonode']].values
+            badlinks = linkstate.loc[
+                linkstate.loc[:, scol] == 0, ["fromnode", "tonode"]
+            ].values
             badlinks = list(zip(badlinks[:, 0], badlinks[:, 1]))
         else:
             badlinks = []
@@ -23,5 +24,9 @@ class EpnFunctionalityUtil:
         return list(set(badlinks))
 
     @staticmethod
-    def network_shortest_paths(G, sources, sinks, weightcol='weight'):
-        return pd.Series(nx.multi_source_dijkstra_path_length(G, sources, cutoff=None, weight=weightcol))[sinks]
+    def network_shortest_paths(G, sources, sinks, weightcol="weight"):
+        return pd.Series(
+            nx.multi_source_dijkstra_path_length(
+                G, sources, cutoff=None, weight=weightcol
+            )
+        )[sinks]

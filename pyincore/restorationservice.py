@@ -3,8 +3,6 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
-
 from urllib.parse import urljoin
 
 from pyincore import IncoreClient
@@ -23,14 +21,23 @@ class RestorationService(Dfr3Service):
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_dfr3_url = urljoin(client.service_url, 'dfr3/api/restorations/')
+        self.base_dfr3_url = urljoin(client.service_url, "dfr3/api/restorations/")
 
         super(RestorationService, self).__init__(client)
 
     @forbid_offline
-    def get_dfr3_sets(self, hazard_type: str = None, inventory_type: str = None,
-                      author: str = None, creator: str = None, space: str = None,
-                      skip: int = None, limit: int = None, timeout=(30, 600), **kwargs):
+    def get_dfr3_sets(
+        self,
+        hazard_type: str = None,
+        inventory_type: str = None,
+        author: str = None,
+        creator: str = None,
+        space: str = None,
+        skip: int = None,
+        limit: int = None,
+        timeout=(30, 600),
+        **kwargs
+    ):
         """Get the set of restoration data, curves.
 
         Args:
@@ -50,19 +57,19 @@ class RestorationService(Dfr3Service):
         payload = {}
 
         if hazard_type is not None:
-            payload['hazard'] = hazard_type
+            payload["hazard"] = hazard_type
         if inventory_type is not None:
-            payload['inventory'] = inventory_type
+            payload["inventory"] = inventory_type
         if author is not None:
-            payload['author'] = author
+            payload["author"] = author
         if creator is not None:
-            payload['creator'] = creator
+            payload["creator"] = creator
         if skip is not None:
-            payload['skip'] = skip
+            payload["skip"] = skip
         if limit is not None:
-            payload['limit'] = limit
+            payload["limit"] = limit
         if space is not None:
-            payload['space'] = space
+            payload["space"] = space
 
         r = self.client.get(url, params=payload, timeout=timeout, **kwargs)
         return return_http_response(r).json()

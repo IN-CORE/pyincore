@@ -1,0 +1,37 @@
+{
+    "Z1": {
+        "threshold": 0.95,
+        "below_lower": 0.01,
+        "below_upper": 0.15,
+        "above_lower": 0.10,
+        "above_upper": 0.90
+    },
+    "Z2": {
+        "threshold": 0.85,
+        "below_lower": 0.10,
+        "below_upper": 0.50,
+        "above_lower": 0.10,
+        "above_upper": 0.90
+    },
+    "Z3": {
+        "threshold": 0.80,
+        "below_lower": 0.30,
+        "below_upper": 0.70,
+        "above_lower": 0.10,
+        "above_upper": 0.90
+    },
+    "Z4": {
+        "threshold": 0.85,
+        "below_lower": 0.50,
+        "below_upper": 0.90,
+        "above_lower": 0.10,
+        "above_upper": 0.90
+    },
+    "Z5": {
+        "threshold": 0.95,
+        "below_lower": 0.85,
+        "below_upper": 0.99,
+        "above_lower": 0.10,
+        "above_upper": 0.90
+    }
+}
