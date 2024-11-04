@@ -103,11 +103,12 @@ class CoreCGEML(BaseAnalysis):
 
             temp_prefd: Dict[str, Dict[str, float]] = defaultdict(dict)
             temp_postfd: Dict[str, Dict[str, float]] = defaultdict(dict)
+
             for i, fd_sector in enumerate(self.sectors["dffd"]):
                 splits = fd_sector.split("_")
-                if len(splits) > 2:
-                    sector = "_".join(splits[:-1])
-                    grp = splits[-1]
+
+                sector = "_".join(splits[:-1]) if len(splits) > 1 else splits[0]
+                grp = splits[-1]
 
                 temp_prefd[sector][grp] = predictions["dffd"]["before"][i]
                 temp_postfd[sector][grp] = predictions["dffd"]["after"][i]
@@ -116,15 +117,8 @@ class CoreCGEML(BaseAnalysis):
                 prefd_l = []
                 postfd_l = []
                 for grp in self.labor_groups:
-                    if temp_prefd[sector].get(grp, None) is None:
-                        prefd_l.append(-1)
-                    else:
-                        prefd_l.append(temp_prefd[sector][grp])
-
-                    if temp_postfd[sector].get(grp, None) is None:
-                        postfd_l.append(-1)
-                    else:
-                        postfd_l.append(temp_postfd[sector][grp])
+                    prefd_l.append(temp_prefd[sector].get(grp, -1))
+                    postfd_l.append(temp_postfd[sector].get(grp, -1))
 
                 prefd[sector] = prefd_l
                 postfd[sector] = postfd_l
