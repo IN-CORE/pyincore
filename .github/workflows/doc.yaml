@@ -6,6 +6,7 @@ on:
       - main
       - develop
       - 'release/*'
+      - main-temp
 
     tags:
       - '*'
@@ -15,6 +16,7 @@ on:
       - main
       - develop
       - 'release/*'
+      - main-temp
 
 env:
   MAIN_REPO: IN-CORE/pyincore
@@ -42,7 +44,7 @@ jobs:
             BRANCH=${GITHUB_REF##*/}
           fi
           echo "GITHUB_BRANCH=${BRANCH}" >> $GITHUB_ENV
-          if [ "$BRANCH" == "main" ]; then
+          if [ "$BRANCH" == "main-temp" ]; then
             version=$(awk -F= '/^release/ { print $2}' docs/source/conf.py | sed "s/[ ']//g")
             tags="latest"
             oldversion=""
@@ -51,6 +53,8 @@ jobs:
               tags="${tags},${version}"
               version=${version%.*}
             done
+            # Remove any unwanted double quotes from tags
+            tags=$(echo $tags | sed 's/"//g')
             echo "VERSION=${version}" >> $GITHUB_ENV
             echo "TAGS=${tags}" >> $GITHUB_ENV
           elif [ "$BRANCH" == "develop" ]; then
@@ -60,6 +64,10 @@ jobs:
             echo "VERSION=testing" >> $GITHUB_ENV
             echo "TAGS=${BRANCH}" >> $GITHUB_ENV
           fi
+
+      # debug TAGS
+      - name: Debug TAGS
+        run: echo "TAGS=${{ env.TAGS }}"
 
       # build image
       - name: Build image
