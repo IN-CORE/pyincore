@@ -6,7 +6,6 @@ on:
       - main
       - develop
       - 'release/*'
-      - main-temp
 
     tags:
       - '*'
@@ -16,7 +15,6 @@ on:
       - main
       - develop
       - 'release/*'
-      - main-temp
 
 env:
   MAIN_REPO: IN-CORE/pyincore
@@ -44,7 +42,7 @@ jobs:
             BRANCH=${GITHUB_REF##*/}
           fi
           echo "GITHUB_BRANCH=${BRANCH}" >> $GITHUB_ENV
-          if [ "$BRANCH" == "main-temp" ]; then
+          if [ "$BRANCH" == "main" ]; then
             version=$(awk -F= '/^release/ { print $2}' docs/source/conf.py | sed "s/[ ']//g")
             tags="latest"
             oldversion=""
