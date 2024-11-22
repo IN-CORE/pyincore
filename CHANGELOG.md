@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - CoreCGEML bug and updated base values [#627](https://github.com/IN-CORE/pyincore/issues/627)
 
+### Changed
+- Update production URL references to tools.in-core.org and dev to dev.in-core.org [#634](https://github.com/IN-CORE/pyincore/issues/634)
+
 
 ## [1.20.0] - 2024-10-24
 
