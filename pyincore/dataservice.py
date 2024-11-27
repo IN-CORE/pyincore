@@ -31,12 +31,27 @@ class DataService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_url = urljoin(client.service_url, "data/api/datasets/")
-        self.files_url = urljoin(client.service_url, "data/api/files/")
-        self.base_earthquake_url = urljoin(
-            client.service_url, "hazard/api/earthquakes/"
-        )
-        self.base_tornado_url = urljoin(client.service_url, "hazard/api/tornadoes/")
+
+        if self.client.internal:
+            self.base_url = urljoin(
+                pyglobals.INCORE_INTERNAL_DATA_API_URL, "data/api/datasets/"
+            )
+            self.base_earthquake_url = urljoin(
+                pyglobals.INCORE_INTERNAL_HAZARD_API_URL, "hazard/api/earthquakes/"
+            )
+            self.base_tornado_url = urljoin(
+                pyglobals.INCORE_INTERNAL_HAZARD_API_URL, "hazard/api/tornadoes/"
+            )
+            self.files_url = urljoin(
+                pyglobals.INCORE_INTERNAL_DATA_API_URL, "data/api/files/"
+            )
+        else:
+            self.base_url = urljoin(client.service_url, "data/api/datasets/")
+            self.base_earthquake_url = urljoin(
+                client.service_url, "hazard/api/earthquakes/"
+            )
+            self.base_tornado_url = urljoin(client.service_url, "hazard/api/tornadoes/")
+            self.files_url = urljoin(client.service_url, "data/api/files/")
 
     @forbid_offline
     def get_dataset_metadata(self, dataset_id: str, timeout=(30, 600), **kwargs):

@@ -22,7 +22,12 @@ class SpaceService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_space_url = urljoin(client.service_url, "space/api/spaces/")
+        if self.client.internal:
+            self.base_space_url = urljoin(
+                pyglobals.INCORE_INTERNAL_SPACE_API_URL, "space/api/spaces/"
+            )
+        else:
+            self.base_space_url = urljoin(client.service_url, "space/api/spaces/")
 
     @forbid_offline
     def create_space(self, space_json, timeout=(30, 600), **kwargs):
