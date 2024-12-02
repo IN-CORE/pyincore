@@ -56,7 +56,7 @@ setup(
         "pandas>=2.1.2",
         "pyomo>=6.0.0,<=6.6.2",
         "pyproj>=3.6.1",
-        "rasterio>=1.3.9",
+        "rasterio>=1.4.2",
         "rtree>=1.1.0",
         "scipy>=1.11.3",
         "shapely>=2.0.2",
