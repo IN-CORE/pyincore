@@ -15,7 +15,7 @@ PACKAGE_VERSION = "1.20.1"
 INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
 INCORE_API_DEV_URL = "https://incore-dev.ncsa.illinois.edu"
 
-INCORE_INTERNAL_API_URL = "http://localhost:8080"
+INCORE_LOCAL_API_URL = "http://localhost:8080"
 INCORE_INTERNAL_DFR3_API_URL = "http://incore-svc-dfr3:8888"
 INCORE_INTERNAL_DATA_API_URL = "http://incore-svc-data:8888"
 INCORE_INTERNAL_HAZARD_API_URL = "http://incore-svc-hazard:8888"
