@@ -29,16 +29,39 @@ class HazardService:
     def __init__(self, client: IncoreClient):
         self.client = client
 
-        self.base_earthquake_url = urljoin(
-            client.service_url, "hazard/api/earthquakes/"
-        )
-        self.base_tornado_url = urljoin(client.service_url, "hazard/api/tornadoes/")
-        self.base_tsunami_url = urljoin(client.service_url, "hazard/api/tsunamis/")
-        self.base_hurricane_url = urljoin(client.service_url, "hazard/api/hurricanes/")
-        self.base_hurricanewf_url = urljoin(
-            client.service_url, "hazard/api/hurricaneWindfields/"
-        )
-        self.base_flood_url = urljoin(client.service_url, "hazard/api/floods/")
+        if self.client.internal:
+            self.base_earthquake_url = urljoin(
+                pyglobals.INCORE_INTERNAL_HAZARD_API_URL, "hazard/api/earthquakes/"
+            )
+            self.base_tornado_url = urljoin(
+                pyglobals.INCORE_INTERNAL_HAZARD_API_URL, "hazard/api/tornadoes/"
+            )
+            self.base_tsunami_url = urljoin(
+                pyglobals.INCORE_INTERNAL_HAZARD_API_URL, "hazard/api/tsunamis/"
+            )
+            self.base_hurricane_url = urljoin(
+                pyglobals.INCORE_INTERNAL_HAZARD_API_URL, "hazard/api/hurricanes/"
+            )
+            self.base_hurricanewf_url = urljoin(
+                pyglobals.INCORE_INTERNAL_HAZARD_API_URL,
+                "hazard/api/hurricaneWindfields/",
+            )
+            self.base_flood_url = urljoin(
+                pyglobals.INCORE_INTERNAL_HAZARD_API_URL, "hazard/api/floods/"
+            )
+        else:
+            self.base_earthquake_url = urljoin(
+                client.service_url, "hazard/api/earthquakes/"
+            )
+            self.base_tornado_url = urljoin(client.service_url, "hazard/api/tornadoes/")
+            self.base_tsunami_url = urljoin(client.service_url, "hazard/api/tsunamis/")
+            self.base_hurricane_url = urljoin(
+                client.service_url, "hazard/api/hurricanes/"
+            )
+            self.base_hurricanewf_url = urljoin(
+                client.service_url, "hazard/api/hurricaneWindfields/"
+            )
+            self.base_flood_url = urljoin(client.service_url, "hazard/api/floods/")
 
     @forbid_offline
     def get_earthquake_hazard_metadata_list(

@@ -29,7 +29,12 @@ class SemanticService:
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_url = urljoin(client.service_url, "semantics/api/types")
+        if self.client.internal:
+            self.base_url = urljoin(
+                pyglobals.INCORE_INTERNAL_SEMANTIC_API_URL, "semantics/api/types"
+            )
+        else:
+            self.base_url = urljoin(client.service_url, "semantics/api/types")
 
     @forbid_offline
     def get_all_semantic_types(

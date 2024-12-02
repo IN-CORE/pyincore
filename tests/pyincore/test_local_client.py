@@ -12,7 +12,7 @@ from pyincore import IncoreClient
 
 user = {
     "service_url": "http://localhost:8080",
-    "internal": True,
+    "local": True,
     "username": "incrtest",
     "usergroups": ["incore_ncsa"],
 }

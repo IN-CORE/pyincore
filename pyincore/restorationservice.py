@@ -9,6 +9,7 @@ from pyincore import IncoreClient
 from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
 from pyincore.utils import return_http_response
+import pyincore.globals as pyglobals
 
 
 class RestorationService(Dfr3Service):
@@ -21,7 +22,12 @@ class RestorationService(Dfr3Service):
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_dfr3_url = urljoin(client.service_url, "dfr3/api/restorations/")
+        if self.client.internal:
+            self.base_dfr3_url = urljoin(
+                pyglobals.INCORE_INTERNAL_DFR3_API_URL, "dfr3/api/restorations/"
+            )
+        else:
+            self.base_dfr3_url = urljoin(client.service_url, "dfr3/api/restorations/")
 
         super(RestorationService, self).__init__(client)
 

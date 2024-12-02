@@ -10,6 +10,7 @@ import urllib
 from pyincore import IncoreClient
 from pyincore.decorators import forbid_offline
 from pyincore.dfr3service import Dfr3Service
+import pyincore.globals as pyglobals
 
 
 class RepairService(Dfr3Service):
@@ -22,9 +23,14 @@ class RepairService(Dfr3Service):
 
     def __init__(self, client: IncoreClient):
         self.client = client
-        self.base_dfr3_url = urllib.parse.urljoin(
-            client.service_url, "dfr3/api/repairs/"
-        )
+        if self.client.internal:
+            self.base_dfr3_url = urllib.parse.urljoin(
+                pyglobals.INCORE_INTERNAL_DFR3_API_URL, "dfr3/api/repairs/"
+            )
+        else:
+            self.base_dfr3_url = urllib.parse.urljoin(
+                client.service_url, "dfr3/api/repairs/"
+            )
 
         super(RepairService, self).__init__(client)
 
