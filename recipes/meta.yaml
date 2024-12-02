@@ -9,7 +9,7 @@ source:
   path: ..
 
 about:
-  home: https://incore.ncsa.illinois.edu
+  home: https://tools.in-core.org
   license: MPL-2.0
   summary: 'Python library for IN-CORE (Interdependent Networked Community Resilience Modeling Environment)'
   description: 'pyIncore is a component of IN-CORE. It is a python package consisting of two primary components: 
@@ -17,7 +17,7 @@ about:
   package allows users to apply various hazards to infrastructure in selected areas, propagating the effect of 
   physical infrastructure damage and loss of functionality to social and economic impacts.'
   dev_url: https://github.com/IN-CORE/pyincore
-  doc_url: https://incore.ncsa.illinois.edu/doc/incore
+  doc_url: https://tools.in-core.org/doc/incore
 
 build:
   # If this is a new build for the same version, increment the build

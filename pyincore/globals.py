@@ -12,8 +12,8 @@ import shutil
 
 PACKAGE_VERSION = "1.20.1"
 
-INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
-INCORE_API_DEV_URL = "https://incore-dev.ncsa.illinois.edu"
+INCORE_API_PROD_URL = "https://tools.in-core.org"
+INCORE_API_DEV_URL = "https://dev.in-core.org"
 
 INCORE_INTERNAL_API_URL = "http://localhost:8080"
 
