@@ -1,5 +1,13 @@
-from pyincore import IncoreClient, FragilityService, MappingSet, Earthquake, HazardService, Tsunami, Hurricane, Flood, \
-    Tornado
+from pyincore import (
+    IncoreClient,
+    FragilityService,
+    MappingSet,
+    Earthquake,
+    HazardService,
+    Tsunami,
+    Hurricane,
+    Tornado,
+)
 from pyincore.analyses.buildingdamage import BuildingDamage
 import pyincore.globals as pyglobals
 
@@ -29,7 +37,7 @@ def run_with_base_class():
     mapping_id = "5b47b350337d4a3629076f2c"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     bldg_dmg.set_input_hazard("hazard", eq)
 
@@ -57,7 +65,7 @@ def run_with_base_class():
     mapping_id = "5b48fb1f337d4a478e7bd54d"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     bldg_dmg.set_input_hazard("hazard", tsunami)
     result_name = "seaside_tsunami_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
@@ -79,37 +87,14 @@ def run_with_base_class():
     mapping_id = "602c381a1d85547cdc9f0675"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    bldg_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
+    bldg_dmg.set_parameter(
+        "fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code"
+    )
 
     bldg_dmg.set_input_hazard("hazard", hurricane)
 
     result_name = "galveston_hurr_dmg_result"
-    bldg_dmg.set_parameter("result_name", result_name)
-    bldg_dmg.set_parameter("num_cpu", 4)
-    bldg_dmg.run_analysis()
-
-    ##########################################################
-    # lumberton flood
-    flood = Flood.from_hazard_service("5f4d02e99f43ee0dde768406", hazardsvc)
-
-    # lumberton building inventory v7
-    # bldg_dataset_id = "603010f7b1db9c28aef53214"  # 40 building subset
-    bldg_dataset_id = "603010a4b1db9c28aef5319f"  # 21k full building
-
-    bldg_dmg = BuildingDamage(client)
-    bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-
-    # lumberton building mapping (with equation)
-    mapping_id = "602f3cf981bd2c09ad8f4f9d"
-    fragility_service = FragilityService(client)
-    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    bldg_dmg.set_parameter("fragility_key", "Lumberton Flood Building Fragility ID Code")
-
-    bldg_dmg.set_input_hazard("hazard", flood)
-
-    result_name = "lumberton_flood_dmg_result"
     bldg_dmg.set_parameter("result_name", result_name)
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
@@ -121,12 +106,10 @@ def run_with_base_class():
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
 
-    mapping_id = "6091d9fbb53ed4646fd276ca"  # 19 archetype with retrofit
-    # mapping_id = "60994a1906d63d5ded1d6dcc" # 19 archetype with retrofit new format mapping
+    mapping_id = "5e8e3a21eaa8b80001f04f1c"  # 19 archetype mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    bldg_dmg.set_parameter("fragility_key", "Fragility ID Code")
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     tornado = Tornado.from_hazard_service("5dfa32bbc0601200080893fb", hazardsvc)
     bldg_dmg.set_input_hazard("hazard", tornado)
@@ -138,5 +121,5 @@ def run_with_base_class():
     bldg_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

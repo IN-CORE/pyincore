@@ -7,13 +7,93 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Documentation container tagging error by github action [#631](https://github.com/IN-CORE/pyincore/issues/631)
+- Updated rasterio dependency to the latest to fetch correct GDAL version [#636](https://github.com/IN-CORE/pyincore/issues/636)
+
 ### Added
-- Add MMSA Shelby County CGE ML analysis [#521](https://github.com/IN-CORE/pyincore/issues/521)
+- - Add MMSA Shelby County CGE ML analysis [#521](https://github.com/IN-CORE/pyincore/issues/521)
+
+
+## [1.20.1] - 2024-11-01
+
+### Fixed
+- CoreCGEML bug and updated base values [#627](https://github.com/IN-CORE/pyincore/issues/627)
+
+
+## [1.20.0] - 2024-10-24
+
+### Fixed
+- Fixed Sphinx autodoc skipping class methods with custom decorators. [#518](https://github.com/IN-CORE/pyincore/issues/518)
+- Pyomo version fixed to fix indp solver failure [#585](https://github.com/IN-CORE/pyincore/issues/585)
+- Uploaded raster files doesn't respect the order [#614](https://github.com/IN-CORE/pyincore/issues/614)
+- Fixed the pypi publish of the package [#621](https://github.com/IN-CORE/pyincore/issues/621)
+
+### Changed
+- Support Interdependent recovery of residential buildings and households [#606](https://github.com/IN-CORE/pyincore/pull/606)
+- Remove unused insecure IN-CORE client [#581](https://github.com/IN-CORE/pyincore/issues/581)
+- Update GH actions to use the latest version [#623](https://github.com/IN-CORE/pyincore/issues/623)
+
+### Added
+- Apply Black formatter [#589](https://github.com/IN-CORE/pyincore/issues/589)
+- Equity Metric Analysis [#608](https://github.com/IN-CORE/pyincore/issues/608)
+- Internal client connecting to the IN-CORE services [#609](https://github.com/IN-CORE/pyincore/issues/609)
+- MlEnabledCgeJoplin analysis with documentation [#588](https://github.com/IN-CORE/pyincore/issues/588)
+
+
+## [1.19.0] - 2024-06-12
+
+### Changed
+- Rename Social Vulnerability Analysis to Social Vulnerability Index Analysis [#556](https://github.com/IN-CORE/pyincore/issues/556)
+- Join dataset has an option for only keeping the table dataset fields [#299](https://github.com/IN-CORE/pyincore/issues/299)
+- Update Non-structural Building Damage to support flood [#562](https://github.com/IN-CORE/pyincore/issues/562)
+- Update flood input to non-structural building damage for combined wind-wave-surge building [#566](https://github.com/IN-CORE/pyincore/issues/566)
+- Rename transportation recovery analysis to traffic flow recovery analysis [#558](https://github.com/IN-CORE/pyincore/issues/558)
+- Rename Monte Carlo Failure Probability to Monte Carlo Limit State Probability [#557](https://github.com/IN-CORE/pyincore/issues/557)
+- Rename Housing Recovery to Housing Valuation Recovery Analysis [#560](https://github.com/IN-CORE/pyincore/issues/560)
+- Rename Building Portfolio Analysis to Building Cluster Recovery Analysis [#559](https://github.com/IN-CORE/pyincore/issues/559)
+- Rename nonstructural building damage [#537](https://github.com/IN-CORE/pyincore/issues/537)
+- Rename building damage to building structural damage [#561](https://github.com/IN-CORE/pyincore/issues/561)
+
+### Added
+- Gas Facility Damage Analysis [#568](https://github.com/IN-CORE/pyincore/issues/568)
+- Copyrights to transportation recovery analysis [#579](https://github.com/IN-CORE/pyincore/issues/579)
+- Buyout Model Analyses [#539](https://github.com/IN-CORE/pyincore/issues/539)
+- Google Analytics to the documentation site [#547](https://github.com/IN-CORE/pyincore/issues/547)
+
+### Fixed
+- Permission error in clearing cache process [#563](https://github.com/IN-CORE/pyincore/issues/563)
+- Out of index error in dfr3 service's property conversion when the rule is not found [#555](https://github.com/IN-CORE/pyincore/issues/555)
+
+
+## [1.18.1] - 2024-04-30
+
+### Changed
+- Name of Joplin Empirical Restoration Analysis to Joplin Empirical Building Restoration Analysis [#538](https://github.com/IN-CORE/pyincore/issues/538)
+
+### Added
+- MlEnabledCgeSlc, CoreCGEML, and CGEMLFileUtil Documentation for sphinx [#542](https://github.com/IN-CORE/pyincore/issues/542)
+- Add support for choice dislocation and unsafe occupancy in the population dislocation analysis [#525](https://github.com/IN-CORE/pyincore/issues/525)
+
+### Fixed
+- Permission error when deleting dataset related files [#544](https://github.com/IN-CORE/pyincore/issues/544)
+- Unnecessary dependency in setup.py [#519](https://github.com/IN-CORE/pyincore/issues/519)
+
+
+## [1.18.0] - 2024-04-03
+
+### Added
+- Add CoreCGEML module [#468](https://github.com/IN-CORE/pyincore/issues/468)
+- Add ML enabled SLC CGE [#508](https://github.com/IN-CORE/pyincore/issues/508)
+- More mathematical functions for the DFR3 expression evaluation [#531](https://github.com/IN-CORE/pyincore/issues/531)
 
 ### Changed
 - Need to use left join so the building number stays the same [#514](https://github.com/IN-CORE/pyincore/issues/541)
 - Building Functionality column renaming [#510](https://github.com/IN-CORE/pyincore/issues/510)
+- Update the post-processing step for generating population dislocation map layer [#526](https://github.com/IN-CORE/pyincore/issues/526)
 
+### Fixed
+- Fixed JWT token validation [#529](https://github.com/IN-CORE/pyincore/issues/529)
 
 ## [1.17.0] - 2024-02-22
 

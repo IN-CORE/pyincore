@@ -3,16 +3,15 @@
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
-
+import base64
 import getpass
 import hashlib
 import json
 import os
 import shutil
 import urllib.parse
-
+from datetime import datetime, timezone
 import requests
-
 from pyincore import globals as pyglobals
 from pyincore.utils import return_http_response
 
@@ -46,10 +45,10 @@ def update_hash_entry(mode, hashed_url=None, service_url=None):
     # to add a hash entry
     if mode == "add" and (service_url is not None and hashed_url is not None):
         entry = {
-                "service-name": "",
-                "service-url": service_url,
-                "hash": hashed_url,
-                "description": ""
+            "service-name": "",
+            "service-url": service_url,
+            "hash": hashed_url,
+            "description": "",
         }
         if not os.path.exists(pyglobals.PYINCORE_SERVICE_JSON):
             with open(pyglobals.PYINCORE_SERVICE_JSON, "w") as f:
@@ -165,7 +164,15 @@ class Client:
 class IncoreClient(Client):
     """IN-CORE service client class. It contains token and service root url."""
 
-    def __init__(self, service_url: str = None, token_file_name: str = None, offline: bool = False):
+    def __init__(
+        self,
+        service_url: str = None,
+        token_file_name: str = None,
+        username: str = None,
+        usergroups: list = None,
+        internal: bool = False,
+        offline: bool = False,
+    ):
         """
 
         Args:
@@ -175,12 +182,18 @@ class IncoreClient(Client):
         """
         super().__init__()
         self.offline = offline
+        self.internal = internal
 
         if not offline:
             if service_url is None or len(service_url.strip()) == 0:
                 service_url = pyglobals.INCORE_API_PROD_URL
+                if internal:
+                    service_url = pyglobals.INCORE_INTERNAL_API_URL
+
             self.service_url = service_url
-            self.token_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_AUTH_PATH)
+            self.token_url = urllib.parse.urljoin(
+                self.service_url, pyglobals.KEYCLOAK_AUTH_PATH
+            )
 
             # hashlib requires bytes array for hash operations
             byte_url_string = str.encode(self.service_url)
@@ -198,29 +211,58 @@ class IncoreClient(Client):
             if not os.path.exists(self.hashed_svc_data_dir):
                 os.makedirs(self.hashed_svc_data_dir)
 
-            # store the token file in the respective repository's directory
-            if token_file_name is None or len(token_file_name.strip()) == 0:
-                token_file_name = "." + self.hashed_service_url + "_token"
-            self.token_file = os.path.join(pyglobals.PYINCORE_USER_CACHE, token_file_name)
-
-            authorization = self.retrieve_token_from_file()
-            if authorization is not None:
-                self.session.headers["Authorization"] = authorization
-                print("Connection successful to IN-CORE services.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
-
+            if internal:
+                # Constructing the headers
+                self.session.headers["x-auth-userinfo"] = json.dumps(
+                    {"preferred_username": username}
+                )
+                self.session.headers["x-auth-usergroup"] = json.dumps(
+                    {"groups": usergroups}
+                )
             else:
-                if self.login():
-                    print("Connection successful to IN-CORE services.", "pyIncore version detected:",
-                          pyglobals.PACKAGE_VERSION)
+                # store the token file in the respective repository's directory
+                if token_file_name is None or len(token_file_name.strip()) == 0:
+                    token_file_name = "." + self.hashed_service_url + "_token"
+                self.token_file = os.path.join(
+                    pyglobals.PYINCORE_USER_CACHE, token_file_name
+                )
+
+                authorization = self.retrieve_token_from_file()
+                if authorization is not None:
+                    self.session.headers["Authorization"] = authorization
+                    print(
+                        "Connection successful to IN-CORE services.",
+                        "pyIncore version detected:",
+                        pyglobals.PACKAGE_VERSION,
+                    )
+                else:
+                    if self.login():
+                        print(
+                            "Connection successful to IN-CORE services.",
+                            "pyIncore version detected:",
+                            pyglobals.PACKAGE_VERSION,
+                        )
+
         else:
             self.service_url = ""
             self.token_url = ""
             self.hashed_service_url = ""
             self.hashed_svc_data_dir = ""
             self.token_file = ""
-            print("You are working with the offline version of IN-CORE.", "pyIncore version detected:", pyglobals.PACKAGE_VERSION)
+            print(
+                "You are working with the offline version of IN-CORE.",
+                "pyIncore version detected:",
+                pyglobals.PACKAGE_VERSION,
+            )
 
     def login(self):
+        if self.offline is True:
+            logger.warning("Offline mode does not have login method.")
+            return False
+        if self.internal is True:
+            logger.warning("Internal mode does not have login method.")
+            return False
+
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
             try:
                 username = input("Enter username: ")
@@ -228,9 +270,15 @@ class IncoreClient(Client):
             except EOFError as e:
                 logger.warning(e)
                 raise e
-            r = requests.post(self.token_url, data={'grant_type': 'password',
-                                                    'client_id': pyglobals.CLIENT_ID,
-                                                    'username': username, 'password': password})
+            r = requests.post(
+                self.token_url,
+                data={
+                    "grant_type": "password",
+                    "client_id": pyglobals.CLIENT_ID,
+                    "username": username,
+                    "password": password,
+                },
+            )
             try:
                 token = return_http_response(r).json()
                 if token is None or token["access_token"] is None:
@@ -238,12 +286,11 @@ class IncoreClient(Client):
                     exit(0)
                 authorization = str("bearer " + token["access_token"])
                 self.store_authorization_in_file(authorization)
-                self.session.headers['Authorization'] = authorization
+                self.session.headers["Authorization"] = authorization
                 return True
             except Exception as e:
                 logger.warning("Authentication failed, attempting login again.")
                 print(e)
-
 
         logger.warning("Authentication failed.")
         exit(0)
@@ -255,11 +302,46 @@ class IncoreClient(Client):
             authorization (str): An authorization in the format "bearer access_token".
 
         """
+        if self.offline is True:
+            logger.warning(
+                "Offline mode does not have store_authorization_in_file method."
+            )
+            return
+        if self.internal is True:
+            logger.warning(
+                "Internal mode does not have store_authorization_in_file method."
+            )
+            return
         try:
-            with open(self.token_file, 'w') as f:
+            with open(self.token_file, "w") as f:
                 f.write(authorization)
         except IOError as e:
             logger.warning(e)
+
+    def is_token_expired(self, token):
+        """Check if the token has expired
+
+        Returns:
+             True if the token has expired, False otherwise
+        """
+        if self.offline is True:
+            logger.warning("Offline mode does not have is_token_expired method.")
+            return
+        if self.internal is True:
+            logger.warning("Internal mode does not have is_token_expired method.")
+            return
+
+        # Split the token to get payload
+        _, payload_encoded, _ = token.split(".")
+        # Decode the payload
+        payload = base64.urlsafe_b64decode(
+            payload_encoded + "=="
+        )  # Padding just in case
+        payload_json = json.loads(payload)
+        now = datetime.now(timezone.utc)
+        current_time = now.timestamp()
+        # Compare current time with exp claim
+        return current_time > payload_json["exp"]
 
     def retrieve_token_from_file(self):
         """Attempts to retrieve authorization from a local file, if it exists.
@@ -269,16 +351,25 @@ class IncoreClient(Client):
             dict: Dictionary containing authorization in  the format "bearer access_token" if file exists, None otherwise
 
         """
+        if self.offline is True:
+            logger.warning(
+                "Offline mode does not have retrieve_token_from_file method."
+            )
+            return
+        if self.internal is True:
+            logger.warning(
+                "Internal mode does not have retrieve_token_from_file method."
+            )
+            return
+
         if not os.path.isfile(self.token_file):
             return None
         else:
             try:
-                with open(self.token_file, 'r') as f:
+                with open(self.token_file, "r") as f:
                     auth = f.read().splitlines()
                     # check if token is valid
-                    userinfo_url = urllib.parse.urljoin(self.service_url, pyglobals.KEYCLOAK_USERINFO_PATH)
-                    r = requests.get(userinfo_url, headers={'Authorization': auth[0]})
-                    if r.status_code != 200:
+                    if self.is_token_expired(auth[0]):
                         return None
                 return auth[0]
             except IndexError:
@@ -371,7 +462,9 @@ class IncoreClient(Client):
         return return_http_response(r)
 
     def create_service_json_entry(self):
-        update_hash_entry("add", hashed_url=self.hashed_service_url, service_url=self.service_url)
+        update_hash_entry(
+            "add", hashed_url=self.hashed_service_url, service_url=self.service_url
+        )
 
     @staticmethod
     def clear_root_cache():
@@ -388,9 +481,9 @@ class IncoreClient(Client):
 
     def clear_cache(self):
         """
-            This function helps clear the data cache for a specific repository or the entire cache
+        This function helps clear the data cache for a specific repository or the entire cache
 
-            Returns: None
+        Returns: None
 
         """
         # incase cache_data folder doesn't exist
@@ -401,29 +494,11 @@ class IncoreClient(Client):
         if not os.path.isdir(self.hashed_svc_data_dir):
             logger.warning("Cached folder doesn't exist")
             return None
+        try:
+            shutil.rmtree(self.hashed_svc_data_dir)
+        except PermissionError as e:
+            print(f"Error clearing cache : {e}")
 
-        shutil.rmtree(self.hashed_svc_data_dir)
         # clear entry from service.json
         update_hash_entry("edit", hashed_url=self.hashed_service_url)
         return
-
-
-class InsecureIncoreClient(Client):
-    """IN-CORE service client class that bypasses Ambassador auth. It contains token and service root url.
-
-        Args:
-            service_url (str): Service url.
-            username (str): Username string.
-
-        """
-
-    def __init__(self, service_url: str = None, username: str = None):
-        super().__init__()
-        if service_url is None or len(service_url.strip()) == 0:
-            service_url = pyglobals.INCORE_API_PROD_URL
-        self.service_url = service_url
-        if username is None or len(username.strip()) == 0:
-            self.session.headers["x-auth-userinfo"] = pyglobals.INCORE_LDAP_TEST_USER_INFO
-        else:
-            user_info = "{\"preferred_username\": \"" + username + "\"}"
-            self.session.headers["x-auth-userinfo"] = user_info

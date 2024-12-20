@@ -1,12 +1,14 @@
 from pyincore import IncoreClient, FragilityService, MappingSet
-from pyincore.analyses.combinedwindwavesurgebuildingloss import CombinedWindWaveSurgeBuildingLoss
+from pyincore.analyses.combinedwindwavesurgebuildingloss import (
+    CombinedWindWaveSurgeBuildingLoss,
+)
 from pyincore.analyses.buildingdamage import BuildingDamage
+from pyincore.analyses.nonstructbuildingdamage import NonStructBuildingDamage
 import pyincore.globals as pyglobals
 from timeit import default_timer as timer
 
 
 def run_with_base_class():
-
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
     # Galveston building inventory
@@ -26,7 +28,7 @@ def run_with_base_class():
     # surge-wave building damage
     sw_bldg_dmg = BuildingDamage(client)
     sw_bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    sw_bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    sw_bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     sw_bldg_dmg.set_parameter("result_name", "Galveston-sw-dmg")
     sw_bldg_dmg.set_parameter("hazard_type", hazard_type)
     sw_bldg_dmg.set_parameter("hazard_id", hazard_id)
@@ -40,7 +42,7 @@ def run_with_base_class():
     # wind building damage
     w_bldg_dmg = BuildingDamage(client)
     w_bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    w_bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    w_bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     w_bldg_dmg.set_parameter("result_name", "Galveston-wind-dmg")
     w_bldg_dmg.set_parameter("hazard_type", hazard_type)
     w_bldg_dmg.set_parameter("hazard_id", hazard_id)
@@ -52,10 +54,11 @@ def run_with_base_class():
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
 
     # flood building damage
-    f_bldg_dmg = BuildingDamage(client)
+    f_bldg_dmg = NonStructBuildingDamage(client)
     f_bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-    f_bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    f_bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     f_bldg_dmg.set_parameter("result_name", "Galveston-flood-dmg")
+    f_bldg_dmg.set_parameter("fragility_key", "Non-Retrofit Fragility ID Code")
     f_bldg_dmg.set_parameter("hazard_type", hazard_type)
     f_bldg_dmg.set_parameter("hazard_id", hazard_id)
     f_bldg_dmg.set_parameter("num_cpu", 4)
@@ -64,7 +67,7 @@ def run_with_base_class():
     # Get damage outputs from different hazards
     surge_wave_damage = sw_bldg_dmg.get_output_dataset("ds_result")
     wind_damage = w_bldg_dmg.get_output_dataset("ds_result")
-    flood_damage = f_bldg_dmg.get_output_dataset("ds_result")
+    flood_damage = f_bldg_dmg.get_output_dataset("result")
 
     start = timer()
 
@@ -74,14 +77,18 @@ def run_with_base_class():
     combined_bldg_loss.set_input_dataset("surge_wave_damage", surge_wave_damage)
     combined_bldg_loss.set_input_dataset("wind_damage", wind_damage)
     combined_bldg_loss.set_input_dataset("flood_damage", flood_damage)
-    combined_bldg_loss.load_remote_input_dataset("structural_cost", "63fd15716d3b2a308ba914c8")
-    combined_bldg_loss.load_remote_input_dataset("content_cost", "63fd16956d3b2a308ba9269a")
+    combined_bldg_loss.load_remote_input_dataset(
+        "structural_cost", "63fd15716d3b2a308ba914c8"
+    )
+    combined_bldg_loss.load_remote_input_dataset(
+        "content_cost", "63fd16956d3b2a308ba9269a"
+    )
     combined_bldg_loss.set_parameter("result_name", "Galveston")
     combined_bldg_loss.run_analysis()
 
     end = timer()
-    print(f'Elapsed time: {end - start:.3f} seconds')
+    print(f"Elapsed time: {end - start:.3f} seconds")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

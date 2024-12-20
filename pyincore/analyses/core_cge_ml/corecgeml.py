@@ -1,13 +1,15 @@
-""" Core CGE ML """
-from typing import List, Dict
+# Copyright (c) 2024 University of Illinois and others. All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
+from typing import List, Dict, Optional
 from collections import defaultdict
 import numpy as np
 import pandas as pd
 
 from pyincore import BaseAnalysis
-from pyincore import globals as pyglobals
-
-logger = pyglobals.LOGGER
 
 
 class CoreCGEML(BaseAnalysis):
@@ -17,6 +19,7 @@ class CoreCGEML(BaseAnalysis):
         self,
         incore_client,
         sectors: Dict[str, List[str]],
+        labor_groups: Optional[List[str]] = None,
     ):
         super(CoreCGEML, self).__init__(incore_client)
 
@@ -27,7 +30,7 @@ class CoreCGEML(BaseAnalysis):
             "factor_demand",
         ]
         self.sectors = sectors
-        self.labor_groups = ["L1", "L2", "L3"]
+        self.labor_groups = ["L1", "L2", "L3"] if labor_groups is None else labor_groups
 
     def construct_output(self, predictions: dict) -> Dict[str, Dict[str, list]]:
         """construct_output will construct the output in the format required by the pyincore.
@@ -78,22 +81,19 @@ class CoreCGEML(BaseAnalysis):
                 "DS0": predictions["ds"]["before"],
                 "DSL": predictions["ds"]["after"],
             }
-        if predictions.get("gi", None) is not None:
-            constructed_outputs["gi"] = {
-                "Household Group": self.sectors["gi"],
-                "Y0": predictions["gi"]["before"],
-                "YL": predictions["gi"]["after"],
+        if predictions.get("dy", None) is not None:
+            constructed_outputs["dy"] = {
+                "Household Group": self.sectors["dy"],
+                "Y0": predictions["dy"]["before"],
+                "YL": predictions["dy"]["after"],
             }
-        if predictions.get("hh", None) is not None:
-            constructed_outputs["hh"] = {
-                "Household Group": self.sectors["hh"],
-                "HH0": predictions["hh"]["before"],
-                "HHL": predictions["hh"]["after"],
+        if predictions.get("migt", None) is not None:
+            constructed_outputs["migt"] = {
+                "Household Group": self.sectors["migt"],
+                "HH0": predictions["migt"]["before"],
+                "HHL": predictions["migt"]["after"],
             }
-        if (
-            predictions.get("prefd", None) is not None
-            and predictions.get("postfd", None) is not None
-        ):
+        if predictions.get("dffd", None) is not None:
             prefd = {
                 "Labor Group": self.labor_groups,
             }
@@ -101,20 +101,27 @@ class CoreCGEML(BaseAnalysis):
                 "Labor Group": self.labor_groups,
             }
 
-            temp_prefd: Dict[str, list] = defaultdict(list)
-            temp_postfd: Dict[str, list] = defaultdict(list)
-            for i, fd_sector in enumerate(self.sectors["fd"]):
-                sector, grp = fd_sector.split("_")
-                temp_prefd[sector].push((grp, predictions["fd"]["before"][i]))
-                temp_postfd[sector].push((grp, predictions["fd"]["after"][i]))
+            temp_prefd: Dict[str, Dict[str, float]] = defaultdict(dict)
+            temp_postfd: Dict[str, Dict[str, float]] = defaultdict(dict)
+
+            for i, fd_sector in enumerate(self.sectors["dffd"]):
+                splits = fd_sector.split("_")
+
+                sector = "_".join(splits[:-1]) if len(splits) > 1 else splits[0]
+                grp = splits[-1]
+
+                temp_prefd[sector][grp] = predictions["dffd"]["before"][i]
+                temp_postfd[sector][grp] = predictions["dffd"]["after"][i]
 
             for sector in temp_prefd.keys():
-                prefd[sector] = [
-                    x[1] for x in sorted(temp_prefd[sector], key=lambda x: x[0])
-                ]
-                postfd[sector] = [
-                    x[1] for x in sorted(temp_postfd[sector], key=lambda x: x[0])
-                ]
+                prefd_l = []
+                postfd_l = []
+                for grp in self.labor_groups:
+                    prefd_l.append(temp_prefd[sector].get(grp, -1))
+                    postfd_l.append(temp_postfd[sector].get(grp, -1))
+
+                prefd[sector] = prefd_l
+                postfd[sector] = postfd_l
 
             constructed_outputs["prefd"] = prefd
             constructed_outputs["postfd"] = postfd
@@ -129,9 +136,12 @@ class CoreCGEML(BaseAnalysis):
         base_cap_factors: List[np.ndarray],
     ) -> None:
         """run_core_cge_ml will use the model coefficients to predict the change in capital stock for each sector.
-        The predicted change will then be added to base_cap_factors to get the final capital stock for each sector after a disaster.
-        The model requires capital stock loss in dollar amount, hence the base_cap will be used to calculate the loss in dollar amount.
-        The capital_shocks is the percentage of capital stock that remains and hence to get the loss we use 1 - capital_shocks.
+        The predicted change will then be added to base_cap_factors to get the final capital stock for each sector
+        after a disaster.
+        The model requires capital stock loss in dollar amount, hence the base_cap will be used to
+        calculate the loss in dollar amount.
+        The capital_shocks is the percentage of capital stock that remains and hence to get the loss we
+        use 1 - capital_shocks.
 
         Some variables for parameters:
         - n: number of factors
@@ -151,7 +161,8 @@ class CoreCGEML(BaseAnalysis):
         capital_shocks : (1 X K) np.ndarray
             This is the capital shock for each sector in percentage. This is a (1, K) array with K elements.
         model_coeffs : Dict[str, np.ndarray]
-            This is a dictionary of 2D arrays with shape [n, (k_i, l_i)]. Each entry in the dictionary corresponds to a factor and each factor has k_i number of models.
+            This is a dictionary of 2D arrays with shape [n, (k_i, l_i)].
+            Each entry in the dictionary corresponds to a factor and each factor has k_i number of models.
             It is assumed that the intercept term is included in the model coefficients and is at the 0th column.
         base_cap_factors : List[np.ndarray]
             This is a list of 1D array with each entry corresponding to a factor representing its base capital by sectors.
@@ -189,7 +200,7 @@ class CoreCGEML(BaseAnalysis):
             assert (
                 factor_capital_loss.shape == factor_base_cap_before.shape
             ), "Number of sectors in models and base_cap_factors do not match. required shape {}, observed shape {}".format(
-                factor_capital_loss[1:, :].shape, factor_base_cap_before.shape
+                factor_capital_loss.shape, factor_base_cap_before.shape
             )
             # add the predicted change in capital stock to the base_cap_factors
             factor_base_cap_after: np.ndarray = (
@@ -203,49 +214,46 @@ class CoreCGEML(BaseAnalysis):
 
         constructed_outputs = self.construct_output(predictions)
 
+        file_prefix = (
+            self.get_parameter("result_name")
+            if self.get_parameter("result_name") is not None
+            else ""
+        )
+        file_prefix += "_"
+
         if constructed_outputs.get("ds", None) is not None:
             self.set_result_csv_data(
                 "domestic-supply",
                 pd.DataFrame(constructed_outputs["ds"]),
-                name=self.get_parameter("domestic_supply_fname")
-                if self.get_parameter("domestic_supply_fname") is not None
-                else "domestic-supply",
+                name=f"{file_prefix}domestic-supply",
                 source="dataframe",
             )
-        if constructed_outputs.get("gi", None) is not None:
+        if constructed_outputs.get("dy", None) is not None:
             self.set_result_csv_data(
                 "gross-income",
-                pd.DataFrame(constructed_outputs["gi"]),
-                name=self.get_parameter("gross_income_fname")
-                if self.get_parameter("gross_income_fname") is not None
-                else "gross-income",
+                pd.DataFrame(constructed_outputs["dy"]),
+                name=f"{file_prefix}gross-income",
                 source="dataframe",
             )
-        if constructed_outputs.get("hh", None) is not None:
+        if constructed_outputs.get("migt", None) is not None:
             self.set_result_csv_data(
                 "household-count",
-                pd.DataFrame(constructed_outputs["hh"]),
-                name=self.get_parameter("household_count_fname")
-                if self.get_parameter("household_count_fname") is not None
-                else "household-count",
+                pd.DataFrame(constructed_outputs["migt"]),
+                name=f"{file_prefix}household-count",
                 source="dataframe",
             )
         if constructed_outputs.get("prefd", None) is not None:
             self.set_result_csv_data(
                 "pre-disaster-factor-demand",
                 pd.DataFrame(constructed_outputs["prefd"]),
-                name=self.get_parameter("pre_factor_demand_fname")
-                if self.get_parameter("pre_factor_demand_fname") is not None
-                else "pre-disaster-factor-demand",
+                name=f"{file_prefix}pre-disaster-factor-demand",
                 source="dataframe",
             )
         if constructed_outputs.get("postfd", None) is not None:
             self.set_result_csv_data(
                 "post-disaster-factor-demand",
                 pd.DataFrame(constructed_outputs["postfd"]),
-                name=self.get_parameter("post_factor_demand_fname")
-                if self.get_parameter("post_factor_demand_fname") is not None
-                else "post-disaster-factor-demand",
+                name=f"{file_prefix}post-disaster-factor-demand",
                 source="dataframe",
             )
 

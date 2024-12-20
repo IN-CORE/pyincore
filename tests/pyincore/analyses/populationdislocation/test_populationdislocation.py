@@ -2,7 +2,7 @@
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
-from pyincore import IncoreClient, FragilityService, MappingSet
+from pyincore import IncoreClient
 from pyincore.analyses.populationdislocation import PopulationDislocation
 import pyincore.globals as pyglobals
 
@@ -31,10 +31,14 @@ def run_with_base_class():
     pop_dis.set_parameter("result_name", result_name)
     pop_dis.set_parameter("seed", seed)
 
+    # Set choice_dislocation and unsafe_occupancy parameters
+    pop_dis.set_parameter("choice_dislocation", True)
+    pop_dis.set_parameter("unsafe_occupancy", True)
+
     pop_dis.run_analysis()
 
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

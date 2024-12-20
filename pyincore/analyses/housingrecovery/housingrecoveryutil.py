@@ -1,6 +1,9 @@
+# Copyright (c) 2019 University of Illinois and others. All rights reserved.
+#
 # This program and the accompanying materials are made available under the
 # terms of the Mozilla Public License v2.0 which accompanies this distribution,
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
 
 class HousingRecoveryUtil:
     BASEYEAR = 2008
@@ -20,7 +23,9 @@ class HousingRecoveryUtil:
     # Year indicator dummy variables
     B_PHM_year = {}
     B_PHM_year[-1] = 0.000000  # year -1, tax assessment immediately before disaster
-    B_PHM_year[0] = 0.263500  # year  0, tax assessment immediately after disaster, damage year
+    B_PHM_year[
+        0
+    ] = 0.263500  # year  0, tax assessment immediately after disaster, damage year
     B_PHM_year[1] = 0.147208  # year +1
     B_PHM_year[2] = 0.110004  # year +2
     B_PHM_year[3] = 0.122228  # year +3
@@ -45,7 +50,7 @@ class HousingRecoveryUtil:
 
     # Owner-occupied and year dummy interactions
     B_PHM_own_year = {}
-    B_PHM_own_year[-1] = 0.017153   # base effect
+    B_PHM_own_year[-1] = 0.017153  # base effect
     B_PHM_own_year[0] = 0.129077 + B_PHM_own_year[-1]
     B_PHM_own_year[1] = 0.188217 + B_PHM_own_year[-1]
     B_PHM_own_year[2] = 0.235435 + B_PHM_own_year[-1]
@@ -56,7 +61,7 @@ class HousingRecoveryUtil:
 
     # Median household income and year dummy interactions
     B_PHM_inc_year = {}
-    B_PHM_inc_year[-1] = 0.002724   # base effect
+    B_PHM_inc_year[-1] = 0.002724  # base effect
     B_PHM_inc_year[0] = 0.001190 + B_PHM_inc_year[-1]
     B_PHM_inc_year[1] = 0.001480 + B_PHM_inc_year[-1]
     B_PHM_inc_year[2] = 0.001746 + B_PHM_inc_year[-1]
@@ -67,7 +72,7 @@ class HousingRecoveryUtil:
 
     # Block Group percent Minority and year dummy interactions
     B_PHM_min_year = {}
-    B_PHM_min_year[-1] = -0.004783   # base effect
+    B_PHM_min_year[-1] = -0.004783  # base effect
     B_PHM_min_year[0] = 0.005609 + B_PHM_min_year[-1]
     B_PHM_min_year[1] = 0.007343 + B_PHM_min_year[-1]
     B_PHM_min_year[2] = 0.007459 + B_PHM_min_year[-1]
@@ -82,7 +87,9 @@ class HousingRecoveryUtil:
     # Year indicator dummy variables
     B_SVHM_year = {}
     B_SVHM_year[-1] = 0.000000  # year -1, tax assessment immediately before disaster
-    B_SVHM_year[0] = 1.489008  # year  0, tax assessment immediately after disaster, damage year
+    B_SVHM_year[
+        0
+    ] = 1.489008  # year  0, tax assessment immediately after disaster, damage year
     B_SVHM_year[1] = 1.858770  # year +1
     B_SVHM_year[2] = 2.163492  # year +2
     B_SVHM_year[3] = 2.071690  # year +3
@@ -107,7 +114,7 @@ class HousingRecoveryUtil:
 
     # Owner-occupied and year dummy interactions
     B_SVHM_own_year = {}
-    B_SVHM_own_year[-1] = -0.017167   # base effect
+    B_SVHM_own_year[-1] = -0.017167  # base effect
     B_SVHM_own_year[0] = 0.043263 + B_SVHM_own_year[-1]
     B_SVHM_own_year[1] = 0.003315 + B_SVHM_own_year[-1]
     B_SVHM_own_year[2] = 0.034372 + B_SVHM_own_year[-1]
@@ -118,7 +125,7 @@ class HousingRecoveryUtil:
 
     # Median household income and year dummy interactions
     B_SVHM_inc_year = {}
-    B_SVHM_inc_year[-1] = 0.003786   # base effect
+    B_SVHM_inc_year[-1] = 0.003786  # base effect
     B_SVHM_inc_year[0] = -0.013662 + B_SVHM_inc_year[-1]
     B_SVHM_inc_year[1] = -0.017401 + B_SVHM_inc_year[-1]
     B_SVHM_inc_year[2] = -0.021541 + B_SVHM_inc_year[-1]

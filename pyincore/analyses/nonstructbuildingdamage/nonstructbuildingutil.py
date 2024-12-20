@@ -9,18 +9,21 @@ import collections
 
 class NonStructBuildingUtil:
     """Utility methods for the non-structural building damage analysis."""
+
     BUILDING_FRAGILITY_KEYSBUILDING_FRAGILITY_KEYS = {
         "drift-sensitive fragility id code": ["Drift Sensitive", "DS"],
         "parametric non-retrofit fragility id code": ["Parametric Non-Retrofit", "PNR"],
         "acceleration-sensitive fragility id code": ["Acceleration Sensitive", "AS"],
-        "non-retrofit fragility id code": ["as built", "none"]
+        "non-retrofit fragility id code": ["as built", "none"],
     }
 
     DEFAULT_FRAGILITY_KEY_DS = "Drift-Sensitive Fragility ID Code"
     DEFAULT_FRAGILITY_KEY_AS = "Acceleration-Sensitive Fragility ID Code"
 
     @staticmethod
-    def adjust_damage_for_liquefaction(limit_state_probabilities, ground_failure_probabilities):
+    def adjust_damage_for_liquefaction(
+        limit_state_probabilities, ground_failure_probabilities
+    ):
         """Adjusts building damage probability based on liquefaction ground failure probability
         with the liq_dmg, we know that it is 3 values, the first two are the same.
         The 3rd might be different.
@@ -44,41 +47,25 @@ class NonStructBuildingUtil:
             # second-to-last probability of ground failure instead.
 
             if i > len(ground_failure_probabilities) - 1:
-                prob_ground_failure = ground_failure_probabilities[len(ground_failure_probabilities) - 2]
+                prob_ground_failure = ground_failure_probabilities[
+                    len(ground_failure_probabilities) - 2
+                ]
             else:
                 prob_ground_failure = ground_failure_probabilities[i]
 
-            adjusted_limit_state_probabilities[keys[i]] = \
-                limit_state_probabilities[keys[i]] + prob_ground_failure \
+            adjusted_limit_state_probabilities[keys[i]] = (
+                limit_state_probabilities[keys[i]]
+                + prob_ground_failure
                 - limit_state_probabilities[keys[i]] * prob_ground_failure
+            )
 
         # the final one is the last of limitStates should match with the last of ground failures
         j = len(limit_state_probabilities) - 1
         prob_ground_failure = ground_failure_probabilities[-1]
-        adjusted_limit_state_probabilities[keys[j]] = \
-            limit_state_probabilities[keys[j]] \
-            + prob_ground_failure - limit_state_probabilities[keys[j]] * prob_ground_failure
+        adjusted_limit_state_probabilities[keys[j]] = (
+            limit_state_probabilities[keys[j]]
+            + prob_ground_failure
+            - limit_state_probabilities[keys[j]] * prob_ground_failure
+        )
 
         return adjusted_limit_state_probabilities
-
-    @staticmethod
-    def determine_haz_exposure(hazard_exposure_as, hazard_exposure_ds):
-        """
-        Determine the hazard exposure of the building based on the
-        Args:
-            hazard_exposure_as:
-            hazard_exposure_ds:
-
-        Returns:
-
-        """
-        if hazard_exposure_as == "yes" and hazard_exposure_ds == "yes":
-            haz_expose = "yes"
-        elif hazard_exposure_as == "error" or hazard_exposure_ds == "error":
-            haz_expose = "error"
-        elif hazard_exposure_as == "no" and hazard_exposure_ds == "no":
-            haz_expose = "no"
-        else:
-            haz_expose = "partial"
-
-        return haz_expose

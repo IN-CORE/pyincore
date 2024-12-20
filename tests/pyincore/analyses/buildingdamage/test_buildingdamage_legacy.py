@@ -33,7 +33,7 @@ def run_with_base_class():
     mapping_id = "5b47b350337d4a3629076f2c"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     result_name = os.path.join(result_folder, "memphis_eq_bldg_dmg_result")
     bldg_dmg.set_parameter("result_name", result_name)
@@ -62,7 +62,7 @@ def run_with_base_class():
     mapping_id = "5b48fb1f337d4a478e7bd54d"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     result_name = os.path.join(result_folder, "seaside_tsunami_dmg_result")
     bldg_dmg.set_parameter("result_name", result_name)
@@ -87,8 +87,10 @@ def run_with_base_class():
     mapping_id = "602c381a1d85547cdc9f0675"
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    bldg_dmg.set_parameter("fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code")
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
+    bldg_dmg.set_parameter(
+        "fragility_key", "Hurricane SurgeLevel and WaveHeight Fragility ID Code"
+    )
 
     result_name = os.path.join(result_folder, "galveston_hurr_dmg_result")
     bldg_dmg.set_parameter("result_name", result_name)
@@ -97,47 +99,18 @@ def run_with_base_class():
     bldg_dmg.set_parameter("num_cpu", 4)
     bldg_dmg.run_analysis()
 
-    # lumberton flood
-    hazard_type = "flood"
-    hazard_id = "5f4d02e99f43ee0dde768406"
-
-    # lumberton building inventory v7
-    # bldg_dataset_id = "603010f7b1db9c28aef53214"  # 40 building subset
-    bldg_dataset_id = "603010a4b1db9c28aef5319f"  # 21k full building
-
-    bldg_dmg = BuildingDamage(client)
-    bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
-
-    # lumberton building mapping (with equation)
-    mapping_id = "602f3cf981bd2c09ad8f4f9d"
-    fragility_service = FragilityService(client)
-    mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    bldg_dmg.set_parameter("fragility_key", "Lumberton Flood Building Fragility ID Code")
-
-    result_name = os.path.join(result_folder, "lumberton_flood_dmg_result")
-    bldg_dmg.set_parameter("result_name", result_name)
-    bldg_dmg.set_parameter("hazard_type", hazard_type)
-    bldg_dmg.set_parameter("hazard_id", hazard_id)
-    bldg_dmg.set_parameter("num_cpu", 4)
-    bldg_dmg.run_analysis()
-
     # joplin tornado with retrofit strategy
     bldg_dataset_id = "5df7d0de425e0b00092d0082"  # joplin building v6
-    retrofit_strategy_id = "6091d5a8daa06e14ee96d502"  # plan 1
-    # retrofit_strategy_id = "6091d5ffdaa06e14ee96d5ef" # plan 2
+    retrofit_strategy_id = "660ab8f8ce705a7e54748557"  # plan 1
 
     bldg_dmg = BuildingDamage(client)
     bldg_dmg.load_remote_input_dataset("buildings", bldg_dataset_id)
     bldg_dmg.load_remote_input_dataset("retrofit_strategy", retrofit_strategy_id)
 
-    # lumberton building mapping (with equation)
-    mapping_id = "6091d9fbb53ed4646fd276ca"  # 19 archetype with retrofit
-    # mapping_id = "60994a1906d63d5ded1d6dcc" # 19 archetype with retrofit new format mapping
+    mapping_id = "5e8e3a21eaa8b80001f04f1c"  # 19 archetype with retrofit
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    bldg_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
-    bldg_dmg.set_parameter("fragility_key", "Fragility ID Code")
+    bldg_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
 
     hazard_type = "tornado"
     hazard_id = "5dfa32bbc0601200080893fb"
@@ -150,5 +123,5 @@ def run_with_base_class():
     bldg_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

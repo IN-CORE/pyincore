@@ -3,7 +3,13 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-from pyincore import IncoreClient, FragilityService, MappingSet, HazardService, Earthquake
+from pyincore import (
+    IncoreClient,
+    FragilityService,
+    MappingSet,
+    HazardService,
+    Earthquake,
+)
 from pyincore.analyses.waterfacilitydamage import WaterFacilityDamage
 import pyincore.globals as pyglobals
 
@@ -11,7 +17,9 @@ import pyincore.globals as pyglobals
 def run_with_base_class():
     client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
     hazard_service = HazardService(client)
-    earthquake = Earthquake.from_hazard_service("5b902cb273c3371e1236b36b", hazard_service)
+    earthquake = Earthquake.from_hazard_service(
+        "5b902cb273c3371e1236b36b", hazard_service
+    )
     facility_datasetid = "5a284f2ac7d30d13bc081e52"
 
     mapping_id = "5b47c383337d4a387669d592"
@@ -28,7 +36,7 @@ def run_with_base_class():
     # Load fragility mapping
     fragility_service = FragilityService(client)
     mapping_set = MappingSet(fragility_service.get_mapping(mapping_id))
-    wf_dmg.set_input_dataset('dfr3_mapping_set', mapping_set)
+    wf_dmg.set_input_dataset("dfr3_mapping_set", mapping_set)
     wf_dmg.set_input_hazard("hazard", earthquake)
     result_name = "wf-dmg-results_w_hazard_obj"
     wf_dmg.set_parameter("result_name", result_name)
@@ -42,5 +50,5 @@ def run_with_base_class():
     wf_dmg.run_analysis()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_with_base_class()

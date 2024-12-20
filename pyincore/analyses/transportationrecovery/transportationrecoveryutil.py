@@ -1,3 +1,9 @@
+# Copyright (c) 2018 University of Illinois and others. All rights reserved.
+
+# This program and the accompanying materials are made available under the
+# terms of the Mozilla Public License v2.0 which accompanies this distribution,
+# and is available at https://www.mozilla.org/en-US/MPL/2.0/
+
 from __future__ import division
 import csv
 import pandas as pd
@@ -8,7 +14,6 @@ from pyincore import GeoUtil, InventoryDataset
 
 
 class TransportationRecoveryUtil:
-
     @staticmethod
     def NBI_coordinate_mapping(NBI_file):
         """Coordinate in NBI is in format of xx(degree)xx(minutes)xx.xx(seconds)
@@ -22,8 +27,10 @@ class TransportationRecoveryUtil:
 
         """
         NBI = pd.read_csv(NBI_file)
-        NBI['LONG_017'] = NBI['LONG_017'].apply(lambda x: -1 * (GeoUtil.degree_to_decimal(x)))
-        NBI['LAT_016'] = NBI['LAT_016'].apply(lambda x: GeoUtil.degree_to_decimal(x))
+        NBI["LONG_017"] = NBI["LONG_017"].apply(
+            lambda x: -1 * (GeoUtil.degree_to_decimal(x))
+        )
+        NBI["LAT_016"] = NBI["LAT_016"].apply(lambda x: GeoUtil.degree_to_decimal(x))
 
         return NBI
 
@@ -36,9 +43,11 @@ class TransportationRecoveryUtil:
         for bridge in bridges:
             # convert lon and lat to the right format
             bridge_coord = GeoUtil.get_location(bridge)
-            nearest_feature, distance = GeoUtil.find_nearest_feature(NBI_features, bridge_coord)
+            nearest_feature, distance = GeoUtil.find_nearest_feature(
+                NBI_features, bridge_coord
+            )
 
-            ADT[bridge['properties']['guid']] = nearest_feature['properties']['ADT_029']
+            ADT[bridge["properties"]["guid"]] = nearest_feature["properties"]["ADT_029"]
 
         return ADT
 
@@ -58,7 +67,7 @@ class TransportationRecoveryUtil:
         bridge_damage_value = {}
         unrepaired_bridge = []
 
-        with open(dmg_results_filename, 'r') as f:
+        with open(dmg_results_filename, "r") as f:
             reader = csv.reader(f)
             next(reader)
             for row in reader:
@@ -74,7 +83,7 @@ class TransportationRecoveryUtil:
                 elif mean_damage >= 0.75 and mean_damage <= 1:
                     bridge_damage_value[state_id] = 4
                 else:
-                    raise ValueError('mean damage should not larger than 1!')
+                    raise ValueError("mean damage should not larger than 1!")
 
             unrepaired_bridge = list(bridge_damage_value.keys())
 
@@ -97,17 +106,18 @@ class TransportationRecoveryUtil:
         network = nx.Graph()
 
         # add nodes to the network
-        network.add_nodes_from(node_df['guid'])
+        network.add_nodes_from(node_df["guid"])
 
         # add arcs to the network
         for i in range(len(arc_df)):
-            fromnode = \
-                node_df.loc[node_df['ID'] == arc_df['fromnode'][i], 'guid'].values[
-                    0]
-            tonode = \
-                node_df.loc[node_df['ID'] == arc_df['tonode'][i], 'guid'].values[0]
-            dis = arc_df['len_mile'][i] / arc_df['freeflowsp'][i]
-            network.add_edge(fromnode, tonode, distance=dis, adt=adt_data[arc_df['guid'][i]])
+            fromnode = node_df.loc[
+                node_df["ID"] == arc_df["fromnode"][i], "guid"
+            ].values[0]
+            tonode = node_df.loc[node_df["ID"] == arc_df["tonode"][i], "guid"].values[0]
+            dis = arc_df["len_mile"][i] / arc_df["freeflowsp"][i]
+            network.add_edge(
+                fromnode, tonode, distance=dis, adt=adt_data[arc_df["guid"][i]]
+            )
 
         return network
 
@@ -125,20 +135,21 @@ class TransportationRecoveryUtil:
         network = copy.deepcopy(temp_network)
 
         for Ed in temp_network.edges():
-            if network.edges[Ed[0], Ed[1]]['Damage_Status'] > 2:
+            if network.edges[Ed[0], Ed[1]]["Damage_Status"] > 2:
                 network.remove_edge(Ed[0], Ed[1])
-            elif network.edges[Ed[0], Ed[1]]['Damage_Status'] == 2:
-                network.edges[Ed[0], Ed[1]]['distance'] \
-                    = network.edges[Ed[0], Ed[1]]['distance'] / 0.5
-            elif network.edges[Ed[0], Ed[1]]['Damage_Status'] == 1:
-                network.edges[Ed[0], Ed[1]]['distance'] \
-                    = network.edges[Ed[0], Ed[1]]['distance'] / 0.75
+            elif network.edges[Ed[0], Ed[1]]["Damage_Status"] == 2:
+                network.edges[Ed[0], Ed[1]]["distance"] = (
+                    network.edges[Ed[0], Ed[1]]["distance"] / 0.5
+                )
+            elif network.edges[Ed[0], Ed[1]]["Damage_Status"] == 1:
+                network.edges[Ed[0], Ed[1]]["distance"] = (
+                    network.edges[Ed[0], Ed[1]]["distance"] / 0.75
+                )
 
         num_node = len(network.nodes())
         distance = [[0 for x in range(num_node)] for y in range(num_node)]
 
-        tdistance = dict(nx.all_pairs_dijkstra_path_length(network,
-                                                           weight='distance'))
+        tdistance = dict(nx.all_pairs_dijkstra_path_length(network, weight="distance"))
         i = 0
         for key1, value1 in tdistance.items():
             j = 0

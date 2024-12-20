@@ -6,7 +6,7 @@ networkx>=3.2.1
 numpy>=1.26.0,<2.0a0
 pandas>=2.1.2
 pycodestyle>=2.6.0
-pyomo>=6.6.2
+pyomo>=6.0.0,<=6.6.2
 pyproj>=3.6.1
 pytest>=3.9.0
 python-jose>=3.0
@@ -15,4 +15,4 @@ requests>=2.31.0
 rtree>=1.1.0
 scipy>=1.11.3
 shapely>=2.0.2
-openpyxl>=3.1.2
+Deprecated>=1.2.14
