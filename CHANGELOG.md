@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- ML Enabled Galveston CGE [#641](https://github.com/IN-CORE/pyincore/issues/641)
+
 ### Fixed
 - Documentation container tagging error by github action [#631](https://github.com/IN-CORE/pyincore/issues/631)
 - Updated rasterio dependency to the latest to fetch correct GDAL version [#636](https://github.com/IN-CORE/pyincore/issues/636)
