@@ -93,8 +93,12 @@ class MlEnabledCgeGalveston(CoreCGEML):
         self.base_cap = base_cap
         self.model_coeffs = model_coeffs
         self.cap_shock_sectors = cap_shock_sectors
+        labor_grps = [f"IL{gp}" for gp in range(1, 5)]
+        labor_grps.extend([f"ML{gp}" for gp in range(1, 5)])
         super(MlEnabledCgeGalveston, self).__init__(
-            incore_client, sectors, labor_groups=[f"L{gp}" for gp in range(1, 5)]
+            incore_client,
+            sectors,
+            labor_groups=labor_grps,
         )  # 4 labor groups
 
     def run(self) -> bool:
