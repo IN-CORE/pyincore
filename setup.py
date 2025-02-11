@@ -18,7 +18,7 @@ setup(
     description="IN-CORE analysis tool python package",
     long_description=readme,
     long_description_content_type="text/x-rst",
-    url="https://incore.ncsa.illinois.edu",
+    url="https://tools.in-core.org",
     license="Mozilla Public License v2.0",
     classifiers=[
         "Development Status :: 4 - Beta",

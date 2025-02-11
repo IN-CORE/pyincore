@@ -33,7 +33,7 @@ To update **pyIncore**, run
    conda update -c in-core pyincore
 
 You can find detail information at the
-`Installation <https://incore.ncsa.illinois.edu/doc/incore/pyincore/install_pyincore.html>`__
+`Installation <https://tools.in-core.org/doc/incore/pyincore/install_pyincore.html>`__
 section at IN-CORE manual.
 
 Installation with pip
@@ -61,17 +61,17 @@ Testing and Running
 -------------------
 
 Please read the `Testing and
-Running <https://incore.ncsa.illinois.edu/doc/incore/pyincore/running.html>`__
+Running <https://tools.in-core.org/doc/incore/pyincore/running.html>`__
 section at IN-CORE manual.
 
 Documentation
 -------------
 
 **pyIncore** documentation can be found at
-https://incore.ncsa.illinois.edu/doc/incore/pyincore.html
+https://tools.in-core.org/doc/incore/pyincore.html
 
 **pyIncore** technical reference (API) can be found at
-https://incore.ncsa.illinois.edu/doc/pyincore/.
+https://tools.in-core.org/doc/pyincore/.
 
 Acknowledgement
 ---------------
