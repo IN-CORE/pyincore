@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.21.0] - 2025-02-12
 
 ### Changed
 - Enable internal network names for each service [#638](https://github.com/IN-CORE/pyincore/issues/638)

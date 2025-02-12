@@ -10,7 +10,7 @@ import logging
 import os
 import shutil
 
-PACKAGE_VERSION = "1.20.1"
+PACKAGE_VERSION = "1.21.0"
 
 INCORE_API_PROD_URL = "https://tools.in-core.org"
 INCORE_API_DEV_URL = "https://dev.in-core.org"
