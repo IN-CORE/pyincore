@@ -171,6 +171,7 @@ class IncoreClient(Client):
         username: str = None,
         usergroups: list = None,
         internal: bool = False,
+        local: bool = False,
         offline: bool = False,
     ):
         """
@@ -183,12 +184,13 @@ class IncoreClient(Client):
         super().__init__()
         self.offline = offline
         self.internal = internal
+        self.local = local
 
         if not offline:
             if service_url is None or len(service_url.strip()) == 0:
                 service_url = pyglobals.INCORE_API_PROD_URL
-                if internal:
-                    service_url = pyglobals.INCORE_INTERNAL_API_URL
+                if local:
+                    service_url = pyglobals.INCORE_LOCAL_API_URL
 
             self.service_url = service_url
             self.token_url = urllib.parse.urljoin(
@@ -211,7 +213,7 @@ class IncoreClient(Client):
             if not os.path.exists(self.hashed_svc_data_dir):
                 os.makedirs(self.hashed_svc_data_dir)
 
-            if internal:
+            if internal or local:
                 # Constructing the headers
                 self.session.headers["x-auth-userinfo"] = json.dumps(
                     {"preferred_username": username}
@@ -261,6 +263,9 @@ class IncoreClient(Client):
             return False
         if self.internal is True:
             logger.warning("Internal mode does not have login method.")
+            return False
+        if self.local is True:
+            logger.warning("Local mode does not have login method.")
             return False
 
         for attempt in range(pyglobals.MAX_LOGIN_ATTEMPTS):
@@ -312,6 +317,11 @@ class IncoreClient(Client):
                 "Internal mode does not have store_authorization_in_file method."
             )
             return
+        if self.local is True:
+            logger.warning(
+                "Local mode does not have store_authorization_in_file method."
+            )
+            return
         try:
             with open(self.token_file, "w") as f:
                 f.write(authorization)
@@ -329,6 +339,9 @@ class IncoreClient(Client):
             return
         if self.internal is True:
             logger.warning("Internal mode does not have is_token_expired method.")
+            return
+        if self.local is True:
+            logger.warning("Local mode does not have is_token_expired method.")
             return
 
         # Split the token to get payload
@@ -360,6 +373,9 @@ class IncoreClient(Client):
             logger.warning(
                 "Internal mode does not have retrieve_token_from_file method."
             )
+            return
+        if self.local is True:
+            logger.warning("Local mode does not have retrieve_token_from_file method.")
             return
 
         if not os.path.isfile(self.token_file):
