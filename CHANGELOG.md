@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.21.0] - 2025-02-12
+
+### Changed
+- Enable internal network names for each service [#638](https://github.com/IN-CORE/pyincore/issues/638)
+- Update production URL references to tools.in-core.org and dev to dev.in-core.org [#634](https://github.com/IN-CORE/pyincore/issues/634)
+
+### Fixed
+- Documentation container tagging error by github action [#631](https://github.com/IN-CORE/pyincore/issues/631)
+- Updated rasterio dependency to the latest to fetch correct GDAL version [#636](https://github.com/IN-CORE/pyincore/issues/636)
+
+
 ## [1.20.1] - 2024-11-01
 
 ### Fixed
