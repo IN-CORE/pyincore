@@ -246,12 +246,16 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
         """
         return {
             "name": "combined-wind-wave-surge-building-damage",
-            "description": "Combined wind wave and surge building damage analysis",
+            "description": (
+                "This analysis determines overall building maximum damage state from wind, flood and surge-wave damage"
+                "The outputs of this analysis are a CSV file with maximum damage state from each hazard and the overall "
+                "maximum damage and a CSV with the combined damage probabilities from the three hazards"
+            ),
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Set custom result dataset name.",
                     "type": str,
                 },
             ],
@@ -259,19 +263,19 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
                 {
                     "id": "wind_damage",
                     "required": True,
-                    "description": "Wind damage result that has damage intervals in it",
+                    "description": "Wind damage result that has damage intervals in it.",
                     "type": ["ergo:buildingDamageVer6"],
                 },
                 {
                     "id": "surge_wave_damage",
                     "required": True,
-                    "description": "Surge-wave damage result that has damage intervals in it",
+                    "description": "Surge-wave damage result that has damage intervals in it.",
                     "type": ["ergo:buildingDamageVer6"],
                 },
                 {
                     "id": "flood_damage",
                     "required": True,
-                    "description": "Flood damage result that has damage intervals in it",
+                    "description": "Flood damage result that has damage intervals in it.",
                     "type": ["ergo:nsBuildingInventoryDamageVer4"],
                 },
             ],
@@ -279,13 +283,13 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
                 {
                     "id": "ds_result",
                     "parent_type": "buildings",
-                    "description": "CSV file of damage states for building structural damage",
+                    "description": "CSV file of damage states for building structural damage. (format: CSV)",
                     "type": "ergo:buildingDamageVer6",
                 },
                 {
                     "id": "result",
                     "parent_type": "buildings",
-                    "description": "CSV file of building maximum damage state",
+                    "description": "CSV file of building maximum damage state. (format: CSV)",
                     "type": "incore:maxDamageState",
                 },
             ],

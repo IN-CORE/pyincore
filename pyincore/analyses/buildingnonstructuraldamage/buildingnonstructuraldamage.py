@@ -333,55 +333,68 @@ class BuildingNonStructDamage(BaseAnalysis):
         """
         return {
             "name": "building-damage",
-            "description": "building damage analysis",
+            "description": (
+                "This analysis computes the non-structural damage to buildings based on a particular hazard."
+                "Currently, supported hazard is: earthquake, flood, and hurricane.The process is similar to evaluating"
+                " other structural damages. The probabilities for building damage state are obtained using fragility "
+                "curves and a hazard definition, each building site will have a specific PGA (Peak Ground Acceleration), "
+                "a measurement of an earthquake hazard for each scenario. Liquefaction effect, which is defined as a "
+                "change in stress condition, in which material that is ordinarily a solid behaves like a liquid can be "
+                "considered as well. The LMF (Liquefaction Modification Factor) values are implemented as multiplication "
+                "factors to the median fragility values and they must be present in the dataset. This analysis can support "
+                "various types of fragility curves assigned to the building: e.g.acceleration-sensitive (AS) and drift-sensitive (DS)."
+            ),
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Set custom result dataset name.",
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
-                    "description": "Hazard Type (e.g. earthquake, flood, hurricane)",
+                    "description": "Hazard Type (e.g. earthquake, flood, hurricane).",
                     "type": str,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
-                    "description": "Hazard ID",
+                    "description": "ID of the hazard from the Hazard service.",
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
-                    "description": "Non-structural Fragility key to use in mapping dataset",
+                    "description": "Non-structural Fragility key to use in mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "use_liquefaction",
                     "required": False,
-                    "description": "Use liquefaction",
+                    "description": "Use liquefaction, if applicable to the hazard. Default is False.",
                     "type": bool,
                 },
                 {
                     "id": "liq_geology_dataset_id",
                     "required": False,
-                    "description": "liquefaction geology dataset id, \
-                        if use liquefaction, you have to provide this id",
+                    "description": "Liquefaction geology/susceptibility dataset id. If not provided, liquefaction will be ignored.",
                     "type": str,
                 },
                 {
                     "id": "use_hazard_uncertainty",
                     "required": False,
-                    "description": "Use hazard uncertainty",
+                    "description": (
+                        "For model based hazard events, if the model supports uncertainty, "
+                        "then you can set this flag to indicate using the mean plus one standard deviation when computing damage. "
+                        "Default is false."
+                    ),
                     "type": bool,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request. Default is 1.",
                     "type": int,
                 },
             ],
@@ -389,7 +402,7 @@ class BuildingNonStructDamage(BaseAnalysis):
                 {
                     "id": "hazard",
                     "required": False,
-                    "description": "Hazard object",
+                    "description": "Supported hazard object for using local and remote hazards.",
                     "type": ["earthquake", "flood", "hurricane"],
                 },
             ],
@@ -397,7 +410,7 @@ class BuildingNonStructDamage(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "building Inventory",
+                    "description": "Set Building Inventory Dataset.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingInventoryVer5",
@@ -408,13 +421,13 @@ class BuildingNonStructDamage(BaseAnalysis):
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "Set the DFR3 Mapping Set Object.",
                     "type": ["incore:dfr3MappingSet"],
                 },
                 {
                     "id": "retrofit_strategy",
                     "required": False,
-                    "description": "Building retrofit strategy that contains guid and retrofit method",
+                    "description": "Building retrofit strategy that contains guid and retrofit method.",
                     "type": ["incore:retrofitStrategy"],
                 },
             ],
@@ -422,13 +435,13 @@ class BuildingNonStructDamage(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "buildings",
-                    "description": "CSV file of damage states for building non-structural damage",
+                    "description": "CSV file of damage states for building non-structural damage.",
                     "type": "ergo:nsBuildingInventoryDamageVer4",
                 },
                 {
                     "id": "damage_result",
                     "parent_type": "buildings",
-                    "description": "Json file with information about applied hazard value and fragility",
+                    "description": "Json file with information about applied hazard value and fragility.",
                     "type": "incore:nsBuildingInventoryDamageSupplement",
                 },
             ],

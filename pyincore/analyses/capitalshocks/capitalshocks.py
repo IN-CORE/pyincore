@@ -23,12 +23,18 @@ class CapitalShocks(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "Capital Shocks",
-            "description": "Capital Shocks generation for cge models.",
+            "description": (
+                "This analysis aggregates building functionality states and calculates total capital shock losses per sector."
+                "Capital stock shocks for an individual building is equal to the functionality probability multiplied by value of the building. "
+                "This gives the capital stock loss in the immediate aftermath of a natural disaster. The analysis aggregates each of these "
+                "individual losses to their associated economic sector and calculates the total capital stock lost for that particular sector."
+                "The output of this analysis is a CSV file with aggregated building losses per sector and calculated total capital stock loss."
+            ),
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Result dataset name.",
+                    "description": "Set custom result dataset name.",
                     "type": str,
                 },
             ],
@@ -36,7 +42,7 @@ class CapitalShocks(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Set Building Inventory Dataset.",
                     "type": [
                         "ergo:buildingInventoryVer5",
                         "ergo:buildingInventoryVer6",
@@ -60,7 +66,7 @@ class CapitalShocks(BaseAnalysis):
                 {
                     "id": "sector_shocks",
                     "required": True,
-                    "description": "Aggregation of building functionality states to capital shocks per sector",
+                    "description": "Aggregation of building functionality states to capital shocks per sector. (format: CSV)",
                     "type": "incore:capitalShocks",
                 }
             ],
