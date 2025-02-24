@@ -155,18 +155,24 @@ class BuildingEconLoss(BaseAnalysis):
         """
         return {
             "name": "building-economy-damage",
-            "description": "building economy damage analysis",
+            "description": (
+                "This analysis calculates the building loss based on building appraisal value, mean damage, and an inflation multiplier. "
+                "A user must supply the inflation rate (as a percentage) between building appraisal year and year of interest "
+                "(current, date of hazard, etc.) and optional Occupancy multiplier. The analysis can be used for with building mean damage "
+                "results for either Structural, Drift-Sensitive Nonstructural, Acceleration-Sensitive Nonstructural or Contents Damage component."
+                "The output of this analysis is a CSV file with structural losses based on damage."
+            ),
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Set custom result dataset name.",
                     "type": str,
                 },
                 {
                     "id": "inflation_factor",
                     "required": False,
-                    "description": "Inflation factor to adjust the appraisal values of buildings. Default 0.0",
+                    "description": "Inflation factor to adjust the appraisal values of buildings. Default 0.0.",
                     "type": float,
                 },
             ],
@@ -174,7 +180,7 @@ class BuildingEconLoss(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Building Inventory dataset.",
                     "type": [
                         "ergo:buildingInventory",
                         "ergo:buildingInventoryVer4",
@@ -205,7 +211,7 @@ class BuildingEconLoss(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "buildings",
-                    "description": "CSV file of building economy damages",
+                    "description": "CSV file of building economy damages.",
                     "type": "incore:buildingEconomicLoss",
                 }
             ],

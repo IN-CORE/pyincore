@@ -35,12 +35,19 @@ class BuildingFunctionality(BaseAnalysis):
         """
         return {
             "name": "functionality_probability",
-            "description": "calculate the functionality probability of each building",
+            "description": (
+                "The building functionality analysis can be used to calculate building functionality probabilities considering"
+                "two situations: buildings are in at least a damage state 2 or greater or buildings are not damaged but electric"
+                "power is not available to the building. Whether buildings can receive electrical power is assumed to depend on"
+                "the interdependency between buildings and substations, and between buildings and poles in close proximity."
+                "If both the nearest pole to the building and the substation where buildings belong to its service area are"
+                "functional, buildings are considered to be able to receive electric power."
+            ),
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": False,
-                    "description": "result dataset name",
+                    "description": "Set a custom result dataset name.",
                     "type": str,
                 }
             ],
@@ -48,37 +55,37 @@ class BuildingFunctionality(BaseAnalysis):
                 {
                     "id": "building_damage_mcs_samples",
                     "required": True,
-                    "description": "building damage samples",
+                    "description": "Set the building damage samples dataset from MCS.",
                     "type": ["incore:sampleFailureState"],
                 },
                 {
                     "id": "substations_damage_mcs_samples",
                     "required": False,
-                    "description": "substations damage samples",
+                    "description": "Set the substations damage samples dataset from MCS.",
                     "type": ["incore:sampleFailureState"],
                 },
                 {
                     "id": "poles_damage_mcs_samples",
                     "required": False,
-                    "description": "poles damage samples",
+                    "description": "Set the poles damage samples from MCS.",
                     "type": ["incore:sampleFailureState"],
                 },
                 {
                     "id": "interdependency_dictionary",
                     "required": False,
-                    "description": "JSON file of interdependency between buildings and substations and poles",
+                    "description": "JSON file of interdependency between buildings and substations and poles.",
                     "type": ["incore:buildingInterdependencyDict"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "functionality_samples",
-                    "description": "CSV file of functionality samples",
+                    "description": "A dataset containing results of functionality samples (format: CSV).",
                     "type": "incore:funcSample",
                 },
                 {
                     "id": "functionality_probability",
-                    "description": "CSV file of functionality probability",
+                    "description": "A dataset containing results of functionality probability (format: CSV).",
                     "type": "incore:funcProbability",
                 },
             ],
