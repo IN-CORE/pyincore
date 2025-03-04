@@ -62,7 +62,7 @@ class HousingValuationRecovery(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Name of the resulting CSV dataset",
+                    "description": "Name of the resulting CSV dataset.",
                     "type": str,
                 },
             ],
@@ -70,7 +70,7 @@ class HousingValuationRecovery(BaseAnalysis):
                 {
                     "id": "population_dislocation",
                     "required": True,
-                    "description": "Population dislocation data aggregated at the block group level",
+                    "description": "Population dislocation data aggregated at the block group level.",
                     "type": ["incore:popDislocation"],
                 },
                 {
@@ -78,13 +78,13 @@ class HousingValuationRecovery(BaseAnalysis):
                     "required": True,
                     "description": "Building square footage and damage: Damage refers to the actual loss in "
                                    "building value, expressed as a percentage, as observed in the County Appraisal "
-                                   "District (GCAD) data",
+                                   "District (GCAD) data.",
                     "type": ["incore:buildingInventoryArea"],
                 },
                 {
                     "id": "census_block_groups_data",
                     "required": True,
-                    "description": "Census ACS 2010 5-year data for block groups, available from IPUMS NHGIS"
+                    "description": "Census ACS 2010 5-year data for block groups, available from IPUMS NHGIS."
                     "website.",
                     "type": ["incore:censusBlockGroupsData"],
                 },
@@ -92,7 +92,7 @@ class HousingValuationRecovery(BaseAnalysis):
                     "id": "census_appraisal_data",
                     "required": True,
                     "description": "Census data from the 2010 Decennial Census and Galveston County Appraisal "
-                                   "District (GCAD)",
+                                   "District (GCAD).",
                     "type": ["incore:censusAppraisalData"],
                 },
             ],
@@ -102,7 +102,7 @@ class HousingValuationRecovery(BaseAnalysis):
                     "description": "A CSV file containing building values for the six years following the disaster "
                                    "event. Year -1 represents pre-impact conditions, while year 0 marks the impact "
                                    "year. Index year values indicate building values relative to the base, pre-impact "
-                                   "value",
+                                   "value.",
                     "type": "incore:buildingValues",
                 }
             ],
@@ -212,7 +212,7 @@ class HousingValuationRecovery(BaseAnalysis):
             Assumption:
             When ownership status is 'missing,' classify vacancy codes 0, 3, and 4 as owner-occupied, while codes
             1, 2, 5, 6, and 7 are considered renter-occupied. The future occupancy status of vacancy codes 3, 4, 5, 6,
-            and 7 remains uncertain, as they may transition to either owner- or renter-occupied status
+            and 7 remains uncertain, as they may transition to either owner- or renter-occupied status.
         .
             Args:
                 popd (pd.DataFrame): Population dislocation results with ownership information.

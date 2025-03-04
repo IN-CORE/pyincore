@@ -22,7 +22,7 @@ class InfrastructureUtil:
         extra_commodity=None,
     ):
         """
-        This function reads the infrastructure network from file in the extended format
+        This function reads the infrastructure network from file in the extended format.
 
         Args:
             power_nodes:
@@ -160,7 +160,7 @@ class InfrastructureUtil:
         G : :class:`~infrastructure.InfrastructureNetwork`
              The object containing the network data.
         sample : int
-            Sample number of the initial damage scenario,
+            Sample number of the initial damage scenario.
 
         Returns
         -------

@@ -12,9 +12,9 @@ class InfrastructureSpace(object):
     Attributes
     ----------
     id : int
-        The id of the space
+        The id of the space.
     cost : float
-        The cost of preparing the space for a repair action
+        The cost of preparing the space for a repair action.
     """
 
     def __init__(self, id, cost):

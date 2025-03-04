@@ -16,9 +16,9 @@ class InfrastructureInterdepArc(InfrastructureArc):
     Attributes
     ----------
     source_layer : int
-        The id of the layer where the dependee node is
+        The id of the layer where the dependee node is.
     dest_layer : int
-        The id of the layer where the depender node is
+        The id of the layer where the depender node is.
     gamma : float
         The strength of the dependency, which is a number between 0 and 1.
     """

@@ -144,8 +144,8 @@ class INDP(BaseAnalysis):
             layers (list): List of layers.
             method (str): Algorithm type.
             t_steps (int): Number of time steps of the analysis.
-            misc (dict): A dictionary that contains miscellaneous data needed for the analysis
-            save_model (bool): Flag indicates if the model should be saved or not
+            misc (dict): A dictionary that contains miscellaneous data needed for the analysis.
+            save_model (bool): Flag indicates if the model should be saved or not.
         Returns:
 
         """
@@ -1118,7 +1118,7 @@ class INDP(BaseAnalysis):
                 {
                     "id": "sample_range",
                     "required": True,
-                    "description": "Defines the range of sample scenarios to be analyzed",
+                    "description": "Defines the range of sample scenarios to be analyzed.",
                     "type": range,
                 },
                 {
@@ -1137,13 +1137,13 @@ class INDP(BaseAnalysis):
                 {
                     "id": "testbed_name",
                     "required": False,
-                    "description": "Defines the name of the testbed in analysis",
+                    "description": "Defines the name of the testbed in analysis.",
                     "type": str,
                 },
                 {
                     "id": "extra_commodity",
                     "required": True,
-                    "description": "multi-commodity parameters dict",
+                    "description": "multi-commodity parameters dict.",
                     "type": dict,
                 },
                 {
@@ -1167,29 +1167,29 @@ class INDP(BaseAnalysis):
                 {
                     "id": "layers",
                     "required": True,
-                    "description": "Specifies the list of layers in the analysis",
+                    "description": "Specifies the list of layers in the analysis.",
                     "type": list,
                 },
                 {
                     "id": "method",
                     "required": True,
-                    "description": "There are two choices of method: 1. `INDP`: runs Interdependent Network "
+                    "description": "There are two choices of method: 1. `INDP`: runs Interdependent Network. "
                     "Restoration Problem (INDP). 2. `TDINDP`: runs time-dependent INDP (td-INDP).  In "
                     'both cases, if "TIME_RESOURCE" is True, then the repair time for each element '
-                    "is considered in devising the restoration plans",
+                    "is considered in devising the restoration plans.",
                     "type": str,
                 },
                 {
                     "id": "t_steps",
                     "required": False,
-                    "description": "Defines the number of time steps of the analysis",
+                    "description": "Defines the number of time steps of the analysis.",
                     "type": int,
                 },
                 {
                     "id": "time_resource",
                     "required": False,
                     "description": "If TIME_RESOURCE is True, then the repair time for each element is "
-                    "considered in devising the restoration plans",
+                    "considered in devising the restoration plans.",
                     "type": bool,
                 },
                 {
@@ -1215,7 +1215,7 @@ class INDP(BaseAnalysis):
                 {
                     "id": "solver_time_limit",
                     "required": False,
-                    "description": "Defines the solver time limit in seconds",
+                    "description": "Defines the solver time limit in seconds.",
                     "type": int,
                 },
             ],
@@ -1223,137 +1223,137 @@ class INDP(BaseAnalysis):
                 {
                     "id": "wf_repair_cost",
                     "required": True,
-                    "description": "Specifies the repair cost for each water facility",
+                    "description": "Specifies the repair cost for each water facility.",
                     "type": ["incore:repairCost"],
                 },
                 {
                     "id": "wf_restoration_time",
                     "required": True,
                     "description": "Specifies the recording repair time at certain functionality recovery "
-                                   "for each class "
+                                   "for each class."
                     "and limit state.",
                     "type": ["incore:waterFacilityRepairTime"],
                 },
                 {
                     "id": "epf_repair_cost",
                     "required": True,
-                    "description": "Defines the repair cost for each electric power facility",
+                    "description": "Defines the repair cost for each electric power facility.",
                     "type": ["incore:repairCost"],
                 },
                 {
                     "id": "epf_restoration_time",
                     "required": True,
                     "description": "Definess the recording repair time at certain functionality recovery for "
-                                   "each class "
+                                   "each class."
                     "and limit state.",
                     "type": ["incore:epfRepairTime"],
                 },
                 {
                     "id": "pipeline_repair_cost",
                     "required": True,
-                    "description": "Specifies the repair cost for each pipeline",
+                    "description": "Specifies the repair cost for each pipeline.",
                     "type": ["incore:pipelineRepairCost"],
                 },
                 {
                     "id": "pipeline_restoration_time",
                     "required": True,
-                    "description": "Defines the pipeline restoration times",
+                    "description": "Defines the pipeline restoration times.",
                     "type": ["incore:pipelineRestorationVer1"],
                 },
                 {
                     "id": "power_network",
                     "required": True,
-                    "description": "Specifies the EPN Network Dataset",
+                    "description": "Specifies the EPN Network Dataset.",
                     "type": ["incore:epnNetwork"],
                 },
                 {
                     "id": "water_network",
                     "required": True,
-                    "description": "Specifies tge Water Network Dataset",
+                    "description": "Specifies tge Water Network Dataset.",
                     "type": ["incore:waterNetwork"],
                 },
                 {
                     "id": "powerline_supply_demand_info",
                     "required": True,
-                    "description": "Defines the supply and demand information for powerlines",
+                    "description": "Defines the supply and demand information for powerlines.",
                     "type": ["incore:powerLineSupplyDemandInfo"],
                 },
                 {
                     "id": "epf_supply_demand_info",
                     "required": True,
-                    "description": "Defines the supply and demand information for epfs",
+                    "description": "Defines the supply and demand information for epfs.",
                     "type": ["incore:epfSupplyDemandInfo"],
                 },
                 {
                     "id": "wf_supply_demand_info",
                     "required": True,
-                    "description": "Defines the supply and demand information for water facilities",
+                    "description": "Defines the supply and demand information for water facilities.",
                     "type": ["incore:waterFacilitySupplyDemandInfo"],
                 },
                 {
                     "id": "pipeline_supply_demand_info",
                     "required": True,
-                    "description": "Defines the supply and demand information for water pipelines",
+                    "description": "Defines the supply and demand information for water pipelines.",
                     "type": ["incore:pipelineSupplyDemandInfo"],
                 },
                 {
                     "id": "interdep",
                     "required": True,
-                    "description": "Specifies the interdepenency between water and electric power facilities",
+                    "description": "Specifies the interdepenency between water and electric power facilities.",
                     "type": ["incore:interdep"],
                 },
                 {
                     "id": "wf_failure_state",
                     "required": True,
-                    "description": "Defines the MCS failure state of water facilities",
+                    "description": "Defines the MCS failure state of water facilities.",
                     "type": ["incore:sampleFailureState"],
                 },
                 {
                     "id": "wf_damage_state",
                     "required": True,
-                    "description": "Defines the MCS damage state of water facilities",
+                    "description": "Defines the MCS damage state of water facilities.",
                     "type": ["incore:sampleDamageState"],
                 },
                 {
                     "id": "pipeline_failure_state",
                     "required": True,
-                    "description": "Defines the failure state of pipeline from pipeline functionality",
+                    "description": "Defines the failure state of pipeline from pipeline functionality.",
                     "type": ["incore:sampleFailureState"],
                 },
                 {
                     "id": "epf_failure_state",
                     "required": True,
-                    "description": "Defines the MCS failure state of electric power facilities",
+                    "description": "Defines the MCS failure state of electric power facilities.",
                     "type": ["incore:sampleFailureState"],
                 },
                 {
                     "id": "epf_damage_state",
                     "required": True,
-                    "description": "Defines the MCS damage state of electric power facilities",
+                    "description": "Defines the MCS damage state of electric power facilities.",
                     "type": ["incore:sampleDamageState"],
                 },
                 {
                     "id": "dt_params",
                     "required": False,
-                    "description": "Specifies the parameters for population dislocation time",
+                    "description": "Specifies the parameters for population dislocation time.",
                     "type": ["incore:dTParams"],
                 },
                 {
                     "id": "pop_dislocation",
                     "required": True,
-                    "description": "Specifies the population dislocation output",
+                    "description": "Specifies the population dislocation output.",
                     "type": ["incore:popDislocation"],
                 },
                 {
                     "id": "bldgs2elec",
                     "required": False,
-                    "description": "Specifies the relation between building and electric power facility",
+                    "description": "Specifies the relation between building and electric power facility.",
                     "type": ["incore:bldgs2elec"],
                 },
                 {
                     "id": "bldgs2wter",
                     "required": False,
-                    "description": "Specifies the relation between building and water facility",
+                    "description": "Specifies the relation between building and water facility.",
                     "type": ["incore:bldgs2wter"],
                 },
             ],
@@ -1361,19 +1361,19 @@ class INDP(BaseAnalysis):
                 {
                     "id": "action",
                     "parent_type": "",
-                    "description": "Restoration action plans",
+                    "description": "Restoration action plans.",
                     "type": "incore:indpAction",
                 },
                 {
                     "id": "cost",
                     "parent_type": "",
-                    "description": "Restoration cost plans",
+                    "description": "Restoration cost plans.",
                     "type": "incore:indpCost",
                 },
                 {
                     "id": "runtime",
                     "parent_type": "",
-                    "description": "Restoration runtime plans",
+                    "description": "Restoration runtime plans.",
                     "type": "incore:indpRuntime",
                 },
             ],

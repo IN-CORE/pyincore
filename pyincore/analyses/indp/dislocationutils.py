@@ -30,7 +30,7 @@ class DislocationUtil:
         Returns
         -------
          dynamic_params : dict
-             Dictionary of dynamic demand value for nodes
+             Dictionary of dynamic demand value for nodes.
         """
         dynamic_param_dict = params["DYNAMIC_PARAMS"]
         return_type = dynamic_param_dict["RETURN"]

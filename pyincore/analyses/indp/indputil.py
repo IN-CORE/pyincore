@@ -128,7 +128,7 @@ class INDPUtil:
         This function initializes a :class:`~infrastructure.InfrastructureNetwork` object based on network data.
 
         Args:
-            cost_scale (float): Scales the cost to improve efficiency. The default is 1.0:
+            cost_scale (float): Scales the cost to improve efficiency. The default is 1.0.
             extra_commodity (dict): Dictionary of commodities other than the default one for each layer of the
             network. The default is 'None', which means that there is only one commodity per layer.
 
@@ -155,14 +155,14 @@ class INDPUtil:
         Parameters
         ----------
         model : Pyomo.Model
-            Pyomo optimization model
+            Pyomo optimization model.
         out_model_dir : str
-            Directory to which the models should be written
+            Directory to which the models should be written.
         t : int
-            The time step corresponding to the model
+            The time step corresponding to the model.
         layer : int
             The layer number corresponding to the model. The default is 0, which means the model includes all layers in
-            the analysis
+            the analysis.
         suffix : str
             The suffix that should be added to files when saved. The default is ''.
         Returns
@@ -192,7 +192,7 @@ class INDPUtil:
     def apply_recovery(N, indp_results, t):
         """
         This function applies the restoration decisions (solution of INDP) to a Gurobi model by changing the state of
-        repaired elements to functional
+        repaired elements to functional.
 
         Parameters
         ----------
