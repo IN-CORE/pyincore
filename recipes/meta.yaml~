@@ -1,0 +1,72 @@
+{% set name = "pyincore" %}
+{% set version = "1.9.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  path: ..
+
+about:
+  home: https://tools.in-core.org
+  license: MPL-2.0
+  summary: 'Python library for IN-CORE (Interdependent Networked Community Resilience Modeling Environment)'
+  description: 'pyIncore is a component of IN-CORE. It is a python package consisting of two primary components: 
+  1) a set of service classes to interact with the IN-CORE web services, and 2) IN-CORE analyses. The pyIncore 
+  package allows users to apply various hazards to infrastructure in selected areas, propagating the effect of 
+  physical infrastructure damage and loss of functionality to social and economic impacts.'
+  dev_url: https://github.com/IN-CORE/pyincore
+  doc_url: https://tools.in-core.org/doc/incore
+
+build:
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  #number: 1
+  noarch: python
+  script: "{{ PYTHON }} -m pip install --no-deps --ignore-installed -vv . " # verbose
+ 
+requirements:
+  build:
+    - python>=3.9
+    - pip
+    - numpy>=1.26.0,<2.0a0
+ 
+  host:
+    - python>=3.9
+    - pip
+    - numpy>=1.26.0,<2.0a0
+
+  run:
+    - python>=3.9
+    - ipopt>=3.11
+    - scip>=8.0.0
+    - {{ pin_compatible('numpy') }}
+    - fiona>=1.9.5
+    - geopandas>=0.14.0
+    - matplotlib>=3.8.0
+    - networkx>=3.2.1
+    - pandas>=2.1.2
+    - pyomo>=6.0.0,<=6.6.2
+    - pyproj>=3.6.1
+    - rasterio>=1.4.2
+    - requests>=2.31.0
+    - rtree>=1.1.0
+    - scipy>=1.11.3
+    - shapely>=2.0.2
+
+test:
+  # Python imports
+  imports:
+    - pyincore
+   
+  requires:
+    # Put any additional test requirements here.  For example
+    - pytest>=3.9.0
+    - pycodestyle>=2.6.0
+    - python-jose>=3.0
+
+  commands:
+    # You can put built-in test commands to be run here.  Use this to test that the entry points work.
+    python -c "import pyincore; print('SUCCESS')" #; pyincore.test_client()"
+    # You can also put a file called run_test.py in the recipe that will be run at test time.
