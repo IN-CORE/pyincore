@@ -14,10 +14,10 @@ from pyincore.analyses.joplinempiricalbuildingrestoration.joplinempirrestor_util
 
 
 class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
-    """Joplin Empirical Building Restoration Model generates a random realization for the restoration time of
-    a building damaged in a tornado event to be restored to a certain functionality level. Functionality
-    levels in this model are defined according to Koliou and van de Lindt (2020) and range from Functionality
-    Level 4 (FL4, the lowest functionality) to Functionality Level 0 (FL0, full functionality).
+    """The Joplin Empirical Building Restoration Model generates a random realization of the restoration time for
+    a building damaged in a tornado event, determining the time required to restore it to a specific functionality
+    level. Functionality levels in this model are based on Koliou and van de Lindt (2020) and range from
+    Functionality Level 4 (FL4, the lowest functionality) to Functionality Level 0 (FL0, full functionality).
 
     Args:
         incore_client (IncoreClient): Service authentication.
@@ -112,7 +112,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 and a target level column.
 
         Returns:
-            np.array: Initial functionality level based on damage state
+            np.array: Initial functionality level based on damage state.
             np.array: Building restoration days.
 
         """
@@ -183,19 +183,19 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Result dataset name.",
                     "type": str,
                 },
                 {
                     "id": "target_functionality_level",
                     "required": False,
-                    "description": "Target functionality level for all infrastructure",
+                    "description": "Target functionality level for all infrastructure.",
                     "type": int,
                 },
                 {
                     "id": "seed",
                     "required": False,
-                    "description": "Initial seed for the tornado hazard value",
+                    "description": "Initial seed for the tornado hazard value.",
                     "type": int,
                 },
             ],
@@ -203,7 +203,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Building Inventory Dataset.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingInventoryVer5",
@@ -214,7 +214,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 {
                     "id": "building_dmg",
                     "required": True,
-                    "description": "Building damage results CSV file",
+                    "description": "Building damage results CSV file.",
                     "type": [
                         "ergo:buildingDamageVer4",
                         "ergo:buildingDamageVer5",
@@ -230,7 +230,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                     "id": "building_functionality_level",
                     "required": False,
                     "description": "Functionality level per building. The target level defaults "
-                    "to target_functionality_level parameter if building not in the dataset",
+                    "to target_functionality_level parameter if building not in the dataset.",
                     "type": ["incore:buildingFuncTargetVer1"],
                 },
             ],
