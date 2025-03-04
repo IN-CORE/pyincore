@@ -18,7 +18,7 @@ class INDPUtil:
     @staticmethod
     def get_resource_suffix(params):
         """
-        This function generates the part of the suffix of result folders that pertains to resource cap(s).
+        This function generates the portion of the result folder suffix that corresponds to the resource cap(s).
 
         Args:
             params (dict): Parameters that are needed to run the INDP optimization.
@@ -56,8 +56,8 @@ class INDPUtil:
         epf_repair_cost_sample,
     ):
         """
-        This module calculates the repair time for nodes and arcs for the current scenario based on their damage
-        state, and writes them to the input files of INDP. Currently, it is only compatible with NIST testbeds.
+        This function calculates the repair time for nodes and arcs in the current scenario based on their damage
+        state and writes the results to INDP input files. Currently, it is compatible only with NIST testbeds.
 
         Args:
             power_arcs (dataframe):
