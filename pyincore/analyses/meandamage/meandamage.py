@@ -29,24 +29,25 @@ class MeanDamage(BaseAnalysis):
         """
         return {
             "name": "mean-damage",
-            "description": "calculate the mean and expected damage using damage ratio table",
+            "description": "Calculate the mean and expected damage using damage ratio table.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Result dataset name.",
                     "type": str,
                 },
                 {
                     "id": "damage_interval_keys",
                     "required": True,
-                    "description": "Column name of the damage interval must be four and ranged in order",
+                    "description": "The damage interval column that must contain exactly four values, "
+                                   "arranged in order.",
                     "type": List[str],
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "The number of cpus to request, when using parallel execution.",
                     "type": int,
                 },
             ],
@@ -54,7 +55,7 @@ class MeanDamage(BaseAnalysis):
                 {
                     "id": "damage",
                     "required": True,
-                    "description": "damage result that has damage intervals in it",
+                    "description": "Damage result dataset that has damage intervals in it.",
                     "type": [
                         "ergo:buildingDamageVer4",
                         "ergo:buildingDamageVer5",
@@ -74,7 +75,7 @@ class MeanDamage(BaseAnalysis):
                 {
                     "id": "dmg_ratios",
                     "required": True,
-                    "description": "Damage Ratios table",
+                    "description": "Damage Ratios table.",
                     "type": [
                         "ergo:buildingDamageRatios",
                         "ergo:bridgeDamageRatios",
@@ -88,7 +89,7 @@ class MeanDamage(BaseAnalysis):
             "output_datasets": [
                 {
                     "id": "result",
-                    "description": "CSV file of mean damage",
+                    "description": "CSV file of mean damage.",
                     "type": "ergo:meanDamage",
                 }
             ],
@@ -157,11 +158,11 @@ class MeanDamage(BaseAnalysis):
         return output
 
     def mean_damage_bulk_input(self, damage, dmg_ratio_tbl):
-        """Run analysis for mean damage calculation
+        """Run analysis for mean damage calculation.
 
         Args:
-            damage (obj): output of building/bridge/waterfacility/epn damage that has damage interval
-            dmg_ratio_tbl (list): damage ratio table
+            damage (obj): output of building/bridge/waterfacility/epn damage that has damage interval.
+            dmg_ratio_tbl (list): damage ratio table.
 
         Returns:
             list: A list of ordered dictionaries with mean damage, deviation, and other data/metadata.
@@ -185,14 +186,14 @@ class MeanDamage(BaseAnalysis):
         return result
 
     def mean_damage(self, dmg, dmg_ratio_tbl, damage_interval_keys, is_bridge):
-        """Calculates mean damage based on damage probabilities and damage ratios
+        """Calculates mean damage based on damage probabilities and damage ratios.
 
         Args:
-            dmg (obj): dmg analysis output for a single entity in the built environment
+            dmg (obj): dmg analysis output for a single entity in the built environment.
             dmg_ratio_tbl (list): dmg ratio table.
-            damage_interval_keys (list): damage interval keys
+            damage_interval_keys (list): damage interval keys.
             is_bridge (bool): a boolean to indicate if the inventory type is bridge.
-            Bridge has its own way of calculating mean damage
+            Bridge has its own way of calculating mean damage.
 
         Returns:
             OrderedDict: A dictionary with mean damage, deviation, and other data/metadata.
