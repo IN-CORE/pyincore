@@ -13,15 +13,16 @@ logger = pyglobals.LOGGER
 
 
 class JoplinCGEModel(BaseAnalysis):
-    """A computable general equilibrium (CGE) model is based on fundamental economic principles.
-    A CGE model uses multiple data sources to reflect the interactions of households,
-    firms and relevant government entities as they contribute to economic activity.
-    The model is based on (1) utility-maximizing households that supply labor and capital,
-    using the proceeds to pay for goods and services (both locally produced and imported)
-    and taxes; (2) the production sector, with perfectly competitive, profit-maximizing firms
-    using intermediate inputs, capital, land and labor to produce goods and services for both
-    domestic consumption and export; (3) the government sector that collects taxes and uses
-    tax revenues in order to finance the provision of public services; and (4) the rest of the world.
+    """A Computable General Equilibrium (CGE) model is grounded in fundamental economic principles and integrates multiple data sources to capture the interactions among households, firms, and government entities that drive economic activity.
+
+    The model is structured as follows:
+
+    1. Households – Utility-maximizing entities that supply labor and capital, using their income to purchase
+    goods and services (both locally produced and imported) and pay taxes.
+    2. Production Sector – Comprising perfectly competitive, profit-maximizing firms that utilize intermediate
+    inputs, capital, land, and labor to produce goods and services for domestic consumption and export.
+    3. Government Sector – Collects taxes and allocates revenue to finance public services.
+    4. Rest of the World – Represents external trade and economic interactions beyond the domestic economy.
 
     Args:
         incore_client (IncoreClient): Service authentication.
@@ -55,17 +56,16 @@ class JoplinCGEModel(BaseAnalysis):
                 {
                     'id': 'SAM',
                     'required': True,
-                    'description': 'Social accounting matrix (SAM) contains data for firms, '
-                                   'households and government which are organized in a way to '
-                                   'represent the interactions of all three entities in a typical economy.',
+                    'description': 'A Social Accounting Matrix (SAM) organizes data on firms, households, and '
+                                   'the government to represent their interactions within a typical economy.',
                     'type': ['incore:CGEsam']
                 },
                 {
                     'id': 'BB',
                     'required': True,
-                    'description': 'BB is a matrix which describes how investment in physical infrastructure is'
-                                   ' transformed into functioning capital such as commercial and residential buildings.'
-                                   ' These data are collected from the Bureau of Economic Analysis (BEA).',
+                    'description': 'BB is a matrix that represents how investment in physical infrastructure '
+                                   'translates into functioning capital, such as commercial and residential buildings. '
+                                   'This data is sourced from the Bureau of Economic Analysis (BEA).',
                     'type': ['incore:CGEbb']
                 },
                 {
@@ -93,8 +93,8 @@ class JoplinCGEModel(BaseAnalysis):
                 {
                     'id': 'LANDCAP',
                     'required': True,
-                    'description': 'LANDCAP contains information regarding elasticity values for the response of '
-                                   'changes in the price of physical capital with respect to the supply of investment.',
+                    'description': 'LANDCAP contains elasticity values that describe how changes in the price of '
+                                   'physical capital respond to variations in investment supply.',
                     'type': ['incore:CGElandcap']
                 },
                 {
@@ -106,15 +106,15 @@ class JoplinCGEModel(BaseAnalysis):
                 {
                     'id': 'IGTD',
                     'required': True,
-                    'description': 'IGTD variable represents a matrix describing the transfer of taxes collected'
-                                   ' to a variable which permits governments to spend the tax revenue on workers and'
-                                   ' intermediate inputs.',
+                    'description': 'The IGTD variable represents a matrix that describes how collected taxes are '
+                                   'allocated, allowing governments to spend tax revenue on workers and '
+                                   'intermediate inputs.',
                     'type': ['incore:CGEigtd']
                 },
                 {
                     'id': 'TAUFF',
                     'required': True,
-                    'description': 'TAUFF represents social security tax rates',
+                    'description': 'TAUFF represents social security tax rates.',
                     'type': ['incore:CGEtauff']
                 },
                 {
@@ -142,31 +142,31 @@ class JoplinCGEModel(BaseAnalysis):
                 {
                     'id': 'domestic-supply',
                     'parent_type': '',
-                    'description': 'CSV file of resulting domestic supply',
+                    'description': 'CSV file of resulting domestic supply.',
                     'type': 'incore:Employment'
                 },
                 {
                     'id': 'gross-income',
                     'parent_type': '',
-                    'description': 'CSV file of resulting gross income',
+                    'description': 'CSV file of resulting gross income.',
                     'type': 'incore:Employment'
                 },
                 {
                     'id': 'pre-disaster-factor-demand',
                     'parent_type': '',
-                    'description': 'CSV file of factor demand before disaster',
+                    'description': 'CSV file of factor demand before disaster.',
                     'type': 'incore:FactorDemand'
                 },
                 {
                     'id': 'post-disaster-factor-demand',
                     'parent_type': '',
-                    'description': 'CSV file of resulting factor-demand',
+                    'description': 'CSV file of resulting factor-demand.',
                     'type': 'incore:FactorDemand'
                 },
                 {
                     'id': 'household-count',
                     'parent_type': '',
-                    'description': 'CSV file of household count',
+                    'description': 'CSV file of household count.',
                     'type': 'incore:HouseholdCount'
                 }
             ]

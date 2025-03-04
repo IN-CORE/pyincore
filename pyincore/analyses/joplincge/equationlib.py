@@ -7,13 +7,13 @@ class VarContainer:
     """All matrix variable(tables) in the GAMS model is flatten to a array to make a better
     interface to the solver.
 
-    AllVarList stores all initial values of variables used in the GAMS model in an array.
-    It also has a indexing system for looking up.
+    AllVarList stores all initial variable values used in the GAMS model within an array.
+    It also includes an indexing system for efficient lookups.
 
     Attributes:
         namelist: A dictionary with all stored GAMS variables and its information.
         nvars: The length of the array, i.e. the size of all matrix variables summed up.
-        initialVals: Stored initial values of all variables
+        initialVals: Stored initial values of all variables.
 
     """
 
@@ -171,8 +171,8 @@ class VarContainer:
                 return result
 
     def get(self, name, x=None):
-        """Returns a Dataframe, Series, or a variable based on the given name and the result array
-        returned from the solver.
+        """Returns a DataFrame, Series, or variable based on the specified name and the result array obtained
+        from the solver.
 
         Args:
             name (str): Name of the variable in GAMS.
@@ -278,7 +278,7 @@ class ExprItem:
             print("invalid parameter to create a item")
 
     '''
-      You could multiply it with a number, a variable, a ExprItem or Expression
+      You could multiply it with a number, a variable, a ExprItem or Expression.
     '''
 
     def __mul__(self, rhs):
@@ -497,13 +497,13 @@ class Expr:
 
 class ExprM:
     """
-    Three ways to create a ExprMatrix:
+    There are three ways to create an ExprMatrix:
 
-    1. Give it the variable name, selected rows and cols(could be empty),
-    The constructor will create a Expression matrix from the variable matrix.
-    2. Give it a pandas Series or DataFrame, it will create the Expression matrix
-    with the content in the Series or DataFrame as constants.
-    3. Give it a ExprMatrix, will return a deep copy of it.
+    1. From a variable name, selected rows, and columns (which may be empty) – The constructor generates an
+    Expression matrix from the corresponding variable matrix.
+    2. From a pandas Series or DataFrame – The constructor creates an Expression matrix where the provided data
+    is treated as constants.
+    3. From an existing ExprMatrix – The constructor returns a deep copy of the given ExprMatrix.
 
     """
 
@@ -637,7 +637,7 @@ class ExprM:
 
     def __xor__(self, rhs):
         """
-          create 2d list out of 2 single lists
+          create 2d list out of 2 single lists.
         """
         # has to be 2 single lists
         if self.info['width'] != 1 or rhs.info['width'] != 1:
@@ -669,7 +669,7 @@ class ExprM:
         return result
 
     def loc(self, rows=None, cols=None):
-        """Get a subset of the matrix by labels"""
+        """Get a subset of the matrix by labels."""
 
         copy = ExprM(self.vars, em=self)
         if cols is not None:
