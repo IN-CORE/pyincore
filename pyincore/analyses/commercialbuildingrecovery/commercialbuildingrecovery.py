@@ -431,30 +431,30 @@ class CommercialBuildingRecovery(BaseAnalysis):
         """
         return {
             "name": "commercial-building-recovery",
-            "description": "calculate commercial building recovery",
+            "description": "Calculates the commercial building recovery time.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "name of the result",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "num_samples",
                     "required": True,
-                    "description": "Number of sample scenarios",
+                    "description": "Number of sample scenarios.",
                     "type": int,
                 },
                 {
                     "id": "repair_key",
                     "required": False,
-                    "description": "Repair key to use in mapping dataset",
+                    "description": "Repair key to use in the mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "seed",
                     "required": False,
-                    "description": "Initial seed for the probabilistic model",
+                    "description": "Initial seed for the probabilistic model.",
                     "type": int,
                 },
             ],
@@ -462,7 +462,7 @@ class CommercialBuildingRecovery(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Dataset containing the building inventory.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingInventoryVer5",
@@ -473,49 +473,49 @@ class CommercialBuildingRecovery(BaseAnalysis):
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "DFR3 Mapping Set Object.",
                     "type": ["incore:dfr3MappingSet"],
                 },
                 {
                     "id": "sample_damage_states",
                     "required": True,
-                    "description": "Sample damage states",
+                    "description": "Sample damage states for each building.",
                     "type": ["incore:sampleDamageState"],
                 },
                 {
                     "id": "mcs_failure",
                     "required": True,
-                    "description": "mcs_failure",
+                    "description": "Failure probability for each building.",
                     "type": ["incore:failureProbability"],
                 },
                 {
                     "id": "delay_factors",
                     "required": True,
                     "description": "Delay impeding factors such as post-disaster inspection, insurance claim, "
-                    "and government permit based on building's damage state. Provided by REDi framework",
+                    "and government permit based on building's damage state. Provided by REDi framework.",
                     "type": ["incore:buildingRecoveryFactors"],
                 },
                 {
                     "id": "building_dmg",
                     "required": True,
-                    "description": "damage result that has damage intervals",
+                    "description": "Damage result dataset that has damage intervals for each building.",
                     "type": ["ergo:buildingDamageVer6"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "total_delay",
-                    "description": "CSV file of commercial building delay time",
+                    "description": "CSV file of commercial building delay time.",
                     "type": "incore:buildingRecoveryDelay",
                 },
                 {
                     "id": "recovery",
-                    "description": "CSV file of commercial building recovery time",
+                    "description": "CSV file of commercial building recovery time.",
                     "type": "incore:buildingRecoveryTime",
                 },
                 {
                     "id": "time_stepping_recovery",
-                    "description": "CSV file of commercial building recovery percent",
+                    "description": "CSV file of commercial building recovery percent.",
                     "type": "incore:buildingRecovery",
                 },
             ],

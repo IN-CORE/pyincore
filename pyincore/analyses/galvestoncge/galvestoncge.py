@@ -2077,7 +2077,7 @@ class GalvestonCGEModel(BaseAnalysis):
                 {
                     'id': 'sector_shocks',
                     'required': True,
-                    'description': 'Aggregation of building functionality states to capital shocks per sector',
+                    'description': 'Aggregation of building functionality states to capital shocks per sector.',
                     'type': ['incore:capitalShocks']
                 }
             ],
@@ -2085,31 +2085,31 @@ class GalvestonCGEModel(BaseAnalysis):
                 {
                     'id': 'domestic-supply',
                     'parent_type': '',
-                    'description': 'CSV file of resulting domestic supply',
+                    'description': 'CSV file of resulting domestic supply.',
                     'type': 'incore:Employment'
                 },
                 {
                     'id': 'gross-income',
                     'parent_type': '',
-                    'description': 'CSV file of resulting gross income',
+                    'description': 'CSV file of resulting gross income.',
                     'type': 'incore:Employment'
                 },
                 {
                     'id': 'pre-disaster-factor-demand',
                     'parent_type': '',
-                    'description': 'CSV file of factor demand before disaster',
+                    'description': 'CSV file of factor demand before disaster.',
                     'type': 'incore:FactorDemand'
                 },
                 {
                     'id': 'post-disaster-factor-demand',
                     'parent_type': '',
-                    'description': 'CSV file of resulting factor-demand',
+                    'description': 'CSV file of resulting factor-demand.',
                     'type': 'incore:FactorDemand'
                 },
                 {
                     'id': 'household-count',
                     'parent_type': '',
-                    'description': 'CSV file of household count',
+                    'description': 'CSV file of household count.',
                     'type': 'incore:HouseholdCount'
                 }
             ]
