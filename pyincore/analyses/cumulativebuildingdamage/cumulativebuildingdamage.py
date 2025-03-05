@@ -201,18 +201,18 @@ class CumulativeBuildingDamage(BaseAnalysis):
         """
         return {
             "name": "cumulative-building-damage",
-            "description": "cumulative building damage (earthquake + tsunami)",
+            "description": "Cumulative building damage from earthquake and tsunami hazards.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request.",
                     "type": int,
                 },
             ],
@@ -220,7 +220,7 @@ class CumulativeBuildingDamage(BaseAnalysis):
                 {
                     "id": "eq_bldg_dmg",
                     "required": True,
-                    "description": "Earthquake Building Damage Results",
+                    "description": "Earthquake Building Damage Results.",
                     "type": ["ergo:buildingDamageVer5", "ergo:buildingDamageVer6"],
                 },
                 {
