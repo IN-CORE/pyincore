@@ -25,7 +25,7 @@ class MlEnabledCgeJoplin(CoreCGEML):
     various crises.
 
     Args:
-        CoreCGEML (class): The base class for the ML enabled CGE model
+        CoreCGEML (class): The base class for the ML enabled CGE model.
     """
     model = "Machine Learning Enabled Computable General Equilibrium - Joplin"
 
@@ -108,7 +108,7 @@ class MlEnabledCgeJoplin(CoreCGEML):
         )  # 4 labor groups
 
     def run(self) -> bool:
-        """Executes the ML enabled CGE model for Joplin"""
+        """Executes the ML enabled CGE model for Joplin."""
 
         logger.info(f"Running {self.model} model...")
         sector_shocks = pd.read_csv(
@@ -121,7 +121,7 @@ class MlEnabledCgeJoplin(CoreCGEML):
             if sector.upper() not in [v.upper() for v in sector_shocks["sector"]]:
                 raise ValueError(
                     f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors.\n"
-                    + "Please make sure you have used the correct capital shocks"
+                    + "Please make sure you have used the correct capital shocks."
                 )
             shocks.append(
                 sector_shocks.loc[sector_shocks["sector"] == sector.upper()]["shock"]
@@ -147,7 +147,7 @@ class MlEnabledCgeJoplin(CoreCGEML):
                 {
                     "id": "result_name",
                     "required": False,
-                    "description": "Result CSV dataset name prefix",
+                    "description": "Result CSV dataset name prefix.",
                     "type": str,
                 }
             ],
@@ -155,7 +155,7 @@ class MlEnabledCgeJoplin(CoreCGEML):
                 {
                     "id": "sector_shocks",
                     "required": True,
-                    "description": "Aggregation of building functionality states to capital shocks per sector",
+                    "description": "Aggregation of building functionality states to capital shocks per sector.",
                     "type": ["incore:capitalShocks"],
                 }
             ],
@@ -163,31 +163,31 @@ class MlEnabledCgeJoplin(CoreCGEML):
                 {
                     "id": "domestic-supply",
                     "parent_type": "",
-                    "description": "CSV file of resulting domestic supply",
+                    "description": "CSV file of resulting domestic suppl.y",
                     "type": "incore:Employment",
                 },
                 {
                     "id": "gross-income",
                     "parent_type": "",
-                    "description": "CSV file of resulting gross income",
+                    "description": "CSV file of resulting gross income.",
                     "type": "incore:Employment",
                 },
                 {
                     "id": "pre-disaster-factor-demand",
                     "parent_type": "",
-                    "description": "CSV file of factor demand before disaster",
+                    "description": "CSV file of factor demand before disaster.",
                     "type": "incore:FactorDemand",
                 },
                 {
                     "id": "post-disaster-factor-demand",
                     "parent_type": "",
-                    "description": "CSV file of resulting factor-demand",
+                    "description": "CSV file of resulting factor-demand.",
                     "type": "incore:FactorDemand",
                 },
                 {
                     "id": "household-count",
                     "parent_type": "",
-                    "description": "CSV file of household count",
+                    "description": "CSV file of household count.",
                     "type": "incore:HouseholdCount",
                 },
             ],
