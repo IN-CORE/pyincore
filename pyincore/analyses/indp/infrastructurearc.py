@@ -7,37 +7,37 @@
 
 class InfrastructureArc(object):
     """
-    This class models an arc in an infrastructure network
+    This class models an arc in an infrastructure network.
 
     Attributes
     ----------
     source : int
-        Start (or head) node id
+        Start (or head) node id.
     dest : int
-        End (or tail) node id
+        End (or tail) node id.
     layer : int
-        The id of the layer of the network to which the arc belong
+        The id of the layer of the network to which the arc belong.
     failure_probability : float
-        Failure probability of the arc
+        Failure probability of the arc.
     functionality : bool
-        Functionality state of the node
+        Functionality state of the node.
     repaired : bool
-        If the arc is repaired or not
+        If the arc is repaired or not.
     flow_cost : float
-        Unit cost of sending the main commodity through the arc
+        Unit cost of sending the main commodity through the arc.
     reconstruction_cost : float
-        Reconstruction cost of the arc
+        Reconstruction cost of the arc.
     capacity : float
-        Maximum volume of the commodities that the arc can carry
+        Maximum volume of the commodities that the arc can carry.
     space : int
-        The id of the geographical space where the arc is
+        The id of the geographical space where the arc is.
     resource_usage : dict
-        The dictionary that shows how many resource (of each resource type) is employed to repair the arc
+        The dictionary that shows how many resource (of each resource type) is employed to repair the arc.
     extra_com : dict
-        The dictionary that shows flow_cost corresponding to commodities other than the main commodity
+        The dictionary that shows flow_cost corresponding to commodities other than the main commodity.
     is_interdep : bool
         If arc represent a normal arc (that carry commodity within a single layer) or physical interdependency between
-        nodes from different layers
+        nodes from different layers.
     """
 
     def __init__(self, source, dest, layer, is_interdep=False):
@@ -74,12 +74,12 @@ class InfrastructureArc(object):
 
     def set_resource_usage(self, resource_names):
         """
-        This function initialize the dictionary for resource usage per all resource types in the analysis
+        This function initialize the dictionary for resource usage per all resource types in the analysis.
 
         Parameters
         ----------
         resource_names : list
-            List of resource types
+            List of resource types.
 
         Returns
         -------
@@ -91,12 +91,12 @@ class InfrastructureArc(object):
 
     def in_space(self, space_id):
         """
-        This function checks if the arc is in a given space or not
+        This function checks if the arc is in a given space or not.
 
         Parameters
         ----------
         space_id :
-            The id of the space that is checked
+            The id of the space that is checked.
 
         Returns
         -------

@@ -10,16 +10,16 @@ import os
 
 class INDPResults:
     """
-    This class saves INDP results including actions, costs, run time, and components
+    This class saves INDP results including actions, costs, run time, and components.
 
     Attributes
     ----------
     results : dict
-        Dictionary containing INDP results including actions, costs, run time, and components
+        Dictionary containing INDP results including actions, costs, run time, and components.
     layers : list
-        List of layers in the analysis
+        List of layers in the analysis.
     results_layer : int
-        Dictionary containing INDP results for each layer including actions, costs, run time, and components
+        Dictionary containing INDP results for each layer including actions, costs, run time, and components.
     """
 
     cost_types = [
@@ -53,7 +53,7 @@ class INDPResults:
         Parameters
         ----------
         indp_result : :class:`~INDPResults`
-            The current :class:`~INDPResults` object before extension
+            The current :class:`~INDPResults` object before extension.
         t_offset : int
             The number of time steps that the current results should be shifted forward. The default is 0.
         t_start : int
@@ -92,12 +92,12 @@ class INDPResults:
         Parameters
         ----------
         t : int
-            The time steps to which the costs should be added
+            The time steps to which the costs should be added.
         cost_type : str
             The cost types that is added. The options are: "Space Prep", "Arc", "Node", "Over Supply", "Under Supply",
-            "Flow", "Total", "Under Supply Perc"
+            "Flow", "Total", "Under Supply Perc".
         cost : float
-            The cost value that is added
+            The cost value that is added.
         cost_layer : dict
             The cost value that is added for each layer. The default is None, which adds no value for layers.
 
@@ -156,9 +156,9 @@ class INDPResults:
         Parameters
         ----------
         t : int
-            The time steps to which the run time should be added
+            The time steps to which the run time should be added.
         run_time : float
-            The run time that is added
+            The run time that is added.
         save_layer : bool
             If the run time should be added for each layer. The default is True.
 
@@ -215,9 +215,9 @@ class INDPResults:
         Parameters
         ----------
         t : int
-            The time steps to which the actions should be added
+            The time steps to which the actions should be added.
         action : list
-            List of actions that are added
+            List of actions that are added.
         save_layer : bool
             If the actions should be added for each layer. The default is True.
 
@@ -269,14 +269,14 @@ class INDPResults:
 
     def add_gc_size(self, t, gc_size):
         """
-        This function adds the giant component size to the results
+        This function adds the giant component size to the results.
 
         Parameters
         ----------
         t : int
-            The time steps to which the giant component size should be added
+            The time steps to which the giant component size should be added.
         gc_size : int
-            The giant component size that is added
+            The giant component size that is added.
 
         Returns
         -------
@@ -305,14 +305,14 @@ class INDPResults:
 
     def add_num_components(self, t, num_components):
         """
-        This function adds the number of components to the results
+        This function adds the number of components to the results.
 
         Parameters
         ----------
         t : int
-            The time steps to which the number of components should be added
+            The time steps to which the number of components should be added.
         num_components : int
-            The number of components that is added
+            The number of components that is added.
 
         Returns
         -------
@@ -341,14 +341,14 @@ class INDPResults:
 
     def add_components(self, t, components):
         """
-        This function adds the components to the results
+        This function adds the components to the results.
 
         Parameters
         ----------
         t : int
-            The time steps to which the number of components should be added
+            The time steps to which the number of components should be added.
         components : list
-            The list of components that is added
+            The list of components that is added.
 
         Returns
         -------
@@ -476,7 +476,7 @@ class INDPResults:
         Parameters
         ----------
         out_dir : str
-            Output directory from which the results should be read
+            Output directory from which the results should be read.
         sample_num : int
             The sample number corresponding to the results, The default is 1.
         suffix : str
@@ -485,7 +485,7 @@ class INDPResults:
         Returns
         -------
         indp_result: :class:`~INDPResults`
-            The :class:`~INDPResults` object containing the read results
+            The :class:`~INDPResults` object containing the read results.
 
         """
         action_file = out_dir + "/actions_" + str(sample_num) + "_" + suffix + ".csv"

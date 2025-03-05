@@ -11,7 +11,7 @@ from pyincore.analyses.montecarlolimitstateprobability import (
 
 @deprecated(
     version="1.19.0",
-    reason="This class will be deprecated soon. Use MonteCarloLimitStateProbability instead.",
+    reason="This class is deprecated. Use MonteCarloLimitStateProbability instead.",
 )
 class MonteCarloFailureProbability:
     def __init__(self, incore_client):

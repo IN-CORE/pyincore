@@ -7,37 +7,37 @@
 
 class InfrastructureNode(object):
     """
-    This class models a node in an infrastructure network
+    This class models a node in an infrastructure network.
 
     Attributes
     ----------
     id : int
-        Node id
+        Node id.
     net_id : int
-        The id of the layer of the network to which the node belong
+        The id of the layer of the network to which the node belong.
     local_id : int
-        Local node id
+        Local node id.
     failure_probability : float
-        Failure probability of the node
+        Failure probability of the node.
     functionality : bool
-        Functionality state of the node
+        Functionality state of the node.
     repaired : bool
-        If the node is repaired or not
+        If the node is repaired or not.
     reconstruction_cost : float
-        Reconstruction cost of the node
+        Reconstruction cost of the node.
     oversupply_penalty : float
-        Penalty per supply unit  of the main commodity that is not used for the the node
+        Penalty per supply unit  of the main commodity that is not used for the node.
     undersupply_penalty : float
-        Penalty per demand unit  of the main commodity that is not satisfied for the the node
+        Penalty per demand unit  of the main commodity that is not satisfied for the node.
     demand : float
-        Demand or supply value of the main commodity assigned to the node
+        Demand or supply value of the main commodity assigned to the node.
     space : int
-        The id of the geographical space where the node is
+        The id of the geographical space where the node is.
     resource_usage : dict
-        The dictionary that shows how many resource (of each resource type) is employed to repair the node
+        The dictionary that shows how many resource (of each resource type) is employed to repair the node.
     extra_com : dict
         The dictionary that shows demand, oversupply_penalty, and undersupply_penalty corresponding to commodities
-        other than the main commodity
+        other than the main commodity.
     """
 
     def __init__(self, id, net_id, local_id=""):
@@ -59,12 +59,12 @@ class InfrastructureNode(object):
 
     def set_failure_probability(self, failure_probability):
         """
-        This function sets the failure probability of the node
+        This function sets the failure probability of the node.
 
         Parameters
         ----------
         failure_probability : float
-            Assigned failure probability of node
+            Assigned failure probability of node.
 
         Returns
         -------
@@ -75,12 +75,12 @@ class InfrastructureNode(object):
 
     def set_extra_commodity(self, extra_commodity):
         """
-        This function initialize the dictionary for the extra commodities
+        This function initialize the dictionary for the extra commodities.
 
         Parameters
         ----------
         extra_commodity : list
-            List of extra commodities
+            List of extra commodities.
 
         Returns
         -------
@@ -96,12 +96,12 @@ class InfrastructureNode(object):
 
     def set_resource_usage(self, resource_names):
         """
-        This function initialize the dictionary for resource usage per all resource types in the analysis
+        This function initialize the dictionary for resource usage per all resource types in the analysis.
 
         Parameters
         ----------
         resource_names : list
-            List of resource types
+            List of resource types.
 
         Returns
         -------
@@ -113,12 +113,12 @@ class InfrastructureNode(object):
 
     def in_space(self, space_id):
         """
-        This function checks if the node is in a given space or not
+        This function checks if the node is in a given space or not.
 
         Parameters
         ----------
         space_id :
-            The id of the space that is checked
+            The id of the space that is checked.
 
         Returns
         -------

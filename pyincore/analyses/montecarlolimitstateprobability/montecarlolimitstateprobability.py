@@ -14,6 +14,11 @@ from pyincore import BaseAnalysis, AnalysisUtil
 
 class MonteCarloLimitStateProbability(BaseAnalysis):
     """
+    This analysis calculates a probability of limit state using a stochastic process. Limit state probability and
+    damage state are derived using the dictionary of failed damage states in the input infrastructure dataset.
+    Limit state probability is calculated from all stochastic runs, limit state shows all infrastructure standings as
+    a string of failed (0) and not failed (1) states of each individual run.
+
     Args:
         incore_client (IncoreClient): Service authentication.
 
@@ -31,13 +36,13 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
         """
         return {
             "name": "monte-carlo-limit-state-probability",
-            "description": "calculate the probability of limit state in monte-carlo simulation",
+            "description": "Calculate the probability of limit state in monte-carlo simulation.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "basename of the result datasets. This analysis will create two outputs: failure "
-                    "proability and failure state with the basename in the filename. "
+                    "description": "Basename of the result datasets. This analysis will create two outputs: failure "
+                    "probability and failure state with the basename in the filename. "
                     'For example: "result_name = joplin_mcs_building" will result in '
                     '"joplin_mcs_building_failure_state.csv" and '
                     '"joplin_mcs_building_failure_probability.csv"',
@@ -46,31 +51,31 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "Number of cpus to request, when using parallel execution.",
                     "type": int,
                 },
                 {
                     "id": "num_samples",
                     "required": True,
-                    "description": "Number of MC samples",
+                    "description": "Number of MC samples.",
                     "type": int,
                 },
                 {
                     "id": "damage_interval_keys",
                     "required": True,
-                    "description": "Column name of the damage interval",
+                    "description": "Column name of the damage interval.",
                     "type": List[str],
                 },
                 {
                     "id": "failure_state_keys",
                     "required": True,
-                    "description": "Column name of the damage interval that considered as damaged",
+                    "description": "Column name of the damage interval that considered as damaged.",
                     "type": List[str],
                 },
                 {
                     "id": "seed",
                     "required": False,
-                    "description": "Initial seed for the probabilistic model",
+                    "description": "Initial seed for the probabilistic model.",
                     "type": int,
                 },
             ],
@@ -78,7 +83,7 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
                 {
                     "id": "damage",
                     "required": True,
-                    "description": "damage result that has damage intervals in it",
+                    "description": "Damage result that has damage intervals in it.",
                     "type": [
                         "ergo:buildingDamageVer4",
                         "ergo:buildingDamageVer5",
@@ -108,17 +113,17 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
             "output_datasets": [
                 {
                     "id": "failure_probability",
-                    "description": "CSV file of failure probability",
+                    "description": "CSV file of failure probability.",
                     "type": "incore:failureProbability",
                 },
                 {
                     "id": "sample_failure_state",
-                    "description": "CSV file of failure state for each sample",
+                    "description": "CSV file of failure state for each sample.",
                     "type": "incore:sampleFailureState",
                 },
                 {
                     "id": "sample_damage_states",
-                    "description": "CSV file of simulated damage states for each sample",
+                    "description": "CSV file of simulated damage states for each sample.",
                     "type": "incore:sampleDamageState",
                 },
             ],
@@ -202,7 +207,7 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
     def monte_carlo_failure_probability_concurrent_future(
         self, function_name, parallelism, *args
     ):
-        """Utilizes concurrent.future module.
+        """Utilizes concurrent future module.
 
         Args:
             function_name (function): The function to be parallelized.
@@ -272,9 +277,9 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
             seed (int): Random number generator seed for reproducibility.
 
         Returns:
-            dict: A dictionary with id/guid and failure state for N samples
+            dict: A dictionary with id/guid and failure state for N samples.
             dict: A dictionary with failure probability and other data/metadata.
-            dict: A dictionary with id/guid and damage states for N samples
+            dict: A dictionary with id/guid and damage states for N samples.
 
         """
         # failure state
@@ -312,7 +317,7 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
 
     def sample_damage_interval(self, dmg, damage_interval_keys, num_samples, seed):
         """
-        Dylan Sanderson code to calculate the Monte Carlo simulations of damage state.
+        Dylan Sanderson's code to calculate the Monte Carlo simulations of damage state.
 
         Args:
             dmg (dict): Damage results that contains dmg interval values.
