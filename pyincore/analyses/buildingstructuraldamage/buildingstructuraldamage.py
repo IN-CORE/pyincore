@@ -186,6 +186,8 @@ class BuildingStructuralDamage(BaseAnalysis):
         # Get geology dataset id containing liquefaction susceptibility
         geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
+        site_class_dataset_id = self.get_parameter("site_class_dataset_id")
+
         multihazard_vals = {}
         adjust_demand_types_mapping = {}
 
@@ -231,6 +233,10 @@ class BuildingStructuralDamage(BaseAnalysis):
                     value_liq = {"demands": [""], "units": [""], "loc": loc}
                     values_payload_liq.append(value_liq)
 
+            if hazard_type == "earthquake" and site_class_dataset_id is not None:
+                # Add site class dataset id if set to get soil type information
+                value = {"siteClassId": site_class_dataset_id}
+                values_payload.append(value)
             hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
 
             # map demand type from payload to response
@@ -456,6 +462,12 @@ class BuildingStructuralDamage(BaseAnalysis):
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
                     "description": "Geology dataset id",
+                    "type": str,
+                },
+                {
+                    "id": "site_class_dataset_id",
+                    "required": False,
+                    "description": "Site classification dataset id containing soil type information.",
                     "type": str,
                 },
             ],
