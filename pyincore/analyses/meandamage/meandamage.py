@@ -38,20 +38,20 @@ class MeanDamage(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Result dataset name.",
+                    "description": "Base name of result dataset.",
                     "type": str,
                 },
                 {
                     "id": "damage_interval_keys",
                     "required": True,
-                    "description": "The damage interval column that must contain exactly four values, "
+                    "description": "Damage interval column that must contain exactly four values, "
                                    "arranged in order.",
                     "type": List[str],
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "The number of cpus to request, when using parallel execution.",
+                    "description": "Number of cpus to request, when using parallel execution.",
                     "type": int,
                 },
             ],

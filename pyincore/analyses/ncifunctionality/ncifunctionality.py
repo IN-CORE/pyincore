@@ -536,7 +536,7 @@ class NciFunctionality(BaseAnalysis):
                 {
                     "id": "epf_time_results",
                     "required": True,
-                    "description": "A csv file recording repair time for EPF per class and limit state.",
+                    "description": "CSV file of recording repair time for EPF per class and limit state.",
                     "type": ["incore:epfRestorationTime"],
                 },
                 {
@@ -554,13 +554,13 @@ class NciFunctionality(BaseAnalysis):
                 {
                     "id": "wds_time_results",
                     "required": True,
-                    "description": "Csv file recording repair time for WDS per class and limit state.",
+                    "description": "CSV file of recording repair time for WDS per class and limit state.",
                     "type": ["incore:waterFacilityRestorationTime"],
                 },
                 {
                     "id": "epf_damage",
                     "required": True,
-                    "description": "Csv file with limit state probabilities and damage states for each electric "
+                    "description": "CSV file of limit state probabilities and damage states for each electric "
                                    "power facility.",
                     "type": ["incore:epfDamageVer3"],
                 },

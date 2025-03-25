@@ -1887,13 +1887,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 {
                     "id": "optimal_solution_dv_x",
                     "parent_type": "",
-                    "description": "Optimal solution for decision variable x.",
+                    "description": "CSV file of optimal solution for decision variable x.",
                     "type": "incore:multiobjectiveOptimalSolutionX",
                 },
                 {
                     "id": "optimal_solution_dv_y",
                     "parent_type": "",
-                    "description": "Optimal solution for decision variable y with initial and final retrofitted."
+                    "description": "CSV file of optimal solution for decision variable y with initial and final retrofitted."
                     "strategies",
                     "type": "incore:multiobjectiveOptimalSolutionY",
                 },

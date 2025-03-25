@@ -41,7 +41,7 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Basename of the result datasets. This analysis will create two outputs: failure "
+                    "description": "Base name of the result datasets. This analysis will create two outputs: failure "
                     "probability and failure state with the basename in the filename. "
                     'For example: "result_name = joplin_mcs_building" will result in '
                     '"joplin_mcs_building_failure_state.csv" and '
