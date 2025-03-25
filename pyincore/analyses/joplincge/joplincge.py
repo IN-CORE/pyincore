@@ -13,16 +13,15 @@ logger = pyglobals.LOGGER
 
 
 class JoplinCGEModel(BaseAnalysis):
-    """A Computable General Equilibrium (CGE) model is grounded in fundamental economic principles and integrates multiple data sources to capture the interactions among households, firms, and government entities that drive economic activity.
-
-    The model is structured as follows:
-
-    1. Households – Utility-maximizing entities that supply labor and capital, using their income to purchase
-    goods and services (both locally produced and imported) and pay taxes.
-    2. Production Sector – Comprising perfectly competitive, profit-maximizing firms that utilize intermediate
-    inputs, capital, land, and labor to produce goods and services for domestic consumption and export.
-    3. Government Sector – Collects taxes and allocates revenue to finance public services.
-    4. Rest of the World – Represents external trade and economic interactions beyond the domestic economy.
+    """A computable general equilibrium (CGE) model is based on fundamental economic principles.
+    A CGE model uses multiple data sources to reflect the interactions of households,
+    firms and relevant government entities as they contribute to economic activity.
+    The model is based on (1) utility-maximizing households that supply labor and capital,
+    using the proceeds to pay for goods and services (both locally produced and imported)
+    and taxes; (2) the production sector, with perfectly competitive, profit-maximizing firms
+    using intermediate inputs, capital, land and labor to produce goods and services for both
+    domestic consumption and export; (3) the government sector that collects taxes and uses
+    tax revenues in order to finance the provision of public services; and (4) the rest of the world.
 
     Args:
         incore_client (IncoreClient): Service authentication.

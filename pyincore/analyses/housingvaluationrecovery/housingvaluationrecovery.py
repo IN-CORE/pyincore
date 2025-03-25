@@ -62,7 +62,7 @@ class HousingValuationRecovery(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Name of the resulting CSV dataset.",
+                    "description": "Base name of the resulting CSV dataset.",
                     "type": str,
                 },
             ],
@@ -210,10 +210,11 @@ class HousingValuationRecovery(BaseAnalysis):
     def get_owneship(self, popd):
         """Filter ownership based on the vacancy codes
             Assumption:
-            When ownership status is 'missing,' classify vacancy codes 0, 3, and 4 as owner-occupied, while codes
-            1, 2, 5, 6, and 7 are considered renter-occupied. The future occupancy status of vacancy codes 3, 4, 5, 6,
-            and 7 remains uncertain, as they may transition to either owner- or renter-occupied status.
-        .
+            Where ownershp is "missing", let vacancy codes 0/3/4 be considered owner-occupied,
+            and 1/2/5/6/7 be considered renter-occupied.
+            It is uncertain whether vacancy codes 3,4,5,6,7 will become owner- or renter-occupied or primarily
+            one or the other.
+
             Args:
                 popd (pd.DataFrame): Population dislocation results with ownership information.
 

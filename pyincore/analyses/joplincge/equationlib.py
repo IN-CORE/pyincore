@@ -499,11 +499,11 @@ class ExprM:
     """
     There are three ways to create an ExprMatrix:
 
-    1. From a variable name, selected rows, and columns (which may be empty) – The constructor generates an
-    Expression matrix from the corresponding variable matrix.
-    2. From a pandas Series or DataFrame – The constructor creates an Expression matrix where the provided data
-    is treated as constants.
-    3. From an existing ExprMatrix – The constructor returns a deep copy of the given ExprMatrix.
+    1. Give it the variable name, selected rows and cols(could be empty),
+    The constructor will create a Expression matrix from the variable matrix.
+    2. Give it a pandas Series or DataFrame, it will create the Expression matrix
+    with the content in the Series or DataFrame as constants.
+    3. Give it a ExprMatrix, will return a deep copy of it.
 
     """
 
