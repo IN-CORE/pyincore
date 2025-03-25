@@ -252,7 +252,7 @@ class CombinedWindWaveSurgeBuildingLoss(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Set custom result dataset name.",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
             ],
@@ -303,7 +303,7 @@ class CombinedWindWaveSurgeBuildingLoss(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "buildings",
-                    "description": "A dataset containing structural, content and total loss for each building. (format: CSV)",
+                    "description": "A CSV file containing structural, content and total loss for each building.",
                     "type": "incore:buildingLoss",
                 }
             ],

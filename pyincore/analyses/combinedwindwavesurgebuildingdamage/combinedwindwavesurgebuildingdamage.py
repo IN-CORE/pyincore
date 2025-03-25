@@ -255,7 +255,7 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Set custom result dataset name.",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
             ],
@@ -283,13 +283,13 @@ class CombinedWindWaveSurgeBuildingDamage(BaseAnalysis):
                 {
                     "id": "ds_result",
                     "parent_type": "buildings",
-                    "description": "CSV file of damage states for building structural damage. (format: CSV)",
+                    "description": "A CSV file of damage states for building structural damage.",
                     "type": "ergo:buildingDamageVer6",
                 },
                 {
                     "id": "result",
                     "parent_type": "buildings",
-                    "description": "CSV file of building maximum damage state. (format: CSV)",
+                    "description": "A CSV file of building maximum damage state.",
                     "type": "incore:maxDamageState",
                 },
             ],

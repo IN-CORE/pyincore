@@ -47,7 +47,7 @@ class BuildingFunctionality(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": False,
-                    "description": "Set a custom result dataset name.",
+                    "description": "Base name of the result output.",
                     "type": str,
                 }
             ],
@@ -80,12 +80,12 @@ class BuildingFunctionality(BaseAnalysis):
             "output_datasets": [
                 {
                     "id": "functionality_samples",
-                    "description": "A dataset containing results of functionality samples (format: CSV).",
+                    "description": "A CSV file containing results of functionality samples.",
                     "type": "incore:funcSample",
                 },
                 {
                     "id": "functionality_probability",
-                    "description": "A dataset containing results of functionality probability (format: CSV).",
+                    "description": "A CSV file containing results of functionality probability.",
                     "type": "incore:funcProbability",
                 },
             ],

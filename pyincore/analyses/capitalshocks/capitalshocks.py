@@ -34,7 +34,7 @@ class CapitalShocks(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Set custom result dataset name.",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
             ],
@@ -66,7 +66,7 @@ class CapitalShocks(BaseAnalysis):
                 {
                     "id": "sector_shocks",
                     "required": True,
-                    "description": "Aggregation of building functionality states to capital shocks per sector. (format: CSV)",
+                    "description": "A CSV file containing aggregation of building functionality states to capital shocks per sector.",
                     "type": "incore:capitalShocks",
                 }
             ],

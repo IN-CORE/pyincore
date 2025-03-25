@@ -41,7 +41,7 @@ class BuildingClusterRecovery(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": False,
-                    "description": "Set custom result dataset name.",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {

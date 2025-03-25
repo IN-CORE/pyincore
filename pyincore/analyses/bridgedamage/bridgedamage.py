@@ -346,7 +346,7 @@ class BridgeDamage(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Set custom result dataset name.",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {

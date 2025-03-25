@@ -166,7 +166,7 @@ class BuildingEconLoss(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Set custom result dataset name.",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
@@ -211,7 +211,7 @@ class BuildingEconLoss(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "buildings",
-                    "description": "CSV file of building economy damages.",
+                    "description": "CSV file of building economic loss.",
                     "type": "incore:buildingEconomicLoss",
                 }
             ],
