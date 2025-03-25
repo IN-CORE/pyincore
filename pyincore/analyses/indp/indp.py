@@ -1099,38 +1099,38 @@ class INDP(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "INDP",
-            "description": "The Interdependent Network Design Problem (INDP) models the restoration of networked "
+            "description": "Interdependent Network Design Problem (INDP) models the restoration of networked "
                            "systems following disruptions.",
             "input_parameters": [
                 {
                     "id": "network_type",
                     "required": True,
-                    "description": "The type of network, set to from_csv for Seaside networks."
+                    "description": "Type of network, set to from_csv for Seaside networks."
                     "e.g. from_csv, incore",
                     "type": str,
                 },
                 {
                     "id": "MAGS",
                     "required": True,
-                    "description": "The earthquake return period.",
+                    "description": "Earthquake return period.",
                     "type": list,
                 },
                 {
                     "id": "sample_range",
                     "required": True,
-                    "description": "The range of sample scenarios to be analyzed.",
+                    "description": "Range of sample scenarios to be analyzed.",
                     "type": range,
                 },
                 {
                     "id": "dislocation_data_type",
                     "required": False,
-                    "description": "The type of the dislocation data.",
+                    "description": "Type of the dislocation data.",
                     "type": str,
                 },
                 {
                     "id": "return_model",
                     "required": False,
-                    "description": "The model type used to estimate the return of the dislocated population."
+                    "description": "Model type used to estimate the return of the dislocated population."
                     "Options: *step_function* and *linear*.",
                     "type": str,
                 },
@@ -1149,7 +1149,7 @@ class INDP(BaseAnalysis):
                 {
                     "id": "RC",
                     "required": True,
-                    "description": "A list of resource caps or the number of available resources at each step of "
+                    "description": "List of resource caps or the number of available resources at each step of "
                    "the analysis. Each item in the list is a dictionary specifying the resource type and the "
                    "corresponding quantity available. "
                    "For example: "
@@ -1167,7 +1167,7 @@ class INDP(BaseAnalysis):
                 {
                     "id": "layers",
                     "required": True,
-                    "description": "The list of layers in the analysis.",
+                    "description": "List of layers in the analysis.",
                     "type": list,
                 },
                 {
@@ -1183,7 +1183,7 @@ class INDP(BaseAnalysis):
                 {
                     "id": "t_steps",
                     "required": False,
-                    "description": "The number of time steps of the analysis.",
+                    "description": "Number of time steps of the analysis.",
                     "type": int,
                 },
                 {
@@ -1202,21 +1202,21 @@ class INDP(BaseAnalysis):
                 {
                     "id": "solver_engine",
                     "required": False,
-                    "description": "The solver to use for optimization model. Such as gurobi/glpk/scip, "
+                    "description": "Solver to use for optimization model. Such as gurobi/glpk/scip, "
                                    "default to scip.",
                     "type": str,
                 },
                 {
                     "id": "solver_path",
                     "required": False,
-                    "description": "The solver to use for optimization model. Such as gurobi/glpk/scip, "
+                    "description": "Solver to use for optimization model. Such as gurobi/glpk/scip, "
                                    "default to scip.",
                     "type": str,
                 },
                 {
                     "id": "solver_time_limit",
                     "required": False,
-                    "description": "The solver time limit in seconds.",
+                    "description": "Solver time limit in seconds.",
                     "type": int,
                 },
             ],
@@ -1224,13 +1224,13 @@ class INDP(BaseAnalysis):
                 {
                     "id": "wf_repair_cost",
                     "required": True,
-                    "description": "The repair cost for each water facility.",
+                    "description": "Repair cost for each water facility.",
                     "type": ["incore:repairCost"],
                 },
                 {
                     "id": "wf_restoration_time",
                     "required": True,
-                    "description": "The recording repair time at certain functionality recovery "
+                    "description": "Recording repair time at certain functionality recovery "
                                    "for each class."
                     "and limit state.",
                     "type": ["incore:waterFacilityRepairTime"],
@@ -1238,13 +1238,13 @@ class INDP(BaseAnalysis):
                 {
                     "id": "epf_repair_cost",
                     "required": True,
-                    "description": "The repair cost for each electric power facility.",
+                    "description": "Repair cost for each electric power facility.",
                     "type": ["incore:repairCost"],
                 },
                 {
                     "id": "epf_restoration_time",
                     "required": True,
-                    "description": "The recording repair time at certain functionality recovery for "
+                    "description": "Recording repair time at certain functionality recovery for "
                                    "each class."
                     "and limit state.",
                     "type": ["incore:epfRepairTime"],
@@ -1252,13 +1252,13 @@ class INDP(BaseAnalysis):
                 {
                     "id": "pipeline_repair_cost",
                     "required": True,
-                    "description": "The repair cost for each pipeline.",
+                    "description": "Repair cost for each pipeline.",
                     "type": ["incore:pipelineRepairCost"],
                 },
                 {
                     "id": "pipeline_restoration_time",
                     "required": True,
-                    "description": "The pipeline restoration times.",
+                    "description": "Pipeline restoration times.",
                     "type": ["incore:pipelineRestorationVer1"],
                 },
                 {
@@ -1276,85 +1276,85 @@ class INDP(BaseAnalysis):
                 {
                     "id": "powerline_supply_demand_info",
                     "required": True,
-                    "description": "The supply and demand information for powerlines.",
+                    "description": "Supply and demand information for powerlines.",
                     "type": ["incore:powerLineSupplyDemandInfo"],
                 },
                 {
                     "id": "epf_supply_demand_info",
                     "required": True,
-                    "description": "The supply and demand information for epfs.",
+                    "description": "Supply and demand information for epfs.",
                     "type": ["incore:epfSupplyDemandInfo"],
                 },
                 {
                     "id": "wf_supply_demand_info",
                     "required": True,
-                    "description": "The supply and demand information for water facilities.",
+                    "description": "Supply and demand information for water facilities.",
                     "type": ["incore:waterFacilitySupplyDemandInfo"],
                 },
                 {
                     "id": "pipeline_supply_demand_info",
                     "required": True,
-                    "description": "The supply and demand information for water pipelines.",
+                    "description": "Supply and demand information for water pipelines.",
                     "type": ["incore:pipelineSupplyDemandInfo"],
                 },
                 {
                     "id": "interdep",
                     "required": True,
-                    "description": "The interdepenency between water and electric power facilities.",
+                    "description": "Interdepenency between water and electric power facilities.",
                     "type": ["incore:interdep"],
                 },
                 {
                     "id": "wf_failure_state",
                     "required": True,
-                    "description": "The MCS failure state of water facilities.",
+                    "description": "MCS failure state of water facilities.",
                     "type": ["incore:sampleFailureState"],
                 },
                 {
                     "id": "wf_damage_state",
                     "required": True,
-                    "description": "The MCS damage state of water facilities.",
+                    "description": "MCS damage state of water facilities.",
                     "type": ["incore:sampleDamageState"],
                 },
                 {
                     "id": "pipeline_failure_state",
                     "required": True,
-                    "description": "The failure state of pipeline from pipeline functionality.",
+                    "description": "Failure state of pipeline from pipeline functionality.",
                     "type": ["incore:sampleFailureState"],
                 },
                 {
                     "id": "epf_failure_state",
                     "required": True,
-                    "description": "The MCS failure state of electric power facilities.",
+                    "description": "MCS failure state of electric power facilities.",
                     "type": ["incore:sampleFailureState"],
                 },
                 {
                     "id": "epf_damage_state",
                     "required": True,
-                    "description": "The MCS damage state of electric power facilities.",
+                    "description": "MCS damage state of electric power facilities.",
                     "type": ["incore:sampleDamageState"],
                 },
                 {
                     "id": "dt_params",
                     "required": False,
-                    "description": "The parameters for population dislocation time.",
+                    "description": "Parameters for population dislocation time.",
                     "type": ["incore:dTParams"],
                 },
                 {
                     "id": "pop_dislocation",
                     "required": True,
-                    "description": "The population dislocation output.",
+                    "description": "Population dislocation output.",
                     "type": ["incore:popDislocation"],
                 },
                 {
                     "id": "bldgs2elec",
                     "required": False,
-                    "description": "Te relation between building and electric power facility.",
+                    "description": "Relation between building and electric power facility.",
                     "type": ["incore:bldgs2elec"],
                 },
                 {
                     "id": "bldgs2wter",
                     "required": False,
-                    "description": "The relation between building and water facility.",
+                    "description": "Relation between building and water facility.",
                     "type": ["incore:bldgs2wter"],
                 },
             ],

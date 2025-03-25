@@ -14,10 +14,10 @@ from pyincore.analyses.joplinempiricalbuildingrestoration.joplinempirrestor_util
 
 
 class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
-    """The Joplin Empirical Building Restoration Model generates a random realization of the restoration time for
-    a building damaged in a tornado event, determining the time required to restore it to a specific functionality
-    level. Functionality levels in this model are based on Koliou and van de Lindt (2020) and range from
-    Functionality Level 4 (FL4, the lowest functionality) to Functionality Level 0 (FL0, full functionality).
+    """Joplin Empirical Building Restoration Model generates a random realization for the restoration time of
+    a building damaged in a tornado event to be restored to a certain functionality level. Functionality
+    levels in this model are defined according to Koliou and van de Lindt (2020) and range from Functionality
+    Level 4 (FL4, the lowest functionality) to Functionality Level 0 (FL0, full functionality).
 
     Args:
         incore_client (IncoreClient): Service authentication.
@@ -183,7 +183,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Result dataset name.",
+                    "description": "Base name of result dataset.",
                     "type": str,
                 },
                 {
@@ -214,7 +214,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 {
                     "id": "building_dmg",
                     "required": True,
-                    "description": "Building damage results CSV file.",
+                    "description": "CSV file of Building damage results.",
                     "type": [
                         "ergo:buildingDamageVer4",
                         "ergo:buildingDamageVer5",
@@ -238,7 +238,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "buildings",
-                    "description": "A dataset containing results (format: CSV) with values (in days) for the predicted "
+                    "description": "CSV file of dataset containing results with values (in days) for the predicted "
                     "restoration time of the building.",
                     "type": "incore:restorationTime",
                 }
