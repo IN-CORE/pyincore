@@ -317,8 +317,7 @@ class PipelineDamage(BaseAnalysis):
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the water facility "
-                    "inventory.",
+                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the pipeline inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
             ],
@@ -333,7 +332,7 @@ class PipelineDamage(BaseAnalysis):
                     "id": "metadata",
                     "parent_type": "pipeline",
                     "description": "JSON file with additional metadata about the applied hazard value and "
-                    "fragility used for each water facility.",
+                    "fragility used for each pipeline.",
                     "type": "incore:pipelineDamageSupplement",
                 },
             ],

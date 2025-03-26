@@ -22,7 +22,7 @@ class PipelineRepairCost(BaseAnalysis):
         super(PipelineRepairCost, self).__init__(incore_client)
 
     def run(self):
-        """Executes pipline facility repair cost analysis."""
+        """Executes pipline repair cost analysis."""
 
         pipeline_df = self.get_input_dataset("pipeline").get_dataframe_from_shapefile()
         pipeline_dmg_df = self.get_input_dataset(
@@ -233,8 +233,7 @@ class PipelineRepairCost(BaseAnalysis):
                 {
                     "id": "pipeline_dmg",
                     "required": True,
-                    "description": "Damage state for each pipeline. Output from pipeline damage repair rate "
-                    "analysis",
+                    "description": "Damage state for each pipeline. Output from pipeline damage repair rate analysis.",
                     "type": ["ergo:pipelineDamageVer3"],
                 },
                 {

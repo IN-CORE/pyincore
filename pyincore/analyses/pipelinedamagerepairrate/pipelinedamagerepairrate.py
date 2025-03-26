@@ -497,7 +497,7 @@ class PipelineDamageRepairRate(BaseAnalysis):
                     "id": "metadata",
                     "parent_type": "pipeline",
                     "description": "JSON file with additional metadata about the applied hazard value and "
-                    "fragility used for each water facility.",
+                    "fragility used for each pipeline.",
                     "type": "incore:pipelineDamageSupplement",
                 },
             ],
