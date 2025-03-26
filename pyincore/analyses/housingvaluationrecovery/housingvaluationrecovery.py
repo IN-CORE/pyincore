@@ -48,7 +48,10 @@ class HousingValuationRecovery(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "housing-valuation-recovery",
-            "description": "Housing Valuation Recovery Analysis",
+            "description": "The model forecasts parcel-level building values and their changes over an eight-year "
+                           "period following a disaster. It is calibrated using demographic data, parcel records, and "
+                           "post-disaster building value trends from Hurricane Ike (2008) in Galveston, Texas, relying "
+                           "on pre-disaster Census or ACS data and parcel records for its predictions.",
             "input_parameters": [
                 {
                     "id": "base_year",
