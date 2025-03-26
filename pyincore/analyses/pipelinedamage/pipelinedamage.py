@@ -259,42 +259,43 @@ class PipelineDamage(BaseAnalysis):
         """
         return {
             "name": "pipeline-damage",
-            "description": "Buried pipeline damage analysis",
+            "description": "This analysis computes buried pipeline damage based on a specific hazard.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
-                    "description": "Hazard Type",
+                    "description": "Hazard type to use in the analysis (e.g. earthquake).",
                     "type": str,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
-                    "description": "Hazard ID",
+                    "description": "ID of the hazard to use in the analysis for computing damage.",
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
-                    "description": "Fragility key to use in mapping dataset",
+                    "description": "Fragility key to use in the mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request. Default is 1.",
                     "type": int,
                 },
                 {
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
-                    "description": "Geology dataset id",
+                    "description": "ID of the dataset containing Liquefaction geology/susceptibility information. If "
+                    "not provided, liquefaction will be ignored.",
                     "type": str,
                 },
             ],
@@ -302,7 +303,7 @@ class PipelineDamage(BaseAnalysis):
                 {
                     "id": "hazard",
                     "required": False,
-                    "description": "Hazard object",
+                    "description": "Hazard object. This can be specified in place of the hazard type and ID.",
                     "type": ["earthquake", "tsunami"],
                 },
             ],
@@ -310,13 +311,14 @@ class PipelineDamage(BaseAnalysis):
                 {
                     "id": "pipeline",
                     "required": True,
-                    "description": "Pipeline Inventory",
+                    "description": "Dataset containing pipeline inventory.",
                     "type": ["ergo:buriedPipelineTopology", "ergo:pipeline"],
                 },
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the water facility "
+                    "inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
             ],
@@ -324,13 +326,14 @@ class PipelineDamage(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "pipeline",
-                    "description": "CSV file of damage states for pipeline damage",
+                    "description": "A CSV file with limit state probabilities and damage states for each pipeline.",
                     "type": "incore:pipelineDamageVer3",
                 },
                 {
                     "id": "metadata",
                     "parent_type": "pipeline",
-                    "description": "Json file with information about applied hazard value and fragility",
+                    "description": "JSON file with additional metadata about the applied hazard value and "
+                    "fragility used for each water facility.",
                     "type": "incore:pipelineDamageSupplement",
                 },
             ],
