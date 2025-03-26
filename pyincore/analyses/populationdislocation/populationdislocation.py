@@ -35,12 +35,12 @@ class PopulationDislocation(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "population-dislocation",
-            "description": "Population Dislocation Analysis",
+            "description": "This analysis computes the population dislocation due to the damage of a specific hazard.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Result CSV dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
@@ -53,37 +53,37 @@ class PopulationDislocation(BaseAnalysis):
                 {
                     "id": "choice_dislocation",
                     "required": False,
-                    "description": "Flag to calculate choice dislocation",
+                    "description": "Flag to calculate choice dislocation.",
                     "type": bool,
                 },
                 {
                     "id": "choice_dislocation_cutoff",
                     "required": False,
-                    "description": "Choice dislocation cutoff",
+                    "description": "Choice dislocation cutoff.",
                     "type": float,
                 },
                 {
                     "id": "choice_dislocation_ds",
                     "required": False,
-                    "description": "Damage state to use for choice dislocation ",
+                    "description": "Damage state to use for choice dislocation.",
                     "type": str,
                 },
                 {
                     "id": "unsafe_occupancy",
                     "required": False,
-                    "description": "Flag to calculate unsafe occupancy",
+                    "description": "Flag to calculate unsafe occupancy.",
                     "type": bool,
                 },
                 {
                     "id": "unsafe_occupancy_cutoff",
                     "required": False,
-                    "description": "Unsafe occupancy cutoff",
+                    "description": "Unsafe occupancy cutoff.",
                     "type": float,
                 },
                 {
                     "id": "unsafe_occupancy_ds",
                     "required": False,
-                    "description": "Damage state to use for unsafe occupancy ",
+                    "description": "Damage state to use for unsafe occupancy.",
                     "type": str,
                 },
             ],
@@ -91,7 +91,7 @@ class PopulationDislocation(BaseAnalysis):
                 {
                     "id": "building_dmg",
                     "required": True,
-                    "description": "Building damage results CSV file",
+                    "description": "Damage state for each building. Output from building damage.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingDamageVer5",
@@ -102,20 +102,20 @@ class PopulationDislocation(BaseAnalysis):
                 {
                     "id": "housing_unit_allocation",
                     "required": True,
-                    "description": "A csv file with the merged dataset of the inputs, aka Probabilistic"
-                    "House Unit Allocation",
+                    "description": "A CSV file with the merged dataset of the inputs, aka Probabilistic"
+                    "House Unit Allocation.",
                     "type": ["incore:housingUnitAllocation"],
                 },
                 {
                     "id": "block_group_data",
                     "required": True,
-                    "description": "Block group racial distribution census CSV data",
+                    "description": "A CSV file with the block group racial distribution census data.",
                     "type": ["incore:blockGroupData"],
                 },
                 {
                     "id": "value_loss_param",
                     "required": True,
-                    "description": "A table with value loss beta distribution parameters based on Bai et al. 2009",
+                    "description": "A table with value loss beta distribution parameters based on Bai et al. 2009.",
                     "type": ["incore:valuLossParam"],
                 },
             ],
@@ -123,8 +123,7 @@ class PopulationDislocation(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "population_block",
-                    "description": "A csv file with population dislocation result "
-                    "aggregated to the block group level",
+                    "description": "A CSV file with population dislocation result aggregated to the block group level.",
                     "type": "incore:popDislocation",
                 }
             ],
