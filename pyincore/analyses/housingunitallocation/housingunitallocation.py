@@ -65,7 +65,7 @@ class HousingUnitAllocation(BaseAnalysis):
             "output_datasets": [
                 {
                     "id": "result",
-                    "description": "A csv file with the merged dataset of the inputs containing a probabilistic"
+                    "description": "A CSV file with the merged dataset of the inputs containing a probabilistic"
                     "housing unit allocation.",
                     "type": "incore:housingUnitAllocation",
                 }

@@ -277,13 +277,13 @@ class EpfRestoration(BaseAnalysis):
                 {
                     "id": "time_interval",
                     "required": False,
-                    "description": "Incremental interval for time in days to compute repair time. Default to 1",
+                    "description": "Incremental interval for time in days to compute repair time. Default to 1.",
                     "type": float,
                 },
                 {
                     "id": "pf_interval",
                     "required": False,
-                    "description": "Incremental interval for percentage of functionality. Default to 0.1",
+                    "description": "Incremental interval for percentage of functionality. Default to 0.1.",
                     "type": float,
                 },
                 {
@@ -322,34 +322,34 @@ class EpfRestoration(BaseAnalysis):
                 {
                     "id": "inventory_restoration_map",
                     "parent_type": "",
-                    "description": "A csv file recording the mapping relationship between GUID and restoration id "
+                    "description": "A CSV file recording the mapping relationship between GUID and restoration id "
                     "applicable.",
                     "type": "incore:inventoryRestorationMap",
                 },
                 {
                     "id": "pf_results",
                     "parent_type": "",
-                    "description": "A csv file recording functionality change with time for each class and limit "
+                    "description": "A CSV file recording functionality change with time for each class and limit "
                     "state.",
                     "type": "incore:epfRestorationFunc",
                 },
                 {
                     "id": "time_results",
                     "parent_type": "",
-                    "description": "A csv file recording repair time at certain functionality recovery for each class "
+                    "description": "A CSV file recording repair time at certain functionality recovery for each class "
                     "and limit state.",
                     "type": "incore:epfRestorationTime",
                 },
                 {
                     "id": "func_results",
                     "parent_type": "",
-                    "description": "A csv file recording discretized functionality over time.",
+                    "description": "A CSV file recording discretized functionality over time.",
                     "type": "incore:epfDiscretizedRestorationFunc",
                 },
                 {
                     "id": "repair_times",
                     "parent_type": "",
-                    "description": "A csv file recording repair time at full functionality recovery for each guid "
+                    "description": "A CSV file recording repair time at full functionality recovery for each guid "
                     "and limit state.",
                     "type": "incore:epfRepairTime",
                 },

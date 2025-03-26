@@ -436,7 +436,7 @@ class EpfDamage(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "epfs",
-                    "description": "A csv file with limit state probabilities and damage states "
+                    "description": "A CSV file with limit state probabilities and damage states "
                     "for each electric power facility.",
                     "type": "incore:epfDamageVer3",
                 },

@@ -686,8 +686,7 @@ class HousingRecoverySequential(BaseAnalysis):
                 {
                     "id": "ds_result",
                     "parent_type": "housing_recovery_block",
-                    "description": "A csv file with housing recovery sequences."
-                    "at the individual household level",
+                    "description": "A CSV file with housing recovery sequences at the individual household level.",
                     "type": "incore:housingRecoveryHistory",
                 }
             ],
