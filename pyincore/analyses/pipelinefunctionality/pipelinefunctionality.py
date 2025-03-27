@@ -144,7 +144,7 @@ class PipelineFunctionality(BaseAnalysis):
                 {
                     "id": "pipeline_repair_rate_damage",
                     "required": True,
-                    "description": "CSV file of damage repair rate for each sample. Output from pipeline "
+                    "description": "A CSV file of damage repair rate for each sample. Output from pipeline "
                     "damage repair rate analysis.",
                     "type": ["ergo:pipelineDamageVer3"],
                 },
@@ -152,12 +152,12 @@ class PipelineFunctionality(BaseAnalysis):
             "output_datasets": [
                 {
                     "id": "failure_probability",
-                    "description": "CSV file of failure probability.",
+                    "description": "A CSV file of failure probability.",
                     "type": "incore:failureProbability",
                 },
                 {
                     "id": "sample_failure_state",
-                    "description": "CSV file of failure state for each sample.",
+                    "description": "A CSV file of failure state for each sample.",
                     "type": "incore:sampleFailureState",
                 },
             ],

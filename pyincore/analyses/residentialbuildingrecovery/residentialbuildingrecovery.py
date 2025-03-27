@@ -612,30 +612,31 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         """
         return {
             "name": "residential-building-recovery",
-            "description": "calculate residential building recovery",
+            "description": "This analysis calculates the delay time, recovery time, and recovery percentage for "
+            "residential buildings.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "name of the result",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "num_samples",
                     "required": True,
-                    "description": "Number of sample scenarios",
+                    "description": "Number of Monte Carlo simulation samples.",
                     "type": int,
                 },
                 {
                     "id": "repair_key",
                     "required": False,
-                    "description": "Repair key to use in mapping dataset",
+                    "description": "Repair key to use in repair mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "seed",
                     "required": False,
-                    "description": "Initial seed for the probabilistic model",
+                    "description": "Initial seed for the probabilistic model.",
                     "type": int,
                 },
             ],
@@ -643,7 +644,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Dataset containing building inventory.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingInventoryVer5",
@@ -654,49 +655,49 @@ class ResidentialBuildingRecovery(BaseAnalysis):
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the pipeline inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
                 {
                     "id": "sample_damage_states",
                     "required": False,
-                    "description": "Sample damage states",
+                    "description": "A CSV file of damage state for each sample.",
                     "type": ["incore:sampleDamageState"],
                 },
                 {
                     "id": "socio_demographic_data",
                     "required": True,
-                    "description": "Socio-demographic data with household income group predictions",
+                    "description": "Socio-demographic data with household income group predictions.",
                     "type": ["incore:socioDemograhicData"],
                 },
                 {
                     "id": "financial_resources",
                     "required": True,
-                    "description": "Financial resources by household income groups",
+                    "description": "Financial resources by household income groups.",
                     "type": ["incore:householdFinancialResources"],
                 },
                 {
                     "id": "delay_factors",
                     "required": True,
                     "description": "Delay impeding factors such as post-disaster inspection, insurance claim, "
-                    "and government permit based on building's damage state. Provided by REDi framework",
+                    "and government permit based on building's damage state. Provided by REDi framework.",
                     "type": ["incore:buildingRecoveryFactors"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "total_delay",
-                    "description": "CSV file of residential building delay time",
+                    "description": "A CSV file of residential building delay time.",
                     "type": "incore:buildingRecoveryDelay",
                 },
                 {
                     "id": "recovery",
-                    "description": "CSV file of residential  building recovery time",
+                    "description": "A CSV file of residential building recovery time.",
                     "type": "incore:buildingRecoveryTime",
                 },
                 {
                     "id": "time_stepping_recovery",
-                    "description": "CSV file of residential building recovery percent",
+                    "description": "A CSV file of residential building recovery percent.",
                     "type": "incore:buildingRecovery",
                 },
             ],
