@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Enable internal network names for each service [#638](https://github.com/IN-CORE/pyincore/issues/638)
 - Update production URL references to tools.in-core.org and dev to dev.in-core.org [#634](https://github.com/IN-CORE/pyincore/issues/634)
+- Descriptions of the analyses, inputs and parameters. [#648](https://github.com/IN-CORE/pyincore/issues/648)
 
 ### Fixed
 - Documentation container tagging error by github action [#631](https://github.com/IN-CORE/pyincore/issues/631)
