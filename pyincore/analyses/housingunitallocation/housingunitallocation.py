@@ -14,24 +14,24 @@ class HousingUnitAllocation(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "housing-unit-allocation",
-            "description": "Probabilistic Housing Unit Allocation Analysis",
+            "description": "Probabilistic housing unit allocation that allocates housing units to address points.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Result CSV dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "seed",
                     "required": True,
-                    "description": "Initial seed for the probabilistic model",
+                    "description": "Initial seed for the probabilistic model.",
                     "type": int,
                 },
                 {
                     "id": "iterations",
                     "required": True,
-                    "description": "No of iterations to perform the probabilistic model on",
+                    "description": "Number of iterations to perform the probabilistic model on.",
                     "type": int,
                 },
             ],
@@ -39,7 +39,7 @@ class HousingUnitAllocation(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Dataset containing the building inventory.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingInventoryVer5",
@@ -51,22 +51,22 @@ class HousingUnitAllocation(BaseAnalysis):
                     "id": "housing_unit_inventory",
                     "required": True,
                     "description": "Housing Unit Inventory CSV data, aka Census Block data. Corresponds to a possible "
-                    "occupied housing unit, vacant housing unit, or a group quarters",
+                    "occupied housing unit, vacant housing unit, or a group quarters.",
                     "type": ["incore:housingUnitInventory"],
                 },
                 {
                     "id": "address_point_inventory",
                     "required": True,
                     "description": "CSV dataset of address locations available in a block. Corresponds to a "
-                    "specific address where a housing unit or group quarters could be assigned",
+                    "specific address where a housing unit or group quarters could be assigned.",
                     "type": ["incore:addressPoints"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "result",
-                    "description": "A csv file with the merged dataset of the inputs, aka Probabilistic"
-                    "Housing Unit Allocation",
+                    "description": "A CSV file with the merged dataset of the inputs containing a probabilistic"
+                    "housing unit allocation.",
                     "type": "incore:housingUnitAllocation",
                 }
             ],

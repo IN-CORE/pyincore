@@ -350,56 +350,56 @@ class EpfDamage(BaseAnalysis):
         """
         return {
             "name": "epf-damage",
-            "description": "Electric Power Facility damage analysis.",
+            "description": "This analysis computes electric power facility damage based on a particular hazard. "
+                           "Currently supported hazards are: earthquake, tsunami, tornado and hurricane.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "A name of the resulting dataset",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
-                    "description": "Hazard type (e.g. earthquake).",
+                    "description": "Hazard type to use in the analysis (e.g. earthquake).",
                     "type": str,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
-                    "description": "Hazard ID which defines the particular hazard (e.g. New madrid earthquake "
-                    "using Atkinson Boore 1995).",
+                    "description": "ID of the hazard to use in the analysis for computing damage.",
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
-                    "description": "Fragility key to use in mapping dataset ()",
+                    "description": "Fragility key to use in mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "liquefaction_fragility_key",
                     "required": False,
-                    "description": "Fragility key to use in liquefaction mapping dataset",
+                    "description": "Fragility key to use in liquefaction mapping dataset, if applicable.",
                     "type": str,
                 },
                 {
                     "id": "use_liquefaction",
                     "required": False,
-                    "description": "Use a ground liquifacition to modify damage interval.",
+                    "description": "Use liquefaction to modify damage intervals, if applicable.",
                     "type": bool,
                 },
                 {
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
-                    "description": "Liquefaction geology/susceptibility dataset id. "
-                    "If not provided, liquefaction will be ignored",
+                    "description": "ID of the dataset containing Liquefaction geology/susceptibility information. If "
+                                   "not provided, liquefaction will be ignored.",
                     "type": str,
                 },
                 {
                     "id": "use_hazard_uncertainty",
                     "required": False,
-                    "description": "Use hazard uncertainty",
+                    "description": "Use hazard uncertainty, if applicable.",
                     "type": bool,
                 },
                 {
@@ -413,7 +413,7 @@ class EpfDamage(BaseAnalysis):
                 {
                     "id": "hazard",
                     "required": False,
-                    "description": "Hazard object",
+                    "description": "Hazard object. This can be specified in place of the hazard type and ID.",
                     "type": ["earthquake", "tornado", "hurricane", "flood", "tsunami"],
                 },
             ],
@@ -421,13 +421,14 @@ class EpfDamage(BaseAnalysis):
                 {
                     "id": "epfs",
                     "required": True,
-                    "description": "Electric Power Facility Inventory",
+                    "description": "Dataset containing the electric power facility inventory.",
                     "type": ["incore:epf", "ergo:epf", "incore:epfVer2"],
                 },
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the electric "
+                                   "power facility inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
             ],
@@ -435,15 +436,15 @@ class EpfDamage(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "epfs",
-                    "description": "A csv file with limit state probabilities and damage states "
-                    "for each electric power facility",
+                    "description": "A CSV file with limit state probabilities and damage states "
+                    "for each electric power facility.",
                     "type": "incore:epfDamageVer3",
                 },
                 {
                     "id": "metadata",
                     "parent_type": "epfs",
-                    "description": "additional metadata in json file about applied hazard value and "
-                    "fragility",
+                    "description": "Additional metadata in json file about applied hazard value and "
+                    "fragility.",
                     "type": "incore:epfDamageSupplement",
                 },
             ],
