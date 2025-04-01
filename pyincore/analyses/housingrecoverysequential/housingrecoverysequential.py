@@ -605,37 +605,38 @@ class HousingRecoverySequential(BaseAnalysis):
         """
         return {
             "name": "housing-recovery-serial",
-            "description": "Household-level housing recovery serial model",
+            "description": "This analysis computes the series of household recovery states given a population "
+                           "dislocation dataset, a transition probability matrix (TPM) and an initial state vector.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Result CSV dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "t_delta",
                     "required": True,
-                    "description": "size of the analysis time step",
+                    "description": "Size of the analysis time step.",
                     "type": float,
                 },
                 {
                     "id": "t_final",
                     "required": True,
-                    "description": "total duration",
+                    "description": "Total duration.",
                     "type": float,
                 },
                 {
                     "id": "seed",
                     "required": False,
-                    "description": "Seed to ensure replication of the Markov Chain path"
+                    "description": "Seed to ensure replication of the Markov Chain path."
                     "in connection with Population Dislocation.",
                     "type": int,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request.",
                     "type": int,
                 },
             ],
@@ -643,7 +644,7 @@ class HousingRecoverySequential(BaseAnalysis):
                 {
                     "id": "population_dislocation_block",
                     "required": True,
-                    "description": "A csv file with population dislocation result "
+                    "description": "A csv file with population dislocation result."
                     "aggregated to the block group level",
                     "type": ["incore:popDislocation"],
                 },
@@ -657,27 +658,27 @@ class HousingRecoverySequential(BaseAnalysis):
                 {
                     "id": "initial_stage_probabilities",
                     "required": True,
-                    "description": "initial mass probability function for stage 0 of the Markov Chain",
+                    "description": "Initial mass probability function for stage 0 of the Markov Chain.",
                     "type": ["incore:houseRecInitialStageProbability"],
                 },
                 {
                     "id": "sv_result",
                     "required": False,
                     "description": "A csv file with zones containing demographic factors"
-                    "qualified by a social vulnerability score",
+                    "qualified by a social vulnerability score.",
                     "type": ["incore:socialVulnerabilityScore"],
                 },
                 {
                     "id": "zone_def_sv",
                     "required": False,
                     "description": "A json file with thresholds and definitions per zone "
-                    "based on social vulnerability analysis",
+                    "based on social vulnerability analysis.",
                     "type": ["incore:zoneDefinitionsSocialVulnerability"],
                 },
                 {
                     "id": "zone_def_hhinc",
                     "required": False,
-                    "description": "A json file with thresholds and definitions per zone based on household income",
+                    "description": "A json file with thresholds and definitions per zone based on household income.",
                     "type": ["incore:zoneDefinitionsHouseholdIncome"],
                 },
             ],
@@ -685,8 +686,7 @@ class HousingRecoverySequential(BaseAnalysis):
                 {
                     "id": "ds_result",
                     "parent_type": "housing_recovery_block",
-                    "description": "A csv file with housing recovery sequences"
-                    "at the individual household level",
+                    "description": "A CSV file with housing recovery sequences at the individual household level.",
                     "type": "incore:housingRecoveryHistory",
                 }
             ],
