@@ -22,7 +22,7 @@ class PipelineRepairCost(BaseAnalysis):
         super(PipelineRepairCost, self).__init__(incore_client)
 
     def run(self):
-        """Executes pipline repair cost analysis."""
+        """Executes pipeline repair cost analysis."""
 
         pipeline_df = self.get_input_dataset("pipeline").get_dataframe_from_shapefile()
         pipeline_dmg_df = self.get_input_dataset(
@@ -188,7 +188,7 @@ class PipelineRepairCost(BaseAnalysis):
         """
         return {
             "name": "pipeline-repair-cost",
-            "description": "This analysis estimates the repair costs of water pipeline for different "
+            "description": "This analysis estimates the repair costs of pipeline for different "
             "simulation scenarios based on their damage states, replacement costs, and damage ratios.",
             "input_parameters": [
                 {

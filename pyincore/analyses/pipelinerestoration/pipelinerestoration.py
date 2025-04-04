@@ -55,8 +55,7 @@ class PipelineRestoration(BaseAnalysis):
                 {
                     "id": "restoration_key",
                     "required": False,
-                    "description": "Restoration key to use in the mapping dataset that maps restoration curves to "
-                    "water pipelines.",
+                    "description": "Restoration key to use in the mapping dataset that maps restoration curves to pipelines.",
                     "type": str,
                 },
             ],

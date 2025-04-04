@@ -655,7 +655,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the pipeline inventory.",
+                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the building inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
                 {
