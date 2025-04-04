@@ -244,48 +244,48 @@ class TrafficFlowRecovery(BaseAnalysis):
         """
         return {
             "name": "traffic-flow-recovery",
-            "description": "traffic flow recovery model",
+            "description": "This analysis calculate a traffic flow network post-disaster recovery.",
             "input_parameters": [
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request. Default is 1.",
                     "type": int,
                 },
                 {
                     "id": "pm",
                     "required": True,
-                    "description": "traffic flow performance metrics 0: WIPW,  1:Free flow travel time",
+                    "description": "Traffic flow performance metrics.Set 0 for WIPW, set 1 for Free flow travel time.",
                     "type": int,
                 },
                 {
                     "id": "ini_num_population",
                     "required": True,
-                    "description": "ini_num_population: 5 or 50",
+                    "description": "An initial population number, 5 or 50",
                     "type": int,
                 },
                 {
                     "id": "population_size",
                     "required": True,
-                    "description": "population_size: 3 or 30",
+                    "description": "A population_size, 3 or 30",
                     "type": int,
                 },
                 {
                     "id": "num_generation",
                     "required": True,
-                    "description": "num_generation: 2 or 250",
+                    "description": "Number of iterations per scenario, 2 or 250",
                     "type": int,
                 },
                 {
                     "id": "mutation_rate",
                     "required": True,
-                    "description": "0.1",
+                    "description": "Mutation rate for the NSGA-II algorithm used for recovery rate. e.g. 0.1",
                     "type": float,
                 },
                 {
                     "id": "crossover_rate",
                     "required": True,
-                    "description": "1.0",
+                    "description": "Crossover rate for the NSGA-II algorithm used for recovery rate. e.g. 1.0",
                     "type": float,
                 },
             ],
@@ -293,51 +293,50 @@ class TrafficFlowRecovery(BaseAnalysis):
                 {
                     "id": "nodes",
                     "required": True,
-                    "description": "road nodes",
+                    "description": "Dataset containing road network nodes.",
                     "type": ["ergo:roadNetwork"],
                 },
                 {
                     "id": "links",
                     "required": True,
-                    "description": "road links",
+                    "description": "Dataset containing road network links.",
                     "type": ["ergo:roadNetwork"],
                 },
                 {
                     "id": "bridges",
                     "required": True,
-                    "description": "bridges",
+                    "description": "Dataset containing bridges.",
                     "type": ["ergo:bridges", "ergo:bridgesVer2", "ergo:bridgesVer3"],
                 },
                 {
                     "id": "bridge_damage_value",
                     "required": True,
-                    "description": "",
+                    "description": "Dataset containing bridge damage.",
                     "type": ["incore:bridgeDamageValue"],
                 },
                 {
                     "id": "unrepaired_bridge",
                     "required": True,
-                    "description": "",
+                    "description": "Dataset containing unrepaired bridges.",
                     "type": ["incore:unrepairedBridge"],
                 },
                 {
                     "id": "ADT",
                     "required": True,
-                    "description": "",
+                    "description": "Dataset containing daily traffic information.",
                     "type": ["incore:ADT"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "optimal_solution_of_bridge_repair_schedule",
-                    "description": "List the Bridge id and its ending repair time.",
+                    "description": "CSV file containing a bridge ids and ending repair time.",
                     "type": "incore:transportationRepairSchedule",
                 },
                 {
                     "id": "overall_traffic_flow_recovery_trajectory",
-                    "description": "shows the overall recovery trajectory of the "
-                    + "traffic flow system. List the ending time and "
-                    + "travel efficiency for the whole network.",
+                    "description": "CSV file showing the overall recovery trajectory of the traffic flow system. "
+                                   "It includes the ending time and travel efficiency for the whole network.",
                     "type": "incore:trafficFlowRecovery",
                 },
             ],
