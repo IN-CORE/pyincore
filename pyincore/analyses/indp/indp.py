@@ -1100,7 +1100,7 @@ class INDP(BaseAnalysis):
         return {
             "name": "INDP",
             "description": "Interdependent Network Design Problem (INDP) models the restoration of networked "
-                           "systems following disruptions.",
+            "systems following disruptions.",
             "input_parameters": [
                 {
                     "id": "network_type",
@@ -1150,9 +1150,9 @@ class INDP(BaseAnalysis):
                     "id": "RC",
                     "required": True,
                     "description": "List of resource caps or the number of available resources at each step of "
-                   "the analysis. Each item in the list is a dictionary specifying the resource type and the "
-                   "corresponding quantity available. "
-                   "For example: "
+                    "the analysis. Each item in the list is a dictionary specifying the resource type and the "
+                    "corresponding quantity available. "
+                    "For example: "
                     "* If `network_type`=*from_csv*, you have two options:* if, for example, "
                     '`R_c`= [{"budget": 3}, {"budget": 6}], then the analysis is done for the cases '
                     'when there are 3 and 6 resources available of type "budget" '
@@ -1203,14 +1203,14 @@ class INDP(BaseAnalysis):
                     "id": "solver_engine",
                     "required": False,
                     "description": "Solver to use for optimization model. Such as gurobi/glpk/scip, "
-                                   "default to scip.",
+                    "default to scip.",
                     "type": str,
                 },
                 {
                     "id": "solver_path",
                     "required": False,
                     "description": "Solver to use for optimization model. Such as gurobi/glpk/scip, "
-                                   "default to scip.",
+                    "default to scip.",
                     "type": str,
                 },
                 {
@@ -1231,7 +1231,7 @@ class INDP(BaseAnalysis):
                     "id": "wf_restoration_time",
                     "required": True,
                     "description": "Recording repair time at certain functionality recovery "
-                                   "for each class."
+                    "for each class."
                     "and limit state.",
                     "type": ["incore:waterFacilityRepairTime"],
                 },
@@ -1245,7 +1245,7 @@ class INDP(BaseAnalysis):
                     "id": "epf_restoration_time",
                     "required": True,
                     "description": "Recording repair time at certain functionality recovery for "
-                                   "each class."
+                    "each class."
                     "and limit state.",
                     "type": ["incore:epfRepairTime"],
                 },

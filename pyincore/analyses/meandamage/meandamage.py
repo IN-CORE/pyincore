@@ -33,7 +33,9 @@ class MeanDamage(BaseAnalysis):
         """
         return {
             "name": "mean-damage",
-            "description": "Calculate the mean and expected damage using damage ratio table.",
+            "description": "The process for computing the structural damage uses mean damage and standard deviation values from damage"
+            "ratios tables. The four damage state probabilities are multiplied by the mean damage and aggregated to get the"
+            "Mean damage for each individual structure (building, bridge, waterfacility etc.).",
             "input_parameters": [
                 {
                     "id": "result_name",
@@ -45,7 +47,7 @@ class MeanDamage(BaseAnalysis):
                     "id": "damage_interval_keys",
                     "required": True,
                     "description": "Damage interval column that must contain exactly four values, "
-                                   "arranged in order.",
+                    "arranged in order.",
                     "type": List[str],
                 },
                 {

@@ -36,7 +36,10 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
         """
         return {
             "name": "monte-carlo-limit-state-probability",
-            "description": "Calculate the probability of limit state in monte-carlo simulation.",
+            "description": "This analysis calculates a probability of limit state using a stochastic process. Limit state probability and"
+            "damage state are derived using the dictionary of failed damage states in the input infrastructure dataset."
+            "Limit state probability is calculated from all stochastic runs, limit state shows all infrastructure standings as"
+            "a string of failed (0) and not failed (1) states of each individual run.",
             "input_parameters": [
                 {
                     "id": "result_name",

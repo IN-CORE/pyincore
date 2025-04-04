@@ -178,7 +178,10 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
         """
         return {
             "name": "joplin-empirical-building-restoration",
-            "description": "Values (in days) for the predicted restoration time of the building.",
+            "description": "Joplin Empirical Building Restoration Model generates a random realization for the restoration time of"
+            "a building damaged in a tornado event to be restored to a certain functionality level. Functionality"
+            "levels in this model are defined according to Koliou and van de Lindt (2020) and range from Functionality"
+            "Level 4 (FL4, the lowest functionality) to Functionality Level 0 (FL0, full functionality).",
             "input_parameters": [
                 {
                     "id": "result_name",

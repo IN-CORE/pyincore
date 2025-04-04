@@ -27,6 +27,7 @@ class MlEnabledCgeJoplin(CoreCGEML):
     Args:
         CoreCGEML (class): The base class for the ML enabled CGE model.
     """
+
     model = "Machine Learning Enabled Computable General Equilibrium - Joplin"
 
     # Coefficients files
@@ -142,7 +143,10 @@ class MlEnabledCgeJoplin(CoreCGEML):
     def get_spec(self):
         return {
             "name": "Joplin-small-calibrated",
-            "description": "CGE model for Joplin.",
+            "description": "The “Machine Learning Enabled Computable General Equilibrium (CGE) - Joplin” analysis merges advanced"
+            " machine learning with traditional CGE models to offer unprecedented insights into the economic impacts of disaster "
+            "scenarios on Joplin. Trained on a comprehensive dataset of numerous simulated disasters and their economic effects, "
+            "this hybrid approach excels in predicting the intricate dynamics of the city’s economy under various crises.",
             "input_parameters": [
                 {
                     "id": "result_name",

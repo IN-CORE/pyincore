@@ -481,12 +481,16 @@ class NciFunctionality(BaseAnalysis):
         """
         return {
             "name": "network-cascading-interdepedency-functionality",
-            "description": "Network cascading interdepedency functionality analysis.",
+            "description": "This analysis computes the output of the Leontief equation for functional dependencies between two"
+            "interdependent networks having functionality information per node. These dependencies capture cascading"
+            "dependencies on infrastructure functionality, expressed in terms of discrete points."
+            "The output of the computation consists of two datasets, one per each labeled network, with new cascading"
+            "functionalities accompanying the original discrete ones.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Result CSV dataset name prefix.",
                     "type": str,
                 },
                 {
@@ -500,75 +504,75 @@ class NciFunctionality(BaseAnalysis):
                 {
                     "id": "epf_network",
                     "required": True,
-                    "description": "EPN network.",
+                    "description": "A EPN network dataset.",
                     "type": ["incore:epnNetwork"],
                 },
                 {
                     "id": "wds_network",
                     "required": True,
-                    "description": "WDS network.",
+                    "description": "A WDS network.",
                     "type": ["incore:waterNetwork"],
                 },
                 {
                     "id": "epf_wds_intdp_table",
                     "required": True,
-                    "description": "Table containing interdependency information from EPN to WDS networks.",
+                    "description": "A Table containing interdependency information from EPN to WDS networks.",
                     "type": ["incore:networkInterdependencyTable"],
                 },
                 {
                     "id": "wds_epf_intdp_table",
                     "required": True,
-                    "description": "Table containing interdependency information from WDS to EPF networks.",
+                    "description": "A Table containing interdependency information from WDS to EPF networks.",
                     "type": ["incore:networkInterdependencyTable"],
                 },
                 {
                     "id": "epf_subst_failure_results",
                     "required": True,
-                    "description": "EPF substation failure results.",
+                    "description": "An EPF substation failure results.",
                     "type": ["incore:failureProbability"],
                 },
                 {
                     "id": "epf_inventory_rest_map",
                     "required": True,
-                    "description": "EPF inventory restoration map.",
+                    "description": "An EPF inventory restoration map.",
                     "type": ["incore:inventoryRestorationMap"],
                 },
                 {
                     "id": "epf_time_results",
                     "required": True,
-                    "description": "CSV file of recording repair time for EPF per class and limit state.",
+                    "description": "A CSV file of recording repair time for EPF per class and limit state.",
                     "type": ["incore:epfRestorationTime"],
                 },
                 {
                     "id": "wds_dmg_results",
                     "required": True,
-                    "description": "WDS damage results.",
+                    "description": "A WDS damage results.",
                     "type": ["ergo:waterFacilityDamageVer6"],
                 },
                 {
                     "id": "wds_inventory_rest_map",
                     "required": True,
-                    "description": "WDS inventory restoration map.",
+                    "description": "A WDS inventory restoration map.",
                     "type": ["incore:inventoryRestorationMap"],
                 },
                 {
                     "id": "wds_time_results",
                     "required": True,
-                    "description": "CSV file of recording repair time for WDS per class and limit state.",
+                    "description": "A CSV file of recording repair time for WDS per class and limit state.",
                     "type": ["incore:waterFacilityRestorationTime"],
                 },
                 {
                     "id": "epf_damage",
                     "required": True,
-                    "description": "CSV file of limit state probabilities and damage states for each electric "
-                                   "power facility.",
+                    "description": "A CSV file of limit state probabilities and damage states for each electric "
+                    "power facility.",
                     "type": ["incore:epfDamageVer3"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "epf_cascading_functionality",
-                    "description": "CSV file of interdependent cascading network functionality for EPF.",
+                    "description": "A CSV file of interdependent cascading network functionality for EPF.",
                     "type": "incore:epfDiscretizedCascadingFunc",
                 }
             ],

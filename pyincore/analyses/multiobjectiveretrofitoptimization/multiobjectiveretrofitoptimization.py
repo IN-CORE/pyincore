@@ -1818,7 +1818,12 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         """
         return {
             "name": "multiobjective-retrofit-optimization",
-            "description": "Multiobjective retrofit optimization model.",
+            "description": "This analysis computes a series of linear programming models for single- and multi-objective"
+            "optimization related to the effect of extreme weather on a community in terms of three objective functions."
+            "The three objectives used in this program are to minimize economic loss, minimize population dislocation,"
+            "and maximize building functionality. The computation proceeds by iteratively solving constrained linear"
+            "models using epsilon steps."
+            "The output of the computation a collection of optimal resource allocations.",
             "input_parameters": [
                 {
                     "id": "result_name",
@@ -1847,7 +1852,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 {
                     "id": "budget_available",
                     "required": False,
-                    "description": "Custom budget value.",
+                    "description": "Choose a custom budget value.",
                     "type": float,
                 },
                 {
@@ -1865,7 +1870,7 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 {
                     "id": "scaling_factor",
                     "required": False,
-                    "description": "Custom scaling factor.",
+                    "description": "Choose a custom scaling factor.",
                     "type": float,
                 },
             ],
@@ -1873,13 +1878,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 {
                     "id": "building_related_data",
                     "required": True,
-                    "description": "Csv file with building related data required to evaluate retrofit strategies.",
+                    "description": "A CSV file with building related data required to evaluate retrofit strategies.",
                     "type": ["incore:multiobjectiveBuildingRelatedData"],
                 },
                 {
                     "id": "strategy_costs_data",
                     "required": True,
-                    "description": "Csv file with strategy cost data" "per building.",
+                    "description": "A CSV file with strategy cost data" "per building.",
                     "type": ["incore:multiobjectiveStrategyCosts"],
                 },
             ],
@@ -1887,13 +1892,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 {
                     "id": "optimal_solution_dv_x",
                     "parent_type": "",
-                    "description": "CSV file of optimal solution for decision variable x.",
+                    "description": "A CSV file of optimal solution for decision variable x.",
                     "type": "incore:multiobjectiveOptimalSolutionX",
                 },
                 {
                     "id": "optimal_solution_dv_y",
                     "parent_type": "",
-                    "description": "CSV file of optimal solution for decision variable y with initial and final retrofitted."
+                    "description": "A CSV file of optimal solution for decision variable y with initial and final retrofitted."
                     "strategies",
                     "type": "incore:multiobjectiveOptimalSolutionY",
                 },

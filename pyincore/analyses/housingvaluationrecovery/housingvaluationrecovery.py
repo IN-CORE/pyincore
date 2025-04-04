@@ -49,17 +49,17 @@ class HousingValuationRecovery(BaseAnalysis):
         return {
             "name": "housing-valuation-recovery",
             "description": "The model forecasts parcel-level building values and their changes over an eight-year "
-                           "period following a disaster. It is calibrated using demographic data, parcel records, and "
-                           "post-disaster building value trends from Hurricane Ike (2008) in Galveston, Texas, relying "
-                           "on pre-disaster Census or ACS data and parcel records for its predictions.",
+            "period following a disaster. It is calibrated using demographic data, parcel records, and "
+            "post-disaster building value trends from Hurricane Ike (2008) in Galveston, Texas, relying "
+            "on pre-disaster Census or ACS data and parcel records for its predictions.",
             "input_parameters": [
                 {
                     "id": "base_year",
                     "required": False,
                     "description": "Base year is used to calculate the improvement age. It should be set to the "
-                                   "tax assessment year that represents pre-disaster building values. For example, "
-                                   "in GCAD data, this corresponds to the improvement valuation before the impacts "
-                                   "of Hurricane Ike. The default value is 2008.",
+                    "tax assessment year that represents pre-disaster building values. For example, "
+                    "in GCAD data, this corresponds to the improvement valuation before the impacts "
+                    "of Hurricane Ike. The default value is 2008.",
                     "type": int,
                 },
                 {
@@ -80,8 +80,8 @@ class HousingValuationRecovery(BaseAnalysis):
                     "id": "building_area",
                     "required": True,
                     "description": "Building square footage and damage: Damage refers to the actual loss in "
-                                   "building value, expressed as a percentage, as observed in the County Appraisal "
-                                   "District (GCAD) data.",
+                    "building value, expressed as a percentage, as observed in the County Appraisal "
+                    "District (GCAD) data.",
                     "type": ["incore:buildingInventoryArea"],
                 },
                 {
@@ -95,7 +95,7 @@ class HousingValuationRecovery(BaseAnalysis):
                     "id": "census_appraisal_data",
                     "required": True,
                     "description": "Census data from the 2010 Decennial Census and Galveston County Appraisal "
-                                   "District (GCAD).",
+                    "District (GCAD).",
                     "type": ["incore:censusAppraisalData"],
                 },
             ],
@@ -103,9 +103,9 @@ class HousingValuationRecovery(BaseAnalysis):
                 {
                     "id": "result",
                     "description": "A CSV file containing building values for the six years following the disaster "
-                                   "event. Year -1 represents pre-impact conditions, while year 0 marks the impact "
-                                   "year. Index year values indicate building values relative to the base, pre-impact "
-                                   "value.",
+                    "event. Year -1 represents pre-impact conditions, while year 0 marks the impact "
+                    "year. Index year values indicate building values relative to the base, pre-impact "
+                    "value.",
                     "type": "incore:buildingValues",
                 }
             ],
@@ -212,17 +212,17 @@ class HousingValuationRecovery(BaseAnalysis):
 
     def get_owneship(self, popd):
         """Filter ownership based on the vacancy codes
-            Assumption:
-            Where ownershp is "missing", let vacancy codes 0/3/4 be considered owner-occupied,
-            and 1/2/5/6/7 be considered renter-occupied.
-            It is uncertain whether vacancy codes 3,4,5,6,7 will become owner- or renter-occupied or primarily
-            one or the other.
+        Assumption:
+        Where ownershp is "missing", let vacancy codes 0/3/4 be considered owner-occupied,
+        and 1/2/5/6/7 be considered renter-occupied.
+        It is uncertain whether vacancy codes 3,4,5,6,7 will become owner- or renter-occupied or primarily
+        one or the other.
 
-            Args:
-                popd (pd.DataFrame): Population dislocation results with ownership information.
+        Args:
+            popd (pd.DataFrame): Population dislocation results with ownership information.
 
-            Returns:
-                pd.DataFrame: Ownership data.
+        Returns:
+            pd.DataFrame: Ownership data.
 
         """
         # Create ownership dummy variable from popd.ownership
