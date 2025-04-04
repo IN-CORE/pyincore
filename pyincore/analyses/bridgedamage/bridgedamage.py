@@ -328,54 +328,71 @@ class BridgeDamage(BaseAnalysis):
         """
         return {
             "name": "bridge-damage",
-            "description": "bridge damage analysis",
+            "description": (
+                "This analysis computes bridge damage based on a particular hazard. Currently "
+                "supported hazards are: earthquake, tsunami, tornado, and hurricane.\n"
+                "The process for computing the structural damage is similar to other parts of "
+                "the built environment. First, a fragility is obtained based on the hazard type "
+                "and attributes of the bridge. Based on the fragility, the hazard intensity at "
+                "the location of the bridge is computed. Using this information, the probability "
+                "of exceeding each limit state is computed, along with the probability of damage.\n"
+                "For the case of an earthquake hazard, if the bridge dataset contains soil "
+                "information, the median value of the associated fragility can be modified to "
+                "account for liquefaction in the damage.\n"
+                "The outputs of this analysis are a CSV file with probabilities of damage and "
+                "a JSON file with information about hazards and fragilities."
+            ),
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
-                    "description": "Fragility key to use in mapping dataset",
+                    "description": "Fragility key used in mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "use_liquefaction",
                     "required": False,
-                    "description": "Use liquefaction",
+                    "description": "Use liquefaction, if applicable to the hazard. Default is False.",
                     "type": bool,
                 },
                 {
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
-                    "description": "Geology dataset id",
+                    "description": "Liquefaction geology/susceptibility dataset id. If not provided, liquefaction will be ignored.",
                     "type": str,
                 },
                 {
                     "id": "use_hazard_uncertainty",
                     "required": False,
-                    "description": "Use hazard uncertainty",
+                    "description": (
+                        "For model based hazard events, if the model supports uncertainty, "
+                        "then you can set this flag to indicate using the mean plus one standard deviation when computing damage. "
+                        "Default is false."
+                    ),
                     "type": bool,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request. Default is 1.",
                     "type": int,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
-                    "description": "Hazard object id",
+                    "description": "ID of the hazard from the Hazard service.",
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
-                    "description": "Hazards type",
+                    "description": "Hazard type (earthquake, tsunami, tornado, hurricaneWindfields).",
                     "type": str,
                 },
             ],
@@ -383,7 +400,7 @@ class BridgeDamage(BaseAnalysis):
                 {
                     "id": "hazard",
                     "required": False,
-                    "description": "Hazard object",
+                    "description": "Supported hazard object for using local and remote hazards.",
                     "type": ["earthquake", "tornado", "hurricane", "flood", "tsunami"],
                 },
             ],
@@ -391,13 +408,13 @@ class BridgeDamage(BaseAnalysis):
                 {
                     "id": "bridges",
                     "required": True,
-                    "description": "Bridge Inventory",
+                    "description": "Set the Bridge Inventory Dataset.",
                     "type": ["ergo:bridges", "ergo:bridgesVer2", "ergo:bridgesVer3"],
                 },
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "Set the DFR3 Mapping Set Object.",
                     "type": ["incore:dfr3MappingSet"],
                 },
             ],
@@ -405,14 +422,13 @@ class BridgeDamage(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "bridges",
-                    "description": "CSV file of bridge structural damage",
+                    "description": "CSV file of bridge structural damage.",
                     "type": "ergo:bridgeDamageVer3",
                 },
                 {
                     "id": "metadata",
                     "parent_type": "bridges",
-                    "description": "additional metadata in json file about applied hazard value and "
-                    "fragility",
+                    "description": "Information about applied hazard value and fragility in JSON format.",
                     "type": "incore:bridgeDamageSupplement",
                 },
             ],
