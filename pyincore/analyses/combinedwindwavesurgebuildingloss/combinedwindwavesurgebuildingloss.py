@@ -243,12 +243,16 @@ class CombinedWindWaveSurgeBuildingLoss(BaseAnalysis):
         """
         return {
             "name": "combined-wind-wave-surge-building-loss",
-            "description": "Combined wind wave and surge building loss analysis",
+            "description": (
+                "This analysis determines overall building loss from wind, flood and surge-wave damage"
+                "The output of this analysis is a CSV file with individual components of structural "
+                "and content loss as well as total loss."
+            ),
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
             ],
@@ -256,7 +260,7 @@ class CombinedWindWaveSurgeBuildingLoss(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Set Building Inventory Dataset.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingInventoryVer5",
@@ -267,31 +271,31 @@ class CombinedWindWaveSurgeBuildingLoss(BaseAnalysis):
                 {
                     "id": "wind_damage",
                     "required": True,
-                    "description": "Wind damage result that has damage intervals in it",
+                    "description": "Wind damage result that has damage intervals in it.",
                     "type": ["ergo:buildingDamageVer6"],
                 },
                 {
                     "id": "surge_wave_damage",
                     "required": True,
-                    "description": "Surge-wave damage result that has damage intervals in it",
+                    "description": "Surge-wave damage result that has damage intervals in it.",
                     "type": ["ergo:buildingDamageVer6"],
                 },
                 {
                     "id": "flood_damage",
                     "required": True,
-                    "description": "Flood damage result that has damage intervals in it",
+                    "description": "Flood damage result that has damage intervals in it.",
                     "type": ["ergo:nsBuildingInventoryDamageVer4"],
                 },
                 {
                     "id": "structural_cost",
                     "required": True,
-                    "description": "Structural cost ratio for each archetype and loss type",
+                    "description": "Structural cost ratio for each archetype and loss type.",
                     "type": ["incore:structuralCostRatio"],
                 },
                 {
                     "id": "content_cost",
                     "required": True,
-                    "description": "Content cost ratio for each archetype and damage state",
+                    "description": "Content cost ratio for each archetype and damage state.",
                     "type": ["incore:contentCostRatio"],
                 },
             ],
@@ -299,7 +303,7 @@ class CombinedWindWaveSurgeBuildingLoss(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "buildings",
-                    "description": "CSV file of building structural and content loss",
+                    "description": "A CSV file containing structural, content and total loss for each building.",
                     "type": "incore:buildingLoss",
                 }
             ],

@@ -222,24 +222,24 @@ class WfnFunctionality(BaseAnalysis):
         """
         return {
             "name": "wfn-functionality",
-            "description": "water facility network functionality analysis",
+            "description": "This analysis computes the functionality of water networks.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "tank_node_list",
                     "required": True,
-                    "description": "list of tank nodes",
+                    "description": "List of tank nodes within the network.",
                     "type": List[int],
                 },
                 {
                     "id": "pumpstation_node_list",
                     "required": True,
-                    "description": "list of pump station nodes",
+                    "description": "List of pump station nodes within the network.",
                     "type": List[int],
                 },
             ],
@@ -247,7 +247,7 @@ class WfnFunctionality(BaseAnalysis):
                 {
                     "id": "wfn_network",
                     "required": True,
-                    "description": "Water Facility Network Dataset",
+                    "description": "Dataset containing water facility network.",
                     "type": ["incore:waterNetwork"],
                 },
                 {
@@ -266,12 +266,12 @@ class WfnFunctionality(BaseAnalysis):
             "output_datasets": [
                 {
                     "id": "failure_probability",
-                    "description": "CSV file of failure probability",
+                    "description": "CSV file of failure probability.",
                     "type": "incore:failureProbability",
                 },
                 {
                     "id": "sample_failure_state",
-                    "description": "CSV file of failure state for each sample",
+                    "description": "CSV file of failure state for each sample.",
                     "type": "incore:sampleFailureState",
                 },
             ],

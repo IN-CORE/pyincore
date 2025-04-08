@@ -37,7 +37,7 @@ class SeasideCGEModel(BaseAnalysis):
     def get_spec(self):
         return {
             'name': 'Seaside cge',
-            'description': 'CGE model for Seaside.',
+            'description': 'Computable general equilibrium (CGE) model for Seaside.',
             'input_parameters': [
                 {
                     'id': 'print_solver_output',
@@ -98,7 +98,7 @@ class SeasideCGEModel(BaseAnalysis):
                 {
                     'id': 'sector_shocks',
                     'required': True,
-                    'description': 'Aggregation of building functionality states to capital shocks per sector',
+                    'description': 'Aggregation of building functionality states to capital shocks per sector.',
                     'type': ['incore:capitalShocks']
                 }
             ],

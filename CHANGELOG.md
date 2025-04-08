@@ -5,8 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+
+## [Unreleased]
+
+### Changed
+- Descriptions of the analyses to be more verbose. [#645](https://github.com/IN-CORE/pyincore/issues/645)
+- Descriptions of the analyses, inputs and parameters. [#649](https://github.com/IN-CORE/pyincore/issues/649)
+- Descriptions of the analyses, inputs and parameters. [#646](https://github.com/IN-CORE/pyincore/issues/646)
 - Descriptions of the analyses to be more verbose. [#647](https://github.com/IN-CORE/pyincore/issues/647)
+
 
 ## [1.21.0] - 2025-02-12
 

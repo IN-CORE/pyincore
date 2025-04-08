@@ -15,7 +15,7 @@ from pyincore.models.restorationcurveset import RestorationCurveSet
 
 
 class EpfRestoration(BaseAnalysis):
-    """Computes electric power facility restoration for an earthquake exposure."""
+    """Computes electric power facility restoration."""
 
     def __init__(self, incore_client):
         self.restorationsvc = RestorationService(incore_client)
@@ -252,42 +252,44 @@ class EpfRestoration(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "electric-power-facility-restoration",
-            "description": "electric power facility restoration analysis",
+            "description": "This analysis computes the repair time and the percentage of functionality change with "
+                           "time for an electric power facility based on input restoration curves",
             "input_parameters": [
-                {
-                    "id": "restoration_key",
-                    "required": False,
-                    "description": "restoration key to use in mapping dataset",
-                    "type": str,
-                },
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
+                    "type": str,
+                },
+                {
+                    "id": "restoration_key",
+                    "required": False,
+                    "description": "Restoration key to use in mapping dataset that maps restoration curves to "
+                                   "electric power facilities.",
                     "type": str,
                 },
                 {
                     "id": "end_time",
                     "required": False,
-                    "description": "end time. Default to 365.",
+                    "description": "End repair time in days. Default to 365 days.",
                     "type": float,
                 },
                 {
                     "id": "time_interval",
                     "required": False,
-                    "description": "incremental interval for time in days. Default to 1",
+                    "description": "Incremental interval for time in days to compute repair time. Default to 1.",
                     "type": float,
                 },
                 {
                     "id": "pf_interval",
                     "required": False,
-                    "description": "incremental interval for percentage of functionality. Default to 0.1",
+                    "description": "Incremental interval for percentage of functionality. Default to 0.1.",
                     "type": float,
                 },
                 {
                     "id": "discretized_days",
                     "required": False,
-                    "description": "Discretized days to compute functionality",
+                    "description": "Discretized days to compute functionality. ",
                     "type": List[int],
                 },
             ],
@@ -295,19 +297,20 @@ class EpfRestoration(BaseAnalysis):
                 {
                     "id": "epfs",
                     "required": True,
-                    "description": "Electric Power Facility Inventory",
+                    "description": "Dataset containing the electric power facility inventory.",
                     "type": ["incore:epf", "ergo:epf"],
                 },
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the electric power "
+                                   "facility inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
                 {
                     "id": "damage",
                     "required": True,
-                    "description": "damage result that has damage intervals in it",
+                    "description": "Dataset of electric power facility damage.",
                     "type": [
                         "incore:epfDamage",
                         "incore:epfDamageVer2",
@@ -319,34 +322,34 @@ class EpfRestoration(BaseAnalysis):
                 {
                     "id": "inventory_restoration_map",
                     "parent_type": "",
-                    "description": "A csv file recording the mapping relationship between GUID and restoration id "
+                    "description": "A CSV file recording the mapping relationship between GUID and restoration id "
                     "applicable.",
                     "type": "incore:inventoryRestorationMap",
                 },
                 {
                     "id": "pf_results",
                     "parent_type": "",
-                    "description": "A csv file recording functionality change with time for each class and limit "
+                    "description": "A CSV file recording functionality change with time for each class and limit "
                     "state.",
                     "type": "incore:epfRestorationFunc",
                 },
                 {
                     "id": "time_results",
                     "parent_type": "",
-                    "description": "A csv file recording repair time at certain functionality recovery for each class "
+                    "description": "A CSV file recording repair time at certain functionality recovery for each class "
                     "and limit state.",
                     "type": "incore:epfRestorationTime",
                 },
                 {
                     "id": "func_results",
                     "parent_type": "",
-                    "description": "A csv file recording discretized functionality over time",
+                    "description": "A CSV file recording discretized functionality over time.",
                     "type": "incore:epfDiscretizedRestorationFunc",
                 },
                 {
                     "id": "repair_times",
                     "parent_type": "",
-                    "description": "A csv file recording repair time at full functionality recovery for each guid "
+                    "description": "A CSV file recording repair time at full functionality recovery for each guid "
                     "and limit state.",
                     "type": "incore:epfRepairTime",
                 },
