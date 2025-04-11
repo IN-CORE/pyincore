@@ -13,9 +13,8 @@ import collections
 
 class MeanDamage(BaseAnalysis):
     """
-    The process for computing the structural damage uses mean damage and standard deviation values from damage
-    ratios tables. The four damage state probabilities are multiplied by the mean damage and aggregated to get the
-    Mean damage for each individual structure (building, bridge, waterfacility etc.).
+    Computes the mean structural damage from discrete probabilities of damage states and mean damage factors in the
+    damage ratios table.
 
     Args:
         incore_client (IncoreClient): Service authentication.

@@ -143,7 +143,7 @@ class MlEnabledCgeSlc(CoreCGEML):
     def get_spec(self):
         return {
             "name": "Salt-Lake-cge",
-            "description": "The “Machine Learning Enabled Computable General Equilibrium (CGE) - Salt Lake City” analysis merges "
+            "description": "The Machine Learning Enabled Computable General Equilibrium (CGE) - Salt Lake City analysis merges "
             "advanced machine learning with traditional CGE models to offer unprecedented insights into the economic impacts of "
             "disaster scenarios on Salt Lake City. Trained on a comprehensive dataset of numerous simulated disasters and their "
             "economic effects, this hybrid approach excels in predicting the intricate dynamics of the city’s economy "

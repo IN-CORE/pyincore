@@ -18,7 +18,7 @@ logger = pyglobals.LOGGER
 
 class MlEnabledCgeJoplin(CoreCGEML):
     """
-    The "Machine Learning Enabled Computable General Equilibrium (CGE) - Joplin" analysis merges advanced machine
+    The Machine Learning Enabled Computable General Equilibrium (CGE) - Joplin analysis merges advanced machine
     learning with traditional CGE models to offer unprecedented insights into the economic impacts of disaster
     scenarios on Joplin. Trained on a comprehensive dataset of numerous simulated disasters and their economic
     effects, this hybrid approach excels in predicting the intricate dynamics of the city's economy under
