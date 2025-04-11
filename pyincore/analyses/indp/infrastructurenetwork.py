@@ -9,16 +9,16 @@ import networkx as nx
 
 class InfrastructureNetwork(object):
     """
-    Stores information of the infrastructure network
+    Stores information of the infrastructure network.
 
     Attributes
     ----------
     G : networkx.DiGraph
-        The networkx graph object that stores node, arc, and interdependency information
+        The networkx graph object that stores node, arc, and interdependency information.
     S : list
-        List of geographical spaces on which the network lays
+        List of geographical spaces on which the network lays.
     id : int
-        Id of the network
+        Id of the network.
     """
 
     def __init__(self, id):
@@ -28,12 +28,12 @@ class InfrastructureNetwork(object):
 
     def copy(self):
         """
-        This function copies the current :class:`InfrastructureNetwork` object
+        This function copies the current :class:`InfrastructureNetwork` object.
 
         Returns
         -------
         new_net: :class:`InfrastructureNetwork`
-            Copy of the current infrastructure network object
+            Copy of the current infrastructure network object.
         """
         new_net = InfrastructureNetwork(self.id)
         new_net.G = self.G.copy()
@@ -42,12 +42,12 @@ class InfrastructureNetwork(object):
 
     def update_with_strategy(self, player_strategy):
         """
-        This function modify the functionality of node and arc per a given strategy
+        This function modify the functionality of node and arc per a given strategy.
 
         Parameters
         ----------
         player_strategy : list
-            Given strategy, where the first list item shows the functionality of nodes, and the second one is for arcs
+            Given strategy, where the first list item shows the functionality of nodes, and the second one is for arcs.
 
         Returns
         -------
@@ -67,17 +67,17 @@ class InfrastructureNetwork(object):
 
     def get_clusters(self, layer):
         """
-        This function find the clusters in a layer of the network
+        This function find the clusters in a layer of the network.
 
         Parameters
         ----------
         layer : int
-            The id of the desired layer
+            The id of the desired layer.
 
         Returns
         -------
             : list
-            List of layer components
+            List of layer components.
 
         """
         g_prime_nodes = [
@@ -99,17 +99,17 @@ class InfrastructureNetwork(object):
 
     def gc_size(self, layer):
         """
-        This function finds the size of the largest component in a layer of the network
+        This function finds the size of the largest component in a layer of the network.
 
         Parameters
         ----------
         layer : int
-            The id of the desired layer
+            The id of the desired layer.
 
         Returns
         -------
             : int
-            Size of the largest component in the layer
+            Size of the largest component in the layer.
         """
         g_prime_nodes = [
             n[0]
@@ -182,12 +182,12 @@ class InfrastructureNetwork(object):
 
     def to_csv(self, filename="infrastructure_adj.csv"):
         """
-        This function writes the object to a csv file
+        This function writes the object to a csv file.
 
         Parameters
         ----------
         filename : str
-            Name of the file to which the network should be written
+            Name of the file to which the network should be written.
 
         Returns
         -------

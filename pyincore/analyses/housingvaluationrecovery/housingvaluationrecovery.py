@@ -14,15 +14,17 @@ from pyincore.analyses.housingvaluationrecovery.housingvaluationrecoveryutil imp
 
 
 class HousingValuationRecovery(BaseAnalysis):
-    """The analysis predicts building values and value changes over time following a disaster event.
-    The model is calibrated with respect to demographics, parcel data, and building value trajectories
-    following Hurricane Ike (2008) in Galveston, Texas. The model predicts building value at the parcel
-    level for 8 years of observation. The models rely on Census (Decennial or American Community Survey, ACS)
-    and parcel data immediately prior to the disaster event (year -1) as inputs for prediction.
+    """The analysis forecasts building values and their changes over time following a disaster event.
+    The model is calibrated using demographic data, parcel records, and building value trends observed after
+    Hurricane Ike (2008) in Galveston, Texas. It predicts building values at the parcel level over an eight-year
+    observation period.
 
-    The Galveston, TX example makes use of 2010 Decennial Census and Galveston County Appraisal District (GCAD)
-    tax assessor data and outputs from other analysis (i.e., Building Damage, Housing Unit Allocation,
-    Population Dislocation) .
+     The model relies on Census data (either Decennial Census or the American Community Survey, ACS) and
+     parcel records from the year preceding the disaster (year -1) as inputs for prediction.
+
+     For the Galveston, TX case study, the analysis utilizes data from the 2010 Decennial Census, tax assessment
+     records from the Galveston County Appraisal District (GCAD), and outputs from related analyses, including
+     Building Damage, Housing Unit Allocation, and Population Dislocation..
 
     The CSV outputs of the building values for the 6 years following the disaster event (with year 0 being
     the impact year).
@@ -46,21 +48,24 @@ class HousingValuationRecovery(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "housing-valuation-recovery",
-            "description": "Housing Valuation Recovery Analysis",
+            "description": "The model forecasts parcel-level building values and their changes over an eight-year "
+            "period following a disaster. It is calibrated using demographic data, parcel records, and "
+            "post-disaster building value trends from Hurricane Ike (2008) in Galveston, Texas, relying "
+            "on pre-disaster Census or ACS data and parcel records for its predictions.",
             "input_parameters": [
                 {
                     "id": "base_year",
                     "required": False,
-                    "description": "Base year is used to calculate improvement age. It needs to be set to the tax "
-                    "assessment year representing pre-disaster building values. For example for GCAD "
-                    "data which represents improvement valuation before Hurricane Ike impacts."
-                    "Deafult 2008",
+                    "description": "Base year is used to calculate the improvement age. It should be set to the "
+                    "tax assessment year that represents pre-disaster building values. For example, "
+                    "in GCAD data, this corresponds to the improvement valuation before the impacts "
+                    "of Hurricane Ike. The default value is 2008.",
                     "type": int,
                 },
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Result CSV dataset name",
+                    "description": "Base name of the resulting CSV dataset.",
                     "type": str,
                 },
             ],
@@ -68,36 +73,39 @@ class HousingValuationRecovery(BaseAnalysis):
                 {
                     "id": "population_dislocation",
                     "required": True,
-                    "description": "Population Dislocation aggregated to the block group level",
+                    "description": "Population dislocation data aggregated at the block group level.",
                     "type": ["incore:popDislocation"],
                 },
                 {
                     "id": "building_area",
                     "required": True,
-                    "description": "Building square footage and damage. Damage is the actual building value loss "
-                    "in percentage terms observed through the County Appraisal District (GCAD) data",
+                    "description": "Building square footage and damage: Damage refers to the actual loss in "
+                    "building value, expressed as a percentage, as observed in the County Appraisal "
+                    "District (GCAD) data.",
                     "type": ["incore:buildingInventoryArea"],
                 },
                 {
                     "id": "census_block_groups_data",
                     "required": True,
-                    "description": "Census ACS data, 2010 5yr data for block groups available at IPUMS NHGIS "
+                    "description": "Census ACS 2010 5-year data for block groups, available from IPUMS NHGIS."
                     "website.",
                     "type": ["incore:censusBlockGroupsData"],
                 },
                 {
                     "id": "census_appraisal_data",
                     "required": True,
-                    "description": "Census data, 2010 Decennial Census District (GCAD) Census data",
+                    "description": "Census data from the 2010 Decennial Census and Galveston County Appraisal "
+                    "District (GCAD).",
                     "type": ["incore:censusAppraisalData"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "result",
-                    "description": "A csv file with the building values for the 6 years following the disaster"
-                    "event (year -1 denotes pre-impact conditions and 0 being the impact year). "
-                    "Index year values represent building values against a base, pre-impact value.",
+                    "description": "A CSV file containing building values for the six years following the disaster "
+                    "event. Year -1 represents pre-impact conditions, while year 0 marks the impact "
+                    "year. Index year values indicate building values relative to the base, pre-impact "
+                    "value.",
                     "type": "incore:buildingValues",
                 }
             ],
@@ -204,17 +212,17 @@ class HousingValuationRecovery(BaseAnalysis):
 
     def get_owneship(self, popd):
         """Filter ownership based on the vacancy codes
-            Assumption:
-            Where ownershp is "missing", let vacancy codes 0/3/4 be considered owner-occupied,
-            and 1/2/5/6/7 be considered renter-occupied.
-            It is uncertain whether vacancy codes 3,4,5,6,7 will become owner- or renter-occupied or primarily
-            one or the other.
-        .
-            Args:
-                popd (pd.DataFrame): Population dislocation results with ownership information.
+        Assumption:
+        Where ownershp is "missing", let vacancy codes 0/3/4 be considered owner-occupied,
+        and 1/2/5/6/7 be considered renter-occupied.
+        It is uncertain whether vacancy codes 3,4,5,6,7 will become owner- or renter-occupied or primarily
+        one or the other.
 
-            Returns:
-                pd.DataFrame: Ownership data.
+        Args:
+            popd (pd.DataFrame): Population dislocation results with ownership information.
+
+        Returns:
+            pd.DataFrame: Ownership data.
 
         """
         # Create ownership dummy variable from popd.ownership
@@ -232,8 +240,8 @@ class HousingValuationRecovery(BaseAnalysis):
         return own
 
     def get_vac_season_housing(self, vac_status):
-        """Calculate the percent vacation or seasonal housing of all housing units within a census tract and
-                add dummy variable for census tract as a seasonal/vacation housing submarket.
+        """Calculate the percentage of vacation or seasonal housing units within each census tract and add a dummy
+        variable to indicate whether the census tract functions as a seasonal/vacation housing submarket.
         .
                 Args:
                     vac_status (obj): Seasonal/vacation housing Census ACS data from json reader.

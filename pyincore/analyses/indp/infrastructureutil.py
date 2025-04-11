@@ -22,7 +22,7 @@ class InfrastructureUtil:
         extra_commodity=None,
     ):
         """
-        This function reads the infrastructure network from file in the extended format
+        This function reads the infrastructure network from file in the extended format.
 
         Args:
             power_nodes:
@@ -151,15 +151,16 @@ class InfrastructureUtil:
     @staticmethod
     def add_from_csv_failure_scenario(G, sample, initial_node, initial_link):
         """
-        This function reads initial damage data from file in the from_csv format, and applies it to the infrastructure
-        network. This format only considers one magnitude value (0), and there can be as many samples from that magnitude.
+        This function reads initial damage data from a file in the from_csv format and applies it to the
+        infrastructure network. This format considers only one magnitude value (0) but allows multiple samples
+        from that magnitude.
 
         Parameters
         ----------
         G : :class:`~infrastructure.InfrastructureNetwork`
              The object containing the network data.
         sample : int
-            Sample number of the initial damage scenario,
+            Sample number of the initial damage scenario.
 
         Returns
         -------

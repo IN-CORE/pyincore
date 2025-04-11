@@ -108,13 +108,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         Args:
 
-            model_solver (str): model solver to use for analysis
-            num_epsilon_steps (int): number of epsilon values for the multistep optimization algorithm
-            budget_available (float): budget constraint of the optimization analysis
-            scaling_factor (float): scaling factor for Q and Sc matrices
-            inactive_submodels (list): submodels to avoid during the computation
-            building_related_data (pd.DataFrame): building repairs after a disaster event
-            strategy_costs (pd.DataFrame): strategy cost data per building
+            model_solver (str): model solver to use for analysis.
+            num_epsilon_steps (int): number of epsilon values for the multistep optimization algorithm.
+            budget_available (float): budget constraint of the optimization analysis.
+            scaling_factor (float): scaling factor for Q and Sc matrices.
+            inactive_submodels (list): submodels to avoid during the computation.
+            building_related_data (pd.DataFrame): building repairs after a disaster event.
+            strategy_costs (pd.DataFrame): strategy cost data per building.
 
         """
         # Setup the stream that will collect data
@@ -170,10 +170,10 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
 
         Args:
 
-            budget_available (float): available budget
-            scaling_factor (float): value to scale monetary input data
-            building_related_data (DataFrame): table containing building functionality data
-            strategy_costs (DataFrame): table containing retrofit strategy costs data
+            budget_available (float): available budget.
+            scaling_factor (float): value to scale monetary input data.
+            building_related_data (DataFrame): table containing building functionality data.
+            strategy_costs (DataFrame): table containing retrofit strategy costs data.
 
         Returns:
             ConcreteModel: a base, parameterized cost/functionality model
@@ -332,13 +332,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         return model, sumSc
 
     def configure_model_objectives(self, model):
-        """Configure the model by adding objectives
+        """Configure the model by adding objectives.
 
         Args:
-            model (ConcreteModel): a base cost/functionality model
+            model (ConcreteModel): a base cost/functionality model.
 
         Returns:
-            ConcreteModel: a model extended with objective functions
+            ConcreteModel: a model extended with objective functions.
 
         """
         model.objective_1 = Objective(rule=self.obj_economic, sense=minimize)
@@ -1818,12 +1818,17 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
         """
         return {
             "name": "multiobjective-retrofit-optimization",
-            "description": "Multiobjective retrofit optimization model",
+            "description": "This analysis computes a series of linear programming models for single- and multi-objective"
+            "optimization related to the effect of extreme weather on a community in terms of three objective functions."
+            "The three objectives used in this program are to minimize economic loss, minimize population dislocation,"
+            "and maximize building functionality. The computation proceeds by iteratively solving constrained linear"
+            "models using epsilon steps."
+            "The output of the computation a collection of optimal resource allocations.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": False,
-                    "description": "Result CSV dataset name",
+                    "description": "Result CSV dataset name.",
                     "type": str,
                 },
                 {
@@ -1835,37 +1840,37 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 {
                     "id": "num_epsilon_steps",
                     "required": True,
-                    "description": "Number of epsilon values to evaluate",
+                    "description": "Number of epsilon values to evaluate.",
                     "type": int,
                 },
                 {
                     "id": "max_budget",
                     "required": True,
-                    "description": "Selection of maximum possible budget",
+                    "description": "Selection of maximum possible budget.",
                     "type": str,
                 },
                 {
                     "id": "budget_available",
                     "required": False,
-                    "description": "Custom budget value",
+                    "description": "Choose a custom budget value.",
                     "type": float,
                 },
                 {
                     "id": "inactive_submodels",
                     "required": False,
-                    "description": "Identifier of submodels to inactivate during analysis",
+                    "description": "Identifier of submodels to inactivate during analysis.",
                     "type": List[int],
                 },
                 {
                     "id": "scale_data",
                     "required": True,
-                    "description": "Choice for scaling data",
+                    "description": "Choice for scaling data.",
                     "type": bool,
                 },
                 {
                     "id": "scaling_factor",
                     "required": False,
-                    "description": "Custom scaling factor",
+                    "description": "Choose a custom scaling factor.",
                     "type": float,
                 },
             ],
@@ -1873,13 +1878,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 {
                     "id": "building_related_data",
                     "required": True,
-                    "description": "A csv file with building related data required to evaluate retrofit strategies",
+                    "description": "A CSV file with building related data required to evaluate retrofit strategies.",
                     "type": ["incore:multiobjectiveBuildingRelatedData"],
                 },
                 {
                     "id": "strategy_costs_data",
                     "required": True,
-                    "description": "A csv file with strategy cost data" "per building",
+                    "description": "A CSV file with strategy cost data" "per building.",
                     "type": ["incore:multiobjectiveStrategyCosts"],
                 },
             ],
@@ -1887,13 +1892,13 @@ class MultiObjectiveRetrofitOptimization(BaseAnalysis):
                 {
                     "id": "optimal_solution_dv_x",
                     "parent_type": "",
-                    "description": "Optimal solution for decision variable x",
+                    "description": "A CSV file of optimal solution for decision variable x.",
                     "type": "incore:multiobjectiveOptimalSolutionX",
                 },
                 {
                     "id": "optimal_solution_dv_y",
                     "parent_type": "",
-                    "description": "Optimal solution for decision variable y with initial and final retrofitted "
+                    "description": "A CSV file of optimal solution for decision variable y with initial and final retrofitted."
                     "strategies",
                     "type": "incore:multiobjectiveOptimalSolutionY",
                 },
