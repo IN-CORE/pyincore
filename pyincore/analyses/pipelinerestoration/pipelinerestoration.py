@@ -32,30 +32,30 @@ class PipelineRestoration(BaseAnalysis):
         """
         return {
             "name": "pipeline-restoration",
-            "description": "calculate the restoration times for damaged pipelines",
+            "description": "This analysis computes the repair time for damaged pipelines.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "name of the result csv dataset",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request. Default is 1.",
                     "type": int,
                 },
                 {
                     "id": "num_available_workers",
                     "required": True,
-                    "description": "Number of available workers to work on the repairs",
+                    "description": "Number of available workers to work on the repairs.",
                     "type": int,
                 },
                 {
                     "id": "restoration_key",
                     "required": False,
-                    "description": "restoration key to use in mapping dataset",
+                    "description": "Restoration key to use in the mapping dataset that maps restoration curves to pipelines.",
                     "type": str,
                 },
             ],
@@ -63,26 +63,26 @@ class PipelineRestoration(BaseAnalysis):
                 {
                     "id": "pipeline",
                     "required": True,
-                    "description": "Pipeline Inventory",
+                    "description": "Dataset containing pipeline inventory.",
                     "type": ["ergo:buriedPipelineTopology", "ergo:pipeline"],
                 },
                 {
                     "id": "pipeline_damage",
                     "required": True,
-                    "description": "pipeline damage results with repairs",
+                    "description": "Damage state for each pipeline. Output from pipeline damage repair rate analysis.",
                     "type": ["ergo:pipelineDamageVer2", "ergo:pipelineDamageVer3"],
                 },
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the pipeline inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "pipeline_restoration",
-                    "description": "CSV file of pipeline restoration times",
+                    "description": "A CSV file recording pipeline restoration times.",
                     "type": "incore:pipelineRestorationVer1",
                 }
             ],

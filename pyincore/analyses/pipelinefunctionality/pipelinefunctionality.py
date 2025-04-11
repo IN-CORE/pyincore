@@ -125,18 +125,18 @@ class PipelineFunctionality(BaseAnalysis):
         """
         return {
             "name": "pipeline-functionality",
-            "description": "buried pipeline functionality analysis",
+            "description": "This analysis computes the functionality of buried pipelines.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "num_samples",
                     "required": True,
-                    "description": "Number of MC samples",
+                    "description": "Number of Monte Carlo simulation samples.",
                     "type": int,
                 },
             ],
@@ -144,19 +144,20 @@ class PipelineFunctionality(BaseAnalysis):
                 {
                     "id": "pipeline_repair_rate_damage",
                     "required": True,
-                    "description": "Output of pipeline damage repair rate analysis",
+                    "description": "A CSV file of damage repair rate for each sample. Output from pipeline "
+                    "damage repair rate analysis.",
                     "type": ["ergo:pipelineDamageVer3"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "failure_probability",
-                    "description": "CSV file of failure probability",
+                    "description": "A CSV file of failure probability.",
                     "type": "incore:failureProbability",
                 },
                 {
                     "id": "sample_failure_state",
-                    "description": "CSV file of failure state for each sample",
+                    "description": "A CSV file of failure state for each sample.",
                     "type": "incore:sampleFailureState",
                 },
             ],
