@@ -22,7 +22,7 @@ class PipelineRepairCost(BaseAnalysis):
         super(PipelineRepairCost, self).__init__(incore_client)
 
     def run(self):
-        """Executes pipline facility repair cost analysis."""
+        """Executes pipeline repair cost analysis."""
 
         pipeline_df = self.get_input_dataset("pipeline").get_dataframe_from_shapefile()
         pipeline_dmg_df = self.get_input_dataset(
@@ -188,31 +188,32 @@ class PipelineRepairCost(BaseAnalysis):
         """
         return {
             "name": "pipeline-repair-cost",
-            "description": "Pipeline repair cost analysis.",
+            "description": "This analysis estimates the repair costs of pipeline for different "
+            "simulation scenarios based on their damage states, replacement costs, and damage ratios.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "A name of the resulting dataset",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request.",
+                    "description": "If using parallel execution, the number of cpus to request. Default is 1.",
                     "type": int,
                 },
                 {
                     "id": "diameter",
                     "required": False,
-                    "description": "Pipeline diameter cutoff assumption for different damage ratios. Default is 20 "
+                    "description": "Assumed pipeline diameter cutoff for varying damage ratios, with a default value of 20."
                     "inches",
                     "type": int,
                 },
                 {
                     "id": "segment_length",
                     "required": False,
-                    "description": "Segment length assumption. Default is 20 feet",
+                    "description": "Assumed segment length for analysis, with a default of 20 feet.",
                     "type": int,
                 },
             ],
@@ -220,25 +221,25 @@ class PipelineRepairCost(BaseAnalysis):
                 {
                     "id": "pipeline",
                     "required": True,
-                    "description": "Pipeline Inventory",
+                    "description": "Dataset containing pipeline inventory.",
                     "type": ["ergo:buriedPipelineTopology", "ergo:pipeline"],
                 },
                 {
                     "id": "replacement_cost",
                     "required": True,
-                    "description": "Repair cost of the node in the complete damage state (= Replacement cost)",
+                    "description": "Repair cost of a fully damaged node, equivalent to its replacement cost.",
                     "type": ["incore:replacementCost"],
                 },
                 {
                     "id": "pipeline_dmg",
                     "required": True,
-                    "description": "pipeline damage from PipelineDamageRepairRate Analysis",
+                    "description": "Damage state for each pipeline. Output from pipeline damage repair rate analysis.",
                     "type": ["ergo:pipelineDamageVer3"],
                 },
                 {
                     "id": "pipeline_dmg_ratios",
                     "required": True,
-                    "description": "Damage Ratios table",
+                    "description": "Damage Ratios table.",
                     "type": ["incore:pipelineDamageRatios"],
                 },
             ],
@@ -246,7 +247,7 @@ class PipelineRepairCost(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "pipelines",
-                    "description": "A csv file with repair cost for each pipeline",
+                    "description": "A CSV file with repair cost for each pipeline.",
                     "type": "incore:pipelineRepairCost",
                 }
             ],

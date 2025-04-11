@@ -322,55 +322,55 @@ class RoadDamage(BaseAnalysis):
 
         return {
             "name": "road-damage",
-            "description": "road damage analysis",
+            "description": "This analysis computes the damage state of roads based on a specific hazard.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
-                    "description": "Hazard Type (e.g. earthquake)",
+                    "description": "Hazard type to use in the analysis (e.g. earthquake).",
                     "type": str,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
-                    "description": "Hazard ID",
+                    "description": "ID of the hazard to use in the analysis for computing damage.",
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
-                    "description": "Fragility key to use in mapping dataset",
+                    "description": "Fragility key to use in the mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "use_liquefaction",
                     "required": False,
-                    "description": "Use liquefaction",
+                    "description": "Use liquefaction to modify damage, if applicable.",
                     "type": bool,
                 },
                 {
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
-                    "description": "Liquefaction geology/susceptibility dataset id. "
-                    "If not provided, liquefaction will be ignored",
+                    "description": "ID of the dataset containing Liquefaction geology/susceptibility information. If "
+                    "not provided, liquefaction will be ignored.",
                     "type": str,
                 },
                 {
                     "id": "use_hazard_uncertainty",
                     "required": False,
-                    "description": "Use hazard uncertainty",
+                    "description": "Use hazard uncertainty, if applicable.",
                     "type": bool,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request. Default is 1.",
                     "type": int,
                 },
             ],
@@ -378,7 +378,7 @@ class RoadDamage(BaseAnalysis):
                 {
                     "id": "hazard",
                     "required": False,
-                    "description": "Hazard object",
+                    "description": "Hazard object. This can be specified in place of the hazard type and ID.",
                     "type": ["earthquake", "hurricane", "tsunami"],
                 },
             ],
@@ -386,7 +386,7 @@ class RoadDamage(BaseAnalysis):
                 {
                     "id": "roads",
                     "required": True,
-                    "description": "Road Inventory",
+                    "description": "Dataset containing road inventory.",
                     "type": [
                         "ergo:roadLinkTopo",
                         "incore:roads",
@@ -396,7 +396,7 @@ class RoadDamage(BaseAnalysis):
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the road inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
             ],
@@ -404,14 +404,14 @@ class RoadDamage(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "roads",
-                    "description": "CSV file of road structural damage",
+                    "description": "A CSV file with damage repair rate for each road.",
                     "type": "ergo:roadDamageVer3",
                 },
                 {
                     "id": "metadata",
                     "parent_type": "roads",
-                    "description": "additional metadata in json file about applied hazard value and "
-                    "fragility",
+                    "description": "JSON file with additional metadata about the applied hazard value and "
+                    "fragility used for each road.",
                     "type": "incore:roadDamageSupplement",
                 },
             ],

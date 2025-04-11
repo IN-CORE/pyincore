@@ -1294,7 +1294,7 @@ class INDP(BaseAnalysis):
                 {
                     "id": "pipeline_supply_demand_info",
                     "required": True,
-                    "description": "Supply and demand information for water pipelines.",
+                    "description": "Supply and demand information for pipelines",
                     "type": ["incore:pipelineSupplyDemandInfo"],
                 },
                 {
