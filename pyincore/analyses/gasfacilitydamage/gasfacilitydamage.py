@@ -372,61 +372,70 @@ class GasFacilityDamage(BaseAnalysis):
         return {
             "name": "gas-facility-damage",
             "description": "This analysis computes gas facility damage based on a particular hazard using the hazard "
-                           "input and fragility curves mapped to the gas facility.",
+            "input and fragility curves mapped to the gas facility.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "gas-facility-damage-result",
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
                     "description": "Fragility key to use in mapping dataset.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "liquefaction_fragility_key",
                     "required": False,
                     "description": "Fragility key to use in liquefaction mapping dataset.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "use_liquefaction",
                     "required": False,
                     "description": "Use liquefaction to modify damage intervals, if applicable.",
+                    "studio-default": False,
                     "type": bool,
                 },
                 {
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
                     "description": "ID of the dataset containing Liquefaction geology/susceptibility information. If "
-                                   "not provided, liquefaction will be ignored.",
+                    "not provided, liquefaction will be ignored.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "use_hazard_uncertainty",
                     "required": False,
                     "description": "Use hazard uncertainty, if applicable.",
+                    "studio-default": False,
                     "type": bool,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "If using parallel execution, the number of cpus to request",
+                    "studio-default": 1,
                     "type": int,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
                     "description": "ID of the hazard to use for computing damage.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
                     "description": "Hazard type to use in the analysis (e.g. earthquake).",
+                    "studio-default": None,
                     "type": str,
                 },
             ],

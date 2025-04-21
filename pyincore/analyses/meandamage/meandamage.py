@@ -40,6 +40,7 @@ class MeanDamage(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of result dataset.",
+                    "studio-default": "mean-damage-result",
                     "type": str,
                 },
                 {
@@ -47,12 +48,14 @@ class MeanDamage(BaseAnalysis):
                     "required": True,
                     "description": "Damage interval column that must contain exactly four values, "
                     "arranged in order.",
+                    "studio-default": "['DS_0', 'DS_1', 'DS_2', 'DS_3', 'DS_4']",
                     "type": List[str],
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "Number of cpus to request, when using parallel execution.",
+                    "studio-default": 1,
                     "type": int,
                 },
             ],

@@ -347,24 +347,28 @@ class BridgeDamage(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "bridge-damage-result",
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
                     "description": "Fragility key used in mapping dataset.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "use_liquefaction",
                     "required": False,
                     "description": "Use liquefaction, if applicable to the hazard. Default is False.",
+                    "studio-default": False,
                     "type": bool,
                 },
                 {
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
                     "description": "Liquefaction geology/susceptibility dataset id. If not provided, liquefaction will be ignored.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
@@ -375,24 +379,28 @@ class BridgeDamage(BaseAnalysis):
                         "then you can set this flag to indicate using the mean plus one standard deviation when computing damage. "
                         "Default is false."
                     ),
+                    "studio-default": False,
                     "type": bool,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "If using parallel execution, the number of cpus to request. Default is 1.",
+                    "studio-default": 4,
                     "type": int,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
                     "description": "ID of the hazard from the Hazard service.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
                     "description": "Hazard type (earthquake, tsunami, tornado, hurricaneWindfields).",
+                    "studio-default": None,
                     "type": str,
                 },
             ],

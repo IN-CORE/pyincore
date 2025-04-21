@@ -35,6 +35,7 @@ class CapitalShocks(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "capital-shocks-result",
                     "type": str,
                 },
             ],

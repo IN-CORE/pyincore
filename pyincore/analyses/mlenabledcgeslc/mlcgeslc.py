@@ -153,6 +153,7 @@ class MlEnabledCgeSlc(CoreCGEML):
                     "id": "result_name",
                     "required": False,
                     "description": "Result CSV dataset name prefix.",
+                    "studio-default": "salt-lake-ml-enabled-cge",
                     "type": str,
                 }
             ],

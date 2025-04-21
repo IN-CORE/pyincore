@@ -49,6 +49,7 @@ class JoplinCGEModel(BaseAnalysis):
                     "id": "model_iterations",
                     "required": True,
                     "description": "Number of dynamic model iterations.",
+                    "studio-default": 1,
                     "type": int,
                 },
                 {
@@ -56,6 +57,7 @@ class JoplinCGEModel(BaseAnalysis):
                     "required": False,
                     "description": "Path to ipopt package. If none is provided, it will default to your environment'ts"
                     "path to the package.",
+                    "studio-default": None,
                     "type": str,
                 },
             ],

@@ -606,24 +606,27 @@ class HousingRecoverySequential(BaseAnalysis):
         return {
             "name": "housing-recovery-serial",
             "description": "This analysis computes the series of household recovery states given a population "
-                           "dislocation dataset, a transition probability matrix (TPM) and an initial state vector.",
+            "dislocation dataset, a transition probability matrix (TPM) and an initial state vector.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "housing-recovery-sequential-result",
                     "type": str,
                 },
                 {
                     "id": "t_delta",
                     "required": True,
                     "description": "Size of the analysis time step.",
+                    "studio-default": None,
                     "type": float,
                 },
                 {
                     "id": "t_final",
                     "required": True,
                     "description": "Total duration.",
+                    "studio-default": None,
                     "type": float,
                 },
                 {
@@ -631,12 +634,14 @@ class HousingRecoverySequential(BaseAnalysis):
                     "required": False,
                     "description": "Seed to ensure replication of the Markov Chain path."
                     "in connection with Population Dislocation.",
+                    "studio-default": 1234,
                     "type": int,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "If using parallel execution, the number of cpus to request.",
+                    "studio-default": 4,
                     "type": int,
                 },
             ],

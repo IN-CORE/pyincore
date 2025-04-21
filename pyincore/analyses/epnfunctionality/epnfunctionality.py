@@ -181,20 +181,22 @@ class EpnFunctionality(BaseAnalysis):
         return {
             "name": "epn-functionality",
             "description": "This analysis computes the functionality of electric power networks. The computation uses "
-                           "sample failure states as well as the network topology of electric power line to determine "
-                           "the functionality probability and failure states for a corresponding electric power "
-                           "facility network by performing a reachability analysis.",
+            "sample failure states as well as the network topology of electric power line to determine "
+            "the functionality probability and failure states for a corresponding electric power "
+            "facility network by performing a reachability analysis.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "epn-functionality-result",
                     "type": str,
                 },
                 {
                     "id": "gate_station_node_list",
                     "required": False,
                     "description": "List of gate station nodes.",
+                    "studio-default": None,
                     "type": List[int],
                 },
             ],

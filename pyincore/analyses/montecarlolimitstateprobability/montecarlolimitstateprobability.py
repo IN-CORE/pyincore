@@ -49,36 +49,42 @@ class MonteCarloLimitStateProbability(BaseAnalysis):
                     'For example: "result_name = joplin_mcs_building" will result in '
                     '"joplin_mcs_building_failure_state.csv" and '
                     '"joplin_mcs_building_failure_probability.csv"',
+                    "studio-default": "monte_carlo_limit_state_probability-result",
                     "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "Number of cpus to request, when using parallel execution.",
+                    "studio-default": 8,
                     "type": int,
                 },
                 {
                     "id": "num_samples",
                     "required": True,
                     "description": "Number of MC samples.",
+                    "studio-default": 10,
                     "type": int,
                 },
                 {
                     "id": "damage_interval_keys",
                     "required": True,
                     "description": "Column name of the damage interval.",
+                    "studio-default": "['DS_0', 'DS_1', 'DS_2', 'DS_3']",
                     "type": List[str],
                 },
                 {
                     "id": "failure_state_keys",
                     "required": True,
                     "description": "Column name of the damage interval that considered as damaged.",
+                    "studio-default": "['DS_1', 'DS_2', 'DS_3']",
                     "type": List[str],
                 },
                 {
                     "id": "seed",
                     "required": False,
                     "description": "Initial seed for the probabilistic model.",
+                    "studio-default": 1234,
                     "type": int,
                 },
             ],

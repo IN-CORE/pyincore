@@ -5,7 +5,7 @@
 # and is available at https://www.mozilla.org/en-US/MPL/2.0/
 
 
-""" Buried Pipeline Damage Analysis with limit state calculation """
+"""Buried Pipeline Damage Analysis with limit state calculation"""
 
 import concurrent.futures
 from itertools import repeat
@@ -265,30 +265,35 @@ class PipelineDamage(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "pipeline-damage-result",
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
                     "description": "Hazard type to use in the analysis (e.g. earthquake).",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
                     "description": "ID of the hazard to use in the analysis for computing damage.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
                     "description": "Fragility key to use in the mapping dataset.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "If using parallel execution, the number of cpus to request. Default is 1.",
+                    "studio-default": 1,
                     "type": int,
                 },
                 {
@@ -296,6 +301,7 @@ class PipelineDamage(BaseAnalysis):
                     "required": False,
                     "description": "ID of the dataset containing Liquefaction geology/susceptibility information. If "
                     "not provided, liquefaction will be ignored.",
+                    "studio-default": None,
                     "type": str,
                 },
             ],

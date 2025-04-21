@@ -152,6 +152,7 @@ class MlEnabledCgeJoplin(CoreCGEML):
                     "id": "result_name",
                     "required": False,
                     "description": "Prefix of the result CSV dataset name.",
+                    "studio-default": "joplin-ml-enabled-cge",
                     "type": str,
                 }
             ],

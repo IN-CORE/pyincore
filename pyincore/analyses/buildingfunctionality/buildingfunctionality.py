@@ -48,6 +48,7 @@ class BuildingFunctionality(BaseAnalysis):
                     "id": "result_name",
                     "required": False,
                     "description": "Base name of the result output.",
+                    "studio-default": "bldg-functionality-result",
                     "type": str,
                 }
             ],

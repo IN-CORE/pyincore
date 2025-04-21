@@ -253,6 +253,7 @@ class CombinedWindWaveSurgeBuildingLoss(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "combined-wind-wave-surge-building-loss-result",
                     "type": str,
                 },
             ],

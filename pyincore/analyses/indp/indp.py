@@ -1107,24 +1107,28 @@ class INDP(BaseAnalysis):
                     "required": True,
                     "description": "Type of network, set to from_csv for Seaside networks."
                     "e.g. from_csv, incore",
+                    "studio-default": "from_csv",
                     "type": str,
                 },
                 {
                     "id": "MAGS",
                     "required": True,
                     "description": "Earthquake return period.",
+                    "studio-default": "[1000]",
                     "type": list,
                 },
                 {
                     "id": "sample_range",
                     "required": True,
                     "description": "Range of sample scenarios to be analyzed.",
+                    "studio-default": "[0]",
                     "type": range,
                 },
                 {
                     "id": "dislocation_data_type",
                     "required": False,
                     "description": "Type of the dislocation data.",
+                    "studio-default": "incore",
                     "type": str,
                 },
                 {
@@ -1132,18 +1136,21 @@ class INDP(BaseAnalysis):
                     "required": False,
                     "description": "Model type used to estimate the return of the dislocated population."
                     "Options: *step_function* and *linear*.",
+                    "studio-default": "step_function",
                     "type": str,
                 },
                 {
                     "id": "testbed_name",
                     "required": False,
                     "description": "Base name of the testbed in analysis.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "extra_commodity",
                     "required": True,
                     "description": "Base name of multi-commodity parameters dict.",
+                    "studio-default": None,
                     "type": dict,
                 },
                 {
@@ -1162,12 +1169,14 @@ class INDP(BaseAnalysis):
                     'type "budget", AND the case where layer 1 gets 1 and layer 2 gets 2 resources of '
                     'type "budget", AND the case where each layer gets 3 resources of type '
                     '"budget" (Prescribed resource for each layer).',
+                    "studio-default": None,
                     "type": list,
                 },
                 {
                     "id": "layers",
                     "required": True,
                     "description": "List of layers in the analysis.",
+                    "studio-default": None,
                     "type": list,
                 },
                 {
@@ -1178,12 +1187,14 @@ class INDP(BaseAnalysis):
                     "Restoration Problem (INDP). 2. `TDINDP`: runs time-dependent INDP (td-INDP).  In "
                     'both cases, if "TIME_RESOURCE" is True, then the repair time for each element '
                     "is considered in devising the restoration plans.",
+                    "studio-default": "INDP",
                     "type": str,
                 },
                 {
                     "id": "t_steps",
                     "required": False,
                     "description": "Number of time steps of the analysis.",
+                    "studio-default": 10,
                     "type": int,
                 },
                 {
@@ -1191,12 +1202,14 @@ class INDP(BaseAnalysis):
                     "required": False,
                     "description": "If TIME_RESOURCE is True, then the repair time for each element is "
                     "considered in devising the restoration plans.",
+                    "studio-default": True,
                     "type": bool,
                 },
                 {
                     "id": "save_model",
                     "required": False,
                     "description": "If the optimization model should be saved to file. The default is False.",
+                    "studio-default": False,
                     "type": bool,
                 },
                 {
@@ -1204,6 +1217,7 @@ class INDP(BaseAnalysis):
                     "required": False,
                     "description": "Solver to use for optimization model. Such as gurobi/glpk/scip, "
                     "default to scip.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
@@ -1211,12 +1225,14 @@ class INDP(BaseAnalysis):
                     "required": False,
                     "description": "Solver to use for optimization model. Such as gurobi/glpk/scip, "
                     "default to scip.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "solver_time_limit",
                     "required": False,
                     "description": "Solver time limit in seconds.",
+                    "studio-default": None,
                     "type": int,
                 },
             ],

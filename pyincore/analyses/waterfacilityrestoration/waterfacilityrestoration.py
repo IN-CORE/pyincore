@@ -269,43 +269,49 @@ class WaterFacilityRestoration(BaseAnalysis):
         return {
             "name": "water-facility-restoration",
             "description": "This analysis computes the repair time, and the percentage of functionality change with "
-                           "time for water facility restoration based the mapped restoration curves.",
+            "time for water facility restoration based the mapped restoration curves.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "water-facility-restoration-result",
                     "type": str,
                 },
                 {
                     "id": "restoration_key",
                     "required": False,
                     "description": "Restoration key to use in the mapping dataset that maps restoration curves to "
-                                   "water facilities.",
+                    "water facilities.",
+                    "studio-default": "Restoration ID Code",
                     "type": str,
                 },
                 {
                     "id": "end_time",
                     "required": False,
                     "description": "End repair time in days. Default to 365 days.",
+                    "studio-default": 100.0,
                     "type": float,
                 },
                 {
                     "id": "time_interval",
                     "required": False,
                     "description": "Incremental interval for time in days to compute repair time. Default is 1.",
+                    "studio-default": 1.0,
                     "type": float,
                 },
                 {
                     "id": "pf_interval",
                     "required": False,
                     "description": "Incremental interval for percentage of functionality. Default is 0.05",
+                    "studio-default": 0.05,
                     "type": float,
                 },
                 {
                     "id": "discretized_days",
                     "required": False,
                     "description": "Discretized days to compute functionality. e.g. 1, 3, 7, 30, 90",
+                    "studio-default": "[1, 3, 7, 30, 90]",
                     "type": List[int],
                 },
             ],
@@ -320,7 +326,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                     "id": "dfr3_mapping_set",
                     "required": True,
                     "description": "DFR3 mapping set containing rules to map DFR3 curves to the water facility "
-                                   "inventory.",
+                    "inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
                 {

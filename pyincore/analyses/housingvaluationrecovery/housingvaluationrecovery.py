@@ -60,12 +60,14 @@ class HousingValuationRecovery(BaseAnalysis):
                     "tax assessment year that represents pre-disaster building values. For example, "
                     "in GCAD data, this corresponds to the improvement valuation before the impacts "
                     "of Hurricane Ike. The default value is 2008.",
+                    "studio-default": 2008,
                     "type": int,
                 },
                 {
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the resulting CSV dataset.",
+                    "studio-default": "housing-valuation-recovery-result",
                     "type": str,
                 },
             ],

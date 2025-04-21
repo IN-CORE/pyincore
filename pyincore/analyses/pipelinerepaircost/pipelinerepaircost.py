@@ -195,12 +195,14 @@ class PipelineRepairCost(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "pipeline-repair-cost-result",
                     "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "If using parallel execution, the number of cpus to request. Default is 1.",
+                    "studio-default": 1,
                     "type": int,
                 },
                 {
@@ -208,12 +210,14 @@ class PipelineRepairCost(BaseAnalysis):
                     "required": False,
                     "description": "Assumed pipeline diameter cutoff for varying damage ratios, with a default value of 20."
                     "inches",
+                    "studio-default": 20,
                     "type": int,
                 },
                 {
                     "id": "segment_length",
                     "required": False,
                     "description": "Assumed segment length for analysis, with a default of 20 feet.",
+                    "studio-default": 20,
                     "type": int,
                 },
             ],

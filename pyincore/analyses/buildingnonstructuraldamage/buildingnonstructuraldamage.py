@@ -349,36 +349,42 @@ class BuildingNonStructDamage(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "Base name of the result output.",
+                    "studio-default": "building-nonstruct-dmg-result",
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
                     "description": "Hazard Type (e.g. earthquake, flood, hurricane).",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
                     "description": "ID of the hazard from the Hazard service.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
                     "description": "Non-structural Fragility key to use in mapping dataset.",
+                    "studio-default": "Acceleration-Sensitive Fragility ID Code",
                     "type": str,
                 },
                 {
                     "id": "use_liquefaction",
                     "required": False,
                     "description": "Use liquefaction, if applicable to the hazard. Default is False.",
+                    "studio-default": True,
                     "type": bool,
                 },
                 {
                     "id": "liq_geology_dataset_id",
                     "required": False,
                     "description": "Liquefaction geology/susceptibility dataset id. If not provided, liquefaction will be ignored.",
+                    "studio-default": None,
                     "type": str,
                 },
                 {
@@ -389,12 +395,14 @@ class BuildingNonStructDamage(BaseAnalysis):
                         "then you can set this flag to indicate using the mean plus one standard deviation when computing damage. "
                         "Default is false."
                     ),
+                    "studio-default": False,
                     "type": bool,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
                     "description": "If using parallel execution, the number of cpus to request. Default is 1.",
+                    "studio-default": 1,
                     "type": int,
                 },
             ],

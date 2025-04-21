@@ -103,6 +103,7 @@ class EquityMetric(BaseAnalysis):
                     "id": "result_name",
                     "required": True,
                     "description": "result dataset name",
+                    "studio-default": "equity-metric-result",
                     "type": str,
                 },
                 {
@@ -112,6 +113,7 @@ class EquityMetric(BaseAnalysis):
                     "Binary variable associated with each household used to group it into two groups "
                     "(e.g. low income vs non low income, minority vs non-minority, "
                     "social vulnerability)",
+                    "studio-default": None,
                     "type": str,
                 },
             ],
