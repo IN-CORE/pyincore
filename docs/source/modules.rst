@@ -233,6 +233,11 @@ analyses/meandamage
 ..  autoclass:: meandamage.meandamage.MeanDamage
     :members:
 
+analyses/mlenabledcgelumberton
+========================
+..  autoclass:: mlenabledcgelumberton.mlcgelumberton.MlEnabledCgeLumberton
+    :members:
+
 analyses/mlenabledcgeslc
 ========================
 ..  autoclass:: mlenabledcgeslc.mlcgeslc.MlEnabledCgeSlc
