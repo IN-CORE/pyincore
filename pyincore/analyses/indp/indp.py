@@ -1151,17 +1151,7 @@ class INDP(BaseAnalysis):
                     "required": True,
                     "description": "List of resource caps or the number of available resources at each step of "
                     "the analysis. Each item in the list is a dictionary specifying the resource type and the "
-                    "corresponding quantity available. "
-                    "For example: "
-                    "* If `network_type`=*from_csv*, you have two options:* if, for example, "
-                    '`R_c`= [{"budget": 3}, {"budget": 6}], then the analysis is done for the cases '
-                    'when there are 3 and 6 resources available of type "budget" '
-                    '(total resource assignment).* if, for example, `R_c`= [{"budget": {1:1, 2:1}}, '
-                    '{"budget": {1:1, 2:2}}, {"budget": {1:3, 2:3}}] and given there are 2 layers,'
-                    " then the analysis is done for the case where each layer gets 1 resource of "
-                    'type "budget", AND the case where layer 1 gets 1 and layer 2 gets 2 resources of '
-                    'type "budget", AND the case where each layer gets 3 resources of type '
-                    '"budget" (Prescribed resource for each layer).',
+                    "corresponding quantity available. ",
                     "type": list,
                 },
                 {
@@ -1173,11 +1163,9 @@ class INDP(BaseAnalysis):
                 {
                     "id": "method",
                     "required": True,
-                    "description": "Based name of method to use. "
-                    "There are two choices of method: 1. `INDP`: runs Interdependent Network. "
-                    "Restoration Problem (INDP). 2. `TDINDP`: runs time-dependent INDP (td-INDP).  In "
-                    'both cases, if "TIME_RESOURCE" is True, then the repair time for each element '
-                    "is considered in devising the restoration plans.",
+                    "description": "There are two choices of method: 1. INDP: runs Interdependent Network Restoration "
+                    "Problem (INDP). 2. TDINDP: runs time-dependent INDP (td-INDP). In both cases, if TIME_RESOURCE is "
+                    "True, then the repair time for each element is considered.",
                     "type": str,
                 },
                 {
