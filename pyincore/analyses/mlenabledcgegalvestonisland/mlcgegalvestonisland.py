@@ -16,8 +16,8 @@ from pyincore.utils.cge_ml_file_util import CGEMLFileUtil
 logger = pyglobals.LOGGER
 
 
-class MlEnabledCgeGalveston(CoreCGEML):
-    model = "Machine Learning Enabled Computable General Equilibrium - Galveston"
+class MlEnabledCgeGalvestonIsland(CoreCGEML):
+    model = "Machine Learning Enabled Computable General Equilibrium - Galveston Island"
 
     # Coefficients files
     DDS_coefficients_file = "DDS_coefficients.csv"
@@ -36,7 +36,7 @@ class MlEnabledCgeGalveston(CoreCGEML):
     base_file_path = os.path.join(
         pyglobals.PYINCORE_PACKAGE_HOME,
         "analyses",
-        "mlenabledcgegalveston",
+        "mlenabledcgegalvestonisland",
     )
 
     model_filenames = {
@@ -94,15 +94,15 @@ class MlEnabledCgeGalveston(CoreCGEML):
         self.model_coeffs = model_coeffs
         self.cap_shock_sectors = cap_shock_sectors
         labor_grps = [f"IL{gp}" for gp in range(1, 5)]
-        labor_grps.extend([f"ML{gp}" for gp in range(1, 5)])
-        super(MlEnabledCgeGalveston, self).__init__(
+
+        super(MlEnabledCgeGalvestonIsland, self).__init__(
             incore_client,
             sectors,
             labor_groups=labor_grps,
         )  # 4 labor groups
 
     def run(self) -> bool:
-        """Executes the ML enabled CGE model for Galveston"""
+        """Executes the ML enabled CGE model for Galveston Island"""
 
         logger.info(f"Running {self.model} model...")
         sector_shocks = pd.read_csv(
@@ -113,16 +113,17 @@ class MlEnabledCgeGalveston(CoreCGEML):
 
         for sector in self.cap_shock_sectors:
             if sector.upper() not in [v.upper() for v in sector_shocks["sector"]]:
-                # special case for galveston: if a sector from base cap is not in the shocks, add a unit shock. (No Loss)
-                shocks.append(1.0)
-            else:
-                shocks.append(
-                    sector_shocks.loc[
-                        sector_shocks["sector"] == sector.upper(), "shock"
-                    ].iloc[0]
+                raise ValueError(
+                    f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors.\n"
+                    + "Please make sure you have used the correct capital shocks"
                 )
+            shocks.append(
+                sector_shocks.loc[sector_shocks["sector"] == sector.upper()]["shock"]
+            )
         capital_shocks = np.array(shocks, dtype=np.float64).reshape(1, -1)
         # logger.info(f"capital_shocks shape: {capital_shocks.shape}")
+        # logger.info(f"capital_shocks: {capital_shocks}")
+        # logger.info(f"base_cap: {self.base_cap}")
 
         super().run_core_cge_ml(
             self.base_cap,
@@ -136,7 +137,7 @@ class MlEnabledCgeGalveston(CoreCGEML):
 
     def get_spec(self):
         return {
-            "name": "Galveston-cge",
+            "name": "Galveston Island-cge",
             "description": "CGE model for Galveston.",
             "input_parameters": [
                 {
