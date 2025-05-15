@@ -20,18 +20,18 @@ class MlEnabledCgeMobile(CoreCGEML):
     model = "Machine Learning Enabled Computable General Equilibrium - Mobile"
 
     # Coefficients files
-    DDS_coefficients_file = "DDS_coefficients.csv"
-    DY_coefficients_file = "DY_coefficients.csv"
-    MIGT_coefficients_file = "MIGT_coefficients.csv"
-    DFFD_coefficients_file = "DFFD_coefficients.csv"
+    DDS_coefficients_file = "galveston_csv/DDS_coefficients.csv"
+    DY_coefficients_file = "galveston_csv/DY_coefficients.csv"
+    MIGT_coefficients_file = "galveston_csv/MIGT_coefficients.csv"
+    DFFD_coefficients_file = "galveston_csv/DFFD_coefficients.csv"
 
     # Base value files
-    DS_base_val_file = "DS_base_val.csv"
-    GI_base_val_file = "GI_base_val.csv"
-    HH_base_val_file = "HH_base_val.csv"
-    FD_base_val_file = "FD_base_val.csv"
+    DS_base_val_file = "galveston_csv/DS_base_val.csv"
+    GI_base_val_file = "galveston_csv/GI_base_val.csv"
+    HH_base_val_file = "galveston_csv/HH_base_val.csv"
+    FD_base_val_file = "galveston_csv/FD_base_val.csv"
 
-    Base_KAP_file = "baseKAP.csv"
+    Base_KAP_file = "galveston_csv/baseKAP.csv"
 
     base_file_path = os.path.join(
         pyglobals.PYINCORE_PACKAGE_HOME,
