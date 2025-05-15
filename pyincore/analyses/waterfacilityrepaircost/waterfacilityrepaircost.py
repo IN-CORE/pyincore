@@ -142,18 +142,19 @@ class WaterFacilityRepairCost(BaseAnalysis):
         """
         return {
             "name": "wf-repair-cost",
-            "description": "Water Facility repair cost analysis.",
+            "description": "This analysis estimates the repair costs of water facilities for different simulation "
+                           "scenarios based on their damage states, replacement costs, and damage ratios.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "A name of the resulting dataset",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request.",
+                    "description": "If using parallel execution, the number of cpus to request. Default is 1.",
                     "type": int,
                 },
             ],
@@ -161,25 +162,26 @@ class WaterFacilityRepairCost(BaseAnalysis):
                 {
                     "id": "water_facilities",
                     "required": True,
-                    "description": "Water Facility Inventory",
+                    "description": "Dataset containing water facility inventory.",
                     "type": ["ergo:waterFacilityTopo"],
                 },
                 {
                     "id": "replacement_cost",
                     "required": True,
-                    "description": "Repair cost of the node in the complete damage state (= Replacement cost)",
+                    "description": "Dataset containing repair cost of the node in the complete damage state (= "
+                                   "Replacement cost).",
                     "type": ["incore:replacementCost"],
                 },
                 {
                     "id": "sample_damage_states",
                     "required": True,
-                    "description": "sample damage states from Monte Carlo Simulation",
+                    "description": "Sample damage states for each water facility.",
                     "type": ["incore:sampleDamageState"],
                 },
                 {
                     "id": "wf_dmg_ratios",
                     "required": True,
-                    "description": "Damage Ratios table",
+                    "description": "Damage Ratios table.",
                     "type": ["incore:waterFacilityDamageRatios"],
                 },
             ],
@@ -187,7 +189,7 @@ class WaterFacilityRepairCost(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "water_facilities",
-                    "description": "A csv file with repair cost for each water facility",
+                    "description": "A CSV file with repair cost for each water facility.",
                     "type": "incore:repairCost",
                 }
             ],

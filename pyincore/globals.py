@@ -10,12 +10,18 @@ import logging
 import os
 import shutil
 
-PACKAGE_VERSION = "1.20.1"
+PACKAGE_VERSION = "1.21.0"
 
-INCORE_API_PROD_URL = "https://incore.ncsa.illinois.edu"
-INCORE_API_DEV_URL = "https://incore-dev.ncsa.illinois.edu"
+INCORE_API_PROD_URL = "https://tools.in-core.org"
+INCORE_API_DEV_URL = "https://dev.in-core.org"
 
-INCORE_INTERNAL_API_URL = "http://localhost:8080"
+INCORE_LOCAL_API_URL = "http://localhost:8080"
+INCORE_INTERNAL_DFR3_API_URL = "http://incore-svc-dfr3:8888"
+INCORE_INTERNAL_DATA_API_URL = "http://incore-svc-data:8888"
+INCORE_INTERNAL_HAZARD_API_URL = "http://incore-svc-hazard:8888"
+INCORE_INTERNAL_SEMANTIC_API_URL = "http://incore-svc-sema:8888"
+INCORE_INTERNAL_SPACE_API_URL = "http://incore-svc-space:8888"
+INCORE_INTERNAL_PROJECT_API_URL = "http://incore-svc-project:8888"
 
 KEYCLOAK_AUTH_PATH = "/auth/realms/In-core/protocol/openid-connect/token"
 KEYCLOAK_USERINFO_PATH = "/auth/realms/In-core/protocol/openid-connect/userinfo"

@@ -62,7 +62,8 @@ jobs:
         run: |
           conda install conda-build
           mkdir dist
-          conda build --output-folder dist \
+          conda build --package-format=tar.bz2 \
+                      --output-folder dist \
                       --label ${{ env.LABEL }} \
                       recipes
 

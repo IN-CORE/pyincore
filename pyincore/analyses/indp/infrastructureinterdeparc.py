@@ -9,16 +9,16 @@ from pyincore.analyses.indp.infrastructurearc import InfrastructureArc
 
 class InfrastructureInterdepArc(InfrastructureArc):
     """
-    This class models a physical interdependency between nodes from two different layers. This class inherits from
-    :class:`InfrastructureArc`, where `source` attributes corresponds to the dependee node, and `dest` corresponds to
-    the depender node. The depender node is non-functional if the corresponding dependee node is non-functional.
+    This class represents a physical interdependency between nodes in two different layers. It inherits from
+    InfrastructureArc, where the source attribute corresponds to the dependee node and the dest attribute corresponds
+    to the depender node. The depender node becomes non-functional if the corresponding dependee node is non-functional.
 
     Attributes
     ----------
     source_layer : int
-        The id of the layer where the dependee node is
+        The id of the layer where the dependee node is.
     dest_layer : int
-        The id of the layer where the depender node is
+        The id of the layer where the depender node is.
     gamma : float
         The strength of the dependency, which is a number between 0 and 1.
     """

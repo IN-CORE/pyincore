@@ -32,42 +32,46 @@ class BuildingClusterRecovery(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "building-cluster-recovery-analysis",
-            "description": "Building Cluster Recovery Analysis (with uncertainty)",
+            "description": (
+                "The Building Portfolio Recovery analysis uses damage probabilities of structural components,"
+                "nonstructural drift-sensitive components, and nonstructural acceleration-sensitive components"
+                "to calculate building’s initial functionality loss."
+            ),
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": False,
-                    "description": "Result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "uncertainty",
                     "required": True,
-                    "description": "Use uncertainty",
+                    "description": "Include uncertainty in the recovery time.",
                     "type": bool,
                 },
                 {
                     "id": "sample_size",
                     "required": False,
-                    "description": "No. of buildings to be considered from input buildings",
+                    "description": "Number of buildings to be considered from buildings dataset.",
                     "type": int,
                 },
                 {
                     "id": "random_sample_size",
                     "required": True,
-                    "description": "Number of iterations for Monte Carlo Simulation",
+                    "description": "Number of iterations for the Monte Carlo simulation.",
                     "type": int,
                 },
                 {
                     "id": "no_of_weeks",
                     "required": True,
-                    "description": "Number of weeks to run the recovery model",
+                    "description": "Number of weeks to run the recovery model.",
                     "type": int,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request. Dafault is 1.",
                     "type": int,
                 },
             ],
@@ -75,44 +79,46 @@ class BuildingClusterRecovery(BaseAnalysis):
                 {
                     "id": "building_data",
                     "required": True,
-                    "description": "Building Data",
+                    "description": "Set the Building inventory dataset.",
                     "type": ["incore:portfolioBuildingInventory"],
                 },
                 {
                     "id": "occupancy_mapping",
                     "required": True,
-                    "description": "Occupancy code mapping",
+                    "description": "Occupancy code mapping, An occupancy of buildings dataset.",
                     "type": ["incore:portfolioOccupancyMapping"],
                 },
                 {
                     "id": "building_damage",
                     "required": True,
-                    "description": "Building Damage Results",
+                    "description": "Building Damage Results. This dataset should contain the damage state of each building.",
                     "type": ["incore:portfolioBuildingDamage"],
                 },
                 {
                     "id": "dmg_ratios",
                     "required": True,
-                    "description": "Percentage of mean repair by occupancy / building type",
+                    "description": "Percentage of mean repair by occupancy / building type.",
                     "type": ["incore:portfolioDamageRatios"],
                 },
                 {
                     "id": "utility",
                     "required": True,
-                    "description": "Full utility availability at each utility service area - joint area of power"
-                    'and water (row), at each week (column)"',
+                    "description": (
+                        "Full utility availability at each utility service area - joint area of power"
+                        "and water (row), at each week (column)."
+                    ),
                     "type": ["incore:portfolioUtilityAvailability"],
                 },
                 {
                     "id": "utility_partial",
                     "required": True,
-                    "description": "Partial utility availability at each utility service area",
+                    "description": "Partial utility availability at each utility service area.",
                     "type": ["incore:portfolioUtilityAvailability"],
                 },
                 {
                     "id": "coefFL",
                     "required": True,
-                    "description": "Correlation coefficient of initial functionality states",
+                    "description": "Correlation coefficient of initial functionality states.",
                     "type": ["incore:portfolioCoefficients"],
                 },
             ],
@@ -120,7 +126,7 @@ class BuildingClusterRecovery(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "buildingClusterRecovery",
-                    "description": "Building cluster recovery result.",
+                    "description": "Building cluster recovery result in CSV format.",
                     "type": "incore:clusterRecovery",
                 }
             ],

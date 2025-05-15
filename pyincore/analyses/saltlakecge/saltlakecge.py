@@ -1970,7 +1970,7 @@ class SaltLakeCGEModel(BaseAnalysis):
     def get_spec(self):
         return {
             'name': 'Salt-Lake-cge',
-            'description': 'CGE model for Salt Lake City.',
+            'description': 'Computable general equilibrium (CGE) model for Salt Lake City.',
             'input_parameters': [
                 {
                     'id': 'model_iterations',
@@ -2049,7 +2049,7 @@ class SaltLakeCGEModel(BaseAnalysis):
                 {
                     'id': 'sector_shocks',
                     'required': True,
-                    'description': 'Aggregation of building functionality states to capital shocks per sector',
+                    'description': 'Aggregation of building functionality states to capital shocks per sector.',
                     'type': ['incore:capitalShocks']
                 }
             ],
@@ -2057,31 +2057,31 @@ class SaltLakeCGEModel(BaseAnalysis):
                 {
                     'id': 'domestic-supply',
                     'parent_type': '',
-                    'description': 'CSV file of resulting domestic supply',
+                    'description': 'A CSV file of resulting domestic supply.',
                     'type': 'incore:Employment'
                 },
                 {
                     'id': 'gross-income',
                     'parent_type': '',
-                    'description': 'CSV file of resulting gross income',
+                    'description': 'A CSV file of resulting gross income.',
                     'type': 'incore:Employment'
                 },
                 {
                     'id': 'pre-disaster-factor-demand',
                     'parent_type': '',
-                    'description': 'CSV file of factor demand before disaster',
+                    'description': 'A CSV file of factor demand before disaster.',
                     'type': 'incore:FactorDemand'
                 },
                 {
                     'id': 'post-disaster-factor-demand',
                     'parent_type': '',
-                    'description': 'CSV file of resulting factor-demand',
+                    'description': 'A CSV file of resulting factor-demand.',
                     'type': 'incore:FactorDemand'
                 },
                 {
                     'id': 'household-count',
                     'parent_type': '',
-                    'description': 'CSV file of household count',
+                    'description': 'A CSV file of household count.',
                     'type': 'incore:HouseholdCount'
                 }
             ]

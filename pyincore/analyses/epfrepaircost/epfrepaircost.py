@@ -140,12 +140,13 @@ class EpfRepairCost(BaseAnalysis):
         """
         return {
             "name": "epf-repair-cost",
-            "description": "Electric Power Facility repair cost analysis.",
+            "description": "This analysis estimates the repair costs of electric power facilities for different "
+                           "simulation scenarios based on their damage states, replacement costs, and damage ratios",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "A name of the resulting dataset",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
@@ -159,25 +160,26 @@ class EpfRepairCost(BaseAnalysis):
                 {
                     "id": "epfs",
                     "required": True,
-                    "description": "Electric Power Facility Inventory",
+                    "description": "Dataset containing the electric power facility inventory.",
                     "type": ["incore:epf", "ergo:epf", "incore:epfVer2"],
                 },
                 {
                     "id": "replacement_cost",
                     "required": True,
-                    "description": "Repair cost of the node in the complete damage state (= Replacement cost)",
+                    "description": "Dataset containing the repair cost of the node in the complete damage state (= "
+                                   "Replacement cost).",
                     "type": ["incore:replacementCost"],
                 },
                 {
                     "id": "sample_damage_states",
                     "required": True,
-                    "description": "sample damage states from Monte Carlo Simulation",
+                    "description": "Sample damage states for each electric power facility.",
                     "type": ["incore:sampleDamageState"],
                 },
                 {
                     "id": "epf_dmg_ratios",
                     "required": True,
-                    "description": "Damage Ratios table",
+                    "description": "Damage Ratios table.",
                     "type": ["incore:epfDamageRatios"],
                 },
             ],
@@ -185,7 +187,7 @@ class EpfRepairCost(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "epfs",
-                    "description": "A csv file with repair cost for each electric power facility",
+                    "description": "A CSV file with repair cost for each electric power facility.",
                     "type": "incore:repairCost",
                 }
             ],

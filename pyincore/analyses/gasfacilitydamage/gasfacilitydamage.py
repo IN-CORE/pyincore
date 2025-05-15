@@ -371,42 +371,44 @@ class GasFacilityDamage(BaseAnalysis):
         """
         return {
             "name": "gas-facility-damage",
-            "description": "Gas facility damage analysis",
+            "description": "This analysis computes gas facility damage based on a particular hazard using the hazard "
+                           "input and fragility curves mapped to the gas facility.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
-                    "description": "Fragility key to use in mapping dataset",
+                    "description": "Fragility key to use in mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "liquefaction_fragility_key",
                     "required": False,
-                    "description": "Fragility key to use in liquefaction mapping dataset",
+                    "description": "Fragility key to use in liquefaction mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "use_liquefaction",
                     "required": False,
-                    "description": "Use liquefaction",
+                    "description": "Use liquefaction to modify damage intervals, if applicable.",
                     "type": bool,
                 },
                 {
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
-                    "description": "Geology dataset id",
+                    "description": "ID of the dataset containing Liquefaction geology/susceptibility information. If "
+                                   "not provided, liquefaction will be ignored.",
                     "type": str,
                 },
                 {
                     "id": "use_hazard_uncertainty",
                     "required": False,
-                    "description": "Use hazard uncertainty",
+                    "description": "Use hazard uncertainty, if applicable.",
                     "type": bool,
                 },
                 {
@@ -418,13 +420,13 @@ class GasFacilityDamage(BaseAnalysis):
                 {
                     "id": "hazard_id",
                     "required": False,
-                    "description": "Hazard object id",
+                    "description": "ID of the hazard to use for computing damage.",
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
-                    "description": "Hazards type",
+                    "description": "Hazard type to use in the analysis (e.g. earthquake).",
                     "type": str,
                 },
             ],
@@ -432,7 +434,7 @@ class GasFacilityDamage(BaseAnalysis):
                 {
                     "id": "hazard",
                     "required": False,
-                    "description": "Hazard object",
+                    "description": "Hazard object. This can be specified in place of the hazard type and ID.",
                     "type": ["earthquake"],
                 },
             ],
@@ -440,13 +442,13 @@ class GasFacilityDamage(BaseAnalysis):
                 {
                     "id": "gas_facilities",
                     "required": True,
-                    "description": "Gas facility Inventory",
+                    "description": "Dataset containing the gas facility inventory.",
                     "type": ["ergo:gasFacilityInventory"],
                 },
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "DFR3 mapping set containing rules to map DFR3 curves to the gas facilities.",
                     "type": ["incore:dfr3MappingSet"],
                 },
             ],
@@ -461,7 +463,7 @@ class GasFacilityDamage(BaseAnalysis):
                     "id": "metadata",
                     "parent_type": "gas_facilities",
                     "description": "additional metadata in json file about applied hazard value and "
-                    "fragility",
+                    "fragility.",
                     "type": "incore:gasFacilityDamageSupplement",
                 },
             ],
