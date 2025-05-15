@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- ML Enabled Galveston CGE [#641](https://github.com/IN-CORE/pyincore/issues/641)
+
 ### Changed
 - Descriptions of the analyses to be more verbose. [#645](https://github.com/IN-CORE/pyincore/issues/645)
 - Descriptions of the analyses, inputs and parameters. [#649](https://github.com/IN-CORE/pyincore/issues/649)

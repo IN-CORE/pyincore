@@ -13,7 +13,7 @@ class CGEMLFileUtil:
 
     @staticmethod
     def parse_coeff(
-        filenames: Dict[str, str]
+        filenames: Dict[str, str],
     ) -> Tuple[Dict[str, np.ndarray], Dict[str, List[str]], Dict[str, List[str]]]:
         """parse_coeff Function to parse the model coefficients.
 
