@@ -5,7 +5,7 @@ client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
 mlcgemobile = MlEnabledCgeMobile(client)
 
-sector_shocks = "677c0c346a42fa7faea05dac"
+sector_shocks = "68434532d11a287c7c34a64a"
 
 mlcgemobile.load_remote_input_dataset("sector_shocks", sector_shocks)
 # optional
