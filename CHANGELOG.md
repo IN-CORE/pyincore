@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
+- ML Enabled Galveston CGE [#641](https://github.com/IN-CORE/pyincore/issues/641)
 - ML Enabled Mobile CGE [#658](https://github.com/IN-CORE/pyincore/issues/658)
 
 ### Changed
