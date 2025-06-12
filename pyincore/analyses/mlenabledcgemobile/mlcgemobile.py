@@ -93,7 +93,7 @@ class MlEnabledCgeMobile(CoreCGEML):
         self.base_cap = base_cap
         self.model_coeffs = model_coeffs
         self.cap_shock_sectors = cap_shock_sectors
-        labor_grps = [f"IL{gp}" for gp in range(1, 5)]
+        labor_grps = [f"L{gp}" for gp in range(1, 5)]
 
         super(MlEnabledCgeMobile, self).__init__(
             incore_client,
