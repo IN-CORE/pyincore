@@ -212,24 +212,30 @@ class BuyoutDecision(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "buyout-decision",
-            "description": "Buyout decision framework",
+            "description": (
+                "This analysis helps identify candidate properties for buyout and allows practitioners and "
+                "researchers to evaluate the potential equity outcomes of their selection under different scenario events."
+                "The outputs of this analysis is a CSV file with buildings to consider for buyout based on the set criteria. "
+                "This can assist local practitioners to identify candidate properties for buyout selection and "
+                "allows practitioners and researchers to evaluate the potential equity outcomes of their selection"
+            ),
             "input_parameters": [
                 {
                     "id": "fema_buyout_cap",
                     "required": True,
-                    "description": "FEMA buyout cap",
+                    "description": "FEMA buyout cap is the maximum appraised value considered for buyout.",
                     "type": float,
                 },
                 {
                     "id": "residential_archetypes",
                     "required": True,
-                    "description": "Residential archetypes",
+                    "description": "Residential archetypes to consider for buyout.",
                     "type": list,
                 },
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "Result name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
             ],
@@ -237,19 +243,19 @@ class BuyoutDecision(BaseAnalysis):
                 {
                     "id": "past_building_damage",
                     "required": True,
-                    "description": "Building Damage Results",
+                    "description": "Set Building Damage Results dataset from past hazard event.",
                     "type": ["ergo:buildingDamageVer6"],
                 },
                 {
                     "id": "future_building_damage",
                     "required": True,
-                    "description": "Building Damage Results",
+                    "description": "Set Building Damage Results dataset from future/predicted hazard event.",
                     "type": ["ergo:buildingDamageVer6"],
                 },
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Set the Building Inventory Dataset.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingInventoryVer5",
@@ -260,14 +266,14 @@ class BuyoutDecision(BaseAnalysis):
                 {
                     "id": "housing_unit_allocation",
                     "required": True,
-                    "description": "A csv file with the merged dataset of the inputs, aka Probabilistic"
+                    "description": "A csv file with the merged dataset of the inputs, aka Probabilistic."
                     "House Unit Allocation",
                     "type": ["incore:housingUnitAllocation"],
                 },
                 {
                     "id": "population_dislocation",
                     "required": True,
-                    "description": "Population Dislocation from past hazard event",
+                    "description": "Population Dislocation results from past hazard event.",
                     "type": ["incore:popDislocation"],
                 },
             ],
@@ -275,7 +281,7 @@ class BuyoutDecision(BaseAnalysis):
                 {
                     "id": "result",
                     "label": "Buyout Decision Results",
-                    "description": "Buyout Decision Results",
+                    "description": "A dataset containing buyout decision results (format: CSV).",
                     "type": ["incore:buyoutDecision"],
                 }
             ],

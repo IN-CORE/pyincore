@@ -112,7 +112,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 and a target level column.
 
         Returns:
-            np.array: Initial functionality level based on damage state
+            np.array: Initial functionality level based on damage state.
             np.array: Building restoration days.
 
         """
@@ -178,24 +178,27 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
         """
         return {
             "name": "joplin-empirical-building-restoration",
-            "description": "Values (in days) for the predicted restoration time of the building.",
+            "description": "Joplin Empirical Building Restoration Model generates a random realization for the restoration time of"
+            "a building damaged in a tornado event to be restored to a certain functionality level. Functionality"
+            "levels in this model are defined according to Koliou and van de Lindt (2020) and range from Functionality"
+            "Level 4 (FL4, the lowest functionality) to Functionality Level 0 (FL0, full functionality).",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of result dataset.",
                     "type": str,
                 },
                 {
                     "id": "target_functionality_level",
                     "required": False,
-                    "description": "Target functionality level for all infrastructure",
+                    "description": "Target functionality level for all infrastructure.",
                     "type": int,
                 },
                 {
                     "id": "seed",
                     "required": False,
-                    "description": "Initial seed for the tornado hazard value",
+                    "description": "Initial seed for the tornado hazard value.",
                     "type": int,
                 },
             ],
@@ -203,7 +206,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Building Inventory Dataset.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingInventoryVer5",
@@ -214,7 +217,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 {
                     "id": "building_dmg",
                     "required": True,
-                    "description": "Building damage results CSV file",
+                    "description": "CSV file of Building damage results.",
                     "type": [
                         "ergo:buildingDamageVer4",
                         "ergo:buildingDamageVer5",
@@ -230,7 +233,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                     "id": "building_functionality_level",
                     "required": False,
                     "description": "Functionality level per building. The target level defaults "
-                    "to target_functionality_level parameter if building not in the dataset",
+                    "to target_functionality_level parameter if building not in the dataset.",
                     "type": ["incore:buildingFuncTargetVer1"],
                 },
             ],
@@ -238,7 +241,7 @@ class JoplinEmpiricalBuildingRestoration(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "buildings",
-                    "description": "A dataset containing results (format: CSV) with values (in days) for the predicted "
+                    "description": "CSV file of dataset containing results with values (in days) for the predicted "
                     "restoration time of the building.",
                     "type": "incore:restorationTime",
                 }

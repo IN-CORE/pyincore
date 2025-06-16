@@ -238,6 +238,11 @@ analyses/mlenabledcgeslc
 ..  autoclass:: mlenabledcgeslc.mlcgeslc.MlEnabledCgeSlc
     :members:
 
+analyses/mlenabledcgegalveston
+========================
+..  autoclass:: mlenabledcgegalveston.mlcgegalveston.MlEnabledCgeGalveston
+    :members:
+
 analyses/mlenabledcgejoplin
 ========================
 ..  autoclass:: mlenabledcgejoplin.mlcgejoplin.MlEnabledCgeJoplin

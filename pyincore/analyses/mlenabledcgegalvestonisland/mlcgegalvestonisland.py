@@ -16,19 +16,8 @@ from pyincore.utils.cge_ml_file_util import CGEMLFileUtil
 logger = pyglobals.LOGGER
 
 
-class MlEnabledCgeSlc(CoreCGEML):
-    """
-    The "Machine Learning Enabled Computable General Equilibrium (CGE) - Joplin" analysis merges advanced machine
-    learning with traditional CGE models to offer unprecedented insights into the economic impacts of disaster
-    scenarios on Joplin. Trained on a comprehensive dataset of numerous simulated disasters and their economic
-    effects, this hybrid approach excels in predicting the intricate dynamics of the city's economy under
-    various crises.
-
-    Args:
-        CoreCGEML (class): The base class for the ML enabled CGE model.
-    """
-
-    model = "Machine Learning Enabled Computable General Equilibrium - Salt Lake City "
+class MlEnabledCgeGalvestonIsland(CoreCGEML):
+    model = "Machine Learning Enabled Computable General Equilibrium - Galveston Island"
 
     # Coefficients files
     DDS_coefficients_file = "DDS_coefficients.csv"
@@ -47,7 +36,7 @@ class MlEnabledCgeSlc(CoreCGEML):
     base_file_path = os.path.join(
         pyglobals.PYINCORE_PACKAGE_HOME,
         "analyses",
-        "mlenabledcgeslc",
+        "mlenabledcgegalvestonisland",
     )
 
     model_filenames = {
@@ -104,12 +93,16 @@ class MlEnabledCgeSlc(CoreCGEML):
         self.base_cap = base_cap
         self.model_coeffs = model_coeffs
         self.cap_shock_sectors = cap_shock_sectors
-        super(MlEnabledCgeSlc, self).__init__(
-            incore_client, sectors, labor_groups=[f"L{gp}" for gp in range(1, 5)]
+        labor_grps = [f"IL{gp}" for gp in range(1, 5)]
+
+        super(MlEnabledCgeGalvestonIsland, self).__init__(
+            incore_client,
+            sectors,
+            labor_groups=labor_grps,
         )  # 4 labor groups
 
     def run(self) -> bool:
-        """Executes the ML enabled CGE model for Salt Lake City."""
+        """Executes the ML enabled CGE model for Galveston Island"""
 
         logger.info(f"Running {self.model} model...")
         sector_shocks = pd.read_csv(
@@ -122,13 +115,15 @@ class MlEnabledCgeSlc(CoreCGEML):
             if sector.upper() not in [v.upper() for v in sector_shocks["sector"]]:
                 raise ValueError(
                     f"Sector {sector} not found in the sector shocks file with\n {sector_shocks['sector']} sectors.\n"
-                    + "Please make sure you have used the correct capital shocks."
+                    + "Please make sure you have used the correct capital shocks"
                 )
             shocks.append(
                 sector_shocks.loc[sector_shocks["sector"] == sector.upper()]["shock"]
             )
         capital_shocks = np.array(shocks, dtype=np.float64).reshape(1, -1)
         # logger.info(f"capital_shocks shape: {capital_shocks.shape}")
+        # logger.info(f"capital_shocks: {capital_shocks}")
+        # logger.info(f"base_cap: {self.base_cap}")
 
         super().run_core_cge_ml(
             self.base_cap,
@@ -142,17 +137,13 @@ class MlEnabledCgeSlc(CoreCGEML):
 
     def get_spec(self):
         return {
-            "name": "Salt-Lake-cge",
-            "description": "The Machine Learning Enabled Computable General Equilibrium (CGE) - Salt Lake City analysis merges "
-            "advanced machine learning with traditional CGE models to offer unprecedented insights into the economic impacts of "
-            "disaster scenarios on Salt Lake City. Trained on a comprehensive dataset of numerous simulated disasters and their "
-            "economic effects, this hybrid approach excels in predicting the intricate dynamics of the city’s economy "
-            "under various crises.",
+            "name": "Galveston Island-cge",
+            "description": "CGE model for Galveston.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": False,
-                    "description": "Result CSV dataset name prefix.",
+                    "description": "Result CSV dataset name prefix",
                     "type": str,
                 }
             ],
@@ -160,7 +151,7 @@ class MlEnabledCgeSlc(CoreCGEML):
                 {
                     "id": "sector_shocks",
                     "required": True,
-                    "description": "Aggregation of building functionality states to capital shocks per sector.",
+                    "description": "Aggregation of building functionality states to capital shocks per sector",
                     "type": ["incore:capitalShocks"],
                 }
             ],
@@ -168,31 +159,31 @@ class MlEnabledCgeSlc(CoreCGEML):
                 {
                     "id": "domestic-supply",
                     "parent_type": "",
-                    "description": "CSV file of resulting domestic supply.",
+                    "description": "CSV file of resulting domestic supply",
                     "type": "incore:Employment",
                 },
                 {
                     "id": "gross-income",
                     "parent_type": "",
-                    "description": "CSV file of resulting gross income.",
+                    "description": "CSV file of resulting gross income",
                     "type": "incore:Employment",
                 },
                 {
                     "id": "pre-disaster-factor-demand",
                     "parent_type": "",
-                    "description": "CSV file of factor demand before disaster.",
+                    "description": "CSV file of factor demand before disaster",
                     "type": "incore:FactorDemand",
                 },
                 {
                     "id": "post-disaster-factor-demand",
                     "parent_type": "",
-                    "description": "CSV file of resulting factor-demand.",
+                    "description": "CSV file of resulting factor-demand",
                     "type": "incore:FactorDemand",
                 },
                 {
                     "id": "household-count",
                     "parent_type": "",
-                    "description": "CSV file of household count.",
+                    "description": "CSV file of household count",
                     "type": "incore:HouseholdCount",
                 },
             ],
