@@ -34,9 +34,12 @@ class WfnFunctionality(BaseAnalysis):
         pumpstation_nodes = self.get_parameter("pumpstation_node_list")
 
         # Get network dataset
-        network_dataset = NetworkDataset.from_dataset(
-            self.get_input_dataset("wfn_network")
-        )
+        network_dataset = self.get_input_dataset("wfn_network")
+        if not isinstance(network_dataset, NetworkDataset):
+            network_dataset = NetworkDataset.from_dataset(
+                self.get_input_dataset("wfn_network")
+            )
+
         edges_wfl_gdf = network_dataset.links.get_dataframe_from_shapefile()
 
         nodes_wfn_gdf = network_dataset.nodes.get_dataframe_from_shapefile()

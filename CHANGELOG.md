@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Descriptions of the analyses, inputs and parameters. [#646](https://github.com/IN-CORE/pyincore/issues/646)
 - Descriptions of the analyses to be more verbose. [#647](https://github.com/IN-CORE/pyincore/issues/647)
 
+### Fixed
+- Network analyses to check if a network dataset is set by the user. [#667](https://github.com/IN-CORE/pyincore/issues/667)
+
 
 ## [1.21.0] - 2025-02-12
 
