@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [Unreleased]
+## [1.22.0] - 2025-07-31
 
 ### Added
 - ML Enabled Galveston CGE [#641](https://github.com/IN-CORE/pyincore/issues/641)
