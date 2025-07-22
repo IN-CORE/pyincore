@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Descriptions of the analyses, inputs and parameters. [#646](https://github.com/IN-CORE/pyincore/issues/646)
 - Descriptions of the analyses to be more verbose. [#647](https://github.com/IN-CORE/pyincore/issues/647)
 
+### Added
+- Add ML enabled Seaside CGE [#657](https://github.com/IN-CORE/pyincore/issues/657)
+
 
 ## [1.21.0] - 2025-02-12
 
