@@ -105,8 +105,8 @@ class MlEnabledCgeSeaside(CoreCGEML):
         self.model_coeffs = model_coeffs
         self.cap_shock_sectors = cap_shock_sectors
         super(MlEnabledCgeSeaside, self).__init__(
-            incore_client, sectors, labor_groups=[f"L{gp}" for gp in range(1, 5)]
-        )  # 4 labor groups
+            incore_client, sectors, labor_groups=[f"L{gp}" for gp in range(1, 6)]
+        )  # 5 labor groups
 
     def run(self) -> bool:
         """Executes the ML enabled CGE model for Seaside."""
