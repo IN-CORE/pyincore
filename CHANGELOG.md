@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Descriptions of the analyses, inputs and parameters. [#649](https://github.com/IN-CORE/pyincore/issues/649)
 - Descriptions of the analyses, inputs and parameters. [#646](https://github.com/IN-CORE/pyincore/issues/646)
 - Descriptions of the analyses to be more verbose. [#647](https://github.com/IN-CORE/pyincore/issues/647)
+- Hazard service earthquake post method to allow user to specify soil type dataset [#654](https://github.com/IN-CORE/pyincore/issues/654)
 
 ### Added
 - Add ML enabled Seaside CGE [#657](https://github.com/IN-CORE/pyincore/issues/657)
