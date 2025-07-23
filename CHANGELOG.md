@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Building retrofit fails with local building dataset. [#617](https://github.com/IN-CORE/pyincore/issues/617)
 
+### Fixed
+- Network analyses to check if a network dataset is set by the user. [#667](https://github.com/IN-CORE/pyincore/issues/667)
+
 
 ## [1.21.0] - 2025-02-12
 
