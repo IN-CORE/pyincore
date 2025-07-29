@@ -57,9 +57,7 @@ class HousingValuationRecovery(BaseAnalysis):
                     "id": "base_year",
                     "required": False,
                     "description": "Base year is used to calculate the improvement age. It should be set to the "
-                    "tax assessment year that represents pre-disaster building values. For example, "
-                    "in GCAD data, this corresponds to the improvement valuation before the impacts "
-                    "of Hurricane Ike. The default value is 2008.",
+                    "tax assessment year that represents pre-disaster building values. The default value is 2008.",
                     "type": int,
                 },
                 {

@@ -8,11 +8,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- ML Enabled Galveston CGE [#641](https://github.com/IN-CORE/pyincore/issues/641)
+- ML Enabled Mobile CGE [#658](https://github.com/IN-CORE/pyincore/issues/658)
+- Add ML enabled Seaside CGE [#657](https://github.com/IN-CORE/pyincore/issues/657)
+
 ### Changed
 - Descriptions of the analyses to be more verbose. [#645](https://github.com/IN-CORE/pyincore/issues/645)
 - Descriptions of the analyses, inputs and parameters. [#649](https://github.com/IN-CORE/pyincore/issues/649)
 - Descriptions of the analyses, inputs and parameters. [#646](https://github.com/IN-CORE/pyincore/issues/646)
 - Descriptions of the analyses to be more verbose. [#647](https://github.com/IN-CORE/pyincore/issues/647)
+- Hazard service earthquake post method to allow user to specify soil type dataset [#654](https://github.com/IN-CORE/pyincore/issues/654)
+- Capital Shocks analysis to also output Sectors in building to sector mappings with no guids as unit shocks. [#671](https://github.com/IN-CORE/pyincore/issues/671)
+
+### Fixed
+- Building retrofit fails with local building dataset. [#617](https://github.com/IN-CORE/pyincore/issues/617)
+
+### Fixed
+- Network analyses to check if a network dataset is set by the user. [#667](https://github.com/IN-CORE/pyincore/issues/667)
 
 
 ## [1.21.0] - 2025-02-12

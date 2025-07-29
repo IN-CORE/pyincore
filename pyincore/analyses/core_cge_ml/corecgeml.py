@@ -199,8 +199,8 @@ class CoreCGEML(BaseAnalysis):
 
             assert (
                 factor_capital_loss.shape == factor_base_cap_before.shape
-            ), "Number of sectors in models and base_cap_factors do not match. required shape {}, observed shape {}".format(
-                factor_capital_loss.shape, factor_base_cap_before.shape
+            ), "Number of sectors in models and base_cap_factors do not match. required shape {}, observed shape {} for {}".format(
+                factor_capital_loss.shape, factor_base_cap_before.shape, factor
             )
             # add the predicted change in capital stock to the base_cap_factors
             factor_base_cap_after: np.ndarray = (

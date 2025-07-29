@@ -26,9 +26,12 @@ class EpnFunctionality(BaseAnalysis):
         """Execute electric power facility functionality analysis"""
 
         # get network dataset
-        network_dataset = NetworkDataset.from_dataset(
-            self.get_input_dataset("epn_network")
-        )
+        network_dataset = self.get_input_dataset("epn_network")
+        if not isinstance(network_dataset, NetworkDataset):
+            network_dataset = NetworkDataset.from_dataset(
+                self.get_input_dataset("epn_network")
+            )
+
         links_epl_gdf = network_dataset.links.get_dataframe_from_shapefile()
         nodes_epf_gdf = network_dataset.nodes.get_dataframe_from_shapefile()
         links_epl_gdf["weight"] = links_epl_gdf.loc[:, "length_km"]
@@ -181,9 +184,9 @@ class EpnFunctionality(BaseAnalysis):
         return {
             "name": "epn-functionality",
             "description": "This analysis computes the functionality of electric power networks. The computation uses "
-                           "sample failure states as well as the network topology of electric power line to determine "
-                           "the functionality probability and failure states for a corresponding electric power "
-                           "facility network by performing a reachability analysis.",
+            "sample failure states as well as the network topology of electric power line to determine "
+            "the functionality probability and failure states for a corresponding electric power "
+            "facility network by performing a reachability analysis.",
             "input_parameters": [
                 {
                     "id": "result_name",

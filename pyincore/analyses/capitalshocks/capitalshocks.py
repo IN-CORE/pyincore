@@ -109,13 +109,15 @@ class CapitalShocks(BaseAnalysis):
             sector_values = inventory_failure.loc[
                 (inventory_failure["sector"] == sector)
             ]
-            sector_cap = sector_values["cap_rem"].sum()
-            sector_total = sector_values["appr_bldg"].sum()
-            if sector_total == 0:
-                continue
-            sector_shock = np.divide(sector_cap, sector_total)
-            sector_shocks[sector] = sector_shock
-
+            if sector_values.empty:
+                sector_shocks[sector] = 1.0
+            else:
+                sector_cap = sector_values["cap_rem"].sum()
+                sector_total = sector_values["appr_bldg"].sum()
+                if sector_total == 0:
+                    continue
+                sector_shock = np.divide(sector_cap, sector_total)
+                sector_shocks[sector] = sector_shock
         sector_shocks = pd.DataFrame(sector_shocks.items(), columns=["sector", "shock"])
         result_name = self.get_parameter("result_name")
         self.set_result_csv_data(

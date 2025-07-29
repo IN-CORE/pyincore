@@ -208,10 +208,17 @@ class HazardService:
 
         """
         url = urljoin(self.base_earthquake_url, hazard_id + "/values")
+        site_class_dataset_id = ""
+        value = payload[len(payload) - 1]
+        if "siteClassId" in value:
+            payload = payload[:-1]
+            site_class_dataset_id = value["siteClassId"]
+
         kwargs = {
             "files": {
                 ("points", json.dumps(payload)),
                 ("amplifyHazard", json.dumps(amplify_hazard)),
+                ("siteClassId", site_class_dataset_id),
             }
         }
         r = self.client.post(url, timeout=timeout, **kwargs)

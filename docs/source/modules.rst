@@ -243,9 +243,23 @@ analyses/mlenabledcgeslc
 ..  autoclass:: mlenabledcgeslc.mlcgeslc.MlEnabledCgeSlc
     :members:
 
-analyses/mlenabledcgejoplin
+analyses/mlenabledcgegalveston
 ========================
+..  autoclass:: mlenabledcgegalveston.mlcgegalveston.MlEnabledCgeGalveston
+    :members:
+
+analyses/mlenabledcgejoplin
+===========================
 ..  autoclass:: mlenabledcgejoplin.mlcgejoplin.MlEnabledCgeJoplin
+    :members:
+
+analyses/mlenabledcgemobile
+===========================
+..  autoclass:: mlenabledcgemobile.mlcgemobile.MlEnabledCgeMobile
+
+analyses/mlenabledcgeseaside
+========================
+..  autoclass:: mlenabledcgeseaside.mlcgeseaside.MlEnabledCgeSeaside
     :members:
 
 analyses/montecarlofailureprobability
