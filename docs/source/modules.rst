@@ -244,9 +244,13 @@ analyses/mlenabledcgegalveston
     :members:
 
 analyses/mlenabledcgejoplin
-========================
+===========================
 ..  autoclass:: mlenabledcgejoplin.mlcgejoplin.MlEnabledCgeJoplin
     :members:
+
+analyses/mlenabledcgemobile
+===========================
+..  autoclass:: mlenabledcgemobile.mlcgemobile.MlEnabledCgeMobile
 
 analyses/mlenabledcgeseaside
 ========================
