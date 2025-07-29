@@ -5,7 +5,7 @@ client = IncoreClient(pyglobals.INCORE_API_DEV_URL)
 
 mlcgelumberton = MlEnabledCgeLumberton(client)
 
-sector_shocks = "6706b97443810e1298e8fbfc"
+sector_shocks = "688913ee54892f07695f541c"
 
 mlcgelumberton.load_remote_input_dataset("sector_shocks", sector_shocks)
 # optional
