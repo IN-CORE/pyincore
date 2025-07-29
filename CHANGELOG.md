@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Descriptions of the analyses, inputs and parameters. [#646](https://github.com/IN-CORE/pyincore/issues/646)
 - Descriptions of the analyses to be more verbose. [#647](https://github.com/IN-CORE/pyincore/issues/647)
 - Hazard service earthquake post method to allow user to specify soil type dataset [#654](https://github.com/IN-CORE/pyincore/issues/654)
+- Capital Shocks analysis to also output Sectors in building to sector mappings with no guids as unit shocks. [#671](https://github.com/IN-CORE/pyincore/issues/671)
 
 ### Fixed
 - Building retrofit fails with local building dataset. [#617](https://github.com/IN-CORE/pyincore/issues/617)
