@@ -96,9 +96,12 @@ class TornadoEpnDamage(BaseAnalysis):
         super(TornadoEpnDamage, self).__init__(incore_client)
 
     def run(self):
-        network_dataset = NetworkDataset.from_dataset(
-            self.get_input_dataset("epn_network")
-        )
+        network_dataset = self.get_input_dataset("epn_network")
+        if not isinstance(network_dataset, NetworkDataset):
+            network_dataset = NetworkDataset.from_dataset(
+                self.get_input_dataset("epn_network")
+            )
+
         tornado = self.get_input_hazard("hazard")
         tornado_id = self.get_parameter("tornado_id")
         if tornado is None and tornado_id is None:

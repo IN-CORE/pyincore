@@ -248,6 +248,11 @@ analyses/mlenabledcgejoplin
 ..  autoclass:: mlenabledcgejoplin.mlcgejoplin.MlEnabledCgeJoplin
     :members:
 
+analyses/mlenabledcgeseaside
+========================
+..  autoclass:: mlenabledcgeseaside.mlcgeseaside.MlEnabledCgeSeaside
+    :members:
+
 analyses/montecarlofailureprobability
 =====================================
 .. deprecated:: 1.19.0

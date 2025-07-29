@@ -13,6 +13,7 @@ from pyincore import Dataset, DataService, MappingSet
 # for evaluation of retrofit expression
 import math  # noqa: F401
 import scipy  # noqa: F401
+import os
 
 
 class DatasetUtil:
@@ -196,7 +197,12 @@ class DatasetUtil:
 
             # save the updated inventory to a new shapefile
             tmpdirname = tempfile.mkdtemp()
-            file_path = f"{tmpdirname}/tmp_updated_{inventory_dataset.id}.shp"
+
+            inventory_dataset_id = inventory_dataset.id
+            # Check if inventory ID is a file path and if it is, just use the base name
+            if os.path.isdir(inventory_dataset_id):
+                inventory_dataset_id = os.path.basename(inventory_dataset_id)
+            file_path = f"{tmpdirname}/tmp_updated_{inventory_dataset_id}.shp"
             inventory_df.to_file(file_path)
 
             # return the updated inventory dataset in geoDataframe for future consumption
