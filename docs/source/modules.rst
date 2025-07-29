@@ -251,6 +251,10 @@ analyses/mlenabledcgejoplin
 analyses/mlenabledcgemobile
 ===========================
 ..  autoclass:: mlenabledcgemobile.mlcgemobile.MlEnabledCgeMobile
+
+analyses/mlenabledcgeseaside
+========================
+..  autoclass:: mlenabledcgeseaside.mlcgeseaside.MlEnabledCgeSeaside
     :members:
 
 analyses/montecarlofailureprobability
