@@ -234,7 +234,7 @@ analyses/meandamage
     :members:
 
 analyses/mlenabledcgelumberton
-========================
+==============================
 ..  autoclass:: mlenabledcgelumberton.mlcgelumberton.MlEnabledCgeLumberton
     :members:
 
@@ -244,7 +244,7 @@ analyses/mlenabledcgeslc
     :members:
 
 analyses/mlenabledcgegalveston
-========================
+==============================
 ..  autoclass:: mlenabledcgegalveston.mlcgegalveston.MlEnabledCgeGalveston
     :members:
 
@@ -258,7 +258,7 @@ analyses/mlenabledcgemobile
 ..  autoclass:: mlenabledcgemobile.mlcgemobile.MlEnabledCgeMobile
 
 analyses/mlenabledcgeseaside
-========================
+============================
 ..  autoclass:: mlenabledcgeseaside.mlcgeseaside.MlEnabledCgeSeaside
     :members:
 
