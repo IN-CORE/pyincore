@@ -51,10 +51,10 @@ class NciFunctionality(BaseAnalysis):
         discretized_days = self.get_parameter("discretized_days")
 
         # Load all dataset-related entities for EPF
-        epf_network_dataset = self.get_input_dataset("epn_network")
+        epf_network_dataset = self.get_input_dataset("epf_network")
         if not isinstance(epf_network_dataset, NetworkDataset):
             epf_network_dataset = NetworkDataset.from_dataset(
-                self.get_input_dataset("epn_network")
+                self.get_input_dataset("epf_network")
             )
 
         epf_network_nodes = epf_network_dataset.nodes.get_dataframe_from_shapefile()
