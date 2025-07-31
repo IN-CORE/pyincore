@@ -26,9 +26,12 @@ class EpnFunctionality(BaseAnalysis):
         """Execute electric power facility functionality analysis"""
 
         # get network dataset
-        network_dataset = NetworkDataset.from_dataset(
-            self.get_input_dataset("epn_network")
-        )
+        network_dataset = self.get_input_dataset("epn_network")
+        if not isinstance(network_dataset, NetworkDataset):
+            network_dataset = NetworkDataset.from_dataset(
+                self.get_input_dataset("epn_network")
+            )
+
         links_epl_gdf = network_dataset.links.get_dataframe_from_shapefile()
         nodes_epf_gdf = network_dataset.nodes.get_dataframe_from_shapefile()
         links_epl_gdf["weight"] = links_epl_gdf.loc[:, "length_km"]
@@ -180,18 +183,21 @@ class EpnFunctionality(BaseAnalysis):
         """
         return {
             "name": "epn-functionality",
-            "description": "electric power network functionality analysis",
+            "description": "This analysis computes the functionality of electric power networks. The computation uses "
+            "sample failure states as well as the network topology of electric power line to determine "
+            "the functionality probability and failure states for a corresponding electric power "
+            "facility network by performing a reachability analysis.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "gate_station_node_list",
                     "required": False,
-                    "description": "list of gate station nodes",
+                    "description": "List of gate station nodes.",
                     "type": List[int],
                 },
             ],
@@ -199,25 +205,25 @@ class EpnFunctionality(BaseAnalysis):
                 {
                     "id": "epn_network",
                     "required": True,
-                    "description": "EPN Network Dataset",
+                    "description": "Electric power network dataset with links and nodes.",
                     "type": ["incore:epnNetwork"],
                 },
                 {
                     "id": "epf_sample_failure_state",
                     "required": True,
-                    "description": "CSV file of failure state for each sample. Output from MCS analysis",
+                    "description": "Dataset containing the sample failure state for the electric power facility.",
                     "type": ["incore:sampleFailureState"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "failure_probability",
-                    "description": "CSV file of failure probability",
+                    "description": "CSV file of failure probability.",
                     "type": "incore:failureProbability",
                 },
                 {
                     "id": "sample_failure_state",
-                    "description": "CSV file of failure state for each sample",
+                    "description": "CSV file of failure state for each sample.",
                     "type": "incore:sampleFailureState",
                 },
             ],

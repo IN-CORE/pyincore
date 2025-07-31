@@ -9,16 +9,16 @@ import string
 
 class INDPComponents:
     """
-    This class stores components of a network
+    This class stores components of a network.
 
     Attributes
     ----------
     components : list
-        List of components of the network
+        List of components of the network.
     num_components : int
-        Number of components of the network
+        Number of components of the network.
     gc_size : int
-        Size of the largest component of the network
+        Size of the largest component of the network.
     """
 
     def __init__(self):
@@ -28,14 +28,14 @@ class INDPComponents:
 
     def add_component(self, members, excess_supply):
         """
-        This function adds a components
+        This function adds a components.
 
         Parameters
         ----------
         members : list
-            List of nodes in the component
+            List of nodes in the component.
         excess_supply : float
-            Excess supply within the component
+            Excess supply within the component.
 
         Returns
         -------
@@ -46,12 +46,12 @@ class INDPComponents:
 
     def to_csv_string(self):
         """
-        Convert the list of components to a string
+        Convert the list of components to a string.
 
         Returns
         -------
             : str
-            List of components as a string
+            List of components as a string.
 
         """
         comp_strings = []
@@ -64,23 +64,23 @@ class INDPComponents:
     @classmethod
     def calculate_components(clss, m, net, t=0, layers=None):
         """
-        Find the components and the corresponding excess supply
+        Find the components and the corresponding excess supply.
 
         Parameters
         ----------
         m : gurobi.Model
             The object containing the solved optimization problem.
         net : networkx.DiGraph
-            The networkx graph object that stores node, arc, and interdependency information
+            The networkx graph object that stores node, arc, and interdependency information.
         t : int
             Time step. The default is zero.
         layers : list
-            List of layers in the analysis
+            List of layers in the analysis.
 
         Returns
         -------
         indp_components : :class:`~INDPComponents`
-            The object containing the components
+            The object containing the components.
 
         """
         if layers is None:
@@ -104,17 +104,17 @@ class INDPComponents:
     @classmethod
     def from_csv_string(clss, csv_string):
         """
-        This functions reads the components data from a string as a :class:`~INDPComponents` object
+        This functions reads the components data from a string as a :class:`~INDPComponents` object.
 
         Parameters
         ----------
         csv_string : str
-            The string containing the component data
+            The string containing the component data.
 
         Returns
         -------
         indp_components : :class:`~INDPComponents`
-            The object containing the components
+            The object containing the components.
 
         """
         indp_components = INDPComponents()

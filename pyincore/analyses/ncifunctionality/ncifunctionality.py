@@ -51,9 +51,12 @@ class NciFunctionality(BaseAnalysis):
         discretized_days = self.get_parameter("discretized_days")
 
         # Load all dataset-related entities for EPF
-        epf_network_dataset = NetworkDataset.from_dataset(
-            self.get_input_dataset("epf_network")
-        )
+        epf_network_dataset = self.get_input_dataset("epf_network")
+        if not isinstance(epf_network_dataset, NetworkDataset):
+            epf_network_dataset = NetworkDataset.from_dataset(
+                self.get_input_dataset("epf_network")
+            )
+
         epf_network_nodes = epf_network_dataset.nodes.get_dataframe_from_shapefile()
         epf_network_links = epf_network_dataset.links.get_dataframe_from_shapefile()
 
@@ -141,26 +144,26 @@ class NciFunctionality(BaseAnalysis):
         wds_time_results,
         epf_damage,
     ):
-        """Compute EPF and WDS cascading functionality outcomes
+        """Compute EPF and WDS cascading functionality outcomes.
 
         Args:
-            discretized_days (List[int]): a list of discretized days
-            epf_network_nodes (pd.DataFrame): network nodes for EPF network
-            epf_network_links (pd.DataFrame): network links for EPF network
-            wds_network_nodes (pd.DataFrame): network nodes for WDS network
-            wds_network_links (pd.DataFrame): network links for WDS network
-            epf_wds_intdp_table (pd.DataFrame): mapping from EPF to WDS networks
-            wds_epf_intdp_table (pd.DataFrame): mapping from WDS to EPF networks
-            epf_subst_failure_results (pd.DataFrame): substation failure results for EPF network
-            epf_inventory_rest_map (pd.DataFrame): inventory restoration map for EPF network
-            epf_time_results (pd.DataFrame): time results for EPF network
-            wds_dmg_results (pd.DataFrame): damage results for WDS network
-            wds_inventory_rest_map (pd.DataFrame): inventory restoration map for WDS network
-            wds_time_results (pd.DataFrame): time results for WDS network
-            epf_damage (pd.DataFrame): limit state probabilities and damage states for each guid
+            discretized_days (List[int]): a list of discretized days.
+            epf_network_nodes (pd.DataFrame): network nodes for EPF network.
+            epf_network_links (pd.DataFrame): network links for EPF network.
+            wds_network_nodes (pd.DataFrame): network nodes for WDS network.
+            wds_network_links (pd.DataFrame): network links for WDS network.
+            epf_wds_intdp_table (pd.DataFrame): mapping from EPF to WDS networks.
+            wds_epf_intdp_table (pd.DataFrame): mapping from WDS to EPF networks.
+            epf_subst_failure_results (pd.DataFrame): substation failure results for EPF network.
+            epf_inventory_rest_map (pd.DataFrame): inventory restoration map for EPF network.
+            epf_time_results (pd.DataFrame): time results for EPF network.
+            wds_dmg_results (pd.DataFrame): damage results for WDS network.
+            wds_inventory_rest_map (pd.DataFrame): inventory restoration map for WDS network.
+            wds_time_results (pd.DataFrame): time results for WDS network.
+            epf_damage (pd.DataFrame): limit state probabilities and damage states for each guid.
 
         Returns:
-            (pd.DataFrame, pd.DataFrame): results for EPF and WDS networks
+            (pd.DataFrame, pd.DataFrame): results for EPF and WDS networks.
         """
 
         # Compute updated EPF and WDS node information
@@ -395,18 +398,22 @@ class NciFunctionality(BaseAnalysis):
 
     @staticmethod
     def solve_leontief_equation(graph, functionality_nodes, discretized_days):
-        """Computes the solution to the Leontief equation for network interdependency given a
+        """Computes the solution to the Leontief equation for network interdependency, considering functional
+        dependencies between two interdependent networks with functionality information per node. The computation
+        captures cascading dependencies on infrastructure functionality, expressed as discrete points, and produces
+        two datasets—one for each labeled network—containing updated cascading functionalities alongside the original
+        discrete ones.
 
         Args:
-            graph (networkx object): graph containing the integrated EPN-WDS network
+            graph (networkx object): graph containing the integrated EPN-WDS network.
             functionality_nodes (pd.DataFrame): dataframe containing discretized EFP/WDS restoration results
-            per node
-            discretized_days (list): days used for discretization of restoration analyses
+            per node.
+            discretized_days (list): days used for discretization of restoration analyses.
 
         Returns:
-            pd.DataFrame
+            pd.DataFrame: updated functionality nodes with cascading functionality results.
         """
-        # Create a deep copy of the incoming fuctionality results to store new values
+        # Create a deep copy of the incoming functionality results to store new values
         df_functionality_nodes = copy.deepcopy(functionality_nodes)
 
         # M is computed once and remains common across discretized days
@@ -425,13 +432,13 @@ class NciFunctionality(BaseAnalysis):
 
     @staticmethod
     def update_wds_network_links(wds_network_links):
-        """Update network links with functionality attributes
+        """Update network links with functionality attributes.
 
         Args:
-            wds_network_links (pd.DataFrame): WDS network links
+            wds_network_links (pd.DataFrame): WDS network links.
 
         Returns:
-            pd.DataFrame
+            pd.DataFrame: Updated WDS network links.
 
         """
         wds_links = copy.deepcopy(wds_network_links)
@@ -471,23 +478,28 @@ class NciFunctionality(BaseAnalysis):
 
     def get_spec(self):
         """Get specifications of the network cascading interdependency functionality analysis.
+
         Returns:
             obj: A JSON object of specifications of the NCI functionality analysis.
         """
         return {
             "name": "network-cascading-interdepedency-functionality",
-            "description": "Network cascading interdepedency functionality analysis",
+            "description": "This analysis computes the output of the Leontief equation for functional dependencies between two"
+            "interdependent networks having functionality information per node. These dependencies capture cascading"
+            "dependencies on infrastructure functionality, expressed in terms of discrete points."
+            "The output of the computation consists of two datasets, one per each labeled network, with new cascading"
+            "functionalities accompanying the original discrete ones.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Result CSV dataset name prefix.",
                     "type": str,
                 },
                 {
                     "id": "discretized_days",
                     "required": False,
-                    "description": "Discretized days to compute functionality",
+                    "description": "Discretized days to compute functionality.",
                     "type": List[int],
                 },
             ],
@@ -495,74 +507,75 @@ class NciFunctionality(BaseAnalysis):
                 {
                     "id": "epf_network",
                     "required": True,
-                    "description": "EPN network",
+                    "description": "A EPN network dataset.",
                     "type": ["incore:epnNetwork"],
                 },
                 {
                     "id": "wds_network",
                     "required": True,
-                    "description": "WDS network",
+                    "description": "A WDS network.",
                     "type": ["incore:waterNetwork"],
                 },
                 {
                     "id": "epf_wds_intdp_table",
                     "required": True,
-                    "description": "Table containing interdependency information from EPN to WDS networks",
+                    "description": "A Table containing interdependency information from EPN to WDS networks.",
                     "type": ["incore:networkInterdependencyTable"],
                 },
                 {
                     "id": "wds_epf_intdp_table",
                     "required": True,
-                    "description": "Table containing interdependency information from WDS to EPF networks",
+                    "description": "A Table containing interdependency information from WDS to EPF networks.",
                     "type": ["incore:networkInterdependencyTable"],
                 },
                 {
                     "id": "epf_subst_failure_results",
                     "required": True,
-                    "description": "EPF substation failure results",
+                    "description": "An EPF substation failure results.",
                     "type": ["incore:failureProbability"],
                 },
                 {
                     "id": "epf_inventory_rest_map",
                     "required": True,
-                    "description": "EPF inventory restoration map",
+                    "description": "An EPF inventory restoration map.",
                     "type": ["incore:inventoryRestorationMap"],
                 },
                 {
                     "id": "epf_time_results",
                     "required": True,
-                    "description": "A csv file recording repair time for EPF per class and limit state",
+                    "description": "A CSV file of recording repair time for EPF per class and limit state.",
                     "type": ["incore:epfRestorationTime"],
                 },
                 {
                     "id": "wds_dmg_results",
                     "required": True,
-                    "description": "WDS damage results",
+                    "description": "A WDS damage results.",
                     "type": ["ergo:waterFacilityDamageVer6"],
                 },
                 {
                     "id": "wds_inventory_rest_map",
                     "required": True,
-                    "description": "WDS inventory restoration map",
+                    "description": "A WDS inventory restoration map.",
                     "type": ["incore:inventoryRestorationMap"],
                 },
                 {
                     "id": "wds_time_results",
                     "required": True,
-                    "description": "A csv file recording repair time for WDS per class and limit state",
+                    "description": "A CSV file of recording repair time for WDS per class and limit state.",
                     "type": ["incore:waterFacilityRestorationTime"],
                 },
                 {
                     "id": "epf_damage",
                     "required": True,
-                    "description": "A csv file with limit state probabilities and damage states for each electric power facility",
+                    "description": "A CSV file of limit state probabilities and damage states for each electric "
+                    "power facility.",
                     "type": ["incore:epfDamageVer3"],
                 },
             ],
             "output_datasets": [
                 {
                     "id": "epf_cascading_functionality",
-                    "description": "CSV file of interdependent cascading network functionality for EPF",
+                    "description": "A CSV file of interdependent cascading network functionality for EPF.",
                     "type": "incore:epfDiscretizedCascadingFunc",
                 }
             ],

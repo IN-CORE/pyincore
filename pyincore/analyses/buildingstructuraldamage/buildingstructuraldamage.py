@@ -186,6 +186,8 @@ class BuildingStructuralDamage(BaseAnalysis):
         # Get geology dataset id containing liquefaction susceptibility
         geology_dataset_id = self.get_parameter("liquefaction_geology_dataset_id")
 
+        site_class_dataset_id = self.get_parameter("site_class_dataset_id")
+
         multihazard_vals = {}
         adjust_demand_types_mapping = {}
 
@@ -231,6 +233,10 @@ class BuildingStructuralDamage(BaseAnalysis):
                     value_liq = {"demands": [""], "units": [""], "loc": loc}
                     values_payload_liq.append(value_liq)
 
+            if hazard_type == "earthquake" and site_class_dataset_id is not None:
+                # Add site class dataset id if set to get soil type information
+                value = {"siteClassId": site_class_dataset_id}
+                values_payload.append(value)
             hazard_vals = hazard.read_hazard_values(values_payload, self.hazardsvc)
 
             # map demand type from payload to response
@@ -402,60 +408,79 @@ class BuildingStructuralDamage(BaseAnalysis):
         """
         return {
             "name": "building-damage",
-            "description": "building damage analysis",
+            "description": (
+                "This analysis computes building structural damage based on a particular hazard. "
+                "Currently supported hazards are: earthquake, tsunami, tornado, hurricane and flood."
+                "The process for computing the structural damage is similar to other parts of the built environment. "
+                "First, a fragility is obtained based on the hazard type and attributes of the building. Based on the "
+                "fragility, the hazard intensity at the location of the building is computed. Using this information, "
+                "the probability of exceeding each limit state is computed, along with the probability of damage. "
+                "For the case of an earthquake hazard, soil information can be used to modify the damage probabilities "
+                "to include damage due to liquefaction."
+            ),
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "hazard_type",
                     "required": False,
-                    "description": "Hazard Type (e.g. earthquake)",
+                    "description": "Hazard type (earthquake, tsunami, tornado, hurricaneWindfields).",
                     "type": str,
                 },
                 {
                     "id": "hazard_id",
                     "required": False,
-                    "description": "Hazard ID",
+                    "description": "ID of the hazard from the Hazard service.",
                     "type": str,
                 },
                 {
                     "id": "fragility_key",
                     "required": False,
-                    "description": "Fragility key to use in mapping dataset",
+                    "description": "Non-structural Fragility key to use in mapping dataset.",
                     "type": str,
                 },
                 {
                     "id": "use_liquefaction",
                     "required": False,
-                    "description": "Use liquefaction",
+                    "description": "Use liquefaction, if applicable to the hazard. Default is False.",
                     "type": bool,
                 },
                 {
                     "id": "use_hazard_uncertainty",
                     "required": False,
-                    "description": "Use hazard uncertainty",
+                    "description": (
+                        "For model based hazard events, if the model supports uncertainty, "
+                        "then you can set this flag to indicate using the mean plus one standard deviation when computing damage. "
+                        "Default is false."
+                    ),
                     "type": bool,
                 },
                 {
                     "id": "num_cpu",
                     "required": False,
-                    "description": "If using parallel execution, the number of cpus to request",
+                    "description": "If using parallel execution, the number of cpus to request. Default is 1.",
                     "type": int,
                 },
                 {
                     "id": "seed",
                     "required": False,
-                    "description": "Initial seed for the tornado hazard value",
+                    "description": "Initial seed for the tornado hazard value.",
                     "type": int,
                 },
                 {
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
-                    "description": "Geology dataset id",
+                    "description": "Liquefaction geology/susceptibility dataset id. If not provided, liquefaction will be ignored.",
+                    "type": str,
+                },
+                {
+                    "id": "site_class_dataset_id",
+                    "required": False,
+                    "description": "Site classification dataset id containing soil type information.",
                     "type": str,
                 },
             ],
@@ -463,7 +488,7 @@ class BuildingStructuralDamage(BaseAnalysis):
                 {
                     "id": "hazard",
                     "required": False,
-                    "description": "Hazard object",
+                    "description": "Supported hazard object for using local and remote hazards.",
                     "type": ["earthquake", "tornado", "hurricane", "flood", "tsunami"],
                 },
             ],
@@ -471,7 +496,7 @@ class BuildingStructuralDamage(BaseAnalysis):
                 {
                     "id": "buildings",
                     "required": True,
-                    "description": "Building Inventory",
+                    "description": "Set Building Inventory Dataset.",
                     "type": [
                         "ergo:buildingInventoryVer4",
                         "ergo:buildingInventoryVer5",
@@ -482,13 +507,13 @@ class BuildingStructuralDamage(BaseAnalysis):
                 {
                     "id": "dfr3_mapping_set",
                     "required": True,
-                    "description": "DFR3 Mapping Set Object",
+                    "description": "Set DFR3 Mapping Set Object.",
                     "type": ["incore:dfr3MappingSet"],
                 },
                 {
                     "id": "retrofit_strategy",
                     "required": False,
-                    "description": "Building retrofit strategy that contains guid and retrofit method",
+                    "description": "Building retrofit strategy that contains guid and retrofit method.",
                     "type": ["incore:retrofitStrategy"],
                 },
             ],
@@ -496,13 +521,13 @@ class BuildingStructuralDamage(BaseAnalysis):
                 {
                     "id": "ds_result",
                     "parent_type": "buildings",
-                    "description": "CSV file of damage states for building structural damage",
+                    "description": "CSV file of damage states for building structural damage.",
                     "type": "ergo:buildingDamageVer6",
                 },
                 {
                     "id": "damage_result",
                     "parent_type": "buildings",
-                    "description": "Json file with information about applied hazard value and fragility",
+                    "description": "Json file with information about applied hazard value and fragility.",
                     "type": "incore:buildingDamageSupplement",
                 },
             ],

@@ -96,9 +96,12 @@ class TornadoEpnDamage(BaseAnalysis):
         super(TornadoEpnDamage, self).__init__(incore_client)
 
     def run(self):
-        network_dataset = NetworkDataset.from_dataset(
-            self.get_input_dataset("epn_network")
-        )
+        network_dataset = self.get_input_dataset("epn_network")
+        if not isinstance(network_dataset, NetworkDataset):
+            network_dataset = NetworkDataset.from_dataset(
+                self.get_input_dataset("epn_network")
+            )
+
         tornado = self.get_input_hazard("hazard")
         tornado_id = self.get_parameter("tornado_id")
         if tornado is None and tornado_id is None:
@@ -620,24 +623,24 @@ class TornadoEpnDamage(BaseAnalysis):
     def get_spec(self):
         return {
             "name": "tornado-epn-damage",
-            "description": "tornado epn damage analysis",
+            "description": "This analysis computes electric power network (EPN) damage based on a particular hazard.",
             "input_parameters": [
                 {
                     "id": "result_name",
                     "required": True,
-                    "description": "result dataset name",
+                    "description": "Base name of the result output.",
                     "type": str,
                 },
                 {
                     "id": "tornado_id",
                     "required": False,
-                    "description": "Tornado hazard id",
+                    "description": "ID of the tornado hazard to use in the analysis for computing damage.",
                     "type": str,
                 },
                 {
                     "id": "seed",
                     "required": False,
-                    "description": "Initial seed for the tornado hazard value",
+                    "description": "Initial seed for the tornado hazard value.",
                     "type": int,
                 },
             ],
@@ -645,7 +648,7 @@ class TornadoEpnDamage(BaseAnalysis):
                 {
                     "id": "hazard",
                     "required": False,
-                    "description": "Hazard object",
+                    "description": "Hazard object. This can be specified in place of the hazard type and ID.",
                     "type": ["tornado"],
                 },
             ],
@@ -653,13 +656,13 @@ class TornadoEpnDamage(BaseAnalysis):
                 {
                     "id": "epn_network",
                     "required": True,
-                    "description": "EPN Network Dataset",
+                    "description": "Dataset containing the electric power network.",
                     "type": ["incore:epnNetwork"],
                 },
                 {
                     "id": "tornado",
                     "required": False,
-                    "description": "Tornado Dataset",
+                    "description": "ID of the tornado hazard dataset to use in the analysis for computing damage.",
                     "type": ["incore:tornadoWindfield"],
                 },
             ],
@@ -667,13 +670,13 @@ class TornadoEpnDamage(BaseAnalysis):
                 {
                     "id": "result",
                     "parent_type": "epn_network",
-                    "description": "CSV file of damages for electric power network by tornado",
+                    "description": "CSV file of damages for electric power network by tornado.",
                     "type": "incore:tornadoEPNDamageVer3",
                 },
                 {
                     "id": "metadata",
                     "parent_type": "epn_network",
-                    "description": "Json file with information about applied hazard value and fragility",
+                    "description": "JSON file with information about applied hazard value and fragility.",
                     "type": "incore:tornadoEPNDamageSupplement",
                 },
             ],

@@ -5,11 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [1.22.0] - 2025-07-31
+
+### Added
+
+- ML Enabled Galveston CGE [#641](https://github.com/IN-CORE/pyincore/issues/641)
+- ML Enabled Mobile CGE [#658](https://github.com/IN-CORE/pyincore/issues/658)
+- ML Enabled Seaside CGE [#657](https://github.com/IN-CORE/pyincore/issues/657)
+- ML Enabled Lumberton CGE [#447](https://github.com/IN-CORE/incore-docs/issues/447)
+
+### Changed
+
+- Descriptions of the analyses to be more verbose. [#645](https://github.com/IN-CORE/pyincore/issues/645)
+- Descriptions of the analyses, inputs and parameters. [#649](https://github.com/IN-CORE/pyincore/issues/649)
+- Descriptions of the analyses, inputs and parameters. [#646](https://github.com/IN-CORE/pyincore/issues/646)
+- Descriptions of the analyses to be more verbose. [#647](https://github.com/IN-CORE/pyincore/issues/647)
+- Hazard service earthquake post method to allow user to specify soil type dataset [#654](https://github.com/IN-CORE/pyincore/issues/654)
+- Capital Shocks analysis to also output Sectors in building to sector mappings with no guids as unit shocks. [#671](https://github.com/IN-CORE/pyincore/issues/671)
+
+### Fixed
+
+- Building retrofit fails with local building dataset. [#617](https://github.com/IN-CORE/pyincore/issues/617)
+- Network analyses to check if a network dataset is set by the user. [#667](https://github.com/IN-CORE/pyincore/issues/667)
+
 ## [1.21.0] - 2025-02-12
 
 ### Changed
 - Enable internal network names for each service [#638](https://github.com/IN-CORE/pyincore/issues/638)
 - Update production URL references to tools.in-core.org and dev to dev.in-core.org [#634](https://github.com/IN-CORE/pyincore/issues/634)
+- Descriptions of the analyses, inputs and parameters. [#648](https://github.com/IN-CORE/pyincore/issues/648)
 
 ### Fixed
 - Documentation container tagging error by github action [#631](https://github.com/IN-CORE/pyincore/issues/631)

@@ -233,14 +233,33 @@ analyses/meandamage
 ..  autoclass:: meandamage.meandamage.MeanDamage
     :members:
 
+analyses/mlenabledcgelumberton
+==============================
+..  autoclass:: mlenabledcgelumberton.mlcgelumberton.MlEnabledCgeLumberton
+    :members:
+
 analyses/mlenabledcgeslc
 ========================
 ..  autoclass:: mlenabledcgeslc.mlcgeslc.MlEnabledCgeSlc
     :members:
 
+analyses/mlenabledcgegalveston
+==============================
+..  autoclass:: mlenabledcgegalveston.mlcgegalveston.MlEnabledCgeGalveston
+    :members:
+
 analyses/mlenabledcgejoplin
-========================
+===========================
 ..  autoclass:: mlenabledcgejoplin.mlcgejoplin.MlEnabledCgeJoplin
+    :members:
+
+analyses/mlenabledcgemobile
+===========================
+..  autoclass:: mlenabledcgemobile.mlcgemobile.MlEnabledCgeMobile
+
+analyses/mlenabledcgeseaside
+============================
+..  autoclass:: mlenabledcgeseaside.mlcgeseaside.MlEnabledCgeSeaside
     :members:
 
 analyses/montecarlofailureprobability
