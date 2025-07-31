@@ -209,10 +209,12 @@ class HazardService:
         """
         url = urljoin(self.base_earthquake_url, hazard_id + "/values")
         site_class_dataset_id = ""
-        value = payload[len(payload) - 1]
-        if "siteClassId" in value:
-            payload = payload[:-1]
-            site_class_dataset_id = value["siteClassId"]
+
+        if len(payload) > 0:
+            value = payload[len(payload) - 1]
+            if "siteClassId" in value:
+                payload = payload[:-1]
+                site_class_dataset_id = value["siteClassId"]
 
         kwargs = {
             "files": {
