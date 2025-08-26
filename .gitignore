@@ -62,3 +62,4 @@ pyincore/analyses/seasidecge/solverconstants/tmp.py
 # credential
 *.incorepw
 
+*.inp
