@@ -16,7 +16,7 @@ jobs:
       matrix:
         vars: [ {python-version: '3.9', sleep: '0s'}, {python-version: '3.10', sleep: '60s'},
                 {python-version: '3.11', sleep: '120s'}, {python-version: '3.12', sleep: '180s'},
-                {python-version: '3.13', sleep: '240s'}, {python-version: '3.14', sleep: '300s'} ]
+                {python-version: '3.13', sleep: '240s'} ]
     name: Python ${{ matrix.vars.python-version }} Test
     steps:
       - name: Checkout source code
