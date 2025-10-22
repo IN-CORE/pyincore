@@ -23,6 +23,11 @@ from pyincore.analyses.indp.infrastructureutil import InfrastructureUtil
 
 from pyincore import globals as pyglobals
 
+import pyomo.opt.base.solvers
+
+# set default solver time limit to 10 seconds avoid hanging
+pyomo.opt.base.solvers.SolverFactory._solver_time_limit = 10
+
 
 class INDP(BaseAnalysis):
     """
@@ -978,6 +983,7 @@ class INDP(BaseAnalysis):
         )
 
         # Conservation of flow constraint. (2) in INDP paper.
+        m.delta_p_index_0 = pyo.Set(initialize=[])
         m.flow_conserv_node = pyo.Constraint(
             m.delta_p_index_0,
             m.time_step,
