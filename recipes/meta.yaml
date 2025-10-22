@@ -28,12 +28,12 @@ build:
  
 requirements:
   build:
-    - python<3.14
+    - python<3.13
     - pip
     - numpy>=1.26.0
  
   host:
-    - python<3.14
+    - python<3.13
     - pip
     - numpy>=1.26.0
 
