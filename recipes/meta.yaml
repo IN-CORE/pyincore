@@ -30,12 +30,12 @@ requirements:
   build:
     - python>=3.9
     - pip
-    - numpy>=1.26.0,<2.0a0
+    - numpy>=1.26.0
  
   host:
     - python>=3.9
     - pip
-    - numpy>=1.26.0,<2.0a0
+    - numpy>=1.26.0
 
   run:
     - python>=3.9
@@ -47,7 +47,7 @@ requirements:
     - matplotlib>=3.8.0
     - networkx>=3.2.1
     - pandas>=2.1.2
-    - pyomo>=6.0.0,<=6.6.2
+    - pyomo>=6.0.0
     - pyproj>=3.6.1
     - rasterio>=1.4.2
     - requests>=2.31.0
