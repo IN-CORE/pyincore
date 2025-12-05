@@ -38,7 +38,7 @@ requirements:
     - numpy>=1.26.0
 
   run:
-    - python>=3.9
+    - python<3.13
     - ipopt>=3.11
     - scip>=8.0.0
     - numpy>=1.26.0
