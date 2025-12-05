@@ -28,26 +28,26 @@ build:
  
 requirements:
   build:
-    - python>=3.9
+    - python<3.13
     - pip
-    - numpy>=1.26.0,<2.0a0
+    - numpy>=1.26.0
  
   host:
-    - python>=3.9
+    - python<3.13
     - pip
-    - numpy>=1.26.0,<2.0a0
+    - numpy>=1.26.0
 
   run:
-    - python>=3.9
+    - python<3.13
     - ipopt>=3.11
     - scip>=8.0.0
-    - {{ pin_compatible('numpy') }}
+    - numpy>=1.26.0
     - fiona>=1.9.5
     - geopandas>=0.14.0
     - matplotlib>=3.8.0
     - networkx>=3.2.1
     - pandas>=2.1.2
-    - pyomo>=6.0.0,<=6.6.2
+    - pyomo>=6.0.0
     - pyproj>=3.6.1
     - rasterio>=1.4.2
     - requests>=2.31.0
