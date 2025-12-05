@@ -31,6 +31,8 @@ class INDP(BaseAnalysis):
     a family of centralized Mixed-Integer Programming (MIP) models. These models determine the optimal restoration
     strategy for disrupted networked systems while considering budget and operational constraints.
 
+    Note: This analysis requires pyomo <= 6.6.2. Higher versions fail to run.
+
     Contributors
         | Science: Hesam Talebiyan
         | Implementation: Chen Wang and NCSA IN-CORE Dev Team
