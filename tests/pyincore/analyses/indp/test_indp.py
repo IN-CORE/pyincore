@@ -30,7 +30,7 @@ def run_with_base_class():
     datasvc = DataService(client)
 
     hazard_type = "earthquake"
-    hazard_id = "5ba8f127ec2309043520906c"  # 1000 yr eq
+    hazard_id = "6838755c53f6d51da81fa6ae"  # 5000 yr eq
     num_cpu = 8
     sim_number = 2
     sample_range = range(0, sim_number)
