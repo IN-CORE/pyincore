@@ -30,11 +30,13 @@ requirements:
   build:
     - python>=3.11
     - pip
+    - setuptools
     - numpy>=2.4.0
  
   host:
     - python>=3.11
     - pip
+    - setuptools
     - numpy>=2.4.0
 
   run:
