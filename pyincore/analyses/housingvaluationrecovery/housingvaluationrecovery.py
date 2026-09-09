@@ -182,8 +182,8 @@ class HousingValuationRecovery(BaseAnalysis):
         # Vacation condition for all years
 
         hse_rec_fin = np.empty(hse_recov.shape)
-        hse_rec_fin[:] = np.NaN
-        hse_rec_fin = np.where(d_vac_np == 0, np.exp(hse_rec_phm), np.NaN)
+        hse_rec_fin[:] = np.nan
+        hse_rec_fin = np.where(d_vac_np == 0, np.exp(hse_rec_phm), np.nan)
         hse_rec_fin = np.where(d_vac_np == 1, np.exp(hse_rec_svhm), hse_rec_fin)
 
         # Index building values against a pre-impact (-1) value
