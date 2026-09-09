@@ -53,7 +53,7 @@ setup(
         "matplotlib>=3.8.0",
         "networkx>=3.2.1",
         "numpy>=2.4.0",
-        "pandas>=2.1.2,<3.0a0",
+        "pandas>=2.1.2",
         "pyomo>=6.10.1",
         "pyproj>=3.6.1",
         "rasterio>=1.4.2",
