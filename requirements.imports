@@ -1,4 +1,5 @@
 
+deprecated
 fiona
 geopandas
 matplotlib
@@ -8,11 +9,9 @@ pandas
 pyomo
 pyproj
 rasterio
-requests
 rtree
 scipy
 shapely
 pycodestyle
 pytest
 python-jose
-Deprecated
