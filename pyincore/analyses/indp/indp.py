@@ -1085,7 +1085,7 @@ class INDP(BaseAnalysis):
                 == TerminationCondition.maxTimeLimit
             ):
                 print(
-                    "\nOptimizer time limit, gap = %1.3f\n" % solution.a.solution(0).gap
+                    "\nOptimizer time limit, gap = %1.3f\n" % solution.solution(0).gap
                 )
             results = INDPUtil.collect_results(m, controlled_layers, coloc=co_location)
             results.add_run_time(t, run_time)
