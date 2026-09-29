@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- INDP failing on Pyomo 6.10.1 with an uninitialized `delta_p_index_0` set [#676](https://github.com/IN-CORE/pyincore/issues/676)
+- INDP flow-conservation constraint silently dropped on Pyomo 6.10.1 (implicit `delta_p_index_0` set no longer created), which produced empty actions and all-zero costs [#676](https://github.com/IN-CORE/pyincore/issues/676)
 
 
 ## [1.22.0] - 2025-07-31
