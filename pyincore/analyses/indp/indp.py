@@ -978,9 +978,12 @@ class INDP(BaseAnalysis):
         )
 
         # Conservation of flow constraint. (2) in INDP paper.
-        m.delta_p_index_0 = pyo.Set(initialize=[])
+        # Pyomo >= 6.x no longer auto-creates the implicit index set
+        # (delta_p_index_0) that older Pyomo attached to m.delta_p, so index
+        # the constraint explicitly over the same node-commodity pairs.
+        m.node_com_idx = pyo.Set(initialize=node_com_idx, dimen=3)
         m.flow_conserv_node = pyo.Constraint(
-            m.delta_p_index_0,
+            m.node_com_idx,
             m.time_step,
             rule=INDPUtil.flow_conserv_node_rule,
             doc="Flow conservation",
