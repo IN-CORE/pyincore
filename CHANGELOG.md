@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Minimum Python raised to 3.11, NumPy to 2.4 and Pyomo to 6.10.1 [#50](https://github.com/IN-CORE/IN-CORE/issues/50)
 - Pinned pandas below 3.0 pending a separate pandas 3 migration [#50](https://github.com/IN-CORE/IN-CORE/issues/50)
 
+### Fixed
+
+- INDP failing on Pyomo 6.10.1 with an uninitialized `delta_p_index_0` set [#676](https://github.com/IN-CORE/pyincore/issues/676)
+
 
 ## [1.22.0] - 2025-07-31
 

@@ -978,6 +978,7 @@ class INDP(BaseAnalysis):
         )
 
         # Conservation of flow constraint. (2) in INDP paper.
+        m.delta_p_index_0 = pyo.Set(initialize=[])
         m.flow_conserv_node = pyo.Constraint(
             m.delta_p_index_0,
             m.time_step,
