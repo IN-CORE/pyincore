@@ -98,6 +98,12 @@ jobs:
     if: needs.select.outputs.count != '0'
     name: ${{ matrix.analysis }}
     runs-on: ubuntu-latest
+    env:
+      # environment.yml installs pyincore's dependencies but not pyincore
+      # itself, and both the bootstrap script and the test scripts run from
+      # directories other than the repository root, so the package has to be
+      # found explicitly. pytests.yml gets this for free from pytest's rootdir.
+      PYTHONPATH: ${{ github.workspace }}
     strategy:
       fail-fast: false
       # The tests share the IN-CORE dev services; keep the load reasonable.
