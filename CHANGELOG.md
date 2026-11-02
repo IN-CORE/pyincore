@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Manual-dispatch GitHub Action to run the analyses tests, per analysis [#695](https://github.com/IN-CORE/pyincore/issues/695)
+
 ### Changed
 
 - Minimum Python raised to 3.11, NumPy to 2.4 and Pyomo to 6.10.1 [#50](https://github.com/IN-CORE/IN-CORE/issues/50)
