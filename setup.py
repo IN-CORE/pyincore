@@ -64,7 +64,7 @@ setup(
     ],
     extras_require={
         "test": [
-            "pycodestyle>=2.6.0",
+            "flake8>=6.1.0",
             "pytest>=3.9.0",
             "python-jose>=3.0",
         ]

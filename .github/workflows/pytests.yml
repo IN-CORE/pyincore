@@ -49,5 +49,5 @@ jobs:
       - name: Run tests with pytest
         run: |
           echo "${{secrets.PYTEST_USER_TOKEN}}" > tests/pyincore/.incorepw
-          python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
+          python -m pytest --ignore=tests/pyincore/analyses
         shell: micromamba-shell {0}

@@ -8,10 +8,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Manual-dispatch GitHub Action to run the analyses tests, per analysis [#695](https://github.com/IN-CORE/pyincore/issues/695)
+- Lint workflow running black and flake8 on every push and pull request [#695](https://github.com/IN-CORE/pyincore/issues/695)
+- Docs workflow building the Sphinx documentation with warnings treated as errors [#695](https://github.com/IN-CORE/pyincore/issues/695)
+
 ### Changed
 
+- `tests/test_format.py` now defers to flake8 and runs in CI again, with the non-ML CGE analyses excluded [#695](https://github.com/IN-CORE/pyincore/issues/695)
+- Replaced the `pycodestyle` dependency with `flake8` [#695](https://github.com/IN-CORE/pyincore/issues/695)
 - Minimum Python raised to 3.11, NumPy to 2.4 and Pyomo to 6.10.1 [#50](https://github.com/IN-CORE/IN-CORE/issues/50)
 - Pinned pandas below 3.0 pending a separate pandas 3 migration [#50](https://github.com/IN-CORE/IN-CORE/issues/50)
+
+### Fixed
+
+- Conda and PyPI workflows no longer pin Python 3.9, which broke every pull request after the 3.11 minimum landed [#695](https://github.com/IN-CORE/pyincore/issues/695)
 
 
 ## [1.22.0] - 2025-07-31
