@@ -4,8 +4,9 @@
 # These are NOT pytest tests. 81 of 86 are plain scripts guarded by
 # `if __name__ == "__main__"`, and the mlenabledcge* ones run at module import.
 # Only a few define a collectable `def test_*`, and those carry a __main__ guard
-# too, so every file is executed the same way: `python <file>` from its own
-# directory (the tests resolve data files relative to the cwd).
+# too, so every file is executed the same way, from its own directory (the tests
+# resolve data files relative to the cwd), via run_analysis_script.py - which
+# turns a run_analysis() that returns False into a non-zero exit.
 #
 # usage: run_analyses_tests.sh <targets> [log-dir]
 #
@@ -23,6 +24,7 @@ TEST_ROOT="tests/pyincore/analyses"
 # Per-test wall-clock cap, in seconds. Some CGE/INDP runs legitimately take tens
 # of minutes, so this is generous.
 TEST_TIMEOUT="${TEST_TIMEOUT_SECONDS:-3600}"
+RUNNER_SHIM="$(cd "$(dirname "$0")" && pwd)/run_analysis_script.py"
 
 if [ ! -d "$TEST_ROOT" ]; then
   echo "error: $TEST_ROOT not found; run this from the repository root" >&2
@@ -65,7 +67,9 @@ for f in $files; do
   log="$LOG_DIR/$key.log"
   start=$SECONDS
   # `timeout` is not on macOS by default; perl's alarm is portable enough.
-  ( cd "$(dirname "$f")" && perl -e 'alarm shift; exec @ARGV' "$TEST_TIMEOUT" python "$(basename "$f")" ) > "$log" 2>&1
+  ( cd "$(dirname "$f")" \
+      && perl -e 'alarm shift; exec @ARGV' "$TEST_TIMEOUT" \
+           python "$RUNNER_SHIM" "$(basename "$f")" ) > "$log" 2>&1
   rc=$?
   dur=$((SECONDS - start))
   if [ "$rc" -eq 0 ]; then

@@ -134,8 +134,10 @@ jobs:
 
       - name: Run ${{ matrix.analysis }} tests
         env:
-          TEST_TIMEOUT_SECONDS: ${{ fromJson(inputs.test_timeout_minutes || '60') * 60 }}
+          # Actions expressions have no arithmetic operators, so convert here.
+          TIMEOUT_MINUTES: ${{ inputs.test_timeout_minutes || '60' }}
         run: |
+          export TEST_TIMEOUT_SECONDS=$((TIMEOUT_MINUTES * 60))
           .github/scripts/run_analyses_tests.sh "${{ matrix.analysis }}" analyses-logs
         shell: micromamba-shell {0}
 
