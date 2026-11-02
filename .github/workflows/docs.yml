@@ -1,0 +1,45 @@
+name: docs
+
+# Builds the Sphinx documentation with warnings treated as errors, so broken
+# docstring references and bad cross-links fail the pull request instead of
+# landing silently. doc.yaml also builds the docs inside a Docker image, but it
+# does not fail on warnings.
+
+on:
+  push:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  sphinx:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install micromamba
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          create-args: >-
+            python=3.11
+            sphinx
+            sphinx_rtd_theme
+            beautifulsoup4
+          environment-file: environment.yml
+          generate-run-shell: true
+
+      # autodoc imports pyincore, so the build also catches import-time breakage
+      # in the analyses packages.
+      - name: Build docs
+        run: sphinx-build -W --keep-going -b html docs/source docs/build
+        shell: micromamba-shell {0}
+
+      - name: Upload built docs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-html
+          path: docs/build/
+          retention-days: 14

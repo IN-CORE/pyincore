@@ -253,7 +253,7 @@ class EpfRestoration(BaseAnalysis):
         return {
             "name": "electric-power-facility-restoration",
             "description": "This analysis computes the repair time and the percentage of functionality change with "
-                           "time for an electric power facility based on input restoration curves",
+            "time for an electric power facility based on input restoration curves",
             "input_parameters": [
                 {
                     "id": "result_name",
@@ -265,7 +265,7 @@ class EpfRestoration(BaseAnalysis):
                     "id": "restoration_key",
                     "required": False,
                     "description": "Restoration key to use in mapping dataset that maps restoration curves to "
-                                   "electric power facilities.",
+                    "electric power facilities.",
                     "type": str,
                 },
                 {
@@ -304,7 +304,7 @@ class EpfRestoration(BaseAnalysis):
                     "id": "dfr3_mapping_set",
                     "required": True,
                     "description": "DFR3 mapping set containing rules to map DFR3 curves to the electric power "
-                                   "facility inventory.",
+                    "facility inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
                 {
