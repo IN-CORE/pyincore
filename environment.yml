@@ -18,6 +18,7 @@ dependencies:
   - python-jose>=3.0
   - rasterio>=1.4.2
   - requests>=2.31.0
+  - brotli-python>=1.2.1
   - rtree>=1.1.0
   - scipy>=1.11.3
   - shapely>=2.0.2
