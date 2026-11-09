@@ -291,7 +291,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
             local_guids = group["guid"]
 
             # Remove guids
-            no_guids = group.drop(columns=["guid"]).to_numpy()
+            no_guids = group.drop(columns=["guid"]).to_numpy(copy=True)
 
             # Compute the maxima of all columns
             maxima = list(no_guids.max(axis=0))
@@ -334,16 +334,16 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         household_guids = household_aggregated_income_groups["guid"]
 
         # Convert household aggregated income to numpy
-        samples_np = household_aggregated_income_groups.drop(
-            columns=["guid"]
-        ).to_numpy()
+        samples_np = household_aggregated_income_groups.drop(columns=["guid"]).to_numpy(
+            copy=True
+        )
 
         # Number of guids
         num_households = household_guids.shape[0]
         num_samples = len(colnames)
 
         # Convert the sample matrix to numpy
-        resources_np = financial_resources.to_numpy()
+        resources_np = financial_resources.to_numpy(copy=True)
 
         # Also, convert financial resources to numpy to perform linear algebra
         hhinc = resources_np[0:5, 0]
@@ -406,7 +406,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         # Convert to numpy
         samples_np = merged_delay.drop(
             columns=["guid", "sample_damage_states"]
-        ).to_numpy()
+        ).to_numpy(copy=True)
         num_samples = len(colnames)
 
         # First, we decompose redi_delay_factors into two dictionaries that can be used to compute vector operations
@@ -420,10 +420,10 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         # Next, we produce two intermediate numpy matrices: one for med and one for sdv
         redi_med = redi_delay_factors[
             ["Ins_med", "Enmo_med", "Como_med", "Per_med"]
-        ].to_numpy()
+        ].to_numpy(copy=True)
         redi_sdv = redi_delay_factors[
             ["Ins_sdv", "Enmo_sdv", "Como_sdv", "Per_sdv"]
-        ].to_numpy()
+        ].to_numpy(copy=True)
 
         # Define indices to facilitate interpretation of the code
         inspection_idx = 0
@@ -504,7 +504,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         # Convert to numpy
         samples_np = merged_delay.drop(
             columns=["guid", "sample_damage_states"]
-        ).to_numpy()
+        ).to_numpy(copy=True)
         num_samples = len(colnames)
         num_households = samples_np.shape[0]
 
@@ -578,7 +578,7 @@ class ResidentialBuildingRecovery(BaseAnalysis):
         recovery_results_guids = recovery_results["guid"]
 
         # Convert household aggregated income to numpy
-        samples_n1_n2 = recovery_results.drop(columns=["guid"]).to_numpy()
+        samples_n1_n2 = recovery_results.drop(columns=["guid"]).to_numpy(copy=True)
 
         # Number of guids
         num_households = recovery_results.shape[0]
