@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Minimum Python raised to 3.11, NumPy to 2.4 and Pyomo to 6.10.1 [#50](https://github.com/IN-CORE/IN-CORE/issues/50)
-- Pinned pandas below 3.0 pending a separate pandas 3 migration [#50](https://github.com/IN-CORE/IN-CORE/issues/50)
+- Support pandas 3 and remove the pandas <3.0 cap; CGE and building recovery analyses updated for pandas 3 [#687](https://github.com/IN-CORE/pyincore/issues/687)
 
 ### Fixed
 
