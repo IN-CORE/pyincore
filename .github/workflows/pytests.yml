@@ -13,10 +13,12 @@ jobs:
   unit_test:
     runs-on: ubuntu-latest
     strategy:
+      # Run one Python version at a time: all jobs share the same test account and data on dev
+      max-parallel: 1
+      fail-fast: false
       matrix:
-        vars: [ {python-version: '3.11', sleep: '0s'}, {python-version: '3.12', sleep: '60s'},
-                {python-version: '3.13', sleep: '120s'} ]
-    name: Python ${{ matrix.vars.python-version }} Test
+        python-version: ['3.11', '3.12', '3.13']
+    name: Python ${{ matrix.python-version }} Test
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -36,15 +38,10 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           create-args: >-
-            python=${{ matrix.vars.python-version }}
+            python=${{ matrix.python-version }}
             pytest
           environment-file: environment.yml
           generate-run-shell: true
-
-      - name: Sleep for ${{ matrix.vars.sleep }} to avoid multiple pytests run concurrently
-        uses: jakejarvis/wait-action@master
-        with:
-          time: ${{ matrix.vars.sleep }}
 
       - name: Run tests with pytest
         run: |
