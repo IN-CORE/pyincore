@@ -7,4 +7,8 @@ repos:
     rev: 6.1.0
     hooks:
       - id: flake8
-exclude: 'pyincore/analyses/(joplincge|saltlakecge|seasidecge|galvestoncge)/.*|docs/*'
+
+# The four non-ML CGE analyses are vendored model code that does not follow the
+# project's formatting conventions. The ML-enabled CGE analyses are NOT excluded.
+# Keep this list in step with `exclude` in .flake8, which the CI lint job uses.
+exclude: '^(build/|(pyincore|tests/pyincore)/analyses/(joplincge|joplincgeanalysis|saltlakecge|seasidecge|galvestoncge)/)'

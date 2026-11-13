@@ -69,7 +69,7 @@ test:
   requires:
     # Put any additional test requirements here.  For example
     - pytest>=3.9.0
-    - pycodestyle>=2.6.0
+    - flake8>=6.1.0
     - python-jose>=3.0
 
   commands:

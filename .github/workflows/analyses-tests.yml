@@ -1,0 +1,167 @@
+name: analyses tests
+
+# End-to-end analysis tests (tests/pyincore/analyses). These are slow and hit the
+# live IN-CORE services, so they are deliberately kept out of pytests.yml and only
+# run when asked for:
+#
+#  - manually, via Actions -> "analyses tests" -> Run workflow
+#  - on a pull request, only once the `test-analyses` label is applied, and then
+#    only for the analyses the pull request actually touches
+#
+# Each analysis gets its own matrix job, so results are attributed per analysis and
+# one failure does not take the rest down.
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Which analyses to run'
+        type: choice
+        required: true
+        default: changed
+        options:
+          - changed
+          - select
+          - all
+      analyses:
+        description: 'For scope=select: analysis names, e.g. "indp, joplincge"'
+        type: string
+        required: false
+        default: ''
+      base_ref:
+        description: 'For scope=changed: branch to diff against'
+        type: string
+        required: false
+        default: develop
+      python_version:
+        description: 'Python version'
+        type: choice
+        required: true
+        default: '3.11'
+        options: ['3.11', '3.12', '3.13', '3.14']
+      test_timeout_minutes:
+        description: 'Per-test timeout, in minutes'
+        type: string
+        required: false
+        default: '60'
+
+  pull_request:
+    types: [labeled, synchronize]
+
+concurrency:
+  group: analyses-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  select:
+    # On a pull request this only runs once someone has asked for it with the label.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'test-analyses')
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+      count: ${{ steps.select.outputs.count }}
+      reason: ${{ steps.select.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need history on both sides to diff against the base branch.
+          fetch-depth: 0
+
+      - name: Pick the analyses to run
+        id: select
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            scope=changed
+            argument="origin/${{ github.base_ref }}...HEAD"
+            git fetch --no-tags origin "${{ github.base_ref }}"
+          else
+            scope="${{ inputs.scope }}"
+            case "$scope" in
+              select)  argument="${{ inputs.analyses }}" ;;
+              changed) argument="origin/${{ inputs.base_ref }}...HEAD"
+                       git fetch --no-tags origin "${{ inputs.base_ref }}" ;;
+              *)       argument="" ;;
+            esac
+          fi
+          python .github/scripts/select_analyses.py "$scope" "$argument"
+
+      - name: Report selection
+        run: |
+          echo "### Analyses selected: ${{ steps.select.outputs.count }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.select.outputs.reason }}" >> $GITHUB_STEP_SUMMARY
+
+  run:
+    needs: select
+    if: needs.select.outputs.count != '0'
+    name: ${{ matrix.analysis }}
+    runs-on: ubuntu-latest
+    env:
+      # environment.yml installs pyincore's dependencies but not pyincore
+      # itself, and both the bootstrap script and the test scripts run from
+      # directories other than the repository root, so the package has to be
+      # found explicitly. pytests.yml gets this for free from pytest's rootdir.
+      PYTHONPATH: ${{ github.workspace }}
+    strategy:
+      fail-fast: false
+      # The tests share the IN-CORE dev services; keep the load reasonable.
+      max-parallel: 5
+      matrix:
+        include: ${{ fromJson(needs.select.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache conda
+        uses: actions/cache@v4
+        env:
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
+            hashFiles('environment.yml') }}
+
+      - name: Install micromamba
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          create-args: >-
+            python=${{ inputs.python_version || '3.11' }}
+            pytest
+          environment-file: environment.yml
+          generate-run-shell: true
+
+      - name: Cache an IN-CORE token
+        run: |
+          echo "${{ secrets.PYTEST_USER_TOKEN }}" > tests/pyincore/.incorepw
+          python .github/scripts/bootstrap_incore_auth.py
+        shell: micromamba-shell {0}
+
+      - name: Run ${{ matrix.analysis }} tests
+        env:
+          # Actions expressions have no arithmetic operators, so convert here.
+          TIMEOUT_MINUTES: ${{ inputs.test_timeout_minutes || '60' }}
+        run: |
+          export TEST_TIMEOUT_SECONDS=$((TIMEOUT_MINUTES * 60))
+          .github/scripts/run_analyses_tests.sh "${{ matrix.analysis }}" analyses-logs
+        shell: micromamba-shell {0}
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "### ${{ matrix.analysis }}"
+            echo ""
+            echo "| status | rc | seconds | test |"
+            echo "| --- | --- | --- | --- |"
+            tail -n +2 analyses-logs/summary.tsv | awk -F'\t' '{printf "| %s | %s | %s | %s |\n", $1, $2, $3, $4}'
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analyses-logs-${{ matrix.analysis }}
+          path: analyses-logs/
+          retention-days: 14

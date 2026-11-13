@@ -5,16 +5,16 @@ from bs4 import BeautifulSoup
 build_dir = "docs/build"
 
 # Google Analytics code snippet to insert into the HTML files
-ga_code = f"""
+ga_code = """
         <script>
             // Fetch and execute the analytics script
             fetch('config/googleAnalytics.js')
             .then(response => response.text())
-            .then(scriptContent => {{
+            .then(scriptContent => {
                 const scriptTag = document.createElement('script');
                 scriptTag.textContent = scriptContent;
                 document.head.appendChild(scriptTag);
-            }})
+            })
             .catch(error => console.error('Failed to load analytics script:', error));
         </script>
 """
