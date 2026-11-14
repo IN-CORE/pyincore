@@ -17,7 +17,7 @@ def run_base_analysis():
     galveston_cge.load_remote_input_dataset("EMPLOY", "6420c474b18d026e7c7dc334")
     galveston_cge.load_remote_input_dataset("JOBCR", "6420c4d9b18d026e7c7dc33a")
     galveston_cge.load_remote_input_dataset("OUTCR", "6420c511b18d026e7c7dc340")
-    galveston_cge.load_remote_input_dataset("sector_shocks", "64219be5b18d026e7c7e1534")
+    galveston_cge.load_remote_input_dataset("sector_shocks", "683f5bb2d11a287c7c2f5372")
 
     galveston_cge.run_analysis()
 

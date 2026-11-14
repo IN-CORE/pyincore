@@ -505,51 +505,51 @@ class JoplinCGEModel(BaseAnalysis):
         # ----------------------------------------------------------------
 
         # these are data frames with zeros to be filled during calibration
-        A = pd.DataFrame(index=Z, columns=Z).fillna(0.0)
-        AD = pd.DataFrame(index=Z, columns=Z).fillna(0.0)
-        AG = pd.DataFrame(index=Z, columns=G).fillna(0.0)
-        AGFS = pd.DataFrame(index=Z, columns=G).fillna(0.0)
-        ALPHA = pd.DataFrame(index=F, columns=I).fillna(0.0)
-        B = pd.DataFrame(index=I, columns=IG).fillna(0.0)
-        B1 = pd.DataFrame(index=I, columns=I).fillna(0.0)
+        A = pd.DataFrame(0.0, index=Z, columns=Z)
+        AD = pd.DataFrame(0.0, index=Z, columns=Z)
+        AG = pd.DataFrame(0.0, index=Z, columns=G)
+        AGFS = pd.DataFrame(0.0, index=Z, columns=G)
+        ALPHA = pd.DataFrame(0.0, index=F, columns=I)
+        B = pd.DataFrame(0.0, index=I, columns=IG)
+        B1 = pd.DataFrame(0.0, index=I, columns=I)
         CMOWAGE = pd.Series(index=CM, dtype="float64").fillna(0.0)
         CMIWAGE = pd.Series(index=L, dtype="float64").fillna(0.0)
-        FCONST = pd.DataFrame(index=F, columns=I).fillna(0.0)
+        FCONST = pd.DataFrame(0.0, index=F, columns=I)
         GAMMA = pd.Series(index=I, dtype="float64").fillna(0.0)
         DELTA = pd.Series(index=I, dtype="float64").fillna(0.0)
-        PIT = pd.DataFrame(index=G, columns=H).fillna(0.0)
+        PIT = pd.DataFrame(0.0, index=G, columns=H)
         PRIVRET = pd.Series(index=H, dtype="float64").fillna(0.0)
         LFOR = pd.Series(index=LA, dtype="float64").fillna(0.0)
         KFOR = pd.Series(index=K, dtype="float64").fillna(0.0)
         GFOR = pd.Series(index=G, dtype="float64").fillna(0.0)
-        out = pd.DataFrame(index=G, columns=G).fillna(0.0)
-        TAUFH = pd.DataFrame(index=G, columns=F).fillna(0.0)
-        TAUFL = pd.DataFrame(index=G, columns=L).fillna(0.0)
-        TAUFLA = pd.DataFrame(index=G, columns=LA).fillna(0.0)
-        TAUFK = pd.DataFrame(index=G, columns=K).fillna(0.0)
-        TAUH = pd.DataFrame(index=G, columns=H).fillna(0.0)
-        TAUH0 = pd.DataFrame(index=G, columns=H).fillna(0.0)
-        TAUQ = pd.DataFrame(index=G, columns=I).fillna(0.0)
-        TAUC = pd.DataFrame(index=G, columns=I).fillna(0.0)
-        TAUCH = pd.DataFrame(index=G, columns=HD).fillna(0.0)
-        TAUV = pd.DataFrame(index=G, columns=I).fillna(0.0)
-        TAUN = pd.DataFrame(index=G, columns=IG).fillna(0.0)
-        TAUX = pd.DataFrame(index=G, columns=IG).fillna(0.0)
-        TAUG = pd.DataFrame(index=G, columns=I).fillna(0.0)
-        TAXS = pd.DataFrame(index=G, columns=G).fillna(0.0)
+        out = pd.DataFrame(0.0, index=G, columns=G)
+        TAUFH = pd.DataFrame(0.0, index=G, columns=F)
+        TAUFL = pd.DataFrame(0.0, index=G, columns=L)
+        TAUFLA = pd.DataFrame(0.0, index=G, columns=LA)
+        TAUFK = pd.DataFrame(0.0, index=G, columns=K)
+        TAUH = pd.DataFrame(0.0, index=G, columns=H)
+        TAUH0 = pd.DataFrame(0.0, index=G, columns=H)
+        TAUQ = pd.DataFrame(0.0, index=G, columns=I)
+        TAUC = pd.DataFrame(0.0, index=G, columns=I)
+        TAUCH = pd.DataFrame(0.0, index=G, columns=HD)
+        TAUV = pd.DataFrame(0.0, index=G, columns=I)
+        TAUN = pd.DataFrame(0.0, index=G, columns=IG)
+        TAUX = pd.DataFrame(0.0, index=G, columns=IG)
+        TAUG = pd.DataFrame(0.0, index=G, columns=I)
+        TAXS = pd.DataFrame(0.0, index=G, columns=G)
         TAXS1 = pd.Series(index=GNL, dtype="float64").fillna(0.0)
 
         # ELASTICITIES AND TAX DATA IMPOSED
 
-        BETA = pd.DataFrame(index=I, columns=H).fillna(0.0)
+        BETA = pd.DataFrame(0.0, index=I, columns=H)
         ETAD = pd.Series(index=I, dtype="float64").fillna(0.0)
         ETAE = pd.Series(index=I, dtype="float64").fillna(0.0)
         ETAI = pd.Series(index=IG, dtype="float64").fillna(0.0)
-        ETAIX = pd.DataFrame(index=K, columns=IG).fillna(0.0)
-        ETAL = pd.DataFrame(index=LA, columns=IG).fillna(0.0)
+        ETAIX = pd.DataFrame(0.0, index=K, columns=IG)
+        ETAL = pd.DataFrame(0.0, index=LA, columns=IG)
         ETAL1 = pd.Series(index=IG, dtype="float64").fillna(0.0)
         ETALB1 = pd.Series(index=IG, dtype="float64").fillna(0.0)
-        ETALB = pd.DataFrame(index=L, columns=IG).fillna(0.0)
+        ETALB = pd.DataFrame(0.0, index=L, columns=IG)
         ETAM = pd.Series(index=I, dtype="float64").fillna(0.0)
         ETAYDO = pd.Series(index=H, dtype="float64").fillna(0.0)
         ETAYDI = pd.Series(index=H, dtype="float64").fillna(0.0)
@@ -564,24 +564,24 @@ class JoplinCGEModel(BaseAnalysis):
         ECOMI = pd.Series(index=L, dtype="float64").fillna(0.0)
         ECOMO = pd.Series(index=CM, dtype="float64").fillna(0.0)
 
-        JOBCOR = pd.DataFrame(index=H, columns=L).fillna(0.0)
-        OUTCOR = pd.DataFrame(index=H, columns=CM).fillna(0.0)
+        JOBCOR = pd.DataFrame(0.0, index=H, columns=L)
+        OUTCOR = pd.DataFrame(0.0, index=H, columns=CM)
 
-        LAMBDA = pd.DataFrame(index=I, columns=I).fillna(0.0)
+        LAMBDA = pd.DataFrame(0.0, index=I, columns=I)
         NRPG = pd.Series(index=H, dtype="float64").fillna(0.0)
         depr = pd.Series(index=IG, dtype="float64").fillna(0.1)
 
         # ARRAYS BUILT TO EXPORT RESULTS TO SEPARATE FILE
 
-        R1 = pd.DataFrame(index=R1H, columns=SM).fillna(0.0)
-        R2 = pd.DataFrame(index=R2H, columns=SM).fillna(0.0)
+        R1 = pd.DataFrame(0.0, index=R1H, columns=SM)
+        R2 = pd.DataFrame(0.0, index=R2H, columns=SM)
 
         # INITIAL VALUES OF ENDOGENOUS VARIABLES
 
-        CG0 = pd.DataFrame(index=I, columns=G).fillna(0.0)
-        CG0T = pd.DataFrame(index=I, columns=G).fillna(0.0)
-        CH0 = pd.DataFrame(index=I, columns=H).fillna(0.0)
-        CH0T = pd.DataFrame(index=I, columns=H).fillna(0.0)
+        CG0 = pd.DataFrame(0.0, index=I, columns=G)
+        CG0T = pd.DataFrame(0.0, index=I, columns=G)
+        CH0 = pd.DataFrame(0.0, index=I, columns=H)
+        CH0T = pd.DataFrame(0.0, index=I, columns=H)
         CMI0 = pd.Series(index=L, dtype="float64").fillna(0.0)
         CMO0 = pd.Series(index=CM, dtype="float64").fillna(0.0)
         CN0 = pd.Series(index=I, dtype="float64").fillna(0.0)
@@ -595,12 +595,12 @@ class JoplinCGEModel(BaseAnalysis):
         DS0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
         mine = pd.Series(index=Z, dtype="float64").fillna(0.0)
         DQ0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
-        FD0 = pd.DataFrame(index=F, columns=Z).fillna(0.0)
-        IGT0 = pd.DataFrame(index=G, columns=G).fillna(0.0)
-        KS0 = pd.DataFrame(index=K, columns=IG).fillna(0.0)
-        KSNEW = pd.DataFrame(index=K, columns=IG).fillna(0.0)
-        KSNEW0 = pd.DataFrame(index=K, columns=IG).fillna(0.0)
-        LAS0 = pd.DataFrame(index=LA, columns=IG).fillna(0.0)
+        FD0 = pd.DataFrame(0.0, index=F, columns=Z)
+        IGT0 = pd.DataFrame(0.0, index=G, columns=G)
+        KS0 = pd.DataFrame(0.0, index=K, columns=IG)
+        KSNEW = pd.DataFrame(0.0, index=K, columns=IG)
+        KSNEW0 = pd.DataFrame(0.0, index=K, columns=IG)
+        LAS0 = pd.DataFrame(0.0, index=LA, columns=IG)
         HH0 = pd.Series(index=H, dtype="float64").fillna(0.0)
         HN0 = pd.Series(index=H, dtype="float64").fillna(0.0)
         HW0 = pd.Series(index=H, dtype="float64").fillna(0.0)
@@ -608,7 +608,7 @@ class JoplinCGEModel(BaseAnalysis):
         M01 = pd.Series(index=Z, dtype="float64").fillna(0.0)
         MI0 = pd.Series(index=H, dtype="float64").fillna(0.0)
         MO0 = pd.Series(index=H, dtype="float64").fillna(0.0)
-        N0 = pd.DataFrame(index=K, columns=IG).fillna(0.0)
+        N0 = pd.DataFrame(0.0, index=K, columns=IG)
 
         # NKIO
         KPFOR01 = pd.Series(index=K, dtype="float64").fillna(0.0)
@@ -622,7 +622,7 @@ class JoplinCGEModel(BaseAnalysis):
         PWM0 = pd.Series(index=I, dtype="float64").fillna(0.0)
         Q0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
         Q10 = pd.Series(index=Z, dtype="float64").fillna(0.0)
-        R0 = pd.DataFrame(index=F, columns=Z).fillna(1.0)
+        R0 = pd.DataFrame(1.0, index=F, columns=Z)
         RA0 = pd.Series(index=F, dtype="float64").fillna(0.0)
         S0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
 
@@ -630,7 +630,7 @@ class JoplinCGEModel(BaseAnalysis):
 
         V0 = pd.Series(index=I, dtype="float64").fillna(0.0)
         V0T = pd.Series(index=I, dtype="float64").fillna(0.0)
-        TP = pd.DataFrame(index=H, columns=G).fillna(0.0)
+        TP = pd.DataFrame(0.0, index=H, columns=G)
 
         # TAUF0 = Table(G,F,Z)
 
@@ -900,7 +900,7 @@ class JoplinCGEModel(BaseAnalysis):
 
         CG0T.loc[I, GN] = SAM.loc[I, GN].div(P0.loc[I], axis="index")
 
-        DEPR = float((SAM.loc[IG, ["INVES"]].sum(0)) / (KS0.loc[K, IG].sum(1).sum(0)))
+        DEPR = float(((SAM.loc[IG, ["INVES"]].sum(0)) / (KS0.loc[K, IG].sum(1).sum(0))).iloc[0])
 
         N0.loc[K, IG] = KS0.loc[K, IG] * DEPR
 
@@ -1756,7 +1756,7 @@ class JoplinCGEModel(BaseAnalysis):
             line2 = (ExprM(vars, m=TAUX.loc[GX, I]) * CX.loc(I) * PD.loc(I)).sum(I)
 
             YGEQline3pre = ExprM(
-                vars, m=pd.DataFrame(index=GX, columns=H).fillna(0.0)
+                vars, m=pd.DataFrame(0.0, index=GX, columns=H)
             )  # first just set it to correct size
             for label in GX:
                 for hlabel in H:
@@ -2168,22 +2168,22 @@ class JoplinCGEModel(BaseAnalysis):
                 # DELTA.loc[I] = 1.02 * DELTA.loc[I]
                 # KS0.loc[K, I] = KS0.loc[K, I]*0.9
                 KS0.loc[K, ["HS1"]] = KS0.loc[K, ["HS1"]] * float(
-                    (sector_shocks.loc[sector_shocks["sector"] == "HS1"])["shock"]
+                    (sector_shocks.loc[sector_shocks["sector"] == "HS1"])["shock"].iloc[0]
                 )
                 KS0.loc[K, ["HS2"]] = KS0.loc[K, ["HS2"]] * float(
-                    (sector_shocks.loc[sector_shocks["sector"] == "HS2"])["shock"]
+                    (sector_shocks.loc[sector_shocks["sector"] == "HS2"])["shock"].iloc[0]
                 )
                 KS0.loc[K, ["HS3"]] = KS0.loc[K, ["HS3"]] * float(
-                    (sector_shocks.loc[sector_shocks["sector"] == "HS3"])["shock"]
+                    (sector_shocks.loc[sector_shocks["sector"] == "HS3"])["shock"].iloc[0]
                 )
                 KS0.loc[K, ["GOODS"]] = KS0.loc[K, ["GOODS"]] * float(
-                    (sector_shocks.loc[sector_shocks["sector"] == "GOODS"])["shock"]
+                    (sector_shocks.loc[sector_shocks["sector"] == "GOODS"])["shock"].iloc[0]
                 )
                 KS0.loc[K, ["TRADE"]] = KS0.loc[K, ["TRADE"]] * float(
-                    (sector_shocks.loc[sector_shocks["sector"] == "TRADE"])["shock"]
+                    (sector_shocks.loc[sector_shocks["sector"] == "TRADE"])["shock"].iloc[0]
                 )
                 KS0.loc[K, ["OTHER"]] = KS0.loc[K, ["OTHER"]] * float(
-                    (sector_shocks.loc[sector_shocks["sector"] == "OTHER"])["shock"]
+                    (sector_shocks.loc[sector_shocks["sector"] == "OTHER"])["shock"].iloc[0]
                 )
             else:  # other simulations
                 KS0 = KSNEW * (1 - DEPR) + vars.get("N", x=soln[-1])
