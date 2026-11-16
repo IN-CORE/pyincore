@@ -10,6 +10,9 @@ on:
   pull_request:
     types: [opened, reopened]
 
+permissions:
+  contents: read
+
 jobs:
   sphinx:
     runs-on: ubuntu-latest
