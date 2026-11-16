@@ -170,7 +170,7 @@ class InfrastructureUtil:
         for index, row in initial_node.iterrows():
             raw_n = row["name"].split(",")
             n = (int(raw_n[0].strip(" )(")), int(raw_n[1].strip(" )(")))
-            state = float(row[sample + 1])
+            state = float(row.iloc[sample + 1])
             G.G.nodes[n]["data"]["inf_data"].functionality = state
             G.G.nodes[n]["data"]["inf_data"].repaired = state
 
@@ -178,7 +178,7 @@ class InfrastructureUtil:
             raw_uv = row["name"].split(",")
             u = (int(raw_uv[0].strip(" )(")), int(raw_uv[1].strip(" )(")))
             v = (int(raw_uv[2].strip(" )(")), int(raw_uv[3].strip(" )(")))
-            state = float(row[sample + 1])
+            state = float(row.iloc[sample + 1])
             if state == 0.0:
                 G.G[u][v]["data"]["inf_data"].functionality = state
                 G.G[u][v]["data"]["inf_data"].repaired = state
