@@ -12,7 +12,7 @@ requests
 rtree
 scipy
 shapely
-pycodestyle
+flake8
 pytest
 python-jose
 Deprecated

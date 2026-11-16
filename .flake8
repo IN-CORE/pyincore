@@ -1,4 +1,18 @@
 [flake8]
 max-line-length = 180
 extend-ignore = E203
-exclude = __init__.py
+# The four non-ML CGE analyses are vendored model code that does not follow the
+# project's formatting conventions, and saltlakecge/ipopt_cons.py additionally
+# blows pyflakes' recursion limit. The ML-enabled CGE analyses are NOT excluded.
+exclude =
+    __init__.py,
+    build,
+    pyincore/analyses/joplincge,
+    pyincore/analyses/joplincgeanalysis,
+    pyincore/analyses/saltlakecge,
+    pyincore/analyses/seasidecge,
+    pyincore/analyses/galvestoncge,
+    tests/pyincore/analyses/joplincge,
+    tests/pyincore/analyses/saltlakecge,
+    tests/pyincore/analyses/seasidecge,
+    tests/pyincore/analyses/galvestoncge

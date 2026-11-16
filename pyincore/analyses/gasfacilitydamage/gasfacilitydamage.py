@@ -372,7 +372,7 @@ class GasFacilityDamage(BaseAnalysis):
         return {
             "name": "gas-facility-damage",
             "description": "This analysis computes gas facility damage based on a particular hazard using the hazard "
-                           "input and fragility curves mapped to the gas facility.",
+            "input and fragility curves mapped to the gas facility.",
             "input_parameters": [
                 {
                     "id": "result_name",
@@ -402,7 +402,7 @@ class GasFacilityDamage(BaseAnalysis):
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
                     "description": "ID of the dataset containing Liquefaction geology/susceptibility information. If "
-                                   "not provided, liquefaction will be ignored.",
+                    "not provided, liquefaction will be ignored.",
                     "type": str,
                 },
                 {

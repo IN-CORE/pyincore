@@ -216,7 +216,7 @@ class CommercialBuildingRecovery(BaseAnalysis):
         # Convert to numpy
         samples_np = merged_delay.drop(
             columns=["guid", "sample_damage_states"]
-        ).to_numpy()
+        ).to_numpy(copy=True)
 
         # First, we decompose redi_delay_factors into two dictionaries that can be used to compute vector operations
         redi_idx = dict(
@@ -229,10 +229,10 @@ class CommercialBuildingRecovery(BaseAnalysis):
         # Next, we produce two intermediate numpy matrices: one for med and one for sdv
         redi_med = redi_delay_factors[
             ["Ins_med", "Enmo_med", "Como_med", "Per_med", "Fin_med"]
-        ].to_numpy()
+        ].to_numpy(copy=True)
         redi_sdv = redi_delay_factors[
             ["Ins_sdv", "Enmo_sdv", "Como_sdv", "Per_sdv", "Fin_sdv"]
-        ].to_numpy()
+        ].to_numpy(copy=True)
 
         # Define indices to facilitate interpretation of the code
         inspection_idx = 0
@@ -321,7 +321,7 @@ class CommercialBuildingRecovery(BaseAnalysis):
         # Convert to numpy
         samples_np = merged_delay.drop(
             columns=["guid", "sample_damage_states"]
-        ).to_numpy()
+        ).to_numpy(copy=True)
         num_samples = len(colnames)
         num_buildings = samples_np.shape[0]
 
@@ -397,7 +397,7 @@ class CommercialBuildingRecovery(BaseAnalysis):
         recovery_results_guids = recovery_results["guid"]
 
         # Convert recovery time results to numpy
-        samples_n1_n2 = recovery_results.drop(columns=["guid"]).to_numpy()
+        samples_n1_n2 = recovery_results.drop(columns=["guid"]).to_numpy(copy=True)
 
         # Number of guids
         num_buildings = recovery_results.shape[0]

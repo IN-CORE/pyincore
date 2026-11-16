@@ -978,8 +978,12 @@ class INDP(BaseAnalysis):
         )
 
         # Conservation of flow constraint. (2) in INDP paper.
+        # Pyomo >= 6.x no longer auto-creates the implicit index set
+        # (delta_p_index_0) that older Pyomo attached to m.delta_p, so index
+        # the constraint explicitly over the same node-commodity pairs.
+        m.node_com_idx = pyo.Set(initialize=node_com_idx, dimen=3)
         m.flow_conserv_node = pyo.Constraint(
-            m.delta_p_index_0,
+            m.node_com_idx,
             m.time_step,
             rule=INDPUtil.flow_conserv_node_rule,
             doc="Flow conservation",
@@ -1081,7 +1085,7 @@ class INDP(BaseAnalysis):
                 == TerminationCondition.maxTimeLimit
             ):
                 print(
-                    "\nOptimizer time limit, gap = %1.3f\n" % solution.a.solution(0).gap
+                    "\nOptimizer time limit, gap = %1.3f\n" % solution.solution(0).gap
                 )
             results = INDPUtil.collect_results(m, controlled_layers, coloc=co_location)
             results.add_run_time(t, run_time)

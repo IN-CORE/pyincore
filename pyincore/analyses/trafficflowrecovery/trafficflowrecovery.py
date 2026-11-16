@@ -336,7 +336,7 @@ class TrafficFlowRecovery(BaseAnalysis):
                 {
                     "id": "overall_traffic_flow_recovery_trajectory",
                     "description": "CSV file showing the overall recovery trajectory of the traffic flow system. "
-                                   "It includes the ending time and travel efficiency for the whole network.",
+                    "It includes the ending time and travel efficiency for the whole network.",
                     "type": "incore:trafficFlowRecovery",
                 },
             ],
