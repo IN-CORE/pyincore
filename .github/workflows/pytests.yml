@@ -13,6 +13,8 @@ jobs:
   unit_test:
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 1
+      fail-fast: false
       matrix:
         vars: [ {python-version: '3.11', sleep: '0s'}, {python-version: '3.12', sleep: '60s'},
                 {python-version: '3.13', sleep: '120s'}, {python-version: '3.14', sleep: '180s'} ]
@@ -49,5 +51,5 @@ jobs:
       - name: Run tests with pytest
         run: |
           echo "${{secrets.PYTEST_USER_TOKEN}}" > tests/pyincore/.incorepw
-          python -m pytest --ignore=tests/test_format.py --ignore=tests/pyincore/analyses
+          python -m pytest --ignore=tests/pyincore/analyses
         shell: micromamba-shell {0}

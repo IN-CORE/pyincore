@@ -141,7 +141,7 @@ class EpfRepairCost(BaseAnalysis):
         return {
             "name": "epf-repair-cost",
             "description": "This analysis estimates the repair costs of electric power facilities for different "
-                           "simulation scenarios based on their damage states, replacement costs, and damage ratios",
+            "simulation scenarios based on their damage states, replacement costs, and damage ratios",
             "input_parameters": [
                 {
                     "id": "result_name",
@@ -167,7 +167,7 @@ class EpfRepairCost(BaseAnalysis):
                     "id": "replacement_cost",
                     "required": True,
                     "description": "Dataset containing the repair cost of the node in the complete damage state (= "
-                                   "Replacement cost).",
+                    "Replacement cost).",
                     "type": ["incore:replacementCost"],
                 },
                 {

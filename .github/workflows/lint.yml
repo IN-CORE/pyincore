@@ -1,0 +1,36 @@
+name: lint
+
+# Fast formatting and style gate. The pre-commit hooks run the same two tools
+# with the same pinned versions, so this only catches commits made without the
+# hooks installed (or with --no-verify).
+
+on:
+  push:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Versions pinned to match .pre-commit-config.yaml - a different black
+      # release would disagree about formatting and make this job useless.
+      - name: Install linters
+        run: pip install black==23.11.0 flake8==6.1.0
+
+      # Exclusions for the non-ML CGE analyses live in .flake8 for flake8, and
+      # in .pre-commit-config.yaml for black; black's are repeated here because
+      # it has no config file of its own in this repo.
+      - name: black
+        run: |
+          black --check --diff \
+            --exclude '(build/|(pyincore|tests/pyincore)/analyses/(joplincge|joplincgeanalysis|saltlakecge|seasidecge|galvestoncge)/)' .
+
+      - name: flake8
+        run: flake8 pyincore tests recipes scripts docs

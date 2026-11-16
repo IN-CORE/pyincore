@@ -143,7 +143,7 @@ class WaterFacilityRepairCost(BaseAnalysis):
         return {
             "name": "wf-repair-cost",
             "description": "This analysis estimates the repair costs of water facilities for different simulation "
-                           "scenarios based on their damage states, replacement costs, and damage ratios.",
+            "scenarios based on their damage states, replacement costs, and damage ratios.",
             "input_parameters": [
                 {
                     "id": "result_name",
@@ -169,7 +169,7 @@ class WaterFacilityRepairCost(BaseAnalysis):
                     "id": "replacement_cost",
                     "required": True,
                     "description": "Dataset containing repair cost of the node in the complete damage state (= "
-                                   "Replacement cost).",
+                    "Replacement cost).",
                     "type": ["incore:replacementCost"],
                 },
                 {

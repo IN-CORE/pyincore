@@ -606,7 +606,7 @@ class HousingRecoverySequential(BaseAnalysis):
         return {
             "name": "housing-recovery-serial",
             "description": "This analysis computes the series of household recovery states given a population "
-                           "dislocation dataset, a transition probability matrix (TPM) and an initial state vector.",
+            "dislocation dataset, a transition probability matrix (TPM) and an initial state vector.",
             "input_parameters": [
                 {
                     "id": "result_name",

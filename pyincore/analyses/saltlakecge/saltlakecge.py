@@ -329,18 +329,18 @@ class SaltLakeCGEModel(BaseAnalysis):
         # ----------------------------------------------------------------
 
         # These are data frames with zeros to be filled during calibration.
-        A = pd.DataFrame(index=Z, columns=Z).fillna(0.0)
-        AD = pd.DataFrame(index=Z, columns=Z).fillna(0.0)
-        AG = pd.DataFrame(index=Z, columns=G).fillna(0.0)
-        ALPHA = pd.DataFrame(index=Z, columns=I).fillna(0.0)
-        B = pd.DataFrame(index=I, columns=IG).fillna(0.0)
+        A = pd.DataFrame(0.0, index=Z, columns=Z)
+        AD = pd.DataFrame(0.0, index=Z, columns=Z)
+        AG = pd.DataFrame(0.0, index=Z, columns=G)
+        ALPHA = pd.DataFrame(0.0, index=Z, columns=I)
+        B = pd.DataFrame(0.0, index=I, columns=IG)
         CMOWAGE = pd.Series(index=CM, dtype="float64").fillna(0.0)
         CMIWAGE = pd.Series(index=L, dtype="float64").fillna(0.0)
-        FCONST = pd.DataFrame(index=F, columns=I).fillna(0.0)
+        FCONST = pd.DataFrame(0.0, index=F, columns=I)
         DELTA = pd.Series(index=I, dtype="float64").fillna(0.0)
         GAMMA = pd.Series(index=I, dtype="float64").fillna(0.0)
-        PIT = pd.DataFrame(index=G, columns=H).fillna(0.0)
-        PIT0 = pd.DataFrame(index=G, columns=H).fillna(0.0)
+        PIT = pd.DataFrame(0.0, index=G, columns=H)
+        PIT0 = pd.DataFrame(0.0, index=G, columns=H)
         PRIVRET = pd.Series(index=H, dtype="float64").fillna(0.0)
         KFOR = pd.Series(index=K, dtype="float64").fillna(0.0)
         # LFOR = pd.Series(index=LA, dtype="float64").fillna(0.0)
@@ -350,35 +350,35 @@ class SaltLakeCGEModel(BaseAnalysis):
         SIGMA = pd.Series(index=I, dtype=float).fillna(0.0)
 
         # TAXES
-        TAUFH = pd.DataFrame(index=G, columns=Z).fillna(0.0)
-        TAUFL = pd.DataFrame(index=G, columns=L).fillna(0.0)
-        TAUFK = pd.DataFrame(index=G, columns=K).fillna(0.0)
-        # TAUFLA = pd.DataFrame(index=G, columns=LA).fillna(0.0)
-        TAUH = pd.DataFrame(index=G, columns=H).fillna(0.0)
-        TAUH0 = pd.DataFrame(index=G, columns=H).fillna(0.0)
-        TAUM = pd.DataFrame(index=G, columns=IG).fillna(0.0)
-        TAUQ = pd.DataFrame(index=G, columns=IG).fillna(0.0)
-        TAUC = pd.DataFrame(index=G, columns=I).fillna(0.0)
-        TAUCH = pd.DataFrame(index=G, columns=HSD).fillna(0.0)
-        TAUV = pd.DataFrame(index=G, columns=I).fillna(0.0)
-        TAUN = pd.DataFrame(index=G, columns=IG).fillna(0.0)
-        TAUX = pd.DataFrame(index=G, columns=IG).fillna(0.0)
-        TAUG = pd.DataFrame(index=G, columns=I).fillna(0.0)
-        TAXS = pd.DataFrame(index=G, columns=GX).fillna(0.0)
+        TAUFH = pd.DataFrame(0.0, index=G, columns=Z)
+        TAUFL = pd.DataFrame(0.0, index=G, columns=L)
+        TAUFK = pd.DataFrame(0.0, index=G, columns=K)
+        # TAUFLA = pd.DataFrame(0.0, index=G, columns=LA)
+        TAUH = pd.DataFrame(0.0, index=G, columns=H)
+        TAUH0 = pd.DataFrame(0.0, index=G, columns=H)
+        TAUM = pd.DataFrame(0.0, index=G, columns=IG)
+        TAUQ = pd.DataFrame(0.0, index=G, columns=IG)
+        TAUC = pd.DataFrame(0.0, index=G, columns=I)
+        TAUCH = pd.DataFrame(0.0, index=G, columns=HSD)
+        TAUV = pd.DataFrame(0.0, index=G, columns=I)
+        TAUN = pd.DataFrame(0.0, index=G, columns=IG)
+        TAUX = pd.DataFrame(0.0, index=G, columns=IG)
+        TAUG = pd.DataFrame(0.0, index=G, columns=I)
+        TAXS = pd.DataFrame(0.0, index=G, columns=GX)
         TAXS1 = pd.Series(index=GNL, dtype="float64").fillna(0.0)
 
         # ELASTICITIES AND TAX DATA IMPOSED
-        LAMBDA = pd.DataFrame(index=I, columns=I).fillna(0.0)
-        BETA = pd.DataFrame(index=I, columns=H).fillna(0.0)
-        BETAH = pd.DataFrame(index=HSD, columns=H).fillna(0.0)
+        LAMBDA = pd.DataFrame(0.0, index=I, columns=I)
+        BETA = pd.DataFrame(0.0, index=I, columns=H)
+        BETAH = pd.DataFrame(0.0, index=HSD, columns=H)
         ETAD = pd.Series(index=I, dtype="float64").fillna(0.0)
         ETAE = pd.Series(index=I, dtype="float64").fillna(0.0)
         ETAI = pd.Series(index=IG, dtype="float64").fillna(0.0)
-        ETAIX = pd.DataFrame(index=K, columns=IG).fillna(0.0)
-        # ETAL = pd.DataFrame(index=LA, columns=IG).fillna(0.0)
+        ETAIX = pd.DataFrame(0.0, index=K, columns=IG)
+        # ETAL = pd.DataFrame(0.0, index=LA, columns=IG)
         ETAL1 = pd.Series(index=IG, dtype="float64").fillna(0.0)
         ETALB1 = pd.Series(index=IG, dtype="float64").fillna(0.0)
-        ETALB = pd.DataFrame(index=L, columns=IG).fillna(0.0)
+        ETALB = pd.DataFrame(0.0, index=L, columns=IG)
         ETAM = pd.Series(index=I, dtype="float64").fillna(0.0)
         ETARA = pd.Series(index=H, dtype="float64").fillna(0.0)
         ETAYD = pd.Series(index=H, dtype="float64").fillna(0.0)
@@ -393,23 +393,23 @@ class SaltLakeCGEModel(BaseAnalysis):
         ECOMO = pd.Series(index=CM, dtype="float64").fillna(0.0)
 
         # VARIABLES FOR INTERMEDIATE CALCULATIONS
-        AGFS = pd.DataFrame(index=Z, columns=G).fillna(0.0)
-        ALPHA1 = pd.DataFrame(index=F, columns=I).fillna(0.0)
-        B1 = pd.DataFrame(index=I, columns=I).fillna(0.0)
+        AGFS = pd.DataFrame(0.0, index=Z, columns=G)
+        ALPHA1 = pd.DataFrame(0.0, index=F, columns=I)
+        B1 = pd.DataFrame(0.0, index=I, columns=I)
         PRIVRET1 = pd.Series(index=H, dtype="float64").fillna(0.0)
-        OUT = pd.DataFrame(index=G, columns=G).fillna(0.0)
+        OUT = pd.DataFrame(0.0, index=G, columns=G)
         KPFOR01 = pd.Series(index=K, dtype="float64").fillna(0.0)
         TT = pd.Series(index=I, dtype="float64").fillna(0.0)
 
         # ARRAYS BUILT TO EXPORT RESULTS TO SEPARATE FILE
-        R1 = pd.DataFrame(index=R1H, columns=SM).fillna(0.0)
-        R2 = pd.DataFrame(index=R2H, columns=SM).fillna(0.0)
+        R1 = pd.DataFrame(0.0, index=R1H, columns=SM)
+        R2 = pd.DataFrame(0.0, index=R2H, columns=SM)
 
         # INITIAL VALUES OF ENDOGENOUS VARIABLES
-        CG0 = pd.DataFrame(index=I, columns=G).fillna(0.0)
-        CG0T = pd.DataFrame(index=I, columns=G).fillna(0.0)
-        CH0 = pd.DataFrame(index=I, columns=H).fillna(0.0)
-        CH0T = pd.DataFrame(index=I, columns=H).fillna(0.0)
+        CG0 = pd.DataFrame(0.0, index=I, columns=G)
+        CG0T = pd.DataFrame(0.0, index=I, columns=G)
+        CH0 = pd.DataFrame(0.0, index=I, columns=H)
+        CH0T = pd.DataFrame(0.0, index=I, columns=H)
         CMI0 = pd.Series(index=L, dtype="float64").fillna(0.0)
         CMO0 = pd.Series(index=CM, dtype="float64").fillna(0.0)
         CN0 = pd.Series(index=I, dtype="float64").fillna(0.0)
@@ -423,24 +423,24 @@ class SaltLakeCGEModel(BaseAnalysis):
         DS0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
         DQ0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
 
-        FD0 = pd.DataFrame(index=F, columns=Z).fillna(0.0)
-        IGT0 = pd.DataFrame(index=G, columns=GX).fillna(0.0)
-        KS0 = pd.DataFrame(index=K, columns=IG).fillna(0.0)
-        # LAS0 = pd.DataFrame(index=LA, columns=IG).fillna(0.0)
+        FD0 = pd.DataFrame(0.0, index=F, columns=Z)
+        IGT0 = pd.DataFrame(0.0, index=G, columns=GX)
+        KS0 = pd.DataFrame(0.0, index=K, columns=IG)
+        # LAS0 = pd.DataFrame(0.0, index=LA, columns=IG)
         HH0 = pd.Series(index=H, dtype="float64").fillna(0.0)
         HN0 = pd.Series(index=H, dtype="float64").fillna(0.0)
         HW0 = pd.Series(index=H, dtype="float64").fillna(0.0)
         EXWGEO = pd.Series(index=CM, dtype="float64").fillna(0.0)
 
-        HOUSECOR = pd.DataFrame(index=H, columns=HSD).fillna(0.0)
-        JOBCOR = pd.DataFrame(index=H, columns=L).fillna(0.0)
-        OUTCOR = pd.DataFrame(index=H, columns=CM).fillna(0.0)
+        HOUSECOR = pd.DataFrame(0.0, index=H, columns=HSD)
+        JOBCOR = pd.DataFrame(0.0, index=H, columns=L)
+        OUTCOR = pd.DataFrame(0.0, index=H, columns=CM)
 
         M0 = pd.Series(index=I, dtype="float64").fillna(0.0)
         M01 = pd.Series(index=Z, dtype="float64").fillna(0.0)
         MI0 = pd.Series(index=H, dtype="float64").fillna(0.0)
         MO0 = pd.Series(index=H, dtype="float64").fillna(0.0)
-        N0 = pd.DataFrame(index=K, columns=IG).fillna(0.0)
+        N0 = pd.DataFrame(0.0, index=K, columns=IG)
         # NKI0
         KPFOR0 = pd.Series(index=K, dtype="float64").fillna(0.0)
         # LNFOR0 = pd.Series(index=LA, dtype="float64").fillna(0.0)
@@ -454,14 +454,14 @@ class SaltLakeCGEModel(BaseAnalysis):
         PWM0 = pd.Series(index=I, dtype="float64").fillna(0.0)
         Q0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
         Q10 = pd.Series(index=Z, dtype="float64").fillna(0.0)
-        R0 = pd.DataFrame(index=F, columns=Z).fillna(1.0)
+        R0 = pd.DataFrame(1.0, index=F, columns=Z)
         RA0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
 
         S0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
         # SPI0
         V0 = pd.Series(index=I, dtype="float64").fillna(0.0)
         V0T = pd.Series(index=I, dtype="float64").fillna(0.0)
-        TP = pd.DataFrame(index=H, columns=G).fillna(0.0)
+        TP = pd.DataFrame(0.0, index=H, columns=G)
         # TAUF0 = Table(G,F,Z)
         YD0 = pd.Series(index=H, dtype="float64").fillna(0.0)
         Y0 = pd.Series(index=Z, dtype="float64").fillna(0.0)
@@ -472,24 +472,24 @@ class SaltLakeCGEModel(BaseAnalysis):
         SD3 = pd.Series(index=GX, dtype="float64").fillna(0.0)
         DDCX = pd.Series(index=I, dtype="float64").fillna(0.0)
 
-        TESTA1 = pd.DataFrame(index=F, columns=I).fillna(0.0)
-        TESTA2 = pd.DataFrame(index=F, columns=I).fillna(0.0)
-        TESTA3 = pd.DataFrame(index=F, columns=I).fillna(0.0)
+        TESTA1 = pd.DataFrame(0.0, index=F, columns=I)
+        TESTA2 = pd.DataFrame(0.0, index=F, columns=I)
+        TESTA3 = pd.DataFrame(0.0, index=F, columns=I)
 
         # Lstore(Z,L,t)
-        # DYSTORE = pd.DataFrame(index=Z, columns=T).fillna(0.0)
-        # DSSTORE = pd.DataFrame(index=I, columns=T).fillna(0.0)
-        # HHSTORE = pd.DataFrame(index=H, columns=T).fillna(0.0)
+        # DYSTORE = pd.DataFrame(0.0, index=Z, columns=T)
+        # DSSTORE = pd.DataFrame(0.0, index=I, columns=T)
+        # HHSTORE = pd.DataFrame(0.0, index=H, columns=T)
         # FSTORE(Z,F,T)
-        # CPISTORE = pd.DataFrame(index=H, columns=T).fillna(0.0)
+        # CPISTORE = pd.DataFrame(0.0, index=H, columns=T)
 
-        TPC = pd.DataFrame(index=H, columns=G).fillna(0.0)
-        IGTD = pd.DataFrame(index=G, columns=G1).fillna(0.0)
-        TAUFF = pd.DataFrame(index=G, columns=F).fillna(0.0)
-        IOUT = pd.DataFrame(index=G1, columns=G1).fillna(0.0)
-        LANDCAP = pd.DataFrame(index=IG, columns=ETALANDCAP).fillna(0.0)
-        MISC = pd.DataFrame(index=IG, columns=ETAMISC).fillna(0.0)
-        # MISCH= pd.DataFrame(index=H, columns=ETAMISCH).fillna(0.0)
+        TPC = pd.DataFrame(0.0, index=H, columns=G)
+        IGTD = pd.DataFrame(0.0, index=G, columns=G1)
+        TAUFF = pd.DataFrame(0.0, index=G, columns=F)
+        IOUT = pd.DataFrame(0.0, index=G1, columns=G1)
+        LANDCAP = pd.DataFrame(0.0, index=IG, columns=ETALANDCAP)
+        MISC = pd.DataFrame(0.0, index=IG, columns=ETAMISC)
+        # MISCH= pd.DataFrame(0.0, index=H, columns=ETAMISCH)
 
         # -------------------------------------------------------------------------------------------------------------
         # SIMPLIFYING TABLES AND DOING AWAY WITH MISC FILES
@@ -767,7 +767,7 @@ class SaltLakeCGEModel(BaseAnalysis):
 
         CG0T.loc[I, GN] = SAM.loc[I, GN].div(P0.loc[I], axis='index')
 
-        DEPR = float((SAM.loc[IG, ["INVES"]].sum(0)) / (KS0.loc[K, IG].sum(1).sum(0)))
+        DEPR = float(((SAM.loc[IG, ["INVES"]].sum(0)) / (KS0.loc[K, IG].sum(1).sum(0))).iloc[0])
 
         N0.loc[K, IG] = KS0.loc[K, IG] * DEPR
 
@@ -1577,7 +1577,7 @@ class SaltLakeCGEModel(BaseAnalysis):
             line2 = (ExprM(vars, m=TAUX.loc[GX, I]) * CX.loc(I) * PD.loc(I)).sum(I)
 
             YGEQline3pre = ExprM(vars,
-                                 m=pd.DataFrame(index=GX, columns=H).fillna(0.0))  # first just set it to correct size
+                                 m=pd.DataFrame(0.0, index=GX, columns=H))  # first just set it to correct size
             for label in GX:
                 for hlabel in H:
                     YGEQline3pre.m[GX.index(label)][H.index(hlabel)] = Expr(
