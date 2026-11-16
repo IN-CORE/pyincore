@@ -52,6 +52,9 @@ concurrency:
   group: analyses-tests-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   select:
     # On a pull request this only runs once someone has asked for it with the label.

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Manual-dispatch GitHub Action to run the analyses tests, per analysis [#695](https://github.com/IN-CORE/pyincore/issues/695)
 - Lint workflow running black and flake8 on every push and pull request [#695](https://github.com/IN-CORE/pyincore/issues/695)
 - Docs workflow building the Sphinx documentation with warnings treated as errors [#695](https://github.com/IN-CORE/pyincore/issues/695)
+- Python 3.14 to the unit test matrix [#676](https://github.com/IN-CORE/pyincore/issues/676)
 
 ### Changed
 
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- INDP flow-conservation constraint silently dropped on Pyomo 6.10.1 (implicit `delta_p_index_0` set no longer created), which produced empty actions and all-zero costs [#676](https://github.com/IN-CORE/pyincore/issues/676)
 - Conda and PyPI workflows no longer pin Python 3.9, which broke every pull request after the 3.11 minimum landed [#695](https://github.com/IN-CORE/pyincore/issues/695)
 - Require brotli-python 1.2.1 or newer in conda environments to fix CVE-2026-111497 (Broccoli2Shell) [#693](https://github.com/IN-CORE/pyincore/issues/693)
 
@@ -701,5 +703,4 @@ pyIncore release for IN-CORE v1.0
 ## [0.3.0] - 2019-04-26
 
 ## [0.2.0] - 2019-03-13
-
 
