@@ -325,8 +325,14 @@ class Dataset:
         filename = self.get_file_path("csv")
         df = pd.DataFrame()
         if os.path.isfile(filename):
+            # pandas 3 treats an explicit delimiter=None as "sniff the separator",
+            # which needs the python engine and rejects low_memory. pandas 2 read
+            # it as the default ",", so keep that.
             df = pd.read_csv(
-                filename, header="infer", low_memory=low_memory, delimiter=delimiter
+                filename,
+                header="infer",
+                low_memory=low_memory,
+                sep="," if delimiter is None else delimiter,
             )
         return df
 

@@ -423,7 +423,7 @@ class WaterFacilityDamage(BaseAnalysis):
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
                     "description": "ID of the dataset containing Liquefaction geology/susceptibility information. If "
-                                   "not provided, liquefaction will be ignored.",
+                    "not provided, liquefaction will be ignored.",
                     "type": str,
                 },
                 {
@@ -464,7 +464,7 @@ class WaterFacilityDamage(BaseAnalysis):
                     "id": "dfr3_mapping_set",
                     "required": True,
                     "description": "DFR3 mapping set containing rules to map DFR3 curves to the water facility "
-                                   "inventory.",
+                    "inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
             ],
