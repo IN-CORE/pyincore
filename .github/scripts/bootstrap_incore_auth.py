@@ -30,18 +30,29 @@ def main():
     builtins.input = lambda *args, **kwargs: credentials["username"]
     getpass.getpass = lambda *args, **kwargs: credentials["password"]
 
-    # Most analyses tests target dev; a couple use prod or the default (prod).
-    for service_url in (pyglobals.INCORE_API_DEV_URL, pyglobals.INCORE_API_PROD_URL):
-        print(f"Caching token for {service_url}")
-        try:
-            client = IncoreClient(service_url=service_url)
-        except SystemExit:
-            # IncoreClient.login() calls exit(0) when authentication fails, which
-            # would otherwise leave this script looking like it succeeded.
-            raise RuntimeError(f"authentication against {service_url} failed")
-        if "Authorization" not in client.session.headers:
-            raise RuntimeError(f"no token obtained for {service_url}")
-        print(f"  token cached at {client.token_file}")
+    # Most analyses tests target dev, which the PYTEST_USER_TOKEN credentials are
+    # rotated for, so dev is required. A few tests use prod or the default (prod);
+    # incrtest's prod password is managed separately and may not match, so a prod
+    # failure only warns. Those prod tests then fail on their own instead of taking
+    # every dev-only analysis down with them.
+    cache_token(pyglobals.INCORE_API_DEV_URL)
+    try:
+        cache_token(pyglobals.INCORE_API_PROD_URL)
+    except RuntimeError as e:
+        print(f"::warning::{e}; analyses tests that use prod will fail to log in")
+
+
+def cache_token(service_url):
+    print(f"Caching token for {service_url}")
+    try:
+        client = IncoreClient(service_url=service_url)
+    except SystemExit:
+        # IncoreClient.login() calls exit(0) when authentication fails, which
+        # would otherwise leave this script looking like it succeeded.
+        raise RuntimeError(f"authentication against {service_url} failed")
+    if "Authorization" not in client.session.headers:
+        raise RuntimeError(f"no token obtained for {service_url}")
+    print(f"  token cached at {client.token_file}")
 
 
 if __name__ == "__main__":
