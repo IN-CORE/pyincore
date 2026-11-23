@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Analyses tests workflow no longer fails every job when the prod login fails; only the dev token is required [#695](https://github.com/IN-CORE/pyincore/issues/695)
 - `tests/test_format.py` now defers to flake8 and runs in CI again, with the non-ML CGE analyses excluded [#695](https://github.com/IN-CORE/pyincore/issues/695)
 - Replaced the `pycodestyle` dependency with `flake8` [#695](https://github.com/IN-CORE/pyincore/issues/695)
 - Minimum Python raised to 3.11, NumPy to 2.4 and Pyomo to 6.10.1 [#50](https://github.com/IN-CORE/IN-CORE/issues/50)
