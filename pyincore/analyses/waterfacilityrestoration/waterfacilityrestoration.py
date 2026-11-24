@@ -269,7 +269,7 @@ class WaterFacilityRestoration(BaseAnalysis):
         return {
             "name": "water-facility-restoration",
             "description": "This analysis computes the repair time, and the percentage of functionality change with "
-                           "time for water facility restoration based the mapped restoration curves.",
+            "time for water facility restoration based the mapped restoration curves.",
             "input_parameters": [
                 {
                     "id": "result_name",
@@ -281,7 +281,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                     "id": "restoration_key",
                     "required": False,
                     "description": "Restoration key to use in the mapping dataset that maps restoration curves to "
-                                   "water facilities.",
+                    "water facilities.",
                     "type": str,
                 },
                 {
@@ -320,7 +320,7 @@ class WaterFacilityRestoration(BaseAnalysis):
                     "id": "dfr3_mapping_set",
                     "required": True,
                     "description": "DFR3 mapping set containing rules to map DFR3 curves to the water facility "
-                                   "inventory.",
+                    "inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
                 {

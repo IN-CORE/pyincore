@@ -338,12 +338,12 @@ class BuildingClusterRecovery(BaseAnalysis):
                     x_range, target_mean_recovery[t], total_standard_deviation[t]
                 )
 
-            coeR = np.trapz(pdf_full, x_range)
+            coeR = np.trapezoid(pdf_full, x_range)
 
             for t in range(time_steps):
                 pdf_full[t] = pdf_full[t] / coeR[t]
                 idx = int(len(x_range) * 95 / 100 + 1)
-                irt[t] = np.trapz(pdf_full[t, idx:], x_range[idx:])
+                irt[t] = np.trapezoid(pdf_full[t, idx:], x_range[idx:])
 
             pdf = np.zeros(time_steps)
             for t in range(1, time_steps - 1):
@@ -893,8 +893,8 @@ class BuildingClusterRecovery(BaseAnalysis):
                 impeding[2] = np.random.lognormal(np.log(15), 0.65)
 
         else:
-            impeding[0] = np.random.lognormal(np.log(4), 0.54, 1)
-            impeding[1] = np.random.lognormal(np.log(15), 0.32, 1)
+            impeding[0] = np.random.lognormal(np.log(4), 0.54)
+            impeding[1] = np.random.lognormal(np.log(15), 0.32)
 
             if finance == 0:
                 impeding[2] = np.random.lognormal(np.log(6), 1.11)

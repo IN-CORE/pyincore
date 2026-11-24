@@ -351,7 +351,7 @@ class EpfDamage(BaseAnalysis):
         return {
             "name": "epf-damage",
             "description": "This analysis computes electric power facility damage based on a particular hazard. "
-                           "Currently supported hazards are: earthquake, tsunami, tornado and hurricane.",
+            "Currently supported hazards are: earthquake, tsunami, tornado and hurricane.",
             "input_parameters": [
                 {
                     "id": "result_name",
@@ -393,7 +393,7 @@ class EpfDamage(BaseAnalysis):
                     "id": "liquefaction_geology_dataset_id",
                     "required": False,
                     "description": "ID of the dataset containing Liquefaction geology/susceptibility information. If "
-                                   "not provided, liquefaction will be ignored.",
+                    "not provided, liquefaction will be ignored.",
                     "type": str,
                 },
                 {
@@ -428,7 +428,7 @@ class EpfDamage(BaseAnalysis):
                     "id": "dfr3_mapping_set",
                     "required": True,
                     "description": "DFR3 mapping set containing rules to map DFR3 curves to the electric "
-                                   "power facility inventory.",
+                    "power facility inventory.",
                     "type": ["incore:dfr3MappingSet"],
                 },
             ],
