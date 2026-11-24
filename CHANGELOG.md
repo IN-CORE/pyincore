@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [Unreleased]
+## [1.23.0] - 2026-11-20
 
 ### Added
 
@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - INDP flow-conservation constraint silently dropped on Pyomo 6.10.1 (implicit `delta_p_index_0` set no longer created), which produced empty actions and all-zero costs [#676](https://github.com/IN-CORE/pyincore/issues/676)
 - Conda and PyPI workflows no longer pin Python 3.9, which broke every pull request after the 3.11 minimum landed [#695](https://github.com/IN-CORE/pyincore/issues/695)
 - Require brotli-python 1.2.1 or newer in conda environments to fix CVE-2026-111497 (Broccoli2Shell) [#693](https://github.com/IN-CORE/pyincore/issues/693)
+- INDP failing with `KeyError` on pandas 3 when reading the initial failure state by column position [#687](https://github.com/IN-CORE/pyincore/issues/687)
 
 ## [1.22.0] - 2025-07-31
 
